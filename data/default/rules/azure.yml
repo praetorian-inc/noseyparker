@@ -1,0 +1,89 @@
+rules:
+
+- name: Azure Connection String
+  # XXX There are a bunch of other keys that seem to have secret content assigned to them:
+  #
+  #   - SharedAccessSignature
+  #   - Authorization
+  #   - UserToken
+  #   - ApplicationToken
+  #
+  # Maybe we can generalize this rule one day.
+  pattern: |
+    (?x)
+    (?i)
+    (?: (?: BlobEndpoint
+          | DefaultEndpointsProtocol
+          | Encrypt
+          | Endpoint
+          | EndpointSuffix
+          | FileEndpoint
+          | HostName
+          | IngestionEndpoint
+          | InstrumentationKey
+          | LiveEndpoint
+          | ProfilerEndpoint
+          | QueueEndpoint
+          | SnapshotEndpoint
+          | TableEndpoint
+          ) \s*=\s* [^;]{1,80} \s*;\s*
+          .{0,10}   (?# possible extra stuff, e.g., string concatenation)
+    ){1,20}
+    .{0,80}  (?# allow for context not enumerated in the cases above )
+    (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^;]{1,80}) \s*;\s*
+    .{0,10}   (?# possible extra stuff, e.g., string concatenation)
+    (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^;]{1,100})
+
+  references:
+  - https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/
+  - https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string
+
+  examples:
+  - |
+      # Azure Storage Connection String
+      AzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=hanatour9833;AccountKey=6jqh42QQjWWBwoPGGR/Jr0PZjhBMZVbHm/gkhEfHvOj8aV6+oI8ed6ZAAwB5a6993WqyQDiuJJB0QpseJwqYxw==;EndpointSuffix=core.windows.net
+  - |
+      DefaultEndpointsProtocol=http;AccountName=testacc1;
+      AccountKey=1gy3lpE7Du1j5ljKiupgKzywSw2isjsa69sfsdfsdsgfsgfdgfdgfd/YThisv/OVVLfIOv9kQ==;
+      BlobEndpoint=http://127.0.0.1:8440/testacc1;
+      TableEndpoint=http://127.0.0.1:8440/testacc1;
+      QueueEndpoint=http://127.0.0.1:8440/testacc1;
+
+  - |
+      "IOTHUB_CONNECTION_STRING": {
+        "value": "HostName=d1-vi-ioth521.azure-devices.net;SharedAccessKeyName=registryReadWrite;SharedAccessKey=S8ii67l3Gd1Ba69az78iP9UksewzhjvUfh1DIuDs30w="
+      }
+
+  - |
+      "AZURE_STORAGE_CONNECTION_STRING": {
+        "value": "DefaultEndpointsProtocol=https;AccountName=d1biblobstor521;AccountKey=NjEwGHd9+piK+iCi2C2XURWPmeDDjif9UKN1HAszYptL4iQ+yD7/dgjLMZc3VOpURsa53aJ4HZfbVWzL429C5g==;EndpointSuffix=core.windows.net"
+      }
+
+  negative_examples:
+  # https://docs.microsoft.com/en-us/azure/azure-monitor/app/sdk-connection-string
+  - 'InstrumentationKey=00000000-0000-0000-0000-000000000000;EndpointSuffix=ai.contoso.com;'
+  - 'InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://custom.com:111/;LiveEndpoint=https://custom.com:222/;ProfilerEndpoint=https://custom.com:333/;SnapshotEndpoint=https://custom.com:444/;'
+
+
+- name: Azure App Configuration Connection String
+  pattern: |
+    (?x)
+    (https://[a-zA-Z0-9-]+\.azconfig\.io);
+    Id=(.{4}-.{2}-.{2}:[a-zA-Z0-9+/]{18,22});
+    Secret=([a-zA-Z0-9+/]{36,50}=)
+
+  examples:
+  - 'Endpoint=https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOPqRSa53VWX05zaBCdE/fg9hi4k='
+  - 'https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOA53ST8uVWX05zaBCdE/fg9hi4k='
+  - 'Endpoint=https://appconfig-test01.azconfig.io;Id=09pv-l0-s0:opFCQMC6+9485xJgN5Ws;Secret=GcoEA53t7GLRNJ910M46IrbHO/Vg0tt4HujRdsaCoTY='
+  - '        private static string appConfigurationConnectionString = "Endpoint=https://appcs-fg-pwc.azconfig.io;Id=pi5x-l9-s0:SZLlhHA53Nz2MpAl04cU;Secret=CQ+mlfQqkzfZv4XA53gigJ/seeXMKwNsqW/rM3wmtuE=";'
+
+  negative_examples:
+  - |
+          text:
+            az appconfig feature delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel
+
+  references:
+  - https://docs.microsoft.com/en-us/azure/azure-app-configuration/
+  - https://docs.microsoft.com/en-us/azure/azure-app-configuration/howto-best-practices
+  - https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/appconfiguration/azure-appconfiguration/azure/appconfiguration/_utils.py

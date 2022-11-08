@@ -1,0 +1,88 @@
+rules:
+
+- name: GitHub Personal Access Token
+  pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
+
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+
+  examples:
+  - 'GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg'
+  - "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'"
+  - |
+      ## git devaloper settings
+      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
+
+
+- name: GitHub OAuth Access Token
+  pattern: '\b(gho_[a-zA-Z0-9]{36})\b'
+
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+
+  examples:
+  - '    "url": "git+https://FelipeMestre:gho_psT9pqNFsehnc4se0ZzzR0HBxapxZD35hNHi@github.com/gontarz/PW_2021_Website-FelipeMestre.git"'
+  - '    oauth_token: gho_fq75OMU7UVbS9pTZmoCCzJT6TM5d1w099FgG'
+
+
+- name: GitHub App Token
+  pattern: '\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\b'
+
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+
+  examples:
+  - '            "token": "ghu_16C7e42F292c69C2E7C10c838347Ae178B4a",'
+
+
+- name: GitHub Refresh Token
+  pattern: '\b(ghr_[a-zA-Z0-9]{76})\b'
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+
+  examples:
+  - '    "refresh_token": "ghr_1B4a2e77838347a7E420ce178F2E7c6912E169246c3CE1ccbF66C46812d16D5B1A9Dc86A1498",'
+
+
+- name: GitHub Client ID
+  pattern: |
+    (?x)(?i)
+    (?:github)
+    .?
+    (?: api | app | application | client | consumer | customer )?
+    .?
+    (?: id | identifier | key )
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{20}) \b
+
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+
+  examples:
+  - |
+      GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7
+      GITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857
+
+
+- name: GitHub Secret Key
+  pattern: |
+    (?x)(?i)
+    github
+    .?
+    (?: api | app | application | client | consumer | customer | secret | key )
+    .?
+    (?: key | oauth | sec | secret )?
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{40}) \b
+
+  references:
+  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+
+  examples:
+  - |
+      GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7
+      GITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857

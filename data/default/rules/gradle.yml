@@ -1,0 +1,34 @@
+rules:
+
+# This is intended to detect hardcoded credentials that sometimes appear in Gradle files.
+- name: Hardcoded Gradle Credentials
+  pattern: |
+    (?x)
+    (?i)
+    credentials \s* \{
+      (?:\s*//.*)*        (?# skip line comments)
+      \s* (?:username|password) \s+ ['"]([^'"]{1,60})['"]
+      (?:\s*//.*)*        (?# skip line comments)
+      \s* (?:username|password) \s+ ['"]([^'"]{1,60})['"]
+
+  examples:
+  - |
+      credentials {
+          username 'user'
+          password 'password'
+      }
+  - |
+      publishing {
+        repositories {
+            maven {
+                url "http://us01cmsysart01.example.com:8081/artifactory/Mobile-Libs-Internal"
+                credentials {
+                    // your password here
+
+                    username "SOME_USERNAME"
+                    password "SOME_PASSWORD"
+                }
+            }
+        }
+  - "credentials {\n  username 'user'\n  password 'password'\n}"
+  - "credentials {\n  username \"user\"\n  password \"password\"\n}"

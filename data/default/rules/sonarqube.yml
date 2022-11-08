@@ -1,0 +1,20 @@
+rules:
+
+- name: SonarQube Token
+  pattern: '(?i)sonar.{0,5}login.{0,5}\s*\b([a-f0-9]{40})\b'
+
+  references:
+  - https://docs.sonarqube.org/latest/user-guide/user-token/
+
+  examples:
+  - 'sonar.host.url=https://sonarcloud.io -Dsonar.login=5524bf449ca45fcace54698371466398321f3a82'
+  - "sonar.login', '826de5590c75919a8317fdface58206eebe7ebbc"
+  - '$sonarLogin = "4924be8f51f3e738c97db2c4ace51db7e938f28b"'
+
+  negative_examples:
+  - 'sonarqube-reporter-1.2.4.tgz#3b335d612137949d2f21fcc6c8c8164db7603227'
+  - 'sonarqube-reporter-1.4.0.tgz#eb9e15deb83e4ca532989df12b40fedd434ef89a'
+  - 'sonarqube-scanner/-/sonarqube-scanner-2.5.0.tgz#ff704cbddf355d38a52c5e9479d6bb5c1ff28eac'
+  - |
+      /d:sonar.host.url=$(SONAR_HOST) /d:sonar.login=$(SONAR_LOGIN) \
+      /d:sonar.coverage.exclusions="**Tests*.cs"

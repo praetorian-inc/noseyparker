@@ -1,0 +1,13 @@
+rules:
+
+- name: Heroku API Key
+  pattern: '(?i)heroku.{0,20}key.{0,20}\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b'
+
+  references:
+  - https://devcenter.heroku.com/articles/authentication
+
+  examples:
+  - '  HEROKU_API_KEY: c55dbac4-e0e8-4a06-b892-75cac2387ce5'
+
+  negative_examples:
+  - 'curl https://kolkrabbi.heroku.com/apps/98fc74a8-ff56-4a21-85f6-7a1fcac895c9/github/push \'

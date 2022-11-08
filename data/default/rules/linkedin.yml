@@ -1,0 +1,42 @@
+rules:
+
+- name: LinkedIn Client ID
+  pattern: |
+    (?x)(?i)
+    linkedin
+    .?
+    (?: api | app | application | client | consumer | customer )?
+    .?
+    (?: id | identifier | key )
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{12,14}) \b
+
+  references:
+  - https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications
+
+  examples:
+  # FIXME: this example should not actually match
+  - 'Email IDÂ Last 5 Digits of your SSNÂ LinkedIn IDÂ Availability'
+  - |
+      LINKEDIN_KEY = "77yg7tx91p4lag"
+      LINKEDIN_SECRET = "zt7GeN6IH911xvRj"
+
+
+- name: LinkedIn Secret Key
+  pattern: |
+    (?x)(?i)
+    linkedin
+    .?
+    (?: api | app | application | client | consumer | customer | secret | key )
+    .?
+    (?: key | oauth | sec | secret )?
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{16}) \b
+
+  references:
+  - https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications
+
+  examples:
+  - |
+      LINKEDIN_KEY = "77yg7tx91p4lag"
+      LINKEDIN_SECRET = "zt7GeN6IH911xvRj"

@@ -1,0 +1,24 @@
+rules:
+
+- name: Jenkins Token or Crumb
+  pattern: '(?i)jenkins.{0,10}(?:crumb)?.{0,10}\b([0-9a-f]{32,36})\b'
+
+  examples:
+  - |
+      jenkins_user = 'root'
+      # jenkins_passwd = '116365fd86d63bf507aba962606a5c8956'  Pre token
+      jenkins_passwd = '11811f784531053132519844d047186074'   # Dev Token
+      jenkins_url = 'http://10.1.188.121'
+  - |
+      export JENKINS_USER=justin-admin-edit-view
+      export JENKINS_TOKEN=11f4274ec59be12eace9a08b08ee13d54b
+      export JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net
+  - |
+      sh "curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'"
+
+  negative_examples:
+  - '1. ~~Does not play well with [Build Token Root Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin) URL formats.~~ (added with [this commit](https://github.com/morficus/Parameterized-Remote-Trigger-Plugin/commit/f687dbe75d1c4f39f7e14b68220890384d7c5674)  )'
+
+  references:
+  - https://www.jenkins.io/blog/2018/07/02/new-api-token-system/
+  - https://www.jenkins.io/doc/book/security/csrf-protection/

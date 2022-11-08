@@ -1,0 +1,25 @@
+rules:
+
+- name: PyPI Upload Token
+  # NOTE: these can actually be arbitrarily long??
+  pattern: '\b(pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,1000})'
+  references:
+  # GitHub Secrets Scanning implementation issue and discussion
+  - https://github.com/pypa/warehouse/issues/6051
+  # A library that generates PyPI tokens (which are b64-encoded macaroons)
+  - https://pypi.org/project/pypitoken/
+  # The library that PyPi uses in its backend?
+  - https://github.com/ecordell/pymacaroons
+  - https://en.wikipedia.org/wiki/Macaroons_(computer_science)
+  - https://github.com/pypa/warehouse/blob/82815b06d9f98deed5f205c66e054de59d22a10d/docs/development/token-scanning.rst
+  - https://research.google/pubs/pub41892/
+
+  examples:
+  - '# password = pypi-AgEIcHlwaS5vcmcCJDkwNzYwNzU1LWMwOTUtNGNkOC1iYjQzLTU3OWNhZjI1NDQ1MwACJXsicGVybWCf99lvbnMiOiAidXNlciIsICJ2ZXJzaW9uIjogMX0AAAYgSpW5PAywXvchMUQnkF5H6-SolJysfUvIWopMsxE4hCM'
+  - |
+      - name: Publish package
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: santoshp
+        password: ${{ secrets.pypi-AgEIcHlwaS5vcmcCJDA1NTdiYzI2LTQ3N2QtNDAyYy04YzBjLTVmODU4ZTFkMjACf99COXsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJlbXB5cmlhbCJdfSwgInZlcnNpb24iOiAxfQAABiAx85KUjr83dNyI9uO0RVMmH7DKqoXNH4_rMkO5SQYItA}}
+  - 'password: pypi-AgEIcHlwaS5vcmcCJGExMDIxZjRhLTFhZDMtNDc4YS1iOWNmLWQwCf99OTIwZjFjNwACSHsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJkamFuZ28tY2hhbm5lbHMtanNvbnJwYyJdfSwgInZlcnNpb24iOiAxfQAABiBZg48cIBQt7HckwM4G3q-462xphsLbm7IZvjqMS4jvQw'

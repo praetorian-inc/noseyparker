@@ -1,0 +1,41 @@
+rules:
+
+- name: Twitter Client ID
+  pattern: |
+    (?x)(?i)
+    \b twitter
+    .?
+    (?: api | app | application | client | consumer | customer )?
+    .?
+    (?: id | identifier | key )
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{18,25}) \b
+
+  references:
+  - https://developer.twitter.com/en/docs/authentication/overview
+
+  examples:
+  - '     TWITTER_ID:               "DkWLqcP3ace3wHuJ7fiw",'
+  - |
+      # TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'
+      # TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'
+
+
+- name: Twitter Secret Key
+  pattern: |
+    (?x)(?i)
+    twitter
+    .?
+    (?: api | app | application | client | consumer | customer | secret | key )
+    .?
+    (?: key | oauth | sec | secret )?
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{35,44}) \b
+
+  references:
+  - https://developer.twitter.com/en/docs/authentication/overview
+
+  examples:
+  - |
+      # TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'
+      # TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'

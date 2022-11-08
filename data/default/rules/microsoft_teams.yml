@@ -1,0 +1,29 @@
+rules:
+
+- name: Microsoft Teams Webhook
+  pattern: |
+    (?x)(?i)
+    outlook\.office\.com/webhook/
+    (
+      [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
+      @
+      [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
+    )
+    /IncomingWebhook/
+    ([a-f0-9]{32})
+    /
+    ([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
+
+  examples:
+  - "//test //url = 'https://outlook.office.com/webhook/9da5da9c-4218-4c22-aed6-b5c8baebfff5@2f2b54b7-0141-4ba7-8fcd-ab7d17a60547/IncomingWebhook/1bf66ccbb8e745e791fa6e6de0cf465b/4361420b-8fde-48eb-b62a-0e34fec63f5c';"
+  - "    [T2`https://outlook.office.com/webhook/fa4983ab-49ea-4c1b-9297-2658ea56164c@f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16113d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd`](https://outlook.office.com/webhook/fe4183ab-49ea-4c1b-9297-2658ea56164c%2540f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16003d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd)"
+  - 'curl -H "Content-Type: application/json" -d "{\"text\": \"Debut du script deploy.sh \"}" https://outlook.office.com/webhook/555aa7fc-ea71-4fb7-ae9e-755caa4404ed@72f988bf-86f1-41af-91ab-2d7cd011db47/IncomingWebhook/16085df23e564bb9076842605ede3af2/51dab674-ad95-4f0a-8964-8bdefc25b6d9'
+  - '  webhooks: https://outlook.office.com/webhook/2f92c502-7feb-4a6c-86f1-477271ae576f@990414fa-d0a3-42f5-b740-21d865a44a28/IncomingWebhook/54e43eb586f14aa9984d5c0bec3d5050/539ce6fa-e9aa-413f-a79b-fb7e8998fcac'
+
+  # FIXME: this example probably should actually match
+  negative_examples:
+  - "			office365ConnectorSend message: 'Execucao Concluida.', status: 'End', webhookUrl: 'https://outlook.office.com/webhook/82fc2788-c6f4-4507-a657-36c91eccfd87@93f33571-550f-43cf-b09f-cd33c338d086/JenkinsCI/4f3bbf41e81a4f36887a1a4d7cbfb2c6/82fa2788-c6f4-45c7-a657-36f91eccfd87'"
+
+  references:
+  - https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/what-are-webhooks-and-connectors
+  - https://github.com/praetorian-inc/nuclei-templates/blob/main/exposures/tokens/microsoft/microsoft-teams-webhook.yaml

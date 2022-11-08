@@ -1,0 +1,30 @@
+rules:
+
+- name: Facebook Secret Key
+  pattern: |
+    (?x)(?i)
+    \b (?: facebook | fb )
+    .?
+    (?: api | app | application | client | consumer | customer | secret | key )
+    .?
+    (?: key | oauth | sec | secret )?
+    .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
+    \b ([a-z0-9]{32}) \b
+
+  references:
+  - https://developers.facebook.com/docs/facebook-login/access-tokens/
+
+  examples:
+  - '   # config.facebook.key = "34cebc81c056a21bc66e212f947d73ec"'
+  - "    var fbApiKey = '0278fc1adf6dc1d82a156f306ce2c5cc';"
+  - '     fbApiKey:            "171e84fd57f430fc59afa8fad3dbda2a",'
+
+
+- name: Facebook Access Token
+  pattern: '\b(EAACEdEose0cBA[a-zA-Z0-9]+)\b'
+
+  references:
+  - https://developers.facebook.com/docs/facebook-login/access-tokens/
+
+  examples:
+  - "url = 'https://graph.facebook.com/me/friends?access_token=EAACEdEose0cBAD5XZCz5JXYvqyeJzcSvFZC42toHiWyfjhcZCMZBZCpE3uRJnEBsrhUEMRK1wWs6SsdiDCaCI1mYwyoNuMix2XZCpvsKbZB9TumtZBlcLeIpl4pa931Ce9rTinEAhtyVVZAAZAX4NmfpBUqWtzCRC0fX5GZBn7ZC28mPKAZDZD'"

@@ -1,0 +1,30 @@
+rules:
+
+- name: netrc Credentials
+  pattern: |
+    (?x)
+    (?: (machine \s+ [^\s]+) | default)
+    \s+
+    login \s+ ([^\s]+)
+    \s+
+    password \s+ ([^\s]+)
+
+  references:
+  - https://everything.curl.dev/usingcurl/netrc
+  - https://devcenter.heroku.com/articles/authentication#api-token-storage
+
+  examples:
+  - 'machine api.github.com login ziggy^stardust password 012345abcdef'
+  - |
+      ```
+      machine raw.github.com
+        login visionmedia
+        password pass123
+      ```
+
+  - |
+      """
+      machine api.wandb.ai
+        login user
+        password 7cc938e45e63e9014f88f811be240ba0395c02dd
+      """

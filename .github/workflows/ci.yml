@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  pull_request:
+
+  push:
+    branches:
+    - main
+
+  schedule:
+  # Force a run every day at 0005 UTC
+  - cron: '00 05 * * *'
+
+
+env:
+  CARGO_TERM_COLOR: always
+
+  # Emit backtraces on panics.
+  RUST_BACKTRACE: 1
+
+
+jobs:
+  tests:
+    name: Tests
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        build:
+        - ubuntu-22.04.stable
+        - macos-12.stable
+
+        include:
+        - build: ubuntu-22.04.stable
+          os: ubuntu-22.04
+          rust: stable
+
+        - build: macos-12.stable
+          os: macos-12
+          rust: stable
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get install -y --no-install-recommends \
+          libhyperscan-dev
+
+    - name: Install system dependencies (macOS)
+      if: matrix.os == 'macos-12'
+      run: |
+        brew install hyperscan
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin
+          ~/.cargo/git
+          ~/.cargo/registry
+          target
+        key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-tests
+
+    - name: Build
+      run: cargo build --verbose --locked
+
+    - name: Run tests
+      run: cargo test --verbose --locked
+
+#  rustfmt:
+#    name: rustfmt
+#    runs-on: ubuntu-22.04
+#    steps:
+#    - name: Checkout repository
+#      uses: actions/checkout@v3
+#    - name: Install Rust
+#      uses: dtolnay/rust-toolchain@master
+#      with:
+#        toolchain: stable
+#        components: rustfmt
+#    - name: Check formatting
+#      run: cargo fmt --all --check
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get install -y --no-install-recommends \
+          libhyperscan-dev
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin
+          ~/.cargo/git
+          ~/.cargo/registry
+          target
+        key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-docs
+
+    - name: Check documentation
+      env:
+        RUSTDOCFLAGS: -D warnings
+      run: cargo doc --no-deps --document-private-items

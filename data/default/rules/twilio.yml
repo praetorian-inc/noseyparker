@@ -1,0 +1,16 @@
+rules:
+
+- name: Twilio API Key
+  pattern: '(?i)twilio.{0,20}\b(sk[a-f0-9]{32})\b'
+
+  examples:
+  - |
+      const twilioAccountSid = 'AC712594f590c0d8ace55c04858f7398f9' // Your Account SID from www.twilio.com/console
+      const twilioApiKeySID = 'SK9b4cc552783500ace5414a1ed3e9fd1a'
+      const twilioApiKeySecret = 'l6LUelKF2BUtMLace5oShZSmRppadYqI'
+  - |
+      // https://www.twilio.com/console/video/dev-tools/api-keys
+      'API'              => env('TWILIO_API','SK6e84981d07ace5c9df33e1ab043a2fb2'),
+      'API_KEY'          => env('TWILIO_API_KEY', 'wbTs1SUt6Aace5eKeNCxuYvJa6PhaRd0')
+
+  # FIXME: add references for this rule

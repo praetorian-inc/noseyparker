@@ -1,0 +1,11 @@
+rules:
+
+- name: NuGet API Key
+  pattern: '\b(oy2[a-z0-9]{43})\b'
+
+  references:
+  - https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys
+
+  examples:
+  - 'nuget push %filename% oy2dgb333j35kjjybcf99yzxo7hjyloera4anxn4ivcvle -Source https://api.nuget.org/v3/index.json'
+  - 'find . -name "*.nupkg"|xargs -I {} dotnet nuget push "{}"  --api-key  oy2l53fxd7xcf99dnyrqewssedgopshuticofclpespbyi  -s https://api.nuget.org/v3/index.json --skip-duplicate'

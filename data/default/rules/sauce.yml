@@ -1,0 +1,12 @@
+rules:
+
+- name: Sauce Token
+  pattern: '(?i)sauce.{0,50}\b([a-f0-9-]{36})\b'
+
+  examples:
+  - |
+      - SAUCE_USERNAME=vitess
+      - SAUCE_ACCESS_KEY=2397f603-c2c4-4897-a8ca-587ace5dc8dd
+
+  # FIXME: add references for this rule
+  # FIXME: review the stuff about tokens in https://docs.saucelabs.com/test-results/sharing-test-results and make sure this pattern is both good and comprehensive

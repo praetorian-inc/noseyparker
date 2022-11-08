@@ -1,0 +1,18 @@
+rules:
+
+- name: Dynatrace Token
+  pattern: '\b(dt0[a-zA-Z]{1}[0-9]{2}\.[A-Z0-9]{24}\.[A-Z0-9]{64})\b'
+
+  examples:
+  - |
+      helmCharts:
+      - name: dynatrace-operator
+        namespace: dynatrace
+        version: 0.4.1
+        repo: https://raw.githubusercontent.com/Dynatrace/helm-charts/master/repos/stable
+        releaseName: dynatrace-operator
+        includeCRDs: true
+        valuesInline:
+          apiUrl: https://fqp43822.live.dynatrace.com/api
+          apiToken: dt0c01.FJEGSO2NBAXCOEA7WOSKOA2G.GGMUK6GJDH2TWLNKQT6F68FH22252VXP2F3QAMBUVUDV5TSYYHAWZVVFCUQLF2UA
+          paasToken: dt0c01.QS7G6CAS5G64DLXFMEDEJ2O7.XVJQTFD2H7XG45V5RTDGA78GAI5W44MFTLZTUOMH4JEXPAV6NSEHUNGAYPIZGEIV

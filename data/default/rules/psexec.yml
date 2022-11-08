@@ -1,0 +1,27 @@
+rules:
+
+- name: Credentials in PsExec
+  pattern: |
+    (?x)
+    (?i)
+    psexec .{0,100}
+    -u \s* (\S+) \s+    (?# username )
+    -p \s* (\S+)        (?# password )
+
+  examples:
+  - 'cmd.exe /C PSEXEC \\10.0.94.120 -u Administrator -p dev_admin CMD /C ECHO'
+  - 'PSEXEC.EXE \\LocalComputerIPAddress -u DOMAIN\my-user -p mypass CMD'
+  - 'psExec \\OAIJCTDU8024272 -u User -p $Password -i -d calc.exe'
+  - |
+      :: satmodel2
+      %RUNTIMEDIR%\PsExec.exe \\satmodel2 -u SATMODEL2\MTCPB -p %nothing% -i 2 -c -f %TEMP%\psexec_helper.bat %RUNTIMEDIR% .\JavaOnly_runNode2.cmd
+      %RUNTIMEDIR%\pslist.exe \\satmodel2 java
+      if %ERRORLEVEL% NEQ 0 goto done
+  - |
+      ASSEMBLE THE BATCH FILE TO COPY THE FILE ACROSS THE DOMAIN
+      start PsExec.exe /accepteula @C:\share$\comps1.txt -u DOMAIN\ADMINISTRATOR -p PASSWORD cmd /c COPY "\PRIMARY DOMAIN CONTROLLER\share$\fx166.exe" "C:\windows\temp\"
+      SAVE IT AS "COPY.BAT"
+  - 'system("psexec \\\\192.168.3.77 -u Administrator -p braksha shutdown -r -f -t 0");'
+
+  references:
+  - https://learn.microsoft.com/en-us/sysinternals/downloads/psexec

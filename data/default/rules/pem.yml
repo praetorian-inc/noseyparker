@@ -1,0 +1,56 @@
+rules:
+
+# FIXME: add for `-----BEGIN CERTIFICATE-----`
+
+- name: PEM-Encoded Private Key
+  # Note: This is intended to match many PEM-encoded base64 payloads
+  pattern: |
+    (?x)
+    -----BEGIN\ .{0,20}\ ?PRIVATE\ KEY\ ?.{0,20}-----
+    \s{0,20}
+    ([a-zA-Z0-9+/=\s]{70,8000})
+    \s{0,20}
+    -----END\ .{0,20}\ ?PRIVATE\ KEY\ ?.{0,20}-----
+
+  references:
+  - https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail
+  - https://datatracker.ietf.org/doc/html/rfc7468
+
+  examples:
+  - |
+      -----BEGIN RSA PRIVATE KEY-----
+      b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn
+      NhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ
+      qjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i
+      qyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH
+      c3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj
+      QiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy
+      jScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi
+      VSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/
+      Ss3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66
+      Zcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT
+      GhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP
+      dW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA
+      QQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF
+      1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B
+      -----END RSA PRIVATE KEY-----
+
+  negative_examples:
+  # FIXME: we would like this negative example to actually match
+  - |
+      "-----BEGIN RSA PRIVATE KEY-----" +
+      "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn" +
+      "NhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ" +
+      "qjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i" +
+      "qyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH" +
+      "c3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj" +
+      "QiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy" +
+      "jScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi" +
+      "VSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/" +
+      "Ss3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66" +
+      "Zcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT" +
+      "GhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP" +
+      "dW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA" +
+      "QQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF" +
+      "1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B" +
+      "-----END RSA PRIVATE KEY-----"

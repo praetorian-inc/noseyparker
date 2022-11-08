@@ -1,0 +1,30 @@
+rules:
+
+- name: md5crypt Hash
+  pattern: '(\$1\$[./A-Za-z0-9]{8}\$[./A-Za-z0-9]{22})'
+
+  references:
+  - https://unix.stackexchange.com/a/511017
+  - https://hashcat.net/wiki/doku.php?id=example_hashes
+
+  examples:
+  # generated with `openssl passwd -1 -salt 'OKgLCmVl' 'a'`
+  - '$1$OKgLCmVl$d02jECa4DXn/oXX0R.MoQ/'
+  - '$1$28772684$iEwNOgGugqO9.bIz5sk8k/'
+
+
+- name: bcrypt Hash
+  # Format from Wikipedia:
+  #   $2<a/b/x/y>$[cost]$[22 character salt][31 character hash]
+  pattern: '(\$2[abxy]\$\d+\$[./A-Za-z0-9]{53})'
+
+  references:
+  - https://en.wikipedia.org/wiki/Bcrypt
+  - https://hashcat.net/wiki/doku.php?id=example_hashes
+
+  examples:
+  - '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW'
+  - '$2a$05$/VT2Xs2dMd8GJKfrXhjYP.DkTjOVrY12yDN7/6I8ZV0q/1lEohLru'
+  - '$2a$05$Uo385Fa0g86uUXHwZxB90.qMMdRFExaXePGka4WGFv.86I45AEjmO'
+  - '$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6'
+  - '$2y$12$atWJ1Nx6ep65tNx0YIJ4I.jzgI86znQbNRI3lF0qIt/XCYnEPxSc2'

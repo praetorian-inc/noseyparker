@@ -1,0 +1,106 @@
+rules:
+
+- name: AWS API Key
+  pattern: '\b((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})\b'
+  references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+  - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
+
+  examples:
+  - 'A3T0ABCDEFGHIJKLMNOP'
+
+  negative_examples:
+  - 'A3T0ABCDEFGHIJKLMNO'
+  - 'A3T0ABCDEFGHIjklmnop'
+  - '======================'
+  - '//////////////////////'
+  - '++++++++++++++++++++++'
+
+
+- name: AWS Secret Access Key
+  pattern: '(?i)\baws_?(?:secret)?_?(?:access)?_?(?:key)?["'']?\s{0,30}(?::|=>|=)\s{0,30}["'']?([a-z0-9/+=]{40})\b'
+  references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+  - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
+
+  examples:
+  - 'aws_secret_access_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  - 'aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+  negative_examples:
+  - '"aws_secret_access_key" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend'
+  - '"aws_secret_access_key" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaendbbbbbbb'
+  - '"aws_sEcReT_key"  =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend'
+  # FIXME: modify the pattern to detect cases like this
+  - 'aws_secret_key: OOzkR1+hF+1ABCsIFDJMEUtqmtnZ1234567890'
+  - '======================'
+  - '//////////////////////'
+  - '++++++++++++++++++++++'
+
+
+- name: AWS Account ID
+  pattern: '(?i)aws_?(?:account)_?(?:id)?["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([0-9]{4}-?[0-9]{4}-?[0-9]{4})'
+
+  examples:
+  - |
+      KeyMetadata: {
+          AWSAccountId: "324320755747",
+          Arn: "arn:aws:kms:us-east-2:324320755747:key/54348bc1-6e3b-4cda-8b18-c6033ca7d328",
+          CreationDate: 2019-07-12 18:23:13 +0000 UTC,
+          Description: "",
+          Enabled: true,
+          KeyId: "54348bc1-6e3b-4cda-8b18-c6033ca7d328",
+          KeyManager: "CUSTOMER",
+          KeyState: "Enabled",
+          KeyUsage: "ENCRYPT_DECRYPT",
+          Origin: "AWS_KMS"
+      }
+  - |
+      4. login into ecr
+
+      ```bash
+      aws_region=eu-central-1
+      aws_account_id=891511536143
+      aws_profile=serverless-bert
+
+      aws ecr get-login-password \
+          --region $aws_region \
+          --profile $aws_profile \
+      | docker login \
+          --username AWS \
+          --password-stdin $aws_account_id.dkr.ecr.$aws_region.amazonaws.com
+      ```
+
+  negative_examples:
+  - '======================'
+  - '//////////////////////'
+  - '++++++++++++++++++++++'
+
+
+- name: AWS Session Token
+  pattern: '(?i)(?:aws.?session|aws.?session.?token|aws.?token)["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([a-z0-9/+=]{16,200})[^a-z0-9/+=]'
+
+  negative_examples:
+  - '======================'
+  - '//////////////////////'
+  - '++++++++++++++++++++++'
+
+  examples:
+  - |
+      export AWS_ACCESS_KEY_ID="I08BCX2ACV45ED1DOC9J"
+      export AWS_SECRET_ACCESS_KEY="0qk+o7XctJMmG6ydO8537c9+TofLJU1K0PiVBXSg"
+      export AWS_SESSION_TOKEN="eyJhbGciOiJIUzUxMi53InR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJJMDhCQ1gySkpWNDVFRDFET0M5SiIsImFjciI6Ij53LCJhdWQiOiJhY2NvdW50IiwiYXV0aF90aW1lIjowLCJhenAiOiJtaW5pbyIsImVtYWlsIjoiYWlkYW4uY29wZUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImV4cCI6MTU4MDUwMDIzOCwiZmFtaWx5X25hbWUiOiJDb3BlIiwiZ2l2ZW5fbmFtZSI6IkFpZGFuIENvcGUiLCJpYXQiOjE1ODA0OTk5MzgsImlzcyI6Imh0dHBzOi8vYXV0aHN0Zy5wb3BkYXRhLmJjLmNhL2F1dGgvcmVhbG1zL3NhbXBsZSIsImp0aSI6IjU5ZTM5ODAxLWQxMmUtNDVhYS04NmQzLWVhMmNmZDU0NmE2MiIsIm1pbmlvX3BvbGljeSI6ImRhdGFzZXRfMV9ybyIsIm5hbWUiOiJBaWRhbiBDb3BlIENvcGUiLCJuYmYiOjAsInByZWZlcnJlZF91c2VybmFtZSI6ImFjb3BlLTk5LXQwNSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2Vzc2lvbl9zdGF0ZSI6IjcxYjczZWJjLThlMzMtNGMyMi04NmE2LWI0MzhhNDM4ZmI2MiIsInN1YiI6IjVkOTBlOTgzLTA1NDItNDYyYS1hZWIwLWYxZWVmNjcwYzdlNSIsInR5cCI6IkJlYXJlciJ9.J-a9PORJToz7MUrnPQlOywcqtVMNkXy53Gedp_V4PW-Gbf1_BAMjwuw_X7fKRd6hkNfEn43CKKju7muzi_d1Ig"
+
+
+- name: Amazon MWS Auth Token
+  pattern: '(?i)amzn\.mws\.([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+
+  examples:
+  - |
+      AWS Access Key:AKIAIDQJ6PTGDFFWYX7A
+      secret key:IwJz1SHMccAKUKuskdVoHFfkre73BTyF80nRmcWc
+      MWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58

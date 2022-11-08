@@ -1,0 +1,19 @@
+rules:
+
+- name: Generic Secret
+  pattern: '(?i)secret.{0,20}\b([0-9a-z]{32,64})\b'
+  examples:
+  - '    private static String CLIENT_SECRET = "6fb1cff7690db9ac066cadbbde8e3c078efdabcf";'
+
+  # FIXME: extend this rule so these examples get matched
+  negative_examples:
+  - "    secret_access_key = 'abcdefg12346+FJQCK'"
+  - '    Ldap password               ----   H7IKC85R#@4$'
+
+
+- name: Generic API Key
+  pattern: '(?i)(?:api|access).?key.{0,20}\b([0-9a-z]{32,64})\b'
+
+  examples:
+  - 'API_KEY = "951bc382db9abad29c68634761dd6e19"'
+  - 'buildConfigField ''String'' , ''API_KEY'' , ''"951bc382db9cfee29c68634761dd6e19"''	API_KEY	'

@@ -1,0 +1,30 @@
+rules:
+
+- name: Okta API Token
+  # Note: looks like `00` followed by a 40-character base-62 payload. We are a
+  # bit more restrictive here, not allowing `-` at the end, so that we can use
+  # the word boundary `\b` zero-width assertion, and also requiring "okta" or
+  # "ssws" out front.
+  pattern: '(?i)(?s)(?:okta|ssws).{0,40}\b(00[a-z0-9_-]{39})[a-z0-9_]\b'
+  references:
+  - https://devforum.okta.com/t/api-token-length/5519
+  - https://developer.okta.com/docs/guides/create-an-api-token/main/
+
+  examples:
+  - 'okta_api_token = 00aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  - 'OKTA_API_KEY = "00-aaaaaaaaaaaaa-aaaaaaaaaaaaaaaaaaaaaaaaa"'
+  - 'okta_secret:  00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGua'
+  - 'Authorization: SSWS 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGua'
+  - |
+      variable "corp_okta_api_token" {
+        default = "004EWTpRQT_HJtG_nL-agxacgzYHjxPcF99kJsFzWg"
+      }
+
+  negative_examples:
+  - '000000000000000000000000000000000000000000'
+  - 'okta_api_token: 000000000000000000000000000000000000000000aa'
+  - 'okta: 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGu--'
+  - 'okta_api_key: 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGu-'
+
+
+# FIXME: also add rules for Okta OAuth 2.0 tokens

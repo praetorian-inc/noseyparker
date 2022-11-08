@@ -1,0 +1,26 @@
+rules:
+
+- name: JSON Web Token (base64url-encoded)
+
+  # `header . payload . signature`, all base64-encoded
+  # Unencoded, the header and payload are JSON objects, starting with `{`, which
+  # gets base64-encoded as `ey`.
+  pattern: |
+    (?x)
+    \b
+    (ey[a-zA-Z0-9_-]+)      (?# header )
+    \.
+    (ey[a-zA-Z0-9_-]+)      (?# payload )
+    \.
+    ([a-zA-Z0-9_-]+)        (?# signature )
+
+  references:
+  - https://en.wikipedia.org/wiki/JSON_Web_Token
+  - https://datatracker.ietf.org/doc/html/rfc7519
+  - https://en.wikipedia.org/wiki/Base64#URL_applications
+  - https://datatracker.ietf.org/doc/html/rfc4648
+  - https://developer.okta.com/blog/2018/06/20/what-happens-if-your-jwt-is-stolen
+
+  examples:
+  - 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dnZWRJbkFzIjoiYWRtaW4iLCJpYXQiOjE0MjI3Nzk2Mzh9.gzSraSYS8EXBxLN_oWnFSRgCzcmEmMjLiuyu5CSpyHI'
+  - 'NUCLEAR_SERVICES_ANON_KEY=eyJhbGciOiJIUzI1NiIsEnR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqcnVqc2lzY2Nzdnl2am5xdG5xIiwicm9sZSI6ImEub24iLCJpYXQiOjE2NTY1OTY0NjEsImV4cCI6MTk3MjE3MjQ2MX0.WQWcwBAQFNE259f2o8ruFln_UMLTFEnEaUD7KHrs9Aw'
