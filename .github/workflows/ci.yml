@@ -76,6 +76,9 @@ jobs:
     - name: Run tests
       run: cargo test --verbose --locked
 
+    - name: Check rules
+      run: cargo run -- rules check data/default/rules --warnings-as-errors
+
 #  rustfmt:
 #    name: rustfmt
 #    runs-on: ubuntu-22.04
