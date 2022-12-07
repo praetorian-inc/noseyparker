@@ -1,19 +1,19 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use hyperscan::prelude::{pattern, BlockDatabase, Builder, Matching};
 
-use tracing::{debug, debug_span, error, error_span, info, warn};
+use tracing::{debug_span, error, error_span, info, warn};
 
 use crate::args;
 use noseyparker::rules::{Rule, Rules};
 use noseyparker::rules_database::RulesDatabase;
 
-pub fn run(_global_args: &args::GlobalArgs, args: &args::RulesArgs) -> Result<()> {
+pub fn run(global_args: &args::GlobalArgs, args: &args::RulesArgs) -> Result<()> {
     match &args.command {
-        args::RulesCommand::Check(args) => cmd_rules_check(args),
+        args::RulesCommand::Check(args) => cmd_rules_check(global_args, args),
     }
 }
 
-fn cmd_rules_check(args: &args::RulesCheckArgs) -> Result<()> {
+fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs) -> Result<()> {
     let _span = debug_span!("cmd_rules_check").entered();
 
     let rules = Rules::from_paths(&args.inputs)?;
@@ -29,9 +29,17 @@ fn cmd_rules_check(args: &args::RulesCheckArgs) -> Result<()> {
         .context("Compiling rules database failed")?;
 
     if num_warnings == 0 && num_errors == 0 {
-        info!("{} rules: no issues detected", num_rules);
+        println!("{} rules: no issues detected", num_rules);
     } else {
-        info!("{} rules: {} errors and {} warnings", num_rules, num_errors, num_warnings);
+        println!("{} rules: {} errors and {} warnings", num_rules, num_errors, num_warnings);
+    }
+
+    if num_errors != 0 {
+        bail!("{} errors in rules", num_errors);
+    }
+
+    if num_warnings != 0 && args.warnings_as_errors {
+        bail!("{} warnings; warnings being treated as errors", num_warnings);
     }
 
     Ok(())
@@ -78,6 +86,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             let mut num_succeeded = 0;
             let mut num_failed = 0;
 
+            // Check positive examples
             for (example_num, example) in rule.examples.iter().enumerate() {
                 if pat.find(example.as_bytes()).is_none() {
                     error!("Regex: failed to match example {}", example_num);
@@ -88,9 +97,20 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
                 }
             }
 
+            // Check negative examples
+            for (example_num, example) in rule.negative_examples.iter().enumerate() {
+                if pat.find(example.as_bytes()).is_some() {
+                    error!("Regex: incorrectly matched negative example {}", example_num);
+                    num_failed += 1;
+                    num_errors += 1;
+                } else {
+                    num_succeeded += 1;
+                }
+            }
+
             let num_total = num_succeeded + num_failed;
             if num_total > 0 {
-                debug!("Regex: {}/{} examples succeeded", num_succeeded, num_total);
+                info!("Regex: {}/{} examples succeeded", num_succeeded, num_total);
             }
         }
     };
@@ -113,6 +133,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             let mut num_succeeded = 0;
             let mut num_failed = 0;
 
+            // Check positive examples
             for (example_num, example) in rule.examples.iter().enumerate() {
                 let mut matched = false;
                 db.scan(example, &scratch, |_id, _from, _to, _flags| {
@@ -128,17 +149,33 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
                 }
             }
 
+            // Check negative examples
+            for (example_num, example) in rule.negative_examples.iter().enumerate() {
+                let mut matched = false;
+                db.scan(example, &scratch, |_id, _from, _to, _flags| {
+                    matched = true;
+                    Matching::Continue
+                })?;
+                if matched {
+                    error!("Hyperscan: incorrectly matched negative example {}", example_num);
+                    num_failed += 1;
+                    num_errors += 1;
+                } else {
+                    num_succeeded += 1;
+                }
+            }
+
             let num_total = num_succeeded + num_failed;
             if num_total > 0 {
-                debug!("Hyperscan: {}/{} examples succeeded", num_succeeded, num_total);
+                info!("Hyperscan: {}/{} examples succeeded", num_succeeded, num_total);
             }
         }
     }
 
     if num_warnings == 0 && num_errors == 0 {
-        debug!("No issues detected");
+        info!("No issues detected");
     } else {
-        debug!("{} errors and {} warnings", num_errors, num_warnings);
+        info!("{} errors and {} warnings", num_errors, num_warnings);
     }
 
     Ok(CheckStats {

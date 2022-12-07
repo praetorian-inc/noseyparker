@@ -159,11 +159,18 @@ pub struct RulesArgs {
 #[derive(Subcommand, Debug)]
 pub enum RulesCommand {
     /// Check rules for problems
+    ///
+    /// If errors are detected, or if warnings are detected and `--warnings-as-errors` is passed,
+    /// the program will exit with a nonzero exit code.
     Check(RulesCheckArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct RulesCheckArgs {
+    #[arg(long, short='W')]
+    /// Treat warnings as errors
+    pub warnings_as_errors: bool,
+
     #[arg(num_args(1..), required(true))]
     /// Files or directories to check
     pub inputs: Vec<PathBuf>,
