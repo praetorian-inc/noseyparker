@@ -1,4 +1,4 @@
-# Nosey Parker: Find secrets and sensitive information in textual data
+# Nosey Parker: Find secrets in textual data
 
 Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
 
@@ -8,7 +8,7 @@ Nosey Parker is a command-line tool that finds secrets and sensitive information
 - It groups matches together that share the same secret, further emphasizing signal over noise
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source in less than 5 minutes on an older MacBook Pro
 
-This open-source version of Nosey Parker is a reimplementation of part of an internal version in use at Praetorian. Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
+This open-source version of Nosey Parker is a reimplementation of part of the internal version in use at Praetorian, which has additional machine learning capabilities. Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
 
 
 ## Building from source
