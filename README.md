@@ -1,6 +1,6 @@
 # Nosey Parker: Find secrets and sensitive information in textual data
 
-Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offsensive and defensive security testing.
+Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
 
 **Key features:**
 - It supports scanning files, directories, and the entire history of Git repositories
