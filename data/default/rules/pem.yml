@@ -8,7 +8,7 @@ rules:
     (?x)
     -----BEGIN\ .{0,20}\ ?PRIVATE\ KEY\ ?.{0,20}-----
     \s{0,20}
-    ([a-zA-Z0-9+/=\s]{70,8000})
+    ( (?: [a-zA-Z0-9+/=\s"',] | \\r | \\n ) {50,} )
     \s{0,20}
     -----END\ .{0,20}\ ?PRIVATE\ KEY\ ?.{0,20}-----
 
@@ -35,8 +35,7 @@ rules:
       1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B
       -----END RSA PRIVATE KEY-----
 
-  negative_examples:
-  # FIXME: we would like this negative example to actually match
+  # Sometimes keys are written as string concatenation in source code
   - |
       "-----BEGIN RSA PRIVATE KEY-----" +
       "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn" +
@@ -54,3 +53,7 @@ rules:
       "QQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF" +
       "1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B" +
       "-----END RSA PRIVATE KEY-----"
+
+  # Other times keys are embedded as literal strings in source code
+  - |
+      "-----BEGIN RSA PRIVATE KEY-----\r\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\r\nNhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\r\nqjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\r\nqyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\r\nc3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\r\nQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\r\njScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\r\nVSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\r\nSs3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\r\nZcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\r\nGhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\r\ndW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\r\nQQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\r\n1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\r\n-----END RSA PRIVATE KEY-----"
