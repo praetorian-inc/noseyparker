@@ -8,7 +8,7 @@ Nosey Parker is a command-line tool that finds secrets and sensitive information
 - It groups matches together that share the same secret, further emphasizing signal over noise
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source in less than 5 minutes on an older MacBook Pro
 
-This open-source version of Nosey Parker is a reimplementation of the regular expression scanner portion of the internal version in use at Praetorian, which was [first announced](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) in March 2022 and [revisited](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/) later in the year.
+This open-source version of Nosey Parker is a reimplementation of part of an internal version in use at Praetorian. Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
 
 
 ## Building from source
