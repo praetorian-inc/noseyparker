@@ -39,6 +39,21 @@ cargo build --release
 ```
 This will produce a binary at `target/release/noseyparker`.
 
+## Docker Usage
+
+**NOTE:** Currently only x86_64 is supported due to the dependency on Hyperscan, which only supports x86_64.
+
+1. Build the Docker image: 
+
+```
+docker build -t noseyparker . 
+```
+
+2. Run Docker image with mounted volume:
+
+```
+docker run -v `pwd`:/opt/ noseyparker
+```
 
 ## Usage quick start
 
