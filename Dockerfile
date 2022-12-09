@@ -9,7 +9,7 @@ RUN cargo build --release
 
 FROM debian:11-slim
 COPY --from=build /noseyparker/target/release/noseyparker /usr/bin/noseyparker
-RUN apt update -y
-RUN apt install libhyperscan-dev -y
+RUN apt update && apt install -y \
+    libhyperscan-dev
 
 ENTRYPOINT ["noseyparker"]
