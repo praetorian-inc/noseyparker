@@ -57,6 +57,7 @@ pub struct BlobMatch<'r, 'b> {
 /// If doing multi-threaded scanning, use a separate `Matcher` for each thread.
 pub struct Matcher<'a> {
     /// A scratch buffer for Hyperscan
+    #[cfg(feature = "hyperscan")]
     hs_scratch: hyperscan::Scratch,
 
     /// A scratch vector for raw matches from Hyperscan, to minimize allocation
@@ -96,6 +97,7 @@ impl<'a> Matcher<'a> {
         global_stats: Option<&'a Mutex<MatcherStats>>,
     ) -> Result<Self> {
         Ok(Matcher {
+            #[cfg(feature = "hyperscan")]
             hs_scratch: rules_db.hsdb.alloc_scratch()?,
             raw_matches_scratch: Vec::with_capacity(16384),
             rules_db,
@@ -106,25 +108,29 @@ impl<'a> Matcher<'a> {
     }
 
     #[inline]
+    #[cfg_attr(not(feature = "hyperscan"), allow(unused_variables))]
     fn scan_bytes_raw(&mut self, input: &[u8]) -> Result<()> {
         self.raw_matches_scratch.clear();
-        let input_len: u64 = input.len().try_into().unwrap();
-        self.rules_db
-            .hsdb
-            .scan(input, &self.hs_scratch, |id: u32, from: u64, to: u64, _flags: u32| {
-                // let start_idx = if from == hyperscan_sys::HS_OFFSET_PAST_HORIZON { 0 } else { from };
-                //
-                // NOTE: `from` is only going to be meaningful here if we start compiling rules
-                // with the HS_SOM_LEFTMOST flag. But it doesn't seem to hurt to use the 0-value
-                // provided when that flag is not used.
-                let start_idx = std::cmp::min(from.try_into().unwrap(), input_len);
-                self.raw_matches_scratch.push(RawMatch {
-                    rule_id: id.try_into().unwrap(),
-                    start_idx,
-                    end_idx: to.try_into().unwrap(),
-                });
-                hyperscan::Matching::Continue
-            })?;
+        #[cfg(feature = "hyperscan")]
+        {
+            let input_len: u64 = input.len().try_into().unwrap();
+            self.rules_db
+                .hsdb
+                .scan(input, &self.hs_scratch, |id: u32, from: u64, to: u64, _flags: u32| {
+                    // let start_idx = if from == hyperscan_sys::HS_OFFSET_PAST_HORIZON { 0 } else { from };
+                    //
+                    // NOTE: `from` is only going to be meaningful here if we start compiling rules
+                    // with the HS_SOM_LEFTMOST flag. But it doesn't seem to hurt to use the 0-value
+                    // provided when that flag is not used.
+                    let start_idx = std::cmp::min(from.try_into().unwrap(), input_len);
+                    self.raw_matches_scratch.push(RawMatch {
+                        rule_id: id.try_into().unwrap(),
+                        start_idx,
+                        end_idx: to.try_into().unwrap(),
+                    });
+                    hyperscan::Matching::Continue
+                })?;
+        }
         Ok(())
     }
 

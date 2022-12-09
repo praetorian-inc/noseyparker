@@ -1,4 +1,7 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
+#[cfg(feature = "hyperscan")]
+use anyhow::{Context};
+#[cfg(feature = "hyperscan")]
 use hyperscan::prelude::{Builder, Pattern, Patterns};
 use regex::bytes::Regex;
 use std::path::Path;
@@ -11,6 +14,7 @@ pub struct RulesDatabase {
     // NOTE: pub(crate) here so that `Matcher` can access these
     pub(crate) rules: Rules,
     pub(crate) anchored_regexes: Vec<Regex>,
+    #[cfg(feature = "hyperscan")]
     pub(crate) hsdb: hyperscan::BlockDatabase,
 }
 
@@ -33,6 +37,7 @@ impl RulesDatabase {
             bail!("No rules to compile");
         }
 
+        #[cfg(feature = "hyperscan")]
         let patterns = rules
             .rules
             .iter()
@@ -43,6 +48,7 @@ impl RulesDatabase {
             .collect::<Result<Vec<Pattern>>>()?;
 
         let t1 = Instant::now();
+        #[cfg(feature = "hyperscan")]
         let hsdb = Patterns::build(&Patterns::from(patterns))?;
         let d1 = t1.elapsed().as_secs_f64();
 
@@ -57,6 +63,7 @@ impl RulesDatabase {
         debug!("Compiled {} rules: hyperscan {}s; regex {}s", rules.rules.len(), d1, d2);
         Ok(RulesDatabase {
             rules,
+            #[cfg(feature = "hyperscan")]
             hsdb,
             anchored_regexes,
         })
@@ -71,6 +78,7 @@ impl RulesDatabase {
 }
 
 #[cfg(test)]
+#[cfg(feature = "hyperscan")]
 mod test {
     use super::*;
     use pretty_assertions::assert_eq;

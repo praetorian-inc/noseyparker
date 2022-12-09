@@ -1,4 +1,5 @@
 use anyhow::{Context, Result, bail};
+#[cfg(feature = "hyperscan")]
 use hyperscan::prelude::{pattern, BlockDatabase, Builder, Matching};
 
 use tracing::{debug_span, error, error_span, info, warn};
@@ -45,6 +46,7 @@ fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs)
     Ok(())
 }
 
+#[cfg(feature = "hyperscan")]
 fn hs_compile_pattern(pat: &str) -> Result<BlockDatabase> {
     let pattern = pattern! {pat};
     let db: BlockDatabase = pattern.build()?;
@@ -123,6 +125,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
     //     Ok(_db) => {}
     // }
 
+    #[cfg(feature = "hyperscan")]
     match hs_compile_pattern(&rule.uncommented_pattern()) {
         Err(e) => {
             error!("Hyperscan: failed to compile pattern: {}", e);

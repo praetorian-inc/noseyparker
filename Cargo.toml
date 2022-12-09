@@ -25,6 +25,10 @@ path = "src/lib.rs"
 name = "noseyparker"
 path = "src/bin/noseyparker/main.rs"
 
+[features]
+default = ["hyperscan"]
+hyperscan = ["dep:hyperscan"]
+
 [dependencies]
 # anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
 anyhow = { version = "1.0" }
@@ -34,7 +38,7 @@ git2 = { version = "0.15", features = ["vendored-libgit2", "vendored-openssl"] }
 libc = "0.2"
 libgit2-sys = "*"
 hex = "0.4"
-hyperscan = { version = "0.3", features = ["full", "static"] }
+hyperscan = { version = "0.3", features = ["full", "static"], optional = true }
 # hyperscan-sys = { version = "0.3", features = ["full", "static"] }
 include_dir = { version = "0.7", features = ["glob"] }
 indenter = "0.3"
