@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use git2::{Oid, Repository, RepositoryOpenFlags};
+use git_repository as git;
 use ignore::{WalkBuilder, WalkState};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -142,7 +143,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 });
             }
         } else if metadata.is_dir() {
-            match open_git_repo(path) {
+            match open_git2_repo(path) {
                 Err(e) => {
                     error!("Failed to open Git repository at {:?}: {}; skipping", path, e);
                     return WalkState::Skip;
@@ -256,7 +257,7 @@ impl FilesystemEnumerator {
 }
 
 /// Opens the given Git repository if it exists, returning None otherwise.
-pub fn open_git_repo(path: &Path) -> Result<Option<Repository>> {
+pub fn open_git2_repo(path: &Path) -> Result<Option<Repository>> {
     match Repository::open_ext(
         path,
         RepositoryOpenFlags::NO_SEARCH | RepositoryOpenFlags::NO_DOTGIT, // | RepositoryOpenFlags::BARE,
@@ -266,6 +267,18 @@ pub fn open_git_repo(path: &Path) -> Result<Option<Repository>> {
             git2::ErrorCode::NotFound => Ok(None),
             _ => Err(e)?,
         },
+        Ok(r) => Ok(Some(r)),
+    }
+}
+
+/// Opens the given Git repository if it exists, returning None otherwise.
+pub fn open_git_repo(path: &Path) -> Result<Option<git::Repository>> {
+    match git::open_opts(
+        path,
+        git::open::Options::isolated()
+    ) {
+        Err(git::open::Error::NotARepository{..}) => Ok(None),
+        Err(err) => Err(err.into()),
         Ok(r) => Ok(Some(r)),
     }
 }

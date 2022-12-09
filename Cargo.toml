@@ -35,6 +35,7 @@ anyhow = { version = "1.0" }
 atty = "0.2"
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 git2 = { version = "0.15", features = ["vendored-libgit2", "vendored-openssl"] }
+git-repository = { version = "0.29.0", features = ["max-performance"] }
 libc = "0.2"
 libgit2-sys = "*"
 hex = "0.4"

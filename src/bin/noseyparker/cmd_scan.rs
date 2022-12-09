@@ -5,6 +5,7 @@ use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
 use tracing::{debug, debug_span, error};
+use git_repository as git;
 
 use crate::args;
 
@@ -266,18 +267,18 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
     inputs.git_repos.par_iter().for_each(|git_repo_result| {
+        let repo = open_git_repo(&git_repo_result.path)
+            .ok()
+            .flatten()
+            .expect("should be able to re-open repository").into_sync();
         git_repo_result
             .blobs
             .par_iter()
             .with_min_len(128)
             .for_each_init(
                 || {
-                    let repo = open_git_repo(&git_repo_result.path)
-                        .ok()
-                        .flatten()
-                        .expect("should be able to re-open repository");
                     let matcher = make_matcher().expect("should be able to create a matcher");
-                    (repo, matcher, progress.clone())
+                    (repo.to_thread_local(), matcher, progress.clone())
                 },
                 |(repo, matcher, progress), (oid, size)| {
                     progress.inc(*size);
@@ -290,7 +291,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     if seen_blobs.contains(&blob_id) {
                         return;
                     }
-                    let blob = match repo.find_blob(*oid) {
+                    let blob = match repo.find_object(git::hash::ObjectId::from(oid.as_bytes())) {
                         Err(e) => {
                             error!(
                                 "Failed to read blob {} from Git repository at {:?}: {}",
@@ -298,7 +299,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                             );
                             return;
                         }
-                        Ok(blob) => Blob::new(blob_id, blob.content().to_owned()),
+                        // TODO: get rid of this extra copy
+                        Ok(blob) => Blob::new(blob_id, blob.data.to_owned()),
                     };
                     let provenance = Provenance::FromGitRepo(path.to_path_buf());
                     match matcher.scan_blob(&blob, &provenance) {
