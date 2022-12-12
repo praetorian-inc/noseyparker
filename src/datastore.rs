@@ -64,7 +64,7 @@ impl Datastore {
     }
 
     fn new_connection(path: &Path) -> Result<Connection> {
-        let conn = Connection::open(&path)?;
+        let conn = Connection::open(path)?;
 
         conn.pragma_update(None, "journal_mode", "wal")?; // https://www.sqlite.org/wal.html
         conn.pragma_update(None, "foreign_keys", "on")?; // https://sqlite.org/foreignkeys.html

@@ -58,7 +58,7 @@ impl Rule {
     }
 
     pub fn as_regex(&self) -> Result<regex::bytes::Regex> {
-        Self::build_regex(&self.uncommented_pattern().to_owned())
+        Self::build_regex(&self.uncommented_pattern())
     }
 
     pub fn as_anchored_regex(&self) -> Result<regex::bytes::Regex> {
