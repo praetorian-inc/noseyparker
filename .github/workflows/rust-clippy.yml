@@ -30,8 +30,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            libhyperscan-dev
+
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af #@v1
+        id: install-rust-toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
           profile: minimal
           toolchain: stable
@@ -41,6 +47,16 @@ jobs:
       - name: Install required cargo
         run: cargo install clippy-sarif sarif-fmt
 
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-clippy
+
       - name: Run rust-clippy
         run:
           cargo clippy
@@ -49,7 +65,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: rust-clippy-results.sarif
           wait-for-processing: true
