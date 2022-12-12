@@ -48,8 +48,14 @@ impl OffsetSpan {
 
     /// Return the length in bytes of this `OffsetSpan`.
     #[inline]
-    pub fn len(self) -> usize {
+    pub fn len(&self) -> usize {
         self.end.saturating_sub(self.start)
+    }
+
+    /// Is the given span empty?
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.start >= self.end
     }
 
     /// Does this `OffsetSpan` entirely contain the other?

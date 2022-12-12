@@ -64,7 +64,7 @@ impl Datastore {
     }
 
     fn new_connection(path: &Path) -> Result<Connection> {
-        let conn = Connection::open(&path)?;
+        let conn = Connection::open(path)?;
 
         conn.pragma_update(None, "journal_mode", "wal")?; // https://www.sqlite.org/wal.html
         conn.pragma_update(None, "foreign_keys", "on")?; // https://sqlite.org/foreignkeys.html
@@ -237,7 +237,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(MatchSummary(es))
@@ -264,7 +264,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(es)
@@ -326,7 +326,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(es)
