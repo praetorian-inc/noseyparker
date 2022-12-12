@@ -368,7 +368,7 @@ impl std::fmt::Display for MatchSummary {
 // -------------------------------------------------------------------------------------------------
 // MatchGroupMetadata
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MatchGroupMetadata {
     pub rule_name: String,
     pub group_input: Vec<u8>,

@@ -5,12 +5,13 @@ use crate::provenance::Provenance;
 use crate::utils::decode_utf8_lossy_escape;
 
 use indenter::indented;
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Write};
 
 // -------------------------------------------------------------------------------------------------
 // Match
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Match {
     /// The blob this match comes from
     pub blob_id: BlobId,

@@ -1,9 +1,10 @@
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
 // -------------------------------------------------------------------------------------------------
 // BlobId
 // -------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
 pub struct BlobId([u8; 20]);
 
 impl BlobId {

@@ -1,5 +1,6 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use indenter::indented;
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::datastore::{Datastore, MatchGroupMetadata};
@@ -10,41 +11,58 @@ use noseyparker::utils::decode_utf8_lossy_escape;
 use crate::args;
 
 pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<()> {
-    match &args.output_args.format {
-        args::OutputFormat::Human => {}
-        _ => {
-            bail!("The `report` command currently only supports the `human` output format.\nSupport for other formats is coming soon.");
-        }
-    }
-
     let datastore = Datastore::open(&args.datastore)?;
     let mut writer = args
         .output_args
         .get_writer()
         .context("Failed to open output destination for writing")?;
-
     let group_metadata = datastore
         .get_match_group_metadata()
         .context("Failed to get match group metadata from datastore")?;
 
-    let num_findings = group_metadata.len();
-    for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
-        let finding_num = finding_num + 1;
-        let matches = datastore
-            .get_match_group_matches(&metadata, Some(3))
-            .with_context(|| format!("Failed to get matches for group {:?}", metadata))?;
-        let match_group = MatchGroup { metadata, matches };
-        let res = writeln!(writer, "Finding {}/{}: {}", finding_num, num_findings, match_group);
-        match res {
-            // Ignore SIGPIPE errors, like those that can come from piping to `head`
-            Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => { return Ok(()) }
-            r => { r? }
+    match &args.output_args.format {
+        args::OutputFormat::Human => {
+            let num_findings = group_metadata.len();
+            for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
+                let finding_num = finding_num + 1;
+                let matches = datastore
+                    .get_match_group_matches(&metadata, Some(3))
+                    .with_context(|| format!("Failed to get matches for group {:?}", metadata))?;
+                let match_group = MatchGroup { metadata, matches };
+                let res = writeln!(writer, "Finding {}/{}: {}", finding_num, num_findings, match_group);
+                match res {
+                    // Ignore SIGPIPE errors, like those that can come from piping to `head`
+                    Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => { return Ok(()) }
+                    r => { r? }
+                }
+            }
+            Ok(())
         }
+
+        args::OutputFormat::Jsonl => {
+            for metadata in group_metadata.into_iter() {
+                let matches = datastore
+                    .get_match_group_matches(&metadata, Some(3))
+                    .with_context(|| format!("Failed to get matches for group {:?}", metadata))?;
+                let match_group = MatchGroup { metadata, matches };
+
+                let res: std::io::Result<()> = serde_json::to_writer(&mut writer, &match_group).map_err(|e| e.into());
+                // .and_then(|()| writeln!(&mut writer));
+                match res {
+                    // Ignore SIGPIPE errors, like those that can come from piping to `head`
+                    Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => { return Ok(()) }
+                    r => { r? }
+                }
+            }
+            Ok(())
+        }
+
+        args::OutputFormat::Json => { panic!("unimplemented"); }
     }
-    Ok(())
 }
 
 /// A group of matches that all have the same rule and capture group content
+#[derive(Serialize, Deserialize)]
 struct MatchGroup {
     metadata: MatchGroupMetadata,
     matches: Vec<Match>,
