@@ -19,7 +19,7 @@ const DURATION_PREFIXES: [(f64, &str); 4] = [
     ((60 * 60 * 24 * 7) as f64, "weeks"),
     ((60 * 60 * 24) as f64, "days"),
     ((60 * 60) as f64, "hours"),
-    (60 as f64, "minutes"),
+    (60_f64, "minutes"),
 ];
 
 pub fn duration_fmt(secs: f64) -> String {

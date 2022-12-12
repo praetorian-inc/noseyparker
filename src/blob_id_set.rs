@@ -43,4 +43,16 @@ impl BlobIdSet {
     pub fn len(&self) -> usize {
         self.sets.iter().map(|b| b.lock().unwrap().len()).sum()
     }
+
+    /// Is the set empty?
+    /// Note: this is not a cheap operation.
+    pub fn is_empty(&self) -> bool {
+        self.sets.iter().all(|b| b.lock().unwrap().is_empty())
+    }
+}
+
+impl Default for BlobIdSet {
+    fn default() -> Self {
+        Self::new()
+    }
 }

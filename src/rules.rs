@@ -58,7 +58,7 @@ impl Rule {
     }
 
     pub fn as_regex(&self) -> Result<regex::bytes::Regex> {
-        Self::build_regex(&self.uncommented_pattern().to_owned())
+        Self::build_regex(&self.uncommented_pattern())
     }
 
     pub fn as_anchored_regex(&self) -> Result<regex::bytes::Regex> {
@@ -163,8 +163,20 @@ impl Rules {
         Self::from_yaml_files(&yaml_files)
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
         self.rules.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.rules.is_empty()
+    }
+}
+
+impl Default for Rules {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

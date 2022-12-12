@@ -117,11 +117,11 @@ impl<'a> Matcher<'a> {
                 // NOTE: `from` is only going to be meaningful here if we start compiling rules
                 // with the HS_SOM_LEFTMOST flag. But it doesn't seem to hurt to use the 0-value
                 // provided when that flag is not used.
-                let start_idx = std::cmp::min(from.try_into().unwrap(), input_len);
+                let start_idx = from.min(input_len);
                 self.raw_matches_scratch.push(RawMatch {
-                    rule_id: id.try_into().unwrap(),
+                    rule_id: id,
                     start_idx,
-                    end_idx: to.try_into().unwrap(),
+                    end_idx: to,
                 });
                 hyperscan::Matching::Continue
             })?;
