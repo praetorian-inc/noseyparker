@@ -18,6 +18,7 @@ pub fn get_mwindow_mapped_limit() -> usize {
     // https://github.com/libgit2/libgit2/blob/936b184e7494158c20e522981f4a324cac6ffa47/src/libgit2/libgit2.c#L179-L181
     assert!(rc >= 0);
 
+    #[allow(clippy::useless_conversion)]
     out.try_into().expect("result should be convertible to usize")
 }
 
@@ -27,6 +28,7 @@ pub fn get_mwindow_mapped_limit() -> usize {
 ///
 /// Note: This is not exposed natively by `git2`, so instead it is implemented here.
 pub fn set_mwindow_mapped_limit(limit: usize) {
+    #[allow(clippy::useless_conversion)]
     let limit: libc::size_t = limit.try_into().expect("input should be convertible to libc::size_t");
     let rc = unsafe {
         raw::git_libgit2_opts(

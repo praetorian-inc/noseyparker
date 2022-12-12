@@ -106,9 +106,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 .context("Failed to load specified rules files")?;
             rules.extend(custom_rules);
         }
-        let rules_db = RulesDatabase::from_rules(rules)
-            .context("Failed to compile rules")?;
-        rules_db
+        RulesDatabase::from_rules(rules)
+            .context("Failed to compile rules")?
     };
 
     // ---------------------------------------------------------------------------------------------
@@ -149,7 +148,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             ie
         };
 
-        let inputs = input_enumerator.run(&mut progress)?;
+        let inputs = input_enumerator.run(&progress)?;
         let total_bytes_found: u64 = {
             let blob_bytes: u64 = inputs.git_repos.iter().map(|r| r.total_blob_bytes()).sum();
             let file_bytes: u64 = inputs.files.iter().map(|e| e.num_bytes).sum();
@@ -307,7 +306,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                 "Failed to scan blob {} from Git repository at {:?}: {}",
                                 oid, path, e
                             );
-                            return;
                         }
                         Ok(matches) => {
                             if matches.is_empty() {

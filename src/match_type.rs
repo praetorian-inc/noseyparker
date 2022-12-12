@@ -78,7 +78,7 @@ impl Match {
             .filter_map(|(group_index, group)| {
                 let group = group?; // XXX should we warn on empty match groups?
                 Some(Match {
-                    blob_id: blob_id.clone(),
+                    blob_id: *blob_id,
                     rule_name: rule_name.clone(),
                     matching_input: matching_input.to_owned(),
                     matching_input_offset_span: offsets.clone(),

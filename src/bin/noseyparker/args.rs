@@ -39,9 +39,8 @@ impl CommandLineArgs {
         // If `NO_COLOR` is set in the environment, disable colored output
         //
         // https://no-color.org/
-        match std::env::var("NO_COLOR") {
-            Ok(_) => { s.global_args.color = Mode::Never }
-            Err(_) => {}
+        if std::env::var("NO_COLOR").is_ok() {
+            s.global_args.color = Mode::Never
         }
 
         s

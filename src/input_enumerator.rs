@@ -283,15 +283,6 @@ impl<'a> GitRepoEnumerator<'a> {
         GitRepoEnumerator { repo }
     }
 
-    // pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-    //     let path = path.as_ref();
-    //     let res = open_git_repo(path)?;
-    //     match res {
-    //         Some(r) => Ok(Self::new(r)),
-    //         None => bail!("{:?} does not appear to be a Git repository", path),
-    //     }
-    // }
-
     pub fn run(&self, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
         let mut blobs: Vec<(Oid, u64)> = Vec::new();
 
@@ -304,15 +295,10 @@ impl<'a> GitRepoEnumerator<'a> {
                 }
                 Ok(v) => v,
             };
-            match obj_type {
-                git2::ObjectType::Blob => {
-                    let obj_size = obj_size as u64;
-                    progress.inc(obj_size);
-                    blobs.push((*oid, obj_size));
-                    // let read_size = odb.read(*oid).unwrap().len();
-                    // assert_eq!(obj_size, read_size);
-                }
-                _ => {}
+            if obj_type == git2::ObjectType::Blob {
+                let obj_size = obj_size as u64;
+                progress.inc(obj_size);
+                blobs.push((*oid, obj_size));
             }
             true
         })?;

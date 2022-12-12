@@ -237,7 +237,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(MatchSummary(es))
@@ -264,7 +264,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(es)
@@ -326,7 +326,7 @@ impl Datastore {
             })
         })?;
         let mut es = Vec::new();
-        for e in entries.into_iter() {
+        for e in entries {
             es.push(e?);
         }
         Ok(es)
