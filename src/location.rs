@@ -97,7 +97,7 @@ impl std::fmt::Display for SourceSpan {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Mapping
+// LocationMapping
 // -------------------------------------------------------------------------------------------------
 /// A translation table from byte offsets to source offsets
 pub struct LocationMapping {
@@ -146,4 +146,14 @@ impl LocationMapping {
         // let end = self.offset_to_source[span.end];
         SourceSpan{ start, end }
     }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// Location
+// -------------------------------------------------------------------------------------------------
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Location {
+    pub offset_span: OffsetSpan,
+    pub source_span: SourceSpan,
 }

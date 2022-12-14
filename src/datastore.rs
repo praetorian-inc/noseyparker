@@ -1,4 +1,5 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
+use bstr::BString;
 use indoc::indoc;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
@@ -6,9 +7,10 @@ use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
 use crate::blob_id::BlobId;
-use crate::location::{OffsetSpan, SourceSpan, SourcePoint};
+use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
 use crate::provenance::Provenance;
+use crate::snippet::Snippet;
 
 // -------------------------------------------------------------------------------------------------
 // Datastore
@@ -187,11 +189,11 @@ impl Datastore {
         "#})?;
         let mut num_changed = 0;
         for m in matches {
-            let span = &m.matching_input_offset_span;
-            let src = &m.matching_input_source_span;
+            let span = &m.location.offset_span;
+            let src = &m.location.source_span;
             let (ptype, ppath) = match &m.provenance {
-                Provenance::FromFile(p) => ("file", p.to_string_lossy()),
-                Provenance::FromGitRepo(p) => ("git", p.to_string_lossy()),
+                Provenance::File { path } => ("file", path.to_string_lossy()),
+                Provenance::GitRepo { path } => ("git", path.to_string_lossy()),
             };
             num_changed += stmt.execute((
                 m.blob_id.hex(),
@@ -201,11 +203,11 @@ impl Datastore {
                 src.start.column,
                 src.end.line,
                 src.end.column,
-                &m.before_snippet,
-                &m.matching_input,
-                &m.after_snippet,
-                &m.group_index,
-                &m.group_input,
+                m.snippet.before.as_slice(),
+                m.snippet.matching.as_slice(),
+                m.snippet.after.as_slice(),
+                &m.capture_group_index,
+                m.match_content.as_slice(),
                 &m.rule_name,
                 ptype,
                 ppath,
@@ -219,7 +221,7 @@ impl Datastore {
     pub fn summarize(&self) -> Result<MatchSummary> {
         let _span = debug_span!("Datastore::summarize", "{:?}", self.root_dir).entered();
 
-        let mut stmt = self.conn.prepare_cached(indoc!{r#"
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select rule_name, count(*) grouped_count, sum(num_matches) total_count
             from (
                 select group_input, rule_name, count(*) num_matches
@@ -248,9 +250,10 @@ impl Datastore {
     }
 
     pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
-        let _span = debug_span!("Datastore::get_match_group_metadata", "{:?}", self.root_dir).entered();
+        let _span =
+            debug_span!("Datastore::get_match_group_metadata", "{:?}", self.root_dir).entered();
 
-        let mut stmt = self.conn.prepare_cached(indoc!{r#"
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select group_input, rule_name, count(*)
             from matches
             group by 1, 2
@@ -258,9 +261,9 @@ impl Datastore {
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(MatchGroupMetadata {
-                group_input: row.get(0)?,
+                match_content: BString::new(row.get(0)?),
                 rule_name: row.get(1)?,
-                matches: row.get(2)?,
+                num_matches: row.get(2)?,
             })
         })?;
         let mut es = Vec::new();
@@ -270,10 +273,14 @@ impl Datastore {
         Ok(es)
     }
 
-    pub fn get_match_group_matches(&self, metadata: &MatchGroupMetadata, limit: Option<usize>) -> Result<Vec<Match>> {
+    pub fn get_match_group_matches(
+        &self,
+        metadata: &MatchGroupMetadata,
+        limit: Option<usize>,
+    ) -> Result<Vec<Match>> {
         let _span = debug_span!("Datastore::match_groups", "{:?}", self.root_dir).entered();
 
-        let mut stmt = self.conn.prepare_cached(indoc!{r#"
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select
                 blob_id,
                 start_byte,
@@ -298,31 +305,36 @@ impl Datastore {
             Some(limit) => limit.try_into().expect("limit should be convertible"),
             None => -1,
         };
-        let entries = stmt.query_map((&metadata.rule_name, &metadata.group_input, limit), |row| {
+        let entries = stmt.query_map((&metadata.rule_name, metadata.match_content.as_slice(), limit), |row| {
             let v0: String = row.get(0)?;
             Ok(Match {
                 blob_id: BlobId::from_hex(&v0).expect("blob id from database should be valid"),
-                matching_input_offset_span: OffsetSpan {
-                    start: row.get(1)?,
-                    end: row.get(2)?,
-                },
-                matching_input_source_span: SourceSpan {
-                    start: SourcePoint {
-                        line: row.get(3)?,
-                        column: row.get(4)?,
+                location: Location {
+                    offset_span: OffsetSpan {
+                        start: row.get(1)?,
+                        end: row.get(2)?,
                     },
-                    end: SourcePoint {
-                        line: row.get(5)?,
-                        column: row.get(6)?,
+                    source_span: SourceSpan {
+                        start: SourcePoint {
+                            line: row.get(3)?,
+                            column: row.get(4)?,
+                        },
+                        end: SourcePoint {
+                            line: row.get(5)?,
+                            column: row.get(6)?,
+                        },
                     },
                 },
-                before_snippet: row.get(7)?,
-                matching_input: row.get(8)?,
-                after_snippet: row.get(9)?,
-                group_index: row.get(10)?,
-                group_input: metadata.group_input.clone(),
+                snippet: Snippet {
+                    before: BString::new(row.get(7)?),
+                    matching: BString::new(row.get(8)?),
+                    after: BString::new(row.get(9)?),
+                },
+                capture_group_index: row.get(10)?,
+                match_content: metadata.match_content.clone(),
                 rule_name: metadata.rule_name.clone(),
-                provenance: provenance_from_parts(row.get(11)?, row.get(12)?).expect("provenance value from database should be valid")
+                provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
+                    .expect("provenance value from database should be valid"),
             })
         })?;
         let mut es = Vec::new();
@@ -333,11 +345,14 @@ impl Datastore {
     }
 }
 
-
 fn provenance_from_parts(tag: String, path: String) -> Result<Provenance> {
     match tag.as_str() {
-        "git" => Ok(Provenance::FromGitRepo(PathBuf::from(path))),
-        "file" => Ok(Provenance::FromFile(PathBuf::from(path))),
+        "git" => Ok(Provenance::GitRepo {
+            path: PathBuf::from(path),
+        }),
+        "file" => Ok(Provenance::File {
+            path: PathBuf::from(path),
+        }),
         t => bail!("Provenance tag {:?} is invalid", t),
     }
 }
@@ -368,9 +383,15 @@ impl std::fmt::Display for MatchSummary {
 // -------------------------------------------------------------------------------------------------
 // MatchGroupMetadata
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MatchGroupMetadata {
+    /// The name of the rule of all the matches in the group
     pub rule_name: String,
-    pub group_input: Vec<u8>,
-    pub matches: usize,
+
+    /// The matched content of all the matches in the group
+    #[serde(with="crate::utils::BStringSerde")]
+    pub match_content: BString,
+
+    /// The number of matches in the group
+    pub num_matches: usize,
 }

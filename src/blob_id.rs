@@ -1,9 +1,11 @@
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
 // -------------------------------------------------------------------------------------------------
 // BlobId
 // -------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
+#[serde(into="String", try_from="&str")]
 pub struct BlobId([u8; 20]);
 
 impl BlobId {
@@ -57,6 +59,20 @@ impl BlobId {
     #[inline]
     pub fn bytes(&self) -> &[u8] {
         &self.0
+    }
+}
+
+impl From<BlobId> for String where {
+    fn from(blob_id: BlobId) -> String {
+        blob_id.hex()
+    }
+}
+
+impl TryFrom<&str> for BlobId where {
+    type Error = anyhow::Error;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        BlobId::from_hex(s)
     }
 }
 
