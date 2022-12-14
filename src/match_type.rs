@@ -20,11 +20,11 @@ pub struct Match {
     pub location: Location,
 
     /// The capture group number, indexed from 1
-    pub group_index: u8,
+    pub capture_group_index: u8,
 
     /// The capture group
     #[serde(with="BStringSerde")]
-    pub group: BString,
+    pub match_content: BString,
 
     /// A snippet of the match and surrounding context
     pub snippet: Snippet,
@@ -77,7 +77,7 @@ impl Match {
                     blob_id: *blob_id,
                     rule_name: rule_name.clone(),
                     snippet: Snippet {
-                        content: BString::from(matching_input),
+                        matching: BString::from(matching_input),
                         before: BString::from(before_snippet),
                         after: BString::from(after_snippet),
                     },
@@ -85,8 +85,8 @@ impl Match {
                         offset_span: offsets.clone(),
                         source_span: source_span.clone(),
                     },
-                    group: BString::from(group.as_bytes()),
-                    group_index: group_index
+                    match_content: BString::from(group.as_bytes()),
+                    capture_group_index: group_index
                         .try_into()
                         .expect("group index should fit in u8"),
                     provenance: provenance.clone(),

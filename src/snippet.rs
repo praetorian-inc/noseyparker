@@ -14,7 +14,7 @@ pub struct Snippet {
 
     /// The matching input
     #[serde(with = "BStringSerde")]
-    pub content: BString,
+    pub matching: BString,
 
     /// A snippet of the input immediately after `content`
     #[serde(with = "BStringSerde")]
@@ -23,6 +23,6 @@ pub struct Snippet {
 
 impl Display for Snippet {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}{}", Escaped(&self.before), Escaped(&self.content), Escaped(&self.after))
+        write!(f, "{}{}{}", Escaped(&self.before), Escaped(&self.matching), Escaped(&self.after))
     }
 }

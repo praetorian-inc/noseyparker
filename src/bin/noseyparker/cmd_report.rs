@@ -114,7 +114,7 @@ impl MatchGroup {
     }
 
     fn group_input(&self) -> &[u8] {
-        &self.metadata.group
+        &self.metadata.match_content
     }
 
     fn total_matches(&self) -> usize {

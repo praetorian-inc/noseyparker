@@ -204,10 +204,10 @@ impl Datastore {
                 src.end.line,
                 src.end.column,
                 m.snippet.before.as_slice(),
-                m.snippet.content.as_slice(),
+                m.snippet.matching.as_slice(),
                 m.snippet.after.as_slice(),
-                &m.group_index,
-                m.group.as_slice(),
+                &m.capture_group_index,
+                m.match_content.as_slice(),
                 &m.rule_name,
                 ptype,
                 ppath,
@@ -261,7 +261,7 @@ impl Datastore {
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(MatchGroupMetadata {
-                group: BString::new(row.get(0)?),
+                match_content: BString::new(row.get(0)?),
                 rule_name: row.get(1)?,
                 num_matches: row.get(2)?,
             })
@@ -305,7 +305,7 @@ impl Datastore {
             Some(limit) => limit.try_into().expect("limit should be convertible"),
             None => -1,
         };
-        let entries = stmt.query_map((&metadata.rule_name, metadata.group.as_slice(), limit), |row| {
+        let entries = stmt.query_map((&metadata.rule_name, metadata.match_content.as_slice(), limit), |row| {
             let v0: String = row.get(0)?;
             Ok(Match {
                 blob_id: BlobId::from_hex(&v0).expect("blob id from database should be valid"),
@@ -327,11 +327,11 @@ impl Datastore {
                 },
                 snippet: Snippet {
                     before: BString::new(row.get(7)?),
-                    content: BString::new(row.get(8)?),
+                    matching: BString::new(row.get(8)?),
                     after: BString::new(row.get(9)?),
                 },
-                group_index: row.get(10)?,
-                group: metadata.group.clone(),
+                capture_group_index: row.get(10)?,
+                match_content: metadata.match_content.clone(),
                 rule_name: metadata.rule_name.clone(),
                 provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
                     .expect("provenance value from database should be valid"),
@@ -385,8 +385,13 @@ impl std::fmt::Display for MatchSummary {
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Deserialize, Serialize)]
 pub struct MatchGroupMetadata {
+    /// The name of the rule of all the matches in the group
     pub rule_name: String,
+
+    /// The matched content of all the matches in the group
     #[serde(with="crate::utils::BStringSerde")]
-    pub group: BString,
+    pub match_content: BString,
+
+    /// The number of matches in the group
     pub num_matches: usize,
 }
