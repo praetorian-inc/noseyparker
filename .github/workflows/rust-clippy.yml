@@ -39,7 +39,6 @@ jobs:
         id: install-rust-toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: stable
           components: clippy
           override: true
