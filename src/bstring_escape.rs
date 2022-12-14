@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use std::fmt::{Display, Formatter, Write};
 
 fn escape_nonprinting(s: &str) -> Cow<'_, str> {
-    for (i, ch) in s.chars().enumerate() {
+    for (i, ch) in s.char_indices() {
         if !ch.is_whitespace() && ch.is_control() {
             let mut escaped = String::with_capacity(s.len());
             escaped.push_str(&s[..i]);
