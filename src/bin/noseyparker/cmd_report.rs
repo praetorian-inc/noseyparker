@@ -157,14 +157,13 @@ impl Display for MatchGroup {
         writeln!(f)?;
 
         // print matches
-        let num_matches = self.num_matches();
         let mut f = indented(f).with_str("    ");
         for (i, m) in self.matches.iter().enumerate() {
             let i = i + 1;
             writeln!(
                 f,
                 "{}",
-                STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, num_matches))
+                STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
             )?;
             match &m.provenance {
                 Provenance::File { path } => {
@@ -190,12 +189,7 @@ impl Display for MatchGroup {
                     )?;
                 }
             }
-            writeln!(
-                f,
-                "{} {}",
-                STYLE_HEADING.apply_to("Lines:"),
-                STYLE_METADATA.apply_to(&m.location.source_span)
-            )?;
+            writeln!(f, "{} {}", STYLE_HEADING.apply_to("Lines:"), &m.location.source_span,)?;
             writeln!(f)?;
             writeln!(
                 indented(&mut f).with_str("    "),
