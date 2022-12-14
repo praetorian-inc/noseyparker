@@ -43,9 +43,6 @@ jobs:
           components: clippy
           override: true
 
-      - name: Install required cargo
-        run: cargo install clippy-sarif sarif-fmt
-
       - name: Cache
         uses: actions/cache@v3
         with:
@@ -55,6 +52,9 @@ jobs:
             ~/.cargo/registry
             target
           key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-clippy
+
+      - name: Install required cargo
+        run: cargo install clippy-sarif sarif-fmt
 
       - name: Run rust-clippy
         run:
