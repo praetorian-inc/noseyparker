@@ -48,6 +48,11 @@ fn main() -> Result<()> {
 
     let args = &args::CommandLineArgs::parse_args();
     let global_args = &args.global_args;
+
+    let use_color = global_args.use_color();
+    console::set_colors_enabled(use_color);
+    console::set_colors_enabled_stderr(use_color);
+
     configure_tracing(&args.global_args).context("Failed to initialize logging")?;
     configure_rlimits().context("Failed to initialize resource limits")?;
 

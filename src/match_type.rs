@@ -6,9 +6,7 @@ use crate::snippet::Snippet;
 use crate::utils::BStringSerde;
 
 use bstr::BString;
-use indenter::indented;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter, Write};
 
 // -------------------------------------------------------------------------------------------------
 // Match
@@ -95,28 +93,5 @@ impl Match {
                 })
             })
             .collect()
-    }
-}
-
-impl Display for Match {
-    /// Render this finding human-readable style to the given formatter.
-    ///
-    /// Note: the output emitted spans multiple lines.
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Rule: {}", &self.rule_name)?;
-        match &self.provenance {
-            Provenance::File { path } => {
-                writeln!(f, "File: {}", path.display())?;
-            }
-            Provenance::GitRepo { path } => {
-                writeln!(f, "Git repo: {}", path.display())?;
-                writeln!(f, "Blob: {}", &self.blob_id)?;
-            }
-        }
-        writeln!(f, "Lines: {}", self.location.source_span)?;
-        writeln!(f, "Match: {}", self.group)?;
-        writeln!(f, "Snippet:\n")?;
-        writeln!(indented(f).with_str("    "), "{}", self.snippet)?;
-        Ok(())
     }
 }
