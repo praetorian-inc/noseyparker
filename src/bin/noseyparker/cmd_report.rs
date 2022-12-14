@@ -32,11 +32,10 @@ pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<(
                 let match_group = MatchGroup { metadata, matches };
                 let res = writeln!(
                     writer,
-                    "{}",
-                    STYLE_FINDING_HEADING.apply_to(format!(
-                        "Finding {}/{}: {}",
-                        finding_num, num_findings, match_group
-                    ))
+                    "{} {}",
+                    STYLE_FINDING_HEADING
+                        .apply_to(format!("Finding {}/{}:", finding_num, num_findings)),
+                    match_group,
                 );
                 match res {
                     // Ignore SIGPIPE errors, like those that can come from piping to `head`
@@ -102,10 +101,10 @@ struct MatchGroup {
 lazy_static! {
     static ref STYLE_FINDING_HEADING: console::Style =
         console::Style::new().bold().bright().white();
-    static ref STYLE_RULE: console::Style = console::Style::new().bright().bold();
+    static ref STYLE_RULE: console::Style = console::Style::new().bright().bold().blue();
     static ref STYLE_HEADING: console::Style = console::Style::new().bold();
-    static ref STYLE_MATCH: console::Style = console::Style::new().red();
-    static ref STYLE_METADATA: console::Style = console::Style::new().blue().bright();
+    static ref STYLE_MATCH: console::Style = console::Style::new().yellow();
+    static ref STYLE_METADATA: console::Style = console::Style::new().bright().blue();
 }
 
 impl MatchGroup {
@@ -158,10 +157,15 @@ impl Display for MatchGroup {
         writeln!(f)?;
 
         // print matches
+        let num_matches = self.num_matches();
         let mut f = indented(f).with_str("    ");
         for (i, m) in self.matches.iter().enumerate() {
             let i = i + 1;
-            writeln!(f, "{}", STYLE_HEADING.apply_to(format!("Occurrence {}:", i)))?;
+            writeln!(
+                f,
+                "{}",
+                STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, num_matches))
+            )?;
             match &m.provenance {
                 Provenance::File { path } => {
                     writeln!(
@@ -193,7 +197,13 @@ impl Display for MatchGroup {
                 STYLE_METADATA.apply_to(&m.location.source_span)
             )?;
             writeln!(f)?;
-            writeln!(indented(&mut f).with_str("    "), "{}", m.snippet)?;
+            writeln!(
+                indented(&mut f).with_str("    "),
+                "{}{}{}",
+                Escaped(&m.snippet.before),
+                STYLE_MATCH.apply_to(Escaped(&m.snippet.matching)),
+                Escaped(&m.snippet.after)
+            )?;
             writeln!(f)?;
         }
 

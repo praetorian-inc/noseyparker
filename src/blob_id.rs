@@ -62,9 +62,9 @@ impl BlobId {
     }
 }
 
-impl Into<String> for BlobId where {
-    fn into(self) -> String {
-        self.hex()
+impl From<BlobId> for String where {
+    fn from(blob_id: BlobId) -> String {
+        blob_id.hex()
     }
 }
 

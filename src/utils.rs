@@ -51,10 +51,12 @@ pub struct BStringSerde (
 );
 
 impl BStringSerde {
+    /// This function only exists to customize the `BStringSerde` serialization.
+    /// Maybe that can be re-spelled to avoid having to write this at all.
     #[inline]
     #[allow(dead_code)]
     fn get_bstring(b: &BString) -> &Vec<u8> {
-        &b
+        b
     }
 }
 
@@ -66,7 +68,7 @@ impl From<BStringSerde> for BString {
 
 #[inline]
 pub fn serialize_bytes_string_lossy<S: serde::Serializer>(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     s: S,
 ) -> Result<S::Ok, S::Error> {
     s.serialize_str(&String::from_utf8_lossy(bytes))
