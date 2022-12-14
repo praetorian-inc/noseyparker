@@ -1,9 +1,11 @@
 use crate::blob_id::BlobId;
-use crate::location::{LocationMapping, OffsetSpan, SourceSpan};
+use crate::location::{LocationMapping, Location};
 use crate::matcher::BlobMatch;
 use crate::provenance::Provenance;
-use crate::utils::decode_utf8_lossy_escape;
+use crate::snippet::Snippet;
+use crate::utils::BStringSerde;
 
+use bstr::BString;
 use indenter::indented;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Write};
@@ -16,29 +18,24 @@ pub struct Match {
     /// The blob this match comes from
     pub blob_id: BlobId,
 
-    /// The location of the matching input, as byte offsets
-    pub matching_input_offset_span: OffsetSpan,
-
-    /// The location of the matching input, as line and column number
-    pub matching_input_source_span: SourceSpan,
-
-    /// The matching input
-    pub matching_input: Vec<u8>,
-
-    /// A snippet of the input immediately prior to `matching_input`
-    pub before_snippet: Vec<u8>,
-
-    /// A snippet of the input immediately after `matching_input`
-    pub after_snippet: Vec<u8>,
+    /// The location of the entire matching content
+    pub location: Location,
 
     /// The capture group number, indexed from 1
     pub group_index: u8,
 
     /// The capture group
-    pub group_input: Vec<u8>,
+    #[serde(with="BStringSerde")]
+    pub group: BString,
+
+    /// A snippet of the match and surrounding context
+    pub snippet: Snippet,
 
     /// The rule that produced this match
     pub rule_name: String,
+
+    // FIXME: add pattern
+    // FIXME: add pattern shasum
 
     /// Where did this blob come from?
     pub provenance: Provenance,
@@ -81,53 +78,45 @@ impl Match {
                 Some(Match {
                     blob_id: *blob_id,
                     rule_name: rule_name.clone(),
-                    matching_input: matching_input.to_owned(),
-                    matching_input_offset_span: offsets.clone(),
-                    matching_input_source_span: source_span.clone(),
-                    group_input: group.as_bytes().to_owned(),
+                    snippet: Snippet {
+                        content: BString::from(matching_input),
+                        before: BString::from(before_snippet),
+                        after: BString::from(after_snippet),
+                    },
+                    location: Location {
+                        offset_span: offsets.clone(),
+                        source_span: source_span.clone(),
+                    },
+                    group: BString::from(group.as_bytes()),
                     group_index: group_index
                         .try_into()
                         .expect("group index should fit in u8"),
                     provenance: provenance.clone(),
-                    before_snippet: before_snippet.to_owned(),
-                    after_snippet: after_snippet.to_owned(),
                 })
             })
             .collect()
-    }
-
-    pub fn snippet(&self) -> String {
-        let snippet: Vec<u8> = [
-            self.before_snippet.as_slice(),
-            self.matching_input.as_slice(),
-            self.after_snippet.as_slice(),
-        ]
-        .concat();
-        decode_utf8_lossy_escape(&snippet)
     }
 }
 
 impl Display for Match {
     /// Render this finding human-readable style to the given formatter.
     ///
-    /// Note: that the output emitted spans multiple lines.
+    /// Note: the output emitted spans multiple lines.
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Rule: {}", &self.rule_name)?;
         match &self.provenance {
-            Provenance::FromFile(p) => {
-                writeln!(f, "File: {}", p.to_string_lossy())?;
+            Provenance::File { path } => {
+                writeln!(f, "File: {}", path.display())?;
             }
-            Provenance::FromGitRepo(p) => {
-                writeln!(f, "Git repo: {}", p.to_string_lossy())?;
+            Provenance::GitRepo { path } => {
+                writeln!(f, "Git repo: {}", path.display())?;
                 writeln!(f, "Blob: {}", &self.blob_id)?;
             }
         }
-        writeln!(f, "Lines: {}", &self.matching_input_source_span)?;
-        writeln!(f, "Match: {:?}", decode_utf8_lossy_escape(&self.group_input))?;
+        writeln!(f, "Lines: {}", self.location.source_span)?;
+        writeln!(f, "Match: {}", self.group)?;
         writeln!(f, "Snippet:\n")?;
-        let mut f = indented(f).with_str("    ");
-        writeln!(f, "{}", &self.snippet())?;
-
+        writeln!(indented(f).with_str("    "), "{}", self.snippet)?;
         Ok(())
     }
 }

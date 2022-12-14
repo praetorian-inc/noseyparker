@@ -20,8 +20,8 @@ use noseyparker::matcher::{BlobMatch, Matcher};
 use noseyparker::matcher_stats::MatcherStats;
 use noseyparker::progress::Progress;
 use noseyparker::provenance::Provenance;
-use noseyparker::rules_database::RulesDatabase;
 use noseyparker::rules::Rules;
+use noseyparker::rules_database::RulesDatabase;
 
 /// This command scans multiple filesystem inputs for secrets.
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
@@ -91,7 +91,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     std::fs::create_dir_all(&tmpdir).with_context(|| {
         format!(
             "Failed to create temporary directory {:?} for datastore at {:?}",
-            tmpdir, datastore.root_dir()
+            tmpdir,
+            datastore.root_dir()
         )
     })?;
 
@@ -99,15 +100,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Load rules
     // ---------------------------------------------------------------------------------------------
     let rules_db = {
-        let mut rules = Rules::from_default_rules()
-            .context("Failed to load default rules")?;
+        let mut rules = Rules::from_default_rules().context("Failed to load default rules")?;
         if !args.rules.is_empty() {
-            let custom_rules = Rules::from_paths(&args.rules)
-                .context("Failed to load specified rules files")?;
+            let custom_rules =
+                Rules::from_paths(&args.rules).context("Failed to load specified rules files")?;
             rules.extend(custom_rules);
         }
-        RulesDatabase::from_rules(rules)
-            .context("Failed to compile rules")?
+        RulesDatabase::from_rules(rules).context("Failed to compile rules")?
     };
 
     // ---------------------------------------------------------------------------------------------
@@ -133,9 +132,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
                 format!("Failed to write default ignore rules to {:?}", &ignore_path)
             })?;
-            ie.add_ignore(&ignore_path).with_context(|| {
-                format!("Failed to load ignore rules from {:?}", &ignore_path)
-            })?;
+            ie.add_ignore(&ignore_path)
+                .with_context(|| format!("Failed to load ignore rules from {:?}", &ignore_path))?;
 
             // Load any specified ignore files
             for ignore_path in args.discovery_args.ignore.iter() {
@@ -200,7 +198,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         };
 
     // FIXME: have this print out aggregate rate at finish
-    let mut progress = Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
+    let mut progress =
+        Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
     // Create a channel pair so that matcher threads can get their results to the database
     // recorder.
@@ -209,20 +208,24 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // We create a separate thread for writing matches to the database.
     // The database uses SQLite, which does best with a single writer.
     let match_writer = {
-        std::thread::Builder::new().name("Datastore Writer".to_string()).spawn(move || {
-            let mut num_matches = 0u64;
-            let mut num_added = 0usize;
-            // keep reading until all the senders hang up; panic if recording matches fails
-            while let Ok(matches) = recv_matches.recv() {
-                num_matches += matches.len() as u64;
-                num_added += datastore
-                    .record_matches(&matches)
-                    .expect("should be able to record matches to the database");
-            }
-            datastore.analyze().expect("should be able to analyze the database");
-            (datastore, num_matches, num_added as u64)
-        })
-        .expect("should be able to start datastore writer thread")
+        std::thread::Builder::new()
+            .name("Datastore Writer".to_string())
+            .spawn(move || {
+                let mut num_matches = 0u64;
+                let mut num_added = 0usize;
+                // keep reading until all the senders hang up; panic if recording matches fails
+                while let Ok(matches) = recv_matches.recv() {
+                    num_matches += matches.len() as u64;
+                    num_added += datastore
+                        .record_matches(&matches)
+                        .expect("should be able to record matches to the database");
+                }
+                datastore
+                    .analyze()
+                    .expect("should be able to analyze the database");
+                (datastore, num_matches, num_added as u64)
+            })
+            .expect("should be able to start datastore writer thread")
     };
 
     // ---------------------------------------------------------------------------------------------
@@ -243,7 +246,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 Ok(v) => v,
             };
             progress.inc(file_result.num_bytes);
-            let provenance = Provenance::FromFile(fname.clone());
+            let provenance = Provenance::File {
+                path: fname.clone(),
+            };
             let matches = match matcher.scan_blob(&blob, &provenance) {
                 Err(e) => {
                     error!("Failed to scan blob from {:?}: {}", fname, e);
@@ -299,7 +304,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         }
                         Ok(blob) => Blob::new(blob_id, blob.content().to_owned()),
                     };
-                    let provenance = Provenance::FromGitRepo(path.to_path_buf());
+                    let provenance = Provenance::GitRepo {
+                        path: path.to_path_buf(),
+                    };
                     match matcher.scan_blob(&blob, &provenance) {
                         Err(e) => {
                             error!(
@@ -339,15 +346,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         let matcher_stats = matcher_stats.into_inner()?;
         let scan_duration = scan_start.elapsed();
-        let seen_bytes_per_sec = (matcher_stats.bytes_seen as f64 / scan_duration.as_secs_f64()) as u64;
+        let seen_bytes_per_sec =
+            (matcher_stats.bytes_seen as f64 / scan_duration.as_secs_f64()) as u64;
 
-        println!("Scanned {} from {} blobs in {} ({}/s); {}/{} new matches",
-                HumanBytes(matcher_stats.bytes_seen),
-                HumanCount(matcher_stats.blobs_seen),
-                HumanDuration(scan_duration),
-                HumanBytes(seen_bytes_per_sec),
-                HumanCount(num_new_matches),
-                HumanCount(num_matches),
+        println!(
+            "Scanned {} from {} blobs in {} ({}/s); {}/{} new matches",
+            HumanBytes(matcher_stats.bytes_seen),
+            HumanCount(matcher_stats.blobs_seen),
+            HumanDuration(scan_duration),
+            HumanBytes(seen_bytes_per_sec),
+            HumanCount(num_new_matches),
+            HumanCount(num_matches),
         );
 
         if num_matches > 0 {

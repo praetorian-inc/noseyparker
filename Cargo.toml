@@ -29,7 +29,9 @@ path = "src/bin/noseyparker/main.rs"
 # anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
 anyhow = { version = "1.0" }
 atty = "0.2"
+bstr = { version = "1.0.1", features = ["serde"] }
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
+console = "0.15.2"
 git2 = { version = "0.15", features = ["vendored-libgit2", "vendored-openssl"] }
 libc = "0.2"
 libgit2-sys = "*"
@@ -55,7 +57,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
 sha1 = "0.10"
-strip-ansi-escapes = "0.1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 walkdir = "2.3"
