@@ -6,7 +6,8 @@ use noseyparker::datastore::{Datastore, MatchSummary};
 use crate::args;
 
 pub fn run(_global_args: &args::GlobalArgs, args: &args::SummarizeArgs) -> Result<()> {
-    let datastore = Datastore::open(&args.datastore)?;
+    let datastore = Datastore::open(&args.datastore)
+        .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
     let mut writer = args
         .output_args
         .get_writer()

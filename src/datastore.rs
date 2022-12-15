@@ -29,20 +29,20 @@ impl Datastore {
     pub fn create_or_open(root_dir: &Path) -> Result<Self> {
         Self::create(root_dir)
             .or_else(|_e| Self::open(root_dir))
-            .with_context(|| format!("Failed to open datastore at {:?}", root_dir))
+            .with_context(|| format!("Failed to open datastore at {}", root_dir.display()))
     }
 
     /// Open the existing datastore at `root_dir`.
     pub fn open(root_dir: &Path) -> Result<Self> {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path)
-            .with_context(|| format!("Failed to open database at {:?}", db_path))?;
+            .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
         let mut ds = Self {
             root_dir: root_dir.to_owned(),
             conn,
         };
         ds.migrate()
-            .with_context(|| format!("Failed to migrate database at {:?}", db_path))?;
+            .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
         Ok(ds)
     }
 
@@ -50,12 +50,12 @@ impl Datastore {
     pub fn create(root_dir: &Path) -> Result<Self> {
         // Create datastore directory
         std::fs::create_dir(root_dir).with_context(|| {
-            format!("Failed to create datastore root directory at {:?}", root_dir)
+            format!("Failed to create datastore root directory at {}", root_dir.display())
         })?;
 
         // Generate .gitignore file
         std::fs::write(&root_dir.join(".gitignore"), "*\n").with_context(|| {
-            format!("Failed to write .gitignore to datastore at {:?}", root_dir)
+            format!("Failed to write .gitignore to datastore at {}", root_dir.display())
         })?;
 
         Self::open(root_dir)
@@ -79,7 +79,7 @@ impl Datastore {
     }
 
     fn migrate(&mut self) -> Result<u64> {
-        let _span = debug_span!("Datastore::migrate", "{:?}", self.root_dir).entered();
+        let _span = debug_span!("Datastore::migrate", "{}", self.root_dir.display()).entered();
         let tx = self.conn.transaction()?;
 
         let get_user_version = || -> Result<u64> {
@@ -164,7 +164,7 @@ impl Datastore {
         &mut self,
         matches: T,
     ) -> Result<usize> {
-        let _span = debug_span!("Datastore::record_matches", "{:?}", self.root_dir).entered();
+        let _span = debug_span!("Datastore::record_matches", "{}", self.root_dir.display()).entered();
 
         let tx = self.conn.transaction()?;
         let mut stmt = tx.prepare_cached(indoc! {r#"
@@ -219,7 +219,7 @@ impl Datastore {
     }
 
     pub fn summarize(&self) -> Result<MatchSummary> {
-        let _span = debug_span!("Datastore::summarize", "{:?}", self.root_dir).entered();
+        let _span = debug_span!("Datastore::summarize", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select rule_name, count(*) grouped_count, sum(num_matches) total_count
@@ -251,7 +251,7 @@ impl Datastore {
 
     pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
         let _span =
-            debug_span!("Datastore::get_match_group_metadata", "{:?}", self.root_dir).entered();
+            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select group_input, rule_name, count(*)
@@ -278,7 +278,7 @@ impl Datastore {
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
     ) -> Result<Vec<Match>> {
-        let _span = debug_span!("Datastore::match_groups", "{:?}", self.root_dir).entered();
+        let _span = debug_span!("Datastore::match_groups", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select

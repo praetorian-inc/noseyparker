@@ -41,7 +41,7 @@ fn configure_rlimits() -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
+fn try_main() -> Result<()> {
     // Print a stack trace in case of panic.
     // This should have no overhead in normal execution.
     std::env::set_var("RUST_BACKTRACE", "1");
@@ -62,6 +62,13 @@ fn main() -> Result<()> {
         args::Command::Scan(args) => cmd_scan::run(global_args, args),
         args::Command::Summarize(args) => cmd_summarize::run(global_args, args),
         args::Command::Report(args) => cmd_report::run(global_args, args),
+    }
+}
+
+fn main() {
+    if let Err(e) = try_main() {
+        eprintln!("Error: {:?}", e);
+        std::process::exit(2);
     }
 }
 

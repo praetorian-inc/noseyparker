@@ -90,9 +90,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let tmpdir = datastore.tmpdir();
     std::fs::create_dir_all(&tmpdir).with_context(|| {
         format!(
-            "Failed to create temporary directory {:?} for datastore at {:?}",
-            tmpdir,
-            datastore.root_dir()
+            "Failed to create temporary directory {} for datastore at {}",
+            tmpdir.display(),
+            datastore.root_dir().display()
         )
     })?;
 
@@ -130,16 +130,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             // string.
             let ignore_path = tmpdir.join("default_ignore_rules.conf");
             std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
-                format!("Failed to write default ignore rules to {:?}", &ignore_path)
+                format!("Failed to write default ignore rules to {}", ignore_path.display())
             })?;
             ie.add_ignore(&ignore_path)
-                .with_context(|| format!("Failed to load ignore rules from {:?}", &ignore_path))?;
+                .with_context(|| format!("Failed to load ignore rules from {}", ignore_path.display()))?;
 
             // Load any specified ignore files
             for ignore_path in args.discovery_args.ignore.iter() {
-                debug!("Using ignore rules from {:?}", ignore_path);
+                debug!("Using ignore rules from {}", ignore_path.display());
                 ie.add_ignore(ignore_path).with_context(|| {
-                    format!("Failed to load ignore rules from {:?}", ignore_path)
+                    format!("Failed to load ignore rules from {}", ignore_path.display())
                 })?;
             }
 
@@ -240,7 +240,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let fname = &file_result.path;
             let blob = match Blob::from_file(fname) {
                 Err(e) => {
-                    error!("Failed to load blob from {:?}: {}", fname, e);
+                    error!("Failed to load blob from {}: {}", fname.display(), e);
                     return;
                 }
                 Ok(v) => v,
@@ -251,7 +251,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             };
             let matches = match matcher.scan_blob(&blob, &provenance) {
                 Err(e) => {
-                    error!("Failed to scan blob from {:?}: {}", fname, e);
+                    error!("Failed to scan blob from {}: {}", fname.display(), e);
                     return;
                 }
                 Ok(v) => v,
@@ -297,8 +297,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     let blob = match repo.find_blob(*oid) {
                         Err(e) => {
                             error!(
-                                "Failed to read blob {} from Git repository at {:?}: {}",
-                                oid, path, e
+                                "Failed to read blob {} from Git repository at {}: {}",
+                                oid, path.display(), e
                             );
                             return;
                         }
@@ -310,8 +310,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     match matcher.scan_blob(&blob, &provenance) {
                         Err(e) => {
                             error!(
-                                "Failed to scan blob {} from Git repository at {:?}: {}",
-                                oid, path, e
+                                "Failed to scan blob {} from Git repository at {}: {}",
+                                oid, path.display(), e
                             );
                         }
                         Ok(matches) => {

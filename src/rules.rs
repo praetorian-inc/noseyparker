@@ -88,7 +88,7 @@ impl Rules {
         let mut rules = Rules { rules: Vec::new() };
         for &(path, contents) in yaml_files.iter() {
             let rs: Self = serde_yaml::from_reader(contents)
-                .with_context(|| format!("Failed to load YAML from {:?}", path))?;
+                .with_context(|| format!("Failed to load YAML from {}", path.display()))?;
             rules.extend(rs);
         }
 
@@ -110,7 +110,7 @@ impl Rules {
                 let new_rules = Rules::from_directory(input)?;
                 rules.extend(new_rules);
             } else {
-                bail!("Unhandled input type: {:?} is neither a file nor directory", input);
+                bail!("Unhandled input type: {} is neither a file nor directory", input.display());
             }
         }
         debug!("Loaded {} rules from {} paths", rules.len(), paths.len());
@@ -119,13 +119,13 @@ impl Rules {
 
     pub fn from_yaml_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
-        let _span = debug_span!("Rules::from_yaml_file", "{:?}", path).entered();
+        let _span = debug_span!("Rules::from_yaml_file", "{}", path.display()).entered();
         let infile =
-            File::open(path).with_context(|| format!("Failed to read rules from {:?}", path))?;
+            File::open(path).with_context(|| format!("Failed to read rules from {}", path.display()))?;
         let reader = BufReader::new(infile);
         let rules: Self = serde_yaml::from_reader(reader)
-            .with_context(|| format!("Failed to load YAML from {:?}", path))?;
-        debug!("Loaded {} rules from {:?}", rules.len(), path);
+            .with_context(|| format!("Failed to load YAML from {}", path.display()))?;
+        debug!("Loaded {} rules from {}", rules.len(), path.display());
         Ok(rules)
     }
 
@@ -141,7 +141,7 @@ impl Rules {
 
     pub fn from_directory<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
-        let _span = debug_span!("Rules::from_directory", "{:?}", path).entered();
+        let _span = debug_span!("Rules::from_directory", "{}", path.display()).entered();
 
         let yaml_types = TypesBuilder::new().add_defaults().select("yaml").build()?;
 
@@ -158,7 +158,7 @@ impl Rules {
             }
         }
         yaml_files.sort();
-        debug!("Found {} rules files to load within {:?}", yaml_files.len(), path);
+        debug!("Found {} rules files to load within {}", yaml_files.len(), path.display());
 
         Self::from_yaml_files(&yaml_files)
     }
