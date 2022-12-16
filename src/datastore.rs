@@ -54,7 +54,7 @@ impl Datastore {
         })?;
 
         // Generate .gitignore file
-        std::fs::write(&root_dir.join(".gitignore"), "*\n").with_context(|| {
+        std::fs::write(root_dir.join(".gitignore"), "*\n").with_context(|| {
             format!("Failed to write .gitignore to datastore at {}", root_dir.display())
         })?;
 
