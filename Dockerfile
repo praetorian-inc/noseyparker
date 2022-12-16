@@ -18,7 +18,7 @@ WORKDIR "/vectorscan"
 ADD https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.8.tar.gz vectorscan.tar.gz
 RUN echo '71fae7ee8d63e1513a6df762cdb5d5f02a9120a2422cf1f31d57747c2b8d36ab vectorscan.tar.gz' | sha256sum -c && \
     tar --strip-components 1 -xzf vectorscan.tar.gz && \
-    cmake -S . -B build -GNinja -DFAT_RUNTIME=OFF && \
+    cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DFAT_RUNTIME=OFF && \
     cmake --build build
 
 # Build Nosey Parker
