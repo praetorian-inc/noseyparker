@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use git2::{Oid, Repository, RepositoryOpenFlags};
 use git_repository as git;
 use ignore::{WalkBuilder, WalkState};
@@ -143,7 +143,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 });
             }
         } else if metadata.is_dir() {
-            match open_git2_repo(path) {
+            match open_git_repo(path) {
                 Err(e) => {
                     error!("Failed to open Git repository at {:?}: {}; skipping", path, e);
                     return WalkState::Skip;
@@ -275,9 +275,13 @@ pub fn open_git2_repo(path: &Path) -> Result<Option<Repository>> {
 pub fn open_git_repo(path: &Path) -> Result<Option<git::Repository>> {
     match git::open_opts(
         path,
-        git::open::Options::isolated()
+        {
+            let mut opts = git::open::Options::isolated();
+            opts.permissions.env.objects = git::sec::Permission::Allow;
+            opts
+        }
     ) {
-        Err(git::open::Error::NotARepository{..}) => Ok(None),
+        Err(git::open::Error::NotARepository{ .. }) => Ok(None),
         Err(err) => Err(err.into()),
         Ok(r) => Ok(Some(r)),
     }
@@ -288,11 +292,11 @@ pub struct GitRepoEnumeratorResult {
 }
 
 pub struct GitRepoEnumerator<'a> {
-    repo: &'a Repository,
+    repo: &'a git::Repository,
 }
 
 impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(repo: &'a Repository) -> Self {
+    pub fn new(repo: &'a git::Repository) -> Self {
         GitRepoEnumerator { repo }
     }
 
@@ -306,29 +310,26 @@ impl<'a> GitRepoEnumerator<'a> {
     // }
 
     pub fn run(&self, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
+        use git::prelude::HeaderExt;
         let mut blobs: Vec<(Oid, u64)> = Vec::new();
 
-        let odb = self.repo.odb()?;
-        odb.foreach(|oid: &git2::Oid| {
-            let (obj_size, obj_type) = match odb.read_header(*oid) {
-                Err(e) => {
-                    error!("Failed to read object header {}: {}", oid, e);
-                    return true;
-                }
-                Ok(v) => v,
-            };
+        let odb = &self.repo.objects;
+        for oid in odb.iter()?
+                 .with_ordering(git::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical)
+                 .filter_map(Result::ok) {
+            let hdr = odb.header(oid).with_context(|| format!("Failed to read object header {}", oid))?;
+            let obj_type = hdr.kind();
             match obj_type {
-                git2::ObjectType::Blob => {
-                    let obj_size = obj_size as u64;
+                git::object::Kind::Blob => {
+                    let obj_size = hdr.size() as u64;
                     progress.inc(obj_size);
-                    blobs.push((*oid, obj_size));
+                    blobs.push((git2::Oid::from_bytes(oid.as_bytes())?, obj_size));
                     // let read_size = odb.read(*oid).unwrap().len();
                     // assert_eq!(obj_size, read_size);
                 }
                 _ => {}
             }
-            true
-        })?;
+        };
 
         Ok(GitRepoEnumeratorResult { blobs })
     }
