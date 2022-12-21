@@ -134,7 +134,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             let bytes = metadata.len();
             let path = path.to_owned();
             if self.file_too_big(bytes) {
-                debug!("Skipping {:?}: size {} exceeds max size", &path, bytes);
+                debug!("Skipping {}: size {} exceeds max size", path.display(), bytes);
             } else {
                 self.progress.inc(bytes);
                 self.local_files.push(FileResult {

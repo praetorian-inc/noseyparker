@@ -1776,6 +1776,7 @@ dependencies = [
  "serde_yaml",
  "sha1",
  "tracing",
+ "tracing-log",
  "tracing-subscriber",
  "walkdir",
 ]
