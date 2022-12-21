@@ -30,7 +30,7 @@ pub fn duration_fmt(secs: f64) -> String {
         .iter()
         .find(|(v, _t)| secs >= *v)
         .unwrap_or(&(1.0, "seconds"));
-    let v = secs / *d as f64;
+    let v = secs / *d;
     format!("{:.2} {}", v, unit)
 }
 
