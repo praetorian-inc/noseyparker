@@ -1,5 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use git_repository as git;
 
 // -------------------------------------------------------------------------------------------------
 // BlobId
@@ -81,6 +82,16 @@ impl std::fmt::Display for BlobId {
         write!(f, "{}", self.hex())
     }
 }
+
+impl<'a> From<&'a git::ObjectId> for BlobId {
+     fn from(id: &'a git::ObjectId) -> Self {
+         BlobId(
+             id.as_bytes()
+                 .try_into()
+                 .expect("oid should be a 20-byte value"),
+         )
+     }
+ }
 
 // -------------------------------------------------------------------------------------------------
 // test

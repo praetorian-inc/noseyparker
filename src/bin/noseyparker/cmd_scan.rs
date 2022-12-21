@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
+use git_repository as git;
 use rayon::prelude::*;
 use std::sync::mpsc;
 use std::sync::Mutex;
@@ -270,18 +271,25 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
     inputs.git_repos.par_iter().for_each(|git_repo_result| {
+        let repo = match open_git_repo(&git_repo_result.path) {
+            Ok(Some(repo)) => repo.into_sync(),
+            Ok(None) => {
+                error!("Failed to re-open repository at {:?}: no longer a repo??", git_repo_result.path);
+                return;
+            }
+            Err(e) => {
+                error!("Failed to re-open repository at {:?}: {}", git_repo_result.path, e);
+                return;
+            }
+        };
         git_repo_result
             .blobs
             .par_iter()
             .with_min_len(128)
             .for_each_init(
                 || {
-                    let repo = open_git_repo(&git_repo_result.path)
-                        .ok()
-                        .flatten()
-                        .expect("should be able to re-open repository");
                     let matcher = make_matcher().expect("should be able to create a matcher");
-                    (repo, matcher, progress.clone())
+                    (repo.to_thread_local(), matcher, progress.clone())
                 },
                 |(repo, matcher, progress), (oid, size)| {
                     progress.inc(*size);
@@ -294,7 +302,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     if seen_blobs.contains(&blob_id) {
                         return;
                     }
-                    let blob = match repo.find_blob(*oid) {
+                    let blob = match repo.find_object(git::hash::ObjectId::from(oid.as_bytes())) {
                         Err(e) => {
                             error!(
                                 "Failed to read blob {} from Git repository at {}: {}",
@@ -302,7 +310,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                             );
                             return;
                         }
-                        Ok(blob) => Blob::new(blob_id, blob.content().to_owned()),
+                        // TODO: get rid of this extra copy
+                        Ok(blob) => Blob::new(blob_id, blob.data.to_owned()),
                     };
                     let provenance = Provenance::GitRepo {
                         path: path.to_path_buf(),

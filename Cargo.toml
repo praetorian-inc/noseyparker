@@ -33,6 +33,7 @@ bstr = { version = "1.0.1", features = ["serde"] }
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15.2"
 git2 = { version = "0.15", features = ["vendored-libgit2", "vendored-openssl"] }
+git-repository = { version = "0.30.0", features = ["max-performance"] }
 libc = "0.2"
 libgit2-sys = "*"
 hex = "0.4"
