@@ -41,16 +41,23 @@ FROM base AS dependencies
 
 WORKDIR "/noseyparker"
 
+# Copy Cargo files for downloading and building dependencies
 COPY ["Cargo.toml", "Cargo.lock",  "./"]
 
-# Make directory structure
+# Create stub directory structure and files to cause Cargo to download and
+# compile dependencies
 RUN mkdir -p  ./src/bin/noseyparker &&\
     mkdir -p ./benches &&\
-    # Create stub files for build
-    touch ./benches/microbench.rs ./src/lib.rs &&\
+    # Benches to avoid error:
+    # can't find `microbench` bench at `benches/microbench.rs`
+    touch ./benches/microbench.rs &&\
+    # Lib stub to avoid:
+    # error: couldn't read src/lib.rs
+    touch ./src/lib.rs &&\
+    # Stub main required for compile
     echo "fn main() {}" > ./src/bin/noseyparker/main.rs &&\
     # Run the build
-    cargo build --bin noseyparker --release
+    cargo build --release
 
 ################################################################################
 # Build application
@@ -61,8 +68,13 @@ WORKDIR "/noseyparker"
 
 COPY . .
 
-# Update file timestamps
-RUN touch ./benches/microbench.rs ./src/lib.rs ./src/bin/noseyparker/main.rs
+# Update file timestamps on any stubs from previous stage. This will cause
+# compilation to happen if needed, otherwise Cargo build can skip files with
+# timestamps older than the previous stage's build command
+RUN touch \
+    ./benches/microbench.rs \
+    ./src/lib.rs \
+    ./src/bin/noseyparker/main.rs
 
 RUN cargo build --release
 
