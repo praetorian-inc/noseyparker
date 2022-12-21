@@ -313,7 +313,7 @@ impl<'a> GitRepoEnumerator<'a> {
             let obj_type = hdr.kind();
             match obj_type {
                 git::object::Kind::Blob => {
-                    let obj_size = hdr.size() as u64;
+                    let obj_size = hdr.size();
                     progress.inc(obj_size);
                     blobs.push((BlobId::from(&oid), obj_size));
                 }
