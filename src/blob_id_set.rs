@@ -27,14 +27,14 @@ impl BlobIdSet {
     /// The return value indicates whether the set was modified by this operation.
     #[inline]
     pub fn insert(&self, blob_id: BlobId) -> bool {
-        let bucket: u8 = blob_id.bytes()[0];
+        let bucket: u8 = blob_id.as_bytes()[0];
         self.sets[bucket as usize].lock().unwrap().insert(blob_id)
     }
 
     /// Check if the given `BlobId` is in the set without modifying it.
     #[inline]
     pub fn contains(&self, blob_id: &BlobId) -> bool {
-        let bucket: u8 = blob_id.bytes()[0];
+        let bucket: u8 = blob_id.as_bytes()[0];
         self.sets[bucket as usize].lock().unwrap().contains(blob_id)
     }
 

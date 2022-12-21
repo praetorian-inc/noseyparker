@@ -9,12 +9,11 @@ use tracing::{debug, debug_span, error};
 
 use crate::args;
 
-use noseyparker::blob::{Blob, BlobId};
+use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
-use noseyparker::git2_utils;
-use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
+use noseyparker::input_enumerator::{FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{BlobMatch, Matcher};
@@ -34,41 +33,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     let color_enabled = global_args.use_color();
     let progress_enabled = global_args.use_progress();
-
-    // ---------------------------------------------------------------------------------------------
-    // Configure git2
-    // ---------------------------------------------------------------------------------------------
-    // From https://docs.rs/git2/latest/git2/opts/fn.enable_caching.html:
-    //
-    //     Controls whether or not libgit2 will cache loaded objects. Enabled by default, but
-    //     disabling this can improve performance and memory usage if loading a large number of
-    //     objects that will not be referenced again. Disabling this will cause repository objects
-    //     to clear their caches when next accessed.
-    git2::opts::enable_caching(false);
-
-    // From https://docs.rs/git2/latest/git2/opts/fn.strict_hash_verification.html:
-    //
-    //     Controls whether or not libgit2 will verify that objects loaded have the expected hash.
-    //     Enabled by default, but disabling this can significantly improve performance, at the
-    //     cost of relying on repository integrity without checking it.
-    git2::opts::strict_hash_verification(false);
-
-    // If we are scanning a large number of Git repositories with a high degree of parallelism
-    // (1000 repos with 12 threads, for example), it's common to see all but one thread grind to a
-    // halt when enumerating files.
-    //
-    // It appears that a global LRU cache in the libgit2 C library, used for managing memory-mapped
-    // windows, ends up hitting capacity, forcing the threads to sequentialize and thrash.
-    //
-    // Increasing this libgit2 option ameliorates the problem of maxing out the cache, and the
-    // threads can make progress.
-    {
-        let orig_limit = git2_utils::get_mwindow_mapped_limit();
-        let new_limit = (orig_limit * 2).max(16 * 1024 * 1024 * 1024);
-        git2_utils::set_mwindow_mapped_limit(new_limit);
-        assert_eq!(new_limit, git2_utils::get_mwindow_mapped_limit());
-        debug!("git2 mwindow mapped limit increased from {} to {}", orig_limit, new_limit);
-    }
 
     // ---------------------------------------------------------------------------------------------
     // Configure the Rayon global thread pool
@@ -118,12 +82,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         let input_enumerator = {
             let mut ie = FilesystemEnumerator::new(&args.inputs)?;
-
-            // XXX Put a cap on the level of parallelism when enumerating inputs.
-            // The libgit2 library has some global state and global locks that result in thrashing
-            // and contention when used with too many threads.
-            ie.threads(args.num_jobs.min(4));
-
+            ie.threads(args.num_jobs);
             ie.max_filesize(args.discovery_args.max_file_size_bytes());
 
             // Load default ignore file. Note that we have to write it to a file first,
@@ -232,7 +191,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     // Scan plain files
     // ---------------------------------------------------------------------------------------------
-    inputs.files.par_iter().with_min_len(128).for_each_init(
+    inputs.files.par_iter().for_each_init(
         || {
             let matcher = make_matcher().expect("should be able to create a matcher");
             (matcher, progress.clone())
@@ -271,47 +230,34 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
     inputs.git_repos.par_iter().for_each(|git_repo_result| {
-        let repo = match open_git_repo(&git_repo_result.path) {
-            Ok(Some(repo)) => repo.into_sync(),
-            Ok(None) => {
-                error!("Failed to re-open repository at {:?}: no longer a repo??", git_repo_result.path);
-                return;
-            }
-            Err(e) => {
-                error!("Failed to re-open repository at {:?}: {}", git_repo_result.path, e);
-                return;
-            }
-        };
         git_repo_result
             .blobs
             .par_iter()
-            .with_min_len(128)
             .for_each_init(
                 || {
                     let matcher = make_matcher().expect("should be able to create a matcher");
-                    (repo.to_thread_local(), matcher, progress.clone())
+                    let repo = git_repo_result.repository.to_thread_local();
+                    (repo, matcher, progress.clone())
                 },
-                |(repo, matcher, progress), (oid, size)| {
+                |(repo, matcher, progress), (blob_id, size)| {
                     progress.inc(*size);
                     let path = &git_repo_result.path;
                     // debug!("Scanning {} size {} from {:?}", oid, size, path);
-
-                    let blob_id = BlobId::from_oid(oid);
 
                     // Check for duplicates before even loading the entire blob contents
                     if seen_blobs.contains(&blob_id) {
                         return;
                     }
-                    let blob = match repo.find_object(git::hash::ObjectId::from(oid.as_bytes())) {
+                    let blob = match repo.find_object(git::hash::ObjectId::from(blob_id.as_bytes())) {
                         Err(e) => {
                             error!(
                                 "Failed to read blob {} from Git repository at {}: {}",
-                                oid, path.display(), e
+                                blob_id, path.display(), e
                             );
                             return;
                         }
                         // TODO: get rid of this extra copy
-                        Ok(blob) => Blob::new(blob_id, blob.data.to_owned()),
+                        Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
                     };
                     let provenance = Provenance::GitRepo {
                         path: path.to_path_buf(),
@@ -320,7 +266,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         Err(e) => {
                             error!(
                                 "Failed to scan blob {} from Git repository at {}: {}",
-                                oid, path.display(), e
+                                blob_id, path.display(), e
                             );
                         }
                         Ok(matches) => {

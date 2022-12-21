@@ -10,6 +10,7 @@ use git_repository as git;
 pub struct BlobId([u8; 20]);
 
 impl BlobId {
+    /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
         use openssl::sha;
@@ -39,15 +40,6 @@ impl BlobId {
     }
 
     #[inline]
-    pub fn from_oid(oid: &git2::Oid) -> Self {
-        BlobId(
-            oid.as_bytes()
-                .try_into()
-                .expect("oid should be a 20-byte value"),
-        )
-    }
-
-    #[inline]
     pub fn from_hex(v: &str) -> Result<Self> {
         Ok(BlobId(hex::decode(v)?.as_slice().try_into()?))
     }
@@ -58,7 +50,7 @@ impl BlobId {
     }
 
     #[inline]
-    pub fn bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }
 }

@@ -1750,6 +1750,7 @@ dependencies = [
  "clap 4.0.30",
  "console",
  "criterion",
+ "git-discover",
  "git-repository",
  "git2",
  "hex",
