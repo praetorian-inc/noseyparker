@@ -41,9 +41,9 @@ pub struct Match {
 
 impl Match {
     #[inline]
-    pub fn new<'r, 'b>(
+    pub fn new(
         loc_mapping: &LocationMapping,
-        blob_match: BlobMatch<'r, 'b>,
+        blob_match: BlobMatch<'_, '_>,
         provenance: &Provenance,
     ) -> Vec<Self> {
         let offsets = &blob_match.matching_input_offset_span;

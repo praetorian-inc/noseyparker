@@ -4,7 +4,6 @@ pub mod blob_id_set;
 pub mod bstring_escape;
 pub mod datastore;
 pub mod defaults;
-pub mod git2_utils;
 pub mod input_enumerator;
 pub mod location;
 pub mod match_type;

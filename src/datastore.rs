@@ -234,7 +234,7 @@ impl Datastore {
         let entries = stmt.query_map((), |row| {
             Ok(MatchSummaryEntry {
                 rule_name: row.get(0)?,
-                grouped_count: row.get(1)?,
+                distinct_count: row.get(1)?,
                 total_count: row.get(2)?,
             })
         })?;
@@ -367,14 +367,14 @@ pub struct MatchSummary(pub Vec<MatchSummaryEntry>);
 #[derive(Deserialize, Serialize)]
 pub struct MatchSummaryEntry {
     pub rule_name: String,
-    pub grouped_count: usize,
+    pub distinct_count: usize,
     pub total_count: usize,
 }
 
 impl std::fmt::Display for MatchSummary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for entry in self.0.iter() {
-            writeln!(f, "{}: {} ({})", entry.rule_name, entry.grouped_count, entry.total_count)?;
+            writeln!(f, "{}: {} ({})", entry.rule_name, entry.distinct_count, entry.total_count)?;
         }
         Ok(())
     }

@@ -1,11 +1,11 @@
-use anyhow::{bail, Result};
-use git2::{Oid, Repository, RepositoryOpenFlags};
+use anyhow::{bail, Context, Result};
+use git_repository as git;
 use ignore::{WalkBuilder, WalkState};
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::{debug, error, warn};
 
+use crate::blob_id::BlobId;
 use crate::progress::Progress;
 
 pub struct FilesystemEnumeratorResult {
@@ -21,16 +21,15 @@ impl FilesystemEnumeratorResult {
     }
 }
 
-#[derive(Clone)]
 pub struct FileResult {
     pub path: PathBuf,
     pub num_bytes: u64,
 }
 
-#[derive(Clone)]
 pub struct GitRepoResult {
     pub path: PathBuf,
-    pub blobs: Vec<(Oid, u64)>,
+    pub repository: git::ThreadSafeRepository,
+    pub blobs: Vec<(BlobId, u64)>,
 }
 
 impl GitRepoResult {
@@ -100,11 +99,11 @@ impl<'t> Drop for Visitor<'t> {
         self.global_files
             .lock()
             .unwrap()
-            .extend(self.local_files.iter().cloned());
+            .extend(std::mem::take(&mut self.local_files));
         self.global_git_repos
             .lock()
             .unwrap()
-            .extend(self.local_git_repos.iter().cloned());
+            .extend(std::mem::take(&mut self.local_git_repos));
     }
 }
 
@@ -123,7 +122,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         let path = entry.path();
         let metadata = match entry.metadata() {
             Err(e) => {
-                error!("Failed to get metadata for {:?}: {}; skipping", path, e);
+                error!("Failed to get metadata for {}: {}; skipping", path.display(), e);
                 return WalkState::Skip;
             }
             Ok(v) => v,
@@ -133,7 +132,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             let bytes = metadata.len();
             let path = path.to_owned();
             if self.file_too_big(bytes) {
-                debug!("Skipping {:?}: size {} exceeds max size", &path, bytes);
+                debug!("Skipping {}: size {} exceeds max size", path.display(), bytes);
             } else {
                 self.progress.inc(bytes);
                 self.local_files.push(FileResult {
@@ -144,11 +143,13 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         } else if metadata.is_dir() {
             match open_git_repo(path) {
                 Err(e) => {
-                    error!("Failed to open Git repository at {:?}: {}; skipping", path, e);
+                    error!("Failed to open Git repository at {}: {}; skipping", path.display(), e);
                     return WalkState::Skip;
                 }
                 Ok(Some(repository)) => {
+                    debug!("Found Git repo at {}", path.display());
                     let enumerator = GitRepoEnumerator::new(&repository);
+                    // FIXME: filter out duplicate blobs here
                     let blobs = match enumerator.run(&mut self.progress) {
                         Err(e) => {
                             error!(
@@ -160,7 +161,8 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                         Ok(v) => v.blobs,
                     };
                     let path = path.to_owned();
-                    self.local_git_repos.push(GitRepoResult { path, blobs })
+                    let repository = repository.into_sync();
+                    self.local_git_repos.push(GitRepoResult { path, repository, blobs })
                 }
                 Ok(None) => {}
             }
@@ -169,9 +171,8 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             //
             // Had follow_symlinks been enabled, the pointed-to entry would have been yielded
             // instead.
-        }
-        else {
-            warn!("Unhandled path type: {:?}: {:?}", path, entry.file_type());
+        } else {
+            warn!("Unhandled path type: {}: {:?}", path.display(), entry.file_type());
         }
         WalkState::Continue
     }
@@ -256,52 +257,69 @@ impl FilesystemEnumerator {
 }
 
 /// Opens the given Git repository if it exists, returning None otherwise.
-pub fn open_git_repo(path: &Path) -> Result<Option<Repository>> {
-    match Repository::open_ext(
-        path,
-        RepositoryOpenFlags::NO_SEARCH | RepositoryOpenFlags::NO_DOTGIT, // | RepositoryOpenFlags::BARE,
-        &[] as &[&OsStr],
-    ) {
-        Err(e) => match e.code() {
-            git2::ErrorCode::NotFound => Ok(None),
-            _ => Err(e)?,
-        },
+pub fn open_git_repo(path: &Path) -> Result<Option<git::Repository>> {
+    // This extra git_discover check here is used to skip appending `.git` to the given path.
+    // From reading the implementation of `git::open_opts`, it seems that gitoxide doesn't
+    // currently support opening a repository with an option analogous to
+    // `git2::RepositoryOpenFlags::NO_DOTGIT`.
+    //
+    // Without this, when encountering a non-bare repository, it gets enumerated twice: once for
+    // its working directory, and once for its .git directory.
+    match git_discover::is_git(path) {
+        Err(err@git_discover::is_git::Error::Metadata { .. }) => {
+            bail!(err);
+        }
+        Err(_) => {
+            return Ok(None);
+        }
+        Ok(_) => {}
+    }
+    match git::open_opts(path, git::open::Options::isolated()) {
+        Err(git::open::Error::NotARepository { .. }) => Ok(None),
+        Err(err) => Err(err.into()),
         Ok(r) => Ok(Some(r)),
     }
 }
 
 pub struct GitRepoEnumeratorResult {
-    pub blobs: Vec<(Oid, u64)>,
+    pub blobs: Vec<(BlobId, u64)>,
 }
 
 pub struct GitRepoEnumerator<'a> {
-    repo: &'a Repository,
+    repo: &'a git::Repository,
 }
 
 impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(repo: &'a Repository) -> Self {
+    pub fn new(repo: &'a git::Repository) -> Self {
         GitRepoEnumerator { repo }
     }
 
     pub fn run(&self, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
-        let mut blobs: Vec<(Oid, u64)> = Vec::new();
+        use git::prelude::HeaderExt;
 
-        let odb = self.repo.odb()?;
-        odb.foreach(|oid: &git2::Oid| {
-            let (obj_size, obj_type) = match odb.read_header(*oid) {
-                Err(e) => {
-                    error!("Failed to read object header {}: {}", oid, e);
-                    return true;
+        let mut blobs: Vec<(BlobId, u64)> = Vec::new();
+
+        let odb = &self.repo.objects;
+        for oid in odb
+            .iter()?
+            .with_ordering(
+                git::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
+            )
+            .filter_map(Result::ok)
+        {
+            let hdr = odb
+                .header(oid)
+                .with_context(|| format!("Failed to read object header {}", oid))?;
+            let obj_type = hdr.kind();
+            match obj_type {
+                git::object::Kind::Blob => {
+                    let obj_size = hdr.size();
+                    progress.inc(obj_size);
+                    blobs.push((BlobId::from(&oid), obj_size));
                 }
-                Ok(v) => v,
-            };
-            if obj_type == git2::ObjectType::Blob {
-                let obj_size = obj_size as u64;
-                progress.inc(obj_size);
-                blobs.push((*oid, obj_size));
+                _ => {}
             }
-            true
-        })?;
+        }
 
         Ok(GitRepoEnumeratorResult { blobs })
     }

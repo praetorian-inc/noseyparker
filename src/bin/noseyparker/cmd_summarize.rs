@@ -59,11 +59,11 @@ pub fn summary_table(summary: MatchSummary) -> prettytable::Table {
         .into_iter()
         .map(|e| row![
              l -> &e.rule_name,
-             r -> HumanCount(e.grouped_count.try_into().unwrap()),
+             r -> HumanCount(e.distinct_count.try_into().unwrap()),
              r -> HumanCount(e.total_count.try_into().unwrap())
         ])
         .collect();
     table.set_format(f);
-    table.set_titles(row![lb -> "Rule", cb -> "Distinct Groups", cb -> "Total Matches"]);
+    table.set_titles(row![lb -> "Rule", cb -> "Distinct Matches", cb -> "Total Matches"]);
     table
 }

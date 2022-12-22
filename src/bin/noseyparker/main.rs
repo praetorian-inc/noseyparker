@@ -10,6 +10,7 @@ mod cmd_summarize;
 
 fn configure_tracing(global_args: &args::GlobalArgs) -> Result<()> {
     use tracing_subscriber::filter::LevelFilter;
+    use tracing_log::{AsLog, LogTracer};
 
     let filter = match global_args.verbose {
         0 => LevelFilter::WARN,
@@ -17,6 +18,10 @@ fn configure_tracing(global_args: &args::GlobalArgs) -> Result<()> {
         2 => LevelFilter::DEBUG,
         _ => LevelFilter::TRACE,
     };
+
+    LogTracer::builder()
+        .with_max_level(filter.as_log())
+        .init()?;
 
     // a builder for `FmtSubscriber`.
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
