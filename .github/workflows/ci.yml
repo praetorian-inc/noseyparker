@@ -149,7 +149,7 @@ jobs:
 
     - name: Upload release binary
       uses: actions/upload-artifact@v3
-      if: matrix.release
       with:
         name: noseyparker.x86_64-unknown-linux-gnu
         path: target/release/noseyparker
+        if-no-files-found: error
