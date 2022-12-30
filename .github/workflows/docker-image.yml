@@ -22,6 +22,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
+        labels: |
+          org.opencontainers.image.title=${{ github.event.repository.name }}
+          org.opencontainers.image.description=${{ github.event.repository.description }}
+          org.opencontainers.image.url=${{ github.event.repository.html_url }}
+          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+
     - name: Test the Docker image
       run: docker run --rm noseyparker --help
 
