@@ -1,5 +1,9 @@
 # Changelog
 
+
+## Unreleased
+
+
 ## [v0.11.0](https://github.com/praetorian-inc/noseyparker/releases/v0.11.0) (2022-12-30)
 
 This is the first released version of Nosey Parker.
