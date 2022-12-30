@@ -1,7 +1,7 @@
 [package]
 name = "noseyparker"
 authors = [ "Brad Larsen <bradford.larsen@praetorian.com>", ]
-version = "0.10.0"
+version = "0.11.0"
 edition = "2021"
 description = "Find secrets and sensitive information in textual data"
 license = "Apache-2.0"
