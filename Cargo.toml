@@ -32,8 +32,8 @@ atty = "0.2"
 bstr = { version = "1.0.1", features = ["serde"] }
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15.2"
-git-discover = "0.10.0"
-git-repository = { version = "0.30.0", features = ["max-performance"] }
+git-discover = "0.12.1"
+git-repository = { version = "0.33.0", features = ["max-performance"] }
 libc = "0.2"
 hex = "0.4"
 hyperscan = { version = "0.3", features = ["full", "static"] }
@@ -51,7 +51,7 @@ pretty_assertions = "1.3"
 prettytable-rs = "0.10.0"
 rayon = "1.5"
 regex = "1.7"
-rlimit = "0.8"
+rlimit = "0.9.0"
 rusqlite = { version = "0.28", features = ["bundled", "backup"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -65,7 +65,7 @@ walkdir = "2.3"
 [dev-dependencies]
 criterion = "0.4"
 libgit2-sys = "0.14.0"
-git2 = { version = "0.15", features = ["vendored-libgit2", "vendored-openssl"] }
+git2 = { version = "0.16.0", features = ["vendored-libgit2", "vendored-openssl"] }
 proptest = "1.0"
 
 [[bench]]
