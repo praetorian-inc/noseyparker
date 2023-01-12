@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Features
+- Nosey Parker now has an optional `rule_profiling` crate feature that causes performance-related statistics to be collected and reported when scanning.
+  This feature imposes some performance cost and is only useful to rule authors, and so is disabled by default.
+
 ### Changes
 - Several default rules have been revised to improve performance of the matching engine and to produce fewer false positives.
   In particular, several rules previously had avoided using a trailing `\b` anchor after secret content which could include a literal `-` character, due to a matching discrepancy between Hyperscan and Rust's `regex` library.

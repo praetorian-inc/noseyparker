@@ -25,6 +25,9 @@ path = "src/lib.rs"
 name = "noseyparker"
 path = "src/bin/noseyparker/main.rs"
 
+[features]
+rule_profiling = []
+
 [dependencies]
 # anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
 anyhow = { version = "1.0" }

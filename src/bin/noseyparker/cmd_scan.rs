@@ -316,6 +316,22 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             HumanCount(num_matches),
         );
 
+        #[cfg(feature = "rule_profiling")]
+        {
+            println!("Rule stats:");
+            let mut entries = matcher_stats.rule_stats.get_entries();
+            entries.retain(|e| e.raw_match_count > 0);
+            entries.sort_by_key(|e| e.stage2_duration);
+            entries.reverse();
+            for entry in entries {
+                let rule_name = &rules_db
+                    .get_rule(entry.rule_id)
+                    .expect("rule index should be valid")
+                    .name;
+                println!("{:>50} {:>10} {:>10.4}s", rule_name, entry.raw_match_count, entry.stage2_duration.as_secs_f64());
+            }
+        }
+
         if num_matches > 0 {
             let matches_summary = datastore.summarize()?;
             let matches_table = crate::cmd_summarize::summary_table(matches_summary);

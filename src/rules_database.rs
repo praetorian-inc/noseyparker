@@ -68,6 +68,14 @@ impl RulesDatabase {
     //     panic!("unimplemented!");
     //     // Ok(())
     // }
+
+    pub fn num_rules(&self) -> usize {
+        self.rules.len()
+    }
+
+    pub fn get_rule(&self, index: usize) -> Option<&Rule> {
+        self.rules.rules.get(index)
+    }
 }
 
 #[cfg(test)]

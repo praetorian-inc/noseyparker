@@ -163,6 +163,14 @@ impl<'a> Matcher<'a> {
         }
 
         // -----------------------------------------------------------------------------------------
+        // Update rule raw match stats
+        // -----------------------------------------------------------------------------------------
+        #[cfg(feature = "rule_profiling")]
+        for m in &self.raw_matches_scratch {
+            self.local_stats.rule_stats.increment_match_count(m.rule_id as usize, 1);
+        }
+
+        // -----------------------------------------------------------------------------------------
         // Perform second-stage regex matching to get groups and precise start locations
         //
         // Also deduplicate overlapping matches with the same rule
@@ -182,6 +190,10 @@ impl<'a> Matcher<'a> {
         let matches = self.raw_matches_scratch.iter().rev()
             .filter_map(|&RawMatch{ rule_id, start_idx, end_idx }| {
                 let rule_id = rule_id as usize;
+
+                #[cfg(feature = "rule_profiling")]
+                let _rule_profiler = self.local_stats.rule_stats.time_stage2(rule_id);
+
                 let start_idx = start_idx as usize;
                 let end_idx = end_idx as usize;
                 let rule = &rules[rule_id];
@@ -213,6 +225,7 @@ impl<'a> Matcher<'a> {
                                 cxt,
                             );
                         // });
+
                         return None;
                     }
                     Some(cs) => { cs }

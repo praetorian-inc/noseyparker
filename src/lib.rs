@@ -13,5 +13,7 @@ pub mod progress;
 pub mod provenance;
 pub mod rules;
 pub mod rules_database;
+#[cfg(feature = "rule_profiling")]
+pub mod rule_profiling;
 pub mod snippet;
 pub mod utils;
