@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
-use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use git_repository as git;
+use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::sync::mpsc;
 use std::sync::Mutex;
@@ -92,8 +92,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
                 format!("Failed to write default ignore rules to {}", ignore_path.display())
             })?;
-            ie.add_ignore(&ignore_path)
-                .with_context(|| format!("Failed to load ignore rules from {}", ignore_path.display()))?;
+            ie.add_ignore(&ignore_path).with_context(|| {
+                format!("Failed to load ignore rules from {}", ignore_path.display())
+            })?;
 
             // Load any specified ignore files
             for ignore_path in args.discovery_args.ignore.iter() {
@@ -230,57 +231,58 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
     inputs.git_repos.par_iter().for_each(|git_repo_result| {
-        git_repo_result
-            .blobs
-            .par_iter()
-            .for_each_init(
-                || {
-                    let matcher = make_matcher().expect("should be able to create a matcher");
-                    let repo = git_repo_result.repository.to_thread_local();
-                    (repo, matcher, progress.clone())
-                },
-                |(repo, matcher, progress), (blob_id, size)| {
-                    progress.inc(*size);
-                    let path = &git_repo_result.path;
-                    // debug!("Scanning {} size {} from {:?}", oid, size, path);
+        git_repo_result.blobs.par_iter().for_each_init(
+            || {
+                let matcher = make_matcher().expect("should be able to create a matcher");
+                let repo = git_repo_result.repository.to_thread_local();
+                (repo, matcher, progress.clone())
+            },
+            |(repo, matcher, progress), (blob_id, size)| {
+                progress.inc(*size);
+                let path = &git_repo_result.path;
+                // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
-                    // Check for duplicates before even loading the entire blob contents
-                    if seen_blobs.contains(&blob_id) {
+                // Check for duplicates before even loading the entire blob contents
+                if seen_blobs.contains(&blob_id) {
+                    return;
+                }
+                let blob = match repo.find_object(git::hash::ObjectId::from(blob_id.as_bytes())) {
+                    Err(e) => {
+                        error!(
+                            "Failed to read blob {} from Git repository at {}: {}",
+                            blob_id,
+                            path.display(),
+                            e
+                        );
                         return;
                     }
-                    let blob = match repo.find_object(git::hash::ObjectId::from(blob_id.as_bytes())) {
-                        Err(e) => {
-                            error!(
-                                "Failed to read blob {} from Git repository at {}: {}",
-                                blob_id, path.display(), e
-                            );
+                    // TODO: get rid of this extra copy
+                    Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
+                };
+                let provenance = Provenance::GitRepo {
+                    path: path.to_path_buf(),
+                };
+                match matcher.scan_blob(&blob, &provenance) {
+                    Err(e) => {
+                        error!(
+                            "Failed to scan blob {} from Git repository at {}: {}",
+                            blob_id,
+                            path.display(),
+                            e
+                        );
+                    }
+                    Ok(matches) => {
+                        if matches.is_empty() {
                             return;
                         }
-                        // TODO: get rid of this extra copy
-                        Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
-                    };
-                    let provenance = Provenance::GitRepo {
-                        path: path.to_path_buf(),
-                    };
-                    match matcher.scan_blob(&blob, &provenance) {
-                        Err(e) => {
-                            error!(
-                                "Failed to scan blob {} from Git repository at {}: {}",
-                                blob_id, path.display(), e
-                            );
-                        }
-                        Ok(matches) => {
-                            if matches.is_empty() {
-                                return;
-                            }
-                            let matches = convert_blob_matches(&blob, matches, provenance);
-                            send_matches
-                                .send(matches)
-                                .expect("should be able to send all matches");
-                        }
+                        let matches = convert_blob_matches(&blob, matches, provenance);
+                        send_matches
+                            .send(matches)
+                            .expect("should be able to send all matches");
                     }
-                },
-            );
+                }
+            },
+        );
     });
 
     // ---------------------------------------------------------------------------------------------

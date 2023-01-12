@@ -137,9 +137,9 @@ impl<'a> Matcher<'a> {
         blob: &'b Blob,
         provenance: &Provenance,
     ) -> Result<Vec<BlobMatch<'a, 'b>>> {
-        // --------------------
+        // -----------------------------------------------------------------------------------------
         // Update local stats
-        // --------------------
+        // -----------------------------------------------------------------------------------------
         self.local_stats.blobs_seen += 1;
         let nbytes = blob.bytes.len() as u64;
         self.local_stats.bytes_seen += nbytes;
@@ -152,9 +152,9 @@ impl<'a> Matcher<'a> {
         self.local_stats.blobs_scanned += 1;
         self.local_stats.bytes_scanned += nbytes;
 
-        // --------------------
+        // -----------------------------------------------------------------------------------------
         // Actually scan the content
-        // --------------------
+        // -----------------------------------------------------------------------------------------
         self.scan_bytes_raw(&blob.bytes)?;
 
         if self.raw_matches_scratch.is_empty() {
@@ -162,11 +162,11 @@ impl<'a> Matcher<'a> {
             return Ok(Vec::new());
         }
 
-        // --------------------
+        // -----------------------------------------------------------------------------------------
         // Perform second-stage regex matching to get groups and precise start locations
         //
         // Also deduplicate overlapping matches with the same rule
-        // --------------------
+        // -----------------------------------------------------------------------------------------
 
         self.raw_matches_scratch.sort_by_key(|m| {
             debug_assert!(m.start_idx <= m.end_idx);
