@@ -6,6 +6,7 @@ use std::sync::Mutex;
 use tracing::{debug, error, warn};
 
 use crate::blob_id::BlobId;
+use crate::blob_id_set::BlobIdSet;
 use crate::progress::Progress;
 
 pub struct FilesystemEnumeratorResult {
@@ -47,6 +48,7 @@ struct VisitorBuilder<'t> {
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
+    seen_blobs: &'t BlobIdSet,
 
     progress: Progress,
 }
@@ -62,6 +64,7 @@ where
             local_git_repos: Vec::new(),
             global_files: self.global_files,
             global_git_repos: self.global_git_repos,
+            seen_blobs: self.seen_blobs,
 
             progress: self.progress.clone(),
         })
@@ -77,6 +80,8 @@ struct Visitor<'t> {
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
 
+    seen_blobs: &'t BlobIdSet,
+
     progress: Progress,
 }
 
@@ -89,13 +94,6 @@ impl<'t> Visitor<'t> {
 
 impl<'t> Drop for Visitor<'t> {
     fn drop(&mut self) {
-        /*
-        debug!(
-            "dropping! {} files, {} repos",
-            self.local_files.len(),
-            self.local_git_repos.len()
-        );
-        */
         self.global_files
             .lock()
             .unwrap()
@@ -149,8 +147,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
                     let enumerator = GitRepoEnumerator::new(&repository);
-                    // FIXME: filter out duplicate blobs here
-                    let blobs = match enumerator.run(&mut self.progress) {
+                    let blobs = match enumerator.run(&self.seen_blobs, &mut self.progress) {
                         Err(e) => {
                             error!(
                                 "Failed to enumerate Git repository at {:?}: {}; skipping",
@@ -237,11 +234,13 @@ impl FilesystemEnumerator {
     pub fn run(&self, progress: &Progress) -> Result<FilesystemEnumeratorResult> {
         let files = Mutex::new(Vec::new());
         let git_repos = Mutex::new(Vec::new());
+        let seen_blobs = BlobIdSet::new();
 
         let mut visitor_builder = VisitorBuilder {
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,
+            seen_blobs: &seen_blobs,
             progress: progress.clone(),
         };
 
@@ -294,7 +293,7 @@ impl<'a> GitRepoEnumerator<'a> {
         GitRepoEnumerator { repo }
     }
 
-    pub fn run(&self, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
+    pub fn run(&self, seen_blobs: &BlobIdSet, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
         use git::prelude::HeaderExt;
 
         let mut blobs: Vec<(BlobId, u64)> = Vec::new();
@@ -307,14 +306,17 @@ impl<'a> GitRepoEnumerator<'a> {
             )
             .filter_map(Result::ok)
         {
+            let blob_id = BlobId::from(&oid);
+            if !seen_blobs.insert(blob_id) {
+                continue;
+            }
             let hdr = odb
                 .header(oid)
                 .with_context(|| format!("Failed to read object header {}", oid))?;
-            let obj_type = hdr.kind();
-            if obj_type == git::object::Kind::Blob {
+            if hdr.kind() == git::object::Kind::Blob {
                 let obj_size = hdr.size();
                 progress.inc(obj_size);
-                blobs.push((BlobId::from(&oid), obj_size));
+                blobs.push((blob_id, obj_size));
             }
         }
 
