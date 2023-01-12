@@ -311,13 +311,10 @@ impl<'a> GitRepoEnumerator<'a> {
                 .header(oid)
                 .with_context(|| format!("Failed to read object header {}", oid))?;
             let obj_type = hdr.kind();
-            match obj_type {
-                git::object::Kind::Blob => {
-                    let obj_size = hdr.size();
-                    progress.inc(obj_size);
-                    blobs.push((BlobId::from(&oid), obj_size));
-                }
-                _ => {}
+            if obj_type == git::object::Kind::Blob => {
+                let obj_size = hdr.size();
+                progress.inc(obj_size);
+                blobs.push((BlobId::from(&oid), obj_size));
             }
         }
 

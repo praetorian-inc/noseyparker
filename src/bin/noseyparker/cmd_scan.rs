@@ -243,7 +243,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
                 // Check for duplicates before even loading the entire blob contents
-                if seen_blobs.contains(&blob_id) {
+                if seen_blobs.contains(blob_id) {
                     return;
                 }
                 let blob = match repo.find_object(git::hash::ObjectId::from(blob_id.as_bytes())) {
