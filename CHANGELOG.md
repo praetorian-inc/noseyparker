@@ -2,11 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project aspires to eventually use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to eventually use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
 ## Unreleased
+
+### Changes
+- Several default rules have been revised to improve performance of the matching engine and to produce fewer false positives.
+  In particular, several rules previously had avoided using a trailing `\b` anchor after secret content which could include a literal `-` character, due to a matching discrepancy between Hyperscan and Rust's `regex` library.
+  These have been revised to use a more complicated but functional anchoring pattern.
 
 
 ## [v0.11.0](https://github.com/praetorian-inc/noseyparker/releases/v0.11.0) (2022-12-30)

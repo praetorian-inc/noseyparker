@@ -1,7 +1,7 @@
 rules:
 
 - name: Google Client ID
-  pattern: '(?i)([0-9]+-[a-z0-9_]{32})\.apps\.googleusercontent\.com'
+  pattern: '(?i)\b([0-9]+-[a-z0-9_]{32})\.apps\.googleusercontent\.com'
 
   examples:
   - "                 'clientID' : '231545488769-4d1mcev9vifvlncrern52id2pqqf5u5l.apps.googleusercontent.com',"
@@ -23,7 +23,11 @@ rules:
 
 
 - name: Google OAuth Access Token
-  pattern: '\b(ya29\.[0-9A-Za-z_-]{20,1024})'
+  pattern: |
+    (?x)
+    \b
+    (ya29\.[0-9A-Za-z_-]{20,1024})
+    (?: [^0-9A-Za-z_-]|$)  (?# Used instead of `\b` because that doesn't play well with trailing `-` )
 
   examples:
   - |

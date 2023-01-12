@@ -4,7 +4,7 @@ rules:
   # NOTE: `pk` tokens are public and have read-only access.
   #       `sk` tokens are secret and should never be shared.
   #       `tk` tokens are temporary access tokens.
-  pattern: '(?i)(?s)mapbox.{0,30}(pk\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})\b'
+  pattern: '(?i)(?s)mapbox.{0,30}(pk\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})(?:[^a-z0-9\-+/=]|$)'
 
   examples:
   - |
@@ -21,7 +21,7 @@ rules:
   # NOTE: `pk` tokens are public and have read-only access.
   #       `sk` tokens are secret and should never be shared.
   #       `tk` tokens are temporary access tokens.
-  pattern: '(?i)(?s)mapbox.{0,30}([st]k\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})\b'
+  pattern: '(?i)(?s)mapbox.{0,30}([st]k\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})(?:[^a-z0-9\-+/=]|$)'
 
   examples:
   - "  //mapboxgl.accessToken = 'sk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';"

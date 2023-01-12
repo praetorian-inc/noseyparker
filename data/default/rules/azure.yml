@@ -12,27 +12,10 @@ rules:
   pattern: |
     (?x)
     (?i)
-    (?: (?: BlobEndpoint
-          | DefaultEndpointsProtocol
-          | Encrypt
-          | Endpoint
-          | EndpointSuffix
-          | FileEndpoint
-          | HostName
-          | IngestionEndpoint
-          | InstrumentationKey
-          | LiveEndpoint
-          | ProfilerEndpoint
-          | QueueEndpoint
-          | SnapshotEndpoint
-          | TableEndpoint
-          ) \s*=\s* [^;]{1,80} \s*;\s*
-          .{0,10}   (?# possible extra stuff, e.g., string concatenation)
-    ){1,20}
-    .{0,80}  (?# allow for context not enumerated in the cases above )
     (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^;]{1,80}) \s*;\s*
     .{0,10}   (?# possible extra stuff, e.g., string concatenation)
     (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^;]{1,100})
+    (?: ;|$ )
 
   references:
   - https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/

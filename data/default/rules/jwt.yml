@@ -3,8 +3,8 @@ rules:
 - name: JSON Web Token (base64url-encoded)
 
   # `header . payload . signature`, all base64-encoded
-  # Unencoded, the header and payload are JSON objects, starting with `{`, which
-  # gets base64-encoded as `ey`.
+  # Unencoded, the header and payload are JSON objects, usually starting with
+  # `{"`, which gets base64-encoded starting with `ey`.
   pattern: |
     (?x)
     \b
@@ -13,6 +13,7 @@ rules:
     (ey[a-zA-Z0-9_-]+)      (?# payload )
     \.
     ([a-zA-Z0-9_-]+)        (?# signature )
+    (?:[^a-zA-Z0-9_-]|$)    (?# this instead of a \b anchor because that doesn't play nicely with `-` )
 
   references:
   - https://en.wikipedia.org/wiki/JSON_Web_Token
