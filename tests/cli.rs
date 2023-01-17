@@ -1,7 +1,8 @@
 use assert_cmd::prelude::*;
 use assert_fs::prelude::*;
 use assert_fs::{fixture::ChildPath, TempDir};
-use insta::{assert_display_snapshot, assert_snapshot, with_settings};
+use indoc::indoc;
+use insta::{assert_display_snapshot, assert_snapshot, assert_json_snapshot, with_settings};
 use lazy_static::lazy_static;
 // use predicates::prelude::*;
 use predicates::str::RegexPredicate;
@@ -116,6 +117,23 @@ impl ScanEnv {
         let input = self.root.child(name);
         input.touch().expect("should be able to write input file");
         assert!(input.is_file());
+        input
+    }
+
+    /// Create an input file within this mock scanning environment with the given name.
+    /// The created input file will have content containing a fake AWS key that should be detected.
+    pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
+        let input = self.root.child(name);
+        input.touch().expect("should be able to write input file");
+        assert!(input.is_file());
+        let contents = indoc! {r#"
+            # This is fake configuration data
+            USERNAME=the_dude
+            AWS_KEY=AKIADEADBEEFDEADBEEF
+        "#};
+        input
+            .write_str(contents)
+            .expect("should be able to write input file contents");
         input
     }
 
@@ -260,8 +278,15 @@ fn test_noseyparker_scan_file_maxsize() {
         .stdout(match_scan_stats("10.00 MiB", 1, 0, 0));
 
     // With a restricted max file size, the file is not scanned
-    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path(), "--max-file-size", "5")
-        .stdout(match_nothing_scanned());
+    noseyparker_success!(
+        "scan",
+        "--datastore",
+        scan_env.dspath(),
+        input.path(),
+        "--max-file-size",
+        "5"
+    )
+    .stdout(match_nothing_scanned());
 
     // Also check for alternatively-spelled versions of a couple arguments
     noseyparker_success!(
@@ -280,8 +305,7 @@ fn test_noseyparker_scan_unreadable_file() {
     use std::os::unix::fs::PermissionsExt;
 
     let scan_env = ScanEnv::new();
-    let input = scan_env.input_file("input.txt");
-    input.write_str("AKIADEADBEEFDEADBEEF").unwrap();
+    let input = scan_env.input_file_with_secret("input.txt");
     // n.b. file value explicitly unnamed so it gets dropped
     File::open(input.path())
         .unwrap()
@@ -292,4 +316,30 @@ fn test_noseyparker_scan_unreadable_file() {
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
         .stdout(is_match("ERROR.*: Failed to load blob from .*: Permission denied"))
         .stdout(match_nothing_scanned());
+}
+
+#[test]
+fn test_noseyparker_scan_secrets1() {
+    let scan_env = ScanEnv::new();
+    let input = scan_env.input_file_with_secret("input.txt");
+
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
+        .stdout(match_scan_stats("81B", 1, 1, 1));
+
+    assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", scan_env.dspath()));
+
+    with_settings!({
+        filters => vec![
+            (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>")
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath()));
+    });
+
+
+    let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
+    let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+    assert_json_snapshot!(json_output, {
+        "[].matches[].provenance.path" => "<ROOT>/input.txt"
+    });
 }
