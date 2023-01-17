@@ -33,7 +33,7 @@ Options:
   -j, --jobs <N>
           The number of parallel scanning jobs
           
-          [default: 10]
+          [default: DEFAULT]
 
   -r, --rules <PATH>
           Path of custom rules to use

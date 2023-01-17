@@ -1,7 +1,7 @@
 use assert_cmd::prelude::*;
 use assert_fs::prelude::*;
 use assert_fs::{fixture::ChildPath, TempDir};
-use insta::{assert_display_snapshot, assert_snapshot};
+use insta::{assert_display_snapshot, assert_snapshot, with_settings};
 // use predicates::prelude::*;
 use std::path::Path;
 use std::process::Command;
@@ -102,7 +102,13 @@ fn test_noseyparker_help() {
 
 #[test]
 fn test_noseyparker_help_scan() {
-    assert_cmd_snapshot!(noseyparker!("help", "scan").assert().success());
+    with_settings!({
+        filters => vec![
+            (r"(?m)(scanning jobs\s+)\[default: \d+\]", r"$1[default: DEFAULT]")
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker!("help", "scan").assert().success());
+    });
 }
 
 #[test]
