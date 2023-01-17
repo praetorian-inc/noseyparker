@@ -66,9 +66,13 @@ tracing-subscriber = { version = "0.3.16", features = ["tracing-log", "ansi"] }
 walkdir = "2.3"
 
 [dev-dependencies]
+assert_cmd = "2.0.8"
+assert_fs = "1.0.10"
 criterion = "0.4"
-libgit2-sys = "0.14.0"
 git2 = { version = "0.16.0", features = ["vendored-libgit2", "vendored-openssl"] }
+insta = { version = "1.26.0", features = ["yaml"] }
+libgit2-sys = "0.14.0"
+predicates = "2.1.5"
 proptest = "1.0"
 
 [[bench]]
@@ -86,6 +90,14 @@ lto = "thin"
 
 opt-level = 3  # default for release profile
 
+# Insta benefits from being compiled in release mode, even as dev dependency.
+[profile.dev.package.insta]
+opt-level = 3
+
+# The `similar` dependency that Insta uses also benefits from being compiled in
+# release mode, even as dev dependency.
+[profile.dev.package.similar]
+opt-level = 3
 
 
 # NOTE: See cargo-license to list dependency licenses: https://github.com/onur/cargo-license
