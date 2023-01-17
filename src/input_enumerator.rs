@@ -147,7 +147,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
                     let enumerator = GitRepoEnumerator::new(&repository);
-                    let blobs = match enumerator.run(&self.seen_blobs, &mut self.progress) {
+                    let blobs = match enumerator.run(self.seen_blobs, &mut self.progress) {
                         Err(e) => {
                             error!(
                                 "Failed to enumerate Git repository at {:?}: {}; skipping",
