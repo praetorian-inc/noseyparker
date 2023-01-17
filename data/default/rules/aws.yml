@@ -10,6 +10,7 @@ rules:
 
   examples:
   - 'A3T0ABCDEFGHIJKLMNOP'
+  - 'AKIADEADBEEFDEADBEEF'
 
   negative_examples:
   - 'A3T0ABCDEFGHIJKLMNO'

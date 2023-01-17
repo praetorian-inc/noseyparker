@@ -43,6 +43,11 @@ macro_rules! noseyparker {
     }
 }
 
+/// Build an `assert_cmd::assert::Assert` by calling `noseyparker!(args).assert().success()`.
+macro_rules! noseyparker_success {
+    ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().success() }
+}
+
 lazy_static! {
     static ref NOSEYPARKER: escargot::CargoRun = escargot::CargoBuild::new()
         .bin("noseyparker")
@@ -79,7 +84,7 @@ pub fn match_scan_stats(
     total_matches: u64,
 ) -> RegexPredicate {
     is_match(&format!(
-        r"^Scanned {} from {} blobs in .*; {}/{} new matches",
+        r"(?m)^Scanned {} from {} blobs in .*; {}/{} new matches$",
         num_bytes, num_blobs, new_matches, total_matches
     ))
 }
@@ -143,12 +148,12 @@ impl ScanEnv {
 
 #[test]
 fn test_noseyparker_no_args() {
-    assert_cmd_snapshot!(noseyparker().assert().failure());
+    assert_cmd_snapshot!(noseyparker!().assert().failure());
 }
 
 #[test]
 fn test_noseyparker_help() {
-    assert_cmd_snapshot!(noseyparker!("help").assert().success());
+    assert_cmd_snapshot!(noseyparker_success!("help"));
 }
 
 #[test]
@@ -158,37 +163,35 @@ fn test_noseyparker_help_scan() {
             (r"(?m)(scanning jobs\s+)\[default: \d+\]", r"$1[default: DEFAULT]")
         ],
     }, {
-        assert_cmd_snapshot!(noseyparker!("help", "scan").assert().success());
+        assert_cmd_snapshot!(noseyparker_success!("help", "scan"));
     });
 }
 
 #[test]
 fn test_noseyparker_help_summarize() {
-    assert_cmd_snapshot!(noseyparker!("help", "summarize").assert().success());
+    assert_cmd_snapshot!(noseyparker_success!("help", "summarize"));
 }
 
 #[test]
 fn test_noseyparker_help_report() {
-    assert_cmd_snapshot!(noseyparker!("help", "report").assert().success());
+    assert_cmd_snapshot!(noseyparker_success!("help", "report"));
 }
 
 #[test]
 fn test_noseyparker_help_datastore() {
-    assert_cmd_snapshot!(noseyparker!("help", "datastore").assert().success());
+    assert_cmd_snapshot!(noseyparker_success!("help", "datastore"));
 }
 
 #[test]
 fn test_noseyparker_help_rules() {
-    assert_cmd_snapshot!(noseyparker!("help", "rules").assert().success());
+    assert_cmd_snapshot!(noseyparker_success!("help", "rules"));
 }
 
 #[test]
 fn test_noseyparker_scan_emptydir() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_dir("empty_dir");
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path())
-        .assert()
-        .success()
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path())
         .stdout(match_nothing_scanned());
 }
 
@@ -196,9 +199,7 @@ fn test_noseyparker_scan_emptydir() {
 fn test_noseyparker_scan_datastore_argorder() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_dir("empty_dir");
-    noseyparker!("scan", input.path(), "--datastore", scan_env.dspath())
-        .assert()
-        .success()
+    noseyparker_success!("scan", input.path(), "--datastore", scan_env.dspath())
         .stdout(match_nothing_scanned());
 }
 
@@ -206,9 +207,7 @@ fn test_noseyparker_scan_datastore_argorder() {
 fn test_noseyparker_scan_datastore_short() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_dir("empty_dir");
-    noseyparker!("scan", "-d", scan_env.dspath(), input.path())
-        .assert()
-        .success()
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
         .stdout(match_nothing_scanned());
 }
 
@@ -227,9 +226,7 @@ fn test_noseyparker_scan_datastore_envvar() {
 fn test_noseyparker_scan_emptyfile() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file("empty_file");
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path())
-        .assert()
-        .success()
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path())
         .stdout(match_scan_stats("0B", 1, 0, 0));
 }
 
@@ -238,9 +235,7 @@ fn test_noseyparker_scan_emptyfiles() {
     let scan_env = ScanEnv::new();
     let input1 = scan_env.input_file("empty_file1");
     let input2 = scan_env.input_file("empty_file2");
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input1.path(), input2.path())
-        .assert()
-        .success()
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input1.path(), input2.path())
         .stdout(match_scan_stats("0B", 2, 0, 0));
 }
 
@@ -249,12 +244,8 @@ fn test_noseyparker_scan_file_symlink() {
     let scan_env = ScanEnv::new();
     let empty_file = scan_env.input_file("empty_file");
     let input = scan_env.child("empty_file_link");
-    input
-        .symlink_to_file(empty_file)
-        .expect("should be able to create input symlink");
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path())
-        .assert()
-        .success()
+    input.symlink_to_file(empty_file).unwrap();
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path())
         .stdout(match_nothing_scanned());
 }
 
@@ -262,25 +253,43 @@ fn test_noseyparker_scan_file_symlink() {
 fn test_noseyparker_scan_file_maxsize() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file("bigfile.dat");
-    input
-        .write_binary(&[b'a'; 1024 * 1024 * 10])
-        .expect("should be able to write input file contents");
+    input.write_binary(&[b'a'; 1024 * 1024 * 10]).unwrap();
 
     // By default the input file gets scanned
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path())
-        .assert()
-        .success()
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path())
         .stdout(match_scan_stats("10.00 MiB", 1, 0, 0));
 
     // With a restricted max file size, the file is not scanned
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path(), "--max-file-size", "5")
-        .assert()
-        .success()
+    noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path(), "--max-file-size", "5")
         .stdout(match_nothing_scanned());
 
-    // Also check for the floating-point version of max file size
-    noseyparker!("scan", "--datastore", scan_env.dspath(), input.path(), "--max-file-size", "5.00")
-        .assert()
-        .success()
+    // Also check for alternatively-spelled versions of a couple arguments
+    noseyparker_success!(
+        "scan",
+        format!("-d={}", scan_env.dspath().display()),
+        "--max-file-size=5.00",
+        input.path()
+    )
+    .stdout(match_nothing_scanned());
+}
+
+#[cfg(unix)]
+#[test]
+fn test_noseyparker_scan_unreadable_file() {
+    use std::fs::{File, Permissions};
+    use std::os::unix::fs::PermissionsExt;
+
+    let scan_env = ScanEnv::new();
+    let input = scan_env.input_file("input.txt");
+    input.write_str("AKIADEADBEEFDEADBEEF").unwrap();
+    // n.b. file value explicitly unnamed so it gets dropped
+    File::open(input.path())
+        .unwrap()
+        .set_permissions(Permissions::from_mode(0o000))
+        .unwrap();
+    assert!(std::fs::read_to_string(input.path()).is_err());
+
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
+        .stdout(is_match("ERROR.*: Failed to load blob from .*: Permission denied"))
         .stdout(match_nothing_scanned());
 }
