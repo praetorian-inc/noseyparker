@@ -13,12 +13,12 @@ impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
-        use openssl::sha;
+        use git_features::hash::Sha1;
         use std::io::Write;
 
-        // XXX implement a Write instance for `sha::Sha1`, in an attempt to avoid allocations for
+        // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
         // formatting the input length. Not sure how well this actually avoids allocation.
-        struct Sha1Writer(sha::Sha1);
+        struct Sha1Writer(Sha1);
 
         impl Write for Sha1Writer {
             #[inline]
@@ -33,10 +33,10 @@ impl BlobId {
             }
         }
 
-        let mut writer = Sha1Writer(sha::Sha1::new());
+        let mut writer = Sha1Writer(Sha1::default());
         write!(&mut writer, "blob {}\0", input.len()).unwrap();
         writer.0.update(input);
-        BlobId(writer.0.finish())
+        BlobId(writer.0.digest())
     }
 
     #[inline]
