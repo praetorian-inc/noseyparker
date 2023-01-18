@@ -13,20 +13,44 @@ This open-source version of Nosey Parker is a reimplementation of part of the in
 
 ## Building from source
 
-**NOTE:** Currently only x86_64 is supported due to the dependency on Hyperscan, which only supports x86_64.
-
-
-**1. Install the [Hyperscan](https://github.com/intel/hyperscan) library and headers for your system**
+**1. (On x86_64) Install the [Hyperscan](https://github.com/intel/hyperscan) library and headers for your system**
 
 On macOS using Homebrew:
+
 ```
 brew install hyperscan pkg-config
 ```
 
 On Ubuntu 22.04:
+
 ```
 apt install libhyperscan-dev pkg-config
 ```
+
+**1. (On non-x86_64) Build [Vectorscan](https://github.com/Vectorcamp/vectorscan) from source**
+
+You will need several dependencies, including `cmake`, `boost`, `ragel`, and `pkg-config`.
+
+Download and extract the source for the [5.4.8 release](https://github.com/VectorCamp/vectorscan/releases/tag/vectorscan%2F5.4.8) of Vectorscan:
+
+```
+wget https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.8.tar.gz && tar xfz 5.4.8.tar.gz
+```
+
+Build with cmake:
+
+```
+cd vectorscan-vectorscan-5.4.8 && cmake -B build -DFAT_RUNTIME=OFF -DCMAKE_BUILD_TYPE=Release . && cmake --build build
+```
+
+Set the `HYPERSCAN_ROOT` environment variable so that Nosey Parker builds against your from-source build of Vectorscan:
+
+```
+export HYPERSCAN_ROOT="$PWD/build"
+```
+
+**Note:** The Nosey Parker [`Dockerfile`](Dockerfile) builds Vectorscan from source and links against that.
+
 
 **2. Install the Rust toolchain**
 
@@ -41,22 +65,34 @@ This will produce a binary at `target/release/noseyparker`.
 
 ## Docker Usage
 
-**NOTE:** Currently only x86_64 is supported due to the dependency on Hyperscan, which only supports x86_64.
+**A [prebuilt Docker image](https://ghcr.io/praetorian-inc/noseyparker:latest) is available for the latest release for x86_64:**
 
-1. Build the Docker image: 
+```
+docker pull ghcr.io/praetorian-inc/noseyparker:latest
+```
+
+**A [prebuilt Docker image](https://ghcr.io/praetorian-inc/noseyparker:edge) is available for the most recent commit for x86_64:**
+
+```
+docker pull ghcr.io/praetorian-inc/noseyparker:edge
+```
+
+**For other architectures (e.g., ARM) you will need to build the Docker image yourself:**
 
 ```
 docker build -t noseyparker . 
 ```
 
-2. Run Docker image with mounted volume:
+**Run the Docker image with a mounted volume:**
 
 ```
-docker run -v `pwd`:/opt/ noseyparker
+docker run -v "$PWD":/opt/ noseyparker
 ```
+
+**Note:** The Docker image runs noticeably slower than a native binary, particularly on macOS.
+
 
 ## Usage quick start
-
 
 ### The datastore
 Most Nosey Parker commands use a _datastore_.
