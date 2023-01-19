@@ -1,0 +1,28 @@
+rules:
+
+- name: Age Recipient (X25519 public key)
+  pattern: '\bage1[0-9a-z]{58}\b'
+
+  examples:
+  - 'age1zvkyg2lqzraa2lnjvqej32nkuu0ues2s82hzrye869xeexvn73equnujwj'
+
+  references:
+  - https://age-encryption.org
+  - https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html
+  - https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type
+
+
+- name: Age Identity (X22519 secret key)
+  pattern: '\bAGE-SECRET-KEY-1[0-9A-Z]{58}\b'
+
+  examples:
+  - |
+      # created: 2022-09-26T21:55:47-05:00
+      # public key: age1epzmwwzw8n09slh0c7z1z52x43nnga7lkksx3qrh07tqz5v7lcys45428t
+      AGE-SECRET-KEY-1HJCRJVK7EE3A5N8CRP8YSEUGZKNW90Y5UR2RGYAS8L279LFP6LCQU5ADNR
+  - 'AGE-SECRET-KEY-1GFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPQ4EGAEX'
+
+  references:
+  - https://age-encryption.org
+  - https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html
+  - https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type
