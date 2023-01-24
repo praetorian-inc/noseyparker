@@ -1,0 +1,52 @@
+rules:
+
+- name: GitLab Runner Registration Token
+  pattern: '\b(GR1348941[0-9a-zA-Z_-]{20})(?:\b|$)'
+
+  references:
+  - https://docs.gitlab.com/runner/security/
+  - https://docs.gitlab.com/ee/security/token_overview.html#runner-registration-tokens-deprecated
+  - https://docs.gitlab.com/ee/security/token_overview.html#security-considerations
+
+  examples:
+  - |
+      sudo gitlab-runner register \
+      --non-interactive \
+      --url "https://gitlab.com/" \
+      --registration-token "GR1348941_iAgdMy7a3NhZaa5oNoH" \
+      --executor "docker" \
+      --docker-image ubuntu:latest \
+      --description "docker-runner" \
+      --tag-list "docker, CICD, App" \
+      --run-untagged="true" \
+      --locked="false" \
+      --access-level="not_protected"
+
+- name: GitLab Personal Access Token
+  pattern: '\b(glpat-[0-9a-zA-Z_-]{20})(?:\b|$)'
+
+  references:
+  - https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+
+  examples:
+  - |
+      docker build -t tweedledee \
+      -f Dockerfile \
+      --build-arg 'GO_REPO_TOKEN=glpat-tFrjFXD7soVU2fqxuDMh' \
+
+- name: GitLab Pipeline Trigger Token
+  pattern: '\b(glptt-[0-9a-f]{40})\b'
+
+  references:
+  - https://docs.gitlab.com/ee/ci/triggers/
+  - https://gitlab.com/gitlab-org/gitlab/-/issues/371396
+  - https://gitlab.com/gitlab-org/gitlab/-/issues/388379
+
+  examples:
+  - |
+      curl    \
+      -X POST \
+      --fail  \
+      --no-progress-meter \
+      -F token=glptt-0d66598d696a02da33fb65e2a041f607c68ea50d \
+      -F ref=main
