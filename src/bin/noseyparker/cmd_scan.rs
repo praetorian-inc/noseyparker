@@ -78,7 +78,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Enumerate initial filesystem inputs
     // ---------------------------------------------------------------------------------------------
     let inputs = {
-        let mut progress = Progress::new_bytes_spinner("Enumerating inputs", progress_enabled);
+        let mut progress = Progress::new_bytes_spinner("Enumerating inputs...", progress_enabled);
 
         let input_enumerator = {
             let mut ie = FilesystemEnumerator::new(&args.inputs)?;
