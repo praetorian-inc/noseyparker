@@ -1,0 +1,174 @@
+rules:
+
+- name: New Relic License Key
+  pattern: |
+    (?x)(?i)
+    \b
+    ([a-z0-9]{6}[a-f0-9]{30}nral)
+    \b
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key
+
+  examples:
+  - |
+      # Required license key associated with your New Relic account.
+      license_key: 033f2f2072ca3f2cb2ec39024fa9e49cd640NRAL
+
+      # Your application name. Renaming here affects where data displays in New
+
+  - '    license_key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaNRAL'
+  - '        license: eu01xxaa7460e1ea3abdfbbbd36e85c10cd0NRAL'
+
+  negative_examples:
+  - '    license_key: xxxxxxxxxxxxxxx'
+  - ' --set global.licenseKey=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8NRAL `'
+
+
+- name: New Relic License Key (non-suffixed)
+  pattern: |
+    (?x)(?i)
+    associated\ with\ your\ New\ Relic\ account\.\s+
+    license_key:\s*
+    ([a-f0-9]{40})
+    \b
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key
+
+  examples:
+  - |
+      # Required license key associated with your New Relic account.
+      license_key: 0a14254db7a1e9d29c3370dacc798cb65d25c9af
+
+      # Your application name. Renaming here affects where data displays in New
+
+  negative_examples:
+  - |
+      # Required license key associated with your New Relic account.
+      license_key: 033f2f2072ca3f2cb2ec39019fa9e49cd640NRAL
+
+  - |
+        license_key: '<%= ENV["NEW_RELIC_LICENSE_KEY"] %>'
+
+
+- name: New Relic API Service Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (nrak-[a-z0-9]{27})
+    \b
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key
+
+  examples:
+  - "  PS> Get-NR1Catalog -PersonalAPIKey 'NRAK-123456788ABCDEFGHIJKLMNOPQR'"
+  - '                placeholder="e.g: NRAK-CIH1YVYWKA9ZP6E49WP5XYJH1G9">'
+  - |
+      ENV NODE_ENV "production"
+      ENV PORT 8079
+      #ENV NEW_RELIC_LICENSE_KEY=NRAK-7JCF597RJ492YP6MZWST3HWRNY2
+
+
+- name: New Relic Admin API Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (nraa-[a-f0-9]{27})
+    \b
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#admin-keys
+
+  examples:
+  - 'admin_access:NRAA-4780f48c47df5882dbec3fd82c7'
+
+
+- name: New Relic Insights Insert Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (nrii-[a-z0-9_-]{32})
+    (?: [^a-z0-9_-] | $)
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-insert-key
+
+  examples:
+  - '                    insertKey: "NRII-3nbcrMjHHs0RrT3GhRNqpd16YVMFHdcI")'
+  - ' "Api-Key": "NRII-7a6SL_Pau5Dz923jEuBEylu3clzXzfby"'
+
+
+- name: New Relic Insights Query Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (nriq-[a-z0-9_-]{32})
+    (?: [^a-z0-9_-] | $)
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-query-key
+
+  examples:
+  - '  "querykey": "NRIQ-pD-yUGl9Z3ACIJ89V-zGkhMxFJE5O121",'
+
+
+- name: New Relic REST API Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (nrra-[a-f0-9]{42})
+    \b
+
+  references:
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
+  - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#rest-api-key
+
+  examples:
+  - |
+      curl -X POST "https://api.newrelic.com/v2/applications/380836898/deployments.json" \
+           -H "X-Api-Key:NRRA-e270623d47659ff6a48ac5bde6bba223bef47c8c26" \
+           -i \
+           -H "Content-Type: application/json" \
+           -d "{ \"deployment\": { \"revision\": \"${rev}\" }}"
+
+
+- name: New Relic Pixie API Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (px-api-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
+    \b
+
+  references:
+  - https://docs.px.dev/reference/admin/api-keys/
+
+  examples:
+  - 'MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a3cba-d3c9-45c1-a557-8864040b8f79'
+
+  negative_examples:
+  - ' --set newrelic-pixie.apiKey=px-api-a1b2c3d4-e5f6-g7h8-i8j0-k0l3m3n4o0p5 `'
+
+
+- name: New Relic Pixie Deploy Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (px-dep-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
+    \b
+
+  references:
+  - https://docs.px.dev/reference/admin/deploy-keys/
+
+  examples:
+  - 'MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a2cba-d3c9-45c1-a556-8864040b8f79'
+
+  negative_examples:
+  - ' --set pixie-chart.deployKey=px-dep-d4c3b2a1-f6e5-h8g7-j1i8-p5o0n5m3l2k1 `'

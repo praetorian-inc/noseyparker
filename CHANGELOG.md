@@ -11,9 +11,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Nosey Parker now has an optional `rule_profiling` crate feature that causes performance-related statistics to be collected and reported when scanning.
   This feature imposes some performance cost and is only useful to rule authors, and so is disabled by default.
 
-- A rule has been added to detect Age encryption keys.
+- Several new rules have been added:
 
-- A rule has been added to detect several GitLab tokens.
+  - Age Identity (X22519 secret key)
+  - Age Recipient (X25519 public key)
+  - GitLab Personal Access Token
+  - GitLab Pipeline Trigger Token
+  - GitLab Runner Registration Token
+  - New Relic API Service Key
+  - New Relic Admin API Key
+  - New Relic Insights Insert Key
+  - New Relic Insights Query Key
+  - New Relic License Key
+  - New Relic License Key (non-suffixed)
+  - New Relic Pixie API Key
+  - New Relic Pixie Deploy Key
+  - New Relic REST API Key
+
+  These rules match token formats that are well-specified fixed-length strings with notable prefixes or suffixes, and so should produce very few false positives.
+
+- Several existing rules were modified to improve signal-to-noise:
+
+  - Credentials in ODBC Connection String
+  - PyPI Upload Token
 
 ### Changes
 - Several default rules have been revised to improve performance of the matching engine and to produce fewer false positives.

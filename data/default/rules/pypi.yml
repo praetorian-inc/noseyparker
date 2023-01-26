@@ -1,8 +1,13 @@
 rules:
 
 - name: PyPI Upload Token
-  # NOTE: these can actually be arbitrarily long??
-  pattern: '\b(pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,1000})'
+  # NOTE: these can actually be arbitrarily long
+  pattern: |
+    (?x)
+    \b
+    (pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,})
+    (?:[^a-zA-Z0-9_-]|$)
+
   references:
   # GitHub Secrets Scanning implementation issue and discussion
   - https://github.com/pypa/warehouse/issues/6051

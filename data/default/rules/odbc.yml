@@ -2,29 +2,10 @@ rules:
 
 - name: Credentials in ODBC Connection String
   pattern: |
-    (?x)
-    (?i)
-    (?: (?: DBQ
-          | Data[\ _]?Source
-          | Database
-          | Driver
-          | Initial[\ _]?Catalog
-          | Network[\ _]?Library
-          | Port
-          | Provider
-          | QueryConsistency
-          | Server
-          | SslMode
-          | Trusted[\ _]?Connection
-          | sslca
-          | sslverify
-          ) \s*=\s* [^;]{1,40} \s*;\s*
-          .{0,10}   (?# possible extra stuff, e.g., string concatenation)
-    ){1,20}
-    .{0,40}  (?# allow for context not enumerated in the cases above )
-    (?: User | User\ Id | UserId | Uid) \s*=\s* ([^;]{1,80}) \s*;\s*
+    (?x)(?i)
+    (?: User | User\ Id | UserId | Uid) \s*=\s* ([^"';]{1,100}) \s*["';]\s*
     .{0,10}   (?# possible extra stuff, e.g., string concatenation)
-    (?: Password | Pwd) \s*=\s* ([^;]{1,80}) \s*;
+    (?: Password | Pwd) \s*=\s* ([^"';]{1,100}) \s*["';]
 
   examples:
   - 'Server=host;Port=5432;User Id=username;Password=secret;Database=databasename;'
