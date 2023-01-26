@@ -1,0 +1,13 @@
+rules:
+
+- name: crates.io API Key
+
+  # It's a 32-character alphanumeric identifier prefixed by `cio`
+  pattern: '\bcio[a-zA-Z0-9]{32}\b'
+
+  references:
+  - https://crates.io/data-access
+  - https://github.com/rust-lang/crates.io/blob/master/src/util/token.rs
+
+  examples:
+  - 'Bearer: ciotgp8BGZBlX192iExSQPm0SrUlBunG8zd'
