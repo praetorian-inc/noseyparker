@@ -16,17 +16,22 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::RulesArgs) -> Result<()>
 fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs) -> Result<()> {
     let _span = debug_span!("cmd_rules_check").entered();
 
-    let rules = Rules::from_paths(&args.inputs)?;
+    let rules = Rules::from_paths(&args.inputs)
+        .context("Failed to load input rules")?;
     let mut num_errors = 0;
     let mut num_warnings = 0;
     let num_rules = rules.rules.len();
+
+    // compile the rules individually
     for (rule_num, rule) in rules.rules.iter().enumerate() {
         let stats = check_rule(rule_num, rule)?;
         num_errors += stats.num_errors;
         num_warnings += stats.num_warnings;
     }
+
+    // compile the rules all together
     let _rules_db = RulesDatabase::from_rules(rules)
-        .context("Compiling rules database failed")?;
+        .context("Failed to compile rules database")?;
 
     if num_warnings == 0 && num_errors == 0 {
         println!("{} rules: no issues detected", num_rules);
