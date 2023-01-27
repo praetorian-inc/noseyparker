@@ -4,7 +4,8 @@ rules:
   pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
 
   references:
-  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
   - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 
   examples:
@@ -19,6 +20,7 @@ rules:
   pattern: '\b(gho_[a-zA-Z0-9]{36})\b'
 
   references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
   - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 
@@ -31,6 +33,7 @@ rules:
   pattern: '\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\b'
 
   references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
   - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 
@@ -41,6 +44,7 @@ rules:
 - name: GitHub Refresh Token
   pattern: '\b(ghr_[a-zA-Z0-9]{76})\b'
   references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
   - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 
@@ -60,6 +64,7 @@ rules:
     \b ([a-z0-9]{20}) \b
 
   references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
 
   examples:
@@ -80,9 +85,25 @@ rules:
     \b ([a-z0-9]{40}) \b
 
   references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
 
   examples:
   - |
       GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7
       GITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857
+
+
+- name: GitHub Personal Access Token (fine-grained permissions)
+  pattern: |
+    (?x)
+    \b
+    (github_pat_[0-9a-zA-Z_]{82})
+    \b
+
+  references:
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+  examples:
+  - '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'
