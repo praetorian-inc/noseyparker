@@ -1,0 +1,21 @@
+rules:
+
+- name: NPM Access Token (fine-grained)
+  pattern: |
+    (?x)
+    \b
+    (npm_[A-Za-z0-9]{36})
+    \b
+
+  references:
+  - https://docs.npmjs.com/about-access-tokens
+  - https://github.com/github/roadmap/issues/557
+  - https://github.blog/changelog/2022-12-06-limit-scope-of-npm-tokens-with-the-new-granular-access-tokens/
+
+  examples:
+  - 'npm_TCllNwh2WLQlMWVhybM1iQrsTj6rMQ0BOh6d'
+
+  # There are also NPM Legacy Access Tokens, which appear to be non-prefixed v4 UUIDs.
+  # Matching these would require a pattern that uses heuristics against surrounding context.
+  negative_examples:
+  - '-export NPM_TOKEN="007e65c7-635d-4d54-8294-f360cb8e2e3f"'
