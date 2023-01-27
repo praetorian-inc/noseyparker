@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Age Identity (X22519 secret key)
   - Age Recipient (X25519 public key)
   - crates.io API Key
+  - DigitalOcean Application Access Token
+  - DigitalOcean Personal Access Token
+  - DigitalOcean Refresh Token
   - GitLab Personal Access Token
   - GitLab Pipeline Trigger Token
   - GitLab Runner Registration Token
