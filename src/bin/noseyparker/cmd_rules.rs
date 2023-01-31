@@ -34,9 +34,9 @@ fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs)
         .context("Failed to compile rules database")?;
 
     if num_warnings == 0 && num_errors == 0 {
-        println!("{} rules: no issues detected", num_rules);
+        println!("{num_rules} rules: no issues detected");
     } else {
-        println!("{} rules: {} errors and {} warnings", num_rules, num_errors, num_warnings);
+        println!("{num_rules} rules: {num_errors} errors and {num_warnings} warnings");
     }
 
     if num_errors != 0 {
