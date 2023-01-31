@@ -13,6 +13,8 @@ Commands:
           Summarize scan findings
   report
           Report detailed scan findings
+  github
+          Query GitHub
   datastore
           Manage datastores
   rules

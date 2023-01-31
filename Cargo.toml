@@ -33,6 +33,7 @@ rule_profiling = []
 anyhow = { version = "1.0" }
 atty = "0.2"
 bstr = { version = "1.0.1", features = ["serde"] }
+chrono = "0.4.23"
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15.2"
 git-discover = "0.12.1"
@@ -54,15 +55,19 @@ pretty_assertions = "1.3"
 prettytable-rs = "0.10.0"
 rayon = "1.5"
 regex = "1.7"
+reqwest = { version = "0.11.13", features = ["json"] }
 rlimit = "0.9.0"
 rusqlite = { version = "0.28", features = ["bundled", "backup"] }
+secrecy = "0.8.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
 sha1 = "0.10"
+tokio = "1.23.0"
 tracing = "0.1.37"
 tracing-log = "0.1.3"
 tracing-subscriber = { version = "0.3.16", features = ["tracing-log", "ansi"] }
+url = "2.3.1"
 walkdir = "2.3"
 
 [dev-dependencies]
@@ -131,7 +136,6 @@ opt-level = 3
 # tempfile                                      # filesystem
 # termcolor                                     # reporting
 # tinytemplate                                  # templating
-# tokio
 # toml                                          # data format, configuration
 # tree_magic                                    # content type guesser
 # unicode-normalization

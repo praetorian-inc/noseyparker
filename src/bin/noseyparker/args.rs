@@ -66,12 +66,17 @@ pub enum Command {
     Scan(ScanArgs),
 
     /// Summarize scan findings
-    #[command(display_order = 2, alias="summarise")]
+    #[command(display_order = 2, alias = "summarise")]
     Summarize(SummarizeArgs),
 
     /// Report detailed scan findings
     #[command(display_order = 3)]
     Report(ReportArgs),
+
+    /// Query GitHub
+    #[command(display_order = 4, name = "github")]
+    GitHub(GitHubArgs),
+
 
     #[command(display_order = 30)]
     /// Manage datastores
@@ -145,6 +150,55 @@ impl std::fmt::Display for Mode {
         write!(f, "{}", s)
     }
 }
+
+// -----------------------------------------------------------------------------
+// `github` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct GitHubArgs {
+    #[command(subcommand)]
+    pub command: GitHubCommand,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum GitHubCommand {
+    /// Interact with GitHub repositories
+    #[command(subcommand)]
+    Repos(GitHubReposCommand),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum GitHubReposCommand {
+    /// List repositories belonging to a specific user or organization
+    List(GitHubReposListArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct GitHubReposListArgs {
+    #[command(flatten)]
+    pub repo_specifiers: GitHubRepoSpecifiers,
+
+    #[command(flatten)]
+    pub output_args: OutputArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct GitHubRepoSpecifiers {
+    /// Select repositories belonging to the specified user
+    #[arg(long)]
+    pub user: Vec<String>,
+
+    /// Select repositories belonging to the specified organization
+    #[arg(long, visible_alias = "org")]
+    pub organization: Vec<String>,
+}
+
+impl GitHubRepoSpecifiers {
+    pub fn is_empty(&self) -> bool {
+        self.user.is_empty() && self.organization.is_empty()
+    }
+}
+
 
 // -----------------------------------------------------------------------------
 // `rules` command
