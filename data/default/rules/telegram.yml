@@ -1,0 +1,15 @@
+rules:
+
+- name: Telegram Bot Token
+  pattern: |
+    (?x)
+    \b
+    (\d+:AA[a-zA-Z0-9_-]{32})
+    (?: [^a-zA-Z0-9_-] | $)
+
+  examples:
+  - '4839574813:AAFD39kkdpWt3ywyRZergyOLMaJhac61qc'
+
+  references:
+  - https://core.telegram.org/bots/api
+  - https://core.telegram.org/bots/features#botfather

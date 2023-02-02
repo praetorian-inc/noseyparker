@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - New Relic REST API Key
   - NPM Access Token (fine-grained)
   - RubyGems API Key
+  - Telegram Bot Token
 
   These rules match token formats that are well-specified fixed-length strings with notable prefixes or suffixes, and so should produce very few false positives.
 
