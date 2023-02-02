@@ -26,7 +26,7 @@ The [`GitHub Personal Access Token`](/data/default/rules/github.yml) rule looks 
   - 'GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg'
   - "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'"
   - |
-      ## git devaloper settings
+      ## git developer settings
       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
 ```
 
