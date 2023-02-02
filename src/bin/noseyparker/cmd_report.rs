@@ -29,13 +29,13 @@ pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<(
                 let finding_num = finding_num + 1;
                 let matches = datastore
                     .get_match_group_matches(&metadata, Some(3))
-                    .with_context(|| format!("Failed to get matches for group {:?}", metadata))?;
+                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
                 let match_group = MatchGroup { metadata, matches };
                 let res = writeln!(
                     writer,
                     "{} {}",
                     STYLE_FINDING_HEADING
-                        .apply_to(format!("Finding {}/{}:", finding_num, num_findings)),
+                        .apply_to(format!("Finding {finding_num}/{num_findings}:")),
                     match_group,
                 );
                 match res {
@@ -51,7 +51,7 @@ pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<(
             for metadata in group_metadata.into_iter() {
                 let matches = datastore
                     .get_match_group_matches(&metadata, None)
-                    .with_context(|| format!("Failed to get matches for group {:?}", metadata))?;
+                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
                 let match_group = MatchGroup { metadata, matches };
 
                 let res = serde_json::to_writer(&mut writer, &match_group)
@@ -74,7 +74,7 @@ pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<(
                     let matches = datastore
                         .get_match_group_matches(&metadata, None)
                         .with_context(|| {
-                            format!("Failed to get matches for group {:?}", metadata)
+                            format!("Failed to get matches for group {metadata:?}")
                         })?;
                     Ok(MatchGroup { metadata, matches })
                 })
@@ -135,7 +135,7 @@ impl Display for MatchGroup {
         let g = self.group_input();
         let match_heading = STYLE_HEADING.apply_to("Match:");
         if g.contains(&b'\n') {
-            writeln!(f, "{}", match_heading)?;
+            writeln!(f, "{match_heading}")?;
             writeln!(f)?;
             writeln!(indented(f).with_str("    "), "{}", STYLE_MATCH.apply_to(Escaped(g)))?;
             writeln!(f)?;

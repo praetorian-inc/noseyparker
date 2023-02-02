@@ -1,0 +1,42 @@
+rules:
+
+- name: DigitalOcean Application Access Token
+  pattern: |
+    (?x)(?i)
+    \b
+    (doo_v1_[a-f0-9]{64})
+    \b
+
+  references:
+  - https://docs.digitalocean.com/reference/api/
+
+  examples:
+  - 'curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer doo_v1_c46dde8bd620fcc382e70d5d43be6eebb141fa2452e8f8fa882433377898ebf2" "https://api.digitalocean.com/v2/cdn/endpoints"'
+
+
+- name: DigitalOcean Personal Access Token
+  pattern: |
+    (?x)(?i)
+    \b
+    (dop_v1_[a-f0-9]{64})
+    \b
+
+  references:
+  - https://docs.digitalocean.com/reference/api/
+
+  examples:
+  - 'token         = "dop_v1_ef0e04edc13918192246e0c90f0735c7f4db7a5a036a857e48d6cc98f1c9576b"'
+
+
+- name: DigitalOcean Refresh Token
+  pattern: |
+    (?x)(?i)
+    \b
+    (dor_v1_[a-f0-9]{64})
+    \b
+
+  references:
+  - https://docs.digitalocean.com/reference/api/
+
+  examples:
+  - '  "refresh_token": "dor_v1_d6ce5b93104521c47be0b580e9296454ef4a319b02b5513469f0ec71d99af2e2",'

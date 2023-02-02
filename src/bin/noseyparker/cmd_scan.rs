@@ -40,7 +40,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     debug!("Using {} parallel jobs", args.num_jobs);
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.num_jobs)
-        .thread_name(|idx| format!("Scanner {}", idx))
+        .thread_name(|idx| format!("Scanner {idx}"))
         .build_global()
         .with_context(|| format!("Failed to configure Rayon with {} threads", args.num_jobs))?;
 

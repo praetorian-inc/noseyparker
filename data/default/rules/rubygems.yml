@@ -1,0 +1,17 @@
+rules:
+
+- name: RubyGems API Key
+  pattern: |
+    (?x)(?i)
+    \b
+    (rubygems_[a-f0-9]{48})
+    \b
+
+  references:
+  - https://guides.rubygems.org/rubygems-org-api/
+  - https://guides.rubygems.org/api-key-scopes/
+
+  examples:
+  - |
+      $ curl -H 'Authorization:rubygems_b9ce70c306b3a2e248679fbbbd66723d408d3c8c5f00566c' \
+             https://rubygems.org/api/v1/web_hooks.json
