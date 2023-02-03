@@ -47,6 +47,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   In particular, several rules previously had avoided using a trailing `\b` anchor after secret content which could include a literal `-` character, due to a matching discrepancy between Hyperscan and Rust's `regex` library.
   These have been revised to use a more complicated but functional anchoring pattern.
 
+- The `JSON Web Token (base64url-encoded)` rule has been changed to only produce a single match group instead of three.
+
 - Blobs are now deduplicated at enumeration time when first enumerating a Git repository, rather than only at scan time. This results in more accurate progress bars.
 
 

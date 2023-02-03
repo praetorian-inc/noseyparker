@@ -8,11 +8,13 @@ rules:
   pattern: |
     (?x)
     \b
-    (ey[a-zA-Z0-9_-]+)      (?# header )
-    \.
-    (ey[a-zA-Z0-9_-]+)      (?# payload )
-    \.
-    ([a-zA-Z0-9_-]+)        (?# signature )
+    (
+      ey[a-zA-Z0-9_-]+      (?# header )
+      \.
+      ey[a-zA-Z0-9_-]+      (?# payload )
+      \.
+      [a-zA-Z0-9_-]+        (?# signature )
+    )
     (?:[^a-zA-Z0-9_-]|$)    (?# this instead of a \b anchor because that doesn't play nicely with `-` )
 
   references:
