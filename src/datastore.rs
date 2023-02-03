@@ -168,7 +168,7 @@ impl Datastore {
 
         let tx = self.conn.transaction()?;
         let mut stmt = tx.prepare_cached(indoc! {r#"
-            insert into matches(
+            insert or replace into matches(
                 blob_id,
                 start_byte,
                 end_byte,
@@ -185,7 +185,6 @@ impl Datastore {
                 provenance_type,
                 provenance
             ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            on conflict do nothing
         "#})?;
         let mut num_changed = 0;
         for m in matches {
