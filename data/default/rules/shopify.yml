@@ -1,0 +1,70 @@
+rules:
+
+- name: Shopify Domain
+  pattern: |
+    (?x)
+    \b
+    (
+      (?:[a-zA-Z0-9-]+\.)* [a-zA-Z0-9-]+ \.myshopify\.com
+    )
+    \b
+
+  references:
+  - https://help.shopify.com/en/manual/domains
+
+  examples:
+  - 'handsomestranger.myshopify.com' 
+  - 'store.handsomestranger.myshopify.com' 
+
+
+- name: Shopify App Secret
+  pattern: '\b(shpss_[a-fA-F0-9]{32})\b'
+
+  references:
+  - https://shopify.dev/apps/auth
+  - https://shopify.dev/changelog/app-secret-key-length-has-increased
+
+  examples:
+  - |
+      SHOPIFY_API_KEY='66eaacb546afcad32162d40acb6bd2b0'
+      SHOPIFY_API_SECRET_KEY='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'
+  - |
+      SHOPIFY_API_KEY: 38d5b9a8b6c0a3d3ad3f2c422c77db80
+      SHOPIFY_API_SECRET: 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
+
+
+- name: Shopify Access Token (Public App)
+  pattern: '\b(shpat_[a-fA-F0-9]{32})\b'
+
+  references:
+  - https://shopify.dev/apps/auth
+  - https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing
+
+  examples:
+  - |
+      include('layouts/header.php');
+      $shop = $_GET['shop'];
+      $token = "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";
+      $query = array(
+
+
+- name: Shopify Access Token (Custom App)
+  pattern: '\b(shpca_[a-fA-F0-9]{32})\b'
+
+  references:
+  - https://shopify.dev/apps/auth
+  - https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing
+
+  examples:
+  - "const TEMP_CONTENT = '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 handsomestranger.myshopify.com'"
+
+
+- name: Shopify Access Token (Legacy Private App)
+  pattern: '\b(shppa_[a-fA-F0-9]{32})\b'
+
+  references:
+  - https://shopify.dev/apps/auth
+  - https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing
+
+  examples:
+  - 'SHOP_PASSWORD=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'

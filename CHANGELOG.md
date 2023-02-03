@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Nosey Parker now has an optional `rule_profiling` crate feature that causes performance-related statistics to be collected and reported when scanning.
   This feature imposes some performance cost and is only useful to rule authors, and so is disabled by default.
 
-- Several new rules have been added:
+- Many new rules have been added:
 
   - Age Identity (X22519 secret key)
   - Age Recipient (X25519 public key)
@@ -32,6 +32,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - New Relic Pixie Deploy Key
   - New Relic REST API Key
   - NPM Access Token (fine-grained)
+  - Shopify Access Token (Custom App)
+  - Shopify Access Token (Legacy Private App)
+  - Shopify Access Token (Public App)
+  - Shopify App Secret
+  - Shopify Domain
   - RubyGems API Key
   - Telegram Bot Token
 
