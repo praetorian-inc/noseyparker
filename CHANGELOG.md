@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - New Relic Pixie Deploy Key
   - New Relic REST API Key
   - NPM Access Token (fine-grained)
+  - Segment Public API Token
   - Shopify Access Token (Custom App)
   - Shopify Access Token (Legacy Private App)
   - Shopify Access Token (Public App)
