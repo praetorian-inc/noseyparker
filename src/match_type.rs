@@ -45,20 +45,19 @@ impl Match {
         loc_mapping: &LocationMapping,
         blob_match: BlobMatch<'_, '_>,
         provenance: &Provenance,
+        snippet_context_bytes: usize,
     ) -> Vec<Self> {
         let offsets = &blob_match.matching_input_offset_span;
 
-        const SNIPPET_CONTEXT_BYTES: usize = 128; // FIXME:parameterize this and expose to CLI
-
         // FIXME: have the snippets start from a line break in the input when feasible, and include an ellipsis otherwise to indicate truncation
-        let start = offsets.start.saturating_sub(SNIPPET_CONTEXT_BYTES);
+        let start = offsets.start.saturating_sub(snippet_context_bytes);
         let end = offsets.start;
         let before_snippet = &blob_match.blob.bytes[start..end];
 
         let start = offsets.end;
         let end = offsets
             .end
-            .saturating_add(SNIPPET_CONTEXT_BYTES)
+            .saturating_add(snippet_context_bytes)
             .min(blob_match.blob.len());
         let after_snippet = &blob_match.blob.bytes[start..end];
         let blob_id = &blob_match.blob.id;

@@ -138,6 +138,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))
     };
 
+    let snippet_context_bytes: usize = 128; // FIXME:parameterize this and expose to CLI
+
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
         |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
@@ -152,9 +154,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     None => return Vec::new(),
                 }
             };
+
             matches
                 .into_iter()
-                .flat_map(|m| Match::new(&loc_mapping, m, &provenance))
+                .flat_map(|m| Match::new(&loc_mapping, m, &provenance, snippet_context_bytes))
                 .collect()
         };
 
