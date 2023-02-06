@@ -10,14 +10,26 @@ rules:
   - '          $cordovaOauth.google("653512027492-5u9blotr1521fa0lo1172nhv4pmqgttq.apps.googleusercontent.com", ["email"]).then(function(result) {'
 
 
-- name: Google Client Secret
-  pattern: '"client_secret"\s{0,30}:\s{0,30}"([a-zA-Z0-9_-]{24})"'
+- name: Google OAuth Client Secret (prefixed)
+  pattern: |
+    (?x)
+    \b
+    (GOCSPX-[a-zA-Z0-9_-]{28})
+    (?:[^a-zA-Z0-9_-] | $)
+
+  examples:
+  - 'const CLIENTSECRET = "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"'
+
+- name: Google OAuth Client Secret
+  pattern: |
+    (?x)(?i)
+    client.?secret .{0,10}
+    \b
+    ([a-z0-9_-]{24})
+    (?: [^a-z0-9_-] |$)
 
   examples:
   - '"client_secret":"aaaaaaaaaaaaaaaaaaaaaaa-"'
-
-  # FIXME: improve the pattern so that these negative examples actually match
-  negative_examples:
   - "                 //$google_client_secret = 'fnhqAakzWrX-mtFQ4PRdMoy0';"
   - "                'clientSecret' : 'Ufvuj-d6alhwGKvvLh_8Nq0K'"
 

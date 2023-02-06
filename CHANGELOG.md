@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - GitLab Personal Access Token
   - GitLab Pipeline Trigger Token
   - GitLab Runner Registration Token
+  - Google OAuth Client Secret (prefixed)
   - New Relic API Service Key
   - New Relic Admin API Key
   - New Relic Insights Insert Key
@@ -54,6 +55,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   These have been revised to use a more complicated but functional anchoring pattern.
 
 - The `JSON Web Token (base64url-encoded)` rule has been changed to only produce a single match group instead of three.
+
+- The `Google Client Secret` rule has been improved to detect additional occurrences and has been renamed to `Google OAuth Client Secret`.
 
 - Blobs are now deduplicated at enumeration time when first enumerating a Git repository, rather than only at scan time. This results in more accurate progress bars.
 
