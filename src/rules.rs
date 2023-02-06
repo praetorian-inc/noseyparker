@@ -61,6 +61,22 @@ impl Rule {
         Self::build_regex(&self.uncommented_pattern())
     }
 
+    /// Compile this rule into a regex with an end-of-line anchor appended.
+    ///
+    /// Examples:
+    ///
+    /// ```
+    /// # use pretty_assertions::assert_eq;
+    /// # use noseyparker::rules::Rule;
+    /// let r = Rule {
+    ///     name: "Test rule".to_string(),
+    ///     pattern: r"hello\s*world".to_string(),
+    ///     examples: vec![],
+    ///     negative_examples: vec![],
+    ///     references: vec![],
+    /// };
+    /// assert_eq!(r.as_anchored_regex().unwrap().as_str(), r"hello\s*world$");
+    /// ```
     pub fn as_anchored_regex(&self) -> Result<regex::bytes::Regex> {
         Self::build_regex(&format!("{}$", self.uncommented_pattern()))
     }
