@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - DigitalOcean Application Access Token
   - DigitalOcean Personal Access Token
   - DigitalOcean Refresh Token
+  - Figma Personal Access Token
   - GitLab Personal Access Token
   - GitLab Pipeline Trigger Token
   - GitLab Runner Registration Token

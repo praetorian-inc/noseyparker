@@ -1,0 +1,25 @@
+rules:
+
+- name: Figma Personal Access Token
+
+  # The key material looks like a v4 UUID with an extra 4 hex digits up front
+  pattern: |
+    (?x)(?i)
+    figma.{0,20}
+    \b
+    (
+      [0-9a-f]{4}-
+      [0-9a-f]{8}-
+      [0-9a-f]{4}-
+      [0-9a-f]{4}-
+      [0-9a-f]{4}-
+      [0-9a-f]{12}
+    )
+    \b
+
+  references:
+  - https://www.figma.com/developers/api
+  - https://www.figma.com/developers/api#access-tokens
+
+  examples:
+  - "--header='X-Figma-Token: 1394-0ca7a5be-8e22-40ee-8c40-778d41ab2313'"
