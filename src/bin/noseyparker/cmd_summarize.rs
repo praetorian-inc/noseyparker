@@ -3,46 +3,43 @@ use indicatif::HumanCount;
 
 use noseyparker::datastore::{Datastore, MatchSummary};
 
-use crate::args;
+use crate::args::{GlobalArgs, Reportable, SummarizeArgs};
 
-pub fn run(_global_args: &args::GlobalArgs, args: &args::SummarizeArgs) -> Result<()> {
-    let datastore = Datastore::open(&args.datastore)
-        .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
-    let mut writer = args
-        .output_args
-        .get_writer()
-        .context("Failed to open output destination for writing")?;
-    let summary = datastore.summarize()?;
+struct MatchSummaryReporter(MatchSummary);
 
-    let run_inner = move || -> std::io::Result<()> {
-        match &args.output_args.format {
-            args::OutputFormat::Human => {
-                writeln!(writer)?;
-                let table = summary_table(summary);
-                // FIXME: this doesn't preserve ANSI styling on the table
-                table.print(&mut writer)?;
-            }
-            args::OutputFormat::Json => {
-                serde_json::to_writer_pretty(&mut writer, &summary)?;
-            }
-            args::OutputFormat::Jsonl => {
-                for entry in summary.0.iter() {
-                    serde_json::to_writer(&mut writer, entry)?;
-                    writeln!(&mut writer)?;
-                }
-            }
+impl Reportable for MatchSummaryReporter {
+    fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let summary = &self.0;
+        writeln!(writer)?;
+        let table = summary_table(summary);
+        // FIXME: this doesn't preserve ANSI styling on the table
+        table.print(&mut writer)?;
+        Ok(())
+    }
+
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        let summary = &self.0;
+        serde_json::to_writer_pretty(writer, &summary)?;
+        Ok(())
+    }
+
+    fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let summary = &self.0;
+        for entry in summary.0.iter() {
+            serde_json::to_writer(&mut writer, entry)?;
+            writeln!(&mut writer)?;
         }
         Ok(())
-    };
-    match run_inner() {
-        // Ignore SIGPIPE errors, like those that can come from piping to `head`
-        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => { Ok(()) }
-        Err(e) => Err(e)?,
-        Ok(()) => Ok(()),
     }
 }
 
-pub fn summary_table(summary: MatchSummary) -> prettytable::Table {
+pub fn run(_global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
+    let datastore = Datastore::open(&args.datastore)
+        .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
+    MatchSummaryReporter(datastore.summarize()?).report(&args.output_args)
+}
+
+pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {
     use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
     use prettytable::row;
 
@@ -56,12 +53,14 @@ pub fn summary_table(summary: MatchSummary) -> prettytable::Table {
 
     let mut table: prettytable::Table = summary
         .0
-        .into_iter()
-        .map(|e| row![
-             l -> &e.rule_name,
-             r -> HumanCount(e.distinct_count.try_into().unwrap()),
-             r -> HumanCount(e.total_count.try_into().unwrap())
-        ])
+        .iter()
+        .map(|e| {
+            row![
+                 l -> &e.rule_name,
+                 r -> HumanCount(e.distinct_count.try_into().unwrap()),
+                 r -> HumanCount(e.total_count.try_into().unwrap())
+            ]
+        })
         .collect();
     table.set_format(f);
     table.set_titles(row![lb -> "Rule", cb -> "Distinct Matches", cb -> "Total Matches"]);

@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum, crate_version, crate_description};
 
 use std::path::PathBuf;
@@ -66,12 +67,21 @@ pub enum Command {
     Scan(ScanArgs),
 
     /// Summarize scan findings
-    #[command(display_order = 2, alias="summarise")]
+    #[command(display_order = 2, alias = "summarise")]
     Summarize(SummarizeArgs),
 
     /// Report detailed scan findings
     #[command(display_order = 3)]
     Report(ReportArgs),
+
+    /// Interact with GitHub
+    ///
+    /// An optional personal access token can be specified using the `GITHUB_TOKEN` environment
+    /// variable.
+    /// Using a personal access token gives higher rate limits and may make additional content
+    /// accessible.
+    #[command(display_order = 4, name = "github")]
+    GitHub(GitHubArgs),
 
     #[command(display_order = 30)]
     /// Manage datastores
@@ -142,9 +152,58 @@ impl std::fmt::Display for Mode {
             Mode::Never => "never",
             Mode::Always => "always",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
+
+// -----------------------------------------------------------------------------
+// `github` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct GitHubArgs {
+    #[command(subcommand)]
+    pub command: GitHubCommand,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum GitHubCommand {
+    /// Interact with GitHub repositories
+    #[command(subcommand)]
+    Repos(GitHubReposCommand),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum GitHubReposCommand {
+    /// List repositories belonging to a specific user or organization
+    List(GitHubReposListArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct GitHubReposListArgs {
+    #[command(flatten)]
+    pub repo_specifiers: GitHubRepoSpecifiers,
+
+    #[command(flatten)]
+    pub output_args: OutputArgs,
+}
+
+#[derive(Args, Debug)]
+pub struct GitHubRepoSpecifiers {
+    /// Select repositories belonging to the specified user
+    #[arg(long)]
+    pub user: Vec<String>,
+
+    /// Select repositories belonging to the specified organization
+    #[arg(long, visible_alias = "org")]
+    pub organization: Vec<String>,
+}
+
+impl GitHubRepoSpecifiers {
+    pub fn is_empty(&self) -> bool {
+        self.user.is_empty() && self.organization.is_empty()
+    }
+}
+
 
 // -----------------------------------------------------------------------------
 // `rules` command
@@ -367,6 +426,35 @@ impl std::fmt::Display for OutputFormat {
             OutputFormat::Json => "json",
             OutputFormat::Jsonl => "jsonl",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// report writer
+// -----------------------------------------------------------------------------
+pub trait Reportable {
+    fn human_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
+    fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
+
+    fn report(&self, output_args: &OutputArgs) -> Result<()> {
+        let writer = output_args.get_writer()
+            .context("Failed to open output destination for writing")?;
+
+        let result = match &output_args.format {
+            OutputFormat::Human => self.human_format(writer),
+            OutputFormat::Json => self.json_format(writer),
+            OutputFormat::Jsonl => self.jsonl_format(writer),
+        };
+        match result {
+            Ok(()) => Ok(()),
+            Err(e) => match e.downcast_ref::<std::io::Error>() {
+                // Ignore SIGPIPE errors, like those that can come from piping to `head`
+                Some(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
+                _ => Err(e)?,
+            }
+        }
     }
 }

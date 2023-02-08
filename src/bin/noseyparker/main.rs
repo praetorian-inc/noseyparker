@@ -3,6 +3,7 @@ use tracing::debug;
 
 mod args;
 mod cmd_datastore;
+mod cmd_github;
 mod cmd_report;
 mod cmd_rules;
 mod cmd_scan;
@@ -23,7 +24,6 @@ fn configure_tracing(global_args: &args::GlobalArgs) -> Result<()> {
         .with_max_level(filter.as_log())
         .init()?;
 
-    // a builder for `FmtSubscriber`.
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_max_level(filter)
       .with_ansi(global_args.use_color())
@@ -63,6 +63,7 @@ fn try_main() -> Result<()> {
 
     match &args.command {
         args::Command::Datastore(args) => cmd_datastore::run(global_args, args),
+        args::Command::GitHub(args) => cmd_github::run(global_args, args),
         args::Command::Rules(args) => cmd_rules::run(global_args, args),
         args::Command::Scan(args) => cmd_scan::run(global_args, args),
         args::Command::Summarize(args) => cmd_summarize::run(global_args, args),

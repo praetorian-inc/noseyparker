@@ -9,85 +9,80 @@ use noseyparker::datastore::{Datastore, MatchGroupMetadata};
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 
-use crate::args;
+use crate::args::{GlobalArgs, ReportArgs, Reportable};
 
-pub fn run(_global_args: &args::GlobalArgs, args: &args::ReportArgs) -> Result<()> {
+pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     let datastore = Datastore::open(&args.datastore)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
-    let mut writer = args
-        .output_args
-        .get_writer()
-        .context("Failed to open output destination for writing")?;
-    let group_metadata = datastore
-        .get_match_group_metadata()
-        .context("Failed to get match group metadata from datastore")?;
+    DetailsReporter(datastore).report(&args.output_args)
+}
 
-    match &args.output_args.format {
-        args::OutputFormat::Human => {
-            let num_findings = group_metadata.len();
-            for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
-                let finding_num = finding_num + 1;
-                let matches = datastore
-                    .get_match_group_matches(&metadata, Some(3))
-                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
-                let match_group = MatchGroup { metadata, matches };
-                let res = writeln!(
-                    writer,
-                    "{} {}",
-                    STYLE_FINDING_HEADING
-                        .apply_to(format!("Finding {finding_num}/{num_findings}:")),
-                    match_group,
-                );
-                match res {
-                    // Ignore SIGPIPE errors, like those that can come from piping to `head`
-                    Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => return Ok(()),
-                    r => r?,
-                }
-            }
-            Ok(())
+struct DetailsReporter(Datastore);
+
+impl Reportable for DetailsReporter {
+    fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let datastore = &self.0;
+        let group_metadata = datastore
+            .get_match_group_metadata()
+            .context("Failed to get match group metadata from datastore")?;
+
+        let num_findings = group_metadata.len();
+        for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
+            let finding_num = finding_num + 1;
+            let matches = datastore
+                .get_match_group_matches(&metadata, Some(3))
+                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+            let match_group = MatchGroup { metadata, matches };
+            writeln!(
+                &mut writer,
+                "{} {}",
+                STYLE_FINDING_HEADING
+                    .apply_to(format!("Finding {finding_num}/{num_findings}:")),
+                match_group,
+            )?;
         }
+        Ok(())
+    }
 
-        args::OutputFormat::Jsonl => {
-            for metadata in group_metadata.into_iter() {
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        let datastore = &self.0;
+        let group_metadata = datastore
+            .get_match_group_metadata()
+            .context("Failed to get match group metadata from datastore")?;
+
+        // XXX is there some nice way to do this serialization without first building a vec?
+        let es = group_metadata
+            .into_iter()
+            .map(|metadata| {
                 let matches = datastore
                     .get_match_group_matches(&metadata, None)
                     .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
-                let match_group = MatchGroup { metadata, matches };
+                Ok(MatchGroup { metadata, matches })
+            })
+            .collect::<Result<Vec<MatchGroup>, anyhow::Error>>()?;
+        let mut ser = serde_json::Serializer::pretty(writer);
+        ser.collect_seq(es)?;
+        Ok(())
+    }
 
-                let res = serde_json::to_writer(&mut writer, &match_group)
-                    .map_err(|e| e.into())
-                    .and_then(|()| writeln!(&mut writer));
-                match res {
-                    // Ignore SIGPIPE errors, like those that can come from piping to `head`
-                    Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => return Ok(()),
-                    r => r?,
-                }
-            }
-            Ok(())
-        }
+    fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let datastore = &self.0;
+        let group_metadata = datastore
+            .get_match_group_metadata()
+            .context("Failed to get match group metadata from datastore")?;
 
-        args::OutputFormat::Json => {
-            // XXX is there some nice way to do this serialization without first building a vec?
-            let es = group_metadata
-                .into_iter()
-                .map(|metadata| {
-                    let matches = datastore
-                        .get_match_group_matches(&metadata, None)
-                        .with_context(|| {
-                            format!("Failed to get matches for group {metadata:?}")
-                        })?;
-                    Ok(MatchGroup { metadata, matches })
-                })
-                .collect::<Result<Vec<MatchGroup>, anyhow::Error>>()?;
-            let mut ser = serde_json::Serializer::pretty(writer);
-            let res: Result<(), std::io::Error> = ser.collect_seq(es).map_err(|e| e.into());
-            match res {
-                // Ignore SIGPIPE errors, like those that can come from piping to `head`
-                Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => return Ok(()),
-                r => r?,
-            }
-            Ok(())
+
+        for metadata in group_metadata.into_iter() {
+            let matches = datastore
+                .get_match_group_matches(&metadata, None)
+                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+            let match_group = MatchGroup { metadata, matches };
+
+            serde_json::to_writer(&mut writer, &match_group)
+                .map_err(|e| e.into())
+                .and_then(|()| writeln!(writer))?;
         }
+        Ok(())
     }
 }
 

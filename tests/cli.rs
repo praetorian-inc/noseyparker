@@ -49,6 +49,11 @@ macro_rules! noseyparker_success {
     ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().success() }
 }
 
+/// Build an `assert_cmd::assert::Assert` by calling `noseyparker!(args).assert().failure()`.
+macro_rules! noseyparker_failure {
+    ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().failure() }
+}
+
 lazy_static! {
     static ref NOSEYPARKER: escargot::CargoRun = escargot::CargoBuild::new()
         .bin("noseyparker")
@@ -204,6 +209,75 @@ fn test_noseyparker_help_datastore() {
 fn test_noseyparker_help_rules() {
     assert_cmd_snapshot!(noseyparker_success!("help", "rules"));
 }
+
+#[test]
+fn test_noseyparker_help_github() {
+    assert_cmd_snapshot!(noseyparker_success!("help", "github"));
+}
+
+#[test]
+fn test_noseyparker_help_github_repos() {
+    assert_cmd_snapshot!(noseyparker_success!("help", "github", "repos"));
+}
+
+#[test]
+fn test_noseyparker_github_repos_list_noargs() {
+    assert_cmd_snapshot!(noseyparker_failure!("github", "repos", "list"));
+}
+
+#[test]
+fn test_noseyparker_github_repos_list_org_badtoken() {
+    let cmd = noseyparker()
+        .args(&["github", "repos", "list", "--org", "praetorian-inc"])
+        .env("GITHUB_TOKEN", "hahabogus")
+        .assert()
+        .failure();
+    assert_cmd_snapshot!(cmd);
+}
+
+#[test]
+fn test_noseyparker_github_repos_list_user_badtoken() {
+    let cmd = noseyparker()
+        .args(&["github", "repos", "list", "--user", "octocat"])
+        .env("GITHUB_TOKEN", "hahabogus")
+        .assert()
+        .failure();
+    assert_cmd_snapshot!(cmd);
+}
+
+// XXX These are disabled for now due to GitHub Actions rate limiting troubles.
+// FIXME: Figure out how to plumb an access token to these tests, then re-enable them.
+/*
+#[test]
+fn test_noseyparker_github_repos_list_user_unauthenticated_human_format() {
+    noseyparker_success!("github", "repos", "list", "--user", "octocat")
+        .stdout(predicates::str::contains("https://github.com/octocat/Spoon-Knife.git"))
+        .stderr(predicates::str::is_empty());
+}
+
+#[test]
+fn test_noseyparker_github_repos_list_user_unauthenticated_jsonl_format() {
+    noseyparker_success!("github", "repos", "list", "--user", "octocat", "--format", "jsonl")
+        .stdout(predicates::str::contains("\"https://github.com/octocat/Spoon-Knife.git\"\n"))
+        .stderr(predicates::str::is_empty());
+}
+
+#[test]
+fn test_noseyparker_github_repos_list_user_unauthenticated_json_format() {
+    let cmd = noseyparker_success!("github", "repos", "list", "--user", "octocat", "--format", "json")
+        .stderr(predicates::str::is_empty());
+    let output = &cmd.get_output().stdout;
+    let json_parsed: Vec<String> = serde_json::from_slice(output).expect("output should be well-formed JSON");
+    assert!(json_parsed.contains(&String::from("https://github.com/octocat/Spoon-Knife.git")),
+        "JSON output does not contain https://github.com/octocat/Spoon-Knife.git: {json_parsed:?}");
+}
+*/
+
+// XXX additional `github repo list` cases to test:
+//
+// - multiple users / orgs
+// - duplicated users / orgs: output list should be deduped
+// - using a real access token
 
 #[test]
 fn test_noseyparker_scan_emptydir() {

@@ -28,7 +28,7 @@ jobs:
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install system dependencies
         run: |
@@ -41,7 +41,6 @@ jobs:
         with:
           toolchain: stable
           components: clippy
-          override: true
 
       - name: Cache
         uses: actions/cache@v3
