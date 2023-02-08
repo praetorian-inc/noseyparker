@@ -1,4 +1,4 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 use tracing::{debug, warn};
 
 use crate::args;
@@ -8,7 +8,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::GitHubArgs) -> Result<()
     use args::GitHubCommand::*;
     use args::GitHubReposCommand::*;
     match &args.command {
-        Repos(List(args)) => list_repos(global_args, args)
+        Repos(List(args)) => list_repos(global_args, args),
     }
 }
 
@@ -29,11 +29,17 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
                 bail!("Value of {} environment variable is ill-formed", GITHUB_TOKEN_ENV_VAR);
             }
             Ok(val) => {
-                debug!("Using GitHub personal access token from {} environment variable", GITHUB_TOKEN_ENV_VAR);
-                builder = builder.auth(github::Auth::PersonalAccessToken(secrecy::SecretString::from(val)));
+                debug!(
+                    "Using GitHub personal access token from {} environment variable",
+                    GITHUB_TOKEN_ENV_VAR
+                );
+                builder = builder
+                    .auth(github::Auth::PersonalAccessToken(secrecy::SecretString::from(val)));
             }
         }
-        builder.build().context("Failed to initialize GitHub client")?
+        builder
+            .build()
+            .context("Failed to initialize GitHub client")?
     };
 
     let runtime = tokio::runtime::Builder::new_current_thread()
@@ -41,8 +47,8 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
         .build()
         .context("Failed to initialize async runtime")?;
 
-    for username in &args.repo_specifiers.user {
-        let result = runtime.block_on(async {
+    let result = runtime.block_on(async {
+        for username in &args.repo_specifiers.user {
             let mut repo_page = Some(client.get_user_repos(username).await?);
             while let Some(page) = repo_page {
                 for repo in page.items.iter() {
@@ -51,17 +57,31 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
                 }
                 repo_page = client.next_page(page).await?;
             }
-            println!("{:#?}", client.get_rate_limit().await?);
-            Ok::<(), noseyparker::github::Error>(())
-        });
-        match result {
-            Ok(()) => {}
-            Err(noseyparker::github::Error::RateLimited { wait, .. }) => {
-                warn!("Rate limit exceeded: Would need to wait for {:?} before retrying", wait);
-                result?;
-            }
-            Err(err) => bail!(err),
         }
+
+        for orgname in &args.repo_specifiers.organization {
+            let mut repo_page = Some(client.get_org_repos(orgname).await?);
+            while let Some(page) = repo_page {
+                for repo in page.items.iter() {
+                    // println!("{:#?}", repo);
+                    println!("{:?}", repo.clone_url);
+                }
+                repo_page = client.next_page(page).await?;
+            }
+        }
+
+        println!("{:#?}", client.get_rate_limit().await?);
+
+        Ok::<(), noseyparker::github::Error>(())
+    });
+
+    match result {
+        Ok(()) => {}
+        Err(noseyparker::github::Error::RateLimited { wait, .. }) => {
+            warn!("Rate limit exceeded: Would need to wait for {:?} before retrying", wait);
+            result?;
+        }
+        Err(err) => bail!(err),
     }
 
     return Ok(());
@@ -100,31 +120,3 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
     }
     */
 }
-
-/*
-pub fn summary_table(summary: MatchSummary) -> prettytable::Table {
-    use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
-    use prettytable::row;
-
-    let f = FormatBuilder::new()
-        // .column_separator('│')
-        // .separators(&[LinePosition::Title], LineSeparator::new('─', '┼', '├', '┤'))
-        .column_separator(' ')
-        .separators(&[LinePosition::Title], LineSeparator::new('─', '─', '─', '─'))
-        .padding(1, 1)
-        .build();
-
-    let mut table: prettytable::Table = summary
-        .0
-        .into_iter()
-        .map(|e| row![
-             l -> &e.rule_name,
-             r -> HumanCount(e.distinct_count.try_into().unwrap()),
-             r -> HumanCount(e.total_count.try_into().unwrap())
-        ])
-        .collect();
-    table.set_format(f);
-    table.set_titles(row![lb -> "Rule", cb -> "Distinct Matches", cb -> "Total Matches"]);
-    table
-}
-*/
