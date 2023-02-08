@@ -1,5 +1,7 @@
 use serde::Deserialize;
-use url::Url;
+
+pub mod page;
+pub use page::Page;
 
 // -------------------------------------------------------------------------------------------------
 // ClientError
@@ -121,82 +123,11 @@ pub struct User {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Gist
-// -------------------------------------------------------------------------------------------------
-/*
-#[derive(Debug, Deserialize)]
-pub struct Gist {
-    pub comments: u64,
-    pub comments_url: Url,
-    pub commits_url: Url,
-    pub created_at: DateTime<Utc>,
-    pub description: Option<String>,
-    pub files: BTreeMap<String, GistFile>,
-    pub forks_url: Url,
-    pub git_pull_url: Url,
-    pub git_push_url: Url,
-    pub html_url: Url,
-    pub id: String,
-    pub node_id: String,
-    pub updated_at: DateTime<Utc>,
-    pub url: Url,
-}
-*/
-
-// -------------------------------------------------------------------------------------------------
-// GistFile
-// -------------------------------------------------------------------------------------------------
-// This is the same as octocrab::models::gists::Gist, except it doesn't have `content` or `truncated`
-/*
-#[derive(Debug, Deserialize)]
-pub struct GistFile {
-    pub filename: String,
-    pub language: Option<String>,
-    pub r#type: String,
-    pub raw_url: Url,
-    pub size: u64,
-}
-*/
-
-// -------------------------------------------------------------------------------------------------
-// Page
-// -------------------------------------------------------------------------------------------------
-/*
-pub struct Page<T> {
-    items: Vec<T>,
-    next: Option<Url>,
-    prev: Option<Url>,
-    last: Option<Url>,
-    first: Option<Url>,
-}
-
-// See <https://docs.rs/octocrab/latest/src/octocrab/page.rs.html#32-40>.
-use anyhow::Result;
-impl <T> Page<T> {
-    pub fn from_response(response: &reqwest::Response) -> Result<Self> {
-        let link = response.headers().get(reqwest::header::LINK);
-        let items =
-        let next = None;
-        let prev = None;
-        let last = None;
-        let first = None;
-        Ok(Page {
-            items,
-            next,
-            prev,
-            last,
-            first,
-        })
-    }
-}
-*/
-
-// -------------------------------------------------------------------------------------------------
 // Repository
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Deserialize)]
 pub struct Repository {
-    pub id: i32,
+    pub id: i64,
     pub node_id: String,
     pub name: String,
     pub full_name: String,
@@ -223,7 +154,7 @@ pub struct Repository {
     pub git_commits_url: String,
     pub git_refs_url: String,
     pub git_tags_url: String,
-    pub git_url: Option<String>,
+    pub git_url: String,
     pub issue_comment_url: String,
     pub issue_events_url: String,
     pub issues_url: String,
@@ -235,7 +166,7 @@ pub struct Repository {
     pub notifications_url: String,
     pub pulls_url: String,
     pub releases_url: String,
-    pub ssh_url: Option<String>,
+    pub ssh_url: String,
     pub stargazers_url: String,
     pub statuses_url: String,
     pub subscribers_url: String,
@@ -243,44 +174,44 @@ pub struct Repository {
     pub tags_url: String,
     pub teams_url: String,
     pub trees_url: String,
-    pub clone_url: Option<String>,
-    pub mirror_url: Option<Option<String>>,
+    pub clone_url: String,
+    pub mirror_url: Option<String>,
     pub hooks_url: String,
-    pub svn_url: Option<String>,
-    pub homepage: Option<Option<String>>,
-    pub language: Option<Option<String>>,
-    pub forks_count: Option<i32>,
-    pub stargazers_count: Option<i32>,
-    pub watchers_count: Option<i32>,
+    pub svn_url: String,
+    pub homepage: Option<String>,
+    pub language: Option<String>,
+    pub forks_count: i64,
+    pub stargazers_count: i64,
+    pub watchers_count: i64,
     /// The size of the repository. Size is calculated hourly. When a repository is initially created, the size is 0.
-    pub size: Option<i32>,
-    pub default_branch: Option<String>,
-    pub open_issues_count: Option<i32>,
+    pub size: i64,
+    pub default_branch: String,
+    pub open_issues_count: i64,
     pub is_template: Option<bool>,
     pub topics: Option<Vec<String>>,
-    pub has_issues: Option<bool>,
-    pub has_projects: Option<bool>,
-    pub has_wiki: Option<bool>,
-    pub has_pages: Option<bool>,
-    pub has_downloads: Option<bool>,
+    pub has_issues: bool,
+    pub has_projects: bool,
+    pub has_wiki: bool,
+    pub has_pages: bool,
+    pub has_downloads: bool,
     pub has_discussions: Option<bool>,
-    pub archived: Option<bool>,
-    pub disabled: Option<bool>,
-    pub visibility: Option<String>,
-    pub pushed_at: Option<Option<String>>,
-    pub created_at: Option<Option<String>>,
-    pub updated_at: Option<Option<String>>,
+    pub archived: bool,
+    pub disabled: bool,
+    pub visibility: String,
+    pub pushed_at: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
     // pub permissions: Option<Box<crate::models::RepositoryTemplateRepositoryPermissions>>,
     pub role_name: Option<String>,
     pub temp_clone_token: Option<String>,
     pub delete_branch_on_merge: Option<bool>,
-    pub subscribers_count: Option<i32>,
-    pub network_count: Option<i32>,
+    pub subscribers_count: Option<i64>,
+    pub network_count: Option<i64>,
     // pub code_of_conduct: Option<Box<crate::models::CodeOfConduct>>,
     // pub license: Option<Option<Box<crate::models::MinimalRepositoryLicense>>>,
-    pub forks: Option<i32>,
-    pub open_issues: Option<i32>,
-    pub watchers: Option<i32>,
+    pub forks: Option<i64>,
+    pub open_issues: Option<i64>,
+    pub watchers: Option<i64>,
     pub allow_forking: Option<bool>,
     pub web_commit_signoff_required: Option<bool>,
     // pub security_and_analysis: Option<Option<Box<crate::models::MinimalRepositorySecurityAndAnalysis>>>,
