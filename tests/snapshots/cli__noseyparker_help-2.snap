@@ -14,7 +14,7 @@ Commands:
   report
           Report detailed scan findings
   github
-          Query GitHub
+          Interact with GitHub
   datastore
           Manage datastores
   rules

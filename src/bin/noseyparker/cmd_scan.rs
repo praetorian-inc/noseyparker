@@ -337,7 +337,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         if num_matches > 0 {
             let matches_summary = datastore.summarize()?;
-            let matches_table = crate::cmd_summarize::summary_table(matches_summary);
+            let matches_table = crate::cmd_summarize::summary_table(&matches_summary);
             println!();
             matches_table.print_tty(color_enabled)?;
         }
