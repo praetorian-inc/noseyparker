@@ -312,7 +312,7 @@ impl<'a> GitRepoEnumerator<'a> {
             }
             let hdr = odb
                 .header(oid)
-                .with_context(|| format!("Failed to read object header {}", oid))?;
+                .with_context(|| format!("Failed to read object header {oid}"))?;
             if hdr.kind() == git::object::Kind::Blob {
                 let obj_size = hdr.size();
                 progress.inc(obj_size);

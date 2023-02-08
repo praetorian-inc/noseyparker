@@ -35,6 +35,6 @@ impl Display for Escaped<'_> {
         let b = String::from_utf8_lossy(self.0);
         let b = escape_nonprinting(&b);
         let b = strip_ansi_codes(&b);
-        write!(f, "{}", b)
+        write!(f, "{b}")
     }
 }

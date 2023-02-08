@@ -147,7 +147,7 @@ impl std::fmt::Display for Mode {
             Mode::Never => "never",
             Mode::Always => "always",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -421,6 +421,6 @@ impl std::fmt::Display for OutputFormat {
             OutputFormat::Json => "json",
             OutputFormat::Jsonl => "jsonl",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
