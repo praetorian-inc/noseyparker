@@ -1,40 +1,6 @@
 use bstr::BString;
 use serde::{Deserialize, Serialize};
 
-const SIZEOF_PREFIXES: [(usize, &str); 5] = [
-    (1024 * 1024 * 1024 * 1024 * 1024, "PiB"),
-    (1024 * 1024 * 1024 * 1024, "TiB"),
-    (1024 * 1024 * 1024, "GiB"),
-    (1024 * 1024, "MiB"),
-    (1024, "KiB"),
-];
-
-pub fn sizeof_fmt(bytes: usize) -> String {
-    let (d, unit) = SIZEOF_PREFIXES
-        .iter()
-        .find(|(v, _t)| bytes >= *v)
-        .unwrap_or(&(1, "B"));
-    let v = bytes as f64 / *d as f64;
-    format!("{:.2} {}", v, unit)
-}
-
-const DURATION_PREFIXES: [(f64, &str); 4] = [
-    ((60 * 60 * 24 * 7) as f64, "weeks"),
-    ((60 * 60 * 24) as f64, "days"),
-    ((60 * 60) as f64, "hours"),
-    (60_f64, "minutes"),
-];
-
-pub fn duration_fmt(secs: f64) -> String {
-    let (d, unit) = DURATION_PREFIXES
-        .iter()
-        .find(|(v, _t)| secs >= *v)
-        .unwrap_or(&(1.0, "seconds"));
-    let v = secs / *d;
-    format!("{:.2} {}", v, unit)
-}
-
-
 // -------------------------------------------------------------------------------------------------
 // BStringSerde
 // -------------------------------------------------------------------------------------------------
