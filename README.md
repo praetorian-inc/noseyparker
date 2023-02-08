@@ -80,7 +80,7 @@ docker pull ghcr.io/praetorian-inc/noseyparker:edge
 **For other architectures (e.g., ARM) you will need to build the Docker image yourself:**
 
 ```
-docker build -t noseyparker . 
+docker build -t noseyparker .
 ```
 
 **Run the Docker image with a mounted volume:**
@@ -141,6 +141,8 @@ $ noseyparker summarize --datastore np.cpython
  md5crypt Hash                           1               2
 ```
 
+Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
+
 
 ### Reporting detailed findings
 To see details of Nosey Parker's findings, use the `report` command.
@@ -188,6 +190,31 @@ Showing 3/29 occurrences:
               # This is set to a secure vari
 ...
 ```
+
+(Note: the findings above are synthetic, invalid secrets.)
+Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
+
+
+### Enumerating repositories from GitHub
+To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
+This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
+For example:
+```
+$ noseyparker github repos list --user octocat
+https://github.com/octocat/Hello-World.git
+https://github.com/octocat/Spoon-Knife.git
+https://github.com/octocat/boysenberry-repo-1.git
+https://github.com/octocat/git-consortium.git
+https://github.com/octocat/hello-worId.git
+https://github.com/octocat/linguist.git
+https://github.com/octocat/octocat.github.io.git
+https://github.com/octocat/test-repo1.git
+```
+
+An optional GitHub Personal Access Token can be provided via the `GITHUB_TOKEN` environment variable.
+Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
+
+Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 
 
 ### Getting help

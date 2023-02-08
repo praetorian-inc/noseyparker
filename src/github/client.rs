@@ -86,7 +86,11 @@ impl Client {
             .clone()
             .join(&buf)
             .map_err(Error::UrlParseError)?;
-        let url = Url::parse_with_params(url.as_str(), params).map_err(Error::UrlParseError)?;
+        let url = if params.is_empty() {
+            Url::parse(url.as_str()).map_err(Error::UrlParseError)?
+        } else {
+            Url::parse_with_params(url.as_str(), params).map_err(Error::UrlParseError)?
+        };
         Ok(url)
     }
 

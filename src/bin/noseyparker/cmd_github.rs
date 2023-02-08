@@ -1,20 +1,22 @@
 use anyhow::{bail, Context, Result};
 use tracing::{debug, warn};
 
-use crate::args;
+use crate::args::{GlobalArgs, GitHubArgs, GitHubReposListArgs, Reportable};
 use noseyparker::github;
 
-pub fn run(global_args: &args::GlobalArgs, args: &args::GitHubArgs) -> Result<()> {
-    use args::GitHubCommand::*;
-    use args::GitHubReposCommand::*;
+pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
+    use crate::args::{GitHubCommand::*, GitHubReposCommand::*};
     match &args.command {
         Repos(List(args)) => list_repos(global_args, args),
     }
 }
 
+/// The name of the environment variable to look for a personal access token in.
+///
+/// NOTE: this variable needs to match the top-level help documentation in args.rs
 const GITHUB_TOKEN_ENV_VAR: &str = "GITHUB_TOKEN";
 
-fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs) -> Result<()> {
+fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<()> {
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
@@ -29,10 +31,7 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
                 bail!("Value of {} environment variable is ill-formed", GITHUB_TOKEN_ENV_VAR);
             }
             Ok(val) => {
-                debug!(
-                    "Using GitHub personal access token from {} environment variable",
-                    GITHUB_TOKEN_ENV_VAR
-                );
+                debug!("Using GitHub personal access token from {GITHUB_TOKEN_ENV_VAR} environment variable");
                 builder = builder
                     .auth(github::Auth::PersonalAccessToken(secrecy::SecretString::from(val)));
             }
@@ -48,13 +47,21 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
         .context("Failed to initialize async runtime")?;
 
     let result = runtime.block_on(async {
+        let mut repo_urls: Vec<String> = Vec::new();
+
+        // Get rate limit first thing.
+        // If there are connectivity issues, this is likely to reveal them quickly.
+        //
+        // This also makes it a little bit simpler to test this code, as the very first request
+        // made by `github repos list` will always be the same, regardless of which repo specifiers
+        // are given.
+        let rate_limit = client.get_rate_limit().await?;
+        debug!("GitHub rate limits: {:?}", rate_limit.rate);
+
         for username in &args.repo_specifiers.user {
             let mut repo_page = Some(client.get_user_repos(username).await?);
             while let Some(page) = repo_page {
-                for repo in page.items.iter() {
-                    // println!("{:#?}", repo);
-                    println!("{:?}", repo.clone_url);
-                }
+                repo_urls.extend(page.items.iter().map(|r| &r.clone_url).cloned());
                 repo_page = client.next_page(page).await?;
             }
         }
@@ -62,21 +69,21 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
         for orgname in &args.repo_specifiers.organization {
             let mut repo_page = Some(client.get_org_repos(orgname).await?);
             while let Some(page) = repo_page {
-                for repo in page.items.iter() {
-                    // println!("{:#?}", repo);
-                    println!("{:?}", repo.clone_url);
-                }
+                repo_urls.extend(page.items.iter().map(|r| &r.clone_url).cloned());
                 repo_page = client.next_page(page).await?;
             }
         }
 
-        println!("{:#?}", client.get_rate_limit().await?);
+        repo_urls.sort();
+        repo_urls.dedup();
 
-        Ok::<(), noseyparker::github::Error>(())
+        Ok::<Vec<String>, noseyparker::github::Error>(repo_urls)
     });
 
     match result {
-        Ok(()) => {}
+        Ok(repo_urls) => {
+            RepoReporter(repo_urls).report(&args.output_args)?;
+        }
         Err(noseyparker::github::Error::RateLimited { wait, .. }) => {
             warn!("Rate limit exceeded: Would need to wait for {:?} before retrying", wait);
             result?;
@@ -85,38 +92,32 @@ fn list_repos(_global_args: &args::GlobalArgs, args: &args::GitHubReposListArgs)
     }
 
     return Ok(());
+}
 
-    /*
-    let mut writer = args
-        .output_args
-        .get_writer()
-        .context("Failed to open output destination for writing")?;
 
-    let run_inner = move || -> std::io::Result<()> {
-        match &args.output_args.format {
-            args::OutputFormat::Human => {
-                // writeln!(writer)?;
-                // let table = summary_table(summary);
-                // // FIXME: this doesn't preserve ANSI styling on the table
-                // table.print(&mut writer)?;
-            }
-            args::OutputFormat::Json => {
-                // serde_json::to_writer_pretty(&mut writer, &summary)?;
-            }
-            args::OutputFormat::Jsonl => {
-                // for entry in summary.0.iter() {
-                //     serde_json::to_writer(&mut writer, entry)?;
-                //     writeln!(&mut writer)?;
-                // }
-            }
+struct RepoReporter(Vec<String>);
+
+impl Reportable for RepoReporter {
+    fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let repo_urls = &self.0;
+        for repo_url in repo_urls {
+            writeln!(writer, "{repo_url}")?;
         }
         Ok(())
-    };
-    match run_inner() {
-        // Ignore SIGPIPE errors, like those that can come from piping to `head`
-        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => { Ok(()) }
-        Err(e) => Err(e)?,
-        Ok(()) => Ok(()),
     }
-    */
+
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        let repo_urls = &self.0;
+        serde_json::to_writer_pretty(writer, repo_urls)?;
+        Ok(())
+    }
+
+    fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let repo_urls = &self.0;
+        for repo_url in repo_urls {
+            serde_json::to_writer(&mut writer, repo_url)?;
+            writeln!(&mut writer)?;
+        }
+        Ok(())
+    }
 }

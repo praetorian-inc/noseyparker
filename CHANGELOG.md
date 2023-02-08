@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Additions
+- Nosey Parker now has rudimentary support for enumerating repositories from GitHub users and organizations.
+  The new `github repos list` command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
+  An optional GitHub Personal Access Token can be provided via the `GITHUB_TOKEN` environment variable.
+
 - Nosey Parker now has an optional `rule_profiling` crate feature that causes performance-related statistics to be collected and reported when scanning.
   This feature imposes some performance cost and is only useful to rule authors, and so is disabled by default.
 

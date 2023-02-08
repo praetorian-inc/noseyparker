@@ -5,9 +5,9 @@ use noseyparker::datastore::{Datastore, MatchSummary};
 
 use crate::args::{GlobalArgs, Reportable, SummarizeArgs};
 
-struct SummaryReporter(MatchSummary);
+struct MatchSummaryReporter(MatchSummary);
 
-impl Reportable for SummaryReporter {
+impl Reportable for MatchSummaryReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let summary = &self.0;
         writeln!(writer)?;
@@ -17,9 +17,9 @@ impl Reportable for SummaryReporter {
         Ok(())
     }
 
-    fn json_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
         let summary = &self.0;
-        serde_json::to_writer_pretty(&mut writer, &summary)?;
+        serde_json::to_writer_pretty(writer, &summary)?;
         Ok(())
     }
 
@@ -36,7 +36,7 @@ impl Reportable for SummaryReporter {
 pub fn run(_global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
     let datastore = Datastore::open(&args.datastore)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
-    SummaryReporter(datastore.summarize()?).report(&args.output_args)
+    MatchSummaryReporter(datastore.summarize()?).report(&args.output_args)
 }
 
 pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {

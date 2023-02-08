@@ -34,7 +34,7 @@ impl Reportable for DetailsReporter {
                 .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
             let match_group = MatchGroup { metadata, matches };
             writeln!(
-                writer,
+                &mut writer,
                 "{} {}",
                 STYLE_FINDING_HEADING
                     .apply_to(format!("Finding {finding_num}/{num_findings}:")),
@@ -80,7 +80,7 @@ impl Reportable for DetailsReporter {
 
             serde_json::to_writer(&mut writer, &match_group)
                 .map_err(|e| e.into())
-                .and_then(|()| writeln!(&mut writer))?;
+                .and_then(|()| writeln!(writer))?;
         }
         Ok(())
     }
