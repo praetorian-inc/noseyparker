@@ -91,7 +91,7 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<(
         Err(err) => bail!(err),
     }
 
-    return Ok(());
+    Ok(())
 }
 
 

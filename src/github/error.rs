@@ -22,9 +22,9 @@ impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::RateLimited{client_error, ..} => write!(f, "request was rate-limited: {}", client_error.message),
-            Error::UrlParseError(e) => write!(f, "error parsing URL: {}", e),
-            Error::UrlSlashError(p) => write!(f, "error building URL: component {:?} contains a slash", p),
-            Error::ReqwestError(e) => write!(f, "error making request: {}", e),
+            Error::UrlParseError(e) => write!(f, "error parsing URL: {e}"),
+            Error::UrlSlashError(p) => write!(f, "error building URL: component {p:?} contains a slash"),
+            Error::ReqwestError(e) => write!(f, "error making request: {e}"),
         }
     }
 }

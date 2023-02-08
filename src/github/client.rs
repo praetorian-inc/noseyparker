@@ -75,7 +75,7 @@ impl Client {
         // XXX Surely this can be done better
         let mut buf = String::new();
         for p in path_parts {
-            buf.push_str("/");
+            buf.push('/');
             if p.contains('/') {
                 return Err(Error::UrlSlashError(p.to_string()));
             }
@@ -116,7 +116,7 @@ impl Client {
         T: serde::de::DeserializeOwned,
     {
         let response = self.get_with_params(path_parts, params).await?;
-        Ok(Page::from_response(response).await?)
+        Page::from_response(response).await
     }
 
     async fn get_url(&self, url: Url) -> Result<reqwest::Response> {
@@ -183,6 +183,6 @@ impl Client {
             }
         }
 
-        Ok(response.error_for_status().map_err(Error::ReqwestError)?)
+        response.error_for_status().map_err(Error::ReqwestError)
     }
 }
