@@ -245,6 +245,9 @@ fn test_noseyparker_github_repos_list_user_badtoken() {
     assert_cmd_snapshot!(cmd);
 }
 
+// XXX These are disabled for now due to GitHub Actions rate limiting troubles.
+// FIXME: Figure out how to plumb an access token to these tests, then re-enable them.
+/*
 #[test]
 fn test_noseyparker_github_repos_list_user_unauthenticated_human_format() {
     noseyparker_success!("github", "repos", "list", "--user", "octocat")
@@ -268,6 +271,7 @@ fn test_noseyparker_github_repos_list_user_unauthenticated_json_format() {
     assert!(json_parsed.contains(&String::from("https://github.com/octocat/Spoon-Knife.git")),
         "JSON output does not contain https://github.com/octocat/Spoon-Knife.git: {json_parsed:?}");
 }
+*/
 
 // XXX additional `github repo list` cases to test:
 //
