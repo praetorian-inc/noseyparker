@@ -1,0 +1,21 @@
+rules:
+
+- name: Adobe OAuth Client Secret
+  pattern: |
+    (?x)(?i)
+    \b
+    (p8e-[a-z0-9-]{32})
+    (?:[^a-z0-9-]|$)
+
+  references:
+  - https://developer.adobe.com/developer-console/docs/guides/authentication/
+  - https://developer.adobe.com/developer-console/docs/guides/authentication/OAuthIntegration/
+  - https://developer.adobe.com/developer-console/docs/guides/authentication/OAuth/
+
+  examples:
+  - |
+      {
+       "client_credentials": {
+        "client_id": "a65b0146769d433a835f36660881db50",
+        "client_secret": "p8e-ibndcvsmAp9ZgPBZ606FSlYIZVlsZ-g5"
+      },

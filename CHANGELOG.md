@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Many new rules have been added:
 
+  - Adobe OAuth Client Secret
   - Age Identity (X22519 secret key)
   - Age Recipient (X25519 public key)
   - crates.io API Key
