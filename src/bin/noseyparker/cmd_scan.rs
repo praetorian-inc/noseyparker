@@ -13,7 +13,7 @@ use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
-use noseyparker::input_enumerator::{FileResult, FilesystemEnumerator};
+use noseyparker::input_enumerator::{FileResult, FilesystemEnumerator, open_git_repo};
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{BlobMatch, Matcher};
@@ -234,10 +234,22 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
     inputs.git_repos.par_iter().for_each(|git_repo_result| {
+        let repository = match open_git_repo(&git_repo_result.path) {
+            Ok(Some(repository)) => repository.into_sync(),
+            Ok(None) => {
+                error!("Failed to re-open previously-found repository at {}", git_repo_result.path.display());
+                return;
+            }
+            Err(err) => {
+                error!("Failed to re-open previously-found repository at {}: {err}", git_repo_result.path.display());
+                return;
+            }
+        };
+
         git_repo_result.blobs.par_iter().for_each_init(
             || {
                 let matcher = make_matcher().expect("should be able to create a matcher");
-                let repo = git_repo_result.repository.to_thread_local();
+                let repo = repository.to_thread_local();
                 (repo, matcher, progress.clone())
             },
             |(repo, matcher, progress), (blob_id, size)| {

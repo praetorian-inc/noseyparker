@@ -66,6 +66,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Blobs are now deduplicated at enumeration time when first enumerating a Git repository, rather than only at scan time. This results in more accurate progress bars.
 
+- When scanning, Git repositories are now opened twice: once at input enumeration time, and once at scanning time.
+  This drastically reduces the amount of memory required to scan a large number of Git repositories.
+
 
 ## [v0.11.0](https://github.com/praetorian-inc/noseyparker/releases/v0.11.0) (2022-12-30)
 

@@ -29,7 +29,6 @@ pub struct FileResult {
 
 pub struct GitRepoResult {
     pub path: PathBuf,
-    pub repository: git::ThreadSafeRepository,
     pub blobs: Vec<(BlobId, u64)>,
 }
 
@@ -158,8 +157,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                         Ok(v) => v.blobs,
                     };
                     let path = path.to_owned();
-                    let repository = repository.into_sync();
-                    self.local_git_repos.push(GitRepoResult { path, repository, blobs })
+                    self.local_git_repos.push(GitRepoResult { path, blobs })
                 }
                 Ok(None) => {}
             }
@@ -296,16 +294,16 @@ impl<'a> GitRepoEnumerator<'a> {
     pub fn run(&self, seen_blobs: &BlobIdSet, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
         use git::prelude::HeaderExt;
 
-        let mut blobs: Vec<(BlobId, u64)> = Vec::new();
+        let mut blobs: Vec<(BlobId, u64)> = Vec::with_capacity(1024 * 1024);
 
         let odb = &self.repo.objects;
         for oid in odb
-            .iter()?
+            .iter().context("failed to iterate object database")?
             .with_ordering(
                 git::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
             )
-            .filter_map(Result::ok)
         {
+            let oid = oid.context("failed to read oid")?;
             let blob_id = BlobId::from(&oid);
             if !seen_blobs.insert(blob_id) {
                 continue;
