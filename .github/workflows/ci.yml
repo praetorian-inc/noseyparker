@@ -143,10 +143,11 @@ jobs:
 
     - name: Run tests
       env:
-      # We use the GitHub Actions automatic token when running tests, to avoid
-      # spurious failures from rate limiting when testing Nosey Parker's github
-      # enumeration capabilities.
-      - NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # We use the GitHub Actions automatic token when running tests, to avoid
+        # spurious failures from rate limiting when testing Nosey Parker's github
+        # enumeration capabilities.
+        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       run: cargo test --release --verbose --locked
 
     - name: Check rules
