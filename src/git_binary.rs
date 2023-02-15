@@ -102,7 +102,7 @@ impl Git {
         let mut cmd = self.git();
         cmd.arg("clone")
             .arg("--mirror")
-            .arg(&repo_url)
+            .arg(repo_url)
             .arg(output_dir);
 
         debug!("{cmd:#?}");
@@ -115,5 +115,12 @@ impl Git {
             });
         }
         Ok(())
+    }
+}
+
+impl Default for Git {
+    /// Equivalent to `Git::new()`
+    fn default() -> Self {
+        Self::new()
     }
 }
