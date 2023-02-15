@@ -1,5 +1,0 @@
----
-source: tests/cli.rs
-expression: status
----
-exit status: 2

@@ -1,0 +1,5 @@
+---
+source: tests/github.rs
+expression: stdout
+---
+

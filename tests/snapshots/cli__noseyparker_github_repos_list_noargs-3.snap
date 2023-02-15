@@ -1,6 +1,0 @@
----
-source: tests/cli.rs
-expression: stderr
----
-Error: No repositories specified
-

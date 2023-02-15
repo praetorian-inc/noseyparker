@@ -1,0 +1,6 @@
+---
+source: tests/github.rs
+expression: stderr
+---
+Error: No repositories specified
+
