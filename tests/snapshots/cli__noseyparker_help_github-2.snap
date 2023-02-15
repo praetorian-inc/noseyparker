@@ -4,8 +4,9 @@ expression: stdout
 ---
 Interact with GitHub
 
-An optional personal access token can be specified using the `GITHUB_TOKEN` environment variable.
-Using a personal access token gives higher rate limits and may make additional content accessible.
+By default, unauthenticated access is used. An optional personal access token can be specified using
+the `NP_GITHUB_TOKEN` environment variable. Using a personal access token gives higher rate limits
+and may make additional content accessible.
 
 Usage: noseyparker github [OPTIONS] <COMMAND>
 

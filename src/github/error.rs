@@ -16,6 +16,7 @@ pub enum Error {
     UrlParseError(url::ParseError),
     UrlSlashError(String),
     ReqwestError(reqwest::Error),
+    InvalidTokenEnvVar(String),
 }
 
 impl std::fmt::Display for Error {
@@ -25,6 +26,7 @@ impl std::fmt::Display for Error {
             Error::UrlParseError(e) => write!(f, "error parsing URL: {e}"),
             Error::UrlSlashError(p) => write!(f, "error building URL: component {p:?} contains a slash"),
             Error::ReqwestError(e) => write!(f, "error making request: {e}"),
+            Error::InvalidTokenEnvVar(v) => write!(f, "error loading token: ill-formed value of {v} environment variable"),
         }
     }
 }
@@ -36,6 +38,7 @@ impl std::error::Error for Error {
             Error::UrlParseError(e) => Some(e),
             Error::UrlSlashError(_) => None,
             Error::ReqwestError(e) => Some(e),
+            Error::InvalidTokenEnvVar(_) => None,
         }
     }
 }

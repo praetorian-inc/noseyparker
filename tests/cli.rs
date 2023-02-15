@@ -229,7 +229,7 @@ fn test_noseyparker_github_repos_list_noargs() {
 fn test_noseyparker_github_repos_list_org_badtoken() {
     let cmd = noseyparker()
         .args(&["github", "repos", "list", "--org", "praetorian-inc"])
-        .env("GITHUB_TOKEN", "hahabogus")
+        .env("NP_GITHUB_TOKEN", "hahabogus")
         .assert()
         .failure();
     assert_cmd_snapshot!(cmd);
@@ -239,7 +239,7 @@ fn test_noseyparker_github_repos_list_org_badtoken() {
 fn test_noseyparker_github_repos_list_user_badtoken() {
     let cmd = noseyparker()
         .args(&["github", "repos", "list", "--user", "octocat"])
-        .env("GITHUB_TOKEN", "hahabogus")
+        .env("NP_GITHUB_TOKEN", "hahabogus")
         .assert()
         .failure();
     assert_cmd_snapshot!(cmd);

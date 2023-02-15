@@ -188,7 +188,7 @@ impl FilesystemEnumerator {
 
     pub fn new<T: AsRef<Path>>(inputs: &[T]) -> Result<Self> {
         if inputs.is_empty() {
-            bail!("No inputs provided");
+            bail!("No root inputs provided");
         }
 
         let mut builder = WalkBuilder::new(&inputs[0]);

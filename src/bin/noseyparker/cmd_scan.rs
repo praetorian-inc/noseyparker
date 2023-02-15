@@ -13,7 +13,9 @@ use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
-use noseyparker::input_enumerator::{FileResult, FilesystemEnumerator, open_git_repo};
+use noseyparker::github;
+use noseyparker::git_binary::Git;
+use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{BlobMatch, Matcher};
@@ -29,7 +31,7 @@ use noseyparker::rules_database::RulesDatabase;
 pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> {
     let _span = debug_span!("scan").entered();
 
-    debug!("Args: {:?}", args);
+    debug!("Args: {args:#?}");
 
     let color_enabled = global_args.use_color();
     let progress_enabled = global_args.use_progress();
@@ -48,18 +50,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Open datastore
     // ---------------------------------------------------------------------------------------------
     let mut datastore = Datastore::create_or_open(&args.datastore)?;
-
-    // ---------------------------------------------------------------------------------------------
-    // Get temporary directory
-    // ---------------------------------------------------------------------------------------------
     let tmpdir = datastore.tmpdir();
-    std::fs::create_dir_all(&tmpdir).with_context(|| {
-        format!(
-            "Failed to create temporary directory {} for datastore at {}",
-            tmpdir.display(),
-            datastore.root_dir().display()
-        )
-    })?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -75,13 +66,70 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     };
 
     // ---------------------------------------------------------------------------------------------
+    // Enumerate any mentioned GitHub repositories; gather list of all repos to clone or update
+    // ---------------------------------------------------------------------------------------------
+    let repo_urls = {
+        let repo_specifiers = github::RepoSpecifiers {
+            user: args.input_args.github_user.clone(),
+            organization: args.input_args.github_organization.clone(),
+        };
+        let mut repo_urls = args.input_args.git_repo.clone();
+        if !repo_specifiers.is_empty() {
+            repo_urls.extend(github::enumerate_repo_urls(&repo_specifiers)?);
+        }
+        repo_urls.sort();
+        repo_urls.dedup();
+        repo_urls
+    };
+
+    // ---------------------------------------------------------------------------------------------
+    // Clone or update all mentioned Git URLs
+    // ---------------------------------------------------------------------------------------------
+    debug!("{} Git URLs to clone or update", repo_urls.len());
+    for repo_url in &repo_urls {
+        debug!("Need to clone or update {repo_url}")
+    }
+
+    let mut input_roots = args.input_args.path_inputs.clone();
+
+    if !repo_urls.is_empty() {
+        let clones_dir = tmpdir.join("clones");
+        let git = Git::new();
+
+        for repo_url in repo_urls {
+            let output_dir = clones_dir.join(&repo_url);
+
+            // First, try to update an existing clone, and if that fails, do a fresh clone
+            if output_dir.is_dir() {
+                match git.update_mirrored_clone(&repo_url, &output_dir) {
+                    Ok(()) => {
+                        input_roots.push(output_dir);
+                        continue;
+                    },
+                    Err(e) => {
+                        debug!("Failed to update clone of {repo_url} at {}: {e}", output_dir.display());
+                        std::fs::remove_dir_all(&output_dir)?;
+                    }
+                }
+            }
+
+            if let Err(e) = git.create_fresh_mirrored_clone(&repo_url, &output_dir) {
+                error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
+                continue;
+            }
+            input_roots.push(output_dir);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // Enumerate initial filesystem inputs
     // ---------------------------------------------------------------------------------------------
+    debug_assert!(!input_roots.is_empty());
     let inputs = {
         let mut progress = Progress::new_bytes_spinner("Enumerating inputs...", progress_enabled);
 
-        let input_enumerator = {
-            let mut ie = FilesystemEnumerator::new(&args.inputs)?;
+        let input_enumerator = || -> Result<FilesystemEnumerator> {
+            let mut ie = FilesystemEnumerator::new(&input_roots)?;
             ie.threads(args.num_jobs);
             ie.max_filesize(args.discovery_args.max_file_size_bytes());
 
@@ -104,10 +152,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 })?;
             }
 
-            ie
-        };
+            Ok(ie)
+        }()
+        .context("Failed to initialize filesystem enumerator")?;
 
-        let inputs = input_enumerator.run(&progress)?;
+        let inputs = input_enumerator
+            .run(&progress)
+            .context("Failed to enumerate filesystem inputs")?;
         let total_bytes_found: u64 = {
             let blob_bytes: u64 = inputs.git_repos.iter().map(|r| r.total_blob_bytes()).sum();
             let file_bytes: u64 = inputs.files.iter().map(|e| e.num_bytes).sum();
@@ -138,7 +189,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))
     };
 
-    let snippet_context_bytes: usize = 128; // FIXME:parameterize this and expose to CLI
+    let snippet_context_bytes: usize = 128; // FIXME: parameterize this and expose to CLI
 
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
@@ -237,11 +288,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let repository = match open_git_repo(&git_repo_result.path) {
             Ok(Some(repository)) => repository.into_sync(),
             Ok(None) => {
-                error!("Failed to re-open previously-found repository at {}", git_repo_result.path.display());
+                error!(
+                    "Failed to re-open previously-found repository at {}",
+                    git_repo_result.path.display()
+                );
                 return;
             }
             Err(err) => {
-                error!("Failed to re-open previously-found repository at {}: {err}", git_repo_result.path.display());
+                error!(
+                    "Failed to re-open previously-found repository at {}: {err}",
+                    git_repo_result.path.display()
+                );
                 return;
             }
         };
@@ -271,7 +328,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         );
                         return;
                     }
-                    // TODO: get rid of this extra copy
+                    // FIXME: get rid of this extra copy
                     Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
                 };
                 let provenance = Provenance::GitRepo {
@@ -343,7 +400,12 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     .get_rule(entry.rule_id)
                     .expect("rule index should be valid")
                     .name;
-                println!("{:>50} {:>10} {:>10.4}s", rule_name, entry.raw_match_count, entry.stage2_duration.as_secs_f64());
+                println!(
+                    "{:>50} {:>10} {:>10.4}s",
+                    rule_name,
+                    entry.raw_match_count,
+                    entry.stage2_duration.as_secs_f64()
+                );
             }
         }
 
