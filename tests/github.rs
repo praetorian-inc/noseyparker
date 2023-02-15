@@ -1,5 +1,7 @@
 //! Tests for Nosey Parker `github` command
 
+pub use pretty_assertions::{assert_eq, assert_ne};
+
 mod common;
 use common::*;
 
@@ -28,7 +30,6 @@ fn github_repos_list_user_badtoken() {
     assert_cmd_snapshot!(cmd);
 }
 
-
 // XXX Note: `octocat` is not a user under our control; it's a kind of test account owned by GitHub.
 // We are assuming that the `octocat` user's list of repositories will always include `Spoon-Knife`.
 
@@ -49,8 +50,7 @@ fn handle_github_token(cmd: &mut Command) {
 fn github_repos_list_user_human_format() {
     let mut cmd = noseyparker!("github", "repos", "list", "--user", "octocat");
     handle_github_token(&mut cmd);
-    cmd
-        .assert()
+    cmd.assert()
         .success()
         .stdout(predicates::str::contains("https://github.com/octocat/Spoon-Knife.git"))
         .stderr(predicates::str::is_empty());
@@ -60,24 +60,43 @@ fn github_repos_list_user_human_format() {
 fn github_repos_list_user_jsonl_format() {
     let mut cmd = noseyparker!("github", "repos", "list", "--user", "octocat", "--format", "jsonl");
     handle_github_token(&mut cmd);
-    cmd
-        .assert()
+    cmd.assert()
         .success()
         .stdout(predicates::str::contains("\"https://github.com/octocat/Spoon-Knife.git\"\n"))
         .stderr(predicates::str::is_empty());
 }
 
 #[test]
+fn github_repos_list_multiple_user_dedupe_jsonl_format() {
+    let mut cmd = noseyparker!(
+        "github", "repos", "list", "--user", "octocat", "--user", "octocat", "--format", "jsonl"
+    );
+    handle_github_token(&mut cmd);
+    let cmd = cmd.assert()
+        .success()
+        .stdout(predicates::str::contains("\"https://github.com/octocat/Spoon-Knife.git\"\n"))
+        .stderr(predicates::str::is_empty());
+
+    // Ensure that output is sorted and there are no dupes
+    let stdout = String::from_utf8(cmd.get_output().stdout.clone()).expect("noseyparker output should be utf-8");
+    let stdout_lines: Vec<String> = stdout.lines().map(|s| s.to_string()).collect();
+    let mut sorted_stdout_lines = stdout_lines.clone();
+    sorted_stdout_lines.sort();
+    sorted_stdout_lines.dedup();
+    assert_eq!(stdout_lines, sorted_stdout_lines);
+}
+
+#[test]
 fn github_repos_list_user_json_format() {
     let mut cmd = noseyparker!("github", "repos", "list", "--user", "octocat", "--format", "json");
     handle_github_token(&mut cmd);
-    let cmd = cmd
-        .assert()
-        .success()
-        .stderr(predicates::str::is_empty());
+    let cmd = cmd.assert().success().stderr(predicates::str::is_empty());
 
     let output = &cmd.get_output().stdout;
-    let json_parsed: Vec<String> = serde_json::from_slice(output).expect("output should be well-formed JSON");
-    assert!(json_parsed.contains(&String::from("https://github.com/octocat/Spoon-Knife.git")),
-        "JSON output does not contain https://github.com/octocat/Spoon-Knife.git: {json_parsed:?}");
+    let json_parsed: Vec<String> =
+        serde_json::from_slice(output).expect("output should be well-formed JSON");
+    assert!(
+        json_parsed.contains(&String::from("https://github.com/octocat/Spoon-Knife.git")),
+        "JSON output does not contain https://github.com/octocat/Spoon-Knife.git: {json_parsed:?}"
+    );
 }
