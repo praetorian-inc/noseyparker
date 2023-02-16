@@ -120,10 +120,11 @@ fn scan_unreadable_file() {
 fn create_empty_git_repo(destination: &Path) {
     Command::new("git")
         .arg("init")
+        .arg("-q")
         .arg(destination)
         .assert()
         .success()
-        .stdout(is_match("^Initialized empty Git repository in .*"))
+        .stdout(is_empty())
         .stderr(is_empty());
 }
 
