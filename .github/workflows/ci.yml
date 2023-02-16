@@ -47,12 +47,13 @@ jobs:
       if: matrix.os == 'ubuntu-22.04'
       run: |
         sudo apt-get install -y --no-install-recommends \
-          libhyperscan-dev
+          libhyperscan-dev \
+          pkg-config
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-12'
       run: |
-        brew install hyperscan
+        brew install hyperscan pkg-config
 
     - name: Install Rust toolchain
       id: install-rust-toolchain
