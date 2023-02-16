@@ -37,8 +37,10 @@ impl Datastore {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path)
             .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
+        let root_dir = root_dir.canonicalize()
+            .with_context(|| format!("Failed to canonicalize datastore path at {}", root_dir.display()))?;
         let mut ds = Self {
-            root_dir: root_dir.to_owned(),
+            root_dir,
             conn,
         };
         ds.migrate()

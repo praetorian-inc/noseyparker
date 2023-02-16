@@ -73,7 +73,7 @@ url = "2.3"
 walkdir = "2.3"
 
 [dev-dependencies]
-assert_cmd = "2.0"
+assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
 criterion = "0.4"
 escargot = "0.5"

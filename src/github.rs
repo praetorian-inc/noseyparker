@@ -44,7 +44,7 @@ pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers) -> anyhow::Result<V
 
         let repo_enumerator = RepoEnumerator::new(&client);
         let repo_urls = repo_enumerator.enumerate_repo_urls(repo_specifiers).await?;
-        Ok::<Vec<String>, Error>(repo_urls)
+        Ok(repo_urls) // ::<Vec<String>, Error>(repo_urls)
     });
 
     match result {

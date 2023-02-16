@@ -1,0 +1,58 @@
+---
+source: tests/test_noseyparker_help.rs
+expression: stdout
+---
+Report detailed scan findings
+
+Usage: noseyparker report [OPTIONS] --datastore <PATH>
+
+Options:
+  -d, --datastore <PATH>
+          Use the specified datastore path
+          
+          [env: NP_DATASTORE=]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+Output Options:
+  -o, --output <PATH>
+          Write output to the specified path
+          
+          If this argument is not provided, stdout will be used.
+
+  -f, --format <FORMAT>
+          Write output in the specified format
+          
+          [default: human]
+
+          Possible values:
+          - human: A text-based format designed for humans
+          - json:  Pretty-printed JSON format
+          - jsonl: JSON Lines format
+
+Global Options:
+  -v, --verbose...
+          Enable verbose output
+          
+          This can be repeated up to 3 times to enable successively more output.
+
+      --color <MODE>
+          Enable or disable colored output
+          
+          When this is "auto", colors are enabled when stdout is a tty.
+          
+          If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to
+          `--color=never`.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+
+      --progress <MODE>
+          Enable or disable progress bars
+          
+          When this is "auto", progress bars are enabled when stderr is a tty.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+

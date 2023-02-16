@@ -1,0 +1,5 @@
+---
+source: tests/test_noseyparker_help.rs
+expression: status
+---
+exit status: 2

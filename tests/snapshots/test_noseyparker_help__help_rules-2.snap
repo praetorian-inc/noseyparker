@@ -1,0 +1,43 @@
+---
+source: tests/test_noseyparker_help.rs
+expression: stdout
+---
+Manage rules
+
+Usage: noseyparker rules [OPTIONS] <COMMAND>
+
+Commands:
+  check
+          Check rules for problems
+  help
+          Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help
+          Print help (see a summary with '-h')
+
+Global Options:
+  -v, --verbose...
+          Enable verbose output
+          
+          This can be repeated up to 3 times to enable successively more output.
+
+      --color <MODE>
+          Enable or disable colored output
+          
+          When this is "auto", colors are enabled when stdout is a tty.
+          
+          If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to
+          `--color=never`.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+
+      --progress <MODE>
+          Enable or disable progress bars
+          
+          When this is "auto", progress bars are enabled when stderr is a tty.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+

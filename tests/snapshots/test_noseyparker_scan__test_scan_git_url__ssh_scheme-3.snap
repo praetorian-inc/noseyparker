@@ -1,0 +1,8 @@
+---
+source: tests/test_noseyparker_scan.rs
+expression: stderr
+---
+error: invalid value 'ssh://example.com/nothere.git' for '--git-url <URL>': only https URLs without credentials, query parameters, or fragment identifiers are supported
+
+For more information, try '--help'.
+

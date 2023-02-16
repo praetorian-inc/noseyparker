@@ -1,7 +1,8 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use git_repository as git;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
+use std::str::FromStr;
 use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -15,6 +16,7 @@ use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::github;
 use noseyparker::git_binary::Git;
+use noseyparker::git_url::GitUrl;
 use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
@@ -73,9 +75,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             user: args.input_args.github_user.clone(),
             organization: args.input_args.github_organization.clone(),
         };
-        let mut repo_urls = args.input_args.git_repo.clone();
+        let mut repo_urls = args.input_args.git_url.clone();
         if !repo_specifiers.is_empty() {
-            repo_urls.extend(github::enumerate_repo_urls(&repo_specifiers)?);
+            for repo_string in github::enumerate_repo_urls(&repo_specifiers)? {
+                match GitUrl::from_str(&repo_string) {
+                    Ok(repo_url) => repo_urls.push(repo_url),
+                    Err(e) => {
+                        error!("Failed to parse repo URL from {repo_string}: {e}");
+                        continue;
+                    }
+                }
+            }
         }
         repo_urls.sort();
         repo_urls.dedup();
@@ -96,8 +106,15 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let clones_dir = tmpdir.join("clones");
         let git = Git::new();
 
+        // FIXME: put a progress meter around this; disable Git's built-in progress
         for repo_url in repo_urls {
-            let output_dir = clones_dir.join(&repo_url);
+            let output_dir = match clone_destination(&clones_dir, &repo_url) {
+                Err(e) => {
+                    error!("Failed to determine output directory for {repo_url}: {e}");
+                    continue
+                }
+                Ok(output_dir) => output_dir,
+            };
 
             // First, try to update an existing clone, and if that fails, do a fresh clone
             if output_dir.is_dir() {
@@ -121,10 +138,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         }
     }
 
+    if input_roots.is_empty() {
+        bail!("No inputs to scan");
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Enumerate initial filesystem inputs
     // ---------------------------------------------------------------------------------------------
-    debug_assert!(!input_roots.is_empty());
     let inputs = {
         let mut progress = Progress::new_bytes_spinner("Enumerating inputs...", progress_enabled);
 
@@ -420,4 +440,42 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     }
 
     Ok(())
+}
+
+
+
+/// Get a path for a local clone of the given git URL underneath `root`.
+fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
+    Ok(root.join(repo.to_path_buf()))
+}
+
+#[cfg(test)]
+mod test {
+    macro_rules! clone_destination_success_tests {
+        ($($case_name:ident: ($root:expr, $repo:expr) => $expected:expr,)*) => {
+            mod clone_destination {
+                use noseyparker::git_url::GitUrl;
+                use pretty_assertions::assert_eq;
+                use std::path::{PathBuf, Path};
+                use std::str::FromStr;
+                use super::super::clone_destination;
+
+                $(
+                    #[test]
+                    fn $case_name() {
+                        let expected: Option<PathBuf> = Some(Path::new($expected).to_owned());
+
+                        let root = Path::new($root);
+                        let repo = GitUrl::from_str($repo).expect("repo should be a URL");
+                        assert_eq!(clone_destination(root, &repo).ok(), expected);
+                    }
+                )*
+            }
+        }
+    }
+
+    clone_destination_success_tests! {
+        https_01: ("rel_root", "https://example.com/testrepo.git") => "rel_root/https/example.com/testrepo.git",
+        https_02: ("/abs_root", "https://example.com/testrepo.git") => "/abs_root/https/example.com/testrepo.git",
+    }
 }

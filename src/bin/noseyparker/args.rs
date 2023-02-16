@@ -1,7 +1,8 @@
 use anyhow::{Context, Result};
 use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
-
 use std::path::PathBuf;
+
+use noseyparker::git_url::GitUrl;
 
 // -----------------------------------------------------------------------------
 // command-line args
@@ -311,12 +312,14 @@ pub struct ScanArgs {
 #[command(next_help_heading = "Input Specifier Options")]
 pub struct ScanInputArgs {
     /// Path to a file, directory, or local Git repository to scan
-    #[arg(value_name="INPUT", required_unless_present_any(["github_user", "github_organization", "git_repo"]), display_order=1)]
+    #[arg(value_name="INPUT", required_unless_present_any(["github_user", "github_organization", "git_url"]), display_order=1)]
     pub path_inputs: Vec<PathBuf>,
 
     /// URL of a Git repository to clone and scan
+    ///
+    /// Only https URLs without credentials, query parameters, or fragment identifiers are supported.
     #[arg(long, value_name = "URL", display_order = 10)]
-    pub git_repo: Vec<String>,
+    pub git_url: Vec<GitUrl>,
 
     /// Name of a GitHub user to enumerate and scan
     #[arg(long, value_name = "NAME", display_order = 20)]

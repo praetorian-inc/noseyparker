@@ -5,6 +5,7 @@ pub mod bstring_escape;
 pub mod datastore;
 pub mod defaults;
 pub mod git_binary;
+pub mod git_url;
 pub mod github;
 pub mod input_enumerator;
 pub mod location;

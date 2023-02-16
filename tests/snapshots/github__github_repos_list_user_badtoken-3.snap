@@ -1,9 +1,0 @@
----
-source: tests/github.rs
-expression: stderr
----
-Error: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
-
-Caused by:
-    HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
-

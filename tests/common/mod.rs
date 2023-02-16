@@ -9,7 +9,7 @@ pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
 pub use insta::{assert_display_snapshot, assert_json_snapshot, assert_snapshot, with_settings};
-pub use predicates::str::RegexPredicate;
+pub use predicates::str::{RegexPredicate, is_empty};
 pub use pretty_assertions::{assert_eq, assert_ne};
 pub use std::path::Path;
 pub use std::process::Command;
@@ -38,7 +38,7 @@ macro_rules! assert_cmd_snapshot {
 macro_rules! noseyparker {
     ( $( $arg:expr ),* ) => {
         {
-            let mut cmd = common::noseyparker();
+            let mut cmd = noseyparker_cmd();
             $(
                 cmd.arg($arg);
             )*
@@ -59,6 +59,9 @@ macro_rules! noseyparker_failure {
     ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().failure() }
 }
 
+// make macros easily visible to other modules
+pub use {noseyparker, noseyparker_success, noseyparker_failure, assert_cmd_snapshot};
+
 lazy_static! {
     static ref NOSEYPARKER: escargot::CargoRun = escargot::CargoBuild::new()
         .bin("noseyparker")
@@ -77,7 +80,7 @@ lazy_static! {
 }
 
 /// Build a `Command` for the `noseyparker` crate binary.
-pub fn noseyparker() -> Command {
+pub fn noseyparker_cmd() -> Command {
     // Command::cargo_bin("noseyparker").expect("noseyparker should be executable")
     NOSEYPARKER.command()
 }

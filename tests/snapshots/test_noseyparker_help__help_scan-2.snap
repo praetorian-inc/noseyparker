@@ -1,0 +1,124 @@
+---
+source: tests/test_noseyparker_help.rs
+expression: stdout
+---
+Scan content for secrets
+
+This command uses regex-based rules to identify hardcoded secrets and other potentially sensitive
+information in textual content (or in inputs that can have textual content extracted from them).
+
+The findings from scanning are recorded into a datastore. The recorded findings can later be
+reported in several formats using the `summarize` and `report` commands.
+
+Several types of inputs can be specified:
+
+- Positional input arguments can be either files or directories. Files are scanned directly;
+directories are recursively enumerated and scanned. Any directories encountered that are Git
+repositories will have their entire history scanned.
+
+- A Git repository URL can be specified with the `--git-repo=URL` argument. This will cause Nosey
+Parker to clone that repository to its datastore and scan its history.
+
+- A GitHub user can be specified with the `--github-user=NAME` argument. This will cause Nosey
+Parker to enumerate accessible repositories belonging to that user, clone them to its datastore, and
+scan their entire history.
+
+- A GitHub organization can be specified with the `--github-org=NAME` argument. This will cause
+Nosey Parker to enumerate accessible repositories belonging to that organization, clone them to its
+datastore, and scan their entire history.
+
+The `git` binary on the PATH is used to clone any required Git repositories. It is careful invoked
+to avoid using any system-wide or user-specific configuration.
+
+By default, when cloning repositories from GitHub or enumerating GitHub users or organizations,
+unauthenticated access is used. An optional personal access token can be specified using the
+`NP_GITHUB_TOKEN` environment variable. Using a personal access token gives higher rate limits and
+may make additional content accessible.
+
+Usage: noseyparker scan [OPTIONS] --datastore <PATH> [INPUT]...
+
+Options:
+  -d, --datastore <PATH>
+          Use the specified datastore path
+          
+          The datastore will be created if it does not exist.
+          
+          [env: NP_DATASTORE=]
+
+  -j, --jobs <N>
+          The number of parallel scanning jobs
+          
+          [default: DEFAULT]
+
+  -r, --rules <PATH>
+          Path of custom rules to use
+          
+          The paths can be either files or directories. Directories are recursively walked and all
+          discovered rule files will be loaded.
+          
+          This option can be repeated.
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+Input Specifier Options:
+  [INPUT]...
+          Path to a file, directory, or local Git repository to scan
+
+      --git-url <URL>
+          URL of a Git repository to clone and scan
+          
+          Only https URLs without credentials, query parameters, or fragment identifiers are
+          supported.
+
+      --github-organization <NAME>
+          Name of a  GitHub organization to enumerate and scan
+          
+          [aliases: github-org]
+
+      --github-user <NAME>
+          Name of a GitHub user to enumerate and scan
+
+Content Discovery Options:
+      --max-file-size <MEGABYTES>
+          Do not scan files larger than the specified size
+          
+          The value is parsed as a floating point literal, and hence fractional values can be
+          supplied. A negative value means "no limit". Note that scanning requires reading the
+          entire contents of each file into memory, so using an excessively large limit may be
+          problematic.
+          
+          [default: 100]
+
+  -i, --ignore <FILE>
+          Path of a custom ignore rules file to use
+          
+          The ignore file should contain gitignore-style rules.
+          
+          This option can be repeated.
+
+Global Options:
+  -v, --verbose...
+          Enable verbose output
+          
+          This can be repeated up to 3 times to enable successively more output.
+
+      --color <MODE>
+          Enable or disable colored output
+          
+          When this is "auto", colors are enabled when stdout is a tty.
+          
+          If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to
+          `--color=never`.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+
+      --progress <MODE>
+          Enable or disable progress bars
+          
+          When this is "auto", progress bars are enabled when stderr is a tty.
+          
+          [default: auto]
+          [possible values: auto, never, always]
+

@@ -1,0 +1,5 @@
+---
+source: tests/test_noseyparker_scan.rs
+expression: stdout
+---
+
