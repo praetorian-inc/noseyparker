@@ -20,8 +20,15 @@ lazy_static! {
     //       The problem is with the library's internal `Estimator` type.
     //
     //       Until that's fixed or we otherwise work around it, we avoid showing ETAs and rates.
+    //
+    //       See https://github.com/console-rs/indicatif/issues/394.
+
     static ref DEFINITE_BYTES_STYLE: ProgressStyle =
         ProgressStyle::with_template("{msg}  {bar} {percent:>3}%  {bytes}/{total_bytes}  [{elapsed_precise}]")
+            .expect("progress bar style template should compile");
+
+    static ref DEFINITE_UNITLESS_STYLE: ProgressStyle =
+        ProgressStyle::with_template("{msg}  {bar} {percent:>3}%  {pos}/{len}  [{elapsed_precise}]")
             .expect("progress bar style template should compile");
 }
 
@@ -61,6 +68,27 @@ impl Progress {
         }
     }
 
+    pub fn new_bar<T: Into<Cow<'static, str>>>(total: u64, message: T, enabled: bool) -> Self {
+        let inner = if enabled {
+            let inner = ProgressBar::new(total)
+                .with_style(DEFINITE_UNITLESS_STYLE.clone())
+                .with_message(message);
+
+            inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
+
+            inner
+        } else {
+            ProgressBar::hidden()
+        };
+
+        Progress {
+            inc_since_sync: 0,
+            last_sync: Instant::now(),
+            inner,
+            finish_style: None,
+        }
+    }
+
     pub fn new_bytes_bar<T: Into<Cow<'static, str>>>(total_bytes: u64, message: T, enabled: bool) -> Self {
         let inner = if enabled {
             let inner = ProgressBar::new(total_bytes)
@@ -80,6 +108,11 @@ impl Progress {
             inner,
             finish_style: None,
         }
+    }
+
+    #[inline]
+    pub fn suspend<F: FnOnce() -> R, R>(&self, f: F) -> R {
+        self.inner.suspend(f)
     }
 
     #[inline]

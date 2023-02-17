@@ -6,7 +6,7 @@ use std::str::FromStr;
 use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error};
+use tracing::{debug, debug_span, info, error, warn};
 
 use crate::args;
 
@@ -95,9 +95,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     // Clone or update all mentioned Git URLs
     // ---------------------------------------------------------------------------------------------
-    debug!("{} Git URLs to clone or update", repo_urls.len());
+    info!("{} Git URLs to fetch", repo_urls.len());
     for repo_url in &repo_urls {
-        debug!("Need to clone or update {repo_url}")
+        debug!("Need to fetch {repo_url}")
     }
 
     let mut input_roots = args.input_args.path_inputs.clone();
@@ -107,10 +107,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let git = Git::new();
 
         // FIXME: put a progress meter around this; disable Git's built-in progress
+        let mut progress =
+            Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
+
         for repo_url in repo_urls {
             let output_dir = match clone_destination(&clones_dir, &repo_url) {
                 Err(e) => {
-                    error!("Failed to determine output directory for {repo_url}: {e}");
+                    progress.suspend(|| {
+                        error!("Failed to determine output directory for {repo_url}: {e}");
+                        warn!("Skipping scan of {repo_url}");
+                    });
+                    progress.inc(1);
                     continue
                 }
                 Ok(output_dir) => output_dir,
@@ -118,24 +125,37 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
             // First, try to update an existing clone, and if that fails, do a fresh clone
             if output_dir.is_dir() {
+                progress.suspend(|| info!("Updating clone of {repo_url}..."));
+
                 match git.update_mirrored_clone(&repo_url, &output_dir) {
                     Ok(()) => {
                         input_roots.push(output_dir);
+                        progress.inc(1);
                         continue;
                     },
                     Err(e) => {
-                        debug!("Failed to update clone of {repo_url} at {}: {e}", output_dir.display());
-                        std::fs::remove_dir_all(&output_dir)?;
+                        progress.suspend(|| warn!("Failed to update clone of {repo_url} at {}: {e}", output_dir.display()));
+                        if let Err(e) =  std::fs::remove_dir_all(&output_dir) {
+                            progress.suspend(|| error!("Failed to remove clone directory at {}: {e}", output_dir.display()));
+                        }
                     }
                 }
             }
 
+            progress.suspend(|| info!("Cloning {repo_url}..."));
             if let Err(e) = git.create_fresh_mirrored_clone(&repo_url, &output_dir) {
-                error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
+                progress.suspend(|| {
+                    error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
+                    warn!("Skipping scan of {repo_url}");
+                });
+                progress.inc(1);
                 continue;
             }
             input_roots.push(output_dir);
+            progress.inc(1);
         }
+
+        progress.finish();
     }
 
     if input_roots.is_empty() {
