@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Additions
-- Nosey Parker now has rudimentary support for enumerating repositories from GitHub users and organizations.
+- The `scan` command can now be given Git https URLs, GitHub usernames, and GitHub organization names as inputs, and will enumerate, clone, and scan as appropriate ([#14](https://github.com/praetorian-inc/noseyparker/issues/14)).
+
+- Nosey Parker now has rudimentary support for enumerating repositories from GitHub users and organizations ([#15](https://github.com/praetorian-inc/noseyparker/issues/15)).
   The new `github repos list` command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
   An optional GitHub Personal Access Token can be provided via the `NP_GITHUB_TOKEN` environment variable.
 
