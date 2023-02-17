@@ -123,8 +123,24 @@ Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 n
 Run the `report` command next to show finding details.
 ```
 
-You can specify multiple inputs to scan at once in any combination of the supported input types (files, directories, and Git repos).
+### Scanning Git repos by URL, GitHub username, or GitHub organization name
+Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
+The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
 
+For example, to scan the Nosey Parker repo itself:
+```
+$ noseyparker scan --datastore np.noseyparker --git-url https://github.com/praetorian-inc/noseyparker
+```
+
+For example, to scan accessible repositories belonging to [`octocat`](https://github.com/octocat):
+```
+$ noseyparker scan --datastore np.noseyparker --github-user octocat
+```
+
+These input specifiers will use an optional GitHub token if available in the `NP_GITHUB_TOKEN` environment variable.
+Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
+
+See `noseyparker help scan` for more details.
 
 ### Summarizing findings
 Nosey Parker prints out a summary of its findings when it finishes
@@ -216,36 +232,14 @@ Providing an access token gives a higher API rate limit and may make additional 
 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 
+See `noseyparker help github` for more details.
+
 
 ### Getting help
 Running the `noseyparker` binary without arguments prints top-level help and exits.
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
-More detailed help is available with the `help` command.
-For example:
-```
-$ noseyparker scan -h
-Scan content for secrets
 
-Usage: noseyparker scan [OPTIONS] --datastore <PATH> <INPUT>...
-
-Arguments:
-  <INPUT>...  Paths of inputs to scan
-
-Options:
-  -d, --datastore <PATH>  Use the specified datastore path [env: NP_DATASTORE=]
-  -j, --jobs <N>          The number of parallel scanning jobs [default: 12]
-  -r, --rules <PATH>      Path of custom rules to use
-  -h, --help              Print help information (use `--help` for more detail)
-
-Content Discovery Options:
-      --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]
-  -i, --ignore <FILE>              Path of a custom ignore rules file to use
-
-Global Options:
-  -v, --verbose...       Enable verbose output
-      --color <MODE>     Enable or disable colored output [default: auto] [possible values: auto, never, always]
-      --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto, never, always]
-```
+**Tip: More detailed help is available with the `help` command or long-form `--help` option.**
 
 
 ## Contributing
