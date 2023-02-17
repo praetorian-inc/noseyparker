@@ -7,7 +7,7 @@
 # More details at https://github.com/rust-lang/rust-clippy
 # and https://rust-lang.github.io/rust-clippy/
 
-name: rust-clippy analyze
+name: Clippy
 
 on:
   push:
@@ -20,7 +20,7 @@ on:
 
 jobs:
   rust-clippy-analyze:
-    name: Run rust-clippy analyzing
+    name: Clippy Analysis
     runs-on: ubuntu-latest
     permissions:
       contents: read

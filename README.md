@@ -211,7 +211,7 @@ https://github.com/octocat/octocat.github.io.git
 https://github.com/octocat/test-repo1.git
 ```
 
-An optional GitHub Personal Access Token can be provided via the `GITHUB_TOKEN` environment variable.
+An optional GitHub Personal Access Token can be provided via the `NP_GITHUB_TOKEN` environment variable.
 Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.

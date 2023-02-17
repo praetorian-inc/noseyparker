@@ -187,10 +187,6 @@ impl FilesystemEnumerator {
     pub const DEFAULT_FOLLOW_LINKS: bool = false;
 
     pub fn new<T: AsRef<Path>>(inputs: &[T]) -> Result<Self> {
-        if inputs.is_empty() {
-            bail!("No inputs provided");
-        }
-
         let mut builder = WalkBuilder::new(&inputs[0]);
         for input in &inputs[1..] {
             builder.add(input);

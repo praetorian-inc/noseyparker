@@ -30,6 +30,7 @@ rules:
 
 
 - name: GitHub App Token
+  # Note: `ghu_` prefix is for user-to-server tokens; `ghs_` is for server-to-server tokens
   pattern: '\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\b'
 
   references:
@@ -39,6 +40,9 @@ rules:
 
   examples:
   - '            "token": "ghu_16C7e42F292c69C2E7C10c838347Ae178B4a",'
+  - |
+      Example usage:
+      git clone http://ghs_RguXIkihJjwHAP6eXEYxaPNvywurTr5IOAbg@github.com/username/repo.git
 
 
 - name: GitHub Refresh Token

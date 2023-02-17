@@ -1,7 +1,6 @@
-use anyhow::{bail, Context, Result};
-use tracing::{debug, warn};
+use anyhow::{bail, Result};
 
-use crate::args::{GlobalArgs, GitHubArgs, GitHubReposListArgs, Reportable};
+use crate::args::{GitHubArgs, GitHubReposListArgs, GlobalArgs, Reportable};
 use noseyparker::github;
 
 pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
@@ -11,89 +10,16 @@ pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
     }
 }
 
-/// The name of the environment variable to look for a personal access token in.
-///
-/// NOTE: this variable needs to match the top-level help documentation in args.rs
-const GITHUB_TOKEN_ENV_VAR: &str = "GITHUB_TOKEN";
-
 fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<()> {
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
-
-    let client = {
-        let mut builder = github::ClientBuilder::new();
-        match std::env::var(GITHUB_TOKEN_ENV_VAR) {
-            Err(std::env::VarError::NotPresent) => {
-                debug!("No GitHub access token provided; using unauthenticated API access.");
-            }
-            Err(std::env::VarError::NotUnicode(_s)) => {
-                bail!("Value of {} environment variable is ill-formed", GITHUB_TOKEN_ENV_VAR);
-            }
-            Ok(val) => {
-                debug!("Using GitHub personal access token from {GITHUB_TOKEN_ENV_VAR} environment variable");
-                builder = builder
-                    .auth(github::Auth::PersonalAccessToken(secrecy::SecretString::from(val)));
-            }
-        }
-        builder
-            .build()
-            .context("Failed to initialize GitHub client")?
-    };
-
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .context("Failed to initialize async runtime")?;
-
-    let result = runtime.block_on(async {
-        let mut repo_urls: Vec<String> = Vec::new();
-
-        // Get rate limit first thing.
-        // If there are connectivity issues, this is likely to reveal them quickly.
-        //
-        // This also makes it a little bit simpler to test this code, as the very first request
-        // made by `github repos list` will always be the same, regardless of which repo specifiers
-        // are given.
-        let rate_limit = client.get_rate_limit().await?;
-        debug!("GitHub rate limits: {:?}", rate_limit.rate);
-
-        for username in &args.repo_specifiers.user {
-            let mut repo_page = Some(client.get_user_repos(username).await?);
-            while let Some(page) = repo_page {
-                repo_urls.extend(page.items.iter().map(|r| &r.clone_url).cloned());
-                repo_page = client.next_page(page).await?;
-            }
-        }
-
-        for orgname in &args.repo_specifiers.organization {
-            let mut repo_page = Some(client.get_org_repos(orgname).await?);
-            while let Some(page) = repo_page {
-                repo_urls.extend(page.items.iter().map(|r| &r.clone_url).cloned());
-                repo_page = client.next_page(page).await?;
-            }
-        }
-
-        repo_urls.sort();
-        repo_urls.dedup();
-
-        Ok::<Vec<String>, noseyparker::github::Error>(repo_urls)
-    });
-
-    match result {
-        Ok(repo_urls) => {
-            RepoReporter(repo_urls).report(&args.output_args)?;
-        }
-        Err(noseyparker::github::Error::RateLimited { wait, .. }) => {
-            warn!("Rate limit exceeded: Would need to wait for {:?} before retrying", wait);
-            result?;
-        }
-        Err(err) => bail!(err),
-    }
-
-    Ok(())
+    let repo_urls = github::enumerate_repo_urls(&github::RepoSpecifiers {
+        user: args.repo_specifiers.user.clone(),
+        organization: args.repo_specifiers.organization.clone(),
+    })?;
+    RepoReporter(repo_urls).report(&args.output_args)
 }
-
 
 struct RepoReporter(Vec<String>);
 

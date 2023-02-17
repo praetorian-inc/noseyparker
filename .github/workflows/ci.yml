@@ -47,12 +47,13 @@ jobs:
       if: matrix.os == 'ubuntu-22.04'
       run: |
         sudo apt-get install -y --no-install-recommends \
-          libhyperscan-dev
+          libhyperscan-dev \
+          pkg-config
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-12'
       run: |
-        brew install hyperscan
+        brew install hyperscan pkg-config
 
     - name: Install Rust toolchain
       id: install-rust-toolchain
@@ -71,13 +72,18 @@ jobs:
         key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-tests
 
     - name: Build
-      run: cargo build --verbose --locked
+      run: cargo build --locked --verbose
 
     - name: Run tests
-      run: cargo test --verbose --locked
+      env:
+        # We use the GitHub Actions automatic token when running tests, to avoid
+        # spurious failures from rate limiting when testing Nosey Parker's github
+        # enumeration capabilities.
+        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: cargo test --locked --verbose
 
     - name: Check rules
-      run: cargo run -- rules check data/default/rules --warnings-as-errors
+      run: cargo run --locked -- rules check data/default/rules --warnings-as-errors
 
   docs:
     name: Docs
@@ -109,10 +115,10 @@ jobs:
     - name: Check documentation
       env:
         RUSTDOCFLAGS: -D warnings
-      run: cargo doc --no-deps --document-private-items
+      run: cargo doc --locked --no-deps --document-private-items
 
   release_build:
-    name: Release Build
+    name: Tests (release build; ubuntu-20.04.stable)
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
@@ -139,13 +145,18 @@ jobs:
         key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-release_build
 
     - name: Build
-      run: cargo build --release --verbose --locked
+      run: cargo build --locked --release --verbose
 
     - name: Run tests
-      run: cargo test --release --verbose --locked
+      env:
+        # We use the GitHub Actions automatic token when running tests, to avoid
+        # spurious failures from rate limiting when testing Nosey Parker's github
+        # enumeration capabilities.
+        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: cargo test --locked --release --verbose
 
     - name: Check rules
-      run: cargo run --release -- rules check data/default/rules --warnings-as-errors
+      run: cargo run --locked --release -- rules check data/default/rules --warnings-as-errors
 
     - name: Upload release binary
       uses: actions/upload-artifact@v3

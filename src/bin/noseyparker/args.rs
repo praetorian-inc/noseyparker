@@ -1,7 +1,8 @@
 use anyhow::{Context, Result};
-use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum, crate_version, crate_description};
-
+use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
+
+use noseyparker::git_url::GitUrl;
 
 // -----------------------------------------------------------------------------
 // command-line args
@@ -52,17 +53,32 @@ impl CommandLineArgs {
 pub enum Command {
     /// Scan content for secrets
     ///
-    /// This command uses regex-based rules to identify hardcoded secrets and other potentially
-    /// sensitive information in textual content (or in inputs that can have textual content
-    /// extracted from them).
+    /// This command uses regex-based rules to identify hardcoded secrets and other potentially sensitive information in textual content (or in inputs that can have textual content extracted from them).
     ///
-    /// The inputs can be either files or directories.
-    /// Files are scanned directly; directories are recursively enumerated and scanned.
-    /// Any Git repositories encountered will have their entire history scanned.
+    /// The findings from scanning are recorded into a datastore. The recorded findings can later
+    /// be reported in several formats using the `summarize` and `report` commands.
     ///
-    /// The findings from scanning are recorded into a datastore.
-    /// The recorded findings can later be reported in several formats using the `summarize` and
-    /// `report` commands.
+    /// Several types of inputs can be specified:
+    ///
+    /// - Positional input arguments can be either files or directories.
+    ///   Files are scanned directly; directories are recursively enumerated and scanned.
+    ///   Any directories encountered that are Git repositories will have their entire history scanned.
+    ///
+    /// - A Git repository URL can be specified with the `--git-repo=URL` argument.
+    ///   This will cause Nosey Parker to clone that repository to its datastore and scan its history.
+    ///
+    /// - A GitHub user can be specified with the `--github-user=NAME` argument.
+    ///   This will cause Nosey Parker to enumerate accessible repositories belonging to that user, clone them to its datastore, and scan their entire history.
+    ///
+    /// - A GitHub organization can be specified with the `--github-org=NAME` argument.
+    ///   This will cause Nosey Parker to enumerate accessible repositories belonging to that organization, clone them to its datastore, and scan their entire history.
+    ///
+    /// The `git` binary on the PATH is used to clone any required Git repositories.
+    /// It is careful invoked to avoid using any system-wide or user-specific configuration.
+    ///
+    /// By default, when cloning repositories from GitHub or enumerating GitHub users or organizations, unauthenticated access is used.
+    /// An optional personal access token can be specified using the `NP_GITHUB_TOKEN` environment variable.
+    /// Using a personal access token gives higher rate limits and may make additional content accessible.
     #[command(display_order = 1)]
     Scan(ScanArgs),
 
@@ -76,10 +92,9 @@ pub enum Command {
 
     /// Interact with GitHub
     ///
-    /// An optional personal access token can be specified using the `GITHUB_TOKEN` environment
-    /// variable.
-    /// Using a personal access token gives higher rate limits and may make additional content
-    /// accessible.
+    /// By default, unauthenticated access is used.
+    /// An optional personal access token can be specified using the `NP_GITHUB_TOKEN` environment variable.
+    /// Using a personal access token gives higher rate limits and may make additional content accessible.
     #[command(display_order = 4, name = "github")]
     GitHub(GitHubArgs),
 
@@ -96,7 +111,7 @@ pub enum Command {
 // global options
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
-#[command(next_help_heading="Global Options")]
+#[command(next_help_heading = "Global Options")]
 pub struct GlobalArgs {
     /// Enable verbose output
     ///
@@ -108,8 +123,7 @@ pub struct GlobalArgs {
     ///
     /// When this is "auto", colors are enabled when stdout is a tty.
     ///
-    /// If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to
-    /// `--color=never`.
+    /// If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `--color=never`.
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
     pub color: Mode,
 
@@ -187,7 +201,7 @@ pub struct GitHubReposListArgs {
     pub output_args: OutputArgs,
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct GitHubRepoSpecifiers {
     /// Select repositories belonging to the specified user
     #[arg(long)]
@@ -204,7 +218,6 @@ impl GitHubRepoSpecifiers {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // `rules` command
 // -----------------------------------------------------------------------------
@@ -218,14 +231,13 @@ pub struct RulesArgs {
 pub enum RulesCommand {
     /// Check rules for problems
     ///
-    /// If errors are detected, or if warnings are detected and `--warnings-as-errors` is passed,
-    /// the program will exit with a nonzero exit code.
+    /// If errors are detected or if warnings are detected and `--warnings-as-errors` is specified, the program will exit with a nonzero exit code.
     Check(RulesCheckArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct RulesCheckArgs {
-    #[arg(long, short='W')]
+    #[arg(long, short = 'W')]
     /// Treat warnings as errors
     pub warnings_as_errors: bool,
 
@@ -251,29 +263,29 @@ pub enum DatastoreCommand {
 
 #[derive(Args, Debug)]
 pub struct DatastoreInitArgs {
-    #[arg(long, short, value_name="PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     /// Initialize the datastore at specified path
     pub datastore: PathBuf,
 }
 
-
 fn get_parallelism() -> usize {
     match std::thread::available_parallelism() {
-        Err(_e) => { 1 }
-        Ok(v) => { v.into() }
+        Err(_e) => 1,
+        Ok(v) => v.into(),
     }
 }
 
 // -----------------------------------------------------------------------------
 // `scan` command
 // -----------------------------------------------------------------------------
+/// Arguments for the `scan` command
 #[derive(Args, Debug)]
 pub struct ScanArgs {
     /// Use the specified datastore path
     ///
     /// The datastore will be created if it does not exist.
-    #[arg(long, short, value_name="PATH", env("NP_DATASTORE"))]
-    // FIXME: choose a default value for this
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
+    // FIXME: choose a good default value for this?
     pub datastore: PathBuf,
 
     /// The number of parallel scanning jobs
@@ -283,35 +295,60 @@ pub struct ScanArgs {
     /// Path of custom rules to use
     ///
     /// The paths can be either files or directories.
-    /// Directories are recursively walked and all found rule files will be loaded.
+    /// Directories are recursively walked and all discovered rule files will be loaded.
     ///
     /// This option can be repeated.
-    #[arg(long, short, value_name="PATH")]
+    #[arg(long, short, value_name = "PATH")]
     pub rules: Vec<PathBuf>,
 
-    /// Paths of inputs to scan
-    ///
-    /// Inputs can be files, directories, or Git repositories.
-    #[arg(num_args(1..), required(true), value_name="INPUT")]
-    pub inputs: Vec<PathBuf>,
+    #[command(flatten)]
+    pub input_args: ScanInputArgs,
 
     #[command(flatten)]
-    pub discovery_args: DiscoveryArgs,
+    pub discovery_args: ScanDiscoveryArgs,
 }
 
-// -----------------------------------------------------------------------------
-// enumeration options
-// -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
-#[command(next_help_heading="Content Discovery Options")]
-pub struct DiscoveryArgs {
+#[command(next_help_heading = "Input Specifier Options")]
+pub struct ScanInputArgs {
+    /// Path to a file, directory, or local Git repository to scan
+    #[arg(value_name="INPUT", required_unless_present_any(["github_user", "github_organization", "git_url"]), display_order=1)]
+    pub path_inputs: Vec<PathBuf>,
+
+    /// URL of a Git repository to clone and scan
+    ///
+    /// Only https URLs without credentials, query parameters, or fragment identifiers are supported.
+    #[arg(long, value_name = "URL", display_order = 10)]
+    pub git_url: Vec<GitUrl>,
+
+    /// Name of a GitHub user to enumerate and scan
+    #[arg(long, value_name = "NAME", display_order = 20)]
+    pub github_user: Vec<String>,
+
+    /// Name of a  GitHub organization to enumerate and scan
+    #[arg(
+        long,
+        visible_alias = "github-org",
+        value_name = "NAME",
+        display_order = 20
+    )]
+    pub github_organization: Vec<String>,
+}
+
+/// This struct represents options to control content discovery.
+#[derive(Args, Debug)]
+#[command(next_help_heading = "Content Discovery Options")]
+pub struct ScanDiscoveryArgs {
     /// Do not scan files larger than the specified size
     ///
-    /// The value is parsed as a floating point literal, and hence can be non-integral.
+    /// The value is parsed as a floating point literal, and hence fractional values can be supplied.
     /// A negative value means "no limit".
-    /// Note that scanning requires reading the entire contents of each file into memory,
-    /// so using an excessively large limit may be problematic.
-    #[arg(long("max-file-size"), default_value_t=100.0, value_name="MEGABYTES")]
+    /// Note that scanning requires reading the entire contents of each file into memory, so using an excessively large limit may be problematic.
+    #[arg(
+        long("max-file-size"),
+        default_value_t = 100.0,
+        value_name = "MEGABYTES"
+    )]
     pub max_file_size_mb: f64,
 
     /// Path of a custom ignore rules file to use
@@ -319,18 +356,16 @@ pub struct DiscoveryArgs {
     /// The ignore file should contain gitignore-style rules.
     ///
     /// This option can be repeated.
-    #[arg(long, short, value_name="FILE")]
+    #[arg(long, short, value_name = "FILE")]
     pub ignore: Vec<PathBuf>,
-
     /*
     /// Do not scan files that appear to be binary
     #[arg(long)]
     pub skip_binary_files: bool,
     */
-
 }
 
-impl DiscoveryArgs {
+impl ScanDiscoveryArgs {
     pub fn max_file_size_bytes(&self) -> Option<u64> {
         if self.max_file_size_mb < 0.0 {
             None
@@ -346,7 +381,7 @@ impl DiscoveryArgs {
 #[derive(Args, Debug)]
 pub struct SummarizeArgs {
     /// Use the specified datastore path
-    #[arg(long, short, value_name="PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     pub datastore: PathBuf,
 
     #[command(flatten)]
@@ -359,7 +394,7 @@ pub struct SummarizeArgs {
 #[derive(Args, Debug)]
 pub struct ReportArgs {
     /// Use the specified datastore path
-    #[arg(long, short, value_name="PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     pub datastore: PathBuf,
 
     #[command(flatten)]
@@ -370,12 +405,12 @@ pub struct ReportArgs {
 // output options
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
-#[command(next_help_heading="Output Options")]
+#[command(next_help_heading = "Output Options")]
 pub struct OutputArgs {
     /// Write output to the specified path
     ///
     /// If this argument is not provided, stdout will be used.
-    #[arg(long, short, value_name="PATH")]
+    #[arg(long, short, value_name = "PATH")]
     pub output: Option<PathBuf>,
 
     /// Write output in the specified format
@@ -391,9 +426,7 @@ impl OutputArgs {
         use std::io::BufWriter;
 
         match &self.output {
-            None => {
-                Ok(Box::new(BufWriter::new(std::io::stdout())))
-            }
+            None => Ok(Box::new(BufWriter::new(std::io::stdout()))),
             Some(p) => {
                 let f = File::create(p)?;
                 Ok(Box::new(BufWriter::new(f)))
@@ -430,7 +463,6 @@ impl std::fmt::Display for OutputFormat {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // report writer
 // -----------------------------------------------------------------------------
@@ -440,7 +472,8 @@ pub trait Reportable {
     fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
 
     fn report(&self, output_args: &OutputArgs) -> Result<()> {
-        let writer = output_args.get_writer()
+        let writer = output_args
+            .get_writer()
             .context("Failed to open output destination for writing")?;
 
         let result = match &output_args.format {
@@ -454,7 +487,7 @@ pub trait Reportable {
                 // Ignore SIGPIPE errors, like those that can come from piping to `head`
                 Some(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
                 _ => Err(e)?,
-            }
+            },
         }
     }
 }

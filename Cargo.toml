@@ -57,7 +57,7 @@ pretty_assertions = "1.3"
 prettytable-rs = "0.10"
 rayon = "1.5"
 regex = "1.7"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
 rlimit = "0.9.0"
 rusqlite = { version = "0.28", features = ["bundled", "backup"] }
 secrecy = "0.8.0"
@@ -73,7 +73,7 @@ url = "2.3"
 walkdir = "2.3"
 
 [dev-dependencies]
-assert_cmd = "2.0"
+assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
 criterion = "0.4"
 escargot = "0.5"

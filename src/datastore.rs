@@ -37,12 +37,24 @@ impl Datastore {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path)
             .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
+        let root_dir = root_dir.canonicalize()
+            .with_context(|| format!("Failed to canonicalize datastore path at {}", root_dir.display()))?;
         let mut ds = Self {
-            root_dir: root_dir.to_owned(),
+            root_dir,
             conn,
         };
         ds.migrate()
             .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
+
+        let tmpdir = ds.tmpdir();
+        std::fs::create_dir_all(&tmpdir).with_context(|| {
+            format!(
+                "Failed to create temporary directory {} for datastore at {}",
+                tmpdir.display(),
+                ds.root_dir().display()
+            )
+        })?;
+
         Ok(ds)
     }
 
@@ -61,6 +73,7 @@ impl Datastore {
         Self::open(root_dir)
     }
 
+    /// Get the path to this datastore's temporary directory.
     pub fn tmpdir(&self) -> PathBuf {
         self.root_dir.join("scratch")
     }

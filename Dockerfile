@@ -5,7 +5,7 @@ ARG VECTORSCAN_SHA=71fae7ee8d63e1513a6df762cdb5d5f02a9120a2422cf1f31d57747c2b8d3
 ################################################################################
 # Base stage
 ################################################################################
-FROM rust:$RUST_VER AS base
+FROM rust:$RUST_VER AS base_builder
 
 ARG VECTORSCAN_VER
 ARG VECTORSCAN_SHA
@@ -37,7 +37,13 @@ RUN apt-get update &&\
 ################################################################################
 # Build Rust dependencies, caching stage
 ################################################################################
-FROM base AS dependencies
+# This stage exists so that dependencies of Nosey Parker can be preserved in
+# the Docker cache.
+#
+# Building dependencies only is not naturally supported out-of-the box with
+# Cargo, and so requires some machinations.
+
+FROM base_builder AS dependencies_builder
 
 WORKDIR "/noseyparker"
 
@@ -57,12 +63,12 @@ RUN mkdir -p  ./src/bin/noseyparker &&\
     # Stub main required for compile
     echo "fn main() {}" > ./src/bin/noseyparker/main.rs &&\
     # Run the build
-    cargo build --release
+    cargo build --release --profile release --locked
 
 ################################################################################
 # Build application
 ################################################################################
-FROM dependencies AS build
+FROM dependencies_builder AS app_builder
 
 WORKDIR "/noseyparker"
 
@@ -76,14 +82,14 @@ RUN touch \
     ./src/lib.rs \
     ./src/bin/noseyparker/main.rs
 
-RUN cargo build --release
+RUN cargo install --root /usr/local --profile release --locked --path .
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
 ################################################################################
 FROM debian:11-slim
 
-COPY --from=build /noseyparker/target/release/noseyparker /usr/bin/noseyparker
+COPY --from=app_builder /usr/local/bin/noseyparker /usr/local/bin/noseyparker
 
 # Tip when running: use a volume mount: `-v "$PWD:/scan"` to make for handling of paths on the command line
 WORKDIR "/scan"

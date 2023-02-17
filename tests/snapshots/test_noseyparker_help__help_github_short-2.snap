@@ -1,0 +1,22 @@
+---
+source: tests/test_noseyparker_help.rs
+expression: stdout
+---
+Interact with GitHub
+
+Usage: noseyparker github [OPTIONS] <COMMAND>
+
+Commands:
+  repos  Interact with GitHub repositories
+  help   Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help (see more with '--help')
+
+Global Options:
+  -v, --verbose...       Enable verbose output
+      --color <MODE>     Enable or disable colored output [default: auto] [possible values: auto,
+                         never, always]
+      --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
+                         never, always]
+
