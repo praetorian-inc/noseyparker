@@ -3,9 +3,9 @@ rules:
 - name: Credentials in ODBC Connection String
   pattern: |
     (?x)(?i)
-    (?: User | User\ Id | UserId | Uid) \s*=\s* ([^"';]{1,100}) \s*["';]\s*
-    .{0,10}   (?# possible extra stuff, e.g., string concatenation)
-    (?: Password | Pwd) \s*=\s* ([^"';]{1,100}) \s*["';]
+    (?: User | User\ Id | UserId | Uid) \s*=\s* ([^\s;]{3,100}) \s* ;
+    [ \t]* .{0,10} [ \t]*  (?# possible extra stuff, e.g., string concatenation)
+    (?: Password | Pwd) \s*=\s* ([^\s;]{3,100}) \s* (?: [;"'] | $)
 
   examples:
   - 'Server=host;Port=5432;User Id=username;Password=secret;Database=databasename;'
@@ -14,6 +14,52 @@ rules:
   - 'Data Source=190.190.200.100,1433;Network_library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;'
   - 'Provider=SQLNCLI;Server=myServerName,myPortNumber;Database=myDataBase;Uid=myUsername;Pwd=myPassword;'
   - '    adoConn.Open("Provider=SQLOLEDB.1;User ID=specialbill_user; " & "Password =specialbill_user;Initial Catalog=SpecialBill_PROD;Data Source=uszdba01;")'
+  - |
+      "driver={SQL Server};server=(#{datastore['DBHOST']});database=#{datastore['DBNAME']};uid=#{datastore['DBUID']};pwd=#{datastore['DBPASSWORD']}"
+
+  negative_examples:
+  - "def login(self, user = '', password = '', domain = ''):"
+  - |
+      if datastore['VERBOSE']
+            text  = ''
+            text << "User=#{username}, "
+            text << "Password=#{password}, "
+            text << "Domain=#{domain}, "
+            text << "Full Name=#{full_name}, "
+            text << "E-mail=#{e_mail}"
+            print_good(text)
+  - |
+      if (len < ulen + wlen + 2)
+        break;
+      user = (char *) (p + 1);
+      pwd = (char *) (p + ulen + 2);
+      p += ulen + wlen + 2;
+
+  - |
+      /* Set default values */
+      server = xmalloc(sizeof(*server));
+      server->user = "anonymous";
+      server->password = "busybox@";
+
+  - |
+      System.out.println("Here we go...");
+                String url = "jdbc:msf:sql://127.0.0.1:8080/sample";
+                String userid = "userid";
+                String password = "password";
+
+  - |
+      char *domain = NULL;
+      char *user = NULL;
+      char *password = NULL;
+
+  - |
+      <?php
+              \$user = \$_POST[\"username\"];
+              \$pwd = \$_POST[\"password\"];
+              \$otherdata = \$_POST[\"otherdata\"];
+      ?>
+
+
 
   references:
   - https://docs.aws.amazon.com/redshift/latest/mgmt/configure-odbc-connection.html

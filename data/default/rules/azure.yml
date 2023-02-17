@@ -13,7 +13,7 @@ rules:
     (?x)
     (?i)
     (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^;]{1,80}) \s*;\s*
-    .{0,10}   (?# possible extra stuff, e.g., string concatenation)
+    .{0,10}\s*  (?# possible extra stuff, e.g., string concatenation)
     (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^;]{1,100})
     (?: ;|$ )
 

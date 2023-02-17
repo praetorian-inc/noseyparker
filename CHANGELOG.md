@@ -54,6 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Several existing rules were modified to improve signal-to-noise:
 
+  - Azure Connection String
   - Credentials in ODBC Connection String
   - PyPI Upload Token
 
