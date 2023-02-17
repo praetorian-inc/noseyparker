@@ -80,7 +80,7 @@ jobs:
         # spurious failures from rate limiting when testing Nosey Parker's github
         # enumeration capabilities.
         NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cargo test --locked --release --verbose
+      run: cargo test --locked --verbose
 
     - name: Check rules
       run: cargo run --locked -- rules check data/default/rules --warnings-as-errors
