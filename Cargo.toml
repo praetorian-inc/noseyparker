@@ -37,8 +37,8 @@ bstr = { version = "1.0", features = ["serde"] }
 chrono = "0.4"
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
-git-features = { version = "0.26", features = ["fast-sha1"] }
-git-repository = { version = "0.33", features = ["max-performance"] }
+gix-features = { version = "0.26", features = ["fast-sha1"] }
+gix = { version = "0.37", features = ["max-performance"] }
 libc = "0.2"
 hex = "0.4"
 hyperscan = { version = "0.3", features = ["full", "static"] }
@@ -48,7 +48,7 @@ include_dir = { version = "0.7", features = ["glob"] }
 indenter = "0.3"
 # XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
 indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
-indoc = "1.0"
+indoc = "2.0"
 ignore = "0.4"
 itertools = "0.10"
 lazy_static = "1.4"

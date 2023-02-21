@@ -1,6 +1,5 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use git_repository as git;
 
 // -------------------------------------------------------------------------------------------------
 // BlobId
@@ -13,7 +12,7 @@ impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
-        use git_features::hash::Sha1;
+        use gix_features::hash::Sha1;
         use std::io::Write;
 
         // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
@@ -75,8 +74,8 @@ impl std::fmt::Display for BlobId {
     }
 }
 
-impl<'a> From<&'a git::ObjectId> for BlobId {
-     fn from(id: &'a git::ObjectId) -> Self {
+impl<'a> From<&'a gix::ObjectId> for BlobId {
+     fn from(id: &'a gix::ObjectId) -> Self {
          BlobId(
              id.as_bytes()
                  .try_into()

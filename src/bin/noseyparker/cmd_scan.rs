@@ -1,5 +1,4 @@
 use anyhow::{Context, Result, bail};
-use git_repository as git;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::str::FromStr;
@@ -358,7 +357,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 if seen_blobs.contains(blob_id) {
                     return;
                 }
-                let blob = match repo.find_object(git::hash::ObjectId::from(blob_id.as_bytes())) {
+                let blob = match repo.find_object(gix::hash::ObjectId::from(blob_id.as_bytes())) {
                     Err(e) => {
                         error!(
                             "Failed to read blob {} from Git repository at {}: {}",

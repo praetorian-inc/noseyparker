@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use git_repository as git;
 use ignore::{WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -250,10 +249,10 @@ impl FilesystemEnumerator {
 }
 
 /// Opens the given Git repository if it exists, returning None otherwise.
-pub fn open_git_repo(path: &Path) -> Result<Option<git::Repository>> {
-    let opts = git::open::Options::isolated().open_path_as_is(true);
-    match git::open_opts(path, opts) {
-        Err(git::open::Error::NotARepository { .. }) => Ok(None),
+pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
+    let opts = gix::open::Options::isolated().open_path_as_is(true);
+    match gix::open_opts(path, opts) {
+        Err(gix::open::Error::NotARepository { .. }) => Ok(None),
         Err(err) => Err(err.into()),
         Ok(r) => Ok(Some(r)),
     }
@@ -264,11 +263,11 @@ pub struct GitRepoEnumeratorResult {
 }
 
 pub struct GitRepoEnumerator<'a> {
-    repo: &'a git::Repository,
+    repo: &'a gix::Repository,
 }
 
 impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(repo: &'a git::Repository) -> Self {
+    pub fn new(repo: &'a gix::Repository) -> Self {
         GitRepoEnumerator { repo }
     }
 
@@ -277,7 +276,7 @@ impl<'a> GitRepoEnumerator<'a> {
         seen_blobs: &BlobIdSet,
         progress: &mut Progress,
     ) -> Result<GitRepoEnumeratorResult> {
-        use git::prelude::HeaderExt;
+        use gix::prelude::HeaderExt;
 
         let mut blobs: Vec<(BlobId, u64)> = Vec::with_capacity(1024 * 1024);
 
@@ -286,7 +285,7 @@ impl<'a> GitRepoEnumerator<'a> {
             .iter()
             .context("failed to iterate object database")?
             .with_ordering(
-                git::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
+                gix::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
             )
         {
             let oid = oid.context("failed to read oid")?;
@@ -297,7 +296,7 @@ impl<'a> GitRepoEnumerator<'a> {
             let hdr = odb
                 .header(oid)
                 .with_context(|| format!("Failed to read object header {oid}"))?;
-            if hdr.kind() == git::object::Kind::Blob {
+            if hdr.kind() == gix::object::Kind::Blob {
                 let obj_size = hdr.size();
                 progress.inc(obj_size);
                 blobs.push((blob_id, obj_size));
