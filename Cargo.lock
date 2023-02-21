@@ -2240,7 +2240,6 @@ dependencies = [
  "console",
  "criterion",
  "escargot",
- "git-discover",
  "git-features",
  "git-repository",
  "git2",

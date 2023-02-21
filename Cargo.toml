@@ -37,7 +37,6 @@ bstr = { version = "1.0", features = ["serde"] }
 chrono = "0.4"
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
-git-discover = "0.12"
 git-features = { version = "0.26", features = ["fast-sha1"] }
 git-repository = { version = "0.33", features = ["max-performance"] }
 libc = "0.2"

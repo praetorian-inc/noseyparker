@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use git_repository as git;
 use ignore::{WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
@@ -251,23 +251,8 @@ impl FilesystemEnumerator {
 
 /// Opens the given Git repository if it exists, returning None otherwise.
 pub fn open_git_repo(path: &Path) -> Result<Option<git::Repository>> {
-    // This extra git_discover check here is used to skip appending `.git` to the given path.
-    // From reading the implementation of `git::open_opts`, it seems that gitoxide doesn't
-    // currently support opening a repository with an option analogous to
-    // `git2::RepositoryOpenFlags::NO_DOTGIT`.
-    //
-    // Without this, when encountering a non-bare repository, it gets enumerated twice: once for
-    // its working directory, and once for its .git directory.
-    match git_discover::is_git(path) {
-        Err(err@git_discover::is_git::Error::Metadata { .. }) => {
-            bail!(err);
-        }
-        Err(_) => {
-            return Ok(None);
-        }
-        Ok(_) => {}
-    }
-    match git::open_opts(path, git::open::Options::isolated()) {
+    let opts = git::open::Options::isolated().open_path_as_is(true);
+    match git::open_opts(path, opts) {
         Err(git::open::Error::NotARepository { .. }) => Ok(None),
         Err(err) => Err(err.into()),
         Ok(r) => Ok(Some(r)),
@@ -287,14 +272,19 @@ impl<'a> GitRepoEnumerator<'a> {
         GitRepoEnumerator { repo }
     }
 
-    pub fn run(&self, seen_blobs: &BlobIdSet, progress: &mut Progress) -> Result<GitRepoEnumeratorResult> {
+    pub fn run(
+        &self,
+        seen_blobs: &BlobIdSet,
+        progress: &mut Progress,
+    ) -> Result<GitRepoEnumeratorResult> {
         use git::prelude::HeaderExt;
 
         let mut blobs: Vec<(BlobId, u64)> = Vec::with_capacity(1024 * 1024);
 
         let odb = &self.repo.objects;
         for oid in odb
-            .iter().context("failed to iterate object database")?
+            .iter()
+            .context("failed to iterate object database")?
             .with_ordering(
                 git::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
             )
