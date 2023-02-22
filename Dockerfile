@@ -31,7 +31,7 @@ RUN apt-get update &&\
     echo "$VECTORSCAN_SHA vectorscan.tar.gz" | sha256sum -c &&\
     tar --strip-components 1 -xzf vectorscan.tar.gz &&\
     rm -rf vectorscan.tar.gz &&\
-    cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DFAT_RUNTIME=OFF &&\
+    cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DFAT_RUNTIME=ON -DBUILD_EXAMPLES=OFF -DBUILD_BENCHMARKS=OFF &&\
     cmake --build build
 
 ################################################################################
