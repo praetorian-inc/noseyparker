@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use ignore::{WalkBuilder, WalkState};
+use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::{debug, error, warn};
@@ -221,6 +221,14 @@ impl FilesystemEnumerator {
     pub fn max_filesize(&mut self, max_filesize: Option<u64>) -> &mut Self {
         self.walk_builder.max_filesize(max_filesize);
         self.max_file_size = max_filesize;
+        self
+    }
+
+    pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
+        where
+            P: Fn(&DirEntry) -> bool + Send + Sync + 'static
+    {
+        self.walk_builder.filter_entry(filter);
         self
     }
 

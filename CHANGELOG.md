@@ -72,6 +72,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - When scanning, Git repositories are now opened twice: once at input enumeration time, and once at scanning time.
   This drastically reduces the amount of memory required to scan a large number of Git repositories.
 
+### Fixes
+- When scanning, the datastore is now explicitly excluded from filesystem enumeration.
+  This ensures that files used internally for Nosey Parker's operation are not inadvertently scanned ([#32](https://github.com/praetorian-inc/noseyparker/issues/32)).
+
 
 ## [v0.11.0](https://github.com/praetorian-inc/noseyparker/releases/v0.11.0) (2022-12-30)
 

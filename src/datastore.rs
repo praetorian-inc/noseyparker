@@ -46,11 +46,20 @@ impl Datastore {
         ds.migrate()
             .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
 
-        let tmpdir = ds.tmpdir();
-        std::fs::create_dir_all(&tmpdir).with_context(|| {
+        let scratch_dir = ds.scratch_dir();
+        std::fs::create_dir_all(&scratch_dir).with_context(|| {
             format!(
-                "Failed to create temporary directory {} for datastore at {}",
-                tmpdir.display(),
+                "Failed to create scratch directory {} for datastore at {}",
+                scratch_dir.display(),
+                ds.root_dir().display()
+            )
+        })?;
+
+        let clones_dir = ds.clones_dir();
+        std::fs::create_dir_all(&clones_dir).with_context(|| {
+            format!(
+                "Failed to create clones directory {} for datastore at {}",
+                clones_dir.display(),
                 ds.root_dir().display()
             )
         })?;
@@ -73,9 +82,14 @@ impl Datastore {
         Self::open(root_dir)
     }
 
-    /// Get the path to this datastore's temporary directory.
-    pub fn tmpdir(&self) -> PathBuf {
+    /// Get the path to this datastore's scratch directory.
+    pub fn scratch_dir(&self) -> PathBuf {
         self.root_dir.join("scratch")
+    }
+
+    /// Get the path to this datastore's clones directory.
+    pub fn clones_dir(&self) -> PathBuf {
+        self.root_dir.join("clones")
     }
 
     fn new_connection(path: &Path) -> Result<Connection> {

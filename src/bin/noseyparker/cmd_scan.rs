@@ -1,11 +1,11 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::str::FromStr;
 use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, info, error, warn};
+use tracing::{debug, debug_span, error, info, warn};
 
 use crate::args;
 
@@ -13,9 +13,9 @@ use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
-use noseyparker::github;
 use noseyparker::git_binary::Git;
 use noseyparker::git_url::GitUrl;
+use noseyparker::github;
 use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
@@ -51,7 +51,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Open datastore
     // ---------------------------------------------------------------------------------------------
     let mut datastore = Datastore::create_or_open(&args.datastore)?;
-    let tmpdir = datastore.tmpdir();
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -102,7 +101,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut input_roots = args.input_args.path_inputs.clone();
 
     if !repo_urls.is_empty() {
-        let clones_dir = tmpdir.join("clones");
+        let clones_dir = datastore.clones_dir();
         let git = Git::new();
 
         // FIXME: put a progress meter around this; disable Git's built-in progress
@@ -117,7 +116,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         warn!("Skipping scan of {repo_url}");
                     });
                     progress.inc(1);
-                    continue
+                    continue;
                 }
                 Ok(output_dir) => output_dir,
             };
@@ -131,11 +130,21 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         input_roots.push(output_dir);
                         progress.inc(1);
                         continue;
-                    },
+                    }
                     Err(e) => {
-                        progress.suspend(|| warn!("Failed to update clone of {repo_url} at {}: {e}", output_dir.display()));
-                        if let Err(e) =  std::fs::remove_dir_all(&output_dir) {
-                            progress.suspend(|| error!("Failed to remove clone directory at {}: {e}", output_dir.display()));
+                        progress.suspend(|| {
+                            warn!(
+                                "Failed to update clone of {repo_url} at {}: {e}",
+                                output_dir.display()
+                            )
+                        });
+                        if let Err(e) = std::fs::remove_dir_all(&output_dir) {
+                            progress.suspend(|| {
+                                error!(
+                                    "Failed to remove clone directory at {}: {e}",
+                                    output_dir.display()
+                                )
+                            });
                         }
                     }
                 }
@@ -175,10 +184,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             // Load default ignore file. Note that we have to write it to a file first,
             // because the API for the `ignore` crate doesn't expose something that takes a
             // string.
-            let ignore_path = tmpdir.join("default_ignore_rules.conf");
+            let ignore_path = datastore.scratch_dir().join("default_ignore_rules.conf");
             std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
                 format!("Failed to write default ignore rules to {}", ignore_path.display())
             })?;
+
             ie.add_ignore(&ignore_path).with_context(|| {
                 format!("Failed to load ignore rules from {}", ignore_path.display())
             })?;
@@ -190,6 +200,23 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     format!("Failed to load ignore rules from {}", ignore_path.display())
                 })?;
             }
+
+            // Make sure the datastore itself is not scanned
+            let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
+            ie.filter_entry(move |entry| {
+                let path = match std::fs::canonicalize(entry.path()) {
+                    Err(e) => {
+                        warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
+                        return true;
+                    }
+                    Ok(p) => p,
+                };
+                if &path != &datastore_path {
+                    true
+                } else {
+                    false
+                }
+            });
 
             Ok(ie)
         }()
@@ -277,6 +304,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 datastore
                     .analyze()
                     .expect("should be able to analyze the database");
+                // FIXME: `num_added` is not computed correctly
                 (datastore, num_matches, num_added as u64)
             })
             .expect("should be able to start datastore writer thread")
@@ -460,8 +488,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     Ok(())
 }
-
-
 
 /// Get a path for a local clone of the given git URL underneath `root`.
 fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
