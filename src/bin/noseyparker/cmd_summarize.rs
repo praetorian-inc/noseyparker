@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use indicatif::HumanCount;
 
 use noseyparker::datastore::{Datastore, MatchSummary};
@@ -30,6 +30,10 @@ impl Reportable for MatchSummaryReporter {
             writeln!(&mut writer)?;
         }
         Ok(())
+    }
+
+    fn sarif_format<W: std::io::Write>(&self, _writer: W) -> Result<()> {
+        bail!("SARIF output not supported for this command")
     }
 }
 

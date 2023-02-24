@@ -70,6 +70,7 @@ tracing-log = "0.1"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi"] }
 url = "2.3"
 walkdir = "2.3"
+serde-sarif = "0.3.5"
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

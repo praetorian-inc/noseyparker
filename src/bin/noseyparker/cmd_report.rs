@@ -1,7 +1,9 @@
 use anyhow::{Context, Result};
 use indenter::indented;
 use lazy_static::lazy_static;
+use noseyparker::rules::Rules;
 use serde::{Deserialize, Serialize, Serializer};
+use serde_sarif::sarif;
 use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::bstring_escape::Escaped;
@@ -82,6 +84,153 @@ impl Reportable for DetailsReporter {
                 .map_err(|e| e.into())
                 .and_then(|()| writeln!(writer))?;
         }
+        Ok(())
+    }
+
+    fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let datastore: &Datastore = &self.0;
+        let group_metadata = datastore
+            .get_match_group_metadata()
+            .context("Failed to get match group metadata from datastore")?;
+
+        // Will store every match for the runs.results array property
+        let mut results: Vec<sarif::Result> = vec![];
+
+        for metadata in group_metadata.into_iter() {
+            let matches = datastore
+                .get_match_group_matches(&metadata, None)
+                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+
+            // Will store every match location for the runs.results.location array property
+            let mut locations: Vec<sarif::Location> = vec![];
+
+            // Get the first blob id in the matches, will be written to the description in runs.results.message
+            let first_matched_blob = match matches.first() {
+                Some(m) => m.blob_id.to_string(),
+                None => String::new(),
+            };
+
+            for m in matches.into_iter() {
+                
+                // Build the location for the match
+                let location = sarif::LocationBuilder::default()
+                    .physical_location(
+                        sarif::PhysicalLocationBuilder::default()
+                            .artifact_location(
+                                sarif::ArtifactLocationBuilder::default()
+                                    .uri(
+                                        match &m.provenance {
+                                            Provenance::File { path} => String::from(path.to_str().with_context(|| format!("Failed to convert path to string: {:?}", &m.provenance))?),
+                                            Provenance::GitRepo { path } => String::from(path.to_str().with_context(|| format!("Failed to convert path to string: {:?}", &m.provenance))?),
+                                        }
+                                    )
+                                    .build()?,
+                            )
+                            .region(
+                                sarif::RegionBuilder::default()
+                                    .start_line(m.location.source_span.start.line as i64)
+                                    .start_column(m.location.source_span.start.column as i64)
+                                    .end_line(m.location.source_span.end.line as i64)
+                                    .end_column(m.location.source_span.end.column as i64)
+                                    .snippet(
+                                        sarif::ArtifactContentBuilder::default()
+                                            .text(m.snippet.matching.to_string())
+                                            .build()?,
+                                    )
+                                    .build()?,
+                            )
+                            .build()?,
+                        )
+                    .logical_locations(
+                        vec![
+                            sarif::LogicalLocationBuilder::default()
+                                .kind("blob")
+                                .name(m.blob_id.to_string())
+                                .build()?
+                        ]
+                    )
+                    .build()?;
+                    
+                locations.push(location);
+            }
+
+            // Build the result for the match
+            let result = sarif::ResultBuilder::default()
+                .rule_id(&metadata.rule_name)
+                .message(
+                    sarif::MessageBuilder::default()
+                        .text(format!("Rule {} has detected a secret with {} matches.\nFirst blob id matched : {}", &metadata.rule_name, &metadata.num_matches, first_matched_blob))
+                        .build()?,
+                )
+                .locations(locations)
+                .level(sarif::ResultLevel::Warning.to_string())
+                .build()?;
+            
+            results.push(result);
+        }
+
+        // Load the rules used during the scan for the runs.tool.driver.rules array property
+        let rules = Rules::from_default_rules().with_context(|| format!("Failed to load default rules"))?;
+        
+        let sr = sarif::SarifBuilder::default()
+            .version(sarif::Version::V2_1_0.to_string())
+            .schema("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json")
+            .runs(
+                vec![
+                    sarif::RunBuilder::default()
+                        .tool(
+                            sarif::ToolBuilder::default()
+                                .driver(
+                                    sarif::ToolComponentBuilder::default()
+                                        .name(env!("CARGO_PKG_NAME").to_string())
+                                        .semantic_version(env!("CARGO_PKG_VERSION").to_string())
+                                        .rules(
+                                            rules.into_iter().map(|rule| {
+
+                                                let help = match sarif::MultiformatMessageStringBuilder::default()
+                                                    .text(&rule.references.join("\n"))
+                                                    .build() {
+                                                        Ok(help) => help,
+                                                        Err(_) => sarif::MultiformatMessageStringBuilder::default().text("No help available".to_string()).build().unwrap()
+                                                    };
+                                                    
+
+                                                // If we can't parse the regex pattern, we just no dot put it in the sarif report
+                                                match sarif::MultiformatMessageStringBuilder::default()
+                                                    .text(rule.pattern)
+                                                    .build() {
+                                                    Ok(description) => {
+                                                        return sarif::ReportingDescriptorBuilder::default()
+                                                            .id(&rule.name)
+                                                            .name(&rule.name)
+                                                            .short_description(description.clone())
+                                                            .full_description(description.clone())
+                                                            .help(help)
+                                                            .build()
+                                                    },
+                                                    Err(_) => {
+                                                        return sarif::ReportingDescriptorBuilder::default()
+                                                            .id(&rule.name)
+                                                            .name(&rule.name)
+                                                            .build()
+                                                    }
+                                                };
+                                            }).collect::<Result<Vec<_>, _>>()?
+                                        )
+                                        .build()?,
+                                    )
+                                    .build()?,
+                        )
+                        .results(results)
+                        .build()?,
+                ]
+            )
+            .build()?;
+
+        serde_json::to_writer(&mut writer, &sr)
+            .map_err(|e| e.into())
+            .and_then(|()| writeln!(writer))?;
+
         Ok(())
     }
 }
