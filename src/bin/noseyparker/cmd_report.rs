@@ -38,8 +38,7 @@ impl Reportable for DetailsReporter {
             writeln!(
                 &mut writer,
                 "{} {}",
-                STYLE_FINDING_HEADING
-                    .apply_to(format!("Finding {finding_num}/{num_findings}:")),
+                STYLE_FINDING_HEADING.apply_to(format!("Finding {finding_num}/{num_findings}:")),
                 match_group,
             )?;
         }
@@ -72,7 +71,6 @@ impl Reportable for DetailsReporter {
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
-
 
         for metadata in group_metadata.into_iter() {
             let matches = datastore
@@ -111,19 +109,30 @@ impl Reportable for DetailsReporter {
             };
 
             for m in matches.into_iter() {
-                
                 // Build the location for the match
                 let location = sarif::LocationBuilder::default()
                     .physical_location(
                         sarif::PhysicalLocationBuilder::default()
                             .artifact_location(
                                 sarif::ArtifactLocationBuilder::default()
-                                    .uri(
-                                        match &m.provenance {
-                                            Provenance::File { path} => String::from(path.to_str().with_context(|| format!("Failed to convert path to string: {:?}", &m.provenance))?),
-                                            Provenance::GitRepo { path } => String::from(path.to_str().with_context(|| format!("Failed to convert path to string: {:?}", &m.provenance))?),
+                                    .uri(match &m.provenance {
+                                        Provenance::File { path } => {
+                                            String::from(path.to_str().with_context(|| {
+                                                format!(
+                                                    "Failed to convert path to string: {:?}",
+                                                    &m.provenance
+                                                )
+                                            })?)
                                         }
-                                    )
+                                        Provenance::GitRepo { path } => {
+                                            String::from(path.to_str().with_context(|| {
+                                                format!(
+                                                    "Failed to convert path to string: {:?}",
+                                                    &m.provenance
+                                                )
+                                            })?)
+                                        }
+                                    })
                                     .build()?,
                             )
                             .region(
@@ -140,17 +149,13 @@ impl Reportable for DetailsReporter {
                                     .build()?,
                             )
                             .build()?,
-                        )
-                    .logical_locations(
-                        vec![
-                            sarif::LogicalLocationBuilder::default()
-                                .kind("blob")
-                                .name(m.blob_id.to_string())
-                                .build()?
-                        ]
                     )
+                    .logical_locations(vec![sarif::LogicalLocationBuilder::default()
+                        .kind("blob")
+                        .name(m.blob_id.to_string())
+                        .build()?])
                     .build()?;
-                    
+
                 locations.push(location);
             }
 
@@ -165,13 +170,13 @@ impl Reportable for DetailsReporter {
                 .locations(locations)
                 .level(sarif::ResultLevel::Warning.to_string())
                 .build()?;
-            
+
             results.push(result);
         }
 
         // Load the rules used during the scan for the runs.tool.driver.rules array property
         let rules = Rules::from_default_rules().context("Failed to load default rules")?;
-        
+
         let sr = sarif::SarifBuilder::default()
             .version(sarif::Version::V2_1_0.to_string())
             .schema("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json")
@@ -193,7 +198,7 @@ impl Reportable for DetailsReporter {
                                                         Ok(help) => help,
                                                         Err(_) => sarif::MultiformatMessageStringBuilder::default().text("No help available".to_string()).build().unwrap()
                                                     };
-                                                    
+
 
                                                 // If we can't parse the regex pattern, we just no dot put it in the sarif report
                                                 match sarif::MultiformatMessageStringBuilder::default()
