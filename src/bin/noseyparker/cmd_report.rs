@@ -191,7 +191,6 @@ impl Reportable for DetailsReporter {
                                         .semantic_version(env!("CARGO_PKG_VERSION").to_string())
                                         .rules(
                                             rules.into_iter().map(|rule| {
-
                                                 let help = match sarif::MultiformatMessageStringBuilder::default()
                                                     .text(&rule.references.join("\n"))
                                                     .build() {
@@ -199,8 +198,7 @@ impl Reportable for DetailsReporter {
                                                         Err(_) => sarif::MultiformatMessageStringBuilder::default().text("No help available".to_string()).build().unwrap()
                                                     };
 
-
-                                                // If we can't parse the regex pattern, we just no dot put it in the sarif report
+                                                // If we can't parse the regex pattern, we just do not put it in the sarif report
                                                 match sarif::MultiformatMessageStringBuilder::default()
                                                     .text(rule.pattern)
                                                     .build() {

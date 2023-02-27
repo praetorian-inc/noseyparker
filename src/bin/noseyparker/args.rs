@@ -453,8 +453,8 @@ pub enum OutputFormat {
 
     /// SARIF format
     ///
-    /// This is a JSON-based format used by Microsoft's Static Application Security Testing (SAST) tool.
-    /// See https://github.com/microsoft/sarif-tutorials
+    /// This is the Static Analysis Results Interchange Format, a standardized JSON-based format used by many tools.
+    /// See the spec at <https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html>.
     Sarif,
 }
 
