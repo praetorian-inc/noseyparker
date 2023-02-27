@@ -170,7 +170,7 @@ impl Reportable for DetailsReporter {
         }
 
         // Load the rules used during the scan for the runs.tool.driver.rules array property
-        let rules = Rules::from_default_rules().with_context(|| format!("Failed to load default rules"))?;
+        let rules = Rules::from_default_rules().context("Failed to load default rules")?;
         
         let sr = sarif::SarifBuilder::default()
             .version(sarif::Version::V2_1_0.to_string())
