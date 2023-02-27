@@ -116,22 +116,8 @@ impl Reportable for DetailsReporter {
                             .artifact_location(
                                 sarif::ArtifactLocationBuilder::default()
                                     .uri(match &m.provenance {
-                                        Provenance::File { path } => {
-                                            String::from(path.to_str().with_context(|| {
-                                                format!(
-                                                    "Failed to convert path to string: {:?}",
-                                                    &m.provenance
-                                                )
-                                            })?)
-                                        }
-                                        Provenance::GitRepo { path } => {
-                                            String::from(path.to_str().with_context(|| {
-                                                format!(
-                                                    "Failed to convert path to string: {:?}",
-                                                    &m.provenance
-                                                )
-                                            })?)
-                                        }
+                                        Provenance::File { path } => path.display().to_string(),
+                                        Provenance::GitRepo { path } => path.display().to_string(),
                                     })
                                     .build()?,
                             )
