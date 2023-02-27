@@ -92,7 +92,7 @@ impl Reportable for DetailsReporter {
             .context("Failed to get match group metadata from datastore")?;
 
         // Will store every match for the runs.results array property
-        let mut results: Vec<sarif::Result> = vec![];
+        let mut results: Vec<sarif::Result> = Vec::with_capacity(group_metadata.len());
 
         for metadata in group_metadata.into_iter() {
             let matches = datastore
@@ -100,7 +100,7 @@ impl Reportable for DetailsReporter {
                 .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
 
             // Will store every match location for the runs.results.location array property
-            let mut locations: Vec<sarif::Location> = vec![];
+            let mut locations: Vec<sarif::Location> = Vec::with_capacity(matches.len());
 
             // Get the first blob id in the matches, will be written to the description in runs.results.message
             let first_matched_blob = match matches.first() {
