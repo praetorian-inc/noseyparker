@@ -93,21 +93,31 @@ impl Reportable for DetailsReporter {
 
         // Will store every match for the runs.results array property
         let mut results: Vec<sarif::Result> = Vec::with_capacity(group_metadata.len());
-
         for metadata in group_metadata.into_iter() {
             let matches = datastore
                 .get_match_group_matches(&metadata, None)
                 .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
 
+            let first_matched_blob = &matches
+                .first()
+                .expect("group matches should be non-empty")
+                .blob_id;
+            let message = sarif::MessageBuilder::default()
+                .text(format!(
+                    "Rule {:?} has found {} {}.\nFirst blob id matched: {}",
+                    &metadata.rule_name,
+                    &metadata.num_matches,
+                    if metadata.num_matches == 1 {
+                        "match"
+                    } else {
+                        "matches"
+                    },
+                    first_matched_blob,
+                ))
+                .build()?;
+
             // Will store every match location for the runs.results.location array property
             let mut locations: Vec<sarif::Location> = Vec::with_capacity(matches.len());
-
-            // Get the first blob id in the matches, will be written to the description in runs.results.message
-            let first_matched_blob = match matches.first() {
-                Some(m) => m.blob_id.to_string(),
-                None => String::new(),
-            };
-
             for m in matches.into_iter() {
                 // Build the location for the match
                 let location = sarif::LocationBuilder::default()
@@ -150,72 +160,72 @@ impl Reportable for DetailsReporter {
             // Build the result for the match
             let result = sarif::ResultBuilder::default()
                 .rule_id(&metadata.rule_name)
-                .message(
-                    sarif::MessageBuilder::default()
-                        .text(format!("Rule {} has detected a secret with {} matches.\nFirst blob id matched : {}", &metadata.rule_name, &metadata.num_matches, first_matched_blob))
-                        .build()?,
-                )
+                .message(message)
                 .locations(locations)
                 .level(sarif::ResultLevel::Warning.to_string())
                 .build()?;
-
             results.push(result);
         }
 
         // Load the rules used during the scan for the runs.tool.driver.rules array property
         let rules = Rules::from_default_rules().context("Failed to load default rules")?;
+        let tool = sarif::ToolBuilder::default()
+            .driver(
+                sarif::ToolComponentBuilder::default()
+                    .name(env!("CARGO_PKG_NAME").to_string())
+                    .semantic_version(env!("CARGO_PKG_VERSION").to_string())
+                    .rules(
+                        rules
+                            .into_iter()
+                            .map(|rule| {
+                                let help = match sarif::MultiformatMessageStringBuilder::default()
+                                    .text(&rule.references.join("\n"))
+                                    .build()
+                                {
+                                    Ok(help) => help,
+                                    Err(_) => sarif::MultiformatMessageStringBuilder::default()
+                                        .text("No help available".to_string())
+                                        .build()
+                                        .unwrap(),
+                                };
+
+                                // If we can't parse the regex pattern, we just do not put it in the sarif report
+                                match sarif::MultiformatMessageStringBuilder::default()
+                                    .text(rule.pattern)
+                                    .build()
+                                {
+                                    Ok(description) => {
+                                        return sarif::ReportingDescriptorBuilder::default()
+                                            .id(&rule.name)
+                                            .name(&rule.name)
+                                            .short_description(description.clone())
+                                            .full_description(description)
+                                            .help(help)
+                                            .build()
+                                    }
+                                    Err(_) => {
+                                        return sarif::ReportingDescriptorBuilder::default()
+                                            .id(&rule.name)
+                                            .name(&rule.name)
+                                            .build()
+                                    }
+                                };
+                            })
+                            .collect::<Result<Vec<_>, _>>()?,
+                    )
+                    .build()?,
+            )
+            .build()?;
+
+        let run = sarif::RunBuilder::default()
+            .tool(tool)
+            .results(results)
+            .build()?;
 
         let sr = sarif::SarifBuilder::default()
             .version(sarif::Version::V2_1_0.to_string())
             .schema("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json")
-            .runs(
-                vec![
-                    sarif::RunBuilder::default()
-                        .tool(
-                            sarif::ToolBuilder::default()
-                                .driver(
-                                    sarif::ToolComponentBuilder::default()
-                                        .name(env!("CARGO_PKG_NAME").to_string())
-                                        .semantic_version(env!("CARGO_PKG_VERSION").to_string())
-                                        .rules(
-                                            rules.into_iter().map(|rule| {
-                                                let help = match sarif::MultiformatMessageStringBuilder::default()
-                                                    .text(&rule.references.join("\n"))
-                                                    .build() {
-                                                        Ok(help) => help,
-                                                        Err(_) => sarif::MultiformatMessageStringBuilder::default().text("No help available".to_string()).build().unwrap()
-                                                    };
-
-                                                // If we can't parse the regex pattern, we just do not put it in the sarif report
-                                                match sarif::MultiformatMessageStringBuilder::default()
-                                                    .text(rule.pattern)
-                                                    .build() {
-                                                    Ok(description) => {
-                                                        return sarif::ReportingDescriptorBuilder::default()
-                                                            .id(&rule.name)
-                                                            .name(&rule.name)
-                                                            .short_description(description.clone())
-                                                            .full_description(description)
-                                                            .help(help)
-                                                            .build()
-                                                    },
-                                                    Err(_) => {
-                                                        return sarif::ReportingDescriptorBuilder::default()
-                                                            .id(&rule.name)
-                                                            .name(&rule.name)
-                                                            .build()
-                                                    }
-                                                };
-                                            }).collect::<Result<Vec<_>, _>>()?
-                                        )
-                                        .build()?,
-                                    )
-                                    .build()?,
-                        )
-                        .results(results)
-                        .build()?,
-                ]
-            )
+            .runs(vec![run])
             .build()?;
 
         serde_json::to_writer(&mut writer, &sr)
