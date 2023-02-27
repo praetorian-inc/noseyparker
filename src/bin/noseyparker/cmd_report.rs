@@ -204,7 +204,7 @@ impl Reportable for DetailsReporter {
                                                             .id(&rule.name)
                                                             .name(&rule.name)
                                                             .short_description(description.clone())
-                                                            .full_description(description.clone())
+                                                            .full_description(description)
                                                             .help(help)
                                                             .build()
                                                     },
