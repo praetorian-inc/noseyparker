@@ -450,6 +450,12 @@ pub enum OutputFormat {
     ///
     /// This is a sequence of JSON objects, one per line.
     Jsonl,
+
+    /// SARIF format
+    ///
+    /// This is the Static Analysis Results Interchange Format, a standardized JSON-based format used by many tools.
+    /// See the spec at <https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html>.
+    Sarif,
 }
 
 impl std::fmt::Display for OutputFormat {
@@ -458,6 +464,7 @@ impl std::fmt::Display for OutputFormat {
             OutputFormat::Human => "human",
             OutputFormat::Json => "json",
             OutputFormat::Jsonl => "jsonl",
+            OutputFormat::Sarif => "sarif",
         };
         write!(f, "{s}")
     }
@@ -470,6 +477,7 @@ pub trait Reportable {
     fn human_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
     fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
     fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
+    fn sarif_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
 
     fn report(&self, output_args: &OutputArgs) -> Result<()> {
         let writer = output_args
@@ -480,6 +488,7 @@ pub trait Reportable {
             OutputFormat::Human => self.human_format(writer),
             OutputFormat::Json => self.json_format(writer),
             OutputFormat::Jsonl => self.jsonl_format(writer),
+            OutputFormat::Sarif => self.sarif_format(writer),
         };
         match result {
             Ok(()) => Ok(()),

@@ -30,6 +30,7 @@ Output Options:
           - human: A text-based format designed for humans
           - json:  Pretty-printed JSON format
           - jsonl: JSON Lines format
+          - sarif: SARIF format
 
 Global Options:
   -v, --verbose...

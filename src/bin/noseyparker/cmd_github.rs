@@ -46,4 +46,8 @@ impl Reportable for RepoReporter {
         }
         Ok(())
     }
+
+    fn sarif_format<W: std::io::Write>(&self, _writer: W) -> Result<()> {
+        bail!("SARIF output not supported for this command")
+    }
 }

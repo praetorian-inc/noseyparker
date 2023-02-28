@@ -211,11 +211,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     }
                     Ok(p) => p,
                 };
-                if &path != &datastore_path {
-                    true
-                } else {
-                    false
-                }
+                path != datastore_path
             });
 
             Ok(ie)
