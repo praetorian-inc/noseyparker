@@ -137,8 +137,8 @@ impl Reportable for DetailsReporter {
                                     .start_column(m.location.source_span.start.column as i64)
                                     .end_line(m.location.source_span.end.line as i64)
                                     .end_column(m.location.source_span.end.column as i64 + 1)
-                                    .byte_offset(m.location.offset_span.start as i64)
-                                    .byte_length(m.location.offset_span.len() as i64)
+                                    // .byte_offset(m.location.offset_span.start as i64)
+                                    // .byte_length(m.location.offset_span.len() as i64)
                                     .snippet(
                                         sarif::ArtifactContentBuilder::default()
                                             .text(m.snippet.matching.to_string())
