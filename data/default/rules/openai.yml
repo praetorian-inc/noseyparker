@@ -1,0 +1,17 @@
+rules:
+
+- name: OpenAI API Key
+
+  pattern: |
+    (?x)
+    \b
+    (sk-[a-zA-Z0-9]{48})
+    \b
+
+  examples:
+  - |
+      curl https://api.openai.com/v1/images/generations  -H 'Content-Type: application/json'  -H "Authorization: Bearer sk-mxIt5s1tyfCJyIKHwrqOT4BlbkFJT3VVmv6VdSwB7XXIq1TO"
+
+  references:
+  - https://platform.openai.com/docs/api-reference
+  - https://platform.openai.com/docs/api-reference/authentication
