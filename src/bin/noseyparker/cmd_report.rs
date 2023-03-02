@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use indenter::indented;
 use lazy_static::lazy_static;
 use noseyparker::rules::Rules;
@@ -78,9 +78,8 @@ impl Reportable for DetailsReporter {
                 .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
             let match_group = MatchGroup { metadata, matches };
 
-            serde_json::to_writer(&mut writer, &match_group)
-                .map_err(|e| e.into())
-                .and_then(|()| writeln!(writer))?;
+            serde_json::to_writer(&mut writer, &match_group)?;
+            writeln!(writer)?;
         }
         Ok(())
     }
@@ -92,148 +91,177 @@ impl Reportable for DetailsReporter {
             .context("Failed to get match group metadata from datastore")?;
 
         // Will store every match for the runs.results array property
-        let mut results: Vec<sarif::Result> = Vec::with_capacity(group_metadata.len());
-        for metadata in group_metadata.into_iter() {
-            let matches = datastore
-                .get_match_group_matches(&metadata, None)
-                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+        let results: Vec<sarif::Result> = group_metadata
+            .into_iter()
+            .map(|metadata| {
+                let matches = datastore
+                    .get_match_group_matches(&metadata, None)
+                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
 
-            let first_matched_blob = &matches
-                .first()
-                .expect("group matches should be non-empty")
-                .blob_id;
-            let message = sarif::MessageBuilder::default()
-                .text(format!(
-                    "Rule {:?} has found {} {}.\nFirst blob id matched: {}",
-                    &metadata.rule_name,
-                    &metadata.num_matches,
-                    if metadata.num_matches == 1 {
-                        "match"
-                    } else {
-                        "matches"
-                    },
-                    first_matched_blob,
-                ))
-                .build()?;
+                let first_match_blob_id = match matches.first() {
+                    Some(m) => m.blob_id.to_string(),
+                    None => bail!("Failed to get group matches for group {metadata:?}"),
+                };
+                let message = sarif::MessageBuilder::default()
+                    .text(format!(
+                        "Rule {:?} found {} {}.\nFirst blob id matched: {}",
+                        metadata.rule_name.clone(),
+                        metadata.num_matches.to_string(),
+                        if metadata.num_matches == 1 {
+                            "match".to_string()
+                        } else {
+                            "matches".to_string()
+                        },
+                        first_match_blob_id,
+                    ))
+                    .build()?;
 
-            // Will store every match location for the runs.results.location array property
-            let mut locations: Vec<sarif::Location> = Vec::with_capacity(matches.len());
-            for m in matches.into_iter() {
-                // Build the location for the match
-                let location = sarif::LocationBuilder::default()
-                    .physical_location(
-                        sarif::PhysicalLocationBuilder::default()
-                            .artifact_location(
-                                sarif::ArtifactLocationBuilder::default()
-                                    .uri(match &m.provenance {
-                                        Provenance::File { path } => path.display().to_string(),
-                                        Provenance::GitRepo { path } => path.display().to_string(),
-                                    })
-                                    .build()?,
-                            )
-                            .region(
-                                sarif::RegionBuilder::default()
-                                    .start_line(m.location.source_span.start.line as i64)
-                                    .start_column(m.location.source_span.start.column as i64)
-                                    .end_line(m.location.source_span.end.line as i64)
-                                    .end_column(m.location.source_span.end.column as i64 + 1)
-                                    // .byte_offset(m.location.offset_span.start as i64)
-                                    // .byte_length(m.location.offset_span.len() as i64)
-                                    .snippet(
-                                        sarif::ArtifactContentBuilder::default()
-                                            .text(m.snippet.matching.to_string())
+                // Will store every match location for the runs.results.location array property
+                let locations: Vec<sarif::Location> = matches
+                    .into_iter()
+                    .map(|m| {
+                        let source_span = &m.location.source_span;
+                        // let offset_span = &m.location.offset_span;
+                        let uri = match m.provenance {
+                            Provenance::File { path } => {
+                                path.display().to_string()
+                            }
+                            // FIXME: using this path is nonsense here
+                            Provenance::GitRepo { path } => {
+                                path.display().to_string()
+                            }
+                        };
+
+                        let location = sarif::LocationBuilder::default()
+                            .physical_location(
+                                sarif::PhysicalLocationBuilder::default()
+                                    .artifact_location(
+                                        sarif::ArtifactLocationBuilder::default()
+                                            .uri(uri)
+                                            .build()?,
+                                    )
+                                    // .context_region() FIXME: fill this in with location info of surrounding context
+                                    .region(
+                                        sarif::RegionBuilder::default()
+                                            .start_line(source_span.start.line as i64)
+                                            .start_column(source_span.start.column as i64)
+                                            .end_line(source_span.end.line as i64)
+                                            .end_column(source_span.end.column as i64 + 1)
+                                            // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
+                                            /*
+                                            .byte_offset(offset_span.start as i64)
+                                            .byte_length(offset_span.len() as i64)
+                                            */
+                                            .snippet(
+                                                sarif::ArtifactContentBuilder::default()
+                                                    .text(m.snippet.matching.to_string())
+                                                    .build()?,
+                                            )
                                             .build()?,
                                     )
                                     .build()?,
                             )
-                            .build()?,
-                    )
-                    .logical_locations(vec![sarif::LogicalLocationBuilder::default()
-                        .kind("blob")
-                        .name(m.blob_id.to_string())
-                        .build()?])
+                            .logical_locations([sarif::LogicalLocationBuilder::default()
+                                .kind("blob")
+                                .name(m.blob_id.to_string())
+                                .build()?])
+                            .build()?;
+                        Ok(location)
+                    })
+                    .collect::<Result<_>>()?;
+
+                let sha1_fingerprint = {
+                    let mut h = gix_features::hash::Sha1::default();
+                    h.update(&metadata.match_content);
+                    hex::encode(h.digest())
+                };
+
+                // Build the result for the match
+                let result = sarif::ResultBuilder::default()
+                    .rule_id(&metadata.rule_name)
+                    // .occurrence_count(locations.len() as i64)  // FIXME: enable?
+                    .message(message)
+                    .kind(sarif::ResultKind::Review.to_string())
+                    .locations(locations)
+                    .level(sarif::ResultLevel::Warning.to_string())
+                    .partial_fingerprints([(
+                        "match_group_content/sha256/v1".to_string(),
+                        sha1_fingerprint,
+                    )])
                     .build()?;
-
-                locations.push(location);
-            }
-
-            // Build the result for the match
-            let result = sarif::ResultBuilder::default()
-                .rule_id(&metadata.rule_name)
-                .message(message)
-                .locations(locations)
-                .level(sarif::ResultLevel::Warning.to_string())
-                .build()?;
-            results.push(result);
-        }
-
-        // Load the rules used during the scan for the runs.tool.driver.rules array property
-        let rules = Rules::from_default_rules().context("Failed to load default rules")?;
-        let tool = sarif::ToolBuilder::default()
-            .driver(
-                sarif::ToolComponentBuilder::default()
-                    .name(env!("CARGO_PKG_NAME").to_string())
-                    .semantic_version(env!("CARGO_PKG_VERSION").to_string())
-                    .rules(
-                        rules
-                            .into_iter()
-                            .map(|rule| {
-                                let help = match sarif::MultiformatMessageStringBuilder::default()
-                                    .text(&rule.references.join("\n"))
-                                    .build()
-                                {
-                                    Ok(help) => help,
-                                    Err(_) => sarif::MultiformatMessageStringBuilder::default()
-                                        .text("No help available".to_string())
-                                        .build()
-                                        .unwrap(),
-                                };
-
-                                // If we can't parse the regex pattern, we just do not put it in the sarif report
-                                match sarif::MultiformatMessageStringBuilder::default()
-                                    .text(rule.pattern)
-                                    .build()
-                                {
-                                    Ok(description) => {
-                                        return sarif::ReportingDescriptorBuilder::default()
-                                            .id(&rule.name)
-                                            .name(&rule.name)
-                                            .short_description(description.clone())
-                                            .full_description(description)
-                                            .help(help)
-                                            .build()
-                                    }
-                                    Err(_) => {
-                                        return sarif::ReportingDescriptorBuilder::default()
-                                            .id(&rule.name)
-                                            .name(&rule.name)
-                                            .build()
-                                    }
-                                };
-                            })
-                            .collect::<Result<Vec<_>, _>>()?,
-                    )
-                    .build()?,
-            )
-            .build()?;
+                Ok(result)
+            })
+            .collect::<Result<_>>()?;
 
         let run = sarif::RunBuilder::default()
-            .tool(tool)
+            .tool(noseyparker_sarif_tool()?)
+            // .artifacts([ ])  // FIXME: add an entry for each blob with findings here; for each scanned git repo, add "nested artifacts" for each blob
             .results(results)
             .build()?;
 
-        let sr = sarif::SarifBuilder::default()
+        let sarif = sarif::SarifBuilder::default()
             .version(sarif::Version::V2_1_0.to_string())
-            .schema("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json")
-            .runs(vec![run])
+            // .schema("https://docs.oasis-open.org/sarif/sarif/v2.1.0/cos02/schemas/sarif-schema-2.1.0.json")
+            .schema(sarif::SCHEMA_URL)
+            .runs([run])
             .build()?;
 
-        serde_json::to_writer(&mut writer, &sr)
-            .map_err(|e| e.into())
-            .and_then(|()| writeln!(writer))?;
+        serde_json::to_writer(&mut writer, &sarif)?;
+        writeln!(writer)?;
 
         Ok(())
     }
+}
+
+/// Load the rules used during the scan for the runs.tool.driver.rules array property
+fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
+    Rules::from_default_rules()
+        .context("Failed to load default rules")?
+        .into_iter()
+        .map(|rule| {
+            let help = sarif::MultiformatMessageStringBuilder::default()
+                .text(&rule.references.join("\n"))
+                .build()?;
+
+            // FIXME: add better descriptions to Nosey Parker rules
+            let description = sarif::MultiformatMessageStringBuilder::default()
+                .text(rule.pattern)
+                .build()?;
+
+            let rule = sarif::ReportingDescriptorBuilder::default()
+                .id(&rule.name) // FIXME: nosey parker rules need to have stable, unique IDs, preferably without spaces
+                // .name(&rule.name)  // FIXME: populate this once we have proper IDs
+                .short_description(description)
+                // .full_description(description)  // FIXME: populate this
+                .help(help) // FIXME: provide better help messages for NP rules that we can include here
+                // .help_uri() // FIXME: populate this
+                .build()?;
+            Ok(rule)
+        })
+        .collect::<Result<Vec<_>>>()
+}
+
+fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
+    sarif::ToolBuilder::default()
+        .driver(
+            sarif::ToolComponentBuilder::default()
+                .name(env!("CARGO_PKG_NAME").to_string())
+                .semantic_version(env!("CARGO_PKG_VERSION").to_string())
+                .full_name(concat!("Nosey Parker ", env!("CARGO_PKG_VERSION"))) // FIXME: move into cargo.toml metadata, extract here; see https://docs.rs/cargo_metadata/latest/cargo_metadata/
+                .organization("Praetorian, Inc") // FIXME: move into cargo.toml metadata, extract here
+                .information_uri(env!("CARGO_PKG_HOMEPAGE").to_string())
+                .download_uri(env!("CARGO_PKG_REPOSITORY").to_string())
+                // .full_description() // FIXME: populate with some long description, like the text from the README.md
+                .short_description(
+                    sarif::MultiformatMessageStringBuilder::default()
+                        .text(env!("CARGO_PKG_DESCRIPTION"))
+                        .build()?,
+                )
+                .rules(noseyparker_sarif_rules()?)
+                .build()?,
+        )
+        .build()
+        .map_err(|e| e.into())
 }
 
 /// A group of matches that all have the same rule and capture group content
