@@ -40,7 +40,7 @@ wget https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.8
 Build with cmake:
 
 ```
-cd vectorscan-vectorscan-5.4.8 && cmake -B build -DFAT_RUNTIME=OFF -DCMAKE_BUILD_TYPE=Release . && cmake --build build
+cd vectorscan-vectorscan-5.4.8 && cmake -B build -DCMAKE_BUILD_TYPE=Release . && cmake --build build
 ```
 
 Set the `HYPERSCAN_ROOT` environment variable so that Nosey Parker builds against your from-source build of Vectorscan:
@@ -65,13 +65,13 @@ This will produce a binary at `target/release/noseyparker`.
 
 ## Docker Usage
 
-**A [prebuilt Docker image](https://ghcr.io/praetorian-inc/noseyparker:latest) is available for the latest release for x86_64:**
+**A prebuilt Docker image is available for the latest release for x86_64:**
 
 ```
 docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-**A [prebuilt Docker image](https://ghcr.io/praetorian-inc/noseyparker:edge) is available for the most recent commit for x86_64:**
+**A prebuilt Docker image is available for the most recent commit for x86_64:**
 
 ```
 docker pull ghcr.io/praetorian-inc/noseyparker:edge

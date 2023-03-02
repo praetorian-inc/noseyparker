@@ -7,7 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+
 ## [v0.12.0](https://github.com/praetorian-inc/noseyparker/releases/v0.12.0) (2023-03-02)
+
+A [prebuilt Docker image](https://github.com/praetorian-inc/noseyparker/pkgs/container/noseyparker/74541424?tag=v0.12.0) for this release is available for x86_64 architectures:
+```
+docker pull ghcr.io/praetorian-inc/noseyparker:v0.12.0
+```
 
 ### Additions
 - The `scan` command can now be given Git https URLs, GitHub usernames, and GitHub organization names as inputs, and will enumerate, clone, and scan as appropriate ([#14](https://github.com/praetorian-inc/noseyparker/issues/14)).
@@ -90,7 +96,7 @@ Its `scan`, `summarize`, and `report` commands are functional.
 It is able to scan files, directories, and the complete history of Git repositories at several hundred megabytes per second per core.
 It comes with 58 rules.
 
-A prebuilt Docker image for this release is available for x86_64 architectures:
+A [prebuilt Docker image](https://github.com/praetorian-inc/noseyparker/pkgs/container/noseyparker/61045424?tag=v0.11.0) for this release is available for x86_64 architectures:
 ```shell
 docker pull ghcr.io/praetorian-inc/noseyparker:v0.11.0
 ```
