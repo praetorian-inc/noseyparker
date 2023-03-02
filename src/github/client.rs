@@ -25,6 +25,13 @@ impl Client {
         ClientBuilder::new().build()
     }
 
+    pub fn is_authenticated(&self) -> bool {
+        match self.auth {
+            Auth::Unauthenticated => false,
+            Auth::PersonalAccessToken(_) => true,
+        }
+    }
+
     pub async fn get_rate_limit(&self) -> Result<RateLimitOverview> {
         let response = self.get(&["rate_limit"]).await?;
         let body = response.json().await.map_err(Error::ReqwestError)?;

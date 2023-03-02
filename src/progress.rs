@@ -1,37 +1,17 @@
 use indicatif::{ProgressBar, ProgressStyle};
-use lazy_static::lazy_static;
 use std::borrow::Cow;
 use std::time::{Duration, Instant};
 
 /// How often should progress bars be redrawn?
 pub const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(500);
 
-lazy_static! {
-    static ref INDEFINITE_BYTES_STYLE: ProgressStyle =
-        ProgressStyle::with_template("{spinner} {msg} {total_bytes} [{elapsed_precise}]")
-            .expect("progress bar style template should compile");
-
-    static ref INDEFINITE_BYTES_FINISH_STYLE: ProgressStyle =
-        ProgressStyle::with_template("{msg} [{elapsed_precise}]")
-            .expect("progress bar style template should compile");
-
-    // NOTE: indicatif uses an estimation algorithm for ETA and the throughput that doesn't
-    //       work well for this use case, resulting in wildly variable and inaccurate values.
-    //       The problem is with the library's internal `Estimator` type.
-    //
-    //       Until that's fixed or we otherwise work around it, we avoid showing ETAs and rates.
-    //
-    //       See https://github.com/console-rs/indicatif/issues/394.
-
-    static ref DEFINITE_BYTES_STYLE: ProgressStyle =
-        ProgressStyle::with_template("{msg}  {bar} {percent:>3}%  {bytes}/{total_bytes}  [{elapsed_precise}]")
-            .expect("progress bar style template should compile");
-
-    static ref DEFINITE_UNITLESS_STYLE: ProgressStyle =
-        ProgressStyle::with_template("{msg}  {bar} {percent:>3}%  {pos}/{len}  [{elapsed_precise}]")
-            .expect("progress bar style template should compile");
-}
-
+// NOTE: indicatif uses an estimation algorithm for ETA and the throughput that doesn't
+//       work well for Nosey Parker, resulting in wildly variable and inaccurate values.
+//       The problem is with the library's internal `Estimator` type.
+//
+//       Until that's fixed or we otherwise work around it, we avoid showing ETAs and rates.
+//
+//       See https://github.com/console-rs/indicatif/issues/394.
 
 /// Wraps an `indicatif::ProgressBar` with a local buffer to reduce update contention overhead.
 /// Updates are batched an the progress bar is updated only every `PROGRESS_UPDATE_INTERVAL`.
@@ -47,12 +27,16 @@ pub struct Progress {
 }
 
 impl Progress {
-    pub fn new_bytes_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
+    pub fn new_countup_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
         let inner = if enabled {
-            let inner = ProgressBar::new_spinner()
-                .with_style(INDEFINITE_BYTES_STYLE.clone())
-                .with_message(message);
+            let style = ProgressStyle::with_template(
+                "{spinner} {msg} {human_len} [{elapsed_precise}]",
+            )
+            .expect("progress bar style template should compile");
 
+            let inner = ProgressBar::new_spinner()
+                .with_style(style)
+                .with_message(message);
             inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
 
             inner
@@ -60,20 +44,54 @@ impl Progress {
             ProgressBar::hidden()
         };
 
+        let finish_style = ProgressStyle::with_template("{msg} [{elapsed_precise}]")
+            .expect("progress bar style template should compile");
+
         Progress {
             inc_since_sync: 0,
             last_sync: Instant::now(),
             inner,
-            finish_style: Some(INDEFINITE_BYTES_FINISH_STYLE.clone()),
+            finish_style: Some(finish_style),
+        }
+    }
+
+    pub fn new_bytes_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
+        let inner = if enabled {
+            let style =
+                ProgressStyle::with_template("{spinner} {msg} {total_bytes} [{elapsed_precise}]")
+                    .expect("progress bar style template should compile");
+
+            let inner = ProgressBar::new_spinner()
+                .with_style(style)
+                .with_message(message);
+            inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
+
+            inner
+        } else {
+            ProgressBar::hidden()
+        };
+
+        let finish_style = ProgressStyle::with_template("{msg} [{elapsed_precise}]")
+            .expect("progress bar style template should compile");
+
+        Progress {
+            inc_since_sync: 0,
+            last_sync: Instant::now(),
+            inner,
+            finish_style: Some(finish_style),
         }
     }
 
     pub fn new_bar<T: Into<Cow<'static, str>>>(total: u64, message: T, enabled: bool) -> Self {
+        let style = ProgressStyle::with_template(
+            "{msg}  {bar} {percent:>3}%  {pos}/{len}  [{elapsed_precise}]",
+        )
+        .expect("progress bar style template should compile");
+
         let inner = if enabled {
             let inner = ProgressBar::new(total)
-                .with_style(DEFINITE_UNITLESS_STYLE.clone())
+                .with_style(style)
                 .with_message(message);
-
             inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
 
             inner
@@ -89,10 +107,19 @@ impl Progress {
         }
     }
 
-    pub fn new_bytes_bar<T: Into<Cow<'static, str>>>(total_bytes: u64, message: T, enabled: bool) -> Self {
+    pub fn new_bytes_bar<T: Into<Cow<'static, str>>>(
+        total_bytes: u64,
+        message: T,
+        enabled: bool,
+    ) -> Self {
+        let style = ProgressStyle::with_template(
+            "{msg}  {bar} {percent:>3}%  {bytes}/{total_bytes}  [{elapsed_precise}]",
+        )
+        .expect("progress bar style template should compile");
+
         let inner = if enabled {
             let inner = ProgressBar::new(total_bytes)
-                .with_style(DEFINITE_BYTES_STYLE.clone())
+                .with_style(style)
                 .with_message(message);
 
             inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
@@ -116,8 +143,8 @@ impl Progress {
     }
 
     #[inline]
-    pub fn inc(&mut self, bytes_seen: u64) {
-        self.inc_since_sync += bytes_seen;
+    pub fn inc(&mut self, amount: u64) {
+        self.inc_since_sync += amount;
         if self.last_sync.elapsed() >= PROGRESS_UPDATE_INTERVAL {
             self.sync();
         }
@@ -126,7 +153,7 @@ impl Progress {
     pub fn finish_with_message<T: Into<Cow<'static, str>>>(&mut self, message: T) {
         self.sync();
         match &self.finish_style {
-            Some(style) => { self.inner.set_style(style.clone()) }
+            Some(style) => self.inner.set_style(style.clone()),
             None => {}
         };
         self.inner.finish_with_message(message);
@@ -135,7 +162,7 @@ impl Progress {
     pub fn finish(&mut self) {
         self.sync();
         match &self.finish_style {
-            Some(style) => { self.inner.set_style(style.clone()) }
+            Some(style) => self.inner.set_style(style.clone()),
             None => {}
         };
         self.inner.finish();

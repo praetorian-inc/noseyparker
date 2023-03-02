@@ -1,6 +1,8 @@
 use super::models::Repository;
 use super::{Client, Result};
 
+use crate::progress::Progress;
+
 /// A `RepoEnumerator` provides higher-level functionality on top of the GitHub REST API to list
 /// repositories belonging to specific users or organizations.
 pub struct RepoEnumerator<'c> {
@@ -31,25 +33,20 @@ impl<'c> RepoEnumerator<'c> {
     pub async fn enumerate_repo_urls(
         &self,
         repo_specifiers: &RepoSpecifiers,
+        mut progress: Option<&mut Progress>,
     ) -> Result<Vec<String>> {
         let mut repo_urls = Vec::new();
 
         for username in &repo_specifiers.user {
-            repo_urls.extend(
-                self.enumerate_user_repos(username)
-                    .await?
-                    .into_iter()
-                    .map(|r| r.clone_url),
-            );
+            let to_add = self.enumerate_user_repos(username).await?;
+            progress.as_mut().map(|p| p.inc(to_add.len() as u64));
+            repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 
         for orgname in &repo_specifiers.organization {
-            repo_urls.extend(
-                self.enumerate_org_repos(orgname)
-                    .await?
-                    .into_iter()
-                    .map(|r| r.clone_url),
-            );
+            let to_add = self.enumerate_org_repos(orgname).await?;
+            progress.as_mut().map(|p| p.inc(to_add.len() as u64));
+            repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 
         repo_urls.sort();

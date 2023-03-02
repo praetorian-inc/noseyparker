@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 
 use crate::args::{GitHubArgs, GitHubReposListArgs, GlobalArgs, Reportable};
 use noseyparker::github;
@@ -17,7 +17,8 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<(
     let repo_urls = github::enumerate_repo_urls(&github::RepoSpecifiers {
         user: args.repo_specifiers.user.clone(),
         organization: args.repo_specifiers.organization.clone(),
-    })?;
+    }, None)
+    .context("Failed to enuemrate GitHub repositories")?;
     RepoReporter(repo_urls).report(&args.output_args)
 }
 

@@ -13,11 +13,13 @@ pub use error::Error;
 pub use repo_enumerator::{RepoEnumerator, RepoSpecifiers};
 pub use result::Result;
 
+use crate::progress::Progress;
+
 /// List accessible repository URLs matching the given specifiers.
 ///
 /// This is a high-level wrapper for enumerating GitHub repositories that handles the details of
 /// creating an async runtime and a GitHub REST API client.
-pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers) -> anyhow::Result<Vec<String>> {
+pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers, progress: Option<&mut Progress>) -> anyhow::Result<Vec<String>> {
     use anyhow::{bail, Context};
     use tracing::{debug, warn};
 
@@ -43,7 +45,7 @@ pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers) -> anyhow::Result<V
         debug!("GitHub rate limits: {:?}", rate_limit.rate);
 
         let repo_enumerator = RepoEnumerator::new(&client);
-        let repo_urls = repo_enumerator.enumerate_repo_urls(repo_specifiers).await?;
+        let repo_urls = repo_enumerator.enumerate_repo_urls(repo_specifiers, progress).await?;
         Ok(repo_urls) // ::<Vec<String>, Error>(repo_urls)
     });
 
@@ -51,7 +53,12 @@ pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers) -> anyhow::Result<V
         Ok(repo_urls) => Ok(repo_urls),
         Err(err) => {
             if let Error::RateLimited { wait, .. } = err {
-                warn!("Rate limit exceeded: Would need to wait for {wait:?} before retrying");
+                let suggestion = if client.is_authenticated() {
+                    ""
+                } else {
+                    "; consider supplying a GitHub personal access token through the NP_GITHUB_TOKEN environment variable"
+                };
+                warn!("Rate limit exceeded: must wait for {wait:?} before retrying{}", suggestion);
             }
             bail!(err);
         }

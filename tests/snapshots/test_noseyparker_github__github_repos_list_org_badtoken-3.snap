@@ -2,8 +2,9 @@
 source: tests/test_noseyparker_github.rs
 expression: stderr
 ---
-Error: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
+Error: Failed to enuemrate GitHub repositories
 
 Caused by:
-    HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
+    0: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
+    1: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
 

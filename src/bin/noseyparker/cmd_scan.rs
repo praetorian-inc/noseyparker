@@ -75,18 +75,34 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         };
         let mut repo_urls = args.input_args.git_url.clone();
         if !repo_specifiers.is_empty() {
-            for repo_string in github::enumerate_repo_urls(&repo_specifiers)? {
+            let mut progress = Progress::new_countup_spinner(
+                "Enumerating GitHub repositories...",
+                progress_enabled,
+            );
+            let mut num_found: u64 = 0;
+            for repo_string in github::enumerate_repo_urls(&repo_specifiers, Some(&mut progress))
+                .context("Failed to enuemrate GitHub repositories")?
+            {
                 match GitUrl::from_str(&repo_string) {
                     Ok(repo_url) => repo_urls.push(repo_url),
                     Err(e) => {
-                        error!("Failed to parse repo URL from {repo_string}: {e}");
+                        progress.suspend(|| {
+                            error!("Failed to parse repo URL from {repo_string}: {e}");
+                        });
                         continue;
                     }
                 }
+                num_found += 1;
             }
+
+            progress.finish_with_message(format!(
+                "Found {} repositories from GitHub",
+                HumanCount(num_found)
+            ));
         }
         repo_urls.sort();
         repo_urls.dedup();
+
         repo_urls
     };
 
