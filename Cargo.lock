@@ -3130,9 +3130,9 @@ dependencies = [
 
 [[package]]
 name = "serde-sarif"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b47973bda4fb144010ea1c14b2677b6df84262627913e1c6a2682d8ed9e0dcc9"
+checksum = "51eda7853590f74ef6f8b9d868f20679f2072b4b86c8970d5ce320b42d457198"
 dependencies = [
  "anyhow",
  "derive_builder",
@@ -3325,9 +3325,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.107"
+version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f4064b5b16e03ae50984a5a8ed5d4f8803e6bc1fd170a3cda91a1be4b18e3f5"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
 dependencies = [
  "proc-macro2",
  "quote",
