@@ -2,7 +2,8 @@
 source: tests/test_noseyparker_help.rs
 expression: stdout
 ---
-Find secrets and sensitive information in textual data
+Nosey Parker is a command-line program that finds secrets and sensitive information in textual data
+and Git history.
 
 Usage: noseyparker [OPTIONS] <COMMAND>
 

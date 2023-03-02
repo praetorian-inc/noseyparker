@@ -3,9 +3,10 @@ name = "noseyparker"
 authors = [ "Brad Larsen <bradford.larsen@praetorian.com>", ]
 version = "0.11.0"
 edition = "2021"
-description = "Find secrets and sensitive information in textual data"
+description = "Nosey Parker is a command-line program that finds secrets and sensitive information in textual data and Git history."
 license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://github.com/praetorian-inc/noseyparker"
 repository = "https://github.com/praetorian-inc/noseyparker"
 
 publish = false
