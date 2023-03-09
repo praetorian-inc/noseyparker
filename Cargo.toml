@@ -38,8 +38,8 @@ bstr = { version = "1.0", features = ["serde"] }
 chrono = "0.4"
 clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
-gix-features = { version = "0.26", features = ["fast-sha1"] }
-gix = { version = "0.37", features = ["max-performance"] }
+gix-features = { version = "0.28", features = ["fast-sha1"] }
+gix = { version = "0.40", features = ["max-performance", "fast-sha1"] }
 libc = "0.2"
 hex = "0.4"
 hyperscan = { version = "0.3", features = ["full", "static"] }
