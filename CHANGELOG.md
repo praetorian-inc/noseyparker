@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Changes
-- The `Telegram Bot Token` rule has been improved to reduce false negatives.
+- Several existing rules were modified to reduce false positives and false negatives:
+
+  - Generic API Key
+  - Telegram Bot Token
+
+- New rules have been added:
+
+    - Generic Username and Password (quoted)
+    - Generic Username and Password (unquoted)
 
 ### Fixes
 - The Docker image now has the `git` binary installed. Previously this was missing, causing the `scan` command to fail when the `--git-url`, `--github-user`, or `--github-organization` input specifiers were used.

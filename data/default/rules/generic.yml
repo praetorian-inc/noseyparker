@@ -1,19 +1,119 @@
 rules:
 
 - name: Generic Secret
-  pattern: '(?i)secret.{0,20}\b([0-9a-z]{32,64})\b'
+  pattern: |
+    (?x)(?i)
+    secret
+    .{0,20}
+    \b
+    ([0-9a-z]{32,64})
+    \b
+
   examples:
   - '    private static String CLIENT_SECRET = "6fb1cff7690db9ac066cadbbde8e3c078efdabcf";'
 
   # FIXME: extend this rule so these examples get matched
   negative_examples:
+  - "    client_credential='5pX8Q~MmTI8OMBJFVqMlFR4DE3Spz6Qm.xO.Gbf-'"
   - "    secret_access_key = 'abcdefg12346+FJQCK'"
   - '    Ldap password               ----   H7IKC85R#@4$'
 
 
 - name: Generic API Key
-  pattern: '(?i)(?:api|access).?key.{0,20}\b([0-9a-z]{32,64})\b'
+  pattern: |
+    (?x)(?i)
+    (?: api_key | apikey | access_key | accesskey )
+    .{0,3}
+    [\ \t]* (?: : | = | := | => | , | ' | " ) [\ \t]*
+    .{0,3}
+    \b
+    ([0-9a-z][0-9a-z\-._/+]{30,62}[0-9a-z])
+    \b
 
   examples:
   - 'API_KEY = "951bc382db9abad29c68634761dd6e19"'
   - 'buildConfigField ''String'' , ''API_KEY'' , ''"951bc382db9cfee29c68634761dd6e19"''	API_KEY	'
+
+  negative_examples:
+  - 'name="ws_plugin__s2member_amazon_s3_comp_files_access_key" id="ws-plugin--s2member-amazon-s3-comp-files-access-key"'
+
+
+- name: Generic Username and Password (quoted)
+  pattern: |
+    (?x)
+    (?: username | USERNAME | user | USER)       (?# username context keyword )
+    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
+    ["'] ([a-zA-Z0-9.@_\-+]{3,30}) ["']          (?# quoted username )
+    \s* [,;]? \s*                                (?# optional assignment separator )
+    (?: \s* (?: \# | //) [^\n\r]*[\n\r])*        (?# optional line comments )
+    (?: password | pass | PASSWORD | PASS)       (?# password context keyword )
+    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
+    ["'] ([^"']{5,30}) ["']                      (?# quoted password )
+
+  examples:
+  - |
+      credential = UsernamePasswordCredential(
+          client_id='da34859b-2ae4-48c3-bfe0-1b28b7cf2eed',
+          username='donjuandemarco',
+          password='1qay@WXS????',
+          tenant_id='bc877b20-f135-4c13-a266-8ed26b8f0f4b')
+
+  - |
+      hostname = '10.11.12.13'
+      username = 'donjuandemarco@example.com'
+      password = '`123QWERasdf'
+
+  - |
+      hostname = '10.11.12.13'
+      USERNAME = 'donjuandemarco@example.com'
+      # some comment
+      # some other comment
+      PASS = '`123QWERasdf'
+
+  - |
+      user = 'abuser'  # some comment
+      password = 'abuser123456'  # some other comment
+
+  - |
+      user = 'Aladdin'
+      password = 'open sesame'
+
+
+  negative_examples:
+  - |
+      USERNAME=donjuan
+      PASSWORD=$($(dirname $0)/../bin/get-django-setting LOCAL_DATABASE_PASSWORD)
+  - ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
+
+
+
+- name: Generic Username and Password (unquoted)
+  pattern: |
+    (?x)
+    (?: username | USERNAME | user | USER)       (?# username context keyword )
+    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
+    ([a-zA-Z0-9.@_\-+]{3,30})                    (?# unquoted username )
+    \s* ;? \s*                                   (?# optional assignment separator )
+    (?: \s* (?: \# | //) [^\n\r]*[\n\r])*        (?# optional line comments )
+    (?: password | pass | PASSWORD | PASS)       (?# password context keyword )
+    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
+    (\S{5,30})                                   (?# unquoted password )
+    (?: \s | $ )                                 (?# end-of-password anchor )
+
+  examples:
+  - |
+      user = Aladdin
+      password = open_sesame
+
+  - |
+      user = Aladdin
+      // some comment
+      // some other comment
+      password = open_sesame
+
+  - ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
+
+  negative_examples:
+  - |
+      user = 'Aladdin'
+      password = 'open_sesame'
