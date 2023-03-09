@@ -89,6 +89,8 @@ RUN cargo install --root /usr/local --profile release --locked --path .
 ################################################################################
 FROM debian:11-slim
 
+RUN apt-get update && apt-get install -y git && apt-get clean
+
 COPY --from=app_builder /usr/local/bin/noseyparker /usr/local/bin/noseyparker
 
 # Tip when running: use a volume mount: `-v "$PWD:/scan"` to make for handling of paths on the command line
