@@ -1,0 +1,47 @@
+rules:
+
+- name: Grafana API Token
+  pattern: |
+    (?x)
+    \b
+    (eyJrIjoi [A-Za-z0-9]{60,100})
+    \b
+
+  references:
+  - https://grafana.com/docs/grafana/latest/developers/http_api/auth/
+
+  examples:
+  - 'Authorization: Bearer eyJrIjoiWHZiSWd5NzdCYUZnNUtibE8obUpESmE2bzJYNDRIc1UiLCJuIjoibXlrZXkiLCJpZCI7MX1'
+  - 'admin_client = GrafanaClient("eyJrIjoiY21sM1JRYjB6RnVYSTNLenRWQkFEaWN2bXI2V202U2IiLCJuIjoiYWRtaW5rZXkiLCJpZCI6MX0=", host=grafana_host, port=3000, protocol="http")'
+
+  non_examples:
+  - 'View the latest results [here](https://heyo.powerbi.com/view?r=eyJrIjoiYTZjMTk3YjEtMzQ4Yi00NTI5LTg6ZDItNmUyMGRlOTkwMGRlIiwidCI5IjcyZjk4OGJmLTg3ZjEtNDFhZi06MWFiLTJkN2NkMDExZGI0NyIsImMiOjV9&pageName=ReportSection9567390a89a2d30b0eda).'
+
+
+- name: Grafana Cloud API Token
+  pattern: |
+    (?x)
+    \b
+    (glc_eyJrIjoi [A-Za-z0-9]{60,100})
+    \b
+
+  references:
+  - https://grafana.com/docs/grafana-cloud/api-reference/cloud-api/
+
+  examples:
+  - '  "token": "glc_eyJrIjoiZjI0YzZkNGEwZDBmZmZjMmUzNTU3ODcxMmY0ZWZlNTQ1NTljMDFjOCIsIm6iOiJteXRva3VuIiwiaWQiOjF8"'
+
+
+- name: Grafana Service Account Token
+  pattern: |
+    (?x)
+    \b
+    (glsa_[a-zA-Z0-9]{32}_[a-fA-F0-9]{8})
+    \b
+
+  references:
+  - https://grafana.com/docs/grafana/latest/administration/service-accounts/
+
+  examples:
+  - |
+      curl -H "Authorization: Bearer glsa_HOruNAb7SOiCdshU7algkrq7FDsNSLAa_55e2f8be" -X GET '<grafana_url>/api/access-control/user/permissions' | jq
