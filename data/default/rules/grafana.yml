@@ -45,3 +45,14 @@ rules:
   examples:
   - |
       curl -H "Authorization: Bearer glsa_HOruNAb7SOiCdshU7algkrq7FDsNSLAa_55e2f8be" -X GET '<grafana_url>/api/access-control/user/permissions' | jq
+
+  - |
+      // getData()
+      // {
+      //  let url="http://localhost:4200/api/search"
+      //  const headers = new HttpHeaders({
+      //    'Content-Type': 'application/json',
+      //    'Authorization': `Bearer glsa_Sof0HKi3agxrQP9qm5r2G98VacBNwV5P_9b638c45`
+      //  })
+      //  return this.http.get(url, {headers: headers});
+      // }
