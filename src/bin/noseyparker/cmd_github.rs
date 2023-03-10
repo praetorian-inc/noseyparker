@@ -18,7 +18,7 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<(
         user: args.repo_specifiers.user.clone(),
         organization: args.repo_specifiers.organization.clone(),
     }, None)
-    .context("Failed to enuemrate GitHub repositories")?;
+    .context("Failed to enumerate GitHub repositories")?;
     RepoReporter(repo_urls).report(&args.output_args)
 }
 

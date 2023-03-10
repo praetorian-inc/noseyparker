@@ -2,7 +2,7 @@
 source: tests/test_noseyparker_github.rs
 expression: stderr
 ---
-Error: Failed to enuemrate GitHub repositories
+Error: Failed to enumerate GitHub repositories
 
 Caused by:
     0: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
