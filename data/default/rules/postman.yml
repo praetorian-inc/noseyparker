@@ -1,0 +1,14 @@
+rules:
+
+- name: Postman API Key
+  pattern: |
+    (?x)
+    \b
+    (PMAK-[a-zA-Z0-9]{24}-[a-zA-Z0-9]{34})
+    \b
+
+  examples:
+  - "// ('x-api-key', 'PMAK-629c73facbc064567cbf6970-f56e8b4cd0bb14d00962f17afc158dc2a2')"
+
+  references:
+  - https://learning.postman.com/docs/developer/intro-api/
