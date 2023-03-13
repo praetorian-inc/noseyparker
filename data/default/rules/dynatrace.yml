@@ -16,3 +16,7 @@ rules:
           apiUrl: https://fqp43822.live.dynatrace.com/api
           apiToken: dt0c01.FJEGSO2NBAXCOEA7WOSKOA2G.GGMUK6GJDH2TWLNKQT6F68FH22252VXP2F3QAMBUVUDV5TSYYHAWZVVFCUQLF2UA
           paasToken: dt0c01.QS7G6CAS5G64DLXFMEDEJ2O7.XVJQTFD2H7XG45V5RTDGA78GAI5W44MFTLZTUOMH4JEXPAV6NSEHUNGAYPIZGEIV
+
+  references:
+  - https://www.dynatrace.com/support/help/dynatrace-api
+  - https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication

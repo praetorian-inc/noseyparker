@@ -13,4 +13,7 @@ rules:
       'API'              => env('TWILIO_API','SK6e84981d07ace5c9df33e1ab043a2fb2'),
       'API_KEY'          => env('TWILIO_API_KEY', 'wbTs1SUt6Aace5eKeNCxuYvJa6PhaRd0')
 
-  # FIXME: add references for this rule
+  references:
+  - https://www.twilio.com/docs/usage/api
+  - https://www.twilio.com/docs/usage/api#authenticate-with-http
+  - https://www.twilio.com/docs/usage/api#authenticate-using-the-twilio-sdks

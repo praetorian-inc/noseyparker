@@ -1,7 +1,12 @@
 rules:
 
 - name: MailChimp API Key
-  pattern: '(?i)(?:mailchimp|mc).{0,20}\b([a-f0-9]{32}-us[0-9]{1,3})\b'
+  pattern: |
+    (?x)(?i)
+    (?:mailchimp|mc).{0,20}
+    \b
+    ([a-f0-9]{32}-us[0-9]{1,3})
+    \b
 
   references:
   - https://mailchimp.com/help/about-api-keys/
