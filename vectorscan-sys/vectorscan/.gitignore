@@ -38,9 +38,6 @@ pcre
 # but not pcre subdirs!
 !pcre/
 
-# ignore boost symlink if it exists
-include/boost
-
 # ignore sqlite3 symlink if it exists
 sqlite3
 
