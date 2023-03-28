@@ -36,7 +36,7 @@ pub struct Rule {
 }
 
 lazy_static! {
-    // used to strip out hyperscan-style comments like `(?# this is a comment)`,
+    // used to strip out vectorscan-style comments like `(?# this is a comment)`,
     // which Rust's regex crate doesn't like
     static ref RULE_COMMENTS_PATTERN: Regex = Regex::new(r"\(\?#[^)]*\)")
         .expect("comment-stripping regex should compile");

@@ -1,0 +1,142 @@
+/* used by cmake */
+
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
+/* "Define if the build is 32 bit" */
+#cmakedefine ARCH_32_BIT
+
+/* "Define if the build is 64 bit" */
+#cmakedefine ARCH_64_BIT
+
+/* "Define if building for IA32" */
+#cmakedefine ARCH_IA32
+
+/* "Define if building for EM64T" */
+#cmakedefine ARCH_X86_64
+
+/* "Define if building for ARM32" */
+#cmakedefine ARCH_ARM32
+
+/* "Define if building for AARCH64" */
+#cmakedefine ARCH_AARCH64
+
+/* "Define if building for PPC64EL" */
+#cmakedefine ARCH_PPC64EL
+
+/* "Define if cross compiling for AARCH64" */
+#cmakedefine CROSS_COMPILE_AARCH64
+
+/* Define if building SVE for AARCH64. */
+#cmakedefine BUILD_SVE
+
+/* Define if building SVE2 for AARCH64. */
+#cmakedefine BUILD_SVE2
+
+/* Define if building SVE2+BITPERM for AARCH64. */
+#cmakedefine BUILD_SVE2_BITPERM
+
+/* internal build, switch on dump support. */
+#cmakedefine DUMP_SUPPORT
+
+/* Define if building "fat" runtime. */
+#cmakedefine FAT_RUNTIME
+
+/* Define if building AVX2 in the fat runtime. */
+#cmakedefine BUILD_AVX2
+
+/* Define if building AVX-512 in the fat runtime. */
+#cmakedefine BUILD_AVX512
+
+/* Define if building AVX512VBMI in the fat runtime. */
+#cmakedefine BUILD_AVX512VBMI
+
+/* Define to 1 if `backtrace' works. */
+#cmakedefine HAVE_BACKTRACE
+
+/* C compiler has __builtin_assume_aligned */
+#cmakedefine HAVE_CC_BUILTIN_ASSUME_ALIGNED
+
+/* C++ compiler has __builtin_assume_aligned */
+#cmakedefine HAVE_CXX_BUILTIN_ASSUME_ALIGNED
+
+/* C++ compiler has x86intrin.h */
+#cmakedefine HAVE_CXX_X86INTRIN_H
+
+/* C compiler has x86intrin.h */
+#cmakedefine HAVE_C_X86INTRIN_H
+
+/* C++ compiler has intrin.h */
+#cmakedefine HAVE_CXX_INTRIN_H
+
+/* C compiler has intrin.h */
+#cmakedefine HAVE_C_INTRIN_H
+
+/* C compiler has arm_neon.h */
+#cmakedefine HAVE_C_ARM_NEON_H
+
+/* C compiler has arm_sve.h */
+#cmakedefine HAVE_C_ARM_SVE_H
+
+/* C compiler has arm_neon.h */
+#cmakedefine HAVE_C_PPC64EL_ALTIVEC_H
+
+/* Define to 1 if you have the declaration of `pthread_setaffinity_np', and to
+   0 if you don't. */
+#cmakedefine HAVE_DECL_PTHREAD_SETAFFINITY_NP
+
+#cmakedefine HAVE_PTHREAD_NP_H
+
+/* Define to 1 if you have the `malloc_info' function. */
+#cmakedefine HAVE_MALLOC_INFO
+
+/* Define to 1 if you have the `memmem' function. */
+#cmakedefine HAVE_MEMMEM
+
+/* Define to 1 if you have a working `mmap' system call. */
+#cmakedefine HAVE_MMAP
+
+/* Define to 1 if `posix_memalign' works. */
+#cmakedefine HAVE_POSIX_MEMALIGN
+
+/* Define to 1 if you have the `setrlimit' function. */
+#cmakedefine HAVE_SETRLIMIT
+
+/* Define to 1 if you have the `shmget' function. */
+#cmakedefine HAVE_SHMGET
+
+/* Define to 1 if you have the `sigaction' function. */
+#cmakedefine HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigaltstack' function. */
+#cmakedefine HAVE_SIGALTSTACK
+
+/* Define if the sqlite3_open_v2 call is available */
+#cmakedefine HAVE_SQLITE3_OPEN_V2
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define to 1 if you have the `_aligned_malloc' function. */
+#cmakedefine HAVE__ALIGNED_MALLOC
+
+/* Define if compiler has __builtin_constant_p */
+#cmakedefine HAVE__BUILTIN_CONSTANT_P
+
+/* Optimize, inline critical functions */
+#cmakedefine HS_OPTIMIZE
+
+#cmakedefine HS_VERSION
+#cmakedefine HS_MAJOR_VERSION
+#cmakedefine HS_MINOR_VERSION
+#cmakedefine HS_PATCH_VERSION
+
+#cmakedefine BUILD_DATE
+
+/* define if this is a release build. */
+#cmakedefine RELEASE_BUILD
+
+/* define if reverse_graph requires patch for boost 1.62.0 */
+#cmakedefine BOOST_REVGRAPH_PATCH
+
+#endif /* CONFIG_H_ */

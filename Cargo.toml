@@ -42,8 +42,7 @@ gix-features = { version = "0.28", features = ["fast-sha1"] }
 gix = { version = "0.40", features = ["max-performance", "fast-sha1"] }
 libc = "0.2"
 hex = "0.4"
-hyperscan = { version = "0.3", features = ["full", "static"] }
-# hyperscan-sys = { version = "0.3", features = ["full", "static"] }
+vectorscan = { path = "vectorscan" }
 hyperx = "1.4"
 include_dir = { version = "0.7", features = ["glob"] }
 indenter = "0.3"

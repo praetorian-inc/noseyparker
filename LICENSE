@@ -200,3 +200,16 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+This product bundles Boost 1.81.0, which is available under the Boost Software
+License Version 1.0. For details, see `vectorscan-sys/boost`.
+
+This product bundles Vectorscan 5.4.8, which is available under a "3-clause
+BSD" software license. For details, see `vectorscan-sys/vectorscan`.
+
+This product includes Rust bindings for Vectorscan that was heavily modified
+from https://github.com/vlaci/pyperscan version 0.2.0, and influenced by
+https://github.com/flier/rust-hyperscan version 0.3.2, both of which are
+available under either the Apache License Version 2.0 or the MIT license, at
+your choice. For details, see `vectorscan-sys` and `vectorscan`.

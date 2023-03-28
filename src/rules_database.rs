@@ -1,5 +1,5 @@
-use anyhow::{bail, Context, Result};
-use hyperscan::prelude::{Builder, Pattern, Patterns};
+use anyhow::{bail, Result};
+use vectorscan::{BlockDatabase, Pattern, Flag};
 use regex::bytes::Regex;
 use std::path::Path;
 use std::time::Instant;
@@ -11,7 +11,7 @@ pub struct RulesDatabase {
     // NOTE: pub(crate) here so that `Matcher` can access these
     pub(crate) rules: Rules,
     pub(crate) anchored_regexes: Vec<Regex>,
-    pub(crate) hsdb: hyperscan::BlockDatabase,
+    pub(crate) vsdb: BlockDatabase,
 }
 
 impl RulesDatabase {
@@ -36,14 +36,15 @@ impl RulesDatabase {
         let patterns = rules
             .rules
             .iter()
-            .map(|r| {
-                Pattern::new(&r.pattern)
-                    .with_context(|| format!("Failed to create rule for pattern {}", &r.pattern))
+            .enumerate()
+            .map(|(id, r)| {
+                let id = id.try_into().unwrap();
+                Pattern::new(r.pattern.clone().into_bytes(), Flag::default(), Some(id))
             })
-            .collect::<Result<Vec<Pattern>>>()?;
+            .collect::<Vec<Pattern>>();
 
         let t1 = Instant::now();
-        let hsdb = Patterns::build(&Patterns::from(patterns))?;
+        let vsdb = BlockDatabase::new(patterns)?;
         let d1 = t1.elapsed().as_secs_f64();
 
         let t2 = Instant::now();
@@ -54,16 +55,16 @@ impl RulesDatabase {
             .collect::<Result<Vec<Regex>>>()?;
         let d2 = t2.elapsed().as_secs_f64();
 
-        debug!("Compiled {} rules: hyperscan {}s; regex {}s", rules.rules.len(), d1, d2);
+        debug!("Compiled {} rules: vectorscan {}s; regex {}s", rules.rules.len(), d1, d2);
         Ok(RulesDatabase {
             rules,
-            hsdb,
+            vsdb,
             anchored_regexes,
         })
     }
 
     // pub fn serialize(&self) -> Result<()> {
-    //     let bytes = self.hsdb.serialize()?;
+    //     let bytes = self.vsdb.serialize()?;
     //     debug!("{} bytes for serialized database", bytes.len());
     //     panic!("unimplemented!");
     //     // Ok(())
@@ -84,22 +85,23 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    pub fn test_hyperscan_sanity() -> Result<()> {
-        use hyperscan::prelude::*;
+    pub fn test_vectorscan_sanity() -> Result<()> {
+        use vectorscan::{BlockDatabase, Pattern, Scan, BlockScanner};
 
-        let input = "some test data for hyperscan";
-        let pattern = pattern! {"test"; CASELESS | SOM_LEFTMOST};
-        let db: BlockDatabase = pattern.build()?;
-        let scratch = db.alloc_scratch()?;
-        let mut matches = vec![];
+        let input = b"some test data for vectorscan";
+        let pattern = Pattern::new(b"test".to_vec(), Flag::CASELESS | Flag::SOM_LEFTMOST, None);
+        let db: BlockDatabase = BlockDatabase::new(vec![pattern])?;
 
-        db.scan(input, &scratch, |id, from, to, _flags| {
+        let mut scanner = BlockScanner::new(&db)?;
+
+        let mut matches: Vec<(u64, u64)> = vec![];
+        scanner.scan(input, |id: u32, from: u64, to: u64, _flags: u32| {
             println!("found pattern #{} @ [{}, {})", id, from, to);
-            matches.push(from..to);
-            Matching::Continue
+            matches.push((from, to));
+            Scan::Continue
         })?;
 
-        assert_eq!(matches, vec![5..9]);
+        assert_eq!(matches, vec![(5, 9)]);
         Ok(())
     }
 }
