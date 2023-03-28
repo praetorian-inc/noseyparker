@@ -17,7 +17,7 @@ CHECK_FUNCTION_EXISTS(sigaction HAVE_SIGACTION)
 CHECK_FUNCTION_EXISTS(setrlimit HAVE_SETRLIMIT)
 
 set_source_files_properties(
-    ${CMAKE_CURRENT_BINARY_DIR}/ColliderCorporaParser.cpp
+    ColliderCorporaParser.cpp
     PROPERTIES
     COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
 
