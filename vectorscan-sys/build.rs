@@ -10,11 +10,6 @@ fn main() {
         .allowlist_var("HS_.*")
         .header("wrapper.h");
 
-    let boost_src_dir = path::Path::new(env!("CARGO_MANIFEST_DIR")).join("boost");
-    if !boost_src_dir.exists() {
-        panic!("boost source directory should exist");
-    }
-
     let vectorscan_src_dir = path::Path::new(env!("CARGO_MANIFEST_DIR")).join("vectorscan");
     if !vectorscan_src_dir.exists() {
         panic!("vectorscan source directory should exist");
@@ -52,7 +47,6 @@ fn main() {
     };
 
     let dst = cmake::Config::new(&vectorscan_src_dir)
-        .env("BOOST_PATH", &boost_src_dir)
         .profile("Release")
         .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
         .define("FAT_RUNTIME", toggle)
@@ -60,7 +54,6 @@ fn main() {
         .build();
 
     println!("cargo:rerun-if-changed={}", file!());
-    println!("cargo:rerun-if-changed={}", boost_src_dir.to_str().unwrap());
     println!("cargo:rerun-if-changed={}", vectorscan_src_dir.to_str().unwrap());
     println!("cargo:rustc-link-lib=static=hs");
     println!(
