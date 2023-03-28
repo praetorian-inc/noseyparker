@@ -18,7 +18,6 @@ INCLUDE (CheckSymbolExists)
 include (CMakeDependentOption)
 include (GNUInstallDirs)
 include (${CMAKE_MODULE_PATH}/platform.cmake)
-include (${CMAKE_MODULE_PATH}/ragel.cmake)
 
 find_package(PkgConfig QUIET)
 
@@ -72,7 +71,6 @@ include_directories(SYSTEM include)
 include (${CMAKE_MODULE_PATH}/boost.cmake)
 
 find_package(Python COMPONENTS Interpreter)
-find_program(RAGEL ragel)
 
 if(NOT Python_Interpreter_FOUND)
     message(FATAL_ERROR "No python interpreter found")
@@ -89,10 +87,6 @@ else ()
 endif ()
 message(STATUS "Build date: ${BUILD_DATE}")
 
-
-if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
-    message(FATAL_ERROR "Ragel state machine compiler not found")
-endif()
 
 option(DEBUG_OUTPUT "Enable debug output (warning: very verbose)" FALSE)
 
@@ -557,18 +551,14 @@ endif()
 set(RAGEL_C_FLAGS "-Wno-unused")
 
 set_source_files_properties(
-    ${CMAKE_BINARY_DIR}/src/parser/Parser.cpp
+    src/parser/Parser.cpp
     PROPERTIES
         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-
-ragelmaker(src/parser/Parser.rl)
 
 set_source_files_properties(
-    ${CMAKE_BINARY_DIR}/src/parser/control_verbs.cpp
+    src/parser/control_verbs.cpp
     PROPERTIES
         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-
-ragelmaker(src/parser/control_verbs.rl)
 
 SET(hs_HEADERS
     src/hs.h
@@ -1399,10 +1389,6 @@ if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (BUILD_STATIC_LIBS)
-    add_dependencies(hs ragel_Parser)
-endif ()
-
 if (NOT BUILD_SHARED_LIBS)
     install(TARGETS hs DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
@@ -1433,7 +1419,6 @@ if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
 
     add_library(hs_shared SHARED ${hs_shared_SRCS} hs.def)
 
-    add_dependencies(hs_shared ragel_Parser)
     set_target_properties(hs_shared PROPERTIES
         OUTPUT_NAME hs
         VERSION ${LIB_VERSION}

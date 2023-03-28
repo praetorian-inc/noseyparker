@@ -21,8 +21,6 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
 
-ragelmaker(ColliderCorporaParser.rl)
-
 if (BUILD_CHIMERA)
     add_definitions(-DHS_HYBRID)
 endif()
@@ -63,7 +61,6 @@ SET(hscollider_SOURCES
 set_source_files_properties(${hscollider_SOURCES} PROPERTIES
     INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(hscollider ${hscollider_SOURCES})
-add_dependencies(hscollider ragel_ColliderCorporaParser)
 
 if (BUILD_CHIMERA)
     target_link_libraries(hscollider hs chimera ${PCRE_LDFLAGS} databaseutil
