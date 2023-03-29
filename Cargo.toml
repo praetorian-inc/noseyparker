@@ -36,10 +36,10 @@ atoi = "2.0"
 atty = "0.2"
 bstr = { version = "1.0", features = ["serde"] }
 chrono = "0.4"
-clap = { version = "4.0", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
+clap = { version = "4.2", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
 gix-features = { version = "0.28", features = ["fast-sha1"] }
-gix = { version = "0.40", features = ["max-performance", "fast-sha1"] }
+gix = { version = "0.43", features = ["max-performance", "fast-sha1"] }
 libc = "0.2"
 hex = "0.4"
 vectorscan = { path = "vectorscan" }
