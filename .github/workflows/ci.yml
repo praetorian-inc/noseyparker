@@ -81,6 +81,9 @@ jobs:
     - name: Build
       run: cargo build --locked --verbose
 
+    - name: Build tests
+      run: cargo test --no-run --locked --verbose
+
     - name: Run tests
       env:
         # We use the GitHub Actions automatic token when running tests, to avoid
@@ -153,6 +156,9 @@ jobs:
 
     - name: Build
       run: cargo build --locked --release --verbose
+
+    - name: Build tests
+      run: cargo test --no-run --locked --release --verbose
 
     - name: Run tests
       env:
