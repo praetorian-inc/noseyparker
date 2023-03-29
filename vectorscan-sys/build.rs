@@ -37,10 +37,22 @@ fn main() {
         panic!("No compatible compiler found. Either clang or gcc is needed.");
     }
 
+    let fat_runtime = {
+        let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+        let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
+        if arch == "x86_64" && vendor != "apple" {
+            // NOTE: The fat runtime would need at minimum the vectorscan/cmake/build_wrapper.sh
+            // script overhauled to get working. For now just do not use the fat runtime for macOS.
+            "ON"
+        } else {
+            "OFF"
+        }
+    };
+
     let dst = cmake::Config::new(&vectorscan_src_dir)
         .profile("Release")
         .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
-        .define("FAT_RUNTIME", "ON")
+        .define("FAT_RUNTIME", fat_runtime)
         .define("BUILD_AVX512", "OFF") // could enable for x86_64?
         .define("BUILD_EXAMPLES", "OFF")
         .define("BUILD_BENCHMARKS", "OFF")
