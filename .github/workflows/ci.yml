@@ -18,6 +18,13 @@ env:
   # Emit backtraces on panics.
   RUST_BACKTRACE: 1
 
+  # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
+  #
+  #     CI builds often are closer to from-scratch builds, as changes are typically much bigger than from a local edit-compile cycle.
+  #     For from-scratch builds, incremental adds an extra dependency-tracking overhead.
+  #     It also significantly increases the amount of IO and the size of ./target, which make caching less effective.
+  CARGO_INCREMENTAL: 0
+
 
 jobs:
   tests:
