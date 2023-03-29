@@ -49,7 +49,7 @@ fn main() {
     let dst = cmake::Config::new(&vectorscan_src_dir)
         .profile("Release")
         .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
-        // .define("FAT_RUNTIME", toggle)
+        .define("FAT_RUNTIME", "ON")
         .define("BUILD_AVX512", toggle)
         .define("BUILD_EXAMPLES", "OFF")
         .define("BUILD_BENCHMARKS", "OFF")

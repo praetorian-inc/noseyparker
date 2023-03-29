@@ -69,7 +69,9 @@ COPY . .
 #     vectorscan-sys/build.rs
 #     vectorscan-sys/src/lib.rs
 
-RUN cargo install --root /usr/local --profile release --locked --path .
+# the net.git-fetch-with-cli=true bit here is to avoid OOM when building for non-native platforms using qemu
+# https://github.com/rust-lang/cargo/issues/10781#issuecomment-1441071052
+RUN cargo install --config net.git-fetch-with-cli=true --root /usr/local --profile release --locked --path .
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
