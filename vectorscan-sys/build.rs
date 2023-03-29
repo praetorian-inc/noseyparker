@@ -37,23 +37,16 @@ fn main() {
         panic!("No compatible compiler found. Either clang or gcc is needed.");
     }
 
-    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
-    // TODO: this could work on intel apple targets if build scripts wouldn't be that fragile
-    let toggle = if arch == "x86_64" && vendor != "apple" {
-        "ON"
-    } else {
-        "OFF"
-    };
-
     let dst = cmake::Config::new(&vectorscan_src_dir)
         .profile("Release")
         .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
         .define("FAT_RUNTIME", "ON")
-        .define("BUILD_AVX512", toggle)
+        .define("BUILD_AVX512", "OFF") // could enable for x86_64?
         .define("BUILD_EXAMPLES", "OFF")
         .define("BUILD_BENCHMARKS", "OFF")
         .define("BUILD_UNITTESTS", "OFF")
+        .define("BUILD_DOCS", "OFF")
+        .define("BUILD_TOOLS", "OFF")
         .build();
 
     println!("cargo:rerun-if-changed={}", file!());

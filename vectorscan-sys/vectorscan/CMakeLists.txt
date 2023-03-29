@@ -246,7 +246,7 @@ endif()
 #        set(ARCH_CXX_FLAGS "-march=${GNUCC_ARCH} -mtune=${TUNE_FLAG}")
 #    endif()
 #endif()
-    
+
 #if(ARCH_PPC64EL)
 #    if (NOT CMAKE_C_FLAGS MATCHES .*march.* AND NOT CMAKE_C_FLAGS MATCHES .*mtune.*)
 #        set(ARCH_C_FLAGS "-mtune=${TUNE_FLAG}")
@@ -505,7 +505,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_CXX_FLAGS}")
 
 add_subdirectory(util)
-add_subdirectory(doc/dev-reference)
+
+option(BUILD_DOCS "Enable building of documentation (default TRUE)" TRUE)
+if(BUILD_DOCS)
+    add_subdirectory(doc/dev-reference)
+endif()
 
 # PCRE check, we have a fixed requirement for PCRE to use Chimera
 # and hscollider
@@ -527,7 +531,8 @@ if(BUILD_UNITTESTS)
     add_subdirectory(unit)
 endif()
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
+option(BUILD_TOOLS "Build supporting tools (default TRUE)" TRUE)
+if (BUILD_TOOLS AND EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
     add_subdirectory(tools)
 endif()
 if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
