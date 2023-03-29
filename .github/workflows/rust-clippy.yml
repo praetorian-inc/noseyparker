@@ -43,13 +43,7 @@ jobs:
           components: clippy
 
       - name: Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/git
-            ~/.cargo/registry
-            target
-          key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-clippy
+        uses: Swatinem/rust-cache@v2
 
       - name: Install required cargo
         run: cargo install clippy-sarif sarif-fmt
