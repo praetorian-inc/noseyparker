@@ -522,7 +522,11 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
     set(BUILD_CHIMERA TRUE)
 endif()
 
-add_subdirectory(unit)
+option(BUILD_UNITTESTS "Build unit tests (default TRUE)" TRUE)
+if(BUILD_UNITTESTS)
+    add_subdirectory(unit)
+endif()
+
 if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
     add_subdirectory(tools)
 endif()
