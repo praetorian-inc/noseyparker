@@ -2,7 +2,7 @@
 # This is used for renaming symbols for the fat runtime, don't call directly
 # TODO: make this a lot less fragile!
 cleanup () {
-    rm -f "${SYMSFILE}" "${KEEPSYMS}"
+    rm -f ${SYMSFILE} ${KEEPSYMS}
 }
 
 PREFIX=$1
@@ -11,8 +11,8 @@ shift 2
 # $@ contains the actual build command
 OUT=$(echo "$@" | rev | cut -d ' ' -f 2- | rev | sed 's/.* -o \(.*\.o\).*/\1/')
 trap cleanup INT QUIT EXIT
-SYMSFILE=$(mktemp ${PREFIX}_rename.syms.XXXXX)
-KEEPSYMS=$(mktemp keep.syms.XXXXX)
+SYMSFILE=$(mktemp -p /tmp ${PREFIX}_rename.syms.XXXXX)
+KEEPSYMS=$(mktemp -p /tmp keep.syms.XXXXX)
 # find the libc used by gcc
 LIBC_SO=$("$@" --print-file-name=libc.so.6)
 cp ${KEEPSYMS_IN} ${KEEPSYMS}
