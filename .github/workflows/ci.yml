@@ -78,8 +78,8 @@ jobs:
           target
         key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-tests
 
-    - name: Build
-      run: cargo build --locked --verbose
+    # - name: Build
+    #   run: cargo build --locked --verbose
 
     - name: Build tests
       run: cargo test --no-run --locked --verbose
@@ -154,8 +154,8 @@ jobs:
           target
         key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-release_build
 
-    - name: Build
-      run: cargo build --locked --release --verbose
+    # - name: Build
+    #   run: cargo build --locked --release --verbose
 
     - name: Build tests
       run: cargo test --no-run --locked --release --verbose
