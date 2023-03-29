@@ -61,8 +61,8 @@ fn main() {
         .define("BUILD_TOOLS", "OFF")
         .build();
 
-    println!("cargo:rerun-if-changed={}", file!());
-    println!("cargo:rerun-if-changed={}", vectorscan_src_dir.to_str().unwrap());
+    // println!("cargo:rerun-if-changed={}", file!());
+    // println!("cargo:rerun-if-changed={}", vectorscan_src_dir.to_str().unwrap());
     println!("cargo:rustc-link-lib=static=hs");
     println!(
         "cargo:rustc-link-search={}",
