@@ -173,7 +173,7 @@ impl<'a> Matcher<'a> {
         // Update rule raw match stats
         // -----------------------------------------------------------------------------------------
         #[cfg(feature = "rule_profiling")]
-        for m in &self.raw_matches_scratch {
+        for m in raw_matches_scratch.iter() {
             self.local_stats.rule_stats.increment_match_count(m.rule_id as usize, 1);
         }
 
