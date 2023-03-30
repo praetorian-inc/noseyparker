@@ -13,14 +13,16 @@ This open-source version of Nosey Parker is a reimplementation of the internal v
 
 ## Building from source
 
+**1. Prerequisites**
 This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS running on both Intel and ARM processors.
 
-**Dependencies**
+Required dependencies:
 - `cargo`: recommended approach:install from <https://rustup.rs>
-- `cmake`
-- `python3`
+- `clang`: needed for building the `vectorscan-sys` crate
+- `cmake`: needed for building the `vectorscan-sys` crate
+- `python3`: needed for building the `vectorscan-sys` crate
 
-**1. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
+**2. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
 
 ```
 cargo build --release
