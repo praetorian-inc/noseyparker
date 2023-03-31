@@ -7,32 +7,40 @@ use std::{ffi::CString, mem::MaybeUninit, ptr};
 foreign_type! {
     unsafe type CompileError {
         type CType = hs::hs_compile_error_t;
-        fn drop = hs::hs_free_compile_error;
+        fn drop = compile_error_drop;
     }
 
     pub unsafe type Database: Send + Sync {
         type CType = hs::hs_database_t;
-        fn drop = hs::hs_free_database;
+        fn drop = database_drop;
     }
 
     pub unsafe type Scratch {
         type CType = hs::hs_scratch_t;
-        fn drop = hs::hs_free_scratch;
+        fn drop = scratch_drop;
     }
-
-    /*
-    pub unsafe type Stream {
-        type CType = hs::hs_stream_t;
-        fn drop = stream_drop;
-    }
-    */
 }
 
-/*
-unsafe fn stream_drop(stream: *mut hs::hs_stream_t) {
-    let _ = hs::hs_close_stream(stream, ptr::null_mut(), None, ptr::null_mut());
+unsafe fn database_drop(v: *mut hs::hs_database_t) {
+    let res = hs::hs_free_database(v);
+    if res != hs::HS_SUCCESS as hs::hs_error_t {
+        panic!("hs_free_database failed: {res}");
+    }
 }
-*/
+
+unsafe fn scratch_drop(v: *mut hs::hs_scratch_t) {
+    let res = hs::hs_free_scratch(v);
+    if res != hs::HS_SUCCESS as hs::hs_error_t {
+        panic!("hs_free_scratch failed: {res}");
+    }
+}
+
+unsafe fn compile_error_drop(v: *mut hs::hs_compile_error_t) {
+    let res = hs::hs_free_compile_error(v);
+    if res != hs::HS_SUCCESS as hs::hs_error_t {
+        panic!("hs_free_compile_error failed: {res}");
+    }
+}
 
 bitflags! {
     #[derive(Default)]
@@ -104,21 +112,8 @@ impl Database {
                 err.as_mut_ptr(),
             )
             .ok()
-            .map_err(|_| err.assume_init())?;
+            .map_err(|_| err.assume_init())?; // note: converts hs_compile_error ptr to rust CompileError; shouldn't leak
             Ok(Database::from_ptr(db.assume_init()))
-        }
-    }
-
-    pub fn try_clone(&self) -> Result<Self, Error> {
-        let mut buf = MaybeUninit::uninit();
-        let mut len = 0usize;
-        unsafe {
-            hs::hs_serialize_database(self.as_ptr(), buf.as_mut_ptr(), &mut len).ok()?;
-            let buf = buf.assume_init();
-            let mut copy = MaybeUninit::uninit();
-            hs::hs_deserialize_database(buf, len, copy.as_mut_ptr()).ok()?;
-            let copy = copy.assume_init();
-            Ok(Self::from_ptr(copy))
         }
     }
 }
@@ -133,18 +128,6 @@ impl Scratch {
         }
     }
 }
-/*
-impl Stream {
-    pub fn new(database: &Database) -> Result<Self, Error> {
-        let mut stream = MaybeUninit::uninit();
-        unsafe {
-            hs::hs_open_stream(database.as_ptr(), 0, stream.as_mut_ptr())
-                .ok()
-                .map(|_| Stream::from_ptr(stream.assume_init()))
-        }
-    }
-}
-*/
 
 impl CompileError {
     fn message(&self) -> String {
@@ -172,12 +155,12 @@ impl From<*mut hs::hs_compile_error> for Error {
 }
 
 bitflags! {
-pub struct ScanMode: u32 {
-    const BLOCK = hs::HS_MODE_BLOCK;
-    const VECTORED = hs::HS_MODE_VECTORED;
-    const STREAM = hs::HS_MODE_STREAM;
-    const SOM_SMALL = hs::HS_MODE_SOM_HORIZON_SMALL;
-    const SOM_MEDIUM = hs::HS_MODE_SOM_HORIZON_MEDIUM;
-    const SOM_LARGE = hs::HS_MODE_SOM_HORIZON_LARGE;
-}
+    pub struct ScanMode: u32 {
+        const BLOCK = hs::HS_MODE_BLOCK;
+        const VECTORED = hs::HS_MODE_VECTORED;
+        const STREAM = hs::HS_MODE_STREAM;
+        const SOM_SMALL = hs::HS_MODE_SOM_HORIZON_SMALL;
+        const SOM_MEDIUM = hs::HS_MODE_SOM_HORIZON_MEDIUM;
+        const SOM_LARGE = hs::HS_MODE_SOM_HORIZON_LARGE;
+    }
 }

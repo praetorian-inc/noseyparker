@@ -13,9 +13,9 @@ pub struct BlockDatabase {
     db: wrapper::Database,
 }
 
-pub struct BlockScanner {
+pub struct BlockScanner<'db> {
     scratch: wrapper::Scratch,
-    database: wrapper::Database,
+    database: &'db wrapper::Database,
 }
 
 impl BlockDatabase {
@@ -31,10 +31,10 @@ impl BlockDatabase {
     }
 }
 
-impl BlockScanner {
-    pub fn new(db: &BlockDatabase) -> Result<Self, Error> {
+impl <'db> BlockScanner<'db> {
+    pub fn new(db: &'db BlockDatabase) -> Result<Self, Error> {
         Ok(Self {
-            database: db.db.try_clone()?,
+            database: &db.db,
             scratch: wrapper::Scratch::new(&db.db)?,
         })
     }
