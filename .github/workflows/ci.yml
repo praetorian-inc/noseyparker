@@ -18,6 +18,13 @@ env:
   # Emit backtraces on panics.
   RUST_BACKTRACE: 1
 
+  # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
+  #
+  #     CI builds often are closer to from-scratch builds, as changes are typically much bigger than from a local edit-compile cycle.
+  #     For from-scratch builds, incremental adds an extra dependency-tracking overhead.
+  #     It also significantly increases the amount of IO and the size of ./target, which make caching less effective.
+  CARGO_INCREMENTAL: 0
+
 
 jobs:
   tests:
@@ -62,17 +69,13 @@ jobs:
         toolchain: ${{ matrix.rust }}
 
     - name: Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin
-          ~/.cargo/git
-          ~/.cargo/registry
-          target
-        key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-tests
+      uses: Swatinem/rust-cache@v2
 
-    - name: Build
-      run: cargo build --locked --verbose
+    # - name: Build
+    #   run: cargo build --locked --verbose
+
+    - name: Build tests
+      run: cargo test --no-run --locked --verbose
 
     - name: Run tests
       env:
@@ -103,14 +106,7 @@ jobs:
         toolchain: stable
 
     - name: Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin
-          ~/.cargo/git
-          ~/.cargo/registry
-          target
-        key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-docs
+      uses: Swatinem/rust-cache@v2
 
     - name: Check documentation
       env:
@@ -135,17 +131,13 @@ jobs:
         toolchain: stable
 
     - name: Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin
-          ~/.cargo/git
-          ~/.cargo/registry
-          target
-        key: ${{ runner.os }}-${{ steps.install-rust-toolchain.cachekey }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-release_build
+      uses: Swatinem/rust-cache@v2
 
-    - name: Build
-      run: cargo build --locked --release --verbose
+    # - name: Build
+    #   run: cargo build --locked --release --verbose
+
+    - name: Build tests
+      run: cargo test --no-run --locked --release --verbose
 
     - name: Run tests
       env:

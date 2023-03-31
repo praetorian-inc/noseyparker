@@ -39,13 +39,17 @@ impl<'c> RepoEnumerator<'c> {
 
         for username in &repo_specifiers.user {
             let to_add = self.enumerate_user_repos(username).await?;
-            progress.as_mut().map(|p| p.inc(to_add.len() as u64));
+            if let Some(progress) = progress.as_mut() {
+                progress.inc(to_add.len() as u64);
+            }
             repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 
         for orgname in &repo_specifiers.organization {
             let to_add = self.enumerate_org_repos(orgname).await?;
-            progress.as_mut().map(|p| p.inc(to_add.len() as u64));
+            if let Some(progress) = progress.as_mut() {
+                progress.inc(to_add.len() as u64);
+            }
             repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 

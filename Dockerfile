@@ -1,38 +1,4 @@
 ARG RUST_VER=1.65
-ARG VECTORSCAN_VER=5.4.8
-ARG VECTORSCAN_SHA=71fae7ee8d63e1513a6df762cdb5d5f02a9120a2422cf1f31d57747c2b8d36ab
-
-################################################################################
-# Base stage
-################################################################################
-FROM rust:$RUST_VER AS base_builder
-
-ARG VECTORSCAN_VER
-ARG VECTORSCAN_SHA
-
-ENV HYPERSCAN_ROOT "/vectorscan/build"
-
-WORKDIR "/vectorscan"
-
-ADD https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/$VECTORSCAN_VER.tar.gz ./vectorscan.tar.gz
-
-# Install dependencies
-RUN apt-get update &&\
-    apt-get install -y \
-    build-essential \
-    cmake \
-    git \
-    libboost-dev \
-    ninja-build \
-    pkg-config \
-    ragel &&\
-    apt-get clean &&\
-    # Build vectorscan from source
-    echo "$VECTORSCAN_SHA vectorscan.tar.gz" | sha256sum -c &&\
-    tar --strip-components 1 -xzf vectorscan.tar.gz &&\
-    rm -rf vectorscan.tar.gz &&\
-    cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DFAT_RUNTIME=ON -DBUILD_EXAMPLES=OFF -DBUILD_BENCHMARKS=OFF &&\
-    cmake --build build
 
 ################################################################################
 # Build Rust dependencies, caching stage
@@ -43,55 +9,79 @@ RUN apt-get update &&\
 # Building dependencies only is not naturally supported out-of-the box with
 # Cargo, and so requires some machinations.
 
-FROM base_builder AS dependencies_builder
+FROM rust:$RUST_VER AS builder
+
+# Install dependencies
+#
+# Note: clang is needed for `bindgen`, used by `vectorscan-sys`.
+RUN apt-get update &&\
+    apt-get install -y \
+    build-essential \
+    clang \
+    cmake \
+    git \
+    ninja-build \
+    pkg-config &&\
+    apt-get clean
 
 WORKDIR "/noseyparker"
 
-# Copy Cargo files for downloading and building dependencies
-COPY ["Cargo.toml", "Cargo.lock",  "./"]
 
-# Create stub directory structure and files to cause Cargo to download and
-# compile dependencies
-RUN mkdir -p  ./src/bin/noseyparker &&\
-    mkdir -p ./benches &&\
-    # Benches to avoid error:
-    # can't find `microbench` bench at `benches/microbench.rs`
-    touch ./benches/microbench.rs &&\
-    # Lib stub to avoid:
-    # error: couldn't read src/lib.rs
-    touch ./src/lib.rs &&\
-    # Stub main required for compile
-    echo "fn main() {}" > ./src/bin/noseyparker/main.rs &&\
-    # Run the build
-    cargo build --release --profile release --locked
-
-################################################################################
-# Build application
-################################################################################
-FROM dependencies_builder AS app_builder
-
-WORKDIR "/noseyparker"
+# # Copy Cargo files for downloading dependencies.
+# #
+# # This causes more Docker caching, allowing `updating crates.io index` to be
+# # avoided unless project dependencies change.
+# #
+# # See https://github.com/rust-lang/cargo/issues/2644 for an odyssey about this
+# # dependency caching idea.
+# COPY ["Cargo.toml", "Cargo.lock",  "."]
+# COPY ["vectorscan/Cargo.toml", "vectorscan/Cargo.toml"]
+# COPY ["vectorscan-sys/Cargo.toml", "vectorscan-sys/Cargo.toml"]
+#
+# # Have cargo download the dependencies
+# #
+# # Note: we stub benches to avoid error: can't find `microbench` bench at `benches/microbench.rs`
+# # Note: we stub the lib files as well to avoid errors
+# RUN mkdir -p benches && touch benches/microbench.rs &&\
+#     mkdir -p src && touch src/lib.rs &&\
+#     mkdir -p vectorscan/src && touch vectorscan/src/lib.rs &&\
+#     mkdir -p vectorscan-sys/src && touch vectorscan-sys/src/lib.rs &&\
+#     cargo fetch
+#
+# # Build the dependencies
+# #
+# # Note: we have to stub the main source to have this work without error
+# # Note: we have to stub the build.rs script for vectorscan-sys to have this work without error
+# RUN mkdir -p src/bin/noseyparker && echo "fn main() {}" > src/bin/noseyparker/main.rs &&\
+#     echo "fn main() {}" > vectorscan-sys/build.rs &&\
+#     cargo build --profile release --locked
 
 COPY . .
 
-# Update file timestamps on any stubs from previous stage. This will cause
-# compilation to happen if needed, otherwise Cargo build can skip files with
-# timestamps older than the previous stage's build command
-RUN touch \
-    ./benches/microbench.rs \
-    ./src/lib.rs \
-    ./src/bin/noseyparker/main.rs
+# # Update file timestamps on any stubs from previous steps. This will cause
+# # compilation to happen if needed, otherwise Cargo build can skip files with
+# # timestamps older than the previous stage's build command
+# RUN touch \
+#     benches/microbench.rs \
+#     src/lib.rs \
+#     src/bin/noseyparker/main.rs \
+#     vectorscan/src/lib.rs \
+#     vectorscan-sys/build.rs
+#     vectorscan-sys/src/lib.rs
 
-RUN cargo install --root /usr/local --profile release --locked --path .
+# the net.git-fetch-with-cli=true bit here is to avoid OOM when building for non-native platforms using qemu
+# https://github.com/rust-lang/cargo/issues/10781#issuecomment-1441071052
+RUN cargo install --config net.git-fetch-with-cli=true --root /usr/local --profile release --locked --path .
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
 ################################################################################
-FROM debian:11-slim
+FROM debian:11-slim as runner
 
+# Add `git` so that noseyparker's git and github integration works
 RUN apt-get update && apt-get install -y git && apt-get clean
 
-COPY --from=app_builder /usr/local/bin/noseyparker /usr/local/bin/noseyparker
+COPY --from=builder /usr/local/bin/noseyparker /usr/local/bin/noseyparker
 
 # Tip when running: use a volume mount: `-v "$PWD:/scan"` to make for handling of paths on the command line
 WORKDIR "/scan"

@@ -13,55 +13,21 @@ This open-source version of Nosey Parker is a reimplementation of the internal v
 
 ## Building from source
 
-**1. (On x86_64) Install the [Hyperscan](https://github.com/intel/hyperscan) library and headers for your system**
+**1. Prerequisites**
+This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS running on both Intel and ARM processors.
 
-On macOS using Homebrew:
+Required dependencies:
+- `cargo`: recommended approach:install from <https://rustup.rs>
+- `clang`: needed for building the `vectorscan-sys` crate
+- `cmake`: needed for building the `vectorscan-sys` crate
+- `python3`: needed for building the `vectorscan-sys` crate
 
-```
-brew install hyperscan pkg-config
-```
-
-On Ubuntu 22.04:
-
-```
-apt install libhyperscan-dev pkg-config
-```
-
-**1. (On non-x86_64) Build [Vectorscan](https://github.com/Vectorcamp/vectorscan) from source**
-
-You will need several dependencies, including `cmake`, `boost`, `ragel`, and `pkg-config`.
-
-Download and extract the source for the [5.4.8 release](https://github.com/VectorCamp/vectorscan/releases/tag/vectorscan%2F5.4.8) of Vectorscan:
-
-```
-wget https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.8.tar.gz && tar xfz 5.4.8.tar.gz
-```
-
-Build with cmake:
-
-```
-cd vectorscan-vectorscan-5.4.8 && cmake -B build -DCMAKE_BUILD_TYPE=Release . && cmake --build build
-```
-
-Set the `HYPERSCAN_ROOT` environment variable so that Nosey Parker builds against your from-source build of Vectorscan:
-
-```
-export HYPERSCAN_ROOT="$PWD/build"
-```
-
-**Note:** The Nosey Parker [`Dockerfile`](Dockerfile) builds Vectorscan from source and links against that.
-
-
-**2. Install the Rust toolchain**
-
-Recommended approach: install from <https://rustup.rs>
-
-**3. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
+**2. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
 
 ```
 cargo build --release
 ```
-This will produce a binary at `target/release/noseyparker`.
+This will produce an optimized binary at `target/release/noseyparker`.
 
 ## Docker Usage
 

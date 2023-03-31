@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use indoc::indoc;
-use lazy_static::lazy_static;
+// use lazy_static::lazy_static;
 
 pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
@@ -62,8 +62,14 @@ macro_rules! noseyparker_failure {
 // make macros easily visible to other modules
 pub use {noseyparker, noseyparker_success, noseyparker_failure, assert_cmd_snapshot};
 
+
+/*
 lazy_static! {
+    // We could use escargot for running Cargo-built binaries.
+    // But it seems to cause the entire project to be rebuilt once at test time!
     static ref NOSEYPARKER: escargot::CargoRun = escargot::CargoBuild::new()
+        .current_release()
+        .current_target()
         .bin("noseyparker")
         .run()
         .expect("noseyparker should be available");
@@ -81,8 +87,12 @@ lazy_static! {
 
 /// Build a `Command` for the `noseyparker` crate binary.
 pub fn noseyparker_cmd() -> Command {
-    // Command::cargo_bin("noseyparker").expect("noseyparker should be executable")
     NOSEYPARKER.command()
+}
+*/
+
+pub fn noseyparker_cmd() -> Command {
+    Command::cargo_bin("noseyparker").expect("noseyparker should be executable")
 }
 
 /// Create a `RegexPredicate` from the given pattern.

@@ -105,8 +105,8 @@ impl Reportable for DetailsReporter {
                 let message = sarif::MessageBuilder::default()
                     .text(format!(
                         "Rule {:?} found {} {}.\nFirst blob id matched: {}",
-                        metadata.rule_name.clone(),
-                        metadata.num_matches.to_string(),
+                        metadata.rule_name,
+                        metadata.num_matches,
                         if metadata.num_matches == 1 {
                             "match".to_string()
                         } else {

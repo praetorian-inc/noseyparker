@@ -1,5 +1,5 @@
 use anyhow::{Context, Result, bail};
-use hyperscan::prelude::{pattern, BlockDatabase, Builder, Matching};
+use vectorscan::{Pattern, BlockDatabase, Scan, Flag};
 
 use tracing::{debug_span, error, error_span, info, warn};
 
@@ -51,15 +51,15 @@ fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs)
 }
 
 fn hs_compile_pattern(pat: &str) -> Result<BlockDatabase> {
-    let pattern = pattern! {pat};
-    let db: BlockDatabase = pattern.build()?;
+    let pat = pat.as_bytes().to_vec();
+    let db = BlockDatabase::new(vec![Pattern::new(pat, Flag::default(), None)])?;
     Ok(db)
 }
 
 // fn hs_compile_pattern_streaming(pat: &str) -> Result<StreamingDatabase> {
 //     let pattern = pattern!{pat};
 //     let mut pattern = pattern.left_most();
-//     pattern.som = Some(hyperscan::SomHorizon::Large);
+//     pattern.som = Some(vectorscan::SomHorizon::Large);
 //     let db: StreamingDatabase = pattern.build()?;
 //     Ok(db)
 // }
@@ -122,7 +122,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
 
     // match hs_compile_pattern_streaming(&rule.pattern) {
     //     Err(e) => {
-    //         error!("Hyperscan: failed to compile streaming pattern: {}", e);
+    //         error!("Vectorscan: failed to compile streaming pattern: {}", e);
     //         num_errors += 1;
     //     }
     //     Ok(_db) => {}
@@ -130,23 +130,24 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
 
     match hs_compile_pattern(&rule.uncommented_pattern()) {
         Err(e) => {
-            error!("Hyperscan: failed to compile pattern: {}", e);
+            error!("Vectorscan: failed to compile pattern: {}", e);
             num_errors += 1;
         }
         Ok(db) => {
-            let scratch = db.alloc_scratch()?;
+            let mut scanner = vectorscan::BlockScanner::new(&db)?;
+
             let mut num_succeeded = 0;
             let mut num_failed = 0;
 
             // Check positive examples
             for (example_num, example) in rule.examples.iter().enumerate() {
                 let mut matched = false;
-                db.scan(example, &scratch, |_id, _from, _to, _flags| {
+                scanner.scan(example.as_bytes(), |_id, _from, _to, _flags| {
                     matched = true;
-                    Matching::Continue
+                    Scan::Continue
                 })?;
                 if !matched {
-                    error!("Hyperscan: failed to match example {}", example_num);
+                    error!("Vectorscan: failed to match example {}", example_num);
                     num_failed += 1;
                     num_errors += 1;
                 } else {
@@ -157,12 +158,12 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             // Check negative examples
             for (example_num, example) in rule.negative_examples.iter().enumerate() {
                 let mut matched = false;
-                db.scan(example, &scratch, |_id, _from, _to, _flags| {
+                scanner.scan(example.as_bytes(), |_id, _from, _to, _flags| {
                     matched = true;
-                    Matching::Continue
+                    Scan::Continue
                 })?;
                 if matched {
-                    error!("Hyperscan: incorrectly matched negative example {}", example_num);
+                    error!("Vectorscan: incorrectly matched negative example {}", example_num);
                     num_failed += 1;
                     num_errors += 1;
                 } else {
@@ -172,7 +173,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
 
             let num_total = num_succeeded + num_failed;
             if num_total > 0 {
-                info!("Hyperscan: {}/{} examples succeeded", num_succeeded, num_total);
+                info!("Vectorscan: {}/{} examples succeeded", num_succeeded, num_total);
             }
         }
     }
