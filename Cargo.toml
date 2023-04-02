@@ -135,6 +135,7 @@ opt-level = 3
 # tempfile                                      # filesystem
 # termcolor                                     # reporting
 # tinytemplate                                  # templating
+# thiserror                                     # error handling
 # toml                                          # data format, configuration
 # tree_magic                                    # content type guesser
 # unicode-normalization
