@@ -127,7 +127,7 @@ jobs:
     - name: Upload build timings
       uses: actions/upload-artifact@v3
       with:
-        name: build-timings
+        name: build-timings.${{ matrix.build }}
         path: target/cargo-timings
         if-no-files-found: error
 
