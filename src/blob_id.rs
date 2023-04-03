@@ -92,34 +92,10 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use proptest::prelude::*;
-
-    fn git2_hash_hex(input: &[u8]) -> String {
-        hex::encode(
-            git2::Oid::hash_object(git2::ObjectType::Blob, &input)
-                .unwrap()
-                .as_ref(),
-        )
-    }
-
-    #[test]
-    fn sanity_check_git2_reference() {
-        assert_eq!(git2_hash_hex(&vec![0; 0]), "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
-        assert_eq!(git2_hash_hex(&vec![0; 1024]), "06d7405020018ddf3cacee90fd4af10487da3d20");
-    }
 
     #[test]
     fn simple() {
         assert_eq!(BlobId::new(&vec![0; 0]).hex(), "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
         assert_eq!(BlobId::new(&vec![0; 1024]).hex(), "06d7405020018ddf3cacee90fd4af10487da3d20");
-    }
-
-    proptest! {
-        #[test]
-        fn matches_git2_hex(input: Vec<u8>) {
-            let id1 = BlobId::new(&input).hex();
-            let id2 = git2_hash_hex(&input);
-            assert_eq!(id1, id2);
-        }
     }
 }
