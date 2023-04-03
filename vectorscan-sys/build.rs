@@ -49,8 +49,18 @@ fn main() {
         }
     };
 
+    let profile = {
+        // See https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level for possible values
+        let opt_level = env::var("OPT_LEVEL").unwrap();
+        match opt_level.as_str() {
+            "0" => "Debug",
+            "s" | "z" => "MinSizeRel",
+            _ => "Release",
+        }
+    };
+
     let dst = cmake::Config::new(&vectorscan_src_dir)
-        .profile("Release")
+        .profile(profile)
         .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
         .define("FAT_RUNTIME", fat_runtime)
         .define("BUILD_AVX512", "OFF") // could enable for x86_64?
