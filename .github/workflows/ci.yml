@@ -130,10 +130,3 @@ jobs:
         name: build-timings.${{ matrix.build }}
         path: target/cargo-timings
         if-no-files-found: error
-
-    # - name: Upload binary
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: noseyparker.x86_64-unknown-linux-gnu
-    #     path: target/release/noseyparker
-    #     if-no-files-found: error
