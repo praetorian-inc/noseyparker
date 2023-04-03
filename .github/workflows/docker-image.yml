@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build, Test, and (Optionally) Publish
+    name: Docker
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
