@@ -32,16 +32,16 @@ env:
 
 jobs:
   tests:
-    name: Tests
+    name: CI
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         build:
-        - macos-12.stable
+        - macos-12.stable.test
         - ubuntu-20.04.stable.release
-        - ubuntu-22.04.stable
+        - ubuntu-22.04.stable.test
 
         include:
         - build: ubuntu-20.04.stable.release
@@ -55,7 +55,7 @@ jobs:
           check_rules: false
           run_tests: true
 
-        - build: ubuntu-22.04.stable
+        - build: ubuntu-22.04.stable.test
           os: ubuntu-22.04
           rust: stable
           profile: test
@@ -65,7 +65,7 @@ jobs:
           check_rules: true
           run_tests: true
 
-        - build: macos-12.stable
+        - build: macos-12.stable.test
           os: macos-12
           rust: stable
           profile: test
