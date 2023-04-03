@@ -115,7 +115,7 @@ jobs:
 
     - name: Check rules
       if: ${{ matrix.check_rules }}
-      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --timings -- rules check data/default/rules --warnings-as-errors
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --timings -- rules check crates/noseyparker/data/default/rules --warnings-as-errors
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}
