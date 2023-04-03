@@ -49,9 +49,8 @@ jobs:
           rust: stable
           profile: release
           install_dependencies: |
-            sudo apt-get install -y --no-install-recommends \
-              libhyperscan-dev \
-              pkg-config
+            true
+
           check_docs: false
           check_rules: false
           run_tests: true
@@ -61,9 +60,7 @@ jobs:
           rust: stable
           profile: test
           install_dependencies: |
-            sudo apt-get install -y --no-install-recommends \
-              libhyperscan-dev \
-              pkg-config
+            true
           check_docs: true
           check_rules: true
           run_tests: true
@@ -73,7 +70,7 @@ jobs:
           rust: stable
           profile: test
           install_dependencies: |
-            brew install hyperscan pkg-config
+            true
           check_docs: false
           check_rules: false
           run_tests: true
