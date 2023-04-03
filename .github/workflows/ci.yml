@@ -123,6 +123,7 @@ jobs:
         RUSTDOCFLAGS: -D warnings
       run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --timings --no-deps --document-private-items
 
+    # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
     - name: Upload build timings
       uses: actions/upload-artifact@v3
       with:

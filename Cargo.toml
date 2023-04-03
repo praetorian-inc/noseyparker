@@ -84,10 +84,6 @@ predicates = "2.1"
 proptest = "1.0"
 sha1 = "0.10"
 
-[[bench]]
-name = "microbench"
-harness = false
-
 [profile.release]
 # Generate debug symbols even in release builds
 # Used for cargo-instruments: https://github.com/cmyr/cargo-instruments
