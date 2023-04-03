@@ -50,9 +50,7 @@ indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
 indoc = "2.0"
 ignore = "0.4"
-itertools = "0.10"
 lazy_static = "1.4"
-pretty_assertions = "1.3"
 prettytable-rs = "0.10"
 rayon = "1.5"
 regex = "1.7"
@@ -74,10 +72,11 @@ serde-sarif = "0.3.6"
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
-criterion = "0.4"
+# criterion = "0.4"
 # escargot = "0.5"  # NOTE: much more capable but much slower than assert_cmd for `cargo run` tests
 insta = { version = "1.29", features = ["filters", "json", "redactions"] }
 predicates = "2.1"
+pretty_assertions = "1.3"
 proptest = "1.0"
 sha1 = "0.10"
 
