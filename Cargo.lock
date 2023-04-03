@@ -2157,13 +2157,9 @@ name = "noseyparker"
 version = "0.12.0-dev"
 dependencies = [
  "anyhow",
- "assert_cmd",
- "assert_fs",
  "atoi",
- "atty",
  "bstr",
  "chrono",
- "clap",
  "console",
  "gix",
  "gix-features",
@@ -2171,34 +2167,56 @@ dependencies = [
  "hyperx",
  "ignore",
  "include_dir",
+ "indicatif",
+ "indoc",
+ "lazy_static",
+ "pretty_assertions",
+ "proptest",
+ "regex",
+ "reqwest",
+ "rusqlite",
+ "secrecy",
+ "serde",
+ "serde_yaml",
+ "tokio",
+ "tracing",
+ "url",
+ "vectorscan",
+]
+
+[[package]]
+name = "noseyparker-bin"
+version = "0.12.0-dev"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "assert_fs",
+ "atty",
+ "clap",
+ "console",
+ "gix",
+ "gix-features",
+ "hex",
+ "ignore",
  "indenter",
  "indicatif",
  "indoc",
  "insta",
  "lazy_static",
- "libc",
+ "noseyparker",
  "predicates 2.1.5",
  "pretty_assertions",
  "prettytable-rs",
- "proptest",
  "rayon",
  "regex",
- "reqwest",
  "rlimit",
- "rusqlite",
- "secrecy",
  "serde",
  "serde-sarif",
  "serde_json",
- "serde_yaml",
- "sha1",
- "tokio",
  "tracing",
  "tracing-log",
  "tracing-subscriber",
- "url",
  "vectorscan",
- "walkdir",
 ]
 
 [[package]]
@@ -3497,7 +3515,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vectorscan"
-version = "0.1.0"
+version = "0.12.0-dev"
 dependencies = [
  "bitflags 2.0.2",
  "foreign-types 0.5.0",
@@ -3507,7 +3525,7 @@ dependencies = [
 
 [[package]]
 name = "vectorscan-sys"
-version = "0.1.0"
+version = "0.12.0-dev"
 dependencies = [
  "bindgen",
  "cmake",

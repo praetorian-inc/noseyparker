@@ -6,7 +6,8 @@ publish.workspace = true
 
 license = "Apache-2.0 OR MIT"
 name = "vectorscan-sys"
-version = "0.1.0"
+version.workspace = true
+
 build = "build.rs"
 
 [build-dependencies]
