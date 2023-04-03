@@ -96,7 +96,7 @@ jobs:
 
     - name: Build tests
       if: ${{ matrix.run_tests }}
-      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }}
+      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --timings
 
     - name: Run tests
       if: ${{ matrix.run_tests }}
@@ -105,23 +105,30 @@ jobs:
         # spurious failures from rate limiting when testing Nosey Parker's github
         # enumeration capabilities.
         NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cargo test --locked --verbose --profile=${{ matrix.profile }}
+      run: cargo test --locked --verbose --profile=${{ matrix.profile }} --timings
 
     - name: Build
       # We only `cargo build` separately if we are running the rule checker.
       # Otherwise this seems to just be wasted compute time!
       if: ${{ matrix.check_rules }}
-      run: cargo build --locked --verbose --profile=${{ matrix.profile }}
+      run: cargo build --locked --verbose --profile=${{ matrix.profile }} --timings
 
     - name: Check rules
       if: ${{ matrix.check_rules }}
-      run: cargo run --locked --verbose --profile=${{ matrix.profile }} -- rules check data/default/rules --warnings-as-errors
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --timings -- rules check data/default/rules --warnings-as-errors
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}
       env:
         RUSTDOCFLAGS: -D warnings
-      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --no-deps --document-private-items
+      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --timings --no-deps --document-private-items
+
+    - name: Upload build timings
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-timings
+        path: target/cargo-timings
+        if-no-files-found: error
 
     # - name: Upload binary
     #   uses: actions/upload-artifact@v3
