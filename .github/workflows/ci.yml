@@ -13,9 +13,11 @@ on:
 
 
 env:
+  CI: 1
+
   CARGO_TERM_COLOR: always
 
-  # Emit backtraces on panics.
+  # Emit backtraces on panics (though these may be worthless without debug info).
   RUST_BACKTRACE: 1
 
   # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
@@ -61,6 +63,7 @@ jobs:
           profile: test
           install_dependencies: |
             true
+
           check_docs: true
           check_rules: true
           run_tests: true
@@ -71,6 +74,7 @@ jobs:
           profile: test
           install_dependencies: |
             true
+
           check_docs: false
           check_rules: false
           run_tests: true
@@ -104,6 +108,8 @@ jobs:
       run: cargo test --locked --verbose --profile=${{ matrix.profile }}
 
     - name: Build
+      # We only `cargo build` separately if we are running the rule checker.
+      # Otherwise this seems to just be wasted compute time!
       if: ${{ matrix.check_rules }}
       run: cargo build --locked --verbose --profile=${{ matrix.profile }}
 
