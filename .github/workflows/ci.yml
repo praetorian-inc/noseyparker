@@ -13,28 +13,36 @@ on:
 
 
 env:
-  CI: 1
+  CI: '1'
 
-  CARGO_TERM_COLOR: always
+  CARGO_TERM_COLOR: 'always'
 
   # Emit backtraces on panics (though these may be worthless without debug info).
-  RUST_BACKTRACE: 1
+  RUST_BACKTRACE: '1'
 
   # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
   #
   #     CI builds often are closer to from-scratch builds, as changes are typically much bigger than from a local edit-compile cycle.
   #     For from-scratch builds, incremental adds an extra dependency-tracking overhead.
   #     It also significantly increases the amount of IO and the size of ./target, which make caching less effective.
-  CARGO_INCREMENTAL: 0
+  CARGO_INCREMENTAL: '0'
+
+  # Explicitly disable LTO in release builds here, even though Nosey Parker
+  # explicitly sets it. For actual release builds that get distributed we want
+  # it, but for builds used only for testing, it adds significant time to the
+  # build.
+  #
+  # https://doc.rust-lang.org/cargo/reference/profiles.html#lto
+  CARGO_PROFILE_RELEASE_LTO: 'false'
 
   # Disable debug info in CI; speeds up builds and shrinks Actions caches a bit
-  CARGO_PROFILE_RELEASE_DEBUG: 0
-  CARGO_PROFILE_DEV_DEBUG: 0
-  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_PROFILE_RELEASE_DEBUG: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
 
   # Use Cargo 1.68's new "sparse" checkout mode, which is much faster at getting crates.io index information
   # https://blog.rust-lang.org/inside-rust/2023/01/30/cargo-sparse-protocol.html
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: 'sparse'
 
 jobs:
   tests:
