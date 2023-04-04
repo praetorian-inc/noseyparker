@@ -1,92 +1,17 @@
-[package]
-name = "noseyparker"
-authors = [ "Brad Larsen <bradford.larsen@praetorian.com>", ]
-version = "0.12.0-dev"
+[workspace]
+members = ["crates/*"]
+
+[workspace.package]
 edition = "2021"
-description = "Nosey Parker is a command-line program that finds secrets and sensitive information in textual data and Git history."
+rust-version = "1.60"
+
 license = "Apache-2.0"
-readme = "README.md"
+authors = ["Brad Larsen <bradford.larsen@praetorian.com>"]
 homepage = "https://github.com/praetorian-inc/noseyparker"
 repository = "https://github.com/praetorian-inc/noseyparker"
+version = "0.12.0-dev"
 
 publish = false
-# at most 5
-keywords = ["cli", "security", "scanner", "secret"]
-# must match one of these list items: https://crates.io/category_slugs
-# at most 5
-categories = ["command-line-utilities"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[lib]
-name = "noseyparker"
-path = "src/lib.rs"
-
-[[bin]]
-name = "noseyparker"
-path = "src/bin/noseyparker/main.rs"
-
-[features]
-rule_profiling = []
-
-[dependencies]
-# anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
-anyhow = { version = "1.0" }
-atoi = "2.0"
-atty = "0.2"
-bstr = { version = "1.0", features = ["serde"] }
-chrono = "0.4"
-clap = { version = "4.2", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
-console = "0.15"
-gix-features = { version = "0.28", features = ["fast-sha1"] }
-gix = { version = "0.43", features = ["max-performance", "fast-sha1"] }
-libc = "0.2"
-hex = "0.4"
-vectorscan = { path = "vectorscan" }
-hyperx = "1.4"
-include_dir = { version = "0.7", features = ["glob"] }
-indenter = "0.3"
-# XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
-indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
-indoc = "2.0"
-ignore = "0.4"
-itertools = "0.10"
-lazy_static = "1.4"
-pretty_assertions = "1.3"
-prettytable-rs = "0.10"
-rayon = "1.5"
-regex = "1.7"
-reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
-rlimit = "0.9.0"
-rusqlite = { version = "0.28", features = ["bundled", "backup"] }
-secrecy = "0.8.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde_yaml = "0.9"
-tokio = "1.23"
-tracing = "0.1"
-tracing-log = "0.1"
-tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi"] }
-url = "2.3"
-walkdir = "2.3"
-serde-sarif = "0.3.6"
-
-[dev-dependencies]
-assert_cmd = { version = "2.0", features = ["color-auto"] }
-assert_fs = "1.0"
-criterion = "0.4"
-# escargot = "0.5"  # NOTE: much more capable but much slower than assert_cmd for `cargo run` tests
-git2 = { version = "0.16", features = ["vendored-libgit2", "vendored-openssl"] }
-insta = { version = "1.29", features = ["filters", "json", "redactions"] }
-libgit2-sys = "0.14"
-openssl = { version = "0.10", features = ["vendored"] }
-predicates = "2.1"
-proptest = "1.0"
-sha1 = "0.10"
-
-[[bench]]
-name = "microbench"
-harness = false
 
 [profile.release]
 # Generate debug symbols even in release builds
@@ -104,40 +29,3 @@ opt-level = 3
 # release mode, even as dev dependency.
 [profile.dev.package.similar]
 opt-level = 3
-
-
-# NOTE: See cargo-license to list dependency licenses: https://github.com/onur/cargo-license
-
-# Other dependencies that sounds possibly useful:
-#
-# aho-corasick                                  # text matching
-# base64
-# bytes
-# bzip2                                         # compression
-# clap_mangen                                   # documentation, arg parsing
-# clap_complete                                 # documentation, arg parsing
-# console                                       # reporting
-# csv                                           # data format
-# digest                                        # hashing
-# dirs                                          # filesystem, configuration
-# env_logger                                    # logging
-# flate2                                        # compression
-# handlebars                                    # templating
-# infer                                         # content type guesser
-# magic                                         # content type guesser
-# mime                                          # content type guesser
-# mime_guess                                    # content type guesser
-# nom                                           # parsing
-# pkg-config                                    # build-time configuration
-# pretty                                        # reporting
-# quickcheck                                    # testing
-# tar                                           # data format
-# tempfile                                      # filesystem
-# termcolor                                     # reporting
-# tinytemplate                                  # templating
-# thiserror                                     # error handling
-# toml                                          # data format, configuration
-# tree_magic                                    # content type guesser
-# unicode-normalization
-# uuid
-# xz2                                           # compression

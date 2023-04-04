@@ -13,54 +13,89 @@ on:
 
 
 env:
-  CARGO_TERM_COLOR: always
+  CI: '1'
 
-  # Emit backtraces on panics.
-  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: 'always'
+
+  # Emit backtraces on panics (though these may be worthless without debug info).
+  RUST_BACKTRACE: '1'
 
   # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
   #
   #     CI builds often are closer to from-scratch builds, as changes are typically much bigger than from a local edit-compile cycle.
   #     For from-scratch builds, incremental adds an extra dependency-tracking overhead.
   #     It also significantly increases the amount of IO and the size of ./target, which make caching less effective.
-  CARGO_INCREMENTAL: 0
+  CARGO_INCREMENTAL: '0'
 
+  # Explicitly disable LTO in release builds here, even though Nosey Parker
+  # explicitly sets it. For actual release builds that get distributed we want
+  # it, but for builds used only for testing, it adds significant time to the
+  # build.
+  #
+  # https://doc.rust-lang.org/cargo/reference/profiles.html#lto
+  CARGO_PROFILE_RELEASE_LTO: 'false'
+
+  # Disable debug info in CI; speeds up builds and shrinks Actions caches a bit
+  CARGO_PROFILE_RELEASE_DEBUG: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+
+  # Use Cargo 1.68's new "sparse" checkout mode, which is much faster at getting crates.io index information
+  # https://blog.rust-lang.org/inside-rust/2023/01/30/cargo-sparse-protocol.html
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: 'sparse'
 
 jobs:
   tests:
-    name: Tests
+    name: CI
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         build:
-        - ubuntu-22.04.stable
-        - macos-12.stable
+        - macos-12.stable.test
+        - ubuntu-20.04.stable.release
+        - ubuntu-22.04.stable.test
 
         include:
-        - build: ubuntu-22.04.stable
+        - build: ubuntu-20.04.stable.release
+          os: ubuntu-20.04
+          rust: stable
+          profile: release
+          install_dependencies: |
+            true
+
+          check_docs: false
+          check_rules: false
+          run_tests: true
+
+        - build: ubuntu-22.04.stable.test
           os: ubuntu-22.04
           rust: stable
+          profile: test
+          install_dependencies: |
+            true
 
-        - build: macos-12.stable
+          check_docs: true
+          check_rules: true
+          run_tests: true
+
+        - build: macos-12.stable.test
           os: macos-12
           rust: stable
+          profile: test
+          install_dependencies: |
+            true
+
+          check_docs: false
+          check_rules: false
+          run_tests: true
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install system dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-22.04'
-      run: |
-        sudo apt-get install -y --no-install-recommends \
-          libhyperscan-dev \
-          pkg-config
-
-    - name: Install system dependencies (macOS)
-      if: matrix.os == 'macos-12'
-      run: |
-        brew install hyperscan pkg-config
+    - name: Install dependencies
+      run: ${{ matrix.install_dependencies }}
 
     - name: Install Rust toolchain
       id: install-rust-toolchain
@@ -71,88 +106,39 @@ jobs:
     - name: Cache
       uses: Swatinem/rust-cache@v2
 
-    # - name: Build
-    #   run: cargo build --locked --verbose
-
     - name: Build tests
-      run: cargo test --no-run --locked --verbose
+      if: ${{ matrix.run_tests }}
+      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --timings
 
     - name: Run tests
+      if: ${{ matrix.run_tests }}
       env:
         # We use the GitHub Actions automatic token when running tests, to avoid
         # spurious failures from rate limiting when testing Nosey Parker's github
         # enumeration capabilities.
         NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cargo test --locked --verbose
+      run: cargo test --locked --verbose --profile=${{ matrix.profile }} --timings
+
+    - name: Build
+      # We only `cargo build` separately if we are running the rule checker.
+      # Otherwise this seems to just be wasted compute time!
+      if: ${{ matrix.check_rules }}
+      run: cargo build --locked --verbose --profile=${{ matrix.profile }} --timings
 
     - name: Check rules
-      run: cargo run --locked -- rules check data/default/rules --warnings-as-errors
-
-  docs:
-    name: Docs
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install system dependencies
-      run: |
-        sudo apt-get install -y --no-install-recommends \
-          libhyperscan-dev
-
-    - name: Install Rust toolchain
-      id: install-rust-toolchain
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-
-    - name: Cache
-      uses: Swatinem/rust-cache@v2
+      if: ${{ matrix.check_rules }}
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --timings -- rules check crates/noseyparker/data/default/rules --warnings-as-errors
 
     - name: Check documentation
+      if: ${{ matrix.check_docs }}
       env:
         RUSTDOCFLAGS: -D warnings
-      run: cargo doc --locked --no-deps --document-private-items
+      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --timings --no-deps --document-private-items
 
-  release_build:
-    name: Tests (release build; ubuntu-20.04.stable)
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install system dependencies
-      run: |
-        sudo apt-get install -y --no-install-recommends \
-          libhyperscan-dev
-
-    - name: Install Rust toolchain
-      id: install-rust-toolchain
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-
-    - name: Cache
-      uses: Swatinem/rust-cache@v2
-
-    # - name: Build
-    #   run: cargo build --locked --release --verbose
-
-    - name: Build tests
-      run: cargo test --no-run --locked --release --verbose
-
-    - name: Run tests
-      env:
-        # We use the GitHub Actions automatic token when running tests, to avoid
-        # spurious failures from rate limiting when testing Nosey Parker's github
-        # enumeration capabilities.
-        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cargo test --locked --release --verbose
-
-    - name: Check rules
-      run: cargo run --locked --release -- rules check data/default/rules --warnings-as-errors
-
-    - name: Upload release binary
+    # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
+    - name: Upload build timings
       uses: actions/upload-artifact@v3
       with:
-        name: noseyparker.x86_64-unknown-linux-gnu
-        path: target/release/noseyparker
+        name: build-timings.${{ matrix.build }}
+        path: target/cargo-timings
         if-no-files-found: error

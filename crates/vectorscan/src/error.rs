@@ -11,7 +11,7 @@ pub enum Error {
     Hyperscan(HyperscanErrorCode, i32),
 
     #[error("Pattern comilation failed, {0} at {1}")]
-    HypercanCompile(String, i32),
+    HyperscanCompile(String, i32),
 }
 
 #[derive(Debug, PartialEq, Eq)]

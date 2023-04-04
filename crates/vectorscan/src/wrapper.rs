@@ -112,7 +112,10 @@ impl Database {
                 err.as_mut_ptr(),
             )
             .ok()
-            .map_err(|_| err.assume_init())?; // note: converts hs_compile_error ptr to rust CompileError; shouldn't leak
+            .map_err(|_| {
+                let err = CompileError::from_ptr(err.assume_init());
+                Error::HyperscanCompile(err.message(), err.expression())
+            })?;
             Ok(Database::from_ptr(db.assume_init()))
         }
     }
@@ -142,15 +145,6 @@ impl CompileError {
     }
     fn expression(&self) -> i32 {
         unsafe { (*self.0.as_ptr()).expression }
-    }
-}
-
-impl From<*mut hs::hs_compile_error> for Error {
-    fn from(err: *mut hs::hs_compile_error) -> Self {
-        unsafe {
-            let err = CompileError::from_ptr(err);
-            Self::HypercanCompile(err.message(), err.expression())
-        }
     }
 }
 

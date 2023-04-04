@@ -1,0 +1,15 @@
+[package]
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+license = "Apache-2.0 OR MIT"
+name = "vectorscan"
+version.workspace = true
+
+[dependencies]
+bitflags = "2.0"
+foreign-types = "0.5"
+thiserror = "1.0"
+vectorscan-sys = { path = "../vectorscan-sys" }
