@@ -10,8 +10,12 @@ version.workspace = true
 
 build = "build.rs"
 
+[features]
+# The `gen` features causes `bindgen` to run to produce the raw Rust bindings to Vectorscan.
+gen = ["bindgen"]
+
 [build-dependencies]
-bindgen = "0.64.0"
+bindgen = { version = "0.64.0", optional = true }
 cmake = "0.1"
 
 [lib]

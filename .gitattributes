@@ -1,1 +1,2 @@
+crates/vectorscan-sys/src/bindings.rs linguist-generated
 crates/vectorscan-sys/vectorscan/** linguist-vendored
