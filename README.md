@@ -18,9 +18,7 @@ This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS 
 
 Required dependencies:
 - `cargo`: recommended approach:install from <https://rustup.rs>
-- `clang`: needed for building the `vectorscan-sys` crate
 - `cmake`: needed for building the `vectorscan-sys` crate
-- `python3`: needed for building the `vectorscan-sys` crate
 
 **2. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
 

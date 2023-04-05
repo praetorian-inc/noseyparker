@@ -5,8 +5,11 @@ This crate implements minimal Rust bindings to the [https://github.com/Vectorcam
 This crate builds a vendored copy of Vectorscan from source.
 
 ## Prerequisites
-To build this crate, you need CMake and Python (for the Vectorscan C++ project), and Clang (for Rust's bindgen).
+To build this crate, you need CMake.
+Additionally, if you build with the `gen` feature enabled, you will need Clang installed so that `bindgen` can produce the raw Rust bindings to Vectorscan.
+
 This has been tested on x86_64 Linux and Intel and ARM macOS.
+
 
 ## Implementation Notes
 This crate was adapted from the [https://github.com/vlaci/pyperscan](pyperscan) project, which uses Rust to expose Hyperscan to Python.

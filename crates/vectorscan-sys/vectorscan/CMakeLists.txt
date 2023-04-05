@@ -76,15 +76,15 @@ if(NOT Python_Interpreter_FOUND)
     message(FATAL_ERROR "No python interpreter found")
 endif()
 
-# allow for reproducible builds - python for portability
-if (DEFINED ENV{SOURCE_DATE_EPOCH})
-      execute_process(
-          COMMAND "${PYTHON}" "${CMAKE_MODULE_PATH}/formatdate.py" "$ENV{SOURCE_DATE_EPOCH}"
-          OUTPUT_VARIABLE BUILD_DATE
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
-else ()
+# # allow for reproducible builds - python for portability
+# if (DEFINED ENV{SOURCE_DATE_EPOCH})
+#       execute_process(
+#           COMMAND "${PYTHON}" "${CMAKE_MODULE_PATH}/formatdate.py" "$ENV{SOURCE_DATE_EPOCH}"
+#           OUTPUT_VARIABLE BUILD_DATE
+#           OUTPUT_STRIP_TRAILING_WHITESPACE)
+# else ()
     string (TIMESTAMP BUILD_DATE "%Y-%m-%d")
-endif ()
+# endif ()
 message(STATUS "Build date: ${BUILD_DATE}")
 
 
