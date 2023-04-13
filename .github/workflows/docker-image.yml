@@ -107,7 +107,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
 
         tags: noseyparker:experimental-multiplatform
-        push: false
+        push: true
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}
