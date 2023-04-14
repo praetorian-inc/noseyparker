@@ -106,7 +106,7 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
 
-        tags: noseyparker:experimental-multiplatform
+        tags: ghcr.io/praetorian-inc/noseyparker:experimental-multiplatform
         push: true
 
         labels: |
