@@ -1,9 +1,13 @@
 name: Release Artifacts
 
 on:
-  # Run when release tags are created
   push:
-    branches: [ "main" ]
+    # The multiplatform Docker image is expensive to build (3h), so we are not
+    # currently running it for every commit to `main`
+    #
+    # branches: [ "main" ]
+
+    # Run when release tags are created
     tags: [ "v*.*.*" ]
 
   # allow manual triggering
