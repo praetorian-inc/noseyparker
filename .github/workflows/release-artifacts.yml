@@ -29,18 +29,33 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build Docker image
+    - name: Build linux/amd64 Docker image
       uses: docker/build-push-action@v4
       with:
-        context: .
-        tags: noseyparker:experimental-multiplatform
-        push: false
-
-        platforms: linux/amd64,linux/arm64
-        load: true
-
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+        context: .
+        tags: noseyparker:test
+        push: false
+        platforms: linux/amd64
+        load: true
+
+    - name: Test the Docker image
+      run: docker run --rm noseyparker:test --help
+
+    # This shouldn't end up building linux/amd64 again; it should get it from the cache
+    - name: Build multiplatform Docker image
+      uses: docker/build-push-action@v4
+      with:
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+        context: .
+        platforms: linux/amd64,linux/arm64
+
+        push: true
+        tags: ghcr.io/praetorian-inc/noseyparker:experimental-multiplatform
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}
@@ -49,6 +64,3 @@ jobs:
           org.opencontainers.image.source=${{ github.event.repository.clone_url }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
-
-    - name: Test the Docker image
-      run: docker run --rm noseyparker --help
