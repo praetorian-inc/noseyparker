@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - Generic Username and Password (quoted)
   - Generic Username and Password (unquoted)
+  - Generic Password (double quoted)
+  - Generic Password (single quoted)
   - Grafana API Token
   - Grafana Cloud API Token
   - Grafana Service Account Token

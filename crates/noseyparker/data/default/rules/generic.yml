@@ -1,3 +1,11 @@
+# The rules in this file detect "generic" secrets.
+# Generic secrets do not have well-defined structure like most new API token schemes do.
+# In particular, there isn't some notable prefix to search for, nor is there a
+# fixed length and alphabet for the secret content.
+# Because of all this, the patterns in these rules tend to be pretty complex, in
+# an attempt to avoid false positives.
+# These rules all have relatively bad precision and recall.
+
 rules:
 
 - name: Generic Secret
@@ -117,3 +125,69 @@ rules:
   - |
       user = 'Aladdin'
       password = 'open_sesame'
+
+
+- name: Generic Password (double quoted)
+  pattern: |
+    (?x)(?i)
+    password                                  (?# preceding context )
+    [\ \t]* (?: = | : | := | => ) [\ \t]*     (?# binder )
+    "
+    ([^$<%@.,\s+'"(){}][^\s+'"(){}]{3,})      (?# password )
+    "
+
+  examples:
+  - |
+      password = "super$ecret"
+  - |
+      String usernamePassword = "application:" + appKey + ":" + appSecret;
+  - |
+      IAMUserChangePassword = "arn:aws:iam::aws:policy/IAMUserChangePassword"
+  - |
+      my_password: "super$ecret"
+  - |
+      my_password := "super$ecret"
+  - |
+      password   =>   "super$ecret"
+
+  negative_examples:
+  - |
+      password = "123"
+  - |
+      password = super$ecret
+  - |
+      password = 'super$ecret'
+  - |
+      "password": "$super$ecret",
+  - |
+      sb.append("MasterUserPassword: " + getMasterUserPassword() + ",");
+  - |
+      "//localhost:1337/:_password = "+new Buffer("feast").toString("base64")
+  - |
+      export PGPASSWORD="$gdcapi_db_password"
+  - |
+      define wget::authfetch($source,$destination,$user,$password="",$timeout="0",$verbose=false) {
+  - |
+      - echo 'export DATABASE_PASSWORD="'$PRECOMPILE_PASSWORD'"' >> .env
+
+
+- name: Generic Password (single quoted)
+  pattern: |
+    (?x)(?i)
+    password                                  (?# preceding context )
+    [\ \t]* (?: = | : | := | => ) [\ \t]*     (?# binder )
+    '
+    ([^$<%@.,\s+'"(){}][^\s+'"(){}]{3,})      (?# password )
+    '
+
+  examples:
+  - |
+      :password       => '4ian1234',
+  - |
+      common.then_log_in({username: 'geronimo', password: '52VeZqtHDCdAr5yM'});
+
+  negative_examples:
+  - |
+      echo 'password = '.$p['config']['daemon_password']."\n";
+  - |
+      usernameLabel:"Username or email:",passwordLabel:"Password:",rememberMeLabel:"Remember me:"
