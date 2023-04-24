@@ -18,7 +18,7 @@ WORKDIR "/noseyparker"
 COPY . .
 
 RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse \
-    cargo install --root /usr/local --profile release --locked --path crates/noseyparker-bin
+    cargo install --root /usr/local --profile release --locked --path crates/noseyparker-cli
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary

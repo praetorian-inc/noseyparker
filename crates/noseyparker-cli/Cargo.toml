@@ -7,7 +7,7 @@ homepage.workspace = true
 repository.workspace = true
 publish.workspace = true
 
-name = "noseyparker-bin"
+name = "noseyparker-cli"
 version.workspace = true
 description = "Nosey Parker is a command-line program that finds secrets and sensitive information in textual data and Git history."
 

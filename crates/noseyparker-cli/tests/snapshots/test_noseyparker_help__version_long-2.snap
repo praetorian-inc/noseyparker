@@ -1,0 +1,6 @@
+---
+source: crates/noseyparker-cli/tests/test_noseyparker_help.rs
+expression: stdout
+---
+noseyparker 0.13.0
+

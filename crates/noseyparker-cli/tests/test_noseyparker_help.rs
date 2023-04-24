@@ -90,3 +90,18 @@ fn help_github_repos() {
 fn help_github_repos_short() {
     assert_cmd_snapshot!(noseyparker_success!("github", "repos", "-h"));
 }
+
+#[test]
+fn version_short() {
+    assert_cmd_snapshot!(noseyparker_success!("-V"));
+}
+
+#[test]
+fn version_long() {
+    assert_cmd_snapshot!(noseyparker_success!("--version"));
+}
+
+#[test]
+fn version_command() {
+    assert_cmd_snapshot!(noseyparker_failure!("version"));
+}

@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)
+
+A prebuilt multiplatform Docker image for this release is available for x86_64 and ARM64 architectures:
+```
+docker pull ghcr.io/praetorian-inc/noseyparker:v0.13.0
+```
+
 ### Changes
 - Nosey Parker now statically links against a bundled version of [Vectorscan](https://github.com/Vectorcamp/vectorscan) for regular expression matching instead of [Hyperscan](https://github.com/intel/hyperscan) ([#5](https://github.com/praetorian-inc/noseyparker/issues/5)).
   This makes building from source simpler, particularly for ARM-based platforms.

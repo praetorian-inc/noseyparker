@@ -9,6 +9,8 @@ use noseyparker::git_url::GitUrl;
 // -----------------------------------------------------------------------------
 #[derive(Parser, Debug)]
 #[command(
+    name("noseyparker"),
+
     author,   // retrieved from Cargo.toml `authors`
     version,  // retrieved from Cargo.toml `version`
     about,    // retrieved from Cargo.toml `description`
