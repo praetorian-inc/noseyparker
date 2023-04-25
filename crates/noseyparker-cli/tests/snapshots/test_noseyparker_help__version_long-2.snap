@@ -4,3 +4,32 @@ expression: stdout
 ---
 noseyparker 0.13.0-dev
 
+Build Configuration:
+
+    Build Timestamp:    <PLACEHOLDER>
+
+    Commit Timestamp:   <PLACEHOLDER>
+    Commit Branch:      <PLACEHOLDER>
+    Commit SHA:         <PLACEHOLDER>
+
+    Cargo Features:     
+    <PLACEHOLDER>
+    Optimization:       <PLACEHOLDER>
+    Target Triple:      <PLACEHOLDER>
+
+Build System:
+
+    OS:                 <PLACEHOLDER>
+    OS Version:         <PLACEHOLDER>
+
+    CPU Vendor:         <PLACEHOLDER>
+    CPU Brand:          <PLACEHOLDER>
+    CPU Cores:          <PLACEHOLDER>
+
+    rustc Version:      <PLACEHOLDER>
+    rustc Channel:      <PLACEHOLDER>
+    rustc Host Triple:  <PLACEHOLDER>
+    rustc Commit Date:  <PLACEHOLDER>
+    rustc Commit SHA:   <PLACEHOLDER>
+    rustc LLVM Version: <PLACEHOLDER>
+

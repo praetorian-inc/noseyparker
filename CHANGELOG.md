@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Additions
+- Running `noseyparker --version` now emits many compile-time details about the build, which can be useful for troubleshooting ([#48](https://github.com/praetorian-inc/noseyparker/issues/48)).
+
+
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)
 
 A prebuilt multiplatform Docker image for this release is available for x86_64 and ARM64 architectures:
@@ -24,7 +28,7 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.13.0
   - Generic API Key
   - Telegram Bot Token
 
-### Additions:
+### Additions
 - New rules have been added:
 
   - Generic Username and Password (quoted)
