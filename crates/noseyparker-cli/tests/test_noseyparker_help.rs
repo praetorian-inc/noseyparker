@@ -98,10 +98,17 @@ fn version_short() {
 
 #[test]
 fn version_long() {
-    assert_cmd_snapshot!(noseyparker_success!("--version"));
+    with_settings!({
+        filters => vec![
+            (r"(?m)^(    [^:]+:\s+).+$", r"$1<PLACEHOLDER>")
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("--version"));
+    });
 }
 
 #[test]
 fn version_command() {
+    // there is no `version` command
     assert_cmd_snapshot!(noseyparker_failure!("version"));
 }

@@ -4,6 +4,41 @@ use std::path::PathBuf;
 
 use noseyparker::git_url::GitUrl;
 
+fn get_long_version() -> &'static str {
+    concat!(
+        crate_version!(),
+        "\n",
+        "\n", "Build Configuration:",
+        "\n",
+        "\n", "    Build Timestamp:    ", env!("VERGEN_BUILD_TIMESTAMP"),
+        "\n",
+        "\n", "    Commit Timestamp:   ", env!("VERGEN_GIT_COMMIT_TIMESTAMP"),
+        "\n", "    Commit Branch:      ", env!("VERGEN_GIT_BRANCH"),
+        "\n", "    Commit SHA:         ", env!("VERGEN_GIT_SHA"),
+        "\n",
+        "\n", "    Cargo Features:     ", env!("VERGEN_CARGO_FEATURES"),
+        "\n", "    Debug:              ", env!("VERGEN_CARGO_DEBUG"),
+        "\n", "    Optimization:       ", env!("VERGEN_CARGO_OPT_LEVEL"),
+        "\n", "    Target Triple:      ", env!("VERGEN_CARGO_TARGET_TRIPLE"),
+        "\n",
+        "\n", "Build System:",
+        "\n",
+        "\n", "    OS:                 ", env!("VERGEN_SYSINFO_NAME"),
+        "\n", "    OS Version:         ", env!("VERGEN_SYSINFO_OS_VERSION"),
+        "\n",
+        "\n", "    CPU Vendor:         ", env!("VERGEN_SYSINFO_CPU_VENDOR"),
+        "\n", "    CPU Brand:          ", env!("VERGEN_SYSINFO_CPU_BRAND"),
+        "\n", "    CPU Cores:          ", env!("VERGEN_SYSINFO_CPU_CORE_COUNT"),
+        "\n",
+        "\n", "    rustc Version:      ", env!("VERGEN_RUSTC_SEMVER"),
+        "\n", "    rustc Channel:      ", env!("VERGEN_RUSTC_CHANNEL"),
+        "\n", "    rustc Host Triple:  ", env!("VERGEN_RUSTC_HOST_TRIPLE"),
+        "\n", "    rustc Commit Date:  ", env!("VERGEN_RUSTC_COMMIT_DATE"),
+        "\n", "    rustc Commit SHA:   ", env!("VERGEN_RUSTC_COMMIT_HASH"),
+        "\n", "    rustc LLVM Version: ", env!("VERGEN_RUSTC_LLVM_VERSION"),
+    )
+}
+
 // -----------------------------------------------------------------------------
 // command-line args
 // -----------------------------------------------------------------------------
@@ -15,10 +50,7 @@ use noseyparker::git_url::GitUrl;
     version,  // retrieved from Cargo.toml `version`
     about,    // retrieved from Cargo.toml `description`
 
-    // FIXME: add something longer for `--version` here
-    long_version = concat!(
-        crate_version!(),
-    ),
+    long_version = get_long_version(),
 
     // FIXME: add longer comment description (will be shown with `--help`)
     long_about = concat!(

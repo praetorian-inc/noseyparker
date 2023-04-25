@@ -42,6 +42,7 @@ This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS 
 Required dependencies:
 - `cargo`: recommended approach:install from <https://rustup.rs>
 - `cmake`: needed for building the `vectorscan-sys` crate
+- `git`: needed for embedding version information into the `noseyparker` CLI
 
 **2. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
 

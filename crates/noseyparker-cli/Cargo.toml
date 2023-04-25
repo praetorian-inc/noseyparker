@@ -17,12 +17,17 @@ keywords = ["cli", "security", "scanner", "secret"]
 # must match one of these list items: https://crates.io/category_slugs; at most 5
 categories = ["command-line-utilities"]
 
+build = "build.rs"
 
 [features]
 rule_profiling = ["noseyparker/rule_profiling"]
 
 [[bin]]
 name = "noseyparker"
+
+[build-dependencies]
+# Used for embedding compile-time version information into the `noseyparker` CLI
+vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
 
 [dependencies]
 
