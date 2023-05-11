@@ -1,9 +1,7 @@
 //! Tests for Nosey Parker `github` command
 
+use super::*;
 use pretty_assertions::assert_eq;
-
-mod common;
-use common::*;
 
 #[test]
 fn github_repos_list_noargs() {

@@ -1,7 +1,6 @@
 //! Tests for Nosey Parker `help` functionality
 
-mod common;
-use common::*;
+use super::*;
 
 #[test]
 fn no_args() {

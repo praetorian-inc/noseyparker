@@ -1,7 +1,4 @@
-//! Tests for Nosey Parker `scan` command
-
-mod common;
-use common::*;
+use super::*;
 
 #[test]
 fn scan_emptydir() {
@@ -96,6 +93,7 @@ fn scan_file_maxsize() {
     .stdout(match_nothing_scanned());
 }
 
+// NOTE: this one fails if you are running as root
 #[cfg(unix)]
 #[test]
 fn scan_unreadable_file() {
@@ -116,18 +114,6 @@ fn scan_unreadable_file() {
         .stdout(match_nothing_scanned());
 }
 
-/// Create an empty Git repo on the filesystem at `destination`.
-fn create_empty_git_repo(destination: &Path) {
-    Command::new("git")
-        .arg("init")
-        .arg("-q")
-        .arg(destination)
-        .assert()
-        .success()
-        .stdout(is_empty())
-        .stderr(is_empty());
-}
-
 #[test]
 fn scan_git_emptyrepo() {
     let scan_env = ScanEnv::new();
@@ -139,69 +125,6 @@ fn scan_git_emptyrepo() {
     noseyparker_success!("scan", "-d", scan_env.dspath(), path)
         .stdout(is_match(r"(?m)^Scanned .* from \d+ blobs in .*; 0/0 new matches$"));
 }
-
-mod test_scan_git_url {
-    use super::*;
-
-    #[test]
-    fn https_nonexistent() {
-        let scan_env = ScanEnv::new();
-
-        let path = "https://example.com/nothere.git";
-        noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path)
-            .stdout(is_match(r"(?m)^Cloning into bare repository .*$"))
-            .stdout(is_match(r"(?m)^fatal: repository .* not found$"))
-            .stderr(is_match(r"(?m)^Error: No inputs to scan$"));
-    }
-
-    // Test what happens when there is no `git` binary but it is needed
-    #[test]
-    fn git_binary_missing() {
-        let scan_env = ScanEnv::new();
-
-        let path = "https://github.com/praetorian-inc/noseyparker";
-        noseyparker!("scan", "-d", scan_env.dspath(), "--git-url", path)
-            .env_clear()
-            .env("PATH", "/dev/null")
-            .assert()
-            .failure()
-            .stdout(is_match(r"Failed to clone .*: git execution failed:"))
-            .stderr(is_match(r"(?m)^Error: No inputs to scan$"));
-    }
-
-    #[test]
-    fn ssh_scheme() {
-        let scan_env = ScanEnv::new();
-        let path = "ssh://example.com/nothere.git";
-        assert_cmd_snapshot!(noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path));
-    }
-
-    #[test]
-    fn http_scheme() {
-        let scan_env = ScanEnv::new();
-        let path = "http://example.com/nothere.git";
-        assert_cmd_snapshot!(noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path));
-    }
-
-    #[test]
-    fn file_scheme() {
-        let scan_env = ScanEnv::new();
-        let path = "file://example.com/nothere.git";
-        assert_cmd_snapshot!(noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path));
-    }
-
-    #[test]
-    fn no_scheme() {
-        let scan_env = ScanEnv::new();
-        let path = "nothere.git";
-        assert_cmd_snapshot!(noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path));
-    }
-}
-
-// TODO: add test for scanning with `--github-user`
-// TODO: add test for scanning with `--github-org`
-// TODO: add test for caching behavior of rescanning `--git-url`
-// TODO: add tests for SARIF output format
 
 #[test]
 fn scan_secrets1() {

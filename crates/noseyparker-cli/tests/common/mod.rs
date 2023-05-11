@@ -120,6 +120,9 @@ pub fn match_nothing_scanned() -> RegexPredicate {
 }
 
 /// A type to represent a mock scanning environment for testing Nosey Parker.
+///
+/// A mock scanning environment automatically chooses a directory name that can be used as a
+/// datastore, and provides operations to create mock input files.
 pub struct ScanEnv {
     pub root: TempDir,
     pub datastore: ChildPath,
@@ -143,21 +146,24 @@ impl ScanEnv {
         input
     }
 
-    /// Create an input file within this mock scanning environment with the given name.
-    /// The created input file will have content containing a fake AWS key that should be detected.
-    pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
+    /// Create a file within this mock scanning environment with the given name and contents.
+    pub fn input_file_with_contents(&self, name: &str, contents: &str) -> ChildPath {
         let input = self.root.child(name);
         input.touch().expect("should be able to write input file");
         assert!(input.is_file());
-        let contents = indoc! {r#"
+        input.write_str(contents)
+            .expect("should be able to write input file contents");
+        input
+    }
+
+    /// Create an input file within this mock scanning environment with the given name.
+    /// The created input file will have content containing a fake AWS key that should be detected.
+    pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
+        self.input_file_with_contents(name, indoc! {r#"
             # This is fake configuration data
             USERNAME=the_dude
             AWS_KEY=AKIADEADBEEFDEADBEEF
-        "#};
-        input
-            .write_str(contents)
-            .expect("should be able to write input file contents");
-        input
+        "#})
     }
 
     /// Create an empty directory within this mock scanning environment with the given name.
@@ -181,4 +187,16 @@ impl ScanEnv {
     pub fn dspath(&self) -> &Path {
         self.datastore.path()
     }
+}
+
+/// Create an empty Git repo on the filesystem at `destination`.
+pub fn create_empty_git_repo(destination: &Path) {
+    Command::new("git")
+        .arg("init")
+        .arg("-q")
+        .arg(destination)
+        .assert()
+        .success()
+        .stdout(is_empty())
+        .stderr(is_empty());
 }
