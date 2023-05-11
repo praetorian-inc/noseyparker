@@ -109,7 +109,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     // Clone or update all mentioned Git URLs
     // ---------------------------------------------------------------------------------------------
-    info!("{} Git URLs to fetch", repo_urls.len());
+    if !repo_urls.is_empty() {
+        info!("{} Git URLs to fetch", repo_urls.len());
+    }
     for repo_url in &repo_urls {
         debug!("Need to fetch {repo_url}")
     }
