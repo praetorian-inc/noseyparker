@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Additions
 - Running `noseyparker --version` now emits many compile-time details about the build, which can be useful for troubleshooting ([#48](https://github.com/praetorian-inc/noseyparker/issues/48)).
 
+### Changes
+- Existing rules were modified to reduce both false positives and false negatives:
+
+  - Generic Password (double quoted)
+  - Generic Password (single quoted)
+
 
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)
 

@@ -130,10 +130,10 @@ rules:
 - name: Generic Password (double quoted)
   pattern: |
     (?x)(?i)
-    password                                  (?# preceding context )
-    [\ \t]* (?: = | : | := | => ) [\ \t]*     (?# binder )
+    password["']?                                (?# preceding context )
+    [\ \t]* (?: = | : | := | => ) [\ \t]*        (?# binder )
     "
-    ([^$<%@.,\s+'"(){}][^\s+'"(){}]{3,})      (?# password )
+    ([^$<%@.,\s+'"(){}&/\#\-][^\s+'"(){}/]{4,})  (?# password )
     "
 
   examples:
@@ -142,13 +142,28 @@ rules:
   - |
       String usernamePassword = "application:" + appKey + ":" + appSecret;
   - |
-      IAMUserChangePassword = "arn:aws:iam::aws:policy/IAMUserChangePassword"
-  - |
       my_password: "super$ecret"
+  - |
+      "password": "super$ecret",
   - |
       my_password := "super$ecret"
   - |
       password   =>   "super$ecret"
+  - |
+      "ApplicationServicesConnection" : {
+          "ServiceAddress" : "https://services-dev.examples.com",
+          "AdminPassword" : "thisismypassword"
+      }
+  - |
+      private const string DevFolkoosComPfxPassword = "thisismypassword";
+  - |
+      "password": "YOURPASSWROD"
+  - |
+        create_random_name('sfrp-cli-cert2', 24),
+                    'cluster_name': self.create_random_name('sfrp-cli-', 24),
+                    'vm_password': "Pass123!@#",
+                    'policy_path': os.path.join(TEST_DIR, 'policy.json')
+                })
 
   negative_examples:
   - |
@@ -169,15 +184,29 @@ rules:
       define wget::authfetch($source,$destination,$user,$password="",$timeout="0",$verbose=false) {
   - |
       - echo 'export DATABASE_PASSWORD="'$PRECOMPILE_PASSWORD'"' >> .env
+  - |
+      "/en/enterprise/3.0/authentication/keeping-your-account-and-data-secure/creating-a-strong-password":"/en/enterprise-server@3.0/auth"
+  - |
+      "password": "&lt;YOURPASSWROD&gt;"
+  - |
+      as: 'cms_user_password'
+        get '/passwords/:id/edit' => "cms/sites/passwords#edit", as: 'edit_password'
+        put '/forgot-password' => "cms/sites/passwords#update", as: 'update_password'
+      end
+  - |
+      IAMUserChangePassword = "arn:aws:iam::aws:policy/IAMUserChangePassword"
+  - |
+      this.addPassword = "#add-password";
+
 
 
 - name: Generic Password (single quoted)
   pattern: |
     (?x)(?i)
-    password                                  (?# preceding context )
-    [\ \t]* (?: = | : | := | => ) [\ \t]*     (?# binder )
+    password["']?                                (?# preceding context )
+    [\ \t]* (?: = | : | := | => ) [\ \t]*        (?# binder )
     '
-    ([^$<%@.,\s+'"(){}][^\s+'"(){}]{3,})      (?# password )
+    ([^$<%@.,\s+'"(){}&/\#\-][^\s+'"(){}/]{4,})  (?# password )
     '
 
   examples:
@@ -186,8 +215,17 @@ rules:
   - |
       common.then_log_in({username: 'geronimo', password: '52VeZqtHDCdAr5yM'});
 
+  - |
+      beta => {
+        host            => 'foo.example.com',
+        user            => 'joe',
+        password        => 'thisismypassword',
+      }
+
   negative_examples:
   - |
       echo 'password = '.$p['config']['daemon_password']."\n";
   - |
       usernameLabel:"Username or email:",passwordLabel:"Password:",rememberMeLabel:"Remember me:"
+  - |
+      this.addPassword = '#add-password';
