@@ -1,23 +1,23 @@
 use anyhow::{bail, Context, Result};
 
 use crate::args::{GitHubArgs, GitHubReposListArgs, GlobalArgs, Reportable};
-use noseyparker::github;
+use noseyparker::{github};
 
 pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
     use crate::args::{GitHubCommand::*, GitHubReposCommand::*};
     match &args.command {
-        Repos(List(args)) => list_repos(global_args, args),
+        Repos(List(args_list)) => list_repos(global_args, args_list, &args.api_url),
     }
 }
 
-fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs) -> Result<()> {
+fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: &String) -> Result<()> {
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
     let repo_urls = github::enumerate_repo_urls(&github::RepoSpecifiers {
         user: args.repo_specifiers.user.clone(),
         organization: args.repo_specifiers.organization.clone(),
-    }, None)
+    }, api_url, None)
     .context("Failed to enumerate GitHub repositories")?;
     RepoReporter(repo_urls).report(&args.output_args)
 }

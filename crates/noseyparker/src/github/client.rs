@@ -101,8 +101,8 @@ impl Client {
     fn make_url(&self, path_parts: &[&str], params: &[(&str, &str)]) -> Result<Url> {
         // XXX Surely this can be done better
         let mut buf = String::new();
-        for p in path_parts {
-            buf.push('/');
+        for (i, p) in path_parts.iter().enumerate() {
+            if i > 0 { buf.push('/'); }
             if p.contains('/') {
                 return Err(Error::UrlSlashError(p.to_string()));
             }

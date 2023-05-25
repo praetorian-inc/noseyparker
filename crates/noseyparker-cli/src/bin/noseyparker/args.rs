@@ -211,6 +211,15 @@ impl std::fmt::Display for Mode {
 pub struct GitHubArgs {
     #[command(subcommand)]
     pub command: GitHubCommand,
+
+    /// Use the given URL for GitHub API access
+    #[arg(
+        long,
+        value_name = "URL",
+        default_value_t = String::from("https://api.github.com"),
+        visible_alias="github-api-url"
+    )]
+    pub api_url: String,
 }
 
 #[derive(Subcommand, Debug)]
@@ -359,7 +368,16 @@ pub struct ScanInputArgs {
     #[arg(long, value_name = "NAME", display_order = 20)]
     pub github_user: Vec<String>,
 
-    /// Name of a  GitHub organization to enumerate and scan
+    /// Use the given URL for GitHub API access
+    #[arg(
+        long,
+        visible_alias = "github-api-url", 
+        value_name = "URL",
+        default_value_t = String::from("https://api.github.com")
+    )]
+    pub api_url: String,
+
+    /// Name of a GitHub organization to enumerate and scan
     #[arg(
         long,
         visible_alias = "github-org",
