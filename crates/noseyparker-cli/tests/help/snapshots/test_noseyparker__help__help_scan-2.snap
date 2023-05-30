@@ -1,5 +1,5 @@
 ---
-source: tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
 Scan content for secrets
@@ -72,12 +72,21 @@ Input Specifier Options:
           supported.
 
       --github-organization <NAME>
-          Name of a  GitHub organization to enumerate and scan
+          Name of a GitHub organization to enumerate and scan
           
           [aliases: github-org]
 
       --github-user <NAME>
           Name of a GitHub user to enumerate and scan
+
+      --github-api-url <URL>
+          Use the given URL for GitHub API access
+          
+          If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
+          include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
+          
+          [default: https://api.github.com/]
+          [aliases: api-url]
 
 Content Discovery Options:
       --max-file-size <MEGABYTES>

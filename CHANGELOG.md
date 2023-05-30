@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Additions
 - Running `noseyparker --version` now emits many compile-time details about the build, which can be useful for troubleshooting ([#48](https://github.com/praetorian-inc/noseyparker/issues/48)).
 
+- The `github` and `scan` commands now support accessing GitHub Enterprise Server instances using the new `--github-api-url URL` parameter ([#53](https://github.com/praetorian-inc/noseyparker/pull/53)).
+  Thank you @AdnaneKhan!
+
 ### Changes
 - Existing rules were modified to reduce both false positives and false negatives:
 
@@ -115,7 +118,7 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.12.0
   - PyPI Upload Token
 
 - The `report` command now offers rudimentary SARIF support ([#4](https://github.com/praetorian-inc/noseyparker/issues/4)).
-  Thanks you @Coruscant11!
+  Thank you @Coruscant11!
 
 ### Changes
 - Several default rules have been revised to improve performance of the matching engine and to produce fewer false positives.

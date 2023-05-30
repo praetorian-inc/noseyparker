@@ -13,6 +13,7 @@ pub enum Error {
         /// The duration to wait until trying again
         wait: Option<Duration>,
     },
+    UrlBaseError(url::Url),
     UrlParseError(url::ParseError),
     UrlSlashError(String),
     ReqwestError(reqwest::Error),
@@ -23,6 +24,7 @@ impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::RateLimited{client_error, ..} => write!(f, "request was rate-limited: {}", client_error.message),
+            Error::UrlBaseError(u) =>write!(f, "invalid base url: {u}"),
             Error::UrlParseError(e) => write!(f, "error parsing URL: {e}"),
             Error::UrlSlashError(p) => write!(f, "error building URL: component {p:?} contains a slash"),
             Error::ReqwestError(e) => write!(f, "error making request: {e}"),
@@ -35,6 +37,7 @@ impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Error::RateLimited{..} => None,
+            Error::UrlBaseError(_) => None,
             Error::UrlParseError(e) => Some(e),
             Error::UrlSlashError(_) => None,
             Error::ReqwestError(e) => Some(e),

@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
+use url::Url;
 
 use noseyparker::git_url::GitUrl;
 
@@ -211,6 +212,18 @@ impl std::fmt::Display for Mode {
 pub struct GitHubArgs {
     #[command(subcommand)]
     pub command: GitHubCommand,
+
+    /// Use the given URL for GitHub API access
+    ///
+    /// If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
+    /// include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
+    #[arg(
+        long,
+        value_name = "URL",
+        default_value_t = Url::parse("https://api.github.com").expect("default API url should parse"),
+        visible_alias="api-url"
+    )]
+    pub github_api_url: Url,
 }
 
 #[derive(Subcommand, Debug)]
@@ -359,7 +372,7 @@ pub struct ScanInputArgs {
     #[arg(long, value_name = "NAME", display_order = 20)]
     pub github_user: Vec<String>,
 
-    /// Name of a  GitHub organization to enumerate and scan
+    /// Name of a GitHub organization to enumerate and scan
     #[arg(
         long,
         visible_alias = "github-org",
@@ -367,6 +380,20 @@ pub struct ScanInputArgs {
         display_order = 20
     )]
     pub github_organization: Vec<String>,
+
+    /// Use the given URL for GitHub API access
+    ///
+    /// If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
+    /// include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
+    #[arg(
+        long,
+        visible_alias = "api-url",
+        value_name = "URL",
+        default_value_t = Url::parse("https://api.github.com").expect("default API url should parse"),
+        display_order = 30
+    )]
+    pub github_api_url: Url,
+
 }
 
 /// This struct represents options to control content discovery.

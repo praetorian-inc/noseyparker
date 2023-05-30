@@ -83,7 +83,8 @@ impl Client {
     }
 
     pub async fn get_all<T>(&self, page: Page<T>) -> Result<Vec<T>>
-        where T: serde::de::DeserializeOwned
+    where
+        T: serde::de::DeserializeOwned,
     {
         let mut results = Vec::new();
         let mut next_page = Some(page);
@@ -95,30 +96,128 @@ impl Client {
     }
 }
 
+/// Create a URL from the given base, path parts, and parameters.
+///
+/// The path parts should not contain slashes.
+fn url_from_path_parts_and_params(
+    base_url: Url,
+    path_parts: &[&str],
+    params: &[(&str, &str)],
+) -> Result<Url> {
+    if base_url.cannot_be_a_base() {
+        return Err(Error::UrlBaseError(base_url));
+    }
+
+    let mut buf = base_url.path().to_string();
+    if !buf.ends_with('/') {
+        buf.push('/');
+    }
+
+    for (i, p) in path_parts.iter().enumerate() {
+        if p.contains('/') {
+            return Err(Error::UrlSlashError(p.to_string()));
+        }
+        if i > 0 {
+            // do not add a leading slash for the very first path part, or the result comes out
+            // wrong, as it is unintentionally treated as an absolute path
+            //
+            // https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=c2674663bf5e681b5bdb302d1b050237
+            buf.push('/');
+        }
+        buf.push_str(p);
+    }
+    let url = base_url.join(&buf).map_err(Error::UrlParseError)?;
+    let url = if params.is_empty() {
+        Url::parse(url.as_str()).map_err(Error::UrlParseError)?
+    } else {
+        Url::parse_with_params(url.as_str(), params).map_err(Error::UrlParseError)?
+    };
+    Ok(url)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    fn make_url(base_url: &str, path_parts: &[&str], params: &[(&str, &str)]) -> Result<Url> {
+        let base_url = Url::parse(base_url).unwrap();
+        url_from_path_parts_and_params(base_url, path_parts, params)
+    }
+
+    fn testcase_ok(inputs: (&str, &[&str], &[(&str, &str)]), expected: &str) {
+        let (base_url, path_parts, params) = inputs;
+        let actual = make_url(base_url, path_parts, params).unwrap();
+        let expected = Url::parse(expected).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_1() {
+        testcase_ok(
+            ("https://github.example.com/api/v3", &[], &[]),
+            "https://github.example.com/api/v3/",
+        );
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_2() {
+        testcase_ok(
+            ("https://github.example.com/api/v3/", &[], &[]),
+            "https://github.example.com/api/v3/",
+        );
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_3() {
+        testcase_ok(
+            ("https://github.example.com/api/v3", &["SomeUser", "somerepo.git"], &[]),
+            "https://github.example.com/api/v3/SomeUser/somerepo.git",
+        );
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_4() {
+        testcase_ok(
+            ("https://github.example.com/api/v3/", &["SomeUser", "somerepo.git"], &[]),
+            "https://github.example.com/api/v3/SomeUser/somerepo.git",
+        );
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_5() {
+        testcase_ok(
+            ("https://api.github.com", &["praetorian-inc", "noseyparker.git"], &[]),
+            "https://api.github.com/praetorian-inc/noseyparker.git",
+        );
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_6() {
+        let res = make_url("https://api.github.com", &["praetorian-inc", "some/bogus/path/part"], &[]);
+        // XXX have to resort to match here because `Error` doesn't have an Eq instance
+        match res {
+            Err(Error::UrlSlashError(p)) if p == "some/bogus/path/part" => (),
+            _ => assert!(false),
+        }
+    }
+
+    #[test]
+    fn url_from_path_parts_and_params_7() {
+        let res = make_url("mailto:blah@example.com", &[], &[]);
+        // XXX have to resort to match here because `Error` doesn't have an Eq instance
+        match res {
+            Err(Error::UrlBaseError(p)) if p.as_str() == "mailto:blah@example.com" => (),
+            _ => assert!(false),
+        }
+    }
+}
+
 // private implementation
 impl Client {
     /// Construct a `Url` from the given path parts and query parameters.
     fn make_url(&self, path_parts: &[&str], params: &[(&str, &str)]) -> Result<Url> {
-        // XXX Surely this can be done better
-        let mut buf = String::new();
-        for p in path_parts {
-            buf.push('/');
-            if p.contains('/') {
-                return Err(Error::UrlSlashError(p.to_string()));
-            }
-            buf.push_str(p);
-        }
-        let url = self
-            .base_url
-            .clone()
-            .join(&buf)
-            .map_err(Error::UrlParseError)?;
-        let url = if params.is_empty() {
-            Url::parse(url.as_str()).map_err(Error::UrlParseError)?
-        } else {
-            Url::parse_with_params(url.as_str(), params).map_err(Error::UrlParseError)?
-        };
-        Ok(url)
+        url_from_path_parts_and_params(self.base_url.clone(), path_parts, params)
     }
 
     async fn get(&self, path_parts: &[&str]) -> Result<reqwest::Response> {

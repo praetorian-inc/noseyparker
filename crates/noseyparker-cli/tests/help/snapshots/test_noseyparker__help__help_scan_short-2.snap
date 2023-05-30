@@ -1,5 +1,5 @@
 ---
-source: tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
 Scan content for secrets
@@ -15,9 +15,11 @@ Options:
 Input Specifier Options:
   [INPUT]...                    Path to a file, directory, or local Git repository to scan
       --git-url <URL>               URL of a Git repository to clone and scan
-      --github-organization <NAME>  Name of a  GitHub organization to enumerate and scan [aliases:
+      --github-organization <NAME>  Name of a GitHub organization to enumerate and scan [aliases:
                                     github-org]
       --github-user <NAME>          Name of a GitHub user to enumerate and scan
+      --github-api-url <URL>        Use the given URL for GitHub API access [default:
+                                    https://api.github.com/] [aliases: api-url]
 
 Content Discovery Options:
       --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]

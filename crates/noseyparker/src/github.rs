@@ -1,3 +1,5 @@
+use url::Url;
+
 mod auth;
 mod client;
 mod client_builder;
@@ -19,11 +21,17 @@ use crate::progress::Progress;
 ///
 /// This is a high-level wrapper for enumerating GitHub repositories that handles the details of
 /// creating an async runtime and a GitHub REST API client.
-pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers, progress: Option<&mut Progress>) -> anyhow::Result<Vec<String>> {
+pub fn enumerate_repo_urls(
+    repo_specifiers: &RepoSpecifiers,
+    github_url: Url,
+    progress: Option<&mut Progress>,
+) -> anyhow::Result<Vec<String>> {
     use anyhow::{bail, Context};
     use tracing::{debug, warn};
 
     let client = ClientBuilder::new()
+        .base_url(github_url)
+        .context("Failed to set base URL")?
         .personal_access_token_from_env()
         .context("Failed to load access token from environment")?
         .build()
@@ -45,7 +53,9 @@ pub fn enumerate_repo_urls(repo_specifiers: &RepoSpecifiers, progress: Option<&m
         debug!("GitHub rate limits: {:?}", rate_limit.rate);
 
         let repo_enumerator = RepoEnumerator::new(&client);
-        let repo_urls = repo_enumerator.enumerate_repo_urls(repo_specifiers, progress).await?;
+        let repo_urls = repo_enumerator
+            .enumerate_repo_urls(repo_specifiers, progress)
+            .await?;
         Ok(repo_urls) // ::<Vec<String>, Error>(repo_urls)
     });
 
