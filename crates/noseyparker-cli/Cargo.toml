@@ -56,6 +56,7 @@ serde-sarif = "0.3.6"
 tracing = "0.1"
 tracing-log = "0.1"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi"] }
+url = "2.3"
 vectorscan = { path = "../vectorscan" }
 
 [dev-dependencies]

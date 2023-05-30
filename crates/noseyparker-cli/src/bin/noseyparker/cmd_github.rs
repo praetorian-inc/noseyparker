@@ -1,16 +1,17 @@
 use anyhow::{bail, Context, Result};
+use url::Url;
 
 use crate::args::{GitHubArgs, GitHubReposListArgs, GlobalArgs, Reportable};
-use noseyparker::{github};
+use noseyparker::github;
 
 pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
     use crate::args::{GitHubCommand::*, GitHubReposCommand::*};
     match &args.command {
-        Repos(List(args_list)) => list_repos(global_args, args_list, &args.api_url),
+        Repos(List(args_list)) => list_repos(global_args, args_list, args.github_api_url.clone()),
     }
 }
 
-fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: &String) -> Result<()> {
+fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Url) -> Result<()> {
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
