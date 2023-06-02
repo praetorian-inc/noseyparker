@@ -1,0 +1,10 @@
+rules:
+
+- name: HuggingFace User Access Token
+  pattern: '\b(hf_[a-zA-Z]{34})\b'
+
+  references:
+  - https://huggingface.co/docs/hub/security-tokens
+
+  examples:
+  - 'HF_TOKEN:"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"'

@@ -4,7 +4,7 @@ Nosey Parker is a command-line tool that finds secrets and sensitive information
 
 **Key features:**
 - It supports scanning files, directories, and the entire history of Git repositories
-- It uses regular expression matching with a set of 98 patterns chosen for high signal-to-noise based on experience and feedback from offensive security engagements
+- It uses regular expression matching with a set of 99 patterns chosen for high signal-to-noise based on experience and feedback from offensive security engagements
 - It groups matches together that share the same secret, further emphasizing signal over noise
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source history in less than 2 minutes on an older MacBook Pro
 
