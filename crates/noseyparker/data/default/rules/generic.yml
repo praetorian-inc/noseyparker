@@ -140,6 +140,8 @@ rules:
   - |
       password = "super$ecret"
   - |
+      password="super$ecret"
+  - |
       String usernamePassword = "application:" + appKey + ":" + appSecret;
   - |
       my_password: "super$ecret"
