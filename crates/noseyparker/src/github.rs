@@ -33,7 +33,7 @@ pub fn enumerate_repo_urls(
         .base_url(github_url)
         .context("Failed to set base URL")?
         .personal_access_token_from_env()
-        .context("Failed to load access token from environment")?
+        .context("Failed to get GitHub access token from environment")?
         .build()
         .context("Failed to initialize GitHub client")?;
 
