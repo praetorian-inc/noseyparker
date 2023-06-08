@@ -16,11 +16,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
 
+- Two new advanced global command-line parameters have been exposed:
+
+  - `--rlimit-nofile LIMIT` to control the maximum number of open file descriptors
+  - `--enable-backtraces BOOL` to control whether backtraces are printed upon panic
+
+- The snippet length for matches found by the `scan` command can now be controlled with the new `--snippet-length BYTES` parameter.
+
+- The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode MODE` parameter.
+
+
 ### Changes
 - Existing rules were modified to reduce both false positives and false negatives:
 
   - Generic Password (double quoted)
   - Generic Password (single quoted)
+
+- The default size of match snippets has been increased from 128 bytes before and after to 256.
+  This typically gives 4-7 lines of context before and after each match.
+
+- When a Git repository is cloned, the default behavior is to match `git clone --bare` instead of `git clone --mirror`.
+  This new default behavior results in cloning potentially less content, but avoids cloning content from forks from repositories hosted on GitHub.
+
+- The command-line help has been refined for clarity
 
 
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)

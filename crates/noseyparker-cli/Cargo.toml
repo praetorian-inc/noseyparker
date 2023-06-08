@@ -34,7 +34,7 @@ vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc
 # anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
 anyhow = { version = "1.0" }
 atty = "0.2"
-clap = { version = "4.2", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
+clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
 gix-features = { version = "0.28", features = ["fast-sha1"] }
 gix = { version = "0.43", features = ["max-performance", "fast-sha1"] }

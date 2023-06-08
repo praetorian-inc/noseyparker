@@ -78,7 +78,7 @@ impl Git {
         cmd
     }
 
-    pub fn update_mirrored_clone(&self, repo_url: &GitUrl, output_dir: &Path) -> Result<(), GitError> {
+    pub fn update_clone(&self, repo_url: &GitUrl, output_dir: &Path) -> Result<(), GitError> {
         let _span = debug_span!("git_update", "{repo_url} {}", output_dir.display()).entered();
         debug!("Attempting to update clone of {repo_url} at {}", output_dir.display());
 
@@ -101,17 +101,18 @@ impl Git {
         Ok(())
     }
 
-    pub fn create_fresh_mirrored_clone(
+    pub fn create_fresh_clone(
         &self,
         repo_url: &GitUrl,
         output_dir: &Path,
+        clone_mode: CloneMode,
     ) -> Result<(), GitError> {
         let _span = debug_span!("git_clone", "{repo_url} {}", output_dir.display()).entered();
         debug!("Attempting to create fresh clone of {} at {}", repo_url, output_dir.display());
 
         let mut cmd = self.git();
         cmd.arg("clone")
-            .arg("--mirror")
+            .arg(clone_mode.arg())
             .arg(repo_url.as_str())
             .arg(output_dir);
 
@@ -132,5 +133,24 @@ impl Default for Git {
     /// Equivalent to `Git::new()`
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// Represents the behavior for cloning a repository
+#[derive(Debug, Clone, Copy)]
+pub enum CloneMode {
+    /// `--bare`
+    Bare,
+
+    /// `--mirror`
+    Mirror,
+}
+
+impl CloneMode {
+    pub fn arg(&self) -> &str {
+        match self {
+            Self::Bare => "--bare",
+            Self::Mirror => "--mirror",
+        }
     }
 }

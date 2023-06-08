@@ -167,6 +167,27 @@ pub struct GlobalArgs {
     /// When this is "auto", progress bars are enabled when stderr is a tty.
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
     pub progress: Mode,
+
+    #[command(flatten)]
+    pub advanced: AdvancedArgs,
+}
+
+#[derive(Args, Debug)]
+#[command(next_help_heading = "Advanced Global Options")]
+/// These are advanced options that should not need to be used in normal circumstances.
+pub struct AdvancedArgs {
+    /// Set the rlimit for number of open files to LIMIT
+    ///
+    /// This should not need to be changed from the default unless you run into crashes from
+    /// running out of file descriptors.
+    #[arg(hide_short_help=true, global=true, long, default_value_t=16384, value_name="LIMIT")]
+    pub rlimit_nofile: u64,
+
+    /// Enable or disable backtraces on panic
+    ///
+    /// This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
+    #[arg(hide_short_help=true, global=true, long, default_value_t=true, action=ArgAction::Set, value_name="BOOL")]
+    pub enable_backtraces: bool,
 }
 
 impl GlobalArgs {
@@ -187,6 +208,7 @@ impl GlobalArgs {
     }
 }
 
+/// A generic auto/never/always mode value
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum Mode {
     Auto,
@@ -213,7 +235,7 @@ pub struct GitHubArgs {
     #[command(subcommand)]
     pub command: GitHubCommand,
 
-    /// Use the given URL for GitHub API access
+    /// Use the specified URL for GitHub API access
     ///
     /// If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
     /// include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
@@ -251,10 +273,14 @@ pub struct GitHubReposListArgs {
 #[derive(Args, Debug, Clone)]
 pub struct GitHubRepoSpecifiers {
     /// Select repositories belonging to the specified user
+    ///
+    /// This option can be repeated.
     #[arg(long)]
     pub user: Vec<String>,
 
     /// Select repositories belonging to the specified organization
+    ///
+    /// This option can be repeated.
     #[arg(long, visible_alias = "org")]
     pub organization: Vec<String>,
 }
@@ -328,18 +354,25 @@ fn get_parallelism() -> usize {
 /// Arguments for the `scan` command
 #[derive(Args, Debug)]
 pub struct ScanArgs {
-    /// Use the specified datastore path
+    /// Use the specified datastore
     ///
     /// The datastore will be created if it does not exist.
     #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     // FIXME: choose a good default value for this?
     pub datastore: PathBuf,
 
-    /// The number of parallel scanning jobs
+    /// Use N parallel scanning jobs
     #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
     pub num_jobs: usize,
 
-    /// Path of custom rules to use
+    /// Include up to the specified number of bytes before and after each match
+    ///
+    /// The default value typically gives between 4 and 7 lines of context before and after each
+    /// match.
+    #[arg(long, value_name="BYTES", default_value_t=256)]
+    pub snippet_length: usize,
+
+    /// Use custom rules from the specified file or directory
     ///
     /// The paths can be either files or directories.
     /// Directories are recursively walked and all discovered rule files will be loaded.
@@ -349,30 +382,59 @@ pub struct ScanArgs {
     pub rules: Vec<PathBuf>,
 
     #[command(flatten)]
-    pub input_args: ScanInputArgs,
+    pub input_specifier_args: InputSpecifierArgs,
 
     #[command(flatten)]
-    pub discovery_args: ScanDiscoveryArgs,
+    pub content_filtering_args: ContentFilteringArgs,
+}
+
+/// The mode to use for cloning a Git repository
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum GitCloneMode {
+    /// Match the behavior of `git clone --bare`
+    Bare,
+
+    /// Match the behavior of `git clone --mirror`
+    ///
+    /// This will clone the most possible content.
+    /// When cloning repositories hosted on GitHub, this mode may clone objects that come from forks.
+    Mirror,
+}
+
+impl std::fmt::Display for GitCloneMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            GitCloneMode::Bare => "bare",
+            GitCloneMode::Mirror => "mirror",
+        };
+        write!(f, "{s}")
+    }
 }
 
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Input Specifier Options")]
-pub struct ScanInputArgs {
-    /// Path to a file, directory, or local Git repository to scan
+pub struct InputSpecifierArgs {
+    /// Scan the specified file, directory, or local Git repository
     #[arg(value_name="INPUT", required_unless_present_any(["github_user", "github_organization", "git_url"]), display_order=1)]
     pub path_inputs: Vec<PathBuf>,
 
-    /// URL of a Git repository to clone and scan
+    /// Clone and scan the Git repository at the specified URL
     ///
     /// Only https URLs without credentials, query parameters, or fragment identifiers are supported.
+    ///
+    /// This option can be repeated.
     #[arg(long, value_name = "URL", display_order = 10)]
     pub git_url: Vec<GitUrl>,
 
-    /// Name of a GitHub user to enumerate and scan
+    /// Clone and scan accessible repositories belonging to the specified GitHub user
+    ///
+    /// This option can be repeated.
     #[arg(long, value_name = "NAME", display_order = 20)]
     pub github_user: Vec<String>,
 
-    /// Name of a GitHub organization to enumerate and scan
+    /// Clone and scan accessible repositories belonging to the specified GitHub organization
+    ///
+    /// This option can be repeated.
     #[arg(
         long,
         visible_alias = "github-org",
@@ -381,7 +443,7 @@ pub struct ScanInputArgs {
     )]
     pub github_organization: Vec<String>,
 
-    /// Use the given URL for GitHub API access
+    /// Use the specified URL for GitHub API access
     ///
     /// If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
     /// include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
@@ -394,12 +456,15 @@ pub struct ScanInputArgs {
     )]
     pub github_api_url: Url,
 
+    /// Use the specified method for cloning Git repositories
+    #[arg(long, value_name = "MODE", display_order = 40, default_value_t=GitCloneMode::Bare)]
+    pub git_clone_mode: GitCloneMode,
 }
 
 /// This struct represents options to control content discovery.
 #[derive(Args, Debug)]
-#[command(next_help_heading = "Content Discovery Options")]
-pub struct ScanDiscoveryArgs {
+#[command(next_help_heading = "Content Filtering Options")]
+pub struct ContentFilteringArgs {
     /// Do not scan files larger than the specified size
     ///
     /// The value is parsed as a floating point literal, and hence fractional values can be supplied.
@@ -412,7 +477,7 @@ pub struct ScanDiscoveryArgs {
     )]
     pub max_file_size_mb: f64,
 
-    /// Path of a custom ignore rules file to use
+    /// Use custom rules from PATH
     ///
     /// The ignore file should contain gitignore-style rules.
     ///
@@ -426,7 +491,7 @@ pub struct ScanDiscoveryArgs {
     */
 }
 
-impl ScanDiscoveryArgs {
+impl ContentFilteringArgs {
     pub fn max_file_size_bytes(&self) -> Option<u64> {
         if self.max_file_size_mb < 0.0 {
             None
@@ -441,7 +506,7 @@ impl ScanDiscoveryArgs {
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
 pub struct SummarizeArgs {
-    /// Use the specified datastore path
+    /// Use the specified datastore
     #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     pub datastore: PathBuf,
 
@@ -454,7 +519,7 @@ pub struct SummarizeArgs {
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
 pub struct ReportArgs {
-    /// Use the specified datastore path
+    /// Use the specified datastore
     #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
     pub datastore: PathBuf,
 
