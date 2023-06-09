@@ -68,10 +68,10 @@ fn try_main() -> Result<()> {
     let args = &args::CommandLineArgs::parse_args();
     let global_args = &args.global_args;
 
-    configure_backtraces(&global_args);
-    configure_color(&global_args);
-    configure_tracing(&global_args).context("Failed to initialize logging")?;
-    configure_rlimits(&global_args).context("Failed to initialize resource limits")?;
+    configure_backtraces(global_args);
+    configure_color(global_args);
+    configure_tracing(global_args).context("Failed to initialize logging")?;
+    configure_rlimits(global_args).context("Failed to initialize resource limits")?;
 
     match &args.command {
         args::Command::Datastore(args) => cmd_datastore::run(global_args, args),
