@@ -1,0 +1,18 @@
+---
+source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
+expression: stdout
+---
+Finding 1/1: AWS API Key
+Match: AKIADEADBEEFDEADBEEF
+
+    Occurrence 1/1
+    File:  <FILENAME>
+    Lines: 30:9-30:28
+
+        he_dude
+        AWS_KEY=AKIADEADBEEFDEADBEEF
+
+        function lorem
+
+
+

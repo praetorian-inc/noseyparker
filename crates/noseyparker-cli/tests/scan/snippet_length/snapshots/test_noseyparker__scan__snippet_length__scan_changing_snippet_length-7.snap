@@ -1,0 +1,44 @@
+---
+source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
+expression: json_output
+---
+[
+  {
+    "match_content": "AKIADEADBEEFDEADBEEF",
+    "matches": [
+      {
+        "blob_id": "c3c55e6f7e1304573e25e85202e9f019bfc05087",
+        "capture_group_index": 1,
+        "location": {
+          "offset_span": {
+            "end": 752,
+            "start": 732
+          },
+          "source_span": {
+            "end": {
+              "column": 28,
+              "line": 30
+            },
+            "start": {
+              "column": 9,
+              "line": 30
+            }
+          }
+        },
+        "match_content": "AKIADEADBEEFDEADBEEF",
+        "provenance": {
+          "kind": "file",
+          "path": "<ROOT>/input.txt"
+        },
+        "rule_name": "AWS API Key",
+        "snippet": {
+          "after": "\n\nfunction lorem",
+          "before": "he_dude\nAWS_KEY=",
+          "matching": "AKIADEADBEEFDEADBEEF"
+        }
+      }
+    ],
+    "num_matches": 1,
+    "rule_name": "AWS API Key"
+  }
+]

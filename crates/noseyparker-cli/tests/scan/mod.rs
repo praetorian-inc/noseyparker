@@ -4,6 +4,7 @@ use super::*;
 mod basic;
 mod git_url;
 mod with_ignore;
+mod snippet_length;
 
 // TODO: add test for scanning with `--github-user`
 // TODO: add test for scanning with `--github-org`
@@ -12,5 +13,3 @@ mod with_ignore;
 // TODO: add test for scanning with `--git-clone-mode bare` and `--git-clone-mode mirror`
 // TODO: add test for scanning with `--github-api-url`
 // TODO: add tests for SARIF output format
-// TODO: add test for scanning with non-default `--snippet-length` parameter
-// TODO: add test for scanning multiple times with changing values of `--snippet-length`
