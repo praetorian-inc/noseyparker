@@ -1,4 +1,4 @@
-//! Tests for Nosey Parker `github` command
+//! Tests for Nosey Parker's `github` command
 
 use super::*;
 use pretty_assertions::assert_eq;

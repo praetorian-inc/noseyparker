@@ -1,3 +1,4 @@
+//! Tests for Nosey Parker's `scan` command
 use super::*;
 
 mod basic;

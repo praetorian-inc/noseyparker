@@ -477,7 +477,7 @@ pub struct ContentFilteringArgs {
     )]
     pub max_file_size_mb: f64,
 
-    /// Use custom rules from PATH
+    /// Use custom path-based ignore rules from the specified file
     ///
     /// The ignore file should contain gitignore-style rules.
     ///

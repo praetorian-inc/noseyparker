@@ -123,7 +123,7 @@ Content Filtering Options:
           [default: 100]
 
   -i, --ignore <FILE>
-          Use custom rules from PATH
+          Use custom path-based ignore rules from the specified file
           
           The ignore file should contain gitignore-style rules.
           
