@@ -13,7 +13,7 @@ A rules file contains a top-level YAML object with a `rules` field that is a lis
 Each rule is a YAML object, comprising a name, a regular expression, a list of references, a list of example inputs, and an optional list of non-example inputs.
 It is easier to understand this from looking at sample rules.
 
-The [`GitHub Personal Access Token`](/data/default/rules/github.yml) rule looks like this:
+The [`GitHub Personal Access Token`](/crates/noseyparker/data/default/rules/github.yml) rule looks like this:
 ```
 - name: GitHub Personal Access Token
   pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
@@ -105,16 +105,16 @@ Please open a pull request!
 ### Secret types with well-defined and distinct formats make for the best Nosey Parker rules
 Some types of secrets have well-specified formats with distinctive prefixes or suffixes that are unlikely to appear accidentally.
 
-For example, [AWS API keys](/data/default/rules/aws.yml) start with one of a few 4-character prefixes followed by 16 hex digits.
+For example, [AWS API keys](/crates/noseyparker/data/default/rules/aws.yml) start with one of a few 4-character prefixes followed by 16 hex digits.
 A pattern that matches these needs no additional context.
 
-Other types of secrets have a well-specified format but lack distinctiveness, such as [Sauce tokens](/data/default/rules/sauce.yml), which appear to be simply version 4 UUIDs.
+Other types of secrets have a well-specified format but lack distinctiveness, such as [Sauce tokens](/crates/noseyparker/data/default/rules/sauce.yml), which appear to be simply version 4 UUIDs.
 A pattern to match these requires looking at surrounding context, which is more likely to produce false positives.
 
 ### Include at least 1 capture group
 Each rule pattern must include at least 1 capture group that isolates the content of the secret from the surrounding context.
 Multiple captures groups are permitted; this can be useful for some types of secrets that involve multiple parts, such as a username and password.
-For an example of this, see the [`netrc Credentials`](/data/default/rules/netrc.yml) rule:
+For an example of this, see the [`netrc Credentials`](/crates/noseyparker/data/default/rules/netrc.yml) rule:
 ```
 - name: netrc Credentials
   pattern: |
@@ -155,7 +155,7 @@ This helps maintainers and operators better understand what a match might be.
 Rules in Nosey Parker are selected to produce few false positives.
 A rule's pattern should be precise as possible while minimizing its size.
 It's always possible to expand a pattern to eliminate false positives, but doing so is usually a bad tradeoff in terms of comprehensibility.
-For example, the [`Credentials in ODBC Connection String`](/data/default/rules/odbc.yml) and [`LinkedIn Secret Key`](/data/default/rules/linkedin.yml) rules are at the borderline of complexity we prefer to see.
+For example, the [`Credentials in ODBC Connection String`](/crates/noseyparker/data/default/rules/odbc.yml) and [`LinkedIn Secret Key`](/crates/noseyparker/data/default/rules/linkedin.yml) rules are at the borderline of complexity we prefer to see.
 
 ### Make complex patterns comprehensible
 Patterns comprehensibility decreases as patterns get longer.
@@ -166,7 +166,7 @@ A few tricks can ameliorate this:
    (Note that you will need to explicitly escape whitespace in this mode if you want it to match.)
 3. Use inline regular expression comments (`(?# COMMENT )`) judiciously.
 
-The pattern in the [`JSON Web Token (base64url-encoded)`](/data/default/rules/jwt.yml) rule demonstrates all these tricks:
+The pattern in the [`JSON Web Token (base64url-encoded)`](/crates/noseyparker/data/default/rules/jwt.yml) rule demonstrates all these tricks:
 ```
 # `header . payload . signature`, all base64-encoded
 # Unencoded, the header and payload are JSON objects, starting with `{`, which
