@@ -41,6 +41,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The command-line help has been refined for clarity
 
 
+### Fixes
+- Python is no longer required as a build-time dependency for `vectorscan-sys`.
+
+
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)
 
 A prebuilt multiplatform Docker image for this release is available for x86_64 and ARM64 architectures:
