@@ -34,7 +34,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     debug!("Args: {args:#?}");
 
-    let color_enabled = global_args.use_color();
     let progress_enabled = global_args.use_progress();
 
     // ---------------------------------------------------------------------------------------------
@@ -496,7 +495,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let matches_summary = datastore.summarize()?;
             let matches_table = crate::cmd_summarize::summary_table(&matches_summary);
             println!();
-            matches_table.print_tty(color_enabled)?;
+            matches_table.print_tty(global_args.use_color())?;
         }
 
         println!("\nRun the `report` command next to show finding details.");
