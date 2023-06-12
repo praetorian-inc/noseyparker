@@ -7,23 +7,28 @@ Scan content for secrets
 Usage: noseyparker scan [OPTIONS] --datastore <PATH> [INPUT]...
 
 Options:
-  -d, --datastore <PATH>  Use the specified datastore path [env: NP_DATASTORE=]
-  -j, --jobs <N>          The number of parallel scanning jobs [default: DEFAULT]
-  -r, --rules <PATH>      Path of custom rules to use
-  -h, --help              Print help (see more with '--help')
+  -d, --datastore <PATH>        Use the specified datastore [env: NP_DATASTORE=]
+  -j, --jobs <N>                Use N parallel scanning jobs [default: DEFAULT]
+      --snippet-length <BYTES>  Include up to the specified number of bytes before and after each
+                                match [default: 256]
+  -r, --rules <PATH>            Use custom rules from the specified file or directory
+  -h, --help                    Print help (see more with '--help')
 
 Input Specifier Options:
-  [INPUT]...                    Path to a file, directory, or local Git repository to scan
-      --git-url <URL>               URL of a Git repository to clone and scan
-      --github-organization <NAME>  Name of a GitHub organization to enumerate and scan [aliases:
-                                    github-org]
-      --github-user <NAME>          Name of a GitHub user to enumerate and scan
-      --github-api-url <URL>        Use the given URL for GitHub API access [default:
+  [INPUT]...                    Scan the specified file, directory, or local Git repository
+      --git-url <URL>               Clone and scan the Git repository at the specified URL
+      --github-organization <NAME>  Clone and scan accessible repositories belonging to the
+                                    specified GitHub organization [aliases: github-org]
+      --github-user <NAME>          Clone and scan accessible repositories belonging to the
+                                    specified GitHub user
+      --github-api-url <URL>        Use the specified URL for GitHub API access [default:
                                     https://api.github.com/] [aliases: api-url]
+      --git-clone-mode <MODE>       Use the specified method for cloning Git repositories [default:
+                                    bare] [possible values: bare, mirror]
 
-Content Discovery Options:
+Content Filtering Options:
       --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]
-  -i, --ignore <FILE>              Path of a custom ignore rules file to use
+  -i, --ignore <FILE>              Use custom path-based ignore rules from the specified file
 
 Global Options:
   -v, --verbose...       Enable verbose output

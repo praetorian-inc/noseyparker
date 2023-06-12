@@ -39,19 +39,27 @@ Usage: noseyparker scan [OPTIONS] --datastore <PATH> [INPUT]...
 
 Options:
   -d, --datastore <PATH>
-          Use the specified datastore path
+          Use the specified datastore
           
           The datastore will be created if it does not exist.
           
           [env: NP_DATASTORE=]
 
   -j, --jobs <N>
-          The number of parallel scanning jobs
+          Use N parallel scanning jobs
           
           [default: DEFAULT]
 
+      --snippet-length <BYTES>
+          Include up to the specified number of bytes before and after each match
+          
+          The default value typically gives between 4 and 7 lines of context before and after each
+          match.
+          
+          [default: 256]
+
   -r, --rules <PATH>
-          Path of custom rules to use
+          Use custom rules from the specified file or directory
           
           The paths can be either files or directories. Directories are recursively walked and all
           discovered rule files will be loaded.
@@ -63,24 +71,30 @@ Options:
 
 Input Specifier Options:
   [INPUT]...
-          Path to a file, directory, or local Git repository to scan
+          Scan the specified file, directory, or local Git repository
 
       --git-url <URL>
-          URL of a Git repository to clone and scan
+          Clone and scan the Git repository at the specified URL
           
           Only https URLs without credentials, query parameters, or fragment identifiers are
           supported.
+          
+          This option can be repeated.
 
       --github-organization <NAME>
-          Name of a GitHub organization to enumerate and scan
+          Clone and scan accessible repositories belonging to the specified GitHub organization
+          
+          This option can be repeated.
           
           [aliases: github-org]
 
       --github-user <NAME>
-          Name of a GitHub user to enumerate and scan
+          Clone and scan accessible repositories belonging to the specified GitHub user
+          
+          This option can be repeated.
 
       --github-api-url <URL>
-          Use the given URL for GitHub API access
+          Use the specified URL for GitHub API access
           
           If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
           include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
@@ -88,7 +102,16 @@ Input Specifier Options:
           [default: https://api.github.com/]
           [aliases: api-url]
 
-Content Discovery Options:
+      --git-clone-mode <MODE>
+          Use the specified method for cloning Git repositories
+          
+          [default: bare]
+
+          Possible values:
+          - bare:   Match the behavior of `git clone --bare`
+          - mirror: Match the behavior of `git clone --mirror`
+
+Content Filtering Options:
       --max-file-size <MEGABYTES>
           Do not scan files larger than the specified size
           
@@ -100,7 +123,7 @@ Content Discovery Options:
           [default: 100]
 
   -i, --ignore <FILE>
-          Path of a custom ignore rules file to use
+          Use custom path-based ignore rules from the specified file
           
           The ignore file should contain gitignore-style rules.
           
@@ -130,4 +153,21 @@ Global Options:
           
           [default: auto]
           [possible values: auto, never, always]
+
+Advanced Global Options:
+      --rlimit-nofile <LIMIT>
+          Set the rlimit for number of open files to LIMIT
+          
+          This should not need to be changed from the default unless you run into crashes from
+          running out of file descriptors.
+          
+          [default: 16384]
+
+      --enable-backtraces <BOOL>
+          Enable or disable backtraces on panic
+          
+          This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
+          
+          [default: true]
+          [possible values: true, false]
 

@@ -1,0 +1,9 @@
+---
+source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
+expression: stdout
+---
+
+ Rule          Distinct Matches   Total Matches 
+────────────────────────────────────────────────
+ AWS API Key                  1               1 
+

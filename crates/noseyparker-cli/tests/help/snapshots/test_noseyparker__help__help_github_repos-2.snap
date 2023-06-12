@@ -1,5 +1,5 @@
 ---
-source: tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
 Interact with GitHub repositories
@@ -7,10 +7,8 @@ Interact with GitHub repositories
 Usage: noseyparker github repos [OPTIONS] <COMMAND>
 
 Commands:
-  list
-          List repositories belonging to a specific user or organization
-  help
-          Print this message or the help of the given subcommand(s)
+  list  List repositories belonging to a specific user or organization
+  help  Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help
@@ -40,4 +38,21 @@ Global Options:
           
           [default: auto]
           [possible values: auto, never, always]
+
+Advanced Global Options:
+      --rlimit-nofile <LIMIT>
+          Set the rlimit for number of open files to LIMIT
+          
+          This should not need to be changed from the default unless you run into crashes from
+          running out of file descriptors.
+          
+          [default: 16384]
+
+      --enable-backtraces <BOOL>
+          Enable or disable backtraces on panic
+          
+          This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
+          
+          [default: true]
+          [possible values: true, false]
 

@@ -11,7 +11,7 @@ Commands:
   help   Print this message or the help of the given subcommand(s)
 
 Options:
-      --github-api-url <URL>  Use the given URL for GitHub API access [default:
+      --github-api-url <URL>  Use the specified URL for GitHub API access [default:
                               https://api.github.com/] [aliases: api-url]
   -h, --help                  Print help (see more with '--help')
 

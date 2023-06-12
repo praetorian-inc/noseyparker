@@ -9,7 +9,9 @@ mod cmd_rules;
 mod cmd_scan;
 mod cmd_summarize;
 
-fn configure_tracing(global_args: &args::GlobalArgs) -> Result<()> {
+use args::GlobalArgs;
+
+fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
     use tracing_subscriber::filter::LevelFilter;
     use tracing_log::{AsLog, LogTracer};
 
@@ -33,33 +35,43 @@ fn configure_tracing(global_args: &args::GlobalArgs) -> Result<()> {
     Ok(())
 }
 
-fn configure_rlimits() -> Result<()> {
+fn configure_rlimits(global_args: &GlobalArgs) -> Result<()> {
     use rlimit::Resource;
     use std::cmp::max;
 
-    const NOFILE_LIMIT: u64 = 16384;
+    let nofile_limit = global_args.advanced.rlimit_nofile;
     let (soft, hard) = Resource::NOFILE.get()?;
-    let soft = max(soft, NOFILE_LIMIT);
-    let hard = max(hard, NOFILE_LIMIT);
+    let soft = max(soft, nofile_limit);
+    let hard = max(hard, nofile_limit);
     Resource::NOFILE.set(soft, hard)?;
     debug!("Set {} limit to ({}, {})", Resource::NOFILE.as_name(), soft, hard);
     Ok(())
 }
 
-fn try_main() -> Result<()> {
-    // Print a stack trace in case of panic.
-    // This should have no overhead in normal execution.
-    std::env::set_var("RUST_BACKTRACE", "1");
-
-    let args = &args::CommandLineArgs::parse_args();
-    let global_args = &args.global_args;
-
+fn configure_color(global_args: &GlobalArgs) {
     let use_color = global_args.use_color();
     console::set_colors_enabled(use_color);
     console::set_colors_enabled_stderr(use_color);
+}
 
-    configure_tracing(&args.global_args).context("Failed to initialize logging")?;
-    configure_rlimits().context("Failed to initialize resource limits")?;
+fn configure_backtraces(global_args: &GlobalArgs) {
+    if global_args.advanced.enable_backtraces {
+        // Print a stack trace in case of panic.
+        // This should have no overhead in normal execution.
+        std::env::set_var("RUST_BACKTRACE", "1");
+    }
+}
+
+
+
+fn try_main() -> Result<()> {
+    let args = &args::CommandLineArgs::parse_args();
+    let global_args = &args.global_args;
+
+    configure_backtraces(global_args);
+    configure_color(global_args);
+    configure_tracing(global_args).context("Failed to initialize logging")?;
+    configure_rlimits(global_args).context("Failed to initialize resource limits")?;
 
     match &args.command {
         args::Command::Datastore(args) => cmd_datastore::run(global_args, args),

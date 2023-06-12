@@ -221,6 +221,7 @@ impl Datastore {
                 Provenance::File { path } => ("file", path.to_string_lossy()),
                 Provenance::GitRepo { path } => ("git", path.to_string_lossy()),
             };
+            // FIXME: the number of changed rows is not the number of newly found matches!
             num_changed += stmt.execute((
                 m.blob_id.hex(),
                 span.start,

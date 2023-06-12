@@ -13,7 +13,7 @@ use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
-use noseyparker::git_binary::Git;
+use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
 use noseyparker::github;
 use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
@@ -34,7 +34,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     debug!("Args: {args:#?}");
 
-    let color_enabled = global_args.use_color();
     let progress_enabled = global_args.use_progress();
 
     // ---------------------------------------------------------------------------------------------
@@ -70,17 +69,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     let repo_urls = {
         let repo_specifiers = github::RepoSpecifiers {
-            user: args.input_args.github_user.clone(),
-            organization: args.input_args.github_organization.clone(),
+            user: args.input_specifier_args.github_user.clone(),
+            organization: args.input_specifier_args.github_organization.clone(),
         };
-        let mut repo_urls = args.input_args.git_url.clone();
+        let mut repo_urls = args.input_specifier_args.git_url.clone();
         if !repo_specifiers.is_empty() {
             let mut progress = Progress::new_countup_spinner(
                 "Enumerating GitHub repositories...",
                 progress_enabled,
             );
             let mut num_found: u64 = 0;
-            let api_url = args.input_args.github_api_url.clone();
+            let api_url = args.input_specifier_args.github_api_url.clone();
             for repo_string in github::enumerate_repo_urls(&repo_specifiers, api_url, Some(&mut progress))
                 .context("Failed to enumerate GitHub repositories")?
             {
@@ -117,13 +116,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         debug!("Need to fetch {repo_url}")
     }
 
-    let mut input_roots = args.input_args.path_inputs.clone();
+    let mut input_roots = args.input_specifier_args.path_inputs.clone();
 
     if !repo_urls.is_empty() {
+        let clone_mode = match args.input_specifier_args.git_clone_mode {
+            args::GitCloneMode::Mirror => CloneMode::Mirror,
+            args::GitCloneMode::Bare => CloneMode::Bare,
+        };
         let clones_dir = datastore.clones_dir();
         let git = Git::new();
 
-        // FIXME: put a progress meter around this; disable Git's built-in progress
         let mut progress =
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
 
@@ -144,7 +146,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             if output_dir.is_dir() {
                 progress.suspend(|| info!("Updating clone of {repo_url}..."));
 
-                match git.update_mirrored_clone(&repo_url, &output_dir) {
+                match git.update_clone(&repo_url, &output_dir) {
                     Ok(()) => {
                         input_roots.push(output_dir);
                         progress.inc(1);
@@ -170,7 +172,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             }
 
             progress.suspend(|| info!("Cloning {repo_url}..."));
-            if let Err(e) = git.create_fresh_mirrored_clone(&repo_url, &output_dir) {
+            if let Err(e) = git.create_fresh_clone(&repo_url, &output_dir, clone_mode) {
                 progress.suspend(|| {
                     error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
                     warn!("Skipping scan of {repo_url}");
@@ -198,7 +200,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let input_enumerator = || -> Result<FilesystemEnumerator> {
             let mut ie = FilesystemEnumerator::new(&input_roots)?;
             ie.threads(args.num_jobs);
-            ie.max_filesize(args.discovery_args.max_file_size_bytes());
+            ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
 
             // Load default ignore file. Note that we have to write it to a file first,
             // because the API for the `ignore` crate doesn't expose something that takes a
@@ -213,7 +215,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             })?;
 
             // Load any specified ignore files
-            for ignore_path in args.discovery_args.ignore.iter() {
+            for ignore_path in args.content_filtering_args.ignore.iter() {
                 debug!("Using ignore rules from {}", ignore_path.display());
                 ie.add_ignore(ignore_path).with_context(|| {
                     format!("Failed to load ignore rules from {}", ignore_path.display())
@@ -270,8 +272,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))
     };
 
-    let snippet_context_bytes: usize = 128; // FIXME: parameterize this and expose to CLI
-
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
         |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
@@ -289,7 +289,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
             matches
                 .into_iter()
-                .flat_map(|m| Match::new(&loc_mapping, m, &provenance, snippet_context_bytes))
+                .flat_map(|m| Match::new(&loc_mapping, m, &provenance, args.snippet_length))
                 .collect()
         };
 
@@ -495,7 +495,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let matches_summary = datastore.summarize()?;
             let matches_table = crate::cmd_summarize::summary_table(&matches_summary);
             println!();
-            matches_table.print_tty(color_enabled)?;
+            matches_table.print_tty(global_args.use_color())?;
         }
 
         println!("\nRun the `report` command next to show finding details.");

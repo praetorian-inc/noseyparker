@@ -1,5 +1,5 @@
 ---
-source: tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
 Summarize scan findings
@@ -7,7 +7,7 @@ Summarize scan findings
 Usage: noseyparker summarize [OPTIONS] --datastore <PATH>
 
 Options:
-  -d, --datastore <PATH>  Use the specified datastore path [env: NP_DATASTORE=]
+  -d, --datastore <PATH>  Use the specified datastore [env: NP_DATASTORE=]
   -h, --help              Print help (see more with '--help')
 
 Output Options:

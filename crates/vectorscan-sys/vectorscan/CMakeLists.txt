@@ -70,11 +70,11 @@ include_directories(SYSTEM include)
 
 include (${CMAKE_MODULE_PATH}/boost.cmake)
 
-find_package(Python COMPONENTS Interpreter)
-
-if(NOT Python_Interpreter_FOUND)
-    message(FATAL_ERROR "No python interpreter found")
-endif()
+# find_package(Python COMPONENTS Interpreter)
+#
+# if(NOT Python_Interpreter_FOUND)
+#     message(FATAL_ERROR "No python interpreter found")
+# endif()
 
 # # allow for reproducible builds - python for portability
 # if (DEFINED ENV{SOURCE_DATE_EPOCH})
