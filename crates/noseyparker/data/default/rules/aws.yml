@@ -105,3 +105,114 @@ rules:
       AWS Access Key:AKIAIDQJ6PTGDFFWYX7A
       secret key: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
       MWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58
+
+
+- name: AWS S3 Bucket (hosted style)
+  pattern: |
+    (?x)
+    (?: ^ | [\s/"'] | %2F )
+    (
+    [a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \. [a-zA-Z0-9_-]+)*   (?# bucket name as subdomain )
+    \.
+    (?: s3
+      | s3-af-south-1
+      | s3-ap-east-1
+      | s3-ap-northeast-1
+      | s3-ap-northeast-2
+      | s3-ap-northeast-3
+      | s3-ap-south-1
+      | s3-ap-south-2
+      | s3-ap-southeast-1
+      | s3-ap-southeast-2
+      | s3-ap-southeast-3
+      | s3-ap-southeast-4
+      | s3-ca-central-1
+      | s3-eu-central-1
+      | s3-eu-central-2
+      | s3-eu-north-1
+      | s3-eu-south-1
+      | s3-eu-south-2
+      | s3-eu-west-1
+      | s3-eu-west-2
+      | s3-eu-west-3
+      | s3-me-central-1
+      | s3-me-south-1
+      | s3-sa-east-1
+      | s3-us-east-1
+      | s3-us-east-2
+      | s3-us-gov-east-1
+      | s3-us-gov-west-1
+      | s3-us-west-1
+      | s3-us-west-2
+      )
+    \.amazonaws\.com
+    ) \b
+
+  references:
+  - https://docs.aws.amazon.com/general/latest/gr/rande.html
+
+  examples:
+  - 'example-bucket.s3.amazonaws.com'
+  - 'http://bucket.s3-us-east-2.amazonaws.com'
+  - 'http%2F%2Fsome-bucket.s3.amazonaws.com'
+
+  negative_examples:
+  - '.s3.amazonaws.com'
+  - 's3.amazonaws.com'
+
+
+- name: AWS S3 Bucket (path style)
+  pattern: |
+    (?x)
+    (?: ^ | [\s/"'] | %2F )
+    (
+    (?: s3
+      | s3-af-south-1
+      | s3-ap-east-1
+      | s3-ap-northeast-1
+      | s3-ap-northeast-2
+      | s3-ap-northeast-3
+      | s3-ap-south-1
+      | s3-ap-south-2
+      | s3-ap-southeast-1
+      | s3-ap-southeast-2
+      | s3-ap-southeast-3
+      | s3-ap-southeast-4
+      | s3-ca-central-1
+      | s3-eu-central-1
+      | s3-eu-central-2
+      | s3-eu-north-1
+      | s3-eu-south-1
+      | s3-eu-south-2
+      | s3-eu-west-1
+      | s3-eu-west-2
+      | s3-eu-west-3
+      | s3-me-central-1
+      | s3-me-south-1
+      | s3-sa-east-1
+      | s3-us-east-1
+      | s3-us-east-2
+      | s3-us-gov-east-1
+      | s3-us-gov-west-1
+      | s3-us-west-1
+      | s3-us-west-2
+      )
+    \.amazonaws\.com
+    /
+    [a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \. [a-zA-Z0-9_-]+)*   (?# bucket name as path )
+    )
+    (?: [^a-zA-Z0-9_-] | $ )                             (?# this instead of a \b anchor because that doesn't play nicely with `-` )
+
+  references:
+  - https://docs.aws.amazon.com/general/latest/gr/rande.html
+
+  examples:
+  - 's3.amazonaws.com/example-bucket'
+  - 'http://s3-us-east-2.amazonaws.com/example-bucket'
+
+  negative_examples:
+  - '.s3.amazonaws.com'
+  - 's3.amazonaws.com'
+  - 's3.amazonaws.com/'
+  - 'some-bucket-name.s3.amazonaws.com/171ea24dd241f8a2178b0374-username-Reponame-3-0'
+  - 'some-bucket.s3.amazonaws.com/some-object-here'
