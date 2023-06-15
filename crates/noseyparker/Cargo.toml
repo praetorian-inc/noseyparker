@@ -23,10 +23,10 @@ rule_profiling = []
 anyhow = { version = "1.0" }
 atoi = "2.0"
 bstr = { version = "1.0", features = ["serde"] }
-chrono = "0.4"
+chrono = { version = "0.4", default_features = false, features = ["std"] }
 console = "0.15"
-gix-features = { version = "0.28", features = ["fast-sha1"] }
-gix = { version = "0.43", features = ["max-performance", "fast-sha1"] }
+gix-features = { version = "0.30", features = ["fast-sha1"] }
+gix = { version = "0.46", features = ["max-performance", "fast-sha1"] }
 hex = "0.4"
 hyperx = "1.4"
 include_dir = { version = "0.7", features = ["glob"] }
@@ -37,7 +37,7 @@ ignore = "0.4"
 lazy_static = "1.4"
 regex = "1.7"
 reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
-rusqlite = { version = "0.28", features = ["bundled", "backup"] }
+rusqlite = { version = "0.29", features = ["bundled", "backup"] }
 secrecy = "0.8.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
