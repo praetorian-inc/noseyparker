@@ -36,8 +36,8 @@ anyhow = { version = "1.0" }
 atty = "0.2"
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
-gix-features = { version = "0.30", features = ["fast-sha1"] }
-gix = { version = "0.46", features = ["max-performance", "fast-sha1"] }
+gix-features = "0.30"
+gix = { version = "0.46", features = ["max-performance"] }
 hex = "0.4"
 indenter = "0.3"
 # XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
