@@ -14,8 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
-  - AWS S3 Bucket (hosted style)
+  - AWS S3 Bucket (subdomain style)
   - AWS S3 Bucket (path style)
+  - Google Cloud Storage Bucket (subdomain style)
+  - Google Cloud Storage Bucket (path style)
   - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
 
 - Two new advanced global command-line parameters have been exposed:

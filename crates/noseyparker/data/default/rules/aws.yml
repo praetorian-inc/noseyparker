@@ -107,13 +107,12 @@ rules:
       MWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58
 
 
-- name: AWS S3 Bucket (hosted style)
+- name: AWS S3 Bucket (subdomain style)
   pattern: |
     (?x)
     (?: ^ | [\s/"'] | %2F )
     (
-    [a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \. [a-zA-Z0-9_-]+)*   (?# bucket name as subdomain )
-    \.
+    (?: [a-zA-Z0-9_-]+ \. )+   (?# bucket name as subdomain )
     (?: s3
       | s3-af-south-1
       | s3-ap-east-1

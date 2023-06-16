@@ -65,3 +65,46 @@ rules:
 
   examples:
   - "  var DEVELOPER_KEY = 'AIzaSyB4sU8lU15bR_87qNb7eUVQN72_vv8mpbU';"
+
+
+- name: Google Cloud Storage Bucket (subdomain style)
+  pattern: |
+    (?x)
+    (?: ^ | [\s/"'] | %2F )
+    (
+    (?: [a-zA-Z0-9_-]+ \. )+    (?# bucket name as subdomain )
+    storage\.googleapis\.com
+    )
+    \b
+
+  references:
+  - https://cloud.google.com/storage/docs/request-endpoints
+
+  examples:
+  - 'c.storage.googleapis.com'
+  - 'some-bucket.example.com.storage.googleapis.com'
+
+  negative_examples:
+  - 'https://storage.googleapis.com'
+
+
+- name: Google Cloud Storage Bucket (path style)
+  pattern: |
+    (?x)
+    (?: ^ | [\s/"'] | %2F )
+    (
+    storage\.googleapis\.com
+    /
+    [a-zA-Z0-9_-]+ (?: \. [a-zA-Z0-9_-]+ )*    (?# bucket name as path )
+    )
+    (?: [^a-zA-Z0-9_-] | $ )                   (?# this instead of a \b anchor because that doesn't play nicely with `-` )
+
+  references:
+  - https://cloud.google.com/storage/docs/request-endpoints
+
+  negative_examples:
+  - 'c.storage.googleapis.com/some_object'
+  - 'some-bucket.example.com.storage.googleapis.com/some_object'
+
+  examples:
+  - 'https://storage.googleapis.com/bucket_name/object_name'
