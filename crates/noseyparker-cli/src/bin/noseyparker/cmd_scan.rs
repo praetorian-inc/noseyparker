@@ -1,8 +1,8 @@
 use anyhow::{bail, Context, Result};
+use crossbeam_channel;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::str::FromStr;
-use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
 use tracing::{debug, debug_span, error, info, warn};
@@ -299,7 +299,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     // Create a channel pair so that matcher threads can get their results to the database
     // recorder.
-    let (send_matches, recv_matches) = mpsc::sync_channel::<Vec<Match>>(512);
+    let (send_matches, recv_matches) = crossbeam_channel::bounded::<Vec<Match>>(512);
 
     // We create a separate thread for writing matches to the database.
     // The database uses SQLite, which does best with a single writer.
@@ -310,7 +310,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let mut num_matches = 0u64;
                 let mut num_added = 0usize;
                 // keep reading until all the senders hang up; panic if recording matches fails
-                while let Ok(matches) = recv_matches.recv() {
+                for matches in recv_matches {
                     num_matches += matches.len() as u64;
                     num_added += datastore
                         .record_matches(&matches)

@@ -2136,6 +2136,7 @@ dependencies = [
  "assert_fs",
  "clap",
  "console",
+ "crossbeam-channel",
  "gix",
  "gix-features",
  "hex",

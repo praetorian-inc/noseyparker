@@ -105,7 +105,7 @@ impl<'t> Drop for Visitor<'t> {
 
 impl<'t> ignore::ParallelVisitor for Visitor<'t> {
     fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
-        // FIXME: dedupe based on (device, inode) on platforms where available
+        // FIXME: dedupe based on (device, inode) on platforms where available; see https://docs.rs/same-file/1.0.6/same_file/ for ideas
 
         let entry = match result {
             Err(e) => {

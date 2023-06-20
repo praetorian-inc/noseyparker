@@ -35,6 +35,7 @@ vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc
 anyhow = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
+crossbeam-channel = "0.5"
 gix-features = "0.30"
 gix = { version = "0.46", features = ["max-performance"] }
 hex = "0.4"
