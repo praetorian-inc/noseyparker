@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
+use std::io::IsTerminal;
 use std::path::PathBuf;
 use url::Url;
 
@@ -195,7 +196,7 @@ impl GlobalArgs {
         match self.color {
             Mode::Never => false,
             Mode::Always => true,
-            Mode::Auto => atty::is(atty::Stream::Stdout),
+            Mode::Auto => std::io::stdin().is_terminal(),
         }
     }
 
@@ -203,7 +204,7 @@ impl GlobalArgs {
         match self.progress {
             Mode::Never => false,
             Mode::Always => true,
-            Mode::Auto => atty::is(atty::Stream::Stderr),
+            Mode::Auto => std::io::stderr().is_terminal(),
         }
     }
 }

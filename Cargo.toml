@@ -3,7 +3,7 @@ members = ["crates/*"]
 
 [workspace.package]
 edition = "2021"
-rust-version = "1.60"
+rust-version = "1.70"
 
 license = "Apache-2.0"
 authors = ["Brad Larsen <bradford.larsen@praetorian.com>"]
