@@ -123,14 +123,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
         };
-        let clones_dir = datastore.clones_dir();
         let git = Git::new();
 
         let mut progress =
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
 
         for repo_url in repo_urls {
-            let output_dir = match clone_destination(&clones_dir, &repo_url) {
+            let output_dir = match datastore.clone_destination(&repo_url) {
                 Err(e) => {
                     progress.suspend(|| {
                         error!("Failed to determine output directory for {repo_url}: {e}");
@@ -501,40 +500,4 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     }
 
     Ok(())
-}
-
-/// Get a path for a local clone of the given git URL underneath `root`.
-fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
-    Ok(root.join(repo.to_path_buf()))
-}
-
-#[cfg(test)]
-mod test {
-    macro_rules! clone_destination_success_tests {
-        ($($case_name:ident: ($root:expr, $repo:expr) => $expected:expr,)*) => {
-            mod clone_destination {
-                use noseyparker::git_url::GitUrl;
-                use pretty_assertions::assert_eq;
-                use std::path::{PathBuf, Path};
-                use std::str::FromStr;
-                use super::super::clone_destination;
-
-                $(
-                    #[test]
-                    fn $case_name() {
-                        let expected: Option<PathBuf> = Some(Path::new($expected).to_owned());
-
-                        let root = Path::new($root);
-                        let repo = GitUrl::from_str($repo).expect("repo should be a URL");
-                        assert_eq!(clone_destination(root, &repo).ok(), expected);
-                    }
-                )*
-            }
-        }
-    }
-
-    clone_destination_success_tests! {
-        https_01: ("rel_root", "https://example.com/testrepo.git") => "rel_root/https/example.com/testrepo.git",
-        https_02: ("/abs_root", "https://example.com/testrepo.git") => "/abs_root/https/example.com/testrepo.git",
-    }
 }
