@@ -1,6 +1,8 @@
 rules:
 
 - name: SonarQube Token
+  id: np-sonarqube-01
+
   pattern: '(?i)sonar.{0,5}login.{0,5}\s*\b([a-f0-9]{40})\b'
 
   references:

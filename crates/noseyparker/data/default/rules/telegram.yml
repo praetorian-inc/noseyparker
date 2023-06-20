@@ -1,6 +1,11 @@
 rules:
 
 - name: Telegram Bot Token
+  id: np-telegram-01
+
+  categories:
+  - secret
+
   pattern: |
     (?x)
     \b

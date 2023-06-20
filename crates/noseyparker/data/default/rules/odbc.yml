@@ -1,6 +1,8 @@
 rules:
 
 - name: Credentials in ODBC Connection String
+  id: np-odbc-01
+
   pattern: |
     (?x)(?i)
     (?: User | User\ Id | UserId | Uid) \s*=\s* ([^\s;]{3,100}) \s* ;
@@ -58,8 +60,6 @@ rules:
               \$pwd = \$_POST[\"password\"];
               \$otherdata = \$_POST[\"otherdata\"];
       ?>
-
-
 
   references:
   - https://docs.aws.amazon.com/redshift/latest/mgmt/configure-odbc-connection.html

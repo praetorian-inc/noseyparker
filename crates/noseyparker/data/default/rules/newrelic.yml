@@ -1,6 +1,8 @@
 rules:
 
 - name: New Relic License Key
+  id: np-newrelic-01
+
   pattern: |
     (?x)(?i)
     \b
@@ -27,6 +29,7 @@ rules:
 
 
 - name: New Relic License Key (non-suffixed)
+  id: np-newrelic-02
   pattern: |
     (?x)(?i)
     associated\ with\ your\ New\ Relic\ account\.\s+
@@ -55,6 +58,7 @@ rules:
 
 
 - name: New Relic API Service Key
+  id: np-newrelic-03
   pattern: |
     (?x)(?i)
     \b
@@ -75,6 +79,7 @@ rules:
 
 
 - name: New Relic Admin API Key
+  id: np-newrelic-04
   pattern: |
     (?x)(?i)
     \b
@@ -90,6 +95,7 @@ rules:
 
 
 - name: New Relic Insights Insert Key
+  id: np-newrelic-05
   pattern: |
     (?x)(?i)
     \b
@@ -106,6 +112,7 @@ rules:
 
 
 - name: New Relic Insights Query Key
+  id: np-newrelic-06
   pattern: |
     (?x)(?i)
     \b
@@ -121,6 +128,7 @@ rules:
 
 
 - name: New Relic REST API Key
+  id: np-newrelic-07
   pattern: |
     (?x)(?i)
     \b
@@ -141,6 +149,7 @@ rules:
 
 
 - name: New Relic Pixie API Key
+  id: np-newrelic-08
   pattern: |
     (?x)(?i)
     \b
@@ -158,6 +167,7 @@ rules:
 
 
 - name: New Relic Pixie Deploy Key
+  id: np-newrelic-09
   pattern: |
     (?x)(?i)
     \b

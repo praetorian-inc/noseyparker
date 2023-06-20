@@ -1,6 +1,7 @@
 rules:
 
 - name: OpenAI API Key
+  id: np-openai-01
 
   pattern: |
     (?x)

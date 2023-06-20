@@ -1,6 +1,8 @@
 rules:
 
 - name: Mapbox Public Access Token
+  id: np-mapbox-01
+
   # NOTE: `pk` tokens are public and have read-only access.
   #       `sk` tokens are secret and should never be shared.
   #       `tk` tokens are temporary access tokens.
@@ -18,6 +20,8 @@ rules:
 
 
 - name: Mapbox Secret Access Token
+  id: np-mapbox-02
+
   # NOTE: `pk` tokens are public and have read-only access.
   #       `sk` tokens are secret and should never be shared.
   #       `tk` tokens are temporary access tokens.

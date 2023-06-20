@@ -1,6 +1,8 @@
 rules:
 
 - name: Azure Connection String
+  id: np-azure-01
+
   # XXX There are a bunch of other keys that seem to have secret content assigned to them:
   #
   #   - SharedAccessSignature
@@ -49,6 +51,8 @@ rules:
 
 
 - name: Azure App Configuration Connection String
+  id: np-azure-02
+
   pattern: |
     (?x)
     (https://[a-zA-Z0-9-]+\.azconfig\.io);

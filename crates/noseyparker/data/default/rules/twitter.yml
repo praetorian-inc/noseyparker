@@ -1,6 +1,11 @@
 rules:
 
 - name: Twitter Client ID
+  id: np-twitter-01
+
+  categories:
+  - identifier
+
   pattern: |
     (?x)(?i)
     \b twitter
@@ -22,6 +27,10 @@ rules:
 
 
 - name: Twitter Secret Key
+  id: np-twitter-02
+  categories:
+  - secret
+
   pattern: |
     (?x)(?i)
     twitter

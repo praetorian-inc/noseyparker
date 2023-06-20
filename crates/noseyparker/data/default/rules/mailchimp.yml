@@ -1,6 +1,8 @@
 rules:
 
 - name: MailChimp API Key
+  id: np-mailchimp-01
+
   pattern: |
     (?x)(?i)
     (?:mailchimp|mc).{0,20}

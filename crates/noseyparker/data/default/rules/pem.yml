@@ -3,6 +3,8 @@ rules:
 # FIXME: add for `-----BEGIN CERTIFICATE-----`
 
 - name: PEM-Encoded Private Key
+  id: np-pem-01
+
   # Note: This is intended to match many PEM-encoded base64 payloads
   pattern: |
     (?x)

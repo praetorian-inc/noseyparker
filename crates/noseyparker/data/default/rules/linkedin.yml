@@ -1,6 +1,8 @@
 rules:
 
 - name: LinkedIn Client ID
+  id: np-linkedin-01
+
   pattern: |
     (?x)(?i)
     linkedin
@@ -23,6 +25,8 @@ rules:
 
 
 - name: LinkedIn Secret Key
+  id: np-linkedin-02
+
   pattern: |
     (?x)(?i)
     linkedin
