@@ -297,12 +297,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut progress =
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
-    // Create a channel pair so that matcher threads can get their results to the database
-    // recorder.
+    // Create a channel pair for matcher threads to get their results to the datastore recorder.
     let (send_matches, recv_matches) = crossbeam_channel::bounded::<Vec<Match>>(512);
 
-    // We create a separate thread for writing matches to the database.
-    // The database uses SQLite, which does best with a single writer.
+    // We create a separate thread for writing matches to the datastore.
+    // The datastore uses SQLite, which does best with a single writer.
     let match_writer = {
         std::thread::Builder::new()
             .name("Datastore Writer".to_string())
@@ -314,11 +313,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     num_matches += matches.len() as u64;
                     num_added += datastore
                         .record_matches(&matches)
-                        .expect("should be able to record matches to the database");
+                        .expect("should be able to record matches to the datastore");
                 }
                 datastore
                     .analyze()
-                    .expect("should be able to analyze the database");
+                    .expect("should be able to analyze the datastore");
                 // FIXME: `num_added` is not computed correctly
                 (datastore, num_matches, num_added as u64)
             })
@@ -400,7 +399,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 if seen_blobs.contains(blob_id) {
                     return;
                 }
-                let blob = match repo.find_object(gix::hash::ObjectId::from(blob_id.as_bytes())) {
+                let blob = match repo.find_object(blob_id) {
                     Err(e) => {
                         error!(
                             "Failed to read blob {} from Git repository at {}: {}",

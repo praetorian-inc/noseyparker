@@ -25,7 +25,6 @@ atoi = "2.0"
 bstr = { version = "1.0", features = ["serde"] }
 chrono = { version = "0.4", default_features = false, features = ["std"] }
 console = "0.15"
-gix-features = "0.30"
 gix = { version = "0.46", features = ["max-performance"] }
 hex = "0.4"
 hyperx = "1.4"

@@ -8,6 +8,7 @@ use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, MatchGroupMetadata};
+use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 
@@ -123,13 +124,9 @@ impl Reportable for DetailsReporter {
                         let source_span = &m.location.source_span;
                         // let offset_span = &m.location.offset_span;
                         let uri = match m.provenance {
-                            Provenance::File { path } => {
-                                path.display().to_string()
-                            }
+                            Provenance::File { path } => path.display().to_string(),
                             // FIXME: using this path is nonsense here
-                            Provenance::GitRepo { path } => {
-                                path.display().to_string()
-                            }
+                            Provenance::GitRepo { path } => path.display().to_string(),
                         };
 
                         let location = sarif::LocationBuilder::default()
@@ -170,11 +167,7 @@ impl Reportable for DetailsReporter {
                     })
                     .collect::<Result<_>>()?;
 
-                let sha1_fingerprint = {
-                    let mut h = gix_features::hash::Sha1::default();
-                    h.update(&metadata.match_content);
-                    hex::encode(h.digest())
-                };
+                let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
 
                 // Build the result for the match
                 let result = sarif::ResultBuilder::default()

@@ -36,9 +36,6 @@ anyhow = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
 crossbeam-channel = "0.5"
-gix-features = "0.30"
-gix = { version = "0.46", features = ["max-performance"] }
-hex = "0.4"
 indenter = "0.3"
 # XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
 indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }

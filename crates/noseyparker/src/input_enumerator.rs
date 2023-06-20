@@ -172,6 +172,13 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
     }
 }
 
+/// Provides capabitilies to recursively enumerate a filesystem.
+///
+/// This provides a handful of features, including:
+///
+/// - Enumeration of found files
+/// - Enumeration of blobs found in Git repositories
+/// - Support for ignoring files based on size or using path-based gitignore-style rules
 pub struct FilesystemEnumerator {
     walk_builder: WalkBuilder,
 
@@ -185,6 +192,12 @@ impl FilesystemEnumerator {
     pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
     pub const DEFAULT_FOLLOW_LINKS: bool = false;
 
+    /// Create a new `FilesystemEnumerator` with the given set of input roots using default
+    /// settings.
+    ///
+    /// The default maximum file size is 100 MiB.
+    ///
+    /// The default behavior is to not follow symlinks.
     pub fn new<T: AsRef<Path>>(inputs: &[T]) -> Result<Self> {
         let mut builder = WalkBuilder::new(&inputs[0]);
         for input in &inputs[1..] {
@@ -201,11 +214,13 @@ impl FilesystemEnumerator {
         })
     }
 
+    /// Set the number of parallel enumeration threads.
     pub fn threads(&mut self, threads: usize) -> &mut Self {
         self.walk_builder.threads(threads);
         self
     }
 
+    /// Add a set of gitignore-style rules from the given ignore file.
     pub fn add_ignore<T: AsRef<Path>>(&mut self, path: T) -> Result<&mut Self> {
         match self.walk_builder.add_ignore(path) {
             Some(e) => Err(e)?,
@@ -213,17 +228,24 @@ impl FilesystemEnumerator {
         }
     }
 
+    /// Enable or disable whether symbolic links are followed.
     pub fn follow_links(&mut self, follow_links: bool) -> &mut Self {
         self.walk_builder.follow_links(follow_links);
         self
     }
 
+    /// Set the maximum file size for enumerated files.
+    ///
+    /// Files larger than this value will be skipped.
     pub fn max_filesize(&mut self, max_filesize: Option<u64>) -> &mut Self {
         self.walk_builder.max_filesize(max_filesize);
         self.max_file_size = max_filesize;
         self
     }
 
+    /// Specify an ad-hoc filtering function to control which entries are enumerated.
+    ///
+    /// This can be used to skip entire directories.
     pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
         where
             P: Fn(&DirEntry) -> bool + Send + Sync + 'static
