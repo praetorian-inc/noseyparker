@@ -395,6 +395,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
                 // Check for duplicates before even loading the entire blob contents
+                // At this point, a blob may have already been seen by another scanner thread,
+                // so this check can avoid some needless work in that case.
                 if seen_blobs.contains(blob_id) {
                     return;
                 }
@@ -408,8 +410,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         );
                         return;
                     }
-                    // FIXME: get rid of this extra copy
-                    Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
+                    Ok(mut blob) => {
+                        let data = std::mem::take(&mut blob.data); // avoid a copy
+                        Blob::new(*blob_id, data)
+                    }
                 };
                 let provenance = Provenance::GitRepo {
                     path: path.to_path_buf(),
