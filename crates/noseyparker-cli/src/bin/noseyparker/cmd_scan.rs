@@ -11,6 +11,7 @@ use crate::args;
 
 use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
+use noseyparker::content_guesser;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
@@ -297,11 +298,12 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
-    let (send_matches, recv_matches) = crossbeam_channel::bounded::<Vec<Match>>(512);
+    let channel_size = std::cmp::max(args.num_jobs * 32, 512);
+    let (send_matches, recv_matches) = crossbeam_channel::bounded::<Vec<Match>>(channel_size);
 
     // We create a separate thread for writing matches to the datastore.
     // The datastore uses SQLite, which does best with a single writer.
-    let match_writer = {
+    let datastore_writer = {
         std::thread::Builder::new()
             .name("Datastore Writer".to_string())
             .spawn(move || {
@@ -323,15 +325,33 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             .expect("should be able to start datastore writer thread")
     };
 
+    let run_matcher = |send_matches: &crossbeam_channel::Sender::<Vec<Match>>, matcher: &mut Matcher, provenance: Provenance, blob: Blob| {
+        let matches = match matcher.scan_blob(&blob, &provenance) {
+            Err(e) => {
+                error!("Failed to scan blob {} from {}: {}", blob.id, provenance, e);
+                return;
+            }
+            Ok(v) => v,
+        };
+        if matches.is_empty() {
+            return;
+        }
+        let matches = convert_blob_matches(&blob, matches, provenance);
+        send_matches
+            .send(matches)
+            .expect("should be able to send all matches");
+    };
+
     // ---------------------------------------------------------------------------------------------
     // Scan plain files
     // ---------------------------------------------------------------------------------------------
     inputs.files.par_iter().for_each_init(
         || {
             let matcher = make_matcher().expect("should be able to create a matcher");
-            (matcher, progress.clone())
+            let guesser = content_guesser::Guesser::new();
+            (matcher, guesser, progress.clone())
         },
-        |(matcher, progress), file_result: &FileResult| {
+        |(matcher, guesser, progress), file_result: &FileResult| {
             let fname = &file_result.path;
             let blob = match Blob::from_file(fname) {
                 Err(e) => {
@@ -344,20 +364,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let provenance = Provenance::File {
                 path: fname.clone(),
             };
-            let matches = match matcher.scan_blob(&blob, &provenance) {
-                Err(e) => {
-                    error!("Failed to scan blob from {}: {}", fname.display(), e);
-                    return;
-                }
-                Ok(v) => v,
-            };
-            if matches.is_empty() {
-                return;
+
+            {
+                let input = content_guesser::Input::from_path_and_bytes(fname.as_path(), &blob.bytes);
+                let guess = guesser.guess(input);
+                info!("*** {:?}: {:?}", fname, guess.guessed_types());
             }
-            let matches = convert_blob_matches(&blob, matches, provenance);
-            send_matches
-                .send(matches)
-                .expect("should be able to send all matches");
+
+            run_matcher(&send_matches, matcher, provenance, blob);
         },
     );
 
@@ -385,21 +399,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         git_repo_result.blobs.par_iter().for_each_init(
             || {
-                let matcher = make_matcher().expect("should be able to create a matcher");
                 let repo = repository.to_thread_local();
-                (repo, matcher, progress.clone())
+                let matcher = make_matcher().expect("should be able to create a matcher");
+                let guesser = content_guesser::Guesser::new();
+                (repo, matcher, guesser, progress.clone())
             },
-            |(repo, matcher, progress), (blob_id, size)| {
+            |(repo, matcher, guesser, progress), (blob_id, size)| {
                 progress.inc(*size);
                 let path = &git_repo_result.path;
                 // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
-                // Check for duplicates before even loading the entire blob contents
-                // At this point, a blob may have already been seen by another scanner thread,
-                // so this check can avoid some needless work in that case.
-                if seen_blobs.contains(blob_id) {
-                    return;
-                }
                 let blob = match repo.find_object(blob_id) {
                     Err(e) => {
                         error!(
@@ -418,25 +427,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let provenance = Provenance::GitRepo {
                     path: path.to_path_buf(),
                 };
-                match matcher.scan_blob(&blob, &provenance) {
-                    Err(e) => {
-                        error!(
-                            "Failed to scan blob {} from Git repository at {}: {}",
-                            blob_id,
-                            path.display(),
-                            e
-                        );
-                    }
-                    Ok(matches) => {
-                        if matches.is_empty() {
-                            return;
-                        }
-                        let matches = convert_blob_matches(&blob, matches, provenance);
-                        send_matches
-                            .send(matches)
-                            .expect("should be able to send all matches");
-                    }
+
+                {
+                    let input = content_guesser::Input::from_bytes(&blob.bytes);
+                    let guess = guesser.guess(input);
+                    info!("*** {}: {:?}", blob_id, guess.guessed_types());
                 }
+
+                run_matcher(&send_matches, matcher, provenance, blob);
             },
         );
     });
@@ -447,7 +445,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Get rid of the reference to the sending channel after starting the scanners,
     // to ensure things terminate as expected.
     drop(send_matches);
-    let (datastore, num_matches, num_new_matches) = match_writer.join().unwrap();
+    let (datastore, num_matches, num_new_matches) = datastore_writer.join().unwrap();
     progress.finish();
 
     // ---------------------------------------------------------------------------------------------

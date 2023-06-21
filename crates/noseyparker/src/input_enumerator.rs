@@ -247,8 +247,8 @@ impl FilesystemEnumerator {
     ///
     /// This can be used to skip entire directories.
     pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
-        where
-            P: Fn(&DirEntry) -> bool + Send + Sync + 'static
+    where
+        P: Fn(&DirEntry) -> bool + Send + Sync + 'static,
     {
         self.walk_builder.filter_entry(filter);
         self
@@ -284,7 +284,7 @@ pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
     match gix::open_opts(path, opts) {
         Err(gix::open::Error::NotARepository { .. }) => Ok(None),
         Err(err) => Err(err.into()),
-        Ok(r) => Ok(Some(r)),
+        Ok(repo) => Ok(Some(repo)),
     }
 }
 

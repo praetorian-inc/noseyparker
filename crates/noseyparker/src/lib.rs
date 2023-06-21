@@ -13,6 +13,7 @@ pub mod location;
 pub mod match_type;
 pub mod matcher;
 pub mod matcher_stats;
+pub use noseyparker_content_guesser as content_guesser;
 pub mod progress;
 pub mod provenance;
 #[cfg(feature = "rule_profiling")]
