@@ -196,7 +196,7 @@ impl GlobalArgs {
         match self.color {
             Mode::Never => false,
             Mode::Always => true,
-            Mode::Auto => std::io::stdin().is_terminal(),
+            Mode::Auto => std::io::stdout().is_terminal(),
         }
     }
 
