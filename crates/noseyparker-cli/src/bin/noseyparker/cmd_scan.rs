@@ -11,7 +11,12 @@ use crate::args;
 
 use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
-use noseyparker::content_guesser;
+
+#[cfg(feature = "content_guesser")]
+use noseyparker::{content_guesser, content_guesser::Guesser};
+#[cfg(not(feature = "content_guesser"))]
+type Guesser = ();
+
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
@@ -81,8 +86,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             );
             let mut num_found: u64 = 0;
             let api_url = args.input_specifier_args.github_api_url.clone();
-            for repo_string in github::enumerate_repo_urls(&repo_specifiers, api_url, Some(&mut progress))
-                .context("Failed to enumerate GitHub repositories")?
+            for repo_string in
+                github::enumerate_repo_urls(&repo_specifiers, api_url, Some(&mut progress))
+                    .context("Failed to enumerate GitHub repositories")?
             {
                 match GitUrl::from_str(&repo_string) {
                     Ok(repo_url) => repo_urls.push(repo_url),
@@ -267,9 +273,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let matcher_stats = Mutex::new(MatcherStats::default());
     let seen_blobs = BlobIdSet::new();
 
-    let make_matcher = || -> Result<Matcher> {
+    let make_matcher = || -> Result<(Matcher, Guesser)> {
         *num_matchers_counter.lock().unwrap() += 1;
-        Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))
+        let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
+
+        #[cfg(feature = "content_guesser")]
+        let guesser = content_guesser::Guesser::new();
+        #[cfg(not(feature = "content_guesser"))]
+        let guesser = ();
+
+        Ok((matcher, guesser))
     };
 
     // a function to convert BlobMatch into regular Match
@@ -325,7 +338,25 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             .expect("should be able to start datastore writer thread")
     };
 
-    let run_matcher = |send_matches: &crossbeam_channel::Sender::<Vec<Match>>, matcher: &mut Matcher, provenance: Provenance, blob: Blob| {
+    let run_matcher = |send_matches: &crossbeam_channel::Sender<Vec<Match>>,
+                       matcher_guesser: &mut (Matcher, Guesser),
+                       provenance: Provenance,
+                       blob: Blob| {
+        #[allow(unused_variables)]
+        let (matcher, guesser) = matcher_guesser;
+
+        #[cfg(feature = "content_guesser")]
+        {
+            let input = match provenance {
+                Provenance::File { path } => {
+                    content_guesser::Input::from_path_and_bytes(&path, &blob.bytes)
+                }
+                Provenance::GitRepo {} => content_guesser::Input::from_bytes(&blob.bytes),
+            };
+            let guess = guesser.guess(input);
+            info!("*** {}: {:?}", blob_id, guess.guessed_types());
+        }
+
         let matches = match matcher.scan_blob(&blob, &provenance) {
             Err(e) => {
                 error!("Failed to scan blob {} from {}: {}", blob.id, provenance, e);
@@ -348,10 +379,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     inputs.files.par_iter().for_each_init(
         || {
             let matcher = make_matcher().expect("should be able to create a matcher");
-            let guesser = content_guesser::Guesser::new();
-            (matcher, guesser, progress.clone())
+
+            (matcher, progress.clone())
         },
-        |(matcher, guesser, progress), file_result: &FileResult| {
+        |(matcher, progress), file_result: &FileResult| {
             let fname = &file_result.path;
             let blob = match Blob::from_file(fname) {
                 Err(e) => {
@@ -364,12 +395,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let provenance = Provenance::File {
                 path: fname.clone(),
             };
-
-            {
-                let input = content_guesser::Input::from_path_and_bytes(fname.as_path(), &blob.bytes);
-                let guess = guesser.guess(input);
-                info!("*** {:?}: {:?}", fname, guess.guessed_types());
-            }
 
             run_matcher(&send_matches, matcher, provenance, blob);
         },
@@ -401,10 +426,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             || {
                 let repo = repository.to_thread_local();
                 let matcher = make_matcher().expect("should be able to create a matcher");
-                let guesser = content_guesser::Guesser::new();
-                (repo, matcher, guesser, progress.clone())
+                (repo, matcher, progress.clone())
             },
-            |(repo, matcher, guesser, progress), (blob_id, size)| {
+            |(repo, matcher, progress), (blob_id, size)| {
                 progress.inc(*size);
                 let path = &git_repo_result.path;
                 // debug!("Scanning {} size {} from {:?}", oid, size, path);
@@ -427,12 +451,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let provenance = Provenance::GitRepo {
                     path: path.to_path_buf(),
                 };
-
-                {
-                    let input = content_guesser::Input::from_bytes(&blob.bytes);
-                    let guess = guesser.guess(input);
-                    info!("*** {}: {:?}", blob_id, guess.guessed_types());
-                }
 
                 run_matcher(&send_matches, matcher, provenance, blob);
             },
