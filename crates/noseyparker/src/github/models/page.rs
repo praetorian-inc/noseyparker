@@ -1,4 +1,4 @@
-use crate::github::{Error, Result};
+use crate::github::Result;
 use url::Url;
 
 // -------------------------------------------------------------------------------------------------
@@ -9,10 +9,10 @@ pub struct Page<T> {
     pub links: HeaderLinks,
 }
 
-impl <T: serde::de::DeserializeOwned> Page<T> {
+impl<T: serde::de::DeserializeOwned> Page<T> {
     pub async fn from_response(response: reqwest::Response) -> Result<Self> {
         let links = get_header_links(&response)?;
-        let items = response.json().await.map_err(Error::ReqwestError)?;
+        let items = response.json().await?;
         Ok(Page { items, links })
     }
 }
@@ -46,13 +46,17 @@ fn get_header_links(response: &reqwest::Response) -> Result<HeaderLinks> {
                         _ => None,
                     };
                     if let Some(dst) = dst {
-                        *dst = Some(Url::parse(value.link()).map_err(Error::UrlParseError)?);
-                    };
+                        *dst = Some(Url::parse(value.link())?);
+                    }
                 }
             }
         }
     }
 
-    Ok(HeaderLinks { first, prev, next, last })
+    Ok(HeaderLinks {
+        first,
+        prev,
+        next,
+        last,
+    })
 }
-

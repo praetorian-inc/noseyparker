@@ -21,6 +21,7 @@ build = "build.rs"
 
 [features]
 rule_profiling = ["noseyparker/rule_profiling"]
+content_guesser = ["noseyparker/content_guesser"]
 
 [[bin]]
 name = "noseyparker"

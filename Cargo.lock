@@ -2181,6 +2181,7 @@ dependencies = [
  "secrecy",
  "serde",
  "serde_yaml",
+ "thiserror",
  "tokio",
  "tracing",
  "url",
@@ -2228,6 +2229,7 @@ dependencies = [
  "magic",
  "mime",
  "mime_guess",
+ "thiserror",
 ]
 
 [[package]]

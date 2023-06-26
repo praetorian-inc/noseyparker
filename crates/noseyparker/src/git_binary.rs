@@ -4,47 +4,20 @@ use tracing::{debug, debug_span};
 
 use crate::git_url::GitUrl;
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum GitError {
-    IOError(std::io::Error),
+    #[error("git execution failed: {0}")]
+    IOError(#[from] std::io::Error),
+
+    #[error("git execution failed\ncode={}\nstdout=```\n{}```\nstderr=```\n{}```",
+            .status,
+            String::from_utf8_lossy(.stdout),
+            String::from_utf8_lossy(.stderr))]
     GitError {
         stdout: Vec<u8>,
         stderr: Vec<u8>,
         status: ExitStatus,
     },
-}
-
-impl From<std::io::Error> for GitError {
-    fn from(err: std::io::Error) -> GitError {
-        GitError::IOError(err)
-    }
-}
-
-impl std::fmt::Display for GitError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GitError::IOError(e) => write!(f, "git execution failed: {e}"),
-            GitError::GitError {
-                stdout,
-                stderr,
-                status,
-            } => write!(
-                f,
-                "git execution failed\ncode={status}\nstdout=```\n{}```\nstderr=```\n{}```",
-                String::from_utf8_lossy(stdout),
-                String::from_utf8_lossy(stderr)
-            ),
-        }
-    }
-}
-
-impl std::error::Error for GitError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            GitError::IOError(e) => Some(e),
-            GitError::GitError { .. } => None,
-        }
-    }
 }
 
 pub struct Git {

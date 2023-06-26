@@ -278,7 +278,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
 
         #[cfg(feature = "content_guesser")]
-        let guesser = content_guesser::Guesser::new();
+        let guesser = content_guesser::Guesser::new()?;
         #[cfg(not(feature = "content_guesser"))]
         let guesser = ();
 
@@ -347,14 +347,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         #[cfg(feature = "content_guesser")]
         {
-            let input = match provenance {
+            let input = match &provenance {
                 Provenance::File { path } => {
-                    content_guesser::Input::from_path_and_bytes(&path, &blob.bytes)
+                    content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
                 }
-                Provenance::GitRepo {} => content_guesser::Input::from_bytes(&blob.bytes),
+                Provenance::GitRepo {..} => content_guesser::Input::from_bytes(&blob.bytes),
             };
             let guess = guesser.guess(input);
-            info!("*** {}: {:?}", blob_id, guess.guessed_types());
+            let guesses = guess.guessed_types();
+            let guesses: Vec<_> = guesses.iter().map(|m| m.essence_str()).collect();
+            info!("*** {}: {:?}", blob.id, guesses);
         }
 
         let matches = match matcher.scan_blob(&blob, &provenance) {

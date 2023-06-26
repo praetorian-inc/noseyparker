@@ -4,8 +4,9 @@ use super::models;
 // -------------------------------------------------------------------------------------------------
 // Error
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("request was rate-limited: {}", .client_error.message)]
     RateLimited {
         /// The client error returned by GitHub
         client_error: models::ClientError,
@@ -13,35 +14,19 @@ pub enum Error {
         /// The duration to wait until trying again
         wait: Option<Duration>,
     },
+
+    #[error("invalid base url: {0}")]
     UrlBaseError(url::Url),
-    UrlParseError(url::ParseError),
+
+    #[error("error parsing URL: {0}")]
+    UrlParseError(#[from] url::ParseError),
+
+    #[error("error building URL: component {0:?} contains a slash")]
     UrlSlashError(String),
-    ReqwestError(reqwest::Error),
+
+    #[error("error making request: {0}")]
+    ReqwestError(#[from] reqwest::Error),
+
+    #[error("error loading token: ill-formed value of {0} environment variable")]
     InvalidTokenEnvVar(String),
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::RateLimited{client_error, ..} => write!(f, "request was rate-limited: {}", client_error.message),
-            Error::UrlBaseError(u) =>write!(f, "invalid base url: {u}"),
-            Error::UrlParseError(e) => write!(f, "error parsing URL: {e}"),
-            Error::UrlSlashError(p) => write!(f, "error building URL: component {p:?} contains a slash"),
-            Error::ReqwestError(e) => write!(f, "error making request: {e}"),
-            Error::InvalidTokenEnvVar(v) => write!(f, "error loading token: ill-formed value of {v} environment variable"),
-        }
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::RateLimited{..} => None,
-            Error::UrlBaseError(_) => None,
-            Error::UrlParseError(e) => Some(e),
-            Error::UrlSlashError(_) => None,
-            Error::ReqwestError(e) => Some(e),
-            Error::InvalidTokenEnvVar(_) => None,
-        }
-    }
 }
