@@ -6,21 +6,18 @@ pub struct Output {
     /// Path-based media type guess
     pub(crate) mime_guess: Option<MimeGuess>,
 
+    /// Content-based media type guess
     pub(crate) magic_guess: Option<Mime>,
 }
 
 impl Output {
-    pub fn guessed_types(&self) -> Vec<Mime> {
-        let mut guessed_types = Vec::new();
+    /// Get the path-based media type guess
+    pub fn path_guess(&self) -> Option<Mime> {
+        self.mime_guess.and_then(|g| g.first())
+    }
 
-        if let Some(mime_guess) = self.mime_guess {
-            guessed_types.extend(mime_guess);
-        }
-
-        if let Some(magic_guess) = &self.magic_guess {
-            guessed_types.push(magic_guess.clone());
-        }
-
-        guessed_types
+    /// Get the content-based media type guess
+    pub fn content_guess(&self) -> Option<Mime> {
+        self.magic_guess.clone()
     }
 }

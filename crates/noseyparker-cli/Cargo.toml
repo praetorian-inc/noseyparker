@@ -43,6 +43,7 @@ indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
+mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"
 rayon = "1.5"

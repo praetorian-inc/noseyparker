@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
+use mime;
+use mime::Mime;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -24,6 +26,13 @@ use crate::snippet::Snippet;
 /// - A sqlite database for recording findings and scan information
 /// - A scratch directory for providing temporary directories and files
 /// - A directory used for storing clones of Git repositories
+///
+/// Note that a `Datastore` is not `Sync`, and thus cannot be directly shared between threads.
+/// The recommended pattern in a case that requires concurrent access is to have a single thread
+/// that mediates access to the `Datastore`.
+///
+/// Accessing a single `Datastore` from multiple processes is untested and may not work correctly.
+/// This implementation has not built-in mechanism to check for or prevent multi-process access.
 pub struct Datastore {
     /// The root directory of everything contained in this `Datastore`.
     root_dir: PathBuf,
@@ -113,7 +122,74 @@ impl Datastore {
         Ok(())
     }
 
+    /// Record the given blob metadata into the datastore.
+    ///
+    /// The given entries are recorded in a single transaction.
+    pub fn record_blob_metadata<'a, T: IntoIterator<Item = &'a (BlobId, usize, Option<Mime>)>>(
+        &mut self,
+        blob_metadata: T,
+    ) -> Result<()> {
+        let _span = debug_span!("Datastore::record_blob_metadata", "{}", self.root_dir.display()).entered();
+
+        let tx = self.conn.transaction()?;
+        {
+            let mut add_blob_id = tx.prepare_cached(indoc! {r#"
+                insert into blob_id(blob_id) values (?)
+                on conflict do update set id = id
+                returning id
+            "#})?;
+
+            let mut add_mime_type = tx.prepare_cached(indoc! {r#"
+                insert into mime_type(essence) values (?)
+                on conflict do update set id = id
+                returning id
+            "#})?;
+
+            let mut add_charset = tx.prepare_cached(indoc! {r#"
+                insert into charset(charset) values (?)
+                on conflict do update set id = id
+                returning id
+            "#})?;
+
+            let mut set_blob_size = tx.prepare_cached(indoc! {r#"
+                insert or ignore into blob_size(blob_id, size) values (?, ?)
+            "#})?;
+
+            let mut set_blob_mime_type = tx.prepare_cached(indoc! {r#"
+                insert or ignore into blob_mime_type(blob_id, mime_type_id) values (?, ?)
+            "#})?;
+
+            let mut set_blob_charset = tx.prepare_cached(indoc! {r#"
+                insert or ignore into blob_charset(blob_id, charset_id) values (?, ?)
+            "#})?;
+
+            fn execute_get_id<P: rusqlite::Params>(stmt: &mut rusqlite::CachedStatement, params: P) -> rusqlite::Result<i64> {
+                stmt.query_row(params, |r| r.get(0))
+            }
+
+            for (blob_id, blob_len, mime) in blob_metadata {
+                let blob_id_id = execute_get_id(&mut add_blob_id, (blob_id.hex(), ))?;
+                set_blob_size.execute((blob_id_id, blob_len))?;
+
+                if let Some(mime) = &mime {
+                    let mime_type_id = execute_get_id(&mut add_mime_type, (mime.essence_str(), ))?;
+                    set_blob_mime_type.execute((blob_id_id, mime_type_id))?;
+
+                    if let Some(charset) = mime.get_param(mime::CHARSET) {
+                        let charset_id: i64 = execute_get_id(&mut add_charset, (charset.as_str(), ))?;
+                        set_blob_charset.execute((blob_id_id, charset_id))?;
+                    }
+                }
+            }
+        }
+
+        tx.commit()?;
+        Ok(())
+    }
+
     /// Record the given matches into the datastore.
+    ///
+    /// The given entries are recorded in a single transaction.
     pub fn record_matches<'a, T: IntoIterator<Item = &'a Match>>(
         &mut self,
         matches: T,
@@ -319,7 +395,7 @@ impl Datastore {
         Ok(conn)
     }
 
-    fn migrate(&mut self) -> Result<u64> {
+    fn migrate(&mut self) -> Result<()> {
         let _span = debug_span!("Datastore::migrate", "{}", self.root_dir.display()).entered();
         let tx = self.conn.transaction()?;
 
@@ -333,6 +409,9 @@ impl Datastore {
             Ok(())
         };
 
+        // -----------------------------------------------------------------------------------------
+        // migration 1
+        // -----------------------------------------------------------------------------------------
         let user_version: u64 = get_user_version()?;
         if user_version == 0 {
             let new_user_version = user_version + 1;
@@ -391,9 +470,76 @@ impl Datastore {
                 create index matches_grouping_index on matches (group_input, rule_name);
             "#})?;
             set_user_version(new_user_version)?;
-            tx.commit()?;
         }
-        Ok(user_version)
+
+        // -----------------------------------------------------------------------------------------
+        // migration 2
+        // -----------------------------------------------------------------------------------------
+        let user_version: u64 = get_user_version()?;
+        if user_version == 1 {
+            let new_user_version = user_version + 1;
+            debug!(
+                "Migrating database schema from version {} to {}",
+                user_version, new_user_version
+            );
+
+            tx.execute_batch(indoc! {r#"
+                create table blob_id
+                -- Assigns a unique integer ID to a Git-style blob ID.
+                --
+                -- Blob IDs are 40-character hexadecimal strings.
+                -- We introduce integer IDs to represent blob IDs instead of using them directly;
+                -- an integer is smaller and cheaper to manipulate than a 40-character string.
+                (
+                    id integer primary key,
+                    blob_id text unique not null,
+                    constraint valid_blob_id check(
+                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
+                    )
+                );
+
+                create table blob_size
+                -- Records the size in bytes of a blob.
+                (
+                    blob_id integer primary key references blob_id(id),
+                    size integer unique not null,
+                    constraint valid_size check(0 <= size)
+                );
+
+                create table mime_type
+                -- Assigns a unique integer ID to a MIME type.
+                (
+                    id integer primary key,
+                    -- The MIME "essence" string, comprising type, subtype, and optional suffix
+                    essence text unique not null
+                );
+
+                create table charset
+                -- Assigns a unique integer ID to charset strings.
+                (
+                    id integer primary key,
+                    charset text unique not null
+                );
+
+                create table blob_mime_type
+                -- Records the guessed mime type of a blob.
+                (
+                    blob_id integer primary key references blob_id(id),
+                    mime_type_id integer references mime_type(id)
+                );
+
+                create table blob_charset
+                -- Records the guessed charset of a blob.
+                (
+                    blob_id integer primary key references blob_id(id),
+                    charset_id integer references charset(id)
+                );
+            "#})?;
+            set_user_version(new_user_version)?;
+        }
+
+        tx.commit()?;
+        Ok(())
     }
 }
 

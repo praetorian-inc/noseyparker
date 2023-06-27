@@ -42,7 +42,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - When a Git repository is cloned, the default behavior is to match `git clone --bare` instead of `git clone --mirror`.
   This new default behavior results in cloning potentially less content, but avoids cloning content from forks from repositories hosted on GitHub.
 
-- The command-line help has been refined for clarity
+- The command-line help has been refined for clarity.
+
+- Scanning performance has been improved on particular workloads by as much as 2x by recording matches to the datastore in larger batches.
+  This is particularly relevant to heavy multithreaded scanning workloads where the inputs have many matches.
 
 
 ### Fixes
