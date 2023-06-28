@@ -312,12 +312,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
-    let channel_size = std::cmp::max(args.num_jobs * 32, 512);
+    let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
     enum DatastoreMessage {
         Matches(Vec<Match>),
-        Blob((BlobId, usize, Option<Mime>)),
+        BlobMetadata((BlobId, usize, Option<Mime>)),
     }
     let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
+    // let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
 
     // We create a separate thread for writing matches to the datastore.
     // The datastore uses SQLite, which does best with a single writer.
@@ -349,7 +350,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                 batch_matches.clear();
                             }
                         }
-                        DatastoreMessage::Blob((blob_id, len, mime)) => {
+                        DatastoreMessage::BlobMetadata((blob_id, len, mime)) => {
                             batch_blob_metadata.push((blob_id, len, mime));
 
                             if batch_blob_metadata.len() >= BATCH_SIZE {
@@ -408,7 +409,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         #[cfg(not(feature = "content_guesser"))]
         let mime: Option<mime::Mime> = None;
 
-        send_ds.send(DatastoreMessage::Blob((blob.id, blob.len(), mime)))?;
+        send_ds.send(DatastoreMessage::BlobMetadata((blob.id, blob.len(), mime)))?;
 
         let matches = match matcher.scan_blob(&blob, &provenance) {
             Err(e) => {
