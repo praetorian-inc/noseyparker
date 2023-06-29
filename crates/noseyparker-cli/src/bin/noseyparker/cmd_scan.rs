@@ -380,22 +380,22 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
                 // record any remaining batched up items
                 if !batch_matches.is_empty() {
-                    let t1 = std::time::Instant::now();
+                    // let t1 = std::time::Instant::now();
                     num_matches += batch_matches_count as u64;
                     num_added += datastore
                         .record_matches(batch_matches.iter().flatten())
                         .expect("should be able to record matches to the datastore");
-                    debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
+                    // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
                     batch_matches.clear();
                     // batch_matches_count = 0;
                 }
 
                 if !batch_metadata.is_empty() {
-                    let t1 = std::time::Instant::now();
+                    // let t1 = std::time::Instant::now();
                     datastore
                         .record_blob_metadata(&batch_metadata)
                         .expect("should be able to record blob metadata to the datastore");
-                    debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
+                    // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
                     batch_metadata.clear();
                 }
 
