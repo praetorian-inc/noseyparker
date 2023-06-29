@@ -29,6 +29,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode MODE` parameter.
 
+- In the `scan` command, basic blob metadata is recorded in the datastore for each discovered blob, including blob size in bytes.
+  If the `content_guesser` Cargo feature is enabled, the recorded metadata additionally includes guessed mime type and charset.
+  This metadata is recorded for each blob in which matches are found, but this behavior can be enabled for all blobs using the new `--record-all-blobs true` parameter.
+  This newly recorded metadata is not currently used for anything in Nosey Parker.
+
 
 ### Changes
 - Existing rules were modified to reduce both false positives and false negatives:

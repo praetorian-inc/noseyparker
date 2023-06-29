@@ -119,6 +119,7 @@ impl Datastore {
     /// Analyze the datastore's sqlite database, potentially allowing for better query planning
     pub fn analyze(&self) -> Result<()> {
         self.conn.execute("analyze", [])?;
+        // self.conn.execute("pragma wal_checkpoint(truncate)", [])?;
         Ok(())
     }
 
@@ -133,72 +134,18 @@ impl Datastore {
 
         let tx = self.conn.transaction()?;
         {
-            let mut add_blob_id = tx.prepare_cached(indoc! {r#"
-                insert into blob_id(blob_id) values (?)
-                on conflict do nothing
-            "#})?;
-
-            let mut get_blob_id_id = tx.prepare_cached(indoc! {r#"
-                select id from blob_id where blob_id = ? limit 1
-            "#})?;
-
-
-            let mut add_mime_type = tx.prepare_cached(indoc! {r#"
-                insert into mime_type(essence) values (?)
-                on conflict do nothing
-            "#})?;
-
-            let mut get_mime_type_id = tx.prepare_cached(indoc! {r#"
-                select id from mime_type where essence = ? limit 1
-            "#})?;
-
-
-            let mut add_charset = tx.prepare_cached(indoc! {r#"
-                insert into charset(charset) values (?)
-                on conflict do nothing
-            "#})?;
-
-            let mut get_charset_id = tx.prepare_cached(indoc! {r#"
-                select id from charset where charset = ? limit 1
-            "#})?;
-
-
-            let mut set_blob_size = tx.prepare_cached(indoc! {r#"
-                insert into blob_size(blob_id, size) values (?, ?)
-                on conflict do nothing
-            "#})?;
-
-            let mut set_blob_mime_type = tx.prepare_cached(indoc! {r#"
-                insert into blob_mime_type(blob_id, mime_type_id) values (?, ?)
-                on conflict do nothing
-            "#})?;
-
-            let mut set_blob_charset = tx.prepare_cached(indoc! {r#"
-                insert into blob_charset(blob_id, charset_id) values (?, ?)
-                on conflict do nothing
+            let mut stmt = tx.prepare_cached(indoc! {r#"
+                insert or replace into blob_metadata(blob_id, size, mime_essence, charset)
+                values (?, ?, ?, ?)
             "#})?;
 
             for (blob_id, blob_len, mime) in blob_metadata {
-                add_blob_id.execute((blob_id.hex(), ))?;
-                let blob_id_id: i64 = get_blob_id_id.query_row((blob_id.hex(), ), |r| r.get(0))?;
+                let (mime_essence, charset) = match mime {
+                    None => (None, None),
+                    Some(mime) => (Some(mime.essence_str()), mime.get_param(mime::CHARSET).map(|n| n.as_str())),
+                };
 
-                set_blob_size.execute((blob_id_id, blob_len))?;
-
-                if let Some(mime) = &mime {
-                    let essence = mime.essence_str();
-                    add_mime_type.execute((essence, ))?;
-                    let mime_type_id: i64 = get_mime_type_id.query_row((essence, ), |r| r.get(0))?;
-
-                    set_blob_mime_type.execute((blob_id_id, mime_type_id))?;
-
-                    if let Some(charset) = mime.get_param(mime::CHARSET) {
-                        let charset_str = charset.as_str();
-                        add_charset.execute((charset_str, ))?;
-                        let charset_id: i64 = get_charset_id.query_row((charset_str, ), |r| r.get(0))?;
-
-                        set_blob_charset.execute((blob_id_id, charset_id))?;
-                    }
-                }
+                stmt.execute((&blob_id.hex(), blob_len, mime_essence, charset))?;
             }
         }
 
@@ -407,8 +354,8 @@ impl Datastore {
         conn.pragma_update(None, "journal_mode", "wal")?; // https://www.sqlite.org/wal.html
         conn.pragma_update(None, "foreign_keys", "on")?; // https://sqlite.org/foreignkeys.html
         conn.pragma_update(None, "synchronous", "normal")?; // https://sqlite.org/pragma.html#pragma_synchronous
-                                                            //
-        let limit: i64 = -512 * 1024; // 512MiB limit
+
+        let limit: i64 = -8192 * 1024; // 8GiB limit
         conn.pragma_update(None, "cache_size", limit)?; // https://sqlite.org/pragma.html#pragma_cache_size
 
         Ok(conn)
@@ -503,93 +450,19 @@ impl Datastore {
             );
 
             tx.execute_batch(indoc! {r#"
-                create table blob_id
-                -- Assigns a unique integer ID to a Git-style blob ID.
-                --
-                -- Blob IDs are 40-character hexadecimal strings.
-                -- We introduce integer IDs to represent blob IDs instead of using them directly;
-                -- an integer is smaller and cheaper to manipulate than a 40-character string.
+                create table blob_metadata
                 (
-                    id integer primary key,
-                    blob_id text unique not null,
+                    blob_id text primary key,
+                    size integer not null,
+                    mime_essence text,
+                    charset text /*,
+
                     constraint valid_blob_id check(
                         length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
-                    )
-                );
-
-                create table blob_size
-                -- Records the size in bytes of a blob.
-                (
-                    blob_id integer primary key references blob_id(id),
-                    size integer not null,
+                    ),
                     constraint valid_size check(0 <= size)
+                    */
                 );
-
-                create view blob_size_denorm as
-                -- A convenience view for the denormalized blob size data.
-                select
-                    blob_id.id blob_id_id,
-                    blob_id.blob_id,
-                    blob_size.size
-                from
-                    blob_size
-                    inner join blob_id on (blob_size.blob_id = blob_id.id)
-                ;
-
-                create table mime_type
-                -- Assigns a unique integer ID to a MIME type.
-                (
-                    id integer primary key,
-                    -- The MIME "essence" string, comprising type, subtype, and optional suffix
-                    essence text unique not null
-                );
-
-                create table charset
-                -- Assigns a unique integer ID to charset strings.
-                (
-                    id integer primary key,
-                    charset text unique not null
-                );
-
-                create table blob_mime_type
-                -- Records the guessed mime type of a blob.
-                (
-                    blob_id integer primary key references blob_id(id),
-                    mime_type_id integer not null references mime_type(id)
-                );
-
-                create view blob_mime_type_denorm as
-                -- A convenience view for the denormalized blob mime type data.
-                select
-                    blob_id.id blob_id_id,
-                    blob_id.blob_id,
-                    mime_type.id mime_type_id,
-                    mime_type.essence
-                from
-                    blob_mime_type
-                    inner join blob_id on (blob_mime_type.blob_id = blob_id.id)
-                    inner join mime_type on (blob_mime_type.mime_type_id = mime_type.id)
-                ;
-
-                create table blob_charset
-                -- Records the guessed charset of a blob.
-                (
-                    blob_id integer primary key references blob_id(id),
-                    charset_id integer not null references charset(id)
-                );
-
-                create view blob_charset_denorm as
-                -- A convenience view for the denormalized blob charset data.
-                select
-                    blob_id.id blob_id_id,
-                    blob_id.blob_id,
-                    charset.id charset_id,
-                    charset.charset
-                from
-                    blob_charset
-                    inner join blob_id on (blob_charset.blob_id = blob_id.id)
-                    inner join charset on (blob_charset.charset_id = charset.id)
-                ;
             "#})?;
             set_user_version(new_user_version)?;
         }

@@ -387,6 +387,10 @@ pub struct ScanArgs {
 
     #[command(flatten)]
     pub content_filtering_args: ContentFilteringArgs,
+
+    /// Enable or disable metadata recording for all discovered blobs instead of just those with matches.
+    #[arg(long, default_value_t=false, action=ArgAction::Set, value_name="BOOL")]
+    pub record_all_blobs: bool,
 }
 
 /// The mode to use for cloning a Git repository

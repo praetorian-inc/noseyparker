@@ -29,6 +29,9 @@ Input Specifier Options:
 Content Filtering Options:
       --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]
   -i, --ignore <FILE>              Use custom path-based ignore rules from the specified file
+      --record-all-blobs <BOOL>    Enable or disable metadata recording for all discovered blobs
+                                   instead of just those with matches [default: false] [possible
+                                   values: true, false]
 
 Global Options:
   -v, --verbose...       Enable verbose output

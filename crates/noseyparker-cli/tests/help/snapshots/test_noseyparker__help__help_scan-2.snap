@@ -129,6 +129,13 @@ Content Filtering Options:
           
           This option can be repeated.
 
+      --record-all-blobs <BOOL>
+          Enable or disable metadata recording for all discovered blobs instead of just those with
+          matches
+          
+          [default: false]
+          [possible values: true, false]
+
 Global Options:
   -v, --verbose...
           Enable verbose output

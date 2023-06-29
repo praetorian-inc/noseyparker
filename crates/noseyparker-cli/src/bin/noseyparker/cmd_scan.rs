@@ -289,7 +289,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
         |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
-            assert!(!matches.is_empty());
+            // assert!(!matches.is_empty());
             let loc_mapping = {
                 match matches
                     .iter()
@@ -312,13 +312,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
-    let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
-    enum DatastoreMessage {
-        Matches(Vec<Match>),
-        BlobMetadata((BlobId, usize, Option<Mime>)),
-    }
-    let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
-    // let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
+    // let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
+    type Metadata = (BlobId, usize, Option<Mime>);
+    type DatastoreMessage = (Vec<Match>, Metadata);
+    // let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
+    let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
 
     // We create a separate thread for writing matches to the datastore.
     // The datastore uses SQLite, which does best with a single writer.
@@ -333,50 +331,72 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 //
                 // accumulate messages in batches to avoid an excessive number of tiny datastore
                 // transactions (which kills performance)
-                const BATCH_SIZE: usize = 512;
-                let mut batch_matches: Vec<Match> = Vec::with_capacity(BATCH_SIZE);
-                let mut batch_blob_metadata: Vec<(BlobId, usize, Option<Mime>)> = Vec::with_capacity(BATCH_SIZE);
 
-                for message in recv_ds {
-                    match message {
-                        DatastoreMessage::Matches(matches) => {
-                            batch_matches.extend(matches);
+                let mut last_tx_time = std::time::Instant::now();
 
-                            if batch_matches.len() >= BATCH_SIZE {
-                                num_matches += batch_matches.len() as u64;
-                                num_added += datastore
-                                    .record_matches(&batch_matches)
-                                    .expect("should be able to record matches to the datastore");
-                                batch_matches.clear();
-                            }
+                const BUF_SIZE: usize = 16384;
+                let mut batch_matches: Vec<Vec<Match>> = Vec::with_capacity(BUF_SIZE);
+                let mut batch_matches_count: usize = 0;
+                let mut batch_metadata: Vec<Metadata> = Vec::with_capacity(BUF_SIZE);
+
+                // Try to commit at least every second
+                const COMMIT_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
+
+                for (matches, metadata) in recv_ds.iter() {
+                    batch_matches_count += matches.len();
+                    batch_matches.push(matches);
+
+                    batch_metadata.push(metadata);
+
+                    if batch_matches_count >= BUF_SIZE || batch_metadata.len() >= BUF_SIZE || last_tx_time.elapsed() >= COMMIT_INTERVAL {
+                        let mut committed = false;
+                        if batch_matches_count > 0 {
+                            // let t1 = std::time::Instant::now();
+                            num_matches += batch_matches_count as u64;
+                            num_added += datastore
+                                .record_matches(batch_matches.iter().flatten())
+                                .expect("should be able to record matches to the datastore");
+                            // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
+                            batch_matches.clear();
+                            batch_matches_count = 0;
+                            committed = true;
                         }
-                        DatastoreMessage::BlobMetadata((blob_id, len, mime)) => {
-                            batch_blob_metadata.push((blob_id, len, mime));
 
-                            if batch_blob_metadata.len() >= BATCH_SIZE {
-                                datastore
-                                    .record_blob_metadata(&batch_blob_metadata)
-                                    .expect("should be able to record blob metadata to the datastore");
-                                batch_blob_metadata.clear()
-                            }
+                        if !batch_metadata.is_empty() {
+                            // let t1 = std::time::Instant::now();
+                            datastore
+                                .record_blob_metadata(&batch_metadata)
+                                .expect("should be able to record blob metadata to the datastore");
+                            // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
+                            batch_metadata.clear();
+                            committed = true;
+                        }
+
+                        if committed {
+                            last_tx_time = std::time::Instant::now();
                         }
                     }
                 }
 
                 // record any remaining batched up items
                 if !batch_matches.is_empty() {
-                    num_matches += batch_matches.len() as u64;
+                    let t1 = std::time::Instant::now();
+                    num_matches += batch_matches_count as u64;
                     num_added += datastore
-                        .record_matches(&batch_matches)
+                        .record_matches(batch_matches.iter().flatten())
                         .expect("should be able to record matches to the datastore");
+                    debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
                     batch_matches.clear();
+                    // batch_matches_count = 0;
                 }
 
-                if !batch_blob_metadata.is_empty() {
+                if !batch_metadata.is_empty() {
+                    let t1 = std::time::Instant::now();
                     datastore
-                        .record_blob_metadata(&batch_blob_metadata)
+                        .record_blob_metadata(&batch_metadata)
                         .expect("should be able to record blob metadata to the datastore");
-                    batch_blob_metadata.clear()
+                    debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
+                    batch_metadata.clear();
                 }
 
                 datastore
@@ -409,7 +429,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         #[cfg(not(feature = "content_guesser"))]
         let mime: Option<mime::Mime> = None;
 
-        send_ds.send(DatastoreMessage::BlobMetadata((blob.id, blob.len(), mime)))?;
+        let metadata = (blob.id, blob.len(), mime);
 
         let matches = match matcher.scan_blob(&blob, &provenance) {
             Err(e) => {
@@ -418,11 +438,12 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             }
             Ok(v) => v,
         };
-        if matches.is_empty() {
+        if matches.is_empty() && !args.record_all_blobs {
             return Ok(());
         }
+
         let matches = convert_blob_matches(&blob, matches, provenance);
-        send_ds.send(DatastoreMessage::Matches(matches))?;
+        send_ds.send((matches, metadata))?;
 
         Ok(())
     };
