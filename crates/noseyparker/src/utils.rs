@@ -32,16 +32,14 @@ impl From<BStringSerde> for BString {
     }
 }
 
-#[inline]
-pub fn serialize_bytes_string_lossy<S: serde::Serializer>(
+fn serialize_bytes_string_lossy<S: serde::Serializer>(
     bytes: &[u8],
     s: S,
 ) -> Result<S::Ok, S::Error> {
     s.serialize_str(&String::from_utf8_lossy(bytes))
 }
 
-#[inline]
-pub fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(
+fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(
     d: D,
 ) -> Result<Vec<u8>, D::Error> {
     let s: &str = serde::Deserialize::deserialize(d)?;

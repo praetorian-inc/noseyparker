@@ -1,14 +1,13 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
-use mime;
-use mime::Mime;
 use rusqlite::Connection;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
 use crate::blob_id::BlobId;
+use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
@@ -126,7 +125,7 @@ impl Datastore {
     /// Record the given blob metadata into the datastore.
     ///
     /// The given entries are recorded in a single transaction.
-    pub fn record_blob_metadata<'a, T: IntoIterator<Item = &'a (BlobId, usize, Option<Mime>)>>(
+    pub fn record_blob_metadata<'a, T: IntoIterator<Item = &'a BlobMetadata>>(
         &mut self,
         blob_metadata: T,
     ) -> Result<()> {
@@ -139,13 +138,8 @@ impl Datastore {
                 values (?, ?, ?, ?)
             "#})?;
 
-            for (blob_id, blob_len, mime) in blob_metadata {
-                let (mime_essence, charset) = match mime {
-                    None => (None, None),
-                    Some(mime) => (Some(mime.essence_str()), mime.get_param(mime::CHARSET).map(|n| n.as_str())),
-                };
-
-                stmt.execute((&blob_id.hex(), blob_len, mime_essence, charset))?;
+            for md in blob_metadata {
+                stmt.execute((&md.id.hex(), md.len(), md.mime_essence(), md.charset()))?;
             }
         }
 
@@ -273,31 +267,36 @@ impl Datastore {
     }
 
     /// Get up to `limit` matches that belong to the group with the given group metadata.
-    pub fn get_match_group_matches(
+    pub fn get_match_group_data(
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<Match>> {
-        let _span = debug_span!("Datastore::match_groups", "{}", self.root_dir.display()).entered();
+    ) -> Result<Vec<(BlobMetadata, Match)>> {
+        let _span = debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select
-                blob_id,
-                start_byte,
-                end_byte,
-                start_line,
-                start_column,
-                end_line,
-                end_column,
-                before_snippet,
-                matching_input,
-                after_snippet,
-                group_index,
-                provenance_type,
-                provenance
-            from matches
-            where rule_name = ? and group_input = ?
-            order by blob_id, start_byte, end_byte
+                m.blob_id,
+                m.start_byte,
+                m.end_byte,
+                m.start_line,
+                m.start_column,
+                m.end_line,
+                m.end_column,
+                m.before_snippet,
+                m.matching_input,
+                m.after_snippet,
+                m.group_index,
+                m.provenance_type,
+                m.provenance,
+
+                b.size,
+                b.mime_essence,
+                b.charset
+            from matches m
+            inner join blob_metadata b on (m.blob_id = b.blob_id)
+            where m.rule_name = ? and m.group_input = ?
+            order by m.blob_id, m.start_byte, m.end_byte
             limit ?
         "#})?;
 
@@ -307,8 +306,9 @@ impl Datastore {
         };
         let entries = stmt.query_map((&metadata.rule_name, metadata.match_content.as_slice(), limit), |row| {
             let v0: String = row.get(0)?;
-            Ok(Match {
-                blob_id: BlobId::from_hex(&v0).expect("blob id from database should be valid"),
+            let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
+            let m = Match {
+                blob_id: blob_id.clone(),
                 location: Location {
                     offset_span: OffsetSpan {
                         start: row.get(1)?,
@@ -335,7 +335,16 @@ impl Datastore {
                 rule_name: metadata.rule_name.clone(),
                 provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
                     .expect("provenance value from database should be valid"),
-            })
+            };
+            let mime_essence: Option<String> = row.get(14)?;
+            let charset: Option<String> = row.get(15)?;
+            let b = BlobMetadata {
+                id: blob_id,
+                num_bytes: row.get(13)?,
+                mime_essence,
+                charset,
+            };
+            Ok((b, m))
         })?;
         let mut es = Vec::new();
         for e in entries {
@@ -355,7 +364,8 @@ impl Datastore {
         conn.pragma_update(None, "foreign_keys", "on")?; // https://sqlite.org/foreignkeys.html
         conn.pragma_update(None, "synchronous", "normal")?; // https://sqlite.org/pragma.html#pragma_synchronous
 
-        let limit: i64 = -8192 * 1024; // 8GiB limit
+        // FIXME: make this a command-line parameter
+        let limit: i64 = -8 * 1024 * 1024; // 8GiB limit
         conn.pragma_update(None, "cache_size", limit)?; // https://sqlite.org/pragma.html#pragma_cache_size
 
         Ok(conn)
@@ -451,17 +461,17 @@ impl Datastore {
 
             tx.execute_batch(indoc! {r#"
                 create table blob_metadata
+                -- This table records various bits of metadata about blobs.
                 (
                     blob_id text primary key,
                     size integer not null,
                     mime_essence text,
-                    charset text /*,
+                    charset text,
 
                     constraint valid_blob_id check(
                         length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
                     ),
                     constraint valid_size check(0 <= size)
-                    */
                 );
             "#})?;
             set_user_version(new_user_version)?;
@@ -530,10 +540,10 @@ mod test {
 // -------------------------------------------------------------------------------------------------
 
 /// A summary of matches in a `Datastore`.
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct MatchSummary(pub Vec<MatchSummaryEntry>);
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct MatchSummaryEntry {
     pub rule_name: String,
     pub distinct_count: usize,
@@ -554,7 +564,7 @@ impl std::fmt::Display for MatchSummary {
 // -------------------------------------------------------------------------------------------------
 
 /// Metadata for a group of matches that have identical match content.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
 pub struct MatchGroupMetadata {
     /// The name of the rule of all the matches in the group
     pub rule_name: String,

@@ -1,7 +1,6 @@
 use anyhow::{bail, Context, Result};
 use crossbeam_channel;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
-use mime::Mime;
 use rayon::prelude::*;
 use std::str::FromStr;
 use std::sync::Mutex;
@@ -10,14 +9,9 @@ use tracing::{debug, debug_span, error, info, warn};
 
 use crate::args;
 
-use noseyparker::blob::{Blob, BlobId};
+use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
-
-#[cfg(feature = "content_guesser")]
-use noseyparker::{content_guesser, content_guesser::Guesser};
-#[cfg(not(feature = "content_guesser"))]
-type Guesser = ();
-
+use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
@@ -32,6 +26,7 @@ use noseyparker::progress::Progress;
 use noseyparker::provenance::Provenance;
 use noseyparker::rules::Rules;
 use noseyparker::rules_database::RulesDatabase;
+use noseyparker::{content_guesser, content_guesser::Guesser};
 
 /// This command scans multiple filesystem inputs for secrets.
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
@@ -277,12 +272,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let make_matcher = || -> Result<(Matcher, Guesser)> {
         *num_matchers_counter.lock().unwrap() += 1;
         let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
-
-        #[cfg(feature = "content_guesser")]
         let guesser = content_guesser::Guesser::new()?;
-        #[cfg(not(feature = "content_guesser"))]
-        let guesser = ();
-
         Ok((matcher, guesser))
     };
 
@@ -313,8 +303,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
     // let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
-    type Metadata = (BlobId, usize, Option<Mime>);
-    type DatastoreMessage = (Vec<Match>, Metadata);
+    type DatastoreMessage = (BlobMetadata, Vec<Match>);
     // let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
     let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
 
@@ -337,18 +326,21 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 const BUF_SIZE: usize = 16384;
                 let mut batch_matches: Vec<Vec<Match>> = Vec::with_capacity(BUF_SIZE);
                 let mut batch_matches_count: usize = 0;
-                let mut batch_metadata: Vec<Metadata> = Vec::with_capacity(BUF_SIZE);
+                let mut batch_metadata: Vec<BlobMetadata> = Vec::with_capacity(BUF_SIZE);
 
                 // Try to commit at least every second
                 const COMMIT_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
 
-                for (matches, metadata) in recv_ds.iter() {
+                for (metadata, matches) in recv_ds.iter() {
                     batch_matches_count += matches.len();
                     batch_matches.push(matches);
 
                     batch_metadata.push(metadata);
 
-                    if batch_matches_count >= BUF_SIZE || batch_metadata.len() >= BUF_SIZE || last_tx_time.elapsed() >= COMMIT_INTERVAL {
+                    if batch_matches_count >= BUF_SIZE
+                        || batch_metadata.len() >= BUF_SIZE
+                        || last_tx_time.elapsed() >= COMMIT_INTERVAL
+                    {
                         let mut committed = false;
                         if batch_matches_count > 0 {
                             // let t1 = std::time::Instant::now();
@@ -415,22 +407,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         #[allow(unused_variables)]
         let (matcher, guesser) = matcher_guesser;
 
-        #[cfg(feature = "content_guesser")]
-        let mime: Option<mime::Mime> = {
-            let input = match &provenance {
-                Provenance::File { path } => {
-                    content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
-                }
-                Provenance::GitRepo { .. } => content_guesser::Input::from_bytes(&blob.bytes),
-            };
-            let guess = guesser.guess(input);
-            guess.content_guess()
-        };
-        #[cfg(not(feature = "content_guesser"))]
-        let mime: Option<mime::Mime> = None;
-
-        let metadata = (blob.id, blob.len(), mime);
-
         let matches = match matcher.scan_blob(&blob, &provenance) {
             Err(e) => {
                 error!("Failed to scan blob {} from {}: {}", blob.id, provenance, e);
@@ -438,12 +414,37 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             }
             Ok(v) => v,
         };
+
         if matches.is_empty() && !args.record_all_blobs {
             return Ok(());
         }
 
+        let (mime_essence, charset) = {
+            let input = match &provenance {
+                Provenance::File { path } => {
+                    content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
+                }
+                Provenance::GitRepo { .. } => content_guesser::Input::from_bytes(&blob.bytes),
+            };
+            let guess = guesser.guess(input);
+            match guess.best_guess() {
+                None => (None, None),
+                Some(m) => {
+                    let essence = m.essence_str().to_owned();
+                    let charset = m.get_param(mime::CHARSET).map(|n| n.to_string());
+                    (Some(essence), charset)
+                }
+            }
+        };
+
+        let metadata = BlobMetadata {
+            id: blob.id,
+            num_bytes: blob.len(),
+            mime_essence,
+            charset,
+        };
         let matches = convert_blob_matches(&blob, matches, provenance);
-        send_ds.send((matches, metadata))?;
+        send_ds.send((metadata, matches))?;
 
         Ok(())
     };

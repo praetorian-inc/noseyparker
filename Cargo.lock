@@ -412,6 +412,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "content_guesser"
+version = "0.13.0-dev"
+dependencies = [
+ "magic",
+ "mime",
+ "mime_guess",
+ "thiserror",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2164,6 +2174,7 @@ dependencies = [
  "bstr",
  "chrono",
  "console",
+ "content_guesser",
  "gix",
  "hex",
  "hyperx",
@@ -2173,7 +2184,6 @@ dependencies = [
  "indoc",
  "lazy_static",
  "mime",
- "noseyparker_content_guesser",
  "pretty_assertions",
  "proptest",
  "regex",
@@ -2222,16 +2232,6 @@ dependencies = [
  "url",
  "vectorscan",
  "vergen",
-]
-
-[[package]]
-name = "noseyparker_content_guesser"
-version = "0.13.0-dev"
-dependencies = [
- "magic",
- "mime",
- "mime_guess",
- "thiserror",
 ]
 
 [[package]]

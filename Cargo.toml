@@ -1,17 +1,5 @@
 [workspace]
-members = [
-    "crates/noseyparker",
-    "crates/noseyparker-cli",
-    "crates/noseyparker-content-guesser",
-    "crates/vectorscan",
-    "crates/vectorscan-sys",
-]
-default-members = [
-    "crates/noseyparker",
-    "crates/noseyparker-cli",
-    "crates/vectorscan",
-    "crates/vectorscan-sys",
-]
+members = ["crates/*"]
 
 [workspace.package]
 edition = "2021"

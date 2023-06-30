@@ -12,12 +12,22 @@ pub struct Output {
 
 impl Output {
     /// Get the path-based media type guess
+    #[inline]
     pub fn path_guess(&self) -> Option<Mime> {
         self.mime_guess.and_then(|g| g.first())
     }
 
     /// Get the content-based media type guess
+    #[inline]
     pub fn content_guess(&self) -> Option<Mime> {
         self.magic_guess.clone()
+    }
+
+    /// Get the guessed mime type that is considered to be the best.
+    ///
+    /// If a content-based guess is available, that is used.
+    /// Otherwise, the path-based guess is used.
+    pub fn best_guess(&self) -> Option<Mime> {
+        self.content_guess().or_else(|| self.path_guess())
     }
 }

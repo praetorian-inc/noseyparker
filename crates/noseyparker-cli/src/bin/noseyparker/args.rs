@@ -604,6 +604,7 @@ impl std::fmt::Display for OutputFormat {
 // -----------------------------------------------------------------------------
 // report writer
 // -----------------------------------------------------------------------------
+// FIXME: refactor this to avoid having to implement bogus methods
 pub trait Reportable {
     fn human_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
     fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()>;

@@ -22,6 +22,7 @@ pub struct PrefixContent<T> {
 }
 
 /// The input to a `Guesser`.
+#[allow(dead_code)]
 pub struct Input<'a, T> {
     pub(crate) path: Option<&'a Path>,
     pub(crate) content: Content<T>,

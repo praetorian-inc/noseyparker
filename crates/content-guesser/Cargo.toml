@@ -8,14 +8,17 @@ homepage.workspace = true
 repository.workspace = true
 publish.workspace = true
 
-name = "noseyparker_content_guesser"
+name = "content_guesser"
 version.workspace = true
+
+[features]
+libmagic = ["magic"]
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-magic = "0.13"
+magic = { version = "0.13", optional = true }
 mime_guess = "2"
 mime = "0.3"
 thiserror = "1"
