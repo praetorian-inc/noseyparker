@@ -15,3 +15,12 @@ pub enum Provenance {
         path: PathBuf,
     },
 }
+
+impl std::fmt::Display for Provenance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Provenance::File { path } => write!(f, "file {:?}", path),
+            Provenance::GitRepo { path } => write!(f, "git repo {:?}", path),
+        }
+    }
+}

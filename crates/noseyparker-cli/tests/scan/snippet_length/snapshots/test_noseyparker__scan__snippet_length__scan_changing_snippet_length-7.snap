@@ -8,6 +8,12 @@ expression: json_output
     "matches": [
       {
         "blob_id": "c3c55e6f7e1304573e25e85202e9f019bfc05087",
+        "blob_metadata": {
+          "charset": null,
+          "id": "c3c55e6f7e1304573e25e85202e9f019bfc05087",
+          "mime_essence": "text/plain",
+          "num_bytes": 1425
+        },
         "capture_group_index": 1,
         "location": {
           "offset_span": {

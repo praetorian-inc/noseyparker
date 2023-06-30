@@ -12,7 +12,7 @@ impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
-        use gix_features::hash::Sha1;
+        use crate::digest::Sha1;
         use std::io::Write;
 
         // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
@@ -82,7 +82,13 @@ impl<'a> From<&'a gix::ObjectId> for BlobId {
                  .expect("oid should be a 20-byte value"),
          )
      }
- }
+}
+
+impl<'a> From<&'a BlobId> for gix::ObjectId {
+    fn from(blob_id: &'a BlobId) -> Self {
+        gix::hash::ObjectId::from(blob_id.as_bytes())
+    }
+}
 
 // -------------------------------------------------------------------------------------------------
 // test

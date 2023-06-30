@@ -99,7 +99,7 @@ fn version_short() {
 fn version_long() {
     with_settings!({
         filters => vec![
-            (r"(?m)^(    [^:]+:\s+).+$", r"$1<PLACEHOLDER>")
+            (r"(?m)^(    [^:]+:[ \t]+).*$", r"$1<PLACEHOLDER>")
         ],
     }, {
         assert_cmd_snapshot!(noseyparker_success!("--version"));

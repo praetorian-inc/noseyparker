@@ -196,7 +196,7 @@ impl GlobalArgs {
         match self.color {
             Mode::Never => false,
             Mode::Always => true,
-            Mode::Auto => std::io::stdin().is_terminal(),
+            Mode::Auto => std::io::stdout().is_terminal(),
         }
     }
 
@@ -387,6 +387,10 @@ pub struct ScanArgs {
 
     #[command(flatten)]
     pub content_filtering_args: ContentFilteringArgs,
+
+    /// Enable or disable metadata recording for all discovered blobs instead of just those with matches.
+    #[arg(long, default_value_t=false, action=ArgAction::Set, value_name="BOOL")]
+    pub record_all_blobs: bool,
 }
 
 /// The mode to use for cloning a Git repository
@@ -600,6 +604,7 @@ impl std::fmt::Display for OutputFormat {
 // -----------------------------------------------------------------------------
 // report writer
 // -----------------------------------------------------------------------------
+// FIXME: refactor this to avoid having to implement bogus methods
 pub trait Reportable {
     fn human_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
     fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()>;

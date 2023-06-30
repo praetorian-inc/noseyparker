@@ -2,12 +2,14 @@ use anyhow::{bail, Context, Result};
 use indenter::indented;
 use lazy_static::lazy_static;
 use noseyparker::rules::Rules;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::Serialize;
 use serde_sarif::sarif;
 use std::fmt::{Display, Formatter, Write};
 
+use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, MatchGroupMetadata};
+use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 
@@ -21,6 +23,22 @@ pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
 
 struct DetailsReporter(Datastore);
 
+impl DetailsReporter {
+    fn get_matches(
+        &self,
+        metadata: &MatchGroupMetadata,
+        limit: Option<usize>,
+    ) -> Result<Vec<BlobMetadataMatch>> {
+        Ok(self
+            .0
+            .get_match_group_data(metadata, limit)
+            .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
+            .into_iter()
+            .map(|(md, m)| BlobMetadataMatch { md, m })
+            .collect())
+    }
+}
+
 impl Reportable for DetailsReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore = &self.0;
@@ -31,9 +49,7 @@ impl Reportable for DetailsReporter {
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
             let finding_num = finding_num + 1;
-            let matches = datastore
-                .get_match_group_matches(&metadata, Some(3))
-                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+            let matches = self.get_matches(&metadata, Some(3))?;
             let match_group = MatchGroup { metadata, matches };
             writeln!(
                 &mut writer,
@@ -55,14 +71,11 @@ impl Reportable for DetailsReporter {
         let es = group_metadata
             .into_iter()
             .map(|metadata| {
-                let matches = datastore
-                    .get_match_group_matches(&metadata, None)
-                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+                let matches = self.get_matches(&metadata, None)?;
                 Ok(MatchGroup { metadata, matches })
             })
             .collect::<Result<Vec<MatchGroup>, anyhow::Error>>()?;
-        let mut ser = serde_json::Serializer::pretty(writer);
-        ser.collect_seq(es)?;
+        serde_json::to_writer_pretty(writer, &es)?;
         Ok(())
     }
 
@@ -73,9 +86,7 @@ impl Reportable for DetailsReporter {
             .context("Failed to get match group metadata from datastore")?;
 
         for metadata in group_metadata.into_iter() {
-            let matches = datastore
-                .get_match_group_matches(&metadata, None)
-                .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+            let matches = self.get_matches(&metadata, None)?;
             let match_group = MatchGroup { metadata, matches };
 
             serde_json::to_writer(&mut writer, &match_group)?;
@@ -94,13 +105,11 @@ impl Reportable for DetailsReporter {
         let results: Vec<sarif::Result> = group_metadata
             .into_iter()
             .map(|metadata| {
-                let matches = datastore
-                    .get_match_group_matches(&metadata, None)
-                    .with_context(|| format!("Failed to get matches for group {metadata:?}"))?;
+                let matches = self.get_matches(&metadata, None)?;
 
                 let first_match_blob_id = match matches.first() {
-                    Some(m) => m.blob_id.to_string(),
-                    None => bail!("Failed to get group matches for group {metadata:?}"),
+                    Some(entry) => entry.m.blob_id.to_string(),
+                    None => bail!("Failed to get group match data for group {metadata:?}"),
                 };
                 let message = sarif::MessageBuilder::default()
                     .text(format!(
@@ -119,18 +128,20 @@ impl Reportable for DetailsReporter {
                 // Will store every match location for the runs.results.location array property
                 let locations: Vec<sarif::Location> = matches
                     .into_iter()
-                    .map(|m| {
+                    .map(|BlobMetadataMatch { md, m }| {
                         let source_span = &m.location.source_span;
                         // let offset_span = &m.location.offset_span;
                         let uri = match m.provenance {
-                            Provenance::File { path } => {
-                                path.display().to_string()
-                            }
+                            Provenance::File { path } => path.display().to_string(),
                             // FIXME: using this path is nonsense here
-                            Provenance::GitRepo { path } => {
-                                path.display().to_string()
-                            }
+                            Provenance::GitRepo { path } => path.display().to_string(),
                         };
+
+                        let properties = sarif::PropertyBagBuilder::default().additional_properties([
+                            (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
+                            (String::from("charset"), serde_json::json!(md.charset)),
+                            (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
+                        ]).build()?;
 
                         let location = sarif::LocationBuilder::default()
                             .physical_location(
@@ -164,17 +175,14 @@ impl Reportable for DetailsReporter {
                             .logical_locations([sarif::LogicalLocationBuilder::default()
                                 .kind("blob")
                                 .name(m.blob_id.to_string())
+                                .properties(properties)
                                 .build()?])
                             .build()?;
                         Ok(location)
                     })
                     .collect::<Result<_>>()?;
 
-                let sha1_fingerprint = {
-                    let mut h = gix_features::hash::Sha1::default();
-                    h.update(&metadata.match_content);
-                    hex::encode(h.digest())
-                };
+                let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
 
                 // Build the result for the match
                 let result = sarif::ResultBuilder::default()
@@ -265,11 +273,19 @@ fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
 }
 
 /// A group of matches that all have the same rule and capture group content
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 struct MatchGroup {
     #[serde(flatten)]
     metadata: MatchGroupMetadata,
-    matches: Vec<Match>,
+    matches: Vec<BlobMetadataMatch>,
+}
+
+#[derive(Serialize)]
+struct BlobMetadataMatch {
+    #[serde(rename="blob_metadata")]
+    md: BlobMetadata,
+    #[serde(flatten)]
+    m: Match,
 }
 
 lazy_static! {
@@ -299,7 +315,6 @@ impl MatchGroup {
     }
 }
 
-// XXX this implementation is grotty
 impl Display for MatchGroup {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", STYLE_RULE.apply_to(self.rule_name()))?;
@@ -332,20 +347,27 @@ impl Display for MatchGroup {
 
         // print matches
         let mut f = indented(f).with_str("    ");
-        for (i, m) in self.matches.iter().enumerate() {
+        for (i, BlobMetadataMatch { md, m }) in self.matches.iter().enumerate() {
             let i = i + 1;
             writeln!(
                 f,
                 "{}",
                 STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
             )?;
+            let blob_metadata =
+                format!("{} bytes, {}, {}",
+                    md.num_bytes(),
+                    md.mime_essence().unwrap_or("unknown type"),
+                    md.charset().unwrap_or("unknown charset"),
+                );
             match &m.provenance {
                 Provenance::File { path } => {
                     writeln!(
                         f,
-                        "{} {}",
+                        "{} {} ({})",
                         STYLE_HEADING.apply_to("File:"),
-                        STYLE_METADATA.apply_to(path.display())
+                        STYLE_METADATA.apply_to(path.display()),
+                        STYLE_METADATA.apply_to(blob_metadata),
                     )?;
                 }
                 Provenance::GitRepo { path } => {
@@ -353,13 +375,14 @@ impl Display for MatchGroup {
                         f,
                         "{} {}",
                         STYLE_HEADING.apply_to("Git repo:"),
-                        STYLE_METADATA.apply_to(path.display())
+                        STYLE_METADATA.apply_to(path.display()),
                     )?;
                     writeln!(
                         f,
-                        "{} {}",
+                        "{} {} ({})",
                         STYLE_HEADING.apply_to("Blob:"),
-                        STYLE_METADATA.apply_to(&m.blob_id)
+                        STYLE_METADATA.apply_to(&m.blob_id),
+                        STYLE_METADATA.apply_to(blob_metadata),
                     )?;
                 }
             }

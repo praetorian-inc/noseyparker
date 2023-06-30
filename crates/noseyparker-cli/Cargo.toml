@@ -21,6 +21,7 @@ build = "build.rs"
 
 [features]
 rule_profiling = ["noseyparker/rule_profiling"]
+libmagic = ["noseyparker/libmagic"]
 
 [[bin]]
 name = "noseyparker"
@@ -35,15 +36,14 @@ vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc
 anyhow = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
-gix-features = "0.30"
-gix = { version = "0.46", features = ["max-performance"] }
-hex = "0.4"
+crossbeam-channel = "0.5"
 indenter = "0.3"
 # XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
 indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
+mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"
 rayon = "1.5"

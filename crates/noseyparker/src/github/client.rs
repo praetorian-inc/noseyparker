@@ -34,13 +34,13 @@ impl Client {
 
     pub async fn get_rate_limit(&self) -> Result<RateLimitOverview> {
         let response = self.get(&["rate_limit"]).await?;
-        let body = response.json().await.map_err(Error::ReqwestError)?;
+        let body = response.json().await?;
         Ok(body)
     }
 
     pub async fn get_user(&self, username: &str) -> Result<User> {
         let response = self.get(&["users", username]).await?;
-        let body = response.json().await.map_err(Error::ReqwestError)?;
+        let body = response.json().await?;
         Ok(body)
     }
 
@@ -126,12 +126,12 @@ fn url_from_path_parts_and_params(
         }
         buf.push_str(p);
     }
-    let url = base_url.join(&buf).map_err(Error::UrlParseError)?;
+    let url = base_url.join(&buf)?;
     let url = if params.is_empty() {
-        Url::parse(url.as_str()).map_err(Error::UrlParseError)?
+        Url::parse(url.as_str())
     } else {
-        Url::parse_with_params(url.as_str(), params).map_err(Error::UrlParseError)?
-    };
+        Url::parse_with_params(url.as_str(), params)
+    }?;
     Ok(url)
 }
 
@@ -258,7 +258,7 @@ impl Client {
         };
 
         // send request and wait for response
-        let response = request_builder.send().await.map_err(Error::ReqwestError)?;
+        let response = request_builder.send().await?;
 
         // Check for rate limiting.
         //
@@ -279,7 +279,7 @@ impl Client {
         if response.status() == StatusCode::FORBIDDEN {
             if let Some(retry_after) = response.headers().get("Retry-After") {
                 let wait = atoi::atoi::<i64>(retry_after.as_bytes()).map(Duration::seconds);
-                let client_error = response.json().await.map_err(Error::ReqwestError)?;
+                let client_error = response.json().await?;
                 return Err(Error::RateLimited { client_error, wait });
             }
 
@@ -304,11 +304,12 @@ impl Client {
                     Some(reset_time - date)
                 }();
 
-                let client_error = response.json().await.map_err(Error::ReqwestError)?;
+                let client_error = response.json().await?;
                 return Err(Error::RateLimited { client_error, wait });
             }
         }
 
-        response.error_for_status().map_err(Error::ReqwestError)
+        let response = response.error_for_status()?;
+        Ok(response)
     }
 }
