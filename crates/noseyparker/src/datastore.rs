@@ -308,7 +308,7 @@ impl Datastore {
             let v0: String = row.get(0)?;
             let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
             let m = Match {
-                blob_id: blob_id,
+                blob_id,
                 location: Location {
                     offset_span: OffsetSpan {
                         start: row.get(1)?,
