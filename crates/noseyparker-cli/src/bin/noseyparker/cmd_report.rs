@@ -31,7 +31,7 @@ impl DetailsReporter {
     ) -> Result<Vec<BlobMetadataMatch>> {
         Ok(self
             .0
-            .get_match_group_data(&metadata, limit)
+            .get_match_group_data(metadata, limit)
             .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
             .into_iter()
             .map(|(md, m)| BlobMetadataMatch { md, m })
@@ -356,7 +356,7 @@ impl Display for MatchGroup {
             )?;
             let blob_metadata =
                 format!("{} bytes, {}, {}",
-                    md.len(),
+                    md.num_bytes(),
                     md.mime_essence().unwrap_or("unknown type"),
                     md.charset().unwrap_or("unknown charset"),
                 );

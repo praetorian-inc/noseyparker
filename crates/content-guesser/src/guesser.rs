@@ -29,7 +29,7 @@ impl Guesser {
         Ok(Guesser {})
     }
 
-    pub fn guess<'a, T>(&self, input: Input<'a, T>) -> Output
+    pub fn guess<T>(&self, input: Input<T>) -> Output
     where
         T: AsRef<[u8]>,
     {

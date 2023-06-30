@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Result};
-use crossbeam_channel;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::str::FromStr;

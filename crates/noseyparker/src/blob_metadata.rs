@@ -19,17 +19,17 @@ pub struct BlobMetadata {
 impl BlobMetadata {
     /// Get the length of the blob in bytes.
     #[inline]
-    pub fn len(&self) -> usize {
+    pub fn num_bytes(&self) -> usize {
         self.num_bytes
     }
 
     #[inline]
     pub fn mime_essence(&self) -> Option<&str> {
-        self.mime_essence.as_ref().map(|s| s.as_str())
+        self.mime_essence.as_deref()
     }
 
     #[inline]
     pub fn charset(&self) -> Option<&str> {
-        self.charset.as_ref().map(|s| s.as_str())
+        self.charset.as_deref()
     }
 }
