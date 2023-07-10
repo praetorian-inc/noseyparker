@@ -6,12 +6,11 @@ use crate::snippet::Snippet;
 use crate::utils::BStringSerde;
 
 use bstr::BString;
-use serde::{Deserialize, Serialize};
 
 // -------------------------------------------------------------------------------------------------
 // Match
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Match {
     /// The blob this match comes from
     pub blob_id: BlobId,

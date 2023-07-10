@@ -2,7 +2,6 @@ use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::str::FromStr;
-use std::sync::mpsc;
 use std::sync::Mutex;
 use std::time::Instant;
 use tracing::{debug, debug_span, error, info, warn};
@@ -11,6 +10,7 @@ use crate::args;
 
 use noseyparker::blob::Blob;
 use noseyparker::blob_id_set::BlobIdSet;
+use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
@@ -25,6 +25,7 @@ use noseyparker::progress::Progress;
 use noseyparker::provenance::Provenance;
 use noseyparker::rules::Rules;
 use noseyparker::rules_database::RulesDatabase;
+use noseyparker::{content_guesser, content_guesser::Guesser};
 
 /// This command scans multiple filesystem inputs for secrets.
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
@@ -80,8 +81,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             );
             let mut num_found: u64 = 0;
             let api_url = args.input_specifier_args.github_api_url.clone();
-            for repo_string in github::enumerate_repo_urls(&repo_specifiers, api_url, Some(&mut progress))
-                .context("Failed to enumerate GitHub repositories")?
+            for repo_string in
+                github::enumerate_repo_urls(&repo_specifiers, api_url, Some(&mut progress))
+                    .context("Failed to enumerate GitHub repositories")?
             {
                 match GitUrl::from_str(&repo_string) {
                     Ok(repo_url) => repo_urls.push(repo_url),
@@ -123,14 +125,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
         };
-        let clones_dir = datastore.clones_dir();
         let git = Git::new();
 
         let mut progress =
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
 
         for repo_url in repo_urls {
-            let output_dir = match clone_destination(&clones_dir, &repo_url) {
+            let output_dir = match datastore.clone_destination(&repo_url) {
                 Err(e) => {
                     progress.suspend(|| {
                         error!("Failed to determine output directory for {repo_url}: {e}");
@@ -267,15 +268,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let matcher_stats = Mutex::new(MatcherStats::default());
     let seen_blobs = BlobIdSet::new();
 
-    let make_matcher = || -> Result<Matcher> {
+    let make_matcher = || -> Result<(Matcher, Guesser)> {
         *num_matchers_counter.lock().unwrap() += 1;
-        Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))
+        let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
+        let guesser = content_guesser::Guesser::new()?;
+        Ok((matcher, guesser))
     };
 
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
         |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
-            assert!(!matches.is_empty());
+            // assert!(!matches.is_empty());
             let loc_mapping = {
                 match matches
                     .iter()
@@ -297,48 +300,169 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut progress =
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
-    // Create a channel pair so that matcher threads can get their results to the database
-    // recorder.
-    let (send_matches, recv_matches) = mpsc::sync_channel::<Vec<Match>>(512);
+    // Create a channel pair for matcher threads to get their results to the datastore recorder.
+    // let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
+    type DatastoreMessage = (BlobMetadata, Vec<Match>);
+    // let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
+    let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
 
-    // We create a separate thread for writing matches to the database.
-    // The database uses SQLite, which does best with a single writer.
-    let match_writer = {
+    // We create a separate thread for writing matches to the datastore.
+    // The datastore uses SQLite, which does best with a single writer.
+    let datastore_writer = {
         std::thread::Builder::new()
             .name("Datastore Writer".to_string())
             .spawn(move || {
                 let mut num_matches = 0u64;
                 let mut num_added = 0usize;
+
                 // keep reading until all the senders hang up; panic if recording matches fails
-                while let Ok(matches) = recv_matches.recv() {
-                    num_matches += matches.len() as u64;
-                    num_added += datastore
-                        .record_matches(&matches)
-                        .expect("should be able to record matches to the database");
+                //
+                // accumulate messages in batches to avoid an excessive number of tiny datastore
+                // transactions (which kills performance)
+
+                let mut last_tx_time = std::time::Instant::now();
+
+                const BUF_SIZE: usize = 16384;
+                let mut batch_matches: Vec<Vec<Match>> = Vec::with_capacity(BUF_SIZE);
+                let mut batch_matches_count: usize = 0;
+                let mut batch_metadata: Vec<BlobMetadata> = Vec::with_capacity(BUF_SIZE);
+
+                // Try to commit at least every second
+                const COMMIT_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
+
+                for (metadata, matches) in recv_ds.iter() {
+                    batch_matches_count += matches.len();
+                    batch_matches.push(matches);
+
+                    batch_metadata.push(metadata);
+
+                    if batch_matches_count >= BUF_SIZE
+                        || batch_metadata.len() >= BUF_SIZE
+                        || last_tx_time.elapsed() >= COMMIT_INTERVAL
+                    {
+                        let mut committed = false;
+                        if batch_matches_count > 0 {
+                            // let t1 = std::time::Instant::now();
+                            num_matches += batch_matches_count as u64;
+                            num_added += datastore
+                                .record_matches(batch_matches.iter().flatten())
+                                .expect("should be able to record matches to the datastore");
+                            // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
+                            batch_matches.clear();
+                            batch_matches_count = 0;
+                            committed = true;
+                        }
+
+                        if !batch_metadata.is_empty() {
+                            // let t1 = std::time::Instant::now();
+                            datastore
+                                .record_blob_metadata(&batch_metadata)
+                                .expect("should be able to record blob metadata to the datastore");
+                            // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
+                            batch_metadata.clear();
+                            committed = true;
+                        }
+
+                        if committed {
+                            last_tx_time = std::time::Instant::now();
+                        }
+                    }
                 }
+
+                // record any remaining batched up items
+                if !batch_matches.is_empty() {
+                    // let t1 = std::time::Instant::now();
+                    num_matches += batch_matches_count as u64;
+                    num_added += datastore
+                        .record_matches(batch_matches.iter().flatten())
+                        .expect("should be able to record matches to the datastore");
+                    // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
+                    batch_matches.clear();
+                    // batch_matches_count = 0;
+                }
+
+                if !batch_metadata.is_empty() {
+                    // let t1 = std::time::Instant::now();
+                    datastore
+                        .record_blob_metadata(&batch_metadata)
+                        .expect("should be able to record blob metadata to the datastore");
+                    // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
+                    batch_metadata.clear();
+                }
+
                 datastore
                     .analyze()
-                    .expect("should be able to analyze the database");
+                    .expect("should be able to analyze the datastore");
                 // FIXME: `num_added` is not computed correctly
                 (datastore, num_matches, num_added as u64)
             })
             .expect("should be able to start datastore writer thread")
     };
 
+    let run_matcher = |matcher_guesser: &mut (Matcher, Guesser),
+                       provenance: Provenance,
+                       blob: Blob|
+     -> Result<()> {
+        #[allow(unused_variables)]
+        let (matcher, guesser) = matcher_guesser;
+
+        let matches = match matcher.scan_blob(&blob, &provenance) {
+            Err(e) => {
+                error!("Failed to scan blob {} from {}: {}", blob.id, provenance, e);
+                return Ok(());
+            }
+            Ok(v) => v,
+        };
+
+        if matches.is_empty() && !args.record_all_blobs {
+            return Ok(());
+        }
+
+        let (mime_essence, charset) = {
+            let input = match &provenance {
+                Provenance::File { path } => {
+                    content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
+                }
+                Provenance::GitRepo { .. } => content_guesser::Input::from_bytes(&blob.bytes),
+            };
+            let guess = guesser.guess(input);
+            match guess.best_guess() {
+                None => (None, None),
+                Some(m) => {
+                    let essence = m.essence_str().to_owned();
+                    let charset = m.get_param(mime::CHARSET).map(|n| n.to_string());
+                    (Some(essence), charset)
+                }
+            }
+        };
+
+        let metadata = BlobMetadata {
+            id: blob.id,
+            num_bytes: blob.len(),
+            mime_essence,
+            charset,
+        };
+        let matches = convert_blob_matches(&blob, matches, provenance);
+        send_ds.send((metadata, matches))?;
+
+        Ok(())
+    };
+
     // ---------------------------------------------------------------------------------------------
     // Scan plain files
     // ---------------------------------------------------------------------------------------------
-    inputs.files.par_iter().for_each_init(
+    inputs.files.par_iter().try_for_each_init(
         || {
             let matcher = make_matcher().expect("should be able to create a matcher");
+
             (matcher, progress.clone())
         },
-        |(matcher, progress), file_result: &FileResult| {
+        |(matcher, progress), file_result: &FileResult| -> Result<()> {
             let fname = &file_result.path;
             let blob = match Blob::from_file(fname) {
                 Err(e) => {
                     error!("Failed to load blob from {}: {}", fname.display(), e);
-                    return;
+                    return Ok(());
                 }
                 Ok(v) => v,
             };
@@ -346,106 +470,82 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let provenance = Provenance::File {
                 path: fname.clone(),
             };
-            let matches = match matcher.scan_blob(&blob, &provenance) {
-                Err(e) => {
-                    error!("Failed to scan blob from {}: {}", fname.display(), e);
-                    return;
-                }
-                Ok(v) => v,
-            };
-            if matches.is_empty() {
-                return;
-            }
-            let matches = convert_blob_matches(&blob, matches, provenance);
-            send_matches
-                .send(matches)
-                .expect("should be able to send all matches");
+
+            run_matcher(matcher, provenance, blob)?;
+
+            Ok(())
         },
-    );
+    )?;
 
     // ---------------------------------------------------------------------------------------------
     // Scan Git repo inputs
     // ---------------------------------------------------------------------------------------------
-    inputs.git_repos.par_iter().for_each(|git_repo_result| {
-        let repository = match open_git_repo(&git_repo_result.path) {
-            Ok(Some(repository)) => repository.into_sync(),
-            Ok(None) => {
-                error!(
-                    "Failed to re-open previously-found repository at {}",
-                    git_repo_result.path.display()
-                );
-                return;
-            }
-            Err(err) => {
-                error!(
-                    "Failed to re-open previously-found repository at {}: {err}",
-                    git_repo_result.path.display()
-                );
-                return;
-            }
-        };
-
-        git_repo_result.blobs.par_iter().for_each_init(
-            || {
-                let matcher = make_matcher().expect("should be able to create a matcher");
-                let repo = repository.to_thread_local();
-                (repo, matcher, progress.clone())
-            },
-            |(repo, matcher, progress), (blob_id, size)| {
-                progress.inc(*size);
-                let path = &git_repo_result.path;
-                // debug!("Scanning {} size {} from {:?}", oid, size, path);
-
-                // Check for duplicates before even loading the entire blob contents
-                if seen_blobs.contains(blob_id) {
-                    return;
+    inputs
+        .git_repos
+        .par_iter()
+        .try_for_each(|git_repo_result| -> Result<()> {
+            let repository = match open_git_repo(&git_repo_result.path) {
+                Ok(Some(repository)) => repository.into_sync(),
+                Ok(None) => {
+                    error!(
+                        "Failed to re-open previously-found repository at {}",
+                        git_repo_result.path.display()
+                    );
+                    return Ok(());
                 }
-                let blob = match repo.find_object(gix::hash::ObjectId::from(blob_id.as_bytes())) {
-                    Err(e) => {
-                        error!(
-                            "Failed to read blob {} from Git repository at {}: {}",
-                            blob_id,
-                            path.display(),
-                            e
-                        );
-                        return;
-                    }
-                    // FIXME: get rid of this extra copy
-                    Ok(blob) => Blob::new(*blob_id, blob.data.to_owned()),
-                };
-                let provenance = Provenance::GitRepo {
-                    path: path.to_path_buf(),
-                };
-                match matcher.scan_blob(&blob, &provenance) {
-                    Err(e) => {
-                        error!(
-                            "Failed to scan blob {} from Git repository at {}: {}",
-                            blob_id,
-                            path.display(),
-                            e
-                        );
-                    }
-                    Ok(matches) => {
-                        if matches.is_empty() {
-                            return;
+                Err(err) => {
+                    error!(
+                        "Failed to re-open previously-found repository at {}: {err}",
+                        git_repo_result.path.display()
+                    );
+                    return Ok(());
+                }
+            };
+
+            git_repo_result.blobs.par_iter().try_for_each_init(
+                || {
+                    let repo = repository.to_thread_local();
+                    let matcher = make_matcher().expect("should be able to create a matcher");
+                    (repo, matcher, progress.clone())
+                },
+                |(repo, matcher, progress), (blob_id, size)| -> Result<()> {
+                    progress.inc(*size);
+                    let path = &git_repo_result.path;
+                    // debug!("Scanning {} size {} from {:?}", oid, size, path);
+
+                    let blob = match repo.find_object(blob_id) {
+                        Err(e) => {
+                            error!(
+                                "Failed to read blob {} from Git repository at {}: {}",
+                                blob_id,
+                                path.display(),
+                                e
+                            );
+                            return Ok(());
                         }
-                        let matches = convert_blob_matches(&blob, matches, provenance);
-                        send_matches
-                            .send(matches)
-                            .expect("should be able to send all matches");
-                    }
-                }
-            },
-        );
-    });
+                        Ok(mut blob) => {
+                            let data = std::mem::take(&mut blob.data); // avoid a copy
+                            Blob::new(*blob_id, data)
+                        }
+                    };
+                    let provenance = Provenance::GitRepo {
+                        path: path.to_path_buf(),
+                    };
+
+                    run_matcher(matcher, provenance, blob)?;
+
+                    Ok(())
+                },
+            )
+        })?;
 
     // ---------------------------------------------------------------------------------------------
     // Wait for all inputs to be scanned and the database thread to finish
     // ---------------------------------------------------------------------------------------------
     // Get rid of the reference to the sending channel after starting the scanners,
     // to ensure things terminate as expected.
-    drop(send_matches);
-    let (datastore, num_matches, num_new_matches) = match_writer.join().unwrap();
+    drop(send_ds);
+    let (datastore, num_matches, num_new_matches) = datastore_writer.join().unwrap();
     progress.finish();
 
     // ---------------------------------------------------------------------------------------------
@@ -502,40 +602,4 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     }
 
     Ok(())
-}
-
-/// Get a path for a local clone of the given git URL underneath `root`.
-fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
-    Ok(root.join(repo.to_path_buf()))
-}
-
-#[cfg(test)]
-mod test {
-    macro_rules! clone_destination_success_tests {
-        ($($case_name:ident: ($root:expr, $repo:expr) => $expected:expr,)*) => {
-            mod clone_destination {
-                use noseyparker::git_url::GitUrl;
-                use pretty_assertions::assert_eq;
-                use std::path::{PathBuf, Path};
-                use std::str::FromStr;
-                use super::super::clone_destination;
-
-                $(
-                    #[test]
-                    fn $case_name() {
-                        let expected: Option<PathBuf> = Some(Path::new($expected).to_owned());
-
-                        let root = Path::new($root);
-                        let repo = GitUrl::from_str($repo).expect("repo should be a URL");
-                        assert_eq!(clone_destination(root, &repo).ok(), expected);
-                    }
-                )*
-            }
-        }
-    }
-
-    clone_destination_success_tests! {
-        https_01: ("rel_root", "https://example.com/testrepo.git") => "rel_root/https/example.com/testrepo.git",
-        https_02: ("/abs_root", "https://example.com/testrepo.git") => "/abs_root/https/example.com/testrepo.git",
-    }
 }
