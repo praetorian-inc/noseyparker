@@ -93,6 +93,15 @@ rules:
       PASSWORD=$($(dirname $0)/../bin/get-django-setting LOCAL_DATABASE_PASSWORD)
   - ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
 
+  # FIXME: extend this rule so this actually gets matched
+  - |
+      #if DEBUG
+                string backend_host = "amazon-subdomain-for-database.string.us-east-1.rds.amazonaws.com";
+                string backend_user = "root";
+                string backend_pass = "XXXXXXXXXXXXX";
+                string backend_db = "database_db";
+                string backend_port = "1234";
+
 
 
 - name: Generic Username and Password (unquoted)
