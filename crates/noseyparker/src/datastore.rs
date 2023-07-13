@@ -271,7 +271,7 @@ impl Datastore {
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(BlobMetadata, Match)>> {
+    ) -> Result<Vec<(Option<BlobMetadata>, Match)>> {
         let _span = debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
@@ -294,7 +294,7 @@ impl Datastore {
                 b.mime_essence,
                 b.charset
             from matches m
-            inner join blob_metadata b on (m.blob_id = b.blob_id)
+            left outer join blob_metadata b on (m.blob_id = b.blob_id)
             where m.rule_name = ? and m.group_input = ?
             order by m.blob_id, m.start_byte, m.end_byte
             limit ?
@@ -336,14 +336,17 @@ impl Datastore {
                 provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
                     .expect("provenance value from database should be valid"),
             };
+            let num_bytes: Option<usize> = row.get(13)?;
             let mime_essence: Option<String> = row.get(14)?;
             let charset: Option<String> = row.get(15)?;
-            let b = BlobMetadata {
-                id: blob_id,
-                num_bytes: row.get(13)?,
-                mime_essence,
-                charset,
-            };
+            let b = num_bytes.map(|num_bytes| {
+                BlobMetadata {
+                    id: blob_id,
+                    num_bytes,
+                    mime_essence,
+                    charset,
+                }
+            });
             Ok((b, m))
         })?;
         let mut es = Vec::new();
@@ -400,7 +403,7 @@ impl Datastore {
                 -- This table is a fully denormalized representation of the matches found from
                 -- scanning.
                 --
-                -- See the `noseyparker::match::Match` type for correspondence.
+                -- See the `Match` type in noseyparker for correspondence.
                 --
                 -- Eventually we should refine the database schema, normalizing where appropriate.
                 -- Doing so could allow for better write performance and smaller databases.

@@ -137,11 +137,15 @@ impl Reportable for DetailsReporter {
                             Provenance::GitRepo { path } => path.display().to_string(),
                         };
 
-                        let properties = sarif::PropertyBagBuilder::default().additional_properties([
-                            (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
-                            (String::from("charset"), serde_json::json!(md.charset)),
-                            (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
-                        ]).build()?;
+                        let mut properties = sarif::PropertyBagBuilder::default();
+                        if let Some(md) = md {
+                            properties.additional_properties([
+                                (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
+                                (String::from("charset"), serde_json::json!(md.charset)),
+                                (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
+                            ]);
+                        }
+                        let properties = properties.build()?;
 
                         let location = sarif::LocationBuilder::default()
                             .physical_location(
@@ -282,8 +286,8 @@ struct MatchGroup {
 
 #[derive(Serialize)]
 struct BlobMetadataMatch {
-    #[serde(rename="blob_metadata")]
-    md: BlobMetadata,
+    #[serde(rename = "blob_metadata")]
+    md: Option<BlobMetadata>,
     #[serde(flatten)]
     m: Match,
 }
@@ -354,12 +358,16 @@ impl Display for MatchGroup {
                 "{}",
                 STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
             )?;
-            let blob_metadata =
-                format!("{} bytes, {}, {}",
+            let blob_metadata = if let Some(md) = md {
+                format!(
+                    "{} bytes, {}, {}",
                     md.num_bytes(),
                     md.mime_essence().unwrap_or("unknown type"),
                     md.charset().unwrap_or("unknown charset"),
-                );
+                )
+            } else {
+                format!("metadata missing")
+            };
             match &m.provenance {
                 Provenance::File { path } => {
                     writeln!(
