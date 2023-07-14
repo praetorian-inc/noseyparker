@@ -1,6 +1,8 @@
 rules:
 
 - name: Grafana API Token
+  id: np.grafana.1
+
   pattern: |
     (?x)
     \b
@@ -19,6 +21,8 @@ rules:
 
 
 - name: Grafana Cloud API Token
+  id: np.grafana.2
+
   pattern: |
     (?x)
     \b
@@ -33,6 +37,8 @@ rules:
 
 
 - name: Grafana Service Account Token
+  id: np.grafana.3
+
   pattern: |
     (?x)
     \b

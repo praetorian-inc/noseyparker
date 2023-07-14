@@ -1,6 +1,8 @@
 rules:
 
 - name: Twitter Client ID
+  id: np.twitter.1
+
   pattern: |
     (?x)(?i)
     \b twitter
@@ -22,6 +24,8 @@ rules:
 
 
 - name: Twitter Secret Key
+  id: np.twitter.2
+
   pattern: |
     (?x)(?i)
     twitter

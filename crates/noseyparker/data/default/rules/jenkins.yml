@@ -1,6 +1,8 @@
 rules:
 
 - name: Jenkins Token or Crumb
+  id: np.jenkins.1
+
   pattern: '(?i)jenkins.{0,10}(?:crumb)?.{0,10}\b([0-9a-f]{32,36})\b'
 
   examples:

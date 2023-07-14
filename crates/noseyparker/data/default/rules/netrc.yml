@@ -1,6 +1,8 @@
 rules:
 
 - name: netrc Credentials
+  id: np.netrc.1
+
   pattern: |
     (?x)
     (?: (machine \s+ [^\s]+) | default)

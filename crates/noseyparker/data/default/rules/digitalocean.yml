@@ -1,6 +1,8 @@
 rules:
 
 - name: DigitalOcean Application Access Token
+  id: np.digitalocean.1
+
   pattern: |
     (?x)(?i)
     \b
@@ -15,6 +17,8 @@ rules:
 
 
 - name: DigitalOcean Personal Access Token
+  id: np.digitalocean.2
+
   pattern: |
     (?x)(?i)
     \b
@@ -29,6 +33,8 @@ rules:
 
 
 - name: DigitalOcean Refresh Token
+  id: np.digitalocean.3
+
   pattern: |
     (?x)(?i)
     \b

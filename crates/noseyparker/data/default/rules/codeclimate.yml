@@ -1,8 +1,12 @@
 rules:
 
 - name: CodeClimate
+  id: np.codeclimate.1
+
   pattern: '(?i)codeclima.{0,50}\b([a-f0-9]{64})\b'
+
   references:
   - https://github.com/codeclimate/ruby-test-reporter/issues/34
+
   examples:
   - ' - RAILS_ENV=test CODECLIMATE_REPO_TOKEN=d37a8b9e09642cb73cfcf4e1284815fc3d6a55a7714110187ac59856ae4ab5ad'

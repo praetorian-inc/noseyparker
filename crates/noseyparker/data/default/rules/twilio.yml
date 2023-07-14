@@ -1,6 +1,8 @@
 rules:
 
 - name: Twilio API Key
+  id: np.twilio.1
+
   pattern: '(?i)twilio.{0,20}\b(sk[a-f0-9]{32})\b'
 
   examples:

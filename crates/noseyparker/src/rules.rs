@@ -16,8 +16,11 @@ use tracing::{debug, debug_span};
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A pattern-based rule as represented syntactically.
 pub struct Rule {
-    /// The name of the rule
+    /// The human-readable name of the rule
     pub name: String,
+
+    /// A globally-unique identifier for the rule
+    pub id: String,
 
     /// The regex pattern that the rule uses
     pub pattern: String,
@@ -70,6 +73,7 @@ impl Rule {
     /// # use noseyparker::rules::Rule;
     /// let r = Rule {
     ///     name: "Test rule".to_string(),
+    ///     id: "test.1".to_string(),
     ///     pattern: r"hello\s*world".to_string(),
     ///     examples: vec![],
     ///     negative_examples: vec![],

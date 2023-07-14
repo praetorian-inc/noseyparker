@@ -1,6 +1,8 @@
 rules:
 
 - name: Microsoft Teams Webhook
+  id: np.msteams.1
+
   pattern: |
     (?x)(?i)
     outlook\.office\.com/webhook/

@@ -1,6 +1,8 @@
 rules:
 
 - name: Adobe OAuth Client Secret
+  id: np.adobe.1
+
   pattern: |
     (?x)(?i)
     \b

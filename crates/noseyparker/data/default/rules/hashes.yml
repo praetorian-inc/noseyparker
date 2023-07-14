@@ -1,6 +1,7 @@
 rules:
 
 - name: md5crypt Hash
+  id: np.md5.1
   pattern: '(\$1\$[./A-Za-z0-9]{8}\$[./A-Za-z0-9]{22})'
 
   references:
@@ -14,6 +15,7 @@ rules:
 
 
 - name: bcrypt Hash
+  id: np.bcrypt.1
   # Format from Wikipedia:
   #   $2<a/b/x/y>$[cost]$[22 character salt][31 character hash]
   pattern: '(\$2[abxy]\$\d+\$[./A-Za-z0-9]{53})'

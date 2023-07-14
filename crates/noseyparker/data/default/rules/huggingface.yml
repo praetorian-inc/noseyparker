@@ -1,6 +1,8 @@
 rules:
 
 - name: HuggingFace User Access Token
+  id: np.huggingface.1
+
   pattern: '\b(hf_[a-zA-Z]{34})\b'
 
   references:

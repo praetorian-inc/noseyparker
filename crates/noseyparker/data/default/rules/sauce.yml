@@ -1,6 +1,8 @@
 rules:
 
 - name: Sauce Token
+  id: np.sauce.1
+
   pattern: '(?i)sauce.{0,50}\b([a-f0-9-]{36})\b'
 
   examples:

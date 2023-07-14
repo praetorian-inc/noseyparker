@@ -1,6 +1,7 @@
 rules:
 
 - name: GitLab Runner Registration Token
+  id: np.gitlab.1
   pattern: '\b(GR1348941[0-9a-zA-Z_-]{20})(?:\b|$)'
 
   references:
@@ -23,6 +24,7 @@ rules:
       --access-level="not_protected"
 
 - name: GitLab Personal Access Token
+  id: np.gitlab.2
   pattern: '\b(glpat-[0-9a-zA-Z_-]{20})(?:\b|$)'
 
   references:
@@ -35,6 +37,7 @@ rules:
       --build-arg 'GO_REPO_TOKEN=glpat-tFrjFXD7soVU2fqxuDMh' \
 
 - name: GitLab Pipeline Trigger Token
+  id: np.gitlab.3
   pattern: '\b(glptt-[0-9a-f]{40})\b'
 
   references:

@@ -1,6 +1,7 @@
 rules:
 
 - name: Artifactory API Key
+  id: np.artifactory.1
   pattern: '(?i)artifactory.{0,50}\b([a-z0-9]{73})\b'
 
   examples:

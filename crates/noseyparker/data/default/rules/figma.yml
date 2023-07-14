@@ -1,6 +1,7 @@
 rules:
 
 - name: Figma Personal Access Token
+  id: np.figma.1
 
   # The key material looks like a v4 UUID with an extra 4 hex digits up front
   pattern: |

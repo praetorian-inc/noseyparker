@@ -1,6 +1,7 @@
 rules:
 
 - name: JSON Web Token (base64url-encoded)
+  id: np.jwt.1
 
   # `header . payload . signature`, all base64-encoded
   # Unencoded, the header and payload are JSON objects, usually starting with

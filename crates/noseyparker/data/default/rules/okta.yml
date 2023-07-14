@@ -1,6 +1,8 @@
 rules:
 
 - name: Okta API Token
+  id: np.okta.1
+
   # Note: looks like `00` followed by a 40-character base-62 payload. We are a
   # bit more restrictive here, not allowing `-` at the end, so that we can use
   # the word boundary `\b` zero-width assertion, and also requiring "okta" or

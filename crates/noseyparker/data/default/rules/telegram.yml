@@ -1,6 +1,8 @@
 rules:
 
 - name: Telegram Bot Token
+  id: np.telegram.1
+
   pattern: |
     (?x)
     \b

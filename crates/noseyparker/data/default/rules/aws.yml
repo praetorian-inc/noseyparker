@@ -1,7 +1,10 @@
 rules:
 
 - name: AWS API Key
+  id: np.aws.1
+
   pattern: '\b((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})\b'
+
   references:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
@@ -21,7 +24,10 @@ rules:
 
 
 - name: AWS Secret Access Key
+  id: np.aws.2
+
   pattern: '(?i)\baws_?(?:secret)?_?(?:access)?_?(?:key)?["'']?\s{0,30}(?::|=>|=)\s{0,30}["'']?([a-z0-9/+=]{40})\b'
+
   references:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
@@ -44,6 +50,8 @@ rules:
 
 
 - name: AWS Account ID
+  id: np.aws.3
+
   pattern: '(?i)aws_?(?:account)_?(?:id)?["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([0-9]{4}-?[0-9]{4}-?[0-9]{4})'
 
   examples:
@@ -83,6 +91,7 @@ rules:
 
 
 - name: AWS Session Token
+  id: np.aws.4
   pattern: '(?i)(?:aws.?session|aws.?session.?token|aws.?token)["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([a-z0-9/+=]{16,200})[^a-z0-9/+=]'
 
   negative_examples:
@@ -98,6 +107,7 @@ rules:
 
 
 - name: Amazon MWS Auth Token
+  id: np.aws.5
   pattern: '(?i)amzn\.mws\.([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
 
   examples:
@@ -108,6 +118,8 @@ rules:
 
 
 - name: AWS S3 Bucket (subdomain style)
+  id: np.s3.1
+
   pattern: |
     (?x)
     (?: ^ | [\s/"'] | %2F )
@@ -161,6 +173,8 @@ rules:
 
 
 - name: AWS S3 Bucket (path style)
+  id: np.s3.2
+
   pattern: |
     (?x)
     (?: ^ | [\s/"'] | %2F )

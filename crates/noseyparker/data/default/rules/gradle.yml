@@ -2,6 +2,8 @@ rules:
 
 # This is intended to detect hardcoded credentials that sometimes appear in Gradle files.
 - name: Hardcoded Gradle Credentials
+  id: np.gradle.1
+
   pattern: |
     (?x)
     (?i)

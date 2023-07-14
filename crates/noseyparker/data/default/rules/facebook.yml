@@ -1,6 +1,8 @@
 rules:
 
 - name: Facebook Secret Key
+  id: np.facebook.1
+
   pattern: |
     (?x)(?i)
     \b (?: facebook | fb )
@@ -21,6 +23,8 @@ rules:
 
 
 - name: Facebook Access Token
+  id: np.facebook.2
+
   pattern: '\b(EAACEdEose0cBA[a-zA-Z0-9]+)\b'
 
   references:
