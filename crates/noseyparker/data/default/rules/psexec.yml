@@ -1,7 +1,7 @@
 rules:
 
 - name: Credentials in PsExec
-  id: np-psexec-01
+  id: np.psexec.1
 
   pattern: |
     (?x)

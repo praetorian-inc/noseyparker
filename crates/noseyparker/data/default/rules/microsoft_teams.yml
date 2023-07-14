@@ -1,7 +1,7 @@
 rules:
 
 - name: Microsoft Teams Webhook
-  id: np-msteams-01
+  id: np.msteams.1
 
   pattern: |
     (?x)(?i)

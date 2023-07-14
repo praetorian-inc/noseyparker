@@ -1,7 +1,7 @@
 rules:
 
 - name: CodeClimate
-  id: np-codeclimate-01
+  id: np.codeclimate.1
 
   pattern: '(?i)codeclima.{0,50}\b([a-f0-9]{64})\b'
 

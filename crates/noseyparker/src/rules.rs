@@ -73,7 +73,7 @@ impl Rule {
     /// # use noseyparker::rules::Rule;
     /// let r = Rule {
     ///     name: "Test rule".to_string(),
-    ///     id: "test001",
+    ///     id: "test.1".to_string(),
     ///     pattern: r"hello\s*world".to_string(),
     ///     examples: vec![],
     ///     negative_examples: vec![],

@@ -1,7 +1,7 @@
 rules:
 
 - name: Mailgun API Key
-  id: np-mailgun-01
+  id: np.mailgun.1
 
   pattern: '(?i)(?:mailgun|mg).{0,20}key-([a-z0-9]{32})\b'
 

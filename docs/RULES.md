@@ -16,22 +16,27 @@ It is easier to understand this from looking at sample rules.
 The [`GitHub Personal Access Token`](/crates/noseyparker/data/default/rules/github.yml) rule looks like this:
 ```
 - name: GitHub Personal Access Token
+  id: np.github.1
   pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
 
   references:
-  - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
+  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
   - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 
   examples:
   - 'GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg'
   - "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'"
   - |
-      ## git developer settings
+      ## git devaloper settings
       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
 ```
 
-The `name` field is used for identifying the rule, particularly in human-oriented output from Nosey Parker.
-The name of a rule should be globally unique.
+The `name` field is intended primarily for human consumption, and is used heavily in various reports.
+This can be any string.
+
+The `id` field is a globally-unique identifier for the rule.
+It must be a string of alphanumeric segments, optionally separated by hyphens or periods, and at most 20 characters long.
 
 The `pattern` field in the rule the most essential part.
 This is the regular expression pattern that controls what input gets matched.
@@ -117,6 +122,8 @@ Multiple captures groups are permitted; this can be useful for some types of sec
 For an example of this, see the [`netrc Credentials`](/crates/noseyparker/data/default/rules/netrc.yml) rule:
 ```
 - name: netrc Credentials
+  id: np.netrc.1
+
   pattern: |
     (?x)
     (?: (machine \s+ [^\s]+) | default)
@@ -169,22 +176,27 @@ A few tricks can ameliorate this:
 The pattern in the [`JSON Web Token (base64url-encoded)`](/crates/noseyparker/data/default/rules/jwt.yml) rule demonstrates all these tricks:
 ```
 # `header . payload . signature`, all base64-encoded
-# Unencoded, the header and payload are JSON objects, starting with `{`, which
-# gets base64-encoded as `ey`.
+# Unencoded, the header and payload are JSON objects, usually starting with
+# `{"`, which gets base64-encoded starting with `ey`.
 pattern: |
   (?x)
   \b
-  (ey[a-zA-Z0-9_-]+)      (?# header )
-  \.
-  (ey[a-zA-Z0-9_-]+)      (?# payload )
-  \.
-  ([a-zA-Z0-9_-]+)        (?# signature )
+  (
+    ey[a-zA-Z0-9_-]+      (?# header )
+    \.
+    ey[a-zA-Z0-9_-]+      (?# payload )
+    \.
+    [a-zA-Z0-9_-]+        (?# signature )
+  )
+  (?:[^a-zA-Z0-9_-]|$)    (?# this instead of a \b anchor because that doesn't play nicely with `-` )
 ```
 
 ### Include real-looking examples found on the public internet
 Each rule should include at least 1 example, preferably something that looks real that was found on the public internet.
-The examples are used in automated testing to find typos in
+The examples are used in automated testing via the `noseyparker rules check` command.
+
 **Please invalidate any possible credentials in examples that you include by mangling the secret content in a structure-preserving way.**
+We don't want to facilitate drive-by hacking by advertising real leaked secrets here.
 
 ### Test your rules to find problems
 The `noseyparker rules check PATH` command runs a number of checks over the rules found at `PATH` and ensures that the examples in the rule match (or not) as expected.
@@ -194,4 +206,4 @@ The `noseyparker rules check PATH` command runs a number of checks over the rule
 
 Nosey Parker's implementation builds on top of the [Hyperscan](https://github.com/intel/hyperscan) library to efficiently match against all its rules simultaneously.
 This is much faster than the naive approach of trying to match each regex rule in a loop on each input.
-Adding additional rules to Nosey Parker should not significantly affect performance.
+Adding more well-written rules to Nosey Parker should not significantly affect performance.

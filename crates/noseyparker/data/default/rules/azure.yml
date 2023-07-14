@@ -1,7 +1,7 @@
 rules:
 
 - name: Azure Connection String
-  id: np-azure-01
+  id: np.azure.1
 
   # XXX There are a bunch of other keys that seem to have secret content assigned to them:
   #
@@ -51,7 +51,7 @@ rules:
 
 
 - name: Azure App Configuration Connection String
-  id: np-azure-02
+  id: np.azure.2
 
   pattern: |
     (?x)

@@ -2,7 +2,7 @@ rules:
 
 # FIXME: figure out what this is actually detecting. Can it be merged with `Slack Token`?
 - name: Slack
-  id: np-slack-01
+  id: np.slack.1
   pattern: '\b(xox[baprs]-[a-zA-Z0-9]{10,48})\b'
 
   examples:
@@ -17,7 +17,7 @@ rules:
 
 
 - name: Slack Token
-  id: np-slack-02
+  id: np.slack.2
   pattern: '\b(xox[pboa]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32})\b'
 
   references:
@@ -34,7 +34,7 @@ rules:
 
 
 - name: Slack Webhook
-  id: np-slack-03
+  id: np.slack.3
   pattern: '(?i)https://hooks.slack.com/services/(T[a-z0-9_]{8}/B[a-z0-9_]{8,12}/[a-z0-9_]{24})'
 
   references:

@@ -281,6 +281,7 @@ mod test {
     #[test]
     pub fn test_simple() -> Result<()> {
         let rules = vec![Rule {
+            id: "test.1".to_string(),
             name: "test".to_string(),
             pattern: "test".to_string(),
             examples: vec![],

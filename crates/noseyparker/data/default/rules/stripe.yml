@@ -4,10 +4,7 @@ rules:
 # Example: STRIPE_PUBLISHABLE_KEY=pk_test_aQbfVWeaCesES5FRSY7iIjk9
 
 - name: Stripe API Key
-  id: np-stripe-01
-
-  categories:
-  - secret
+  id: np.stripe.1
 
   pattern: '(?i)\b((?:sk|rk)_live_[a-z0-9]{24})\b'
 
@@ -19,11 +16,7 @@ rules:
   - 'var stripe = require("stripe")("sk_live_qdyFazIVmace52bThiOzbEVT");'
 
 - name: Stripe API Test Key
-  id: np-stripe-02
-
-  categories:
-  - secret
-  - test
+  id: np.stripe.2
 
   pattern: '(?i)\b((?:sk|rk)_test_[a-z0-9]{24})\b'
 

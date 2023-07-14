@@ -1,7 +1,7 @@
 rules:
 
 - name: Segment Public API Token
-  id: np-segment-01
+  id: np.segment.1
 
   pattern: |
     (?x)

@@ -1,7 +1,7 @@
 rules:
 
 - name: RubyGems API Key
-  id: np-rubygems-01
+  id: np.rubygems.1
 
   pattern: |
     (?x)(?i)

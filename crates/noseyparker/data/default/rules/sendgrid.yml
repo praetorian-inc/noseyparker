@@ -1,9 +1,7 @@
 rules:
 
 - name: SendGrid API Key
-  id: np-sendgrid-01
-
-  categories: [secret]
+  id: np.sendgrid.1
 
   pattern: '\b(SG\.[0-9A-Za-z_-]{22}\.[0-9A-Za-z_-]{43})\b'
 

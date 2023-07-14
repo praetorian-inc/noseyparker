@@ -1,7 +1,7 @@
 rules:
 
 - name: Credentials in ODBC Connection String
-  id: np-odbc-01
+  id: np.odbc.1
 
   pattern: |
     (?x)(?i)

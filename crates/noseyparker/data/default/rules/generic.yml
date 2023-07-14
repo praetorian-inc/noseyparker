@@ -9,7 +9,7 @@
 rules:
 
 - name: Generic Secret
-  id: np-generic-01
+  id: np.generic.1
 
   pattern: |
     (?x)(?i)
@@ -30,7 +30,7 @@ rules:
 
 
 - name: Generic API Key
-  id: np-generic-02
+  id: np.generic.2
 
   pattern: |
     (?x)(?i)
@@ -51,7 +51,7 @@ rules:
 
 
 - name: Generic Username and Password (quoted)
-  id: np-generic-03
+  id: np.generic.3
 
   pattern: |
     (?x)
@@ -111,7 +111,7 @@ rules:
 
 
 - name: Generic Username and Password (unquoted)
-  id: np-generic-04
+  id: np.generic.4
   pattern: |
     (?x)
     (?: username | USERNAME | user | USER)       (?# username context keyword )
@@ -144,7 +144,7 @@ rules:
 
 
 - name: Generic Password (double quoted)
-  id: np-generic-05
+  id: np.generic.5
 
   pattern: |
     (?x)(?i)
@@ -221,7 +221,7 @@ rules:
 
 
 - name: Generic Password (single quoted)
-  id: np-generic-06
+  id: np.generic.6
 
   pattern: |
     (?x)(?i)

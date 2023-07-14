@@ -1,10 +1,7 @@
 rules:
 
 - name: Twitter Client ID
-  id: np-twitter-01
-
-  categories:
-  - identifier
+  id: np.twitter.1
 
   pattern: |
     (?x)(?i)
@@ -27,9 +24,7 @@ rules:
 
 
 - name: Twitter Secret Key
-  id: np-twitter-02
-  categories:
-  - secret
+  id: np.twitter.2
 
   pattern: |
     (?x)(?i)

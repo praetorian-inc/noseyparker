@@ -1,7 +1,7 @@
 rules:
 
 - name: NPM Access Token (fine-grained)
-  id: np-npm-01
+  id: np.npm.1
 
   pattern: |
     (?x)

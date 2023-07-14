@@ -1,7 +1,7 @@
 rules:
 
 - name: Postman API Key
-  id: np-postman-01
+  id: np.postman.1
 
   pattern: |
     (?x)

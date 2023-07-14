@@ -37,7 +37,7 @@ fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs)
 
     // ensure IDs are well-formed
     {
-        let id_pat = Regex::new(r"^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$")
+        let id_pat = Regex::new(r"^[a-zA-Z0-9]+(?:[.-][a-zA-Z0-9]+)*$")
             .expect("ID validator pattern should compile");
 
         for rule in rules.rules.iter() {
@@ -45,12 +45,15 @@ fn cmd_rules_check(_global_args: &args::GlobalArgs, args: &args::RulesCheckArgs)
             const ID_LIMIT: usize = 20;
             let rule_id_len = rule_id.len();
             if rule_id_len > ID_LIMIT {
-                error!("Rule ID {rule_id} is too long ({rule_id_len} characters: should be {ID_LIMIT} characters max)");
+                error!("Rule ID {rule_id} is too long ({rule_id_len} characters: \
+                       should be {ID_LIMIT} characters max)");
                 num_errors += 1;
             }
 
             if !id_pat.is_match(rule_id) {
-                error!("Rule ID {rule_id} is not well-formed: it should consist only of alphanumeric sections delimited by hyphens");
+                error!("Rule ID {rule_id} is not well-formed: \
+                       it should consist only of alphanumeric sections \
+                       delimited by hyphens or periods");
                 num_errors += 1;
             }
         }

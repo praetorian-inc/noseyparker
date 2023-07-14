@@ -1,7 +1,7 @@
 rules:
 
 - name: netrc Credentials
-  id: np-netrc-01
+  id: np.netrc.1
 
   pattern: |
     (?x)

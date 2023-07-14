@@ -1,7 +1,7 @@
 rules:
 
 - name: Shopify Domain
-  id: np-shopify-01
+  id: np.shopify.1
   catgegories: [identifier]
 
   pattern: |
@@ -21,7 +21,7 @@ rules:
 
 
 - name: Shopify App Secret
-  id: np-shopify-02
+  id: np.shopify.2
   catgegories: [secret]
 
   pattern: '\b(shpss_[a-fA-F0-9]{32})\b'
@@ -40,7 +40,7 @@ rules:
 
 
 - name: Shopify Access Token (Public App)
-  id: np-shopify-03
+  id: np.shopify.3
   pattern: '\b(shpat_[a-fA-F0-9]{32})\b'
 
   references:
@@ -56,7 +56,7 @@ rules:
 
 
 - name: Shopify Access Token (Custom App)
-  id: np-shopify-04
+  id: np.shopify.4
   pattern: '\b(shpca_[a-fA-F0-9]{32})\b'
 
   references:
@@ -68,7 +68,7 @@ rules:
 
 
 - name: Shopify Access Token (Legacy Private App)
-  id: np-shopify-05
+  id: np.shopify.5
   pattern: '\b(shppa_[a-fA-F0-9]{32})\b'
 
   references:

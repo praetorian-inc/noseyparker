@@ -1,7 +1,7 @@
 rules:
 
 - name: Google Client ID
-  id: np-google-01
+  id: np.google.1
 
   pattern: '(?i)\b([0-9]+-[a-z0-9_]{32})\.apps\.googleusercontent\.com'
 
@@ -13,7 +13,7 @@ rules:
 
 
 - name: Google OAuth Client Secret (prefixed)
-  id: np-google-02
+  id: np.google.2
 
   pattern: |
     (?x)
@@ -25,7 +25,7 @@ rules:
   - 'const CLIENTSECRET = "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"'
 
 - name: Google OAuth Client Secret
-  id: np-google-03
+  id: np.google.3
 
   pattern: |
     (?x)(?i)
@@ -41,7 +41,7 @@ rules:
 
 
 - name: Google OAuth Access Token
-  id: np-google-04
+  id: np.google.4
 
   pattern: |
     (?x)
@@ -66,7 +66,7 @@ rules:
 
 
 - name: Google API Key
-  id: np-google-05
+  id: np.google.5
 
   pattern: '\b(AIza[0-9A-Za-z_-]{35})\b'
   references:
@@ -78,7 +78,7 @@ rules:
 
 
 - name: Google Cloud Storage Bucket (subdomain style)
-  id: np-gcs-01
+  id: np.gcs.1
 
   pattern: |
     (?x)
@@ -101,7 +101,7 @@ rules:
 
 
 - name: Google Cloud Storage Bucket (path style)
-  id: np-gcs-02
+  id: np.gcs.2
 
   pattern: |
     (?x)

@@ -1,10 +1,7 @@
 rules:
 
 - name: StackHawk API Key
-  id: np-stackhawk-1
-
-  categories:
-  - secret
+  id: np.stackhawk.1
 
   pattern: '\b(hawk\.[0-9A-Za-z_-]{20}\.[0-9A-Za-z_-]{20})\b'
 

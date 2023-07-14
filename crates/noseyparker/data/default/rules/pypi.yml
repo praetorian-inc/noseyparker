@@ -1,7 +1,7 @@
 rules:
 
 - name: PyPI Upload Token
-  id: np-pypi-01
+  id: np.pypi.1
 
   # NOTE: these can actually be arbitrarily long
   pattern: |
