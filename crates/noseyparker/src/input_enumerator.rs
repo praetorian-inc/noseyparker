@@ -144,7 +144,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 }
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
-                    let enumerator = GitRepoEnumerator::new(&repository);
+                    let enumerator = GitRepoEnumerator::new(path, &repository);
                     let blobs = match enumerator.run(self.seen_blobs, &mut self.progress) {
                         Err(e) => {
                             error!(
@@ -288,24 +288,21 @@ pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
     }
 }
 
-pub struct GitRepoEnumeratorResult {
-    pub blobs: Vec<(BlobId, u64)>,
-}
-
 pub struct GitRepoEnumerator<'a> {
+    path: &'a Path,
     repo: &'a gix::Repository,
 }
 
 impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(repo: &'a gix::Repository) -> Self {
-        GitRepoEnumerator { repo }
+    pub fn new(path: &'a Path, repo: &'a gix::Repository) -> Self {
+        Self { path, repo }
     }
 
     pub fn run(
         &self,
         seen_blobs: &BlobIdSet,
         progress: &mut Progress,
-    ) -> Result<GitRepoEnumeratorResult> {
+    ) -> Result<GitRepoResult> {
         use gix::prelude::HeaderExt;
 
         let mut blobs: Vec<(BlobId, u64)> = Vec::with_capacity(1024 * 1024);
@@ -333,6 +330,6 @@ impl<'a> GitRepoEnumerator<'a> {
             }
         }
 
-        Ok(GitRepoEnumeratorResult { blobs })
+        Ok(GitRepoResult { path: self.path.to_owned(), blobs })
     }
 }

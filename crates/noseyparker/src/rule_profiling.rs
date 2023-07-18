@@ -34,11 +34,13 @@ impl RuleProfile {
         }
     }
 
+    #[inline]
     pub fn increment_match_count(&mut self, rule_id: usize, count: u64) {
         self.resize_to_fit(rule_id);
         self.raw_match_counts[rule_id] += count;
     }
 
+    #[inline]
     pub fn increment_stage2_duration(&mut self, rule_id: usize, duration: Duration) {
         self.resize_to_fit(rule_id);
         self.stage2_durations[rule_id] += duration;
@@ -66,8 +68,15 @@ impl RuleProfile {
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug)]
 pub struct RuleProfileEntry {
+    /// The rule ID this entry corresponds to
     pub rule_id: usize,
+
+    /// How many raw matches for this rule were produced by the first stage of matching using
+    /// Vectorscan?
     pub raw_match_count: u64,
+
+    /// How much wall clock time was consumed when evaluating this rule in the second stage of
+    /// matching using `regex`?
     pub stage2_duration: Duration,
 }
 
