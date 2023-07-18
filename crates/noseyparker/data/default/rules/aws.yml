@@ -229,3 +229,69 @@ rules:
   - 's3.amazonaws.com/'
   - 'some-bucket-name.s3.amazonaws.com/171ea24dd241f8a2178b0374-username-Reponame-3-0'
   - 'some-bucket.s3.amazonaws.com/some-object-here'
+
+
+- name: Amazon Resource Name
+  id: np.arn.1
+
+  pattern: |
+    (?x)
+    \b
+    (
+      arn
+      :
+      (?: aws | aws-cn | aws-us-gov )         (?# partition )
+      :
+      [a-zA-Z0-9_-]{2,}                       (?# service )
+      :
+      (?: af-south-1
+        | ap-east-1
+        | ap-northeast-1
+        | ap-northeast-2
+        | ap-northeast-3
+        | ap-south-1
+        | ap-south-2
+        | ap-southeast-1
+        | ap-southeast-2
+        | ap-southeast-3
+        | ap-southeast-4
+        | ca-central-1
+        | eu-central-1
+        | eu-central-2
+        | eu-north-1
+        | eu-south-1
+        | eu-south-2
+        | eu-west-1
+        | eu-west-2
+        | eu-west-3
+        | me-central-1
+        | me-south-1
+        | sa-east-1
+        | us-east-1
+        | us-east-2
+        | us-gov-east-1
+        | us-gov-west-1
+        | us-west-1
+        | us-west-2
+        )?                                    (?# region )
+      :
+      (?: \d{12} )?                           (?# account ID sans hyphens )
+      :
+      (?: [a-zA-Z0-9_-]+ [:/])?               (?# resource type)
+      [^\s"'&<>\\%]+                          (?# resource ID)
+    )
+    (?: [\s"'&<>\\%] | $ )
+
+  references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+
+  examples:
+  - 'arn:aws:s3:::my_corporate_bucket/*'
+  - 'arn:aws:s3:::my_corporate_bucket/Development/*'
+  - 'arn:aws:iam::123456789012:user/Development/product_1234/*'
+  - 'alerts: "arn:aws:sns:us-west-2:123456789023:CloudwatchMetricAlarm"'
+  - '"Principal":{"Federated":["arn:aws:iam:::oidc-provider/localhost:8080/auth/realms/quickstart"]},'
+  - '"KeyId": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",'
+  - '"aws-kms://arn:aws:kms:us-east-1:003084325827:key/84a66985-f968-4bac-82c2-365518adf157";'
+  - 'return f"arn:aws:s3:::{bucket_name}"'
+  - 'return f"arn:aws:s3:::${bucket_name}"'

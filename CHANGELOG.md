@@ -14,11 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - Amazon Resource Name
   - AWS S3 Bucket (subdomain style)
   - AWS S3 Bucket (path style)
   - Google Cloud Storage Bucket (subdomain style)
   - Google Cloud Storage Bucket (path style)
   - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
+
+- Rules are now required to have a globally-unique identifier ([#62](https://github.com/praetorian-inc/noseyparker/pull/62))
 
 - Two new advanced global command-line parameters have been exposed:
 
@@ -29,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode MODE` parameter.
 
-- In the `scan` command, basic blob metadata is recorded in the datastore for each discovered blob, including blob size in bytes and guessed mime type and charset when available.
+- In the `scan` command, basic blob metadata is recorded in the datastore for each discovered blob, including blob size in bytes and guessed mime type and charset when available ([#63](https://github.com/praetorian-inc/noseyparker/pull/63)).
   A path-based mechanism is used to guess mime type; at present, this only works for plain file inputs (i.e., not for blobs found in Git history).
   Optionally, if the `libmagic` Cargo feature is enabled, libmagic (the guts of the `file` command-line program) is used to guess mime type and charset based on content for blobs from all sources.
   This metadata is recorded for each blob in which matches are found, but this behavior can be enabled for all blobs using the new `--record-all-blobs true` parameter.
