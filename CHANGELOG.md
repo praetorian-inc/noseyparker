@@ -59,6 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixes
 - Python is no longer required as a build-time dependency for `vectorscan-sys`.
+- A typo was fixed in the Okta API Key rule that caused it to truncate the secret.
 
 
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)
