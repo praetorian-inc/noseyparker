@@ -139,6 +139,11 @@ impl Datastore {
             "#})?;
 
             for md in blob_metadata {
+                if let Some(first_seen) = &md.first_seen {
+                    if first_seen.len() > 1 {
+                        debug!("{md:#?}");
+                    }
+                }
                 stmt.execute((&md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()))?;
             }
         }
@@ -182,7 +187,7 @@ impl Datastore {
             let src = &m.location.source_span;
             let (ptype, ppath) = match &m.provenance {
                 Provenance::File { path } => ("file", path.to_string_lossy()),
-                // FIXME: do something useful with the expanded git provenance data
+                // FIXME: use git metadata
                 Provenance::GitRepo { repo_path, .. } => ("git", repo_path.to_string_lossy()),
             };
             // FIXME: the number of changed rows is not the number of newly found matches!
@@ -340,12 +345,14 @@ impl Datastore {
             let num_bytes: Option<usize> = row.get(13)?;
             let mime_essence: Option<String> = row.get(14)?;
             let charset: Option<String> = row.get(15)?;
+            let first_seen = None;  // FIXME:: use git metadata
             let b = num_bytes.map(|num_bytes| {
                 BlobMetadata {
                     id: blob_id,
                     num_bytes,
                     mime_essence,
                     charset,
+                    first_seen,
                 }
             });
             Ok((b, m))
@@ -490,7 +497,7 @@ impl Datastore {
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
-// FIXME: rework this function for the added git provenance data
+// FIXME: use git metadata
 fn provenance_from_parts(tag: String, path: String) -> Result<Provenance> {
     match tag.as_str() {
         "git" => Ok(Provenance::GitRepo {

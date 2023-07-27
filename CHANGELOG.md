@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to eventually use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
 ## Unreleased
@@ -32,11 +32,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode MODE` parameter.
 
-- In the `scan` command, basic blob metadata is recorded in the datastore for each discovered blob, including blob size in bytes and guessed mime type and charset when available ([#63](https://github.com/praetorian-inc/noseyparker/pull/63)).
-  A path-based mechanism is used to guess mime type; at present, this only works for plain file inputs (i.e., not for blobs found in Git history).
-  Optionally, if the `libmagic` Cargo feature is enabled, libmagic (the guts of the `file` command-line program) is used to guess mime type and charset based on content for blobs from all sources.
-  This metadata is recorded for each blob in which matches are found, but this behavior can be enabled for all blobs using the new `--record-all-blobs true` parameter.
-  This newly-recorded metadata is included in output of the `report` command.
+- The `scan` command now collects additional metadata about blobs.
+  This metadata includes size in bytes, guessed mime type based on filename extension.
+  Optionally, if the non-default `libmagic` Cargo feature is enabled, the mime type and charset are guessed by passing the content of the blob through `libmagic` (the guts of the `file` command-line program).
+
+  Additionally, for each blob found in Git repository history, the set of commits where it was introduced and the accompanying pathname for the blob is collected ([#16](https://github.com/praetorian-inc/noseyparker/issues/16)).
+  This can be disabled using the new `--git-blob-metadata=none` parameter.
+
+  By default, all this additional metadata is recorded into the datastore for each blob in which matches are found.
+  This can be more precisely controlled using the new `--record-blob-metadata={all,matching,none}` parameter.
+
+  This newly-collected metadata is included in output of the `report` command.
 
 
 ### Changes

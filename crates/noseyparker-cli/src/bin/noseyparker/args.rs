@@ -388,9 +388,8 @@ pub struct ScanArgs {
     #[command(flatten)]
     pub content_filtering_args: ContentFilteringArgs,
 
-    /// Enable or disable metadata recording for all discovered blobs instead of just those with matches.
-    #[arg(long, default_value_t=false, action=ArgAction::Set, value_name="BOOL")]
-    pub record_all_blobs: bool,
+    #[command(flatten)]
+    pub metadata_args: MetadataArgs,
 }
 
 /// The mode to use for cloning a Git repository
@@ -415,6 +414,61 @@ impl std::fmt::Display for GitCloneMode {
         write!(f, "{s}")
     }
 }
+
+#[derive(Args, Debug)]
+#[command(next_help_heading = "Metadata Collection Options")]
+pub struct MetadataArgs {
+    /// Specify which blobs will have metadata recorded
+    #[arg(long, default_value_t=BlobMetadataRecordingMode::Matching, value_name="MODE")]
+    pub record_blob_metadata: BlobMetadataRecordingMode,
+
+    /// Specify which Git metadata will be collected for blobs
+    #[arg(long, default_value_t=GitBlobMetadataMode::FirstSeen, value_name="MODE")]
+    pub git_blob_metadata: GitBlobMetadataMode,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum BlobMetadataRecordingMode {
+    /// All encountered blobs
+    All,
+
+    /// Only blobs with matches
+    Matching,
+
+    /// No blobs
+    None,
+}
+
+impl std::fmt::Display for BlobMetadataRecordingMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            BlobMetadataRecordingMode::All => "all",
+            BlobMetadataRecordingMode::Matching => "matching",
+            BlobMetadataRecordingMode::None => "none",
+        };
+        write!(f, "{s}")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum GitBlobMetadataMode {
+    /// The set of commits and accompanying pathnames in which a blob first appears
+    FirstSeen,
+
+    /// No Git metadata about a blob
+    None,
+}
+
+impl std::fmt::Display for GitBlobMetadataMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            GitBlobMetadataMode::FirstSeen => "first-seen",
+            GitBlobMetadataMode::None => "none",
+        };
+        write!(f, "{s}")
+    }
+}
+
 
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Input Specifier Options")]

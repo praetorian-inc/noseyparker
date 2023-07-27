@@ -1,4 +1,5 @@
 pub mod blob;
+pub mod blob_appearance;
 pub mod blob_id;
 pub mod blob_id_set;
 pub mod blob_metadata;
@@ -8,6 +9,7 @@ pub mod datastore;
 pub mod defaults;
 pub mod digest;
 pub mod git_binary;
+pub mod git_metadata_graph;
 pub mod git_url;
 pub mod github;
 pub mod input_enumerator;

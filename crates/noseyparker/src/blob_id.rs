@@ -4,9 +4,15 @@ use serde::{Deserialize, Serialize};
 // -------------------------------------------------------------------------------------------------
 // BlobId
 // -------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Deserialize, Serialize)]
 #[serde(into="String", try_from="&str")]
 pub struct BlobId([u8; 20]);
+
+impl std::fmt::Debug for BlobId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "BlobId({})", self.hex())
+    }
+}
 
 impl BlobId {
     /// Create a new BlobId computed from the given input.

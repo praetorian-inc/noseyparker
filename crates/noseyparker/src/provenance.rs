@@ -1,10 +1,7 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::path::PathBuf;
 
-use smallvec::SmallVec;
-
-// FIXME: factor this out
-use crate::input_enumerator::BlobSeenIn;
+use crate::blob_appearance::BlobAppearanceSet;
 
 // -------------------------------------------------------------------------------------------------
 // Provenance
@@ -18,7 +15,7 @@ pub enum Provenance {
     },
     GitRepo {
         repo_path: PathBuf,
-        first_seen: SmallVec<[BlobSeenIn; 1]>,
+        first_seen: BlobAppearanceSet,
     },
 }
 

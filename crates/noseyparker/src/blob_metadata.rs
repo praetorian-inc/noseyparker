@@ -1,7 +1,8 @@
 use crate::blob_id::BlobId;
+use crate::blob_appearance::BlobAppearanceSet;
 
 /// Metadata about a blob
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct BlobMetadata {
     /// The blob ID this metadata applies to
     pub id: BlobId,
@@ -14,6 +15,9 @@ pub struct BlobMetadata {
 
     /// The guessed charset of the blob
     pub charset: Option<String>,
+
+    /// The set of first appearances of the blob
+    pub first_seen: Option<BlobAppearanceSet>,
 }
 
 impl BlobMetadata {

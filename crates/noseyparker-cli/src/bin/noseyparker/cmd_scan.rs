@@ -1,7 +1,6 @@
 use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
-use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -278,7 +277,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     // a function to convert BlobMatch into regular Match
     let convert_blob_matches =
-        |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
+        |blob: &Blob, matches: Vec<BlobMatch>, provenance: &Provenance| -> Vec<Match> {
             // assert!(!matches.is_empty());
             let loc_mapping = {
                 match matches
@@ -293,7 +292,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
             matches
                 .into_iter()
-                .flat_map(|m| Match::new(&loc_mapping, m, &provenance, args.snippet_length))
+                .flat_map(|m| Match::new(&loc_mapping, m, provenance, args.snippet_length))
                 .collect()
         };
 
@@ -404,7 +403,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                        provenance: Provenance,
                        blob: Blob|
      -> Result<()> {
-        #[allow(unused_variables)]
         let (matcher, guesser) = matcher_guesser;
 
         let matches = match matcher.scan_blob(&blob, &provenance) {
@@ -415,11 +413,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             Ok(v) => v,
         };
 
-        if matches.is_empty() && !args.record_all_blobs {
+        if matches.is_empty() && args.metadata_args.record_blob_metadata != args::BlobMetadataRecordingMode::All {
             return Ok(());
         }
 
-        let (mime_essence, charset) = {
+        let (mime_essence, charset, first_seen) = {
             let input = match &provenance {
                 Provenance::File { path } => {
                     content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
@@ -437,6 +435,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     }
                 }
             };
+            let first_seen = match &provenance {
+                Provenance::GitRepo { first_seen, .. } => Some(first_seen.clone()),
+                Provenance::File { .. } => None,
+            };
             let path: Option<std::path::PathBuf> = input.path().map(|p| p.to_owned());
             let guess = guesser.guess(input);
             let (essence, charset) = match guess.best_guess() {
@@ -453,7 +455,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                       path,
                       essence, charset);
             });
-            (essence, charset)
+            (essence, charset, first_seen)
         };
 
         let metadata = BlobMetadata {
@@ -461,8 +463,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             num_bytes: blob.len(),
             mime_essence,
             charset,
+            first_seen,
         };
-        let matches = convert_blob_matches(&blob, matches, provenance);
+        let matches = convert_blob_matches(&blob, matches, &provenance);
         send_ds.send((metadata, matches))?;
 
         Ok(())
