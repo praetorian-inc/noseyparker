@@ -134,7 +134,8 @@ impl Reportable for DetailsReporter {
                         let uri = match m.provenance {
                             Provenance::File { path } => path.display().to_string(),
                             // FIXME: using this path is nonsense here
-                            Provenance::GitRepo { path } => path.display().to_string(),
+                            // FIXME: rework for the expanded git provenance data
+                            Provenance::GitRepo { repo_path, .. } => repo_path.display().to_string(),
                         };
 
                         let mut properties = sarif::PropertyBagBuilder::default();
@@ -366,7 +367,7 @@ impl Display for MatchGroup {
                     md.charset().unwrap_or("unknown charset"),
                 )
             } else {
-                format!("metadata missing")
+                "metadata missing".to_string()
             };
             match &m.provenance {
                 Provenance::File { path } => {
@@ -378,12 +379,13 @@ impl Display for MatchGroup {
                         STYLE_METADATA.apply_to(blob_metadata),
                     )?;
                 }
-                Provenance::GitRepo { path } => {
+                // FIXME: rework this for the expanded git provenance data
+                Provenance::GitRepo { repo_path, .. } => {
                     writeln!(
                         f,
                         "{} {}",
                         STYLE_HEADING.apply_to("Git repo:"),
-                        STYLE_METADATA.apply_to(path.display()),
+                        STYLE_METADATA.apply_to(repo_path.display()),
                     )?;
                     writeln!(
                         f,

@@ -182,7 +182,8 @@ impl Datastore {
             let src = &m.location.source_span;
             let (ptype, ppath) = match &m.provenance {
                 Provenance::File { path } => ("file", path.to_string_lossy()),
-                Provenance::GitRepo { path } => ("git", path.to_string_lossy()),
+                // FIXME: do something useful with the expanded git provenance data
+                Provenance::GitRepo { repo_path, .. } => ("git", repo_path.to_string_lossy()),
             };
             // FIXME: the number of changed rows is not the number of newly found matches!
             num_changed += stmt.execute((
@@ -489,10 +490,12 @@ impl Datastore {
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
+// FIXME: rework this function for the added git provenance data
 fn provenance_from_parts(tag: String, path: String) -> Result<Provenance> {
     match tag.as_str() {
         "git" => Ok(Provenance::GitRepo {
-            path: PathBuf::from(path),
+            repo_path: PathBuf::from(path),
+            first_seen: Default::default(),
         }),
         "file" => Ok(Provenance::File {
             path: PathBuf::from(path),

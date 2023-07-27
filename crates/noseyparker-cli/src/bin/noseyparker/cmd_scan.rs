@@ -1,6 +1,7 @@
 use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
+use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -8,7 +9,7 @@ use tracing::{debug, debug_span, error, info, warn};
 
 use crate::args;
 
-use noseyparker::blob::Blob;
+use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
@@ -423,17 +424,36 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 Provenance::File { path } => {
                     content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
                 }
-                Provenance::GitRepo { .. } => content_guesser::Input::from_bytes(&blob.bytes),
+                Provenance::GitRepo { first_seen, .. } => {
+                    match first_seen.first() {
+                        None => content_guesser::Input::from_bytes(&blob.bytes),
+                        Some(e) => {
+                            if let Ok(path) = e.path() {
+                                content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
+                            } else {
+                                content_guesser::Input::from_bytes(&blob.bytes)
+                            }
+                        }
+                    }
+                }
             };
+            let path: Option<std::path::PathBuf> = input.path().map(|p| p.to_owned());
             let guess = guesser.guess(input);
-            match guess.best_guess() {
+            let (essence, charset) = match guess.best_guess() {
                 None => (None, None),
                 Some(m) => {
                     let essence = m.essence_str().to_owned();
                     let charset = m.get_param(mime::CHARSET).map(|n| n.to_string());
                     (Some(essence), charset)
                 }
-            }
+            };
+            progress.suspend(|| {
+                info!("{}:  {:?}:  {:?}:  {:?}",
+                      blob.id,
+                      path,
+                      essence, charset);
+            });
+            (essence, charset)
         };
 
         let metadata = BlobMetadata {
@@ -482,7 +502,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     inputs
         .git_repos
-        .par_iter()
+        .into_par_iter()
         .try_for_each(|git_repo_result| -> Result<()> {
             let repository = match open_git_repo(&git_repo_result.path) {
                 Ok(Some(repository)) => repository.into_sync(),
@@ -502,15 +522,17 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 }
             };
 
-            git_repo_result.blobs.par_iter().try_for_each_init(
+            git_repo_result.blobs.into_par_iter().try_for_each_init(
                 || {
                     let repo = repository.to_thread_local();
                     let matcher = make_matcher().expect("should be able to create a matcher");
                     (repo, matcher, progress.clone())
                 },
-                |(repo, matcher, progress), (blob_id, size)| -> Result<()> {
-                    progress.inc(*size);
-                    let path = &git_repo_result.path;
+                |(repo, matcher, progress), md| -> Result<()> {
+                    let size = md.num_bytes;
+                    let blob_id = md.blob_oid;
+                    progress.inc(size);
+                    let repo_path = &git_repo_result.path;
                     // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
                     let blob = match repo.find_object(blob_id) {
@@ -518,18 +540,19 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                             error!(
                                 "Failed to read blob {} from Git repository at {}: {}",
                                 blob_id,
-                                path.display(),
+                                repo_path.display(),
                                 e
                             );
                             return Ok(());
                         }
                         Ok(mut blob) => {
                             let data = std::mem::take(&mut blob.data); // avoid a copy
-                            Blob::new(*blob_id, data)
+                            Blob::new(BlobId::from(&blob_id), data)
                         }
                     };
                     let provenance = Provenance::GitRepo {
-                        path: path.to_path_buf(),
+                        repo_path: repo_path.to_path_buf(),
+                        first_seen: md.first_seen,
                     };
 
                     run_matcher(matcher, provenance, blob)?;

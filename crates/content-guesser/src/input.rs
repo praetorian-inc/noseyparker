@@ -36,6 +36,11 @@ impl<'a, T> Input<'a, T> {
             content: Content::None,
         }
     }
+
+    #[inline]
+    pub fn path(&self) -> Option<&Path> {
+        self.path
+    }
 }
 
 impl<'a> Input<'a, &'a [u8]> {

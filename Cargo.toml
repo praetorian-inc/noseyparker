@@ -13,13 +13,13 @@ version = "0.13.0-dev"
 
 publish = false
 
-[profile.release]
-# Generate debug symbols even in release builds
-# Used for cargo-instruments: https://github.com/cmyr/cargo-instruments
-# debug = true
-# split-debuginfo = "packed"
-lto = "thin"
-opt-level = 3  # default for release profile
+# [profile.release]
+# # Generate debug symbols even in release builds
+# # Used for cargo-instruments: https://github.com/cmyr/cargo-instruments
+# # debug = true
+# # split-debuginfo = "packed"
+# lto = "thin"
+# opt-level = 3  # default for release profile
 
 # Insta benefits from being compiled in release mode, even as dev dependency.
 [profile.dev.package.insta]

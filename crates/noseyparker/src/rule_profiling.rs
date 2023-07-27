@@ -10,6 +10,7 @@ pub struct RuleProfile {
 }
 
 impl RuleProfile {
+    /// Update this rule profile by combining it with the contents of another one.
     pub fn update(&mut self, other: &Self) {
         if other.raw_match_counts.len() >= self.raw_match_counts.len() {
             self.raw_match_counts.resize(other.raw_match_counts.len(), 0);
@@ -58,6 +59,7 @@ impl RuleProfile {
             .collect()
     }
 
+    #[inline]
     pub fn time_stage2(&mut self, rule_id: usize) -> RuleStage2Timer<'_> {
         RuleStage2Timer::new(self, rule_id)
     }
@@ -91,6 +93,7 @@ pub struct RuleStage2Timer<'a> {
 }
 
 impl <'a> RuleStage2Timer<'a> {
+    #[inline]
     pub fn new(rule_stats: &'a mut RuleProfile, rule_id: usize) -> Self {
         RuleStage2Timer {
             rule_id,
@@ -101,6 +104,7 @@ impl <'a> RuleStage2Timer<'a> {
 }
 
 impl <'a> Drop for RuleStage2Timer<'a> {
+    #[inline]
     fn drop(&mut self) {
         self.rule_stats.increment_stage2_duration(self.rule_id, self.start_time.elapsed());
     }

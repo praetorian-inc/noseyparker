@@ -3,6 +3,7 @@ pub mod blob_id;
 pub mod blob_id_set;
 pub mod blob_metadata;
 pub mod bstring_escape;
+pub mod bstring_table;
 pub mod datastore;
 pub mod defaults;
 pub mod digest;
