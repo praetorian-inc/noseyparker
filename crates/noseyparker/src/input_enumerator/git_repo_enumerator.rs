@@ -1,15 +1,79 @@
 use anyhow::{Context, Result};
-use gix::{ObjectId, Repository, hashtable::HashMap};
+use gix::{OdbHandle, ObjectId, Repository, hashtable::HashMap};
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 // use std::time::Instant;
-use tracing::{debug, error, error_span, info, warn};
+use tracing::{error_span, warn};
 
 use crate::blob_appearance::{BlobAppearance, BlobAppearanceSet};
 use crate::git_metadata_graph::GitMetadataGraph;
 use crate::progress::Progress;
 
+// -------------------------------------------------------------------------------------------------
+// implementation helpers
+// -------------------------------------------------------------------------------------------------
+macro_rules! unwrap_or_continue {
+    ($arg:expr) => {
+        match $arg {
+            Ok(v) => v,
+            Err(e) => {
+                continue;
+            }
+        }
+    };
+    ($arg:expr, $on_error:expr) => {
+        match $arg {
+            Ok(v) => v,
+            Err(e) => {
+                $on_error(e);
+                continue;
+            }
+        }
+    };
+}
 
+pub struct ObjectCounts {
+    num_commits: usize,
+    num_trees: usize,
+    num_blobs: usize,
+}
+
+// TODO: measure how helpful or pointless it is to count the objects in advance
+// FIXME: if keeping the pre-counting step, add some new kind of progress indicator
+fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCounts> {
+    use gix::prelude::*;
+    use gix::object::Kind;
+    use gix::odb::store::iter::Ordering;
+
+    let mut num_commits = 0;
+    let mut num_trees = 0;
+    let mut num_blobs = 0;
+
+    for oid in odb
+        .iter()
+        .context("Failed to iterate object database")?
+        .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
+    {
+        let oid = unwrap_or_continue!(oid, |e| {
+            progress.suspend(|| warn!("Failed to read object id: {e}"))
+        });
+        let hdr = unwrap_or_continue!(odb.header(oid), |e| {
+            progress.suspend(|| warn!("Failed to read object header for {oid}: {e}"))
+        });
+        match hdr.kind() {
+            Kind::Commit => num_commits += 1,
+            Kind::Tree => num_trees += 1,
+            Kind::Blob => num_blobs += 1,
+            Kind::Tag => {}
+        }
+    }
+    Ok(ObjectCounts { num_commits, num_trees, num_blobs })
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// enumeration return types
+// -------------------------------------------------------------------------------------------------
 pub struct GitRepoResult {
     pub path: PathBuf,
     pub blobs: Vec<BlobMetadata>,
@@ -34,12 +98,15 @@ pub struct BlobMetadata {
 }
 
 
-pub struct GitRepoEnumerator<'a> {
+// -------------------------------------------------------------------------------------------------
+// git repo enumerator, with metadata
+// -------------------------------------------------------------------------------------------------
+pub struct GitRepoWithMetadataEnumerator<'a> {
     path: &'a Path,
     repo: &'a Repository,
 }
 
-impl<'a> GitRepoEnumerator<'a> {
+impl<'a> GitRepoWithMetadataEnumerator<'a> {
     pub fn new(path: &'a Path, repo: &'a Repository) -> Self {
         Self { path, repo }
     }
@@ -49,7 +116,7 @@ impl<'a> GitRepoEnumerator<'a> {
         use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
 
-        let _span = error_span!("git_enumerator", "{}", self.path.display()).entered();
+        let _span = error_span!("enuemrate_git_with_metadata", "{}", self.path.display()).entered();
 
         macro_rules! warn {
             ($($arg:expr),*) => {
@@ -59,74 +126,15 @@ impl<'a> GitRepoEnumerator<'a> {
             }
         }
 
-        /*
-        macro_rules! info {
-            ($($arg:expr),*) => {
-                progress.suspend(|| {
-                    tracing::info!($($arg),*);
-                })
-            }
-        }
-        */
-
-        macro_rules! unwrap_or_continue {
-            ($arg:expr) => {
-                match $arg {
-                    Ok(v) => v,
-                    Err(e) => {
-                        continue;
-                    }
-                }
-            };
-            ($arg:expr, $on_error:expr) => {
-                match $arg {
-                    Ok(v) => v,
-                    Err(e) => {
-                        $on_error(e);
-                        continue;
-                    }
-                }
-            };
-        }
-
         let odb = &self.repo.objects;
-
-        // info!("Counting objects...");
 
         // TODO: measure how helpful or pointless it is to count the objects in advance
         // FIXME: if keeping the pre-counting step, add some new kind of progress indicator
 
-        // First count the objects to figure out how big to allocate data structures
-        // We are assuming that the repository doesn't change in the meantime.
+        // First count the objects to figure out how big to allocate data structures.
+        // We're assuming that the repository doesn't change in the meantime.
         // If it does, our allocation estimates won't be right. Too bad!
-        // let t1 = Instant::now();
-        let (num_commits, num_trees, num_blobs) = {
-            let mut num_commits = 0;
-            let mut num_trees = 0;
-            let mut num_blobs = 0;
-
-            for oid in odb
-                .iter()
-                .context("Failed to iterate object database")?
-                .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
-            {
-                let oid = unwrap_or_continue!(oid, |e| warn!("Failed to read object id: {e}"));
-                let hdr = unwrap_or_continue!(odb.header(oid), |e| warn!(
-                    "Failed to read object header for {oid}: {e}"
-                ));
-                match hdr.kind() {
-                    Kind::Commit => num_commits += 1,
-                    Kind::Tree => num_trees += 1,
-                    Kind::Blob => num_blobs += 1,
-                    _ => {}
-                }
-            }
-            (num_commits, num_trees, num_blobs)
-        };
-        // info!(
-        //     "Counted {num_commits} commits, {num_trees} trees, and {num_blobs} blobs in {:.6}s",
-        //     t1.elapsed().as_secs_f64()
-        // );
+        let ObjectCounts { num_commits, num_trees, num_blobs } = count_git_objects(odb, progress)?;
 
         let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(num_blobs);
         let mut metadata_graph = GitMetadataGraph::with_capacity(num_commits, num_trees, num_blobs);
@@ -157,25 +165,6 @@ impl<'a> GitRepoEnumerator<'a> {
                     let commit = unwrap_or_continue!(odb.find_commit(oid, &mut scratch), |e| {
                         // NOTE: resolution of this will improve things: https://github.com/Byron/gitoxide/issues/950
                         warn!("Failed to find commit {oid}: {e}");
-
-                        // let mut scratch2 = Vec::new();
-                        // let res = odb.try_find(oid, &mut scratch2);
-                        // warn!("try_find result: {res:?}");
-                        // match res {
-                        //     Err(e) => warn!("error finding object {oid}: {e:?}"),
-                        //     Ok(None) => warn!("error finding object {oid}: object not found??"),
-                        //     Ok(Some(d)) => {
-                        //         match d.decode() {
-                        //             Err(e) => warn!("error decoding object {oid}: {e:?}"),
-                        //             Ok(o) => {
-                        //                 match o.into_commit() {
-                        //                     None => warn!("failed to convert data from {oid} into commit"),
-                        //                     Some(c) => warn!("got commit! {c:?}"),
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // }
                     });
 
                     let tree_idx = metadata_graph.get_tree_idx(commit.tree());
@@ -247,5 +236,67 @@ impl<'a> GitRepoEnumerator<'a> {
                 Ok(GitRepoResult { path, blobs })
             }
         }
+    }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// git repo enumerator, sans metadata
+// -------------------------------------------------------------------------------------------------
+pub struct GitRepoEnumerator<'a> {
+    path: &'a Path,
+    repo: &'a Repository,
+}
+
+impl<'a> GitRepoEnumerator<'a> {
+    pub fn new(path: &'a Path, repo: &'a Repository) -> Self {
+        Self { path, repo }
+    }
+
+    pub fn run(&self, progress: &mut Progress) -> Result<GitRepoResult> {
+        use gix::object::Kind;
+        use gix::odb::store::iter::Ordering;
+        use gix::prelude::*;
+
+        let _span = error_span!("enumerate_git", "{}", self.path.display()).entered();
+
+        macro_rules! warn {
+            ($($arg:expr),*) => {
+                progress.suspend(|| {
+                    tracing::warn!($($arg),*);
+                })
+            }
+        }
+
+        let odb = &self.repo.objects;
+
+        let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(64 * 1024);
+
+        for oid in odb
+            .iter()
+            .context("Failed to iterate object database")?
+            .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
+        {
+            let oid = unwrap_or_continue!(oid, |e| warn!("Failed to read object id: {e}"));
+            let hdr = unwrap_or_continue!(odb.header(oid), |e| warn!(
+                "Failed to read object header for {oid}: {e}"
+            ));
+            if hdr.kind() == Kind::Blob {
+                let obj_size = hdr.size();
+                blobs.push((oid, obj_size));
+                progress.inc(obj_size);
+            }
+        }
+
+        let path = self.path.to_owned();
+        let blobs = blobs
+            .into_iter()
+            .map(|(blob_oid, num_bytes)| BlobMetadata {
+                blob_oid,
+                num_bytes,
+                first_seen: Default::default(),
+            })
+            .collect();
+        Ok(GitRepoResult { path, blobs })
     }
 }

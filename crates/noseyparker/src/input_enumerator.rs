@@ -6,8 +6,8 @@ use tracing::{debug, error, warn};
 
 use crate::progress::Progress;
 
-pub mod git_repo_enumerator;
-use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult};
+mod git_repo_enumerator;
+pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoWithMetadataEnumerator, GitRepoResult};
 
 pub struct FilesystemEnumeratorResult {
     pub files: Vec<FileResult>,
@@ -32,6 +32,7 @@ pub struct FileResult {
 // -------------------------------------------------------------------------------------------------
 struct VisitorBuilder<'t> {
     max_file_size: Option<u64>,
+    collect_git_metadata: bool,
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
@@ -46,6 +47,7 @@ where
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(Visitor {
             max_file_size: self.max_file_size,
+            collect_git_metadata: self.collect_git_metadata,
             local_files: Vec::new(),
             local_git_repos: Vec::new(),
             global_files: self.global_files,
@@ -60,6 +62,7 @@ where
 // Visitor
 // -------------------------------------------------------------------------------------------------
 struct Visitor<'t> {
+    collect_git_metadata: bool,
     max_file_size: Option<u64>,
 
     local_files: Vec<FileResult>,
@@ -106,7 +109,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         let path = entry.path();
         let metadata = match entry.metadata() {
             Err(e) => {
-                error!("Failed to get metadata for {}: {}; skipping", path.display(), e);
+                error!("Failed to get metadata for {}: {e}; skipping", path.display());
                 return WalkState::Skip;
             }
             Ok(v) => v,
@@ -116,7 +119,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             let bytes = metadata.len();
             let path = path.to_owned();
             if self.file_too_big(bytes) {
-                debug!("Skipping {}: size {} exceeds max size", path.display(), bytes);
+                debug!("Skipping {}: size {bytes} exceeds max size", path.display());
             } else {
                 self.progress.inc(bytes);
                 self.local_files.push(FileResult {
@@ -127,21 +130,30 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         } else if metadata.is_dir() {
             match open_git_repo(path) {
                 Err(e) => {
-                    error!("Failed to open Git repository at {}: {}; skipping", path.display(), e);
+                    error!("Failed to open Git repository at {}: {e}; skipping", path.display());
                     return WalkState::Skip;
                 }
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
-                    let enumerator = GitRepoEnumerator::new(path, &repository);
-                    let blobs = match enumerator.run(&mut self.progress) {
-                        Err(e) => {
-                            error!(
-                                "Failed to enumerate Git repository at {:?}: {}; skipping",
-                                path, e
-                            );
-                            return WalkState::Skip;
+
+                    let blobs = if self.collect_git_metadata {
+                        let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
+                        match enumerator.run(&mut self.progress) {
+                            Err(e) => {
+                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                return WalkState::Skip;
+                            }
+                            Ok(v) => v.blobs,
                         }
-                        Ok(v) => v.blobs,
+                    } else {
+                        let enumerator = GitRepoEnumerator::new(path, &repository);
+                        match enumerator.run(&mut self.progress) {
+                            Err(e) => {
+                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                return WalkState::Skip;
+                            }
+                            Ok(v) => v.blobs,
+                        }
                     };
                     let path = path.to_owned();
                     self.local_git_repos.push(GitRepoResult { path, blobs })
@@ -174,11 +186,14 @@ pub struct FilesystemEnumerator {
     // bug in `ignore` where max filesize is not applied to top-level file inputs, only inputs that
     // appear under a directory.
     max_file_size: Option<u64>,
+
+    collect_git_metadata: bool,
 }
 
 impl FilesystemEnumerator {
     pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
     pub const DEFAULT_FOLLOW_LINKS: bool = false;
+    pub const DEFAULT_COLLECT_GIT_METADATA: bool = true;
 
     /// Create a new `FilesystemEnumerator` with the given set of input roots using default
     /// settings.
@@ -199,6 +214,7 @@ impl FilesystemEnumerator {
         Ok(FilesystemEnumerator {
             walk_builder: builder,
             max_file_size,
+            collect_git_metadata: Self::DEFAULT_COLLECT_GIT_METADATA,
         })
     }
 
@@ -231,6 +247,12 @@ impl FilesystemEnumerator {
         self
     }
 
+    /// Enable or disable whether detailed Git metadata will be collected.
+    pub fn collect_git_metadata(&mut self, collect_git_metadata: bool) -> &mut Self {
+        self.collect_git_metadata = collect_git_metadata;
+        self
+    }
+
     /// Specify an ad-hoc filtering function to control which entries are enumerated.
     ///
     /// This can be used to skip entire directories.
@@ -247,6 +269,7 @@ impl FilesystemEnumerator {
         let git_repos = Mutex::new(Vec::new());
 
         let mut visitor_builder = VisitorBuilder {
+            collect_git_metadata: self.collect_git_metadata,
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,

@@ -210,7 +210,7 @@ impl GlobalArgs {
 }
 
 /// A generic auto/never/always mode value
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum Mode {
     Auto,
     Never,
@@ -393,7 +393,7 @@ pub struct ScanArgs {
 }
 
 /// The mode to use for cloning a Git repository
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum GitCloneMode {
     /// Match the behavior of `git clone --bare`
     Bare,
@@ -419,51 +419,52 @@ impl std::fmt::Display for GitCloneMode {
 #[command(next_help_heading = "Metadata Collection Options")]
 pub struct MetadataArgs {
     /// Specify which blobs will have metadata recorded
-    #[arg(long, default_value_t=BlobMetadataRecordingMode::Matching, value_name="MODE")]
-    pub record_blob_metadata: BlobMetadataRecordingMode,
+    #[arg(long, default_value_t=BlobMetadataMode::Matching, value_name="MODE")]
+    pub blob_metadata: BlobMetadataMode,
 
-    /// Specify which Git metadata will be collected for blobs
-    #[arg(long, default_value_t=GitBlobMetadataMode::FirstSeen, value_name="MODE")]
-    pub git_blob_metadata: GitBlobMetadataMode,
+    /// Specify which Git commit provenance metadata will be collected
+    #[arg(long, default_value_t=GitBlobProvenanceMode::FirstSeen, value_name="MODE")]
+    pub git_blob_provenance: GitBlobProvenanceMode,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum BlobMetadataRecordingMode {
-    /// All encountered blobs
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum BlobMetadataMode {
+    /// Record metadata for all encountered blobs
     All,
 
-    /// Only blobs with matches
+    /// Record metadata only for blobs with matches
     Matching,
 
-    /// No blobs
+    /// Record metadata for no blobs
     None,
 }
 
-impl std::fmt::Display for BlobMetadataRecordingMode {
+impl std::fmt::Display for BlobMetadataMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            BlobMetadataRecordingMode::All => "all",
-            BlobMetadataRecordingMode::Matching => "matching",
-            BlobMetadataRecordingMode::None => "none",
+            BlobMetadataMode::All => "all",
+            BlobMetadataMode::Matching => "matching",
+            BlobMetadataMode::None => "none",
         };
         write!(f, "{s}")
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum GitBlobMetadataMode {
-    /// The set of commits and accompanying pathnames in which a blob first appears
+pub enum GitBlobProvenanceMode {
+    /// The Git repository and set of commits and accompanying pathnames in which a blob first
+    /// appears
     FirstSeen,
 
-    /// No Git metadata about a blob
-    None,
+    /// Only the Git repository in which a blob appears
+    Minimal,
 }
 
-impl std::fmt::Display for GitBlobMetadataMode {
+impl std::fmt::Display for GitBlobProvenanceMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            GitBlobMetadataMode::FirstSeen => "first-seen",
-            GitBlobMetadataMode::None => "none",
+            GitBlobProvenanceMode::FirstSeen => "first-seen",
+            GitBlobProvenanceMode::Minimal => "minimal",
         };
         write!(f, "{s}")
     }
@@ -623,7 +624,7 @@ impl OutputArgs {
 // -----------------------------------------------------------------------------
 // output format
 // -----------------------------------------------------------------------------
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum OutputFormat {
     /// A text-based format designed for humans
     Human,

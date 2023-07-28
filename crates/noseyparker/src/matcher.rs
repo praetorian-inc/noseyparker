@@ -77,6 +77,7 @@ pub struct Matcher<'a> {
     /// The set of blobs that have been seen
     seen_blobs: &'a BlobIdSet,
 
+    /// Data passed to the Vectorscan callback
     user_data: UserData,
 }
 
@@ -117,18 +118,14 @@ impl<'a> Matcher<'a> {
     fn scan_bytes_raw(&mut self, input: &[u8]) -> Result<()> {
         self.user_data.raw_matches_scratch.clear();
         self.user_data.input_len = input.len().try_into().unwrap();
-        self.vs_scanner.scan(input, |id: u32, from: u64, to: u64, _flags: u32| {
+        self.vs_scanner.scan(input, |rule_id: u32, from: u64, to: u64, _flags: u32| {
             // let start_idx = if from == vectorscan_sys::HS_OFFSET_PAST_HORIZON { 0 } else { from };
             //
             // NOTE: `from` is only going to be meaningful here if we start compiling rules
             // with the HS_SOM_LEFTMOST flag. But it doesn't seem to hurt to use the 0-value
             // provided when that flag is not used.
             let start_idx = from.min(self.user_data.input_len);
-            self.user_data.raw_matches_scratch.push(RawMatch {
-                rule_id: id,
-                start_idx,
-                end_idx: to,
-            });
+            self.user_data.raw_matches_scratch.push(RawMatch { rule_id, start_idx, end_idx: to });
             vectorscan::Scan::Continue
         })?;
         Ok(())
@@ -147,7 +144,7 @@ impl<'a> Matcher<'a> {
         // Update local stats
         // -----------------------------------------------------------------------------------------
         self.local_stats.blobs_seen += 1;
-        let nbytes = blob.bytes.len() as u64;
+        let nbytes: u64 = blob.bytes.len().try_into().unwrap();
         self.local_stats.bytes_seen += nbytes;
 
         if !self.seen_blobs.insert(blob.id) {
@@ -196,13 +193,13 @@ impl<'a> Matcher<'a> {
         // suppress overlapping matches in a single pass
         let matches = raw_matches_scratch.iter().rev()
             .filter_map(|&RawMatch{ rule_id, start_idx, end_idx }| {
-                let rule_id = rule_id as usize;
+                let rule_id: usize = rule_id.try_into().unwrap();
 
                 #[cfg(feature = "rule_profiling")]
                 let _rule_profiler = self.local_stats.rule_stats.time_stage2(rule_id);
 
-                let start_idx = start_idx as usize;
-                let end_idx = end_idx as usize;
+                let start_idx: usize = start_idx.try_into().unwrap();
+                let end_idx: usize = end_idx.try_into().unwrap();
                 let rule = &rules[rule_id];
                 let re = &anchored_regexes[rule_id];
                 // second-stage regex match
@@ -216,20 +213,14 @@ impl<'a> Matcher<'a> {
                             error!("\
                                 Regex failed to match where vectorscan did; something is probably odd about the rule:\n\
                                 Blob: {}\n\
-                                Provenance: {:?}\n\
-                                Offsets: [{}..{}]\n\
-                                Rule id: {}\n\
+                                Provenance: {provenance:?}\n\
+                                Offsets: [{start_idx}..{end_idx}]\n\
+                                Rule id: {rule_id}\n\
                                 Rule name: {:?}:\n\
-                                Regex: {:?}:\n\
-                                Snippet: {:?}",
+                                Regex: {re:?}:\n\
+                                Snippet: {cxt:?}",
                                 &blob.id,
-                                provenance,
-                                start_idx,
-                                end_idx,
-                                rule_id,
                                 rule.name,
-                                re,
-                                cxt,
                             );
                         // });
 
@@ -242,14 +233,10 @@ impl<'a> Matcher<'a> {
                 let matching_input_offset_span = OffsetSpan::from_range(matching_input.range());
 
                 // deduplicate overlaps
-                let suppress = match &previous {
-                    None => false,
-                    Some((prev_rule_id, prev_loc)) => {
-                        *prev_rule_id == rule_id && prev_loc.fully_contains(&matching_input_offset_span)
+                if let Some((prev_rule_id, prev_loc)) = previous {
+                    if prev_rule_id == rule_id && prev_loc.fully_contains(&matching_input_offset_span) {
+                        return None
                     }
-                };
-                if suppress {
-                    return None;
                 }
 
                 // Not a duplicate! Turn the RawMatch into a BlobMatch
@@ -262,8 +249,8 @@ impl<'a> Matcher<'a> {
                 };
                 previous = Some((rule_id, matching_input_offset_span));
                 Some(m)
-            });
-        Ok(matches.collect())
+            }).collect();
+        Ok(matches)
     }
 }
 
