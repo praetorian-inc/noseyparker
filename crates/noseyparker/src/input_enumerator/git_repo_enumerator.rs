@@ -214,7 +214,7 @@ impl<'a> GitRepoEnumerator<'a> {
         }
 
         let path = self.path.to_owned();
-        match metadata_graph.repo_metadata(&progress) {
+        match metadata_graph.repo_metadata(progress) {
             Err(e) => {
                 warn!("failed to compute reachable blobs: {e}");
                 let blobs = blobs

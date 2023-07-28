@@ -212,7 +212,7 @@ impl GitMetadataGraph {
             hash_map::Entry::Occupied(e) => {
                 let idx = *e.get();
                 if tree_idx.is_some() {
-                    let mut md = self
+                    let md = self
                         .commits
                         .node_weight_mut(idx)
                         .expect("a commit graph node should exist for given index");
@@ -310,10 +310,7 @@ pub struct RepoMetadata {
 }
 
 impl GitMetadataGraph {
-    pub fn repo_metadata(
-        &self,
-        progress: &Progress,
-    ) -> Result<Vec<RepoMetadata>> {
+    pub fn repo_metadata(&self, progress: &Progress) -> Result<Vec<RepoMetadata>> {
         let t1 = Instant::now();
         let symbols = &self.symbols;
         let cg = &self.commits;
@@ -400,7 +397,8 @@ impl GitMetadataGraph {
 
             // info!("{commit_index}: {out_degree:?} {:?}", worklist.iter().map(|e| e.0).max());
 
-            let mut seen = std::mem::replace(&mut seen_sets[commit_index], None)
+            let mut seen = seen_sets[commit_index]
+                .take()
                 .expect("should have a seen set");
             assert!(num_live_seen_sets > 0);
             num_live_seen_sets -= 1;
@@ -477,10 +475,10 @@ impl GitMetadataGraph {
                 }
 
                 // If the child node has no unvisited parents, add it to the worklist
-                if let None = cg
+                if cg
                     .edges_directed(child_idx, Incoming)
-                    .filter(|edge| !visited_edges.contains(edge.id().index()))
-                    .next()
+                    .find(|edge| !visited_edges.contains(edge.id().index()))
+                    .is_none()
                 {
                     worklist.push((commit_out_degree(child_idx)?, child_idx));
                 }
