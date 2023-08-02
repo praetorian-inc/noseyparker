@@ -31,21 +31,21 @@ struct RawMatch {
 ///
 /// It is mostly made up of references and small data.
 /// For a representation that is more friendly for human consumption, see `Match`.
-pub struct BlobMatch<'r, 'b> {
+pub struct BlobMatch<'a> {
     /// The rule that was matched
-    pub rule: &'r Rule,
+    pub rule: &'a Rule,
 
     /// The blob that was matched
-    pub blob: &'b Blob,
+    pub blob: &'a Blob,
 
     /// The matching input in `blob.input`
-    pub matching_input: &'b [u8],
+    pub matching_input: &'a [u8],
 
     /// The location of the matching input in `blob.input`
     pub matching_input_offset_span: OffsetSpan,
 
     /// The capture groups from the match
-    pub captures: regex::bytes::Captures<'b>,
+    pub captures: regex::bytes::Captures<'a>,
 }
 
 struct UserData {
@@ -139,7 +139,9 @@ impl<'a> Matcher<'a> {
         &mut self,
         blob: &'b Blob,
         provenance: &Provenance,
-    ) -> Result<Vec<BlobMatch<'a, 'b>>> {
+    ) -> Result<Vec<BlobMatch<'b>>>
+        where 'a: 'b
+    {
         // -----------------------------------------------------------------------------------------
         // Update local stats
         // -----------------------------------------------------------------------------------------

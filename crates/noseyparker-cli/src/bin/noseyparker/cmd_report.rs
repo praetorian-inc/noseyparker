@@ -131,22 +131,15 @@ impl Reportable for DetailsReporter {
                     .map(|BlobMetadataMatch { md, m }| {
                         let source_span = &m.location.source_span;
                         // let offset_span = &m.location.offset_span;
-                        let uri = match m.provenance {
-                            Provenance::File { path } => path.display().to_string(),
-                            // FIXME: using this path is nonsense here
-                            // FIXME: rework for the expanded git provenance data
-                            Provenance::GitRepo { repo_path, .. } => repo_path.display().to_string(),
-                        };
 
-                        let mut properties = sarif::PropertyBagBuilder::default();
-                        if let Some(md) = md {
-                            properties.additional_properties([
-                                (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
-                                (String::from("charset"), serde_json::json!(md.charset)),
-                                (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
-                            ]);
-                        }
-                        let properties = properties.build()?;
+                        // FIXME: rework for the expanded git provenance data
+                        let uri = "FIXME: rework for the expanded git provenance data".to_string();
+
+                        let properties = sarif::PropertyBagBuilder::default().additional_properties([
+                            (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
+                            (String::from("charset"), serde_json::json!(md.charset)),
+                            (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
+                        ]).build()?;
 
                         let location = sarif::LocationBuilder::default()
                             .physical_location(
@@ -288,7 +281,8 @@ struct MatchGroup {
 #[derive(Serialize)]
 struct BlobMetadataMatch {
     #[serde(rename = "blob_metadata")]
-    md: Option<BlobMetadata>,
+    md: BlobMetadata,
+
     #[serde(flatten)]
     m: Match,
 }
@@ -359,16 +353,17 @@ impl Display for MatchGroup {
                 "{}",
                 STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
             )?;
-            let blob_metadata = if let Some(md) = md {
+            let blob_metadata = {
                 format!(
                     "{} bytes, {}, {}",
                     md.num_bytes(),
                     md.mime_essence().unwrap_or("unknown type"),
                     md.charset().unwrap_or("unknown charset"),
                 )
-            } else {
-                "metadata missing".to_string()
             };
+
+            // FIXME: rework this for the expanded git provenance data
+            /*
             match &m.provenance {
                 Provenance::File { path } => {
                     writeln!(
@@ -379,7 +374,6 @@ impl Display for MatchGroup {
                         STYLE_METADATA.apply_to(blob_metadata),
                     )?;
                 }
-                // FIXME: rework this for the expanded git provenance data
                 Provenance::GitRepo { repo_path, .. } => {
                     writeln!(
                         f,
@@ -396,6 +390,8 @@ impl Display for MatchGroup {
                     )?;
                 }
             }
+            */
+
             writeln!(f, "{} {}", STYLE_HEADING.apply_to("Lines:"), &m.location.source_span,)?;
             writeln!(f)?;
             writeln!(

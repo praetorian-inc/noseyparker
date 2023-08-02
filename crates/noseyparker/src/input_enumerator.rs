@@ -136,14 +136,14 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
 
-                    let blobs = if self.collect_git_metadata {
+                    if self.collect_git_metadata {
                         let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
                         match enumerator.run(&mut self.progress) {
                             Err(e) => {
                                 error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
                                 return WalkState::Skip;
                             }
-                            Ok(v) => v.blobs,
+                            Ok(r) => self.local_git_repos.push(r),
                         }
                     } else {
                         let enumerator = GitRepoEnumerator::new(path, &repository);
@@ -152,11 +152,9 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                                 error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
                                 return WalkState::Skip;
                             }
-                            Ok(v) => v.blobs,
+                            Ok(r) => self.local_git_repos.push(r),
                         }
-                    };
-                    let path = path.to_owned();
-                    self.local_git_repos.push(GitRepoResult { path, blobs })
+                    }
                 }
                 Ok(None) => {}
             }

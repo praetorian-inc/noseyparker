@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use tracing::{error_span, warn};
 
 use crate::blob_appearance::{BlobAppearance, BlobAppearanceSet};
+use crate::git_commit_metadata::CommitMetadata;
 use crate::git_metadata_graph::GitMetadataGraph;
 use crate::progress::Progress;
 
@@ -75,8 +76,16 @@ fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCount
 // enumeration return types
 // -------------------------------------------------------------------------------------------------
 pub struct GitRepoResult {
+    /// Path to the repository clone
     pub path: PathBuf,
+
+    /// The blobs to be scanned
     pub blobs: Vec<BlobMetadata>,
+
+    /// Finite map from commit ID to metadata
+    ///
+    /// NOTE: this may be incomplete, missing entries for some commits
+    pub commit_metadata: HashMap<ObjectId, CommitMetadata>,
 }
 
 impl GitRepoResult {
@@ -144,6 +153,8 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         let orig_scratch_capacity = 1024 * 1024;
         let mut scratch: Vec<u8> = Vec::with_capacity(orig_scratch_capacity);
 
+        let mut commit_metadata = HashMap::with_capacity_and_hasher(num_commits, Default::default());
+
         for oid in odb
             .iter()
             .context("Failed to iterate object database")?
@@ -173,6 +184,20 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                         let parent_idx = metadata_graph.get_commit_idx(parent_oid, None);
                         metadata_graph.add_commit_edge(parent_idx, commit_idx);
                     }
+
+                    let committer = &commit.committer;
+                    let author = &commit.author;
+                    let md = CommitMetadata {
+                        commit_id: oid,
+                        committer_name: committer.name.to_owned(),
+                        committer_timestamp: committer.time,
+                        committer_email: committer.email.to_owned(),
+                        author_name: author.name.to_owned(),
+                        author_timestamp: author.time,
+                        author_email: author.email.to_owned(),
+                        message: commit.message.to_owned(),
+                    };
+                    commit_metadata.insert(oid, md);
                 }
 
                 Kind::Tree => {
@@ -214,7 +239,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                         first_seen: Default::default(),
                     })
                     .collect();
-                Ok(GitRepoResult { path, blobs })
+                Ok(GitRepoResult { path, blobs, commit_metadata })
             }
             Ok(md) => {
                 // FIXME: apply path-based ignore rules to blobs here, like the filesystem enumerator
@@ -233,7 +258,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                         BlobMetadata { blob_oid, num_bytes, first_seen }
                     })
                     .collect();
-                Ok(GitRepoResult { path, blobs })
+                Ok(GitRepoResult { path, blobs, commit_metadata })
             }
         }
     }
@@ -297,6 +322,6 @@ impl<'a> GitRepoEnumerator<'a> {
                 first_seen: Default::default(),
             })
             .collect();
-        Ok(GitRepoResult { path, blobs })
+        Ok(GitRepoResult { path, blobs, commit_metadata: Default::default() })
     }
 }

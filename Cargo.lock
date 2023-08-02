@@ -2400,6 +2400,7 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "assert_fs",
+ "bstr",
  "clap",
  "console",
  "crossbeam-channel",

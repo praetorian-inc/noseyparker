@@ -8,6 +8,7 @@ use tracing::{debug, debug_span};
 
 use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
+use crate::git_commit_metadata::CommitMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
@@ -55,12 +56,10 @@ impl Datastore {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path)
             .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
-        let root_dir = root_dir.canonicalize()
-            .with_context(|| format!("Failed to canonicalize datastore path at {}", root_dir.display()))?;
-        let mut ds = Self {
-            root_dir,
-            conn,
-        };
+        let root_dir = root_dir.canonicalize().with_context(|| {
+            format!("Failed to canonicalize datastore path at {}", root_dir.display())
+        })?;
+        let mut ds = Self { root_dir, conn };
         ds.migrate()
             .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
 
@@ -110,6 +109,11 @@ impl Datastore {
         self.root_dir.join("clones")
     }
 
+    /// Get the root directory that contains this `Datastore`.
+    pub fn root_dir(&self) -> &Path {
+        &self.root_dir
+    }
+
     /// Get a path for a local clone of the given git URL within this datastore's clones directory.
     pub fn clone_destination(&self, repo: &GitUrl) -> Result<std::path::PathBuf> {
         clone_destination(&self.clones_dir(), repo)
@@ -121,97 +125,166 @@ impl Datastore {
         // self.conn.execute("pragma wal_checkpoint(truncate)", [])?;
         Ok(())
     }
+}
 
-    /// Record the given blob metadata into the datastore.
+// Public implementation, recording functions
+impl Datastore {
+    /// Record the given commit metadata into the datastore.
     ///
     /// The given entries are recorded in a single transaction.
-    pub fn record_blob_metadata<'a, T: IntoIterator<Item = &'a BlobMetadata>>(
+    pub fn record_commit_metadata<T: IntoIterator<Item = CommitMetadata>>(
         &mut self,
-        blob_metadata: T,
+        commit_metadata: T,
     ) -> Result<()> {
-        let _span = debug_span!("Datastore::record_blob_metadata", "{}", self.root_dir.display()).entered();
+        panic!("FIXME: unimplemented");
+    }
+
+    /// Record the given provenance entries into the datastore.
+    ///
+    /// The given entries are recorded in a single transaction.
+    pub fn record_blob_provenance<T: IntoIterator<Item = (BlobId, Provenance)>>(
+        &mut self,
+        blob_provenance: T,
+    ) -> Result<()> {
+        panic!("FIXME: unimplemented");
+
+        /*
+            let mut add_provenance_payload_file = tx.prepare_cached(indoc! {r#"
+                insert or ignore into provenance_payload_file(path)
+                values (?)
+            "#})?;
+
+            let mut add_provenance_payload_git = tx.prepare_cached(indoc! {r#"
+                insert or ignore into provenance_payload_git(repo_path, commit_id, blob_path)
+                values (?, ?, ?)
+            "#})?;
+
+            let mut add_provenance = tx.prepare_cached(indoc! {r#"
+                insert or ignore into provenance(kind, payload_id)
+                values (?, ?)
+            "#})?;
+        */
+    }
+
+    /// Record the given blob metadata entries and matches into the datastore.
+    /// Returns the number of matches added.
+    ///
+    /// The given entries are recorded in a single transaction.
+    pub fn record_metadata_and_matches<I1, I2>(
+        &mut self,
+        blob_metadata: I1,
+        matches: I2,
+    ) -> Result<u64>
+    where
+        I1: IntoIterator<Item = BlobMetadata>,
+        I2: IntoIterator<Item = Match>,
+    {
+        let _span =
+            debug_span!("Datastore::record_metadata_and_matches", "{}", self.root_dir.display())
+                .entered();
 
         let tx = self.conn.transaction()?;
-        {
-            let mut stmt = tx.prepare_cached(indoc! {r#"
-                insert or replace into blob_metadata(blob_id, size, mime_essence, charset)
+
+        let num_added = {
+            let mut add_blob = tx.prepare_cached(indoc! {r#"
+                insert into blob(blob_id, size, mime_essence, charset)
                 values (?, ?, ?, ?)
+                on conflict do update set
+                    mime_essence = excluded.mime_essence,
+                    size = excluded.size,
+                    charset = excluded.charset
+            "#})?;
+
+            let mut get_blob_id = tx.prepare_cached(indoc! {r#"
+                select id from blob where blob_id = ?
+            "#})?;
+
+            let mut contains_match = tx.prepare_cached(indoc! {r#"
+                select * from match
+                where
+                    blob_id = ? and
+                    start_byte = ? and
+                    end_byte = ? and
+                    group_index = ? and
+                    rule_name = ?
+                limit 1
+            "#})?;
+
+            let mut add_match = tx.prepare_cached(indoc! {r#"
+                insert or replace into match(
+                    blob_id,
+                    start_byte,
+                    end_byte,
+                    start_line,
+                    start_column,
+                    end_line,
+                    end_column,
+                    before_snippet,
+                    matching_input,
+                    after_snippet,
+                    group_index,
+                    group_input,
+                    rule_name
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#})?;
 
             for md in blob_metadata {
-                if let Some(first_seen) = &md.first_seen {
-                    if first_seen.len() > 1 {
-                        debug!("{md:#?}");
-                    }
-                }
-                stmt.execute((&md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()))?;
+                add_blob
+                    .execute((md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()))
+                    .context("Failed to add metadata")?;
             }
-        }
+
+            let mut num_added = 0;
+            for m in matches {
+                let span = &m.location.offset_span;
+                let src = &m.location.source_span;
+                let rule_name = &m.rule_name;
+
+                let blob_id: i64 = get_blob_id
+                    .query_row((m.blob_id.hex(),), |row| row.get(0))
+                    .context("Failed to get blob id")?;
+
+                if !contains_match
+                    .exists((&blob_id, span.start, span.end, m.capture_group_index, rule_name))
+                    .context("Failed to check if match exists")?
+                {
+                    num_added += 1;
+                }
+
+                add_match
+                    .execute((
+                        blob_id,
+                        span.start,
+                        span.end,
+                        src.start.line,
+                        src.start.column,
+                        src.end.line,
+                        src.end.column,
+                        m.snippet.before.as_slice(),
+                        m.snippet.matching.as_slice(),
+                        m.snippet.after.as_slice(),
+                        m.capture_group_index,
+                        m.match_content.as_slice(),
+                        rule_name,
+                    ))
+                    .context("Failed to add match")?;
+            }
+            num_added
+        };
 
         tx.commit()?;
-        Ok(())
+        Ok(num_added)
     }
+}
 
-    /// Record the given matches into the datastore.
-    ///
-    /// The given entries are recorded in a single transaction.
-    pub fn record_matches<'a, T: IntoIterator<Item = &'a Match>>(
-        &mut self,
-        matches: T,
-    ) -> Result<usize> {
-        let _span = debug_span!("Datastore::record_matches", "{}", self.root_dir.display()).entered();
-
-        let tx = self.conn.transaction()?;
-        let mut stmt = tx.prepare_cached(indoc! {r#"
-            insert or replace into matches(
-                blob_id,
-                start_byte,
-                end_byte,
-                start_line,
-                start_column,
-                end_line,
-                end_column,
-                before_snippet,
-                matching_input,
-                after_snippet,
-                group_index,
-                group_input,
-                rule_name,
-                provenance_type,
-                provenance
-            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+// Public implementation, querying functions
+impl Datastore {
+    pub fn get_num_matches(&self) -> Result<u64> {
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
+            select count(*) from match
         "#})?;
-        let mut num_changed = 0;
-        for m in matches {
-            let span = &m.location.offset_span;
-            let src = &m.location.source_span;
-            let (ptype, ppath) = match &m.provenance {
-                Provenance::File { path } => ("file", path.to_string_lossy()),
-                // FIXME: use git metadata
-                Provenance::GitRepo { repo_path, .. } => ("git", repo_path.to_string_lossy()),
-            };
-            // FIXME: the number of changed rows is not the number of newly found matches!
-            num_changed += stmt.execute((
-                m.blob_id.hex(),
-                span.start,
-                span.end,
-                src.start.line,
-                src.start.column,
-                src.end.line,
-                src.end.column,
-                m.snippet.before.as_slice(),
-                m.snippet.matching.as_slice(),
-                m.snippet.after.as_slice(),
-                &m.capture_group_index,
-                m.match_content.as_slice(),
-                &m.rule_name,
-                ptype,
-                ppath,
-            ))?;
-        }
-        drop(stmt);
-        tx.commit()?;
-        Ok(num_changed)
+        let num_matches: u64 = stmt.query_row((), |row| row.get(0))?;
+        Ok(num_matches)
     }
 
     /// Summarize all recorded findings.
@@ -222,7 +295,7 @@ impl Datastore {
             select rule_name, count(*) grouped_count, sum(num_matches) total_count
             from (
                 select group_input, rule_name, count(*) num_matches
-                from matches
+                from match
                 group by 1, 2
             )
             group by 1
@@ -242,19 +315,15 @@ impl Datastore {
         Ok(MatchSummary(es))
     }
 
-    /// Get the root directory that contains this `Datastore`.
-    pub fn root_dir(&self) -> &Path {
-        &self.root_dir
-    }
-
     /// Get metadata for all groups of identical matches recorded within this `Datastore`.
     pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
         let _span =
-            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display()).entered();
+            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display())
+                .entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select group_input, rule_name, count(*)
-            from matches
+            from match
             group by 1, 2
             order by 2
         "#})?;
@@ -277,12 +346,13 @@ impl Datastore {
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(Option<BlobMetadata>, Match)>> {
-        let _span = debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
+    ) -> Result<Vec<(BlobMetadata, Match)>> {
+        let _span =
+            debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select
-                m.blob_id,
+                b.blob_id,
                 m.start_byte,
                 m.end_byte,
                 m.start_line,
@@ -293,70 +363,65 @@ impl Datastore {
                 m.matching_input,
                 m.after_snippet,
                 m.group_index,
-                m.provenance_type,
-                m.provenance,
 
                 b.size,
                 b.mime_essence,
                 b.charset
-            from matches m
-            left outer join blob_metadata b on (m.blob_id = b.blob_id)
-            where m.rule_name = ? and m.group_input = ?
+            from match m
+            inner join blob b on (m.blob_id = b.id)
+            where m.group_input = ?1 and m.rule_name = ?2
             order by m.blob_id, m.start_byte, m.end_byte
-            limit ?
+            limit ?3
         "#})?;
 
         let limit: i64 = match limit {
             Some(limit) => limit.try_into().expect("limit should be convertible"),
             None => -1,
         };
-        let entries = stmt.query_map((&metadata.rule_name, metadata.match_content.as_slice(), limit), |row| {
-            let v0: String = row.get(0)?;
-            let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
-            let m = Match {
-                blob_id,
-                location: Location {
-                    offset_span: OffsetSpan {
-                        start: row.get(1)?,
-                        end: row.get(2)?,
-                    },
-                    source_span: SourceSpan {
-                        start: SourcePoint {
-                            line: row.get(3)?,
-                            column: row.get(4)?,
+        let entries = stmt.query_map(
+            (metadata.match_content.as_slice(), &metadata.rule_name, limit),
+            |row| {
+                let v0: String = row.get(0)?;
+                let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
+                let m = Match {
+                    blob_id,
+                    location: Location {
+                        offset_span: OffsetSpan {
+                            start: row.get(1)?,
+                            end: row.get(2)?,
                         },
-                        end: SourcePoint {
-                            line: row.get(5)?,
-                            column: row.get(6)?,
+                        source_span: SourceSpan {
+                            start: SourcePoint {
+                                line: row.get(3)?,
+                                column: row.get(4)?,
+                            },
+                            end: SourcePoint {
+                                line: row.get(5)?,
+                                column: row.get(6)?,
+                            },
                         },
                     },
-                },
-                snippet: Snippet {
-                    before: BString::new(row.get(7)?),
-                    matching: BString::new(row.get(8)?),
-                    after: BString::new(row.get(9)?),
-                },
-                capture_group_index: row.get(10)?,
-                match_content: metadata.match_content.clone(),
-                rule_name: metadata.rule_name.clone(),
-                provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
-                    .expect("provenance value from database should be valid"),
-            };
-            let num_bytes: Option<usize> = row.get(13)?;
-            let mime_essence: Option<String> = row.get(14)?;
-            let charset: Option<String> = row.get(15)?;
-            let first_seen = None;  // FIXME:: use git metadata
-            let b = num_bytes.map(|num_bytes| {
-                BlobMetadata {
+                    snippet: Snippet {
+                        before: BString::new(row.get(7)?),
+                        matching: BString::new(row.get(8)?),
+                        after: BString::new(row.get(9)?),
+                    },
+                    capture_group_index: row.get(10)?,
+                    match_content: metadata.match_content.clone(),
+                    rule_name: metadata.rule_name.clone(),
+                };
+                let num_bytes: usize = row.get(11)?;
+                let mime_essence: Option<String> = row.get(12)?;
+                let charset: Option<String> = row.get(13)?;
+                let b = BlobMetadata {
                     id: blob_id,
                     num_bytes,
                     mime_essence,
                     charset,
-                    first_seen,
-                }
-            });
-            Ok((b, m))
-        })?;
+                };
+                Ok((b, m))
+            },
+        )?;
         let mut es = Vec::new();
         for e in entries {
             es.push(e?);
@@ -364,7 +429,6 @@ impl Datastore {
         Ok(es)
     }
 }
-
 
 // Private implementation
 impl Datastore {
@@ -397,26 +461,129 @@ impl Datastore {
         };
 
         // -----------------------------------------------------------------------------------------
-        // migration 1
+        // migration 3
         // -----------------------------------------------------------------------------------------
         let user_version: u64 = get_user_version()?;
-        if user_version == 0 {
-            let new_user_version = user_version + 1;
-            debug!(
-                "Migrating database schema from version {} to {}",
-                user_version, new_user_version
+        if user_version == 1 || user_version == 2 {
+            bail!(
+                "Datastores from earlier Nosey Parker versions cannot be migrated to \
+                  the new format; rescanning the inputs with a new datastore will be required."
             );
+        }
+        if user_version > 3 {
+            bail!("Unknown schema version {user_version}");
+        }
+
+        if user_version == 0 {
+            let new_user_version = 3;
+            debug!("Migrating database schema from version {user_version} to {new_user_version}");
             tx.execute_batch(indoc! {r#"
-                create table matches
-                -- This table is a fully denormalized representation of the matches found from
-                -- scanning.
-                --
-                -- See the `Match` type in noseyparker for correspondence.
-                --
-                -- Eventually we should refine the database schema, normalizing where appropriate.
-                -- Doing so could allow for better write performance and smaller databases.
+                create table blob
+                -- This table records various bits of metadata about blobs.
                 (
-                    blob_id text not null,
+                    id integer primary key,
+
+                    -- The blob hash, computed a la Git
+                    blob_id text unique not null,
+
+                    -- Size of the blob in bytes
+                    size integer not null,
+
+                    -- Guessed mime type of the blob
+                    mime_essence text,
+
+                    -- Guess charset encoding of the blob
+                    charset text,
+
+                    constraint valid_blob_id check(
+                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
+                    ),
+                    constraint valid_size check(0 <= size)
+                ) strict;
+
+                create table git_commit
+                -- This table records various bits of metadata about Git commits.
+                (
+                    id integer primary key,
+
+                    -- The commit hash
+                    commit_id text unique not null,
+
+                    -- The commit timestamp
+                    commit_date text not null,
+
+                    -- The committer
+                    committer text not null,
+
+                    -- The commit author timestamp
+                    author_date text not null,
+
+                    -- The commit author
+                    author text not null,
+
+                    -- The commit message
+                    message text not null,
+
+                    constraint valid_commit_id check(
+                        length(commit_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', commit_id)
+                    )
+                ) strict;
+
+                create table provenance_payload_file
+                -- This table records provenance information about plain files.
+                (
+                    id integer primary key,
+
+                    -- The filesystem path of the file
+                    path blob unique not null
+                ) strict;
+
+                create table provenance_payload_git
+                -- This table records provenance information about Git commits.
+                (
+                    id integer primary key,
+
+                    -- The filesystem path of the Git repo
+                    repo_path text not null,
+
+                    commit_id integer references git_commit(id),
+
+                    -- The path of the blob within the commit
+                    blob_path blob not null,
+
+                    unique(commit_id, blob_path)
+                ) strict;
+
+                create table provenance
+                -- This table encodes a union of the `provenance_payload_*` tables.
+                (
+                    id integer primary key,
+
+                    kind text not null,
+                    -- The ID of the provenance payload;
+                    -- references one of the `provenance_payload_*` tables depending on `kind`
+                    payload_id integer not null,
+
+                    unique(kind, payload_id),
+
+                    constraint valid_kind check(kind in ('file', 'git'))
+                ) strict;
+
+                create table blob_provenance
+                -- This table records the various ways in which a blob was encountered.
+                (
+                    id integer primary key,
+                    blob_id integer not null references blob(id),
+                    provenance_id integer not null references provenance(id),
+                    unique(blob_id, provenance_id)
+                ) strict;
+
+                create table match
+                -- This table is a representation of the matches found from scanning.
+                --
+                -- See the `noseyparker::match_type::Match` type in noseyparker for correspondence.
+                (
+                    blob_id integer not null references blob(id),
 
                     start_byte integer not null,
                     end_byte integer not null,
@@ -436,14 +603,8 @@ impl Datastore {
 
                     rule_name text not null,
 
-                    provenance_type text not null,
-                    provenance blob not null,
-
-                    -- NOTE: We really want this entire table to have unique values.
-                    --       But checking just these fields ought to be sufficient to ensure that;
-                    --       the remaining fields are either derived from these or are not relevant
-                    --       to match deduping (like provenance).
-                    --       Checking fewer fields should be cheaper than checking _all_ fields.
+                    -- NOTE: Checking just these fields ought to be sufficient to ensure that
+                    --       entries in the table are unique.
                     unique (
                         blob_id,
                         start_byte,
@@ -451,39 +612,10 @@ impl Datastore {
                         group_index,
                         rule_name
                     )
-                );
+                ) strict;
 
                 -- An index to allow quick grouping of equivalent matches
-                create index matches_grouping_index on matches (group_input, rule_name);
-            "#})?;
-            set_user_version(new_user_version)?;
-        }
-
-        // -----------------------------------------------------------------------------------------
-        // migration 2
-        // -----------------------------------------------------------------------------------------
-        let user_version: u64 = get_user_version()?;
-        if user_version == 1 {
-            let new_user_version = user_version + 1;
-            debug!(
-                "Migrating database schema from version {} to {}",
-                user_version, new_user_version
-            );
-
-            tx.execute_batch(indoc! {r#"
-                create table blob_metadata
-                -- This table records various bits of metadata about blobs.
-                (
-                    blob_id text primary key,
-                    size integer not null,
-                    mime_essence text,
-                    charset text,
-
-                    constraint valid_blob_id check(
-                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
-                    ),
-                    constraint valid_size check(0 <= size)
-                );
+                create index match_grouping_index on match (group_input, rule_name);
             "#})?;
             set_user_version(new_user_version)?;
         }
@@ -493,25 +625,9 @@ impl Datastore {
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
-// FIXME: use git metadata
-fn provenance_from_parts(tag: String, path: String) -> Result<Provenance> {
-    match tag.as_str() {
-        "git" => Ok(Provenance::GitRepo {
-            repo_path: PathBuf::from(path),
-            first_seen: Default::default(),
-        }),
-        "file" => Ok(Provenance::File {
-            path: PathBuf::from(path),
-        }),
-        t => bail!("Provenance tag {:?} is invalid", t),
-    }
-}
-
-
 /// Get a path for a local clone of the given git URL underneath `root`.
 fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
     Ok(root.join(repo.to_path_buf()))
@@ -583,7 +699,7 @@ pub struct MatchGroupMetadata {
     pub rule_name: String,
 
     /// The matched content of all the matches in the group
-    #[serde(with="crate::utils::BStringSerde")]
+    #[serde(with = "crate::utils::BStringSerde")]
     pub match_content: BString,
 
     /// The number of matches in the group

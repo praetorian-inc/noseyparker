@@ -9,6 +9,7 @@ pub mod datastore;
 pub mod defaults;
 pub mod digest;
 pub mod git_binary;
+pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 pub mod git_url;
 pub mod github;

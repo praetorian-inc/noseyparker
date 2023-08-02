@@ -34,6 +34,7 @@ vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc
 
 # anyhow = { version = "1.0", features = ["backtrace"] }   # add backtraces to errors -- not sure how expensive this is
 anyhow = { version = "1.0" }
+bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 console = "0.15"
 crossbeam-channel = "0.5"
