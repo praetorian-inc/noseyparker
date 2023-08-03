@@ -21,6 +21,7 @@ pub mod matcher_stats;
 pub use content_guesser;
 pub mod progress;
 pub mod provenance;
+pub mod provenance_set;
 #[cfg(feature = "rule_profiling")]
 pub mod rule_profiling;
 pub mod rules;

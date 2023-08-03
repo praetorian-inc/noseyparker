@@ -6,7 +6,7 @@ use crate::blob::Blob;
 use crate::blob_id_set::BlobIdSet;
 use crate::location::OffsetSpan;
 use crate::matcher_stats::MatcherStats;
-use crate::provenance::Provenance;
+use crate::provenance_set::ProvenanceSet;
 use crate::rules::Rule;
 use crate::rules_database::RulesDatabase;
 
@@ -52,6 +52,7 @@ struct UserData {
     /// A scratch vector for raw matches from Vectorscan, to minimize allocation
     raw_matches_scratch: Vec<RawMatch>,
 
+    /// The length of the input being scanned
     input_len: u64,
 }
 
@@ -114,7 +115,6 @@ impl<'a> Matcher<'a> {
         })
     }
 
-    #[inline]
     fn scan_bytes_raw(&mut self, input: &[u8]) -> Result<()> {
         self.user_data.raw_matches_scratch.clear();
         self.user_data.input_len = input.len().try_into().unwrap();
@@ -133,13 +133,15 @@ impl<'a> Matcher<'a> {
 
     /// Scan a blob.
     ///
-    /// `provenance` is used only for diagnostic purposes if something goes wrong.
-    // #[inline]
+    /// If the blob was already scanned, `None` is returned.
+    /// Otherwise, the matches found within the blob are returned.
+    ///
+    /// NOTE: `provenance` is used only for diagnostic purposes if something goes wrong.
     pub fn scan_blob<'b>(
         &mut self,
         blob: &'b Blob,
-        provenance: &Provenance,
-    ) -> Result<Vec<BlobMatch<'b>>>
+        provenance: &ProvenanceSet,
+    ) -> Result<Option<Vec<BlobMatch<'b>>>>
         where 'a: 'b
     {
         // -----------------------------------------------------------------------------------------
@@ -151,7 +153,7 @@ impl<'a> Matcher<'a> {
 
         if !self.seen_blobs.insert(blob.id) {
             // debug!("Blob {} already seen; skipping", &blob.id);
-            return Ok(Vec::new());
+            return Ok(None);
         }
 
         self.local_stats.blobs_scanned += 1;
@@ -165,7 +167,7 @@ impl<'a> Matcher<'a> {
         let raw_matches_scratch = &mut self.user_data.raw_matches_scratch;
         if raw_matches_scratch.is_empty() {
             // No matches! We can exit early and save work.
-            return Ok(Vec::new());
+            return Ok(Some(Vec::new()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -181,7 +183,6 @@ impl<'a> Matcher<'a> {
         //
         // Also deduplicate overlapping matches with the same rule
         // -----------------------------------------------------------------------------------------
-
         raw_matches_scratch.sort_by_key(|m| {
             debug_assert!(m.start_idx <= m.end_idx);
             (m.rule_id, m.end_idx, m.end_idx - m.start_idx)
@@ -215,13 +216,14 @@ impl<'a> Matcher<'a> {
                             error!("\
                                 Regex failed to match where vectorscan did; something is probably odd about the rule:\n\
                                 Blob: {}\n\
-                                Provenance: {provenance:?}\n\
+                                Provenance: {}\n\
                                 Offsets: [{start_idx}..{end_idx}]\n\
                                 Rule id: {rule_id}\n\
                                 Rule name: {:?}:\n\
                                 Regex: {re:?}:\n\
                                 Snippet: {cxt:?}",
                                 &blob.id,
+                                provenance.first(),
                                 rule.name,
                             );
                         // });
@@ -252,7 +254,7 @@ impl<'a> Matcher<'a> {
                 previous = Some((rule_id, matching_input_offset_span));
                 Some(m)
             }).collect();
-        Ok(matches)
+        Ok(Some(matches))
     }
 }
 

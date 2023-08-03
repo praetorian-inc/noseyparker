@@ -174,7 +174,6 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
                 Kind::Commit => {
                     let commit = unwrap_or_continue!(odb.find_commit(oid, &mut scratch), |e| {
-                        // NOTE: resolution of this will improve things: https://github.com/Byron/gitoxide/issues/950
                         warn!("Failed to find commit {oid}: {e}");
                     });
 

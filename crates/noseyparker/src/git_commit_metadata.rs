@@ -2,7 +2,7 @@ use bstr::BString;
 use gix::ObjectId;
 use gix::date::Time;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, PartialEq, Eq, Hash)]
 pub struct CommitMetadata {
     pub commit_id: ObjectId,
 
