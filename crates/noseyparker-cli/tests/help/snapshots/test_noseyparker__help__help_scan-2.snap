@@ -129,12 +129,26 @@ Content Filtering Options:
           
           This option can be repeated.
 
-      --record-all-blobs <BOOL>
-          Enable or disable metadata recording for all discovered blobs instead of just those with
-          matches
+Metadata Collection Options:
+      --blob-metadata <MODE>
+          Specify which blobs will have metadata recorded
           
-          [default: false]
-          [possible values: true, false]
+          [default: matching]
+
+          Possible values:
+          - all:      Record metadata for all encountered blobs
+          - matching: Record metadata only for blobs with matches
+          - none:     Record metadata for no blobs
+
+      --git-blob-provenance <MODE>
+          Specify which Git commit provenance metadata will be collected
+          
+          [default: first-seen]
+
+          Possible values:
+          - first-seen: The Git repository and set of commits and accompanying pathnames in which a blob first
+            appears
+          - minimal:    Only the Git repository in which a blob appears
 
 Global Options:
   -v, --verbose...

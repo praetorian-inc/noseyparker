@@ -138,7 +138,8 @@ fn scan_secrets1() {
 
     with_settings!({
         filters => vec![
-            (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>")
+            (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>"),
+            (r"(?m)^(\s*Blob: ).*$", r"$1 <BLOB>"),
         ],
     }, {
         assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath()));
@@ -148,6 +149,6 @@ fn scan_secrets1() {
     let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
     let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
     assert_json_snapshot!(json_output, {
-        "[].matches[].provenance.path" => "<ROOT>/input.txt"
+        "[].matches[].provenance[].path" => "<ROOT>/input.txt"
     });
 }
