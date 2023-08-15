@@ -18,7 +18,7 @@ publish = false
 # Used for cargo-instruments: https://github.com/cmyr/cargo-instruments
 # debug = true
 # split-debuginfo = "packed"
-# lto = "thin"
+lto = "thin"
 opt-level = 3  # default for release profile
 
 # Insta benefits from being compiled in release mode, even as dev dependency.

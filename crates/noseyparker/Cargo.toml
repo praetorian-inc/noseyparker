@@ -31,11 +31,8 @@ content_guesser = { path = "../content-guesser" }
 fixedbitset = "0.4"
 gix = { version = "0.51", features = ["max-performance", "serde"] }
 
-# # XXX gix debugging
-# gix = { version = "0.50", default_features = false, features = [] }
-# gix-features = { version = "0.32", features = ["parallel"] }
-# XXX want verbose-object-parsing-errors in debug mode
-gix-object = { version = "0.33", features = ["verbose-object-parsing-errors"] }
+# XXX enable this if you want verbose-object-parsing-errors for debugging gix parsing errors
+# gix-object = { version = "0.33", features = ["verbose-object-parsing-errors"] }
 
 hex = "0.4"
 hyperx = "1.4"
