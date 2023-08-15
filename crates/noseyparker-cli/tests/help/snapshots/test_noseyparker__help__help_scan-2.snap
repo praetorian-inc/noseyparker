@@ -146,9 +146,9 @@ Metadata Collection Options:
           [default: first-seen]
 
           Possible values:
-          - first-seen: The Git repository and set of commits and accompanying pathnames in which a blob first
-            appears
-          - minimal:    Only the Git repository in which a blob appears
+          - first-seen: The Git repository and set of commits and accompanying pathnames in which a
+            blob is first seen
+          - minimal:    Only the Git repository in which a blob is seen
 
 Global Options:
   -v, --verbose...

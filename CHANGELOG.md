@@ -48,6 +48,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   This newly-collected metadata is included in output of the `report` command.
 
 ### Changes
+- The datastore schema has been changed in an incompatible way such that migrating existing datastores to the new version is not possible.
+  This was necessary to support the significantly increased metadata that is now collected when scanning.
+  Datastores from earlier releases of Nosey Parker cannot be used with this release; instead, the inputs will have to be rescanned with a new datastore.
+
+- The JSON and JSONL output formats for the `report` command have changed slightly.
+  In particular, the `.matches[].provenance` field is now an array of objects instead of a single object, making it possible to handle situations where a blob is discovered multiple ways.
+  The `provenenance` objects have some renamed fields, and contain significantly more metadata than before.
+
+
 - Existing rules were modified to reduce both false positives and false negatives:
 
   - Generic Password (double quoted)
@@ -64,13 +73,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Scanning performance has been improved on particular workloads by as much as 2x by recording matches to the datastore in larger batches.
   This is particularly relevant to heavy multithreaded scanning workloads where the inputs have many matches.
 
-- The JSON and JSONL output formats for the `report` command have changed slightly.
-  In particular, the `.matches[].provenance` field is now an array of objects instead of a single object, making it possible to handle situations where a blob is discovered multiple ways.
-  The `provenenance` objects have some renamed fields, and contain significantly more metadata than before.
-
 ### Fixes
 - Python is no longer required as a build-time dependency for `vectorscan-sys`.
+
 - A typo was fixed in the Okta API Key rule that caused it to truncate the secret.
+
+- The `scan` command now correctly reports the number of newly-seen matches when reusing an existing datastore.
 
 
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)

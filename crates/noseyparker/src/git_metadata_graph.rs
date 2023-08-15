@@ -317,6 +317,10 @@ impl GitMetadataGraph {
         let tbg = &self.trees_and_blobs;
         let num_commits = cg.node_count();
 
+        // The set of seen trees and blobs. This has an entry for _each_ commit, though at runtime,
+        // not all of these seen sets will be "live".
+        //
+        // FIXME: merge this data structure with the `worklist` priority queue; See https://docs.rs/priority-queue; this allows O(1) updates of items in the queue
         let mut seen_sets: Vec<Option<SeenTreeBlobSet>> = vec![None; num_commits];
 
         let mut blobs_introduced: Vec<Vec<(ObjectId, BString)>> = vec![Vec::new(); num_commits];

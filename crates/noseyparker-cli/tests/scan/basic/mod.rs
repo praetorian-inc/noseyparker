@@ -40,7 +40,7 @@ fn scan_emptyfile() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file("empty_file");
     noseyparker_success!("scan", "--datastore", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("0B", 1, 0, 0));
+        .stdout(match_scan_stats("0 B", 1, 0, 0));
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn scan_emptyfiles() {
     let input1 = scan_env.input_file("empty_file1");
     let input2 = scan_env.input_file("empty_file2");
     noseyparker_success!("scan", "--datastore", scan_env.dspath(), input1.path(), input2.path())
-        .stdout(match_scan_stats("0B", 2, 0, 0));
+        .stdout(match_scan_stats("0 B", 2, 0, 0));
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn scan_secrets1() {
     let input = scan_env.input_file_with_secret("input.txt");
 
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("81B", 1, 1, 1));
+        .stdout(match_scan_stats("81 B", 1, 1, 1));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", scan_env.dspath()));
 

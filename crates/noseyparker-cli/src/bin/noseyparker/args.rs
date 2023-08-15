@@ -452,11 +452,11 @@ impl std::fmt::Display for BlobMetadataMode {
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum GitBlobProvenanceMode {
-    /// The Git repository and set of commits and accompanying pathnames in which a blob first
-    /// appears
+    /// The Git repository and set of commits and accompanying pathnames in which a blob is first
+    /// seen
     FirstSeen,
 
-    /// Only the Git repository in which a blob appears
+    /// Only the Git repository in which a blob is seen
     Minimal,
 }
 
