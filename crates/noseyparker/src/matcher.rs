@@ -248,7 +248,7 @@ impl<'a> Matcher<'a> {
                     rule,
                     blob,
                     matching_input: matching_input.as_bytes(),
-                    matching_input_offset_span: matching_input_offset_span.clone(),
+                    matching_input_offset_span,
                     captures,
                 };
                 previous = Some((rule_id, matching_input_offset_span));

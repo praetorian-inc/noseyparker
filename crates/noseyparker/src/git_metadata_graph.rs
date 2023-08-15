@@ -475,10 +475,9 @@ impl GitMetadataGraph {
                 }
 
                 // If the child node has no unvisited parents, add it to the worklist
-                if cg
+                if !cg
                     .edges_directed(child_idx, Incoming)
-                    .find(|edge| !visited_edges.contains(edge.id().index()))
-                    .is_none()
+                    .any(|edge| !visited_edges.contains(edge.id().index()))
                 {
                     worklist.push((commit_out_degree(child_idx)?, child_idx));
                 }

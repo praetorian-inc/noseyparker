@@ -10,6 +10,7 @@ use crate::git_commit_metadata::CommitMetadata;
 /// `Provenance` indicates where a particular blob or match was found when scanning.
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case", tag = "kind")]
+#[allow(clippy::large_enum_variant)]
 pub enum Provenance {
     File(FileProvenance),
     GitRepo(GitRepoProvenance),

@@ -66,6 +66,7 @@ impl ProvenanceSet {
         &self.provenance
     }
 
+    #[allow(clippy::len_without_is_empty)]
     #[inline]
     pub fn len(&self) -> usize {
         1 + self.more_provenance.len()
@@ -76,6 +77,7 @@ impl ProvenanceSet {
         std::iter::once(&self.provenance).chain(&self.more_provenance)
     }
 
+    #[allow(clippy::should_implement_trait)]
     #[inline]
     pub fn into_iter(self) -> impl IntoIterator<Item = Provenance> {
         std::iter::once(self.provenance).chain(self.more_provenance)

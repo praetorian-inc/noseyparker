@@ -384,7 +384,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 &send_ds,
                 args.snippet_length,
                 args.metadata_args.blob_metadata,
-                &progress,
+                progress,
             )?;
 
             Ok(())
@@ -488,7 +488,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         &send_ds,
                         args.snippet_length,
                         args.metadata_args.blob_metadata,
-                        &progress,
+                        progress,
                     )?;
 
                     Ok(())
@@ -642,7 +642,7 @@ fn run_matcher(
                     charset: None,
                 },
                 _ => {
-                    let md = MetadataResult::from_blob_and_provenance(&guesser, &blob, &provenance);
+                    let md = MetadataResult::from_blob_and_provenance(guesser, &blob, &provenance);
                     BlobMetadata {
                         id: blob.id,
                         num_bytes: blob.len(),
@@ -667,8 +667,7 @@ fn run_matcher(
                     new_matches.extend(
                         matches
                             .iter()
-                            .map(|m| Match::convert(&loc_mapping, m, snippet_length))
-                            .flatten(),
+                            .flat_map(|m| Match::convert(&loc_mapping, m, snippet_length))
                     );
                     new_matches
                 }
