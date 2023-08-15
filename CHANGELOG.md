@@ -44,7 +44,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   This newly-collected metadata is included in output of the `report` command.
 
-
 ### Changes
 - Existing rules were modified to reduce both false positives and false negatives:
 
@@ -62,6 +61,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Scanning performance has been improved on particular workloads by as much as 2x by recording matches to the datastore in larger batches.
   This is particularly relevant to heavy multithreaded scanning workloads where the inputs have many matches.
 
+- The JSON and JSONL output formats for the `report` command have changed slightly.
+  In particular, the `.matches[].provenance` field is now an array of objects instead of a single object, making it possible to handle situations where a blob is discovered multiple ways.
+  The `provenenance` objects have some renamed fields, and contain significantly more metadata than before.
 
 ### Fixes
 - Python is no longer required as a build-time dependency for `vectorscan-sys`.

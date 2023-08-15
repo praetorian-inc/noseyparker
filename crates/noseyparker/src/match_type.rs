@@ -1,10 +1,10 @@
+use bstr::BString;
+
 use crate::blob_id::BlobId;
 use crate::location::{LocationMapping, Location};
 use crate::matcher::BlobMatch;
 use crate::snippet::Snippet;
 use crate::utils::BStringSerde;
-
-use bstr::BString;
 
 // -------------------------------------------------------------------------------------------------
 // Match

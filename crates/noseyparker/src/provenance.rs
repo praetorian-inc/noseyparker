@@ -3,6 +3,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 
 use crate::git_commit_metadata::CommitMetadata;
+use crate::utils::BStringSerde;
 
 // -------------------------------------------------------------------------------------------------
 // Provenance
@@ -91,6 +92,7 @@ pub struct GitRepoProvenance {
 
 /// What is the kind of this commit metadata?
 #[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case", tag = "kind")]
 pub enum CommitKind {
     /// The first commit in which a blob was seen
     FirstSeen,
@@ -131,5 +133,7 @@ impl std::fmt::Display for CommitKind {
 pub struct CommitProvenance {
     pub commit_kind: CommitKind,
     pub commit_metadata: CommitMetadata,
+
+    #[serde(with = "BStringSerde")]
     pub blob_path: BString,
 }
