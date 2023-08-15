@@ -462,11 +462,10 @@ pub enum GitBlobProvenanceMode {
 
 impl std::fmt::Display for GitBlobProvenanceMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            GitBlobProvenanceMode::FirstSeen => "first-seen",
-            GitBlobProvenanceMode::Minimal => "minimal",
-        };
-        write!(f, "{s}")
+        match self {
+            GitBlobProvenanceMode::FirstSeen => write!(f, "first-seen"),
+            GitBlobProvenanceMode::Minimal => write!(f, "minimal"),
+        }
     }
 }
 
