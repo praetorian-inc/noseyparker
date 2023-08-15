@@ -10,7 +10,7 @@ use roaring::RoaringBitmap;
 use smallvec::SmallVec;
 use std::collections::BinaryHeap;
 use std::time::Instant;
-use tracing::{info, warn};
+use tracing::{debug, warn};
 
 use crate::bstring_table::BStringTable;
 use crate::progress::Progress;
@@ -496,7 +496,7 @@ impl GitMetadataGraph {
         assert_eq!(visited_commits.len(), num_commits);
 
         progress.suspend(|| {
-            info!(
+            debug!(
                 "{num_commits_visited} commits visited; \
                   {max_frontier_size} max entries in frontier; \
                   {max_live_seen_sets} max live seen sets; \
