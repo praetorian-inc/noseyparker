@@ -33,14 +33,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode {mirror,bare}` parameter.
 
 - The `scan` command now collects additional metadata about blobs.
-  This metadata includes size in bytes, guessed mime type based on filename extension.
+  This metadata includes size in bytes and guessed mime type based on filename extension.
   Optionally, if the non-default `libmagic` Cargo feature is enabled, the mime type and charset are guessed by passing the content of the blob through `libmagic` (the guts of the `file` command-line program).
-
-  Additionally, for each blob found in Git repository history, the set of commits where it was introduced and the accompanying pathname for the blob is collected ([#16](https://github.com/praetorian-inc/noseyparker/issues/16)).
-  This can be controlled using the new `--git-blob-provenance={first-seen,minimal}` parameter.
 
   By default, all this additional metadata is recorded into the datastore for each blob in which matches are found.
   This can be more precisely controlled using the new `--blob-metadata={all,matching,none}` parameter.
+
+  This newly-collected metadata is included in output of the `report` command.
+
+- The `scan` command now collects additional metadata about blobs found within Git repositories.
+  Specifically, for each blob found in Git repository history, the set of commits where it was introduced and the accompanying pathname for the blob is collected ([#16](https://github.com/praetorian-inc/noseyparker/issues/16)).
+  This is enabled by default, but can be controlled using the new `--git-blob-provenance={first-seen,minimal}` parameter.
 
   This newly-collected metadata is included in output of the `report` command.
 

@@ -92,7 +92,7 @@ pub struct GitRepoProvenance {
 
 /// What is the kind of this commit metadata?
 #[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
-#[serde(rename_all = "snake_case", tag = "kind")]
+#[serde(rename_all = "snake_case")]
 pub enum CommitKind {
     /// The first commit in which a blob was seen
     FirstSeen,
@@ -129,9 +129,11 @@ impl std::fmt::Display for CommitKind {
     }
 }
 
+/// How was a particular Git commit encountered?
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 pub struct CommitProvenance {
     pub commit_kind: CommitKind,
+
     pub commit_metadata: CommitMetadata,
 
     #[serde(with = "BStringSerde")]

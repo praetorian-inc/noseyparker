@@ -76,10 +76,15 @@ impl ProvenanceSet {
     pub fn iter(&self) -> impl Iterator<Item = &Provenance> {
         std::iter::once(&self.provenance).chain(&self.more_provenance)
     }
+}
 
-    #[allow(clippy::should_implement_trait)]
+impl IntoIterator for ProvenanceSet {
+    type Item = Provenance;
+    type IntoIter =
+        std::iter::Chain<std::iter::Once<Provenance>, <Vec<Provenance> as IntoIterator>::IntoIter>;
+
     #[inline]
-    pub fn into_iter(self) -> impl IntoIterator<Item = Provenance> {
+    fn into_iter(self) -> Self::IntoIter {
         std::iter::once(self.provenance).chain(self.more_provenance)
     }
 }

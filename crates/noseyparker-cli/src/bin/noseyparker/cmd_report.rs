@@ -130,57 +130,67 @@ impl Reportable for DetailsReporter {
                 // Will store every match location for the runs.results.location array property
                 let locations: Vec<sarif::Location> = matches
                     .into_iter()
-                    .map(|ReportMatch { ps, md, m }| {
-                        let source_span = &m.location.source_span;
-                        // let offset_span = &m.location.offset_span;
+                    .flat_map(|ReportMatch { ps, md, m }| {
+                        ps.into_iter().map(move |p| {
+                            let source_span = &m.location.source_span;
+                            // let offset_span = &m.location.offset_span;
 
-                        // FIXME: rework for the expanded git provenance data
-                        let uri = "FIXME: rework for the expanded git provenance data".to_string();
+                            let mut properties = sarif::PropertyBagBuilder::default();
+                            properties.additional_properties([
+                                (String::from("blob_metadata"), serde_json::json!(md)),
+                            ]);
 
-                        let properties = sarif::PropertyBagBuilder::default()
-                            .additional_properties([
-                                (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
-                                (String::from("charset"), serde_json::json!(md.charset)),
-                                (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
-                            ])
-                            .build()?;
+                            let uri = match p {
+                                Provenance::File(e) => e.path.to_string_lossy().into_owned(),
+                                Provenance::GitRepo(e) => {
+                                    if let Some(p) = e.commit_provenance {
+                                        properties.additional_properties([
+                                            (String::from("commit_provenance"), serde_json::json!(p)),
+                                        ]);
+                                    }
+                                    e.repo_path.to_string_lossy().into_owned()
+                                }
+                            };
 
-                        let location = sarif::LocationBuilder::default()
-                            .physical_location(
-                                sarif::PhysicalLocationBuilder::default()
-                                    .artifact_location(
-                                        sarif::ArtifactLocationBuilder::default()
-                                            .uri(uri)
-                                            .build()?,
-                                    )
-                                    // .context_region() FIXME: fill this in with location info of surrounding context
-                                    .region(
-                                        sarif::RegionBuilder::default()
-                                            .start_line(source_span.start.line as i64)
-                                            .start_column(source_span.start.column as i64)
-                                            .end_line(source_span.end.line as i64)
-                                            .end_column(source_span.end.column as i64 + 1)
-                                            // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
-                                            /*
-                                            .byte_offset(offset_span.start as i64)
-                                            .byte_length(offset_span.len() as i64)
-                                            */
-                                            .snippet(
-                                                sarif::ArtifactContentBuilder::default()
-                                                    .text(m.snippet.matching.to_string())
-                                                    .build()?,
-                                            )
-                                            .build()?,
-                                    )
-                                    .build()?,
-                            )
-                            .logical_locations([sarif::LogicalLocationBuilder::default()
-                                .kind("blob")
-                                .name(m.blob_id.to_string())
-                                .properties(properties)
-                                .build()?])
-                            .build()?;
-                        Ok(location)
+                            let properties = properties.build()?;
+
+                            let location = sarif::LocationBuilder::default()
+                                .physical_location(
+                                    sarif::PhysicalLocationBuilder::default()
+                                        .artifact_location(
+                                            sarif::ArtifactLocationBuilder::default()
+                                                .uri(uri)
+                                                .build()?,
+                                        )
+                                        // .context_region() FIXME: fill this in with location info of surrounding context
+                                        .region(
+                                            sarif::RegionBuilder::default()
+                                                .start_line(source_span.start.line as i64)
+                                                .start_column(source_span.start.column as i64)
+                                                .end_line(source_span.end.line as i64)
+                                                .end_column(source_span.end.column as i64 + 1)
+                                                // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
+                                                /*
+                                                .byte_offset(offset_span.start as i64)
+                                                .byte_length(offset_span.len() as i64)
+                                                */
+                                                .snippet(
+                                                    sarif::ArtifactContentBuilder::default()
+                                                        .text(m.snippet.matching.to_string())
+                                                        .build()?,
+                                                )
+                                                .build()?,
+                                        )
+                                        .build()?,
+                                )
+                                .logical_locations([sarif::LogicalLocationBuilder::default()
+                                    .kind("blob")
+                                    .name(m.blob_id.to_string())
+                                    .properties(properties)
+                                    .build()?])
+                                .build()?;
+                            Ok(location)
+                        })
                     })
                     .collect::<Result<_>>()?;
 
@@ -390,7 +400,9 @@ impl Display for MatchGroup {
                         if let Some(cs) = &e.commit_provenance {
                             let cmd = &cs.commit_metadata;
                             let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
-                            let ctime = cmd.committer_timestamp.format(time::macros::format_description!("[year]-[month]-[day]"));
+                            let ctime = cmd
+                                .committer_timestamp
+                                .format(time::macros::format_description!("[year]-[month]-[day]"));
                             writeln!(
                                 f,
                                 "{} {} in {}",
@@ -405,18 +417,14 @@ impl Display for MatchGroup {
                                  {}  {} <{}>\n\
                                  {}       {}\n\
                                  {}    {}",
-
                                 STYLE_HEADING.apply_to("Author:"),
                                 cmd.author_name,
                                 cmd.author_email,
-
                                 STYLE_HEADING.apply_to("Committer:"),
                                 cmd.committer_name,
                                 cmd.committer_email,
-
                                 STYLE_HEADING.apply_to("Date:"),
                                 ctime,
-
                                 STYLE_HEADING.apply_to("Summary:"),
                                 msg,
                             )?;
