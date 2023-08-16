@@ -125,7 +125,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
 
-        let _span = error_span!("enuemrate_git_with_metadata", "{}", self.path.display()).entered();
+        let _span = error_span!("enumerate_git_with_metadata", "{}", self.path.display()).entered();
 
         macro_rules! warn {
             ($($arg:expr),*) => {
