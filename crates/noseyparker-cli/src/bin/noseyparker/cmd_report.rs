@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use bstr::{BStr, ByteSlice};
 use indenter::indented;
 use lazy_static::lazy_static;
 use noseyparker::rules::Rules;
@@ -12,6 +13,7 @@ use noseyparker::datastore::{Datastore, MatchGroupMetadata};
 use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
+use noseyparker::provenance_set::ProvenanceSet;
 
 use crate::args::{GlobalArgs, ReportArgs, Reportable};
 
@@ -28,13 +30,13 @@ impl DetailsReporter {
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<BlobMetadataMatch>> {
+    ) -> Result<Vec<ReportMatch>> {
         Ok(self
             .0
             .get_match_group_data(metadata, limit)
             .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
             .into_iter()
-            .map(|(md, m)| BlobMetadataMatch { md, m })
+            .map(|(p, md, m)| ReportMatch { ps: p, md, m })
             .collect())
     }
 }
@@ -128,61 +130,67 @@ impl Reportable for DetailsReporter {
                 // Will store every match location for the runs.results.location array property
                 let locations: Vec<sarif::Location> = matches
                     .into_iter()
-                    .map(|BlobMetadataMatch { md, m }| {
-                        let source_span = &m.location.source_span;
-                        // let offset_span = &m.location.offset_span;
-                        let uri = match m.provenance {
-                            Provenance::File { path } => path.display().to_string(),
-                            // FIXME: using this path is nonsense here
-                            Provenance::GitRepo { path } => path.display().to_string(),
-                        };
+                    .flat_map(|ReportMatch { ps, md, m }| {
+                        ps.into_iter().map(move |p| {
+                            let source_span = &m.location.source_span;
+                            // let offset_span = &m.location.offset_span;
 
-                        let mut properties = sarif::PropertyBagBuilder::default();
-                        if let Some(md) = md {
+                            let mut properties = sarif::PropertyBagBuilder::default();
                             properties.additional_properties([
-                                (String::from("mime_essence"), serde_json::json!(md.mime_essence)),
-                                (String::from("charset"), serde_json::json!(md.charset)),
-                                (String::from("num_bytes"), serde_json::json!(md.num_bytes)),
+                                (String::from("blob_metadata"), serde_json::json!(md)),
                             ]);
-                        }
-                        let properties = properties.build()?;
 
-                        let location = sarif::LocationBuilder::default()
-                            .physical_location(
-                                sarif::PhysicalLocationBuilder::default()
-                                    .artifact_location(
-                                        sarif::ArtifactLocationBuilder::default()
-                                            .uri(uri)
-                                            .build()?,
-                                    )
-                                    // .context_region() FIXME: fill this in with location info of surrounding context
-                                    .region(
-                                        sarif::RegionBuilder::default()
-                                            .start_line(source_span.start.line as i64)
-                                            .start_column(source_span.start.column as i64)
-                                            .end_line(source_span.end.line as i64)
-                                            .end_column(source_span.end.column as i64 + 1)
-                                            // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
-                                            /*
-                                            .byte_offset(offset_span.start as i64)
-                                            .byte_length(offset_span.len() as i64)
-                                            */
-                                            .snippet(
-                                                sarif::ArtifactContentBuilder::default()
-                                                    .text(m.snippet.matching.to_string())
-                                                    .build()?,
-                                            )
-                                            .build()?,
-                                    )
-                                    .build()?,
-                            )
-                            .logical_locations([sarif::LogicalLocationBuilder::default()
-                                .kind("blob")
-                                .name(m.blob_id.to_string())
-                                .properties(properties)
-                                .build()?])
-                            .build()?;
-                        Ok(location)
+                            let uri = match p {
+                                Provenance::File(e) => e.path.to_string_lossy().into_owned(),
+                                Provenance::GitRepo(e) => {
+                                    if let Some(p) = e.commit_provenance {
+                                        properties.additional_properties([
+                                            (String::from("commit_provenance"), serde_json::json!(p)),
+                                        ]);
+                                    }
+                                    e.repo_path.to_string_lossy().into_owned()
+                                }
+                            };
+
+                            let properties = properties.build()?;
+
+                            let location = sarif::LocationBuilder::default()
+                                .physical_location(
+                                    sarif::PhysicalLocationBuilder::default()
+                                        .artifact_location(
+                                            sarif::ArtifactLocationBuilder::default()
+                                                .uri(uri)
+                                                .build()?,
+                                        )
+                                        // .context_region() FIXME: fill this in with location info of surrounding context
+                                        .region(
+                                            sarif::RegionBuilder::default()
+                                                .start_line(source_span.start.line as i64)
+                                                .start_column(source_span.start.column as i64)
+                                                .end_line(source_span.end.line as i64)
+                                                .end_column(source_span.end.column as i64 + 1)
+                                                // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
+                                                /*
+                                                .byte_offset(offset_span.start as i64)
+                                                .byte_length(offset_span.len() as i64)
+                                                */
+                                                .snippet(
+                                                    sarif::ArtifactContentBuilder::default()
+                                                        .text(m.snippet.matching.to_string())
+                                                        .build()?,
+                                                )
+                                                .build()?,
+                                        )
+                                        .build()?,
+                                )
+                                .logical_locations([sarif::LogicalLocationBuilder::default()
+                                    .kind("blob")
+                                    .name(m.blob_id.to_string())
+                                    .properties(properties)
+                                    .build()?])
+                                .build()?;
+                            Ok(location)
+                        })
                     })
                     .collect::<Result<_>>()?;
 
@@ -281,13 +289,17 @@ fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
 struct MatchGroup {
     #[serde(flatten)]
     metadata: MatchGroupMetadata,
-    matches: Vec<BlobMetadataMatch>,
+    matches: Vec<ReportMatch>,
 }
 
 #[derive(Serialize)]
-struct BlobMetadataMatch {
+struct ReportMatch {
+    #[serde(rename = "provenance")]
+    ps: ProvenanceSet,
+
     #[serde(rename = "blob_metadata")]
-    md: Option<BlobMetadata>,
+    md: BlobMetadata,
+
     #[serde(flatten)]
     m: Match,
 }
@@ -351,49 +363,85 @@ impl Display for MatchGroup {
 
         // print matches
         let mut f = indented(f).with_str("    ");
-        for (i, BlobMetadataMatch { md, m }) in self.matches.iter().enumerate() {
+        for (i, ReportMatch { ps, md, m }) in self.matches.iter().enumerate() {
             let i = i + 1;
             writeln!(
                 f,
                 "{}",
                 STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
             )?;
-            let blob_metadata = if let Some(md) = md {
+
+            let blob_metadata = {
                 format!(
                     "{} bytes, {}, {}",
                     md.num_bytes(),
                     md.mime_essence().unwrap_or("unknown type"),
                     md.charset().unwrap_or("unknown charset"),
                 )
-            } else {
-                format!("metadata missing")
             };
-            match &m.provenance {
-                Provenance::File { path } => {
-                    writeln!(
-                        f,
-                        "{} {} ({})",
-                        STYLE_HEADING.apply_to("File:"),
-                        STYLE_METADATA.apply_to(path.display()),
-                        STYLE_METADATA.apply_to(blob_metadata),
-                    )?;
-                }
-                Provenance::GitRepo { path } => {
-                    writeln!(
-                        f,
-                        "{} {}",
-                        STYLE_HEADING.apply_to("Git repo:"),
-                        STYLE_METADATA.apply_to(path.display()),
-                    )?;
-                    writeln!(
-                        f,
-                        "{} {} ({})",
-                        STYLE_HEADING.apply_to("Blob:"),
-                        STYLE_METADATA.apply_to(&m.blob_id),
-                        STYLE_METADATA.apply_to(blob_metadata),
-                    )?;
+
+            for p in ps.iter() {
+                match p {
+                    Provenance::File(e) => {
+                        writeln!(
+                            f,
+                            "{} {}",
+                            STYLE_HEADING.apply_to("File:"),
+                            STYLE_METADATA.apply_to(e.path.display()),
+                        )?;
+                    }
+                    Provenance::GitRepo(e) => {
+                        writeln!(
+                            f,
+                            "{} {}",
+                            STYLE_HEADING.apply_to("Git repo:"),
+                            STYLE_METADATA.apply_to(e.repo_path.display()),
+                        )?;
+                        if let Some(cs) = &e.commit_provenance {
+                            let cmd = &cs.commit_metadata;
+                            let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
+                            let ctime = cmd
+                                .committer_timestamp
+                                .format(time::macros::format_description!("[year]-[month]-[day]"));
+                            writeln!(
+                                f,
+                                "{} {} in {}",
+                                STYLE_HEADING.apply_to("Commit:"),
+                                cs.commit_kind,
+                                STYLE_METADATA.apply_to(cmd.commit_id),
+                            )?;
+                            writeln!(f)?;
+                            writeln!(
+                                indented(&mut f).with_str("    "),
+                                "{}     {} <{}>\n\
+                                 {}  {} <{}>\n\
+                                 {}       {}\n\
+                                 {}    {}",
+                                STYLE_HEADING.apply_to("Author:"),
+                                cmd.author_name,
+                                cmd.author_email,
+                                STYLE_HEADING.apply_to("Committer:"),
+                                cmd.committer_name,
+                                cmd.committer_email,
+                                STYLE_HEADING.apply_to("Date:"),
+                                ctime,
+                                STYLE_HEADING.apply_to("Summary:"),
+                                msg,
+                            )?;
+                            writeln!(f)?;
+                        }
+                    }
                 }
             }
+
+            writeln!(
+                f,
+                "{} {} ({})",
+                STYLE_HEADING.apply_to("Blob:"),
+                STYLE_METADATA.apply_to(&m.blob_id),
+                STYLE_METADATA.apply_to(blob_metadata),
+            )?;
+
             writeln!(f, "{} {}", STYLE_HEADING.apply_to("Lines:"), &m.location.source_span,)?;
             writeln!(f)?;
             writeln!(

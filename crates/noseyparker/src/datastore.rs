@@ -1,17 +1,21 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
-use rusqlite::Connection;
+use rusqlite::{Connection, Transaction};
 use serde::Serialize;
+use std::ffi::OsString;
+use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
 use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
+use crate::git_commit_metadata::CommitMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
-use crate::provenance::Provenance;
+use crate::provenance::{CommitKind, Provenance};
+use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
 // -------------------------------------------------------------------------------------------------
@@ -55,12 +59,10 @@ impl Datastore {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path)
             .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
-        let root_dir = root_dir.canonicalize()
-            .with_context(|| format!("Failed to canonicalize datastore path at {}", root_dir.display()))?;
-        let mut ds = Self {
-            root_dir,
-            conn,
-        };
+        let root_dir = root_dir.canonicalize().with_context(|| {
+            format!("Failed to canonicalize datastore path at {}", root_dir.display())
+        })?;
+        let mut ds = Self { root_dir, conn };
         ds.migrate()
             .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
 
@@ -110,6 +112,11 @@ impl Datastore {
         self.root_dir.join("clones")
     }
 
+    /// Get the root directory that contains this `Datastore`.
+    pub fn root_dir(&self) -> &Path {
+        &self.root_dir
+    }
+
     /// Get a path for a local clone of the given git URL within this datastore's clones directory.
     pub fn clone_destination(&self, repo: &GitUrl) -> Result<std::path::PathBuf> {
         clone_destination(&self.clones_dir(), repo)
@@ -121,44 +128,69 @@ impl Datastore {
         // self.conn.execute("pragma wal_checkpoint(truncate)", [])?;
         Ok(())
     }
+}
 
-    /// Record the given blob metadata into the datastore.
+type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<Match>);
+
+// Public implementation, recording functions
+impl Datastore {
+    /// Record the given data into the datastore.
+    /// Returns the number of matches that were newly added.
     ///
-    /// The given entries are recorded in a single transaction.
-    pub fn record_blob_metadata<'a, T: IntoIterator<Item = &'a BlobMetadata>>(
-        &mut self,
-        blob_metadata: T,
-    ) -> Result<()> {
-        let _span = debug_span!("Datastore::record_blob_metadata", "{}", self.root_dir.display()).entered();
+    /// The given data is recorded in a single transaction.
+    pub fn record(&mut self, batch: &[BatchEntry]) -> Result<u64> {
+        let _span =
+            debug_span!("Datastore::record_metadata_and_matches", "{}", self.root_dir.display())
+                .entered();
 
         let tx = self.conn.transaction()?;
-        {
-            let mut stmt = tx.prepare_cached(indoc! {r#"
-                insert or replace into blob_metadata(blob_id, size, mime_essence, charset)
-                values (?, ?, ?, ?)
-            "#})?;
-
-            for md in blob_metadata {
-                stmt.execute((&md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()))?;
-            }
-        }
-
+        let num_matches_added = Self::record_inner(&tx, batch)?;
         tx.commit()?;
-        Ok(())
+
+        Ok(num_matches_added)
     }
 
-    /// Record the given matches into the datastore.
-    ///
-    /// The given entries are recorded in a single transaction.
-    pub fn record_matches<'a, T: IntoIterator<Item = &'a Match>>(
-        &mut self,
-        matches: T,
-    ) -> Result<usize> {
-        let _span = debug_span!("Datastore::record_matches", "{}", self.root_dir.display()).entered();
+    pub fn record_inner(tx: &Transaction, batch: &[BatchEntry]) -> Result<u64> {
+        let mut add_blob_get_id = tx.prepare_cached(indoc! {r#"
+            insert into blob(blob_id, size, mime_essence, charset)
+            values (?, ?, ?, ?)
+            on conflict do update set
+                size = excluded.size,
+                mime_essence = coalesce(excluded.mime_essence, mime_essence),
+                charset = coalesce(excluded.charset, charset)
+            returning id
+        "#})?;
 
-        let tx = self.conn.transaction()?;
-        let mut stmt = tx.prepare_cached(indoc! {r#"
-            insert or replace into matches(
+        let mut add_git_commit = tx.prepare_cached(indoc! {r#"
+            insert into git_commit(
+                commit_id,
+                commit_date,
+                committer_name,
+                committer_email,
+                author_date,
+                author_name,
+                author_email,
+                message
+            ) values (?, ?, ?, ?, ?, ?, ?, ?)
+            on conflict do nothing
+        "#})?;
+
+        let mut get_git_commit_id = tx.prepare_cached(indoc! {r#"
+            select id from git_commit where commit_id = ?
+        "#})?;
+
+        let mut contains_match = tx.prepare_cached(indoc! {r#"
+            select * from match
+            where
+                blob_id = ? and
+                start_byte = ? and
+                end_byte = ? and
+                group_index = ? and
+                rule_name = ?
+        "#})?;
+
+        let mut add_match = tx.prepare_cached(indoc! {r#"
+            insert or replace into match(
                 blob_id,
                 start_byte,
                 end_byte,
@@ -171,41 +203,177 @@ impl Datastore {
                 after_snippet,
                 group_index,
                 group_input,
-                rule_name,
-                provenance_type,
-                provenance
-            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                rule_name
+            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         "#})?;
-        let mut num_changed = 0;
-        for m in matches {
-            let span = &m.location.offset_span;
-            let src = &m.location.source_span;
-            let (ptype, ppath) = match &m.provenance {
-                Provenance::File { path } => ("file", path.to_string_lossy()),
-                Provenance::GitRepo { path } => ("git", path.to_string_lossy()),
-            };
-            // FIXME: the number of changed rows is not the number of newly found matches!
-            num_changed += stmt.execute((
-                m.blob_id.hex(),
-                span.start,
-                span.end,
-                src.start.line,
-                src.start.column,
-                src.end.line,
-                src.end.column,
-                m.snippet.before.as_slice(),
-                m.snippet.matching.as_slice(),
-                m.snippet.after.as_slice(),
-                &m.capture_group_index,
-                m.match_content.as_slice(),
-                &m.rule_name,
-                ptype,
-                ppath,
-            ))?;
+
+        let mut add_provenance_payload_file = tx.prepare_cached(indoc! {r#"
+            insert into provenance_payload_file(path)
+            values (?)
+            on conflict do nothing
+        "#})?;
+
+        let mut get_provenance_payload_file_id = tx.prepare_cached(indoc! {r#"
+            select id from provenance_payload_file
+            where path = ?
+        "#})?;
+
+        let mut add_provenance_payload_git_repo = tx.prepare_cached(indoc! {r#"
+            insert into provenance_payload_git_repo(repo_path)
+            values (?)
+            on conflict do nothing
+        "#})?;
+
+        let mut get_provenance_payload_git_repo_id = tx.prepare_cached(indoc! {r#"
+            select id from provenance_payload_git_repo
+            where repo_path = ?
+        "#})?;
+
+        let mut add_provenance_payload_git_commit = tx.prepare_cached(indoc! {r#"
+            insert into provenance_payload_git_commit(repo_path, commit_id, blob_path)
+            values (?, ?, ?)
+            on conflict do nothing
+        "#})?;
+
+        let mut get_provenance_payload_git_commit_id = tx.prepare_cached(indoc! {r#"
+            select id from provenance_payload_git_commit
+            where repo_path = ? and commit_id = ? and blob_path = ?
+        "#})?;
+
+        let mut add_provenance = tx.prepare_cached(indoc! {r#"
+            insert into provenance(payload_kind, payload_id)
+            values (?, ?)
+            on conflict do nothing
+        "#})?;
+
+        let mut get_provenance_id = tx.prepare_cached(indoc! {r#"
+            select id from provenance
+            where payload_kind = ? and payload_id = ?
+        "#})?;
+
+        let mut add_provenance_id = tx.prepare_cached(indoc! {r#"
+            insert into blob_provenance(blob_id, provenance_id, kind)
+            values (?, ?, ?)
+            on conflict do nothing
+        "#})?;
+
+        let mut num_matches_added = 0;
+
+        for (ps, md, ms) in batch {
+            // record blob metadata
+            let blob_id: i64 = add_blob_get_id
+                .query_row((md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()), |r| {
+                    r.get(0)
+                })
+                .context("Failed to add blob metadata")?;
+
+            // record provenance
+            for p in ps.iter() {
+                let (provenance_id, kind) = match p {
+                    Provenance::File(e) => {
+                        let path = e.path.as_os_str().as_bytes();
+                        add_provenance_payload_file.execute((&path,))?;
+                        let payload_id: i64 =
+                            get_provenance_payload_file_id.query_row((&path,), |r| r.get(0))?;
+
+                        let params = ("file", payload_id);
+                        add_provenance.execute(params)?;
+                        let provenance_id: i64 =
+                            get_provenance_id.query_row(params, |r| r.get(0))?;
+                        (provenance_id, None)
+                    }
+                    Provenance::GitRepo(e) => {
+                        let repo_path = e.repo_path.as_os_str().as_bytes();
+                        match &e.commit_provenance {
+                            None => {
+                                let params = (repo_path,);
+                                add_provenance_payload_git_repo.execute(params)?;
+                                let payload_id: i64 = get_provenance_payload_git_repo_id
+                                    .query_row(params, |r| r.get(0))?;
+
+                                let params = ("git_repo", payload_id);
+                                add_provenance.execute(params)?;
+                                let provenance_id: i64 =
+                                    get_provenance_id.query_row(params, |r| r.get(0))?;
+                                (provenance_id, None)
+                            }
+                            Some(c) => {
+                                let commit_id = c.commit_metadata.commit_id.to_string();
+                                add_git_commit.execute((
+                                    &commit_id,
+                                    c.commit_metadata.committer_timestamp.seconds,
+                                    c.commit_metadata.committer_name.as_slice(),
+                                    c.commit_metadata.committer_email.as_slice(),
+                                    c.commit_metadata.author_timestamp.seconds,
+                                    c.commit_metadata.author_name.as_slice(),
+                                    c.commit_metadata.author_email.as_slice(),
+                                    c.commit_metadata.message.as_slice(),
+                                ))?;
+                                let commit_id: i64 =
+                                    get_git_commit_id.query_row((&commit_id,), |r| r.get(0))?;
+
+                                let blob_path = c.blob_path.as_slice();
+                                let params = (repo_path, commit_id, blob_path);
+                                add_provenance_payload_git_commit.execute(params)?;
+                                let payload_id: i64 = get_provenance_payload_git_commit_id
+                                    .query_row(params, |r| r.get(0))?;
+
+                                let params = ("git_commit", payload_id);
+                                add_provenance.execute(params)?;
+                                let provenance_id: i64 =
+                                    get_provenance_id.query_row(params, |r| r.get(0))?;
+                                (provenance_id, Some(c.commit_kind))
+                            }
+                        }
+                    }
+                };
+
+                add_provenance_id.execute((blob_id, provenance_id, kind))?;
+            }
+
+            // record matches
+            for m in ms {
+                let bytes = &m.location.offset_span;
+
+                let will_add = !contains_match
+                    .exists((&blob_id, bytes.start, bytes.end, m.capture_group_index, &m.rule_name))
+                    .context("Failed to check if match exists")?;
+                if will_add {
+                    num_matches_added += 1;
+                }
+
+                add_match
+                    .execute((
+                        blob_id,
+                        bytes.start,
+                        bytes.end,
+                        m.location.source_span.start.line,
+                        m.location.source_span.start.column,
+                        m.location.source_span.end.line,
+                        m.location.source_span.end.column,
+                        m.snippet.before.as_slice(),
+                        m.snippet.matching.as_slice(),
+                        m.snippet.after.as_slice(),
+                        m.capture_group_index,
+                        m.match_content.as_slice(),
+                        &m.rule_name,
+                    ))
+                    .context("Failed to add match")?;
+            }
         }
-        drop(stmt);
-        tx.commit()?;
-        Ok(num_changed)
+
+        Ok(num_matches_added)
+    }
+}
+
+// Public implementation, querying functions
+impl Datastore {
+    pub fn get_num_matches(&self) -> Result<u64> {
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
+            select count(*) from match
+        "#})?;
+        let num_matches: u64 = stmt.query_row((), |row| row.get(0))?;
+        Ok(num_matches)
     }
 
     /// Summarize all recorded findings.
@@ -216,7 +384,7 @@ impl Datastore {
             select rule_name, count(*) grouped_count, sum(num_matches) total_count
             from (
                 select group_input, rule_name, count(*) num_matches
-                from matches
+                from match
                 group by 1, 2
             )
             group by 1
@@ -236,19 +404,15 @@ impl Datastore {
         Ok(MatchSummary(es))
     }
 
-    /// Get the root directory that contains this `Datastore`.
-    pub fn root_dir(&self) -> &Path {
-        &self.root_dir
-    }
-
     /// Get metadata for all groups of identical matches recorded within this `Datastore`.
     pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
         let _span =
-            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display()).entered();
+            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display())
+                .entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select group_input, rule_name, count(*)
-            from matches
+            from match
             group by 1, 2
             order by 2
         "#})?;
@@ -271,12 +435,18 @@ impl Datastore {
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(Option<BlobMetadata>, Match)>> {
-        let _span = debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
+    ) -> Result<Vec<(ProvenanceSet, BlobMetadata, Match)>> {
+        let _span =
+            debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
 
-        let mut stmt = self.conn.prepare_cached(indoc! {r#"
+        let match_limit: i64 = match limit {
+            Some(limit) => limit.try_into().expect("limit should be convertible"),
+            None => -1,
+        };
+
+        let mut get_blob_metadata_and_match = self.conn.prepare_cached(indoc! {r#"
             select
-                m.blob_id,
+                b.blob_id,
                 m.start_byte,
                 m.end_byte,
                 m.start_line,
@@ -287,76 +457,197 @@ impl Datastore {
                 m.matching_input,
                 m.after_snippet,
                 m.group_index,
-                m.provenance_type,
-                m.provenance,
 
                 b.size,
                 b.mime_essence,
                 b.charset
-            from matches m
-            left outer join blob_metadata b on (m.blob_id = b.blob_id)
-            where m.rule_name = ? and m.group_input = ?
+            from match m
+            inner join blob b on (m.blob_id = b.id)
+            where m.group_input = ?1 and m.rule_name = ?2
             order by m.blob_id, m.start_byte, m.end_byte
-            limit ?
+            limit ?3
         "#})?;
 
-        let limit: i64 = match limit {
-            Some(limit) => limit.try_into().expect("limit should be convertible"),
-            None => -1,
-        };
-        let entries = stmt.query_map((&metadata.rule_name, metadata.match_content.as_slice(), limit), |row| {
-            let v0: String = row.get(0)?;
-            let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
-            let m = Match {
-                blob_id,
-                location: Location {
-                    offset_span: OffsetSpan {
-                        start: row.get(1)?,
-                        end: row.get(2)?,
-                    },
-                    source_span: SourceSpan {
-                        start: SourcePoint {
-                            line: row.get(3)?,
-                            column: row.get(4)?,
+        let mut get_provenance = self.conn.prepare_cached(indoc! {r#"
+            select distinct p.payload_kind, p.payload_id, bp.kind provenance_kind
+            from
+                blob_provenance bp
+                inner join blob b on (bp.blob_id = b.id)
+                inner join provenance p on (bp.provenance_id = p.id)
+            where b.blob_id = ?
+        "#})?;
+
+        let mut get_provenance_payload_file = self.conn.prepare_cached(indoc! {r#"
+            select path from provenance_payload_file
+            where id = ?
+        "#})?;
+
+        let mut get_provenance_payload_git_repo = self.conn.prepare_cached(indoc! {r#"
+            select repo_path from provenance_payload_git_repo
+            where id = ?
+        "#})?;
+
+        let mut get_provenance_payload_git_commit = self.conn.prepare_cached(indoc! {r#"
+            select repo_path, commit_id, blob_path
+            from provenance_payload_git_commit
+            where id = ?
+        "#})?;
+
+        let mut get_commit_metadata = self.conn.prepare_cached(indoc! {r#"
+            select
+                commit_id,
+                committer_name,
+                committer_email,
+                commit_date,
+                author_name,
+                author_email,
+                author_date,
+                message
+            from git_commit
+            where id = ?
+        "#})?;
+
+        let entries = get_blob_metadata_and_match.query_map(
+            (metadata.match_content.as_slice(), &metadata.rule_name, match_limit),
+            |row| {
+                let v0: String = row.get(0)?;
+                let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
+                let m = Match {
+                    blob_id,
+                    location: Location {
+                        offset_span: OffsetSpan {
+                            start: row.get(1)?,
+                            end: row.get(2)?,
                         },
-                        end: SourcePoint {
-                            line: row.get(5)?,
-                            column: row.get(6)?,
+                        source_span: SourceSpan {
+                            start: SourcePoint {
+                                line: row.get(3)?,
+                                column: row.get(4)?,
+                            },
+                            end: SourcePoint {
+                                line: row.get(5)?,
+                                column: row.get(6)?,
+                            },
                         },
                     },
-                },
-                snippet: Snippet {
-                    before: BString::new(row.get(7)?),
-                    matching: BString::new(row.get(8)?),
-                    after: BString::new(row.get(9)?),
-                },
-                capture_group_index: row.get(10)?,
-                match_content: metadata.match_content.clone(),
-                rule_name: metadata.rule_name.clone(),
-                provenance: provenance_from_parts(row.get(11)?, row.get(12)?)
-                    .expect("provenance value from database should be valid"),
-            };
-            let num_bytes: Option<usize> = row.get(13)?;
-            let mime_essence: Option<String> = row.get(14)?;
-            let charset: Option<String> = row.get(15)?;
-            let b = num_bytes.map(|num_bytes| {
-                BlobMetadata {
+                    snippet: Snippet {
+                        before: BString::new(row.get(7)?),
+                        matching: BString::new(row.get(8)?),
+                        after: BString::new(row.get(9)?),
+                    },
+                    capture_group_index: row.get(10)?,
+                    match_content: metadata.match_content.clone(),
+                    rule_name: metadata.rule_name.clone(),
+                };
+                let num_bytes: usize = row.get(11)?;
+                let mime_essence: Option<String> = row.get(12)?;
+                let charset: Option<String> = row.get(13)?;
+                let b = BlobMetadata {
                     id: blob_id,
                     num_bytes,
                     mime_essence,
                     charset,
-                }
-            });
-            Ok((b, m))
-        })?;
+                };
+                Ok((b, m))
+            },
+        )?;
         let mut es = Vec::new();
         for e in entries {
-            es.push(e?);
+            let (md, m) = e?;
+            let ps = {
+                let ps = get_provenance.query_map((md.id.hex(),), |row| {
+                    let payload_kind = row.get_ref(0)?.as_str()?;
+                    let payload_id: i64 = row.get(1)?;
+                    let provenance_kind: Option<CommitKind> = row.get(2)?;
+                    match payload_kind {
+                        "file" => {
+                            let path: Vec<u8> = get_provenance_payload_file
+                                .query_row((payload_id,), |r| r.get(0))?;
+                            let path = PathBuf::from(OsString::from_vec(path));
+                            Ok(Provenance::from_file(path))
+                        }
+
+                        "git_repo" => {
+                            let path: Vec<u8> = get_provenance_payload_git_repo
+                                .query_row((payload_id,), |r| r.get(0))?;
+                            let path = PathBuf::from(OsString::from_vec(path));
+                            Ok(Provenance::from_git_repo(path))
+                        }
+
+                        "git_commit" => {
+                            let mut rows =
+                                get_provenance_payload_git_commit.query((payload_id,))?;
+                            let row = rows.next()?.expect("FIXME");
+
+                            let repo_path: Vec<u8> = row.get(0)?;
+                            let repo_path = PathBuf::from(OsString::from_vec(repo_path));
+
+                            let commit_id: i64 = row.get(1)?;
+                            let blob_path: Vec<u8> = row.get(2)?;
+                            let blob_path = BString::from(blob_path);
+
+                            let commit_metadata: CommitMetadata = {
+                                let mut rows = get_commit_metadata.query((commit_id,))?;
+                                let row = rows.next()?.expect("FIXME");
+
+                                let get_bstring = |idx: usize| -> rusqlite::Result<BString> {
+                                    Ok(row.get_ref(idx)?.as_bytes()?.into())
+                                };
+
+                                let get_time = |idx: usize| -> rusqlite::Result<gix::date::Time> {
+                                    let epoch_seconds = row.get_ref(idx)?.as_i64()?;
+                                    Ok(gix::date::Time::new(epoch_seconds, 0))
+                                };
+
+                                let commit_id =
+                                    gix::ObjectId::from_hex(row.get_ref(0)?.as_bytes()?)
+                                        .expect("should have valid commit hash");
+                                let committer_name = get_bstring(1)?;
+                                let committer_email = get_bstring(2)?;
+                                let committer_timestamp = get_time(3)?;
+                                let author_name = get_bstring(4)?;
+                                let author_email = get_bstring(5)?;
+                                let author_timestamp = get_time(6)?;
+                                let message = get_bstring(7)?;
+
+                                CommitMetadata {
+                                    commit_id,
+                                    committer_name,
+                                    committer_email,
+                                    committer_timestamp,
+                                    author_name,
+                                    author_email,
+                                    author_timestamp,
+                                    message,
+                                }
+                            };
+
+                            Ok(Provenance::from_git_repo_and_commit_metadata(
+                                repo_path,
+                                provenance_kind.expect("should have a provenance kind"),
+                                commit_metadata,
+                                blob_path,
+                            ))
+                        }
+
+                        _ => {
+                            panic!("unexpected payload kind {payload_kind:?}");
+                        }
+                    }
+                })?;
+                let mut results = Vec::new();
+                for p in ps {
+                    results.push(p?);
+                }
+                ProvenanceSet::try_from_iter(results)
+                    .expect("should have at least 1 provenance entry")
+            };
+
+            es.push((ps, md, m));
         }
         Ok(es)
     }
 }
-
 
 // Private implementation
 impl Datastore {
@@ -389,26 +680,149 @@ impl Datastore {
         };
 
         // -----------------------------------------------------------------------------------------
-        // migration 1
+        // migration 3
         // -----------------------------------------------------------------------------------------
         let user_version: u64 = get_user_version()?;
-        if user_version == 0 {
-            let new_user_version = user_version + 1;
-            debug!(
-                "Migrating database schema from version {} to {}",
-                user_version, new_user_version
+        if user_version == 1 || user_version == 2 {
+            bail!(
+                "Datastores from earlier Nosey Parker versions cannot be migrated to \
+                  the new format; rescanning the inputs with a new datastore will be required."
             );
+        }
+        if user_version > 3 {
+            bail!("Unknown schema version {user_version}");
+        }
+
+        if user_version == 0 {
+            let new_user_version = 3;
+            debug!("Migrating database schema from version {user_version} to {new_user_version}");
             tx.execute_batch(indoc! {r#"
-                create table matches
-                -- This table is a fully denormalized representation of the matches found from
-                -- scanning.
-                --
-                -- See the `Match` type in noseyparker for correspondence.
-                --
-                -- Eventually we should refine the database schema, normalizing where appropriate.
-                -- Doing so could allow for better write performance and smaller databases.
+                create table blob
+                -- This table records various bits of metadata about blobs.
                 (
-                    blob_id text not null,
+                    id integer primary key,
+
+                    -- The blob hash, computed a la Git
+                    blob_id text unique not null,
+
+                    -- Size of the blob in bytes
+                    size integer not null,
+
+                    -- Guessed mime type of the blob
+                    mime_essence text,
+
+                    -- Guess charset encoding of the blob
+                    charset text,
+
+                    constraint valid_blob_id check(
+                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
+                    ),
+                    constraint valid_size check(0 <= size)
+                ) strict;
+
+                create table git_commit
+                -- This table records various bits of metadata about Git commits.
+                (
+                    id integer primary key,
+
+                    -- The commit hash
+                    commit_id text unique not null,
+
+                    -- The commit timestamp, in seconds since the epoch
+                    commit_date integer not null,
+
+                    -- The committer name
+                    committer_name blob not null,
+
+                    -- The committer email
+                    committer_email blob not null,
+
+                    -- The commit author timestamp, in seconds since the epoch
+                    author_date integer not null,
+
+                    -- The commit author
+                    author_name blob not null,
+
+                    -- The commit author
+                    author_email blob not null,
+
+                    -- The commit message
+                    message blob not null,
+
+                    constraint valid_commit_id check(
+                        length(commit_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', commit_id)
+                    )
+                ) strict;
+
+                create table provenance_payload_file
+                -- This table records provenance information about plain files.
+                (
+                    id integer primary key,
+
+                    -- The filesystem path of the file
+                    path blob unique not null
+                ) strict;
+
+                create table provenance_payload_git_commit
+                -- This table records provenance information about Git commits.
+                (
+                    id integer primary key,
+
+                    -- The filesystem path of the Git repo
+                    repo_path blob not null,
+
+                    commit_id integer not null references git_commit(id),
+
+                    -- The path of the blob within the commit
+                    blob_path blob not null,
+
+                    unique(repo_path, commit_id, blob_path)
+                ) strict;
+
+                create table provenance_payload_git_repo
+                -- This table records provenance information about Git repositories.
+                (
+                    id integer primary key,
+
+                    -- The filesystem path of the Git repo
+                    repo_path blob not null,
+
+                    unique(repo_path)
+                ) strict;
+
+                create table provenance
+                -- This table encodes a union of the `provenance_payload_*` tables.
+                (
+                    id integer primary key,
+
+                    payload_kind text not null,
+                    -- The ID of the provenance payload;
+                    -- references one of the `provenance_payload_*` tables depending on `kind`
+                    payload_id integer not null,
+
+                    unique(payload_kind, payload_id),
+
+                    constraint valid_payload_kind check(payload_kind in ('file', 'git_repo', 'git_commit'))
+                ) strict;
+
+                create table blob_provenance
+                -- This table records the various ways in which a blob was encountered.
+                (
+                    id integer primary key,
+                    blob_id integer not null references blob(id),
+                    provenance_id integer not null references provenance(id),
+                    kind text,
+
+                    constraint kind_valid check (kind in ('first_seen', 'last_seen')),
+                    unique(blob_id, provenance_id, kind)
+                ) strict;
+
+                create table match
+                -- This table is a representation of the matches found from scanning.
+                --
+                -- See the `noseyparker::match_type::Match` type in noseyparker for correspondence.
+                (
+                    blob_id integer not null references blob(id),
 
                     start_byte integer not null,
                     end_byte integer not null,
@@ -428,14 +842,8 @@ impl Datastore {
 
                     rule_name text not null,
 
-                    provenance_type text not null,
-                    provenance blob not null,
-
-                    -- NOTE: We really want this entire table to have unique values.
-                    --       But checking just these fields ought to be sufficient to ensure that;
-                    --       the remaining fields are either derived from these or are not relevant
-                    --       to match deduping (like provenance).
-                    --       Checking fewer fields should be cheaper than checking _all_ fields.
+                    -- NOTE: Checking just these fields ought to be sufficient to ensure that
+                    --       entries in the table are unique.
                     unique (
                         blob_id,
                         start_byte,
@@ -443,39 +851,10 @@ impl Datastore {
                         group_index,
                         rule_name
                     )
-                );
+                ) strict;
 
                 -- An index to allow quick grouping of equivalent matches
-                create index matches_grouping_index on matches (group_input, rule_name);
-            "#})?;
-            set_user_version(new_user_version)?;
-        }
-
-        // -----------------------------------------------------------------------------------------
-        // migration 2
-        // -----------------------------------------------------------------------------------------
-        let user_version: u64 = get_user_version()?;
-        if user_version == 1 {
-            let new_user_version = user_version + 1;
-            debug!(
-                "Migrating database schema from version {} to {}",
-                user_version, new_user_version
-            );
-
-            tx.execute_batch(indoc! {r#"
-                create table blob_metadata
-                -- This table records various bits of metadata about blobs.
-                (
-                    blob_id text primary key,
-                    size integer not null,
-                    mime_essence text,
-                    charset text,
-
-                    constraint valid_blob_id check(
-                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
-                    ),
-                    constraint valid_size check(0 <= size)
-                );
+                create index match_grouping_index on match (group_input, rule_name);
             "#})?;
             set_user_version(new_user_version)?;
         }
@@ -485,23 +864,9 @@ impl Datastore {
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
-fn provenance_from_parts(tag: String, path: String) -> Result<Provenance> {
-    match tag.as_str() {
-        "git" => Ok(Provenance::GitRepo {
-            path: PathBuf::from(path),
-        }),
-        "file" => Ok(Provenance::File {
-            path: PathBuf::from(path),
-        }),
-        t => bail!("Provenance tag {:?} is invalid", t),
-    }
-}
-
-
 /// Get a path for a local clone of the given git URL underneath `root`.
 fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
     Ok(root.join(repo.to_path_buf()))
@@ -573,7 +938,7 @@ pub struct MatchGroupMetadata {
     pub rule_name: String,
 
     /// The matched content of all the matches in the group
-    #[serde(with="crate::utils::BStringSerde")]
+    #[serde(with = "crate::utils::BStringSerde")]
     pub match_content: BString,
 
     /// The number of matches in the group

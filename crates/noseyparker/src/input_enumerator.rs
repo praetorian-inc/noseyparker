@@ -1,12 +1,13 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::{debug, error, warn};
 
-use crate::blob_id::BlobId;
-use crate::blob_id_set::BlobIdSet;
 use crate::progress::Progress;
+
+mod git_repo_enumerator;
+pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoWithMetadataEnumerator, GitRepoResult};
 
 pub struct FilesystemEnumeratorResult {
     pub files: Vec<FileResult>,
@@ -26,27 +27,15 @@ pub struct FileResult {
     pub num_bytes: u64,
 }
 
-pub struct GitRepoResult {
-    pub path: PathBuf,
-    pub blobs: Vec<(BlobId, u64)>,
-}
-
-impl GitRepoResult {
-    pub fn total_blob_bytes(&self) -> u64 {
-        self.blobs.iter().map(|t| t.1).sum()
-    }
-
-    pub fn num_blobs(&self) -> u64 {
-        self.blobs.len() as u64
-    }
-}
-
+// -------------------------------------------------------------------------------------------------
+// VisitorBuilder
+// -------------------------------------------------------------------------------------------------
 struct VisitorBuilder<'t> {
     max_file_size: Option<u64>,
+    collect_git_metadata: bool,
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
-    seen_blobs: &'t BlobIdSet,
 
     progress: Progress,
 }
@@ -58,18 +47,22 @@ where
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(Visitor {
             max_file_size: self.max_file_size,
+            collect_git_metadata: self.collect_git_metadata,
             local_files: Vec::new(),
             local_git_repos: Vec::new(),
             global_files: self.global_files,
             global_git_repos: self.global_git_repos,
-            seen_blobs: self.seen_blobs,
 
             progress: self.progress.clone(),
         })
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+// Visitor
+// -------------------------------------------------------------------------------------------------
 struct Visitor<'t> {
+    collect_git_metadata: bool,
     max_file_size: Option<u64>,
 
     local_files: Vec<FileResult>,
@@ -77,8 +70,6 @@ struct Visitor<'t> {
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
-
-    seen_blobs: &'t BlobIdSet,
 
     progress: Progress,
 }
@@ -118,7 +109,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         let path = entry.path();
         let metadata = match entry.metadata() {
             Err(e) => {
-                error!("Failed to get metadata for {}: {}; skipping", path.display(), e);
+                error!("Failed to get metadata for {}: {e}; skipping", path.display());
                 return WalkState::Skip;
             }
             Ok(v) => v,
@@ -128,7 +119,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             let bytes = metadata.len();
             let path = path.to_owned();
             if self.file_too_big(bytes) {
-                debug!("Skipping {}: size {} exceeds max size", path.display(), bytes);
+                debug!("Skipping {}: size {bytes} exceeds max size", path.display());
             } else {
                 self.progress.inc(bytes);
                 self.local_files.push(FileResult {
@@ -139,24 +130,31 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         } else if metadata.is_dir() {
             match open_git_repo(path) {
                 Err(e) => {
-                    error!("Failed to open Git repository at {}: {}; skipping", path.display(), e);
+                    error!("Failed to open Git repository at {}: {e}; skipping", path.display());
                     return WalkState::Skip;
                 }
                 Ok(Some(repository)) => {
                     debug!("Found Git repo at {}", path.display());
-                    let enumerator = GitRepoEnumerator::new(&repository);
-                    let blobs = match enumerator.run(self.seen_blobs, &mut self.progress) {
-                        Err(e) => {
-                            error!(
-                                "Failed to enumerate Git repository at {:?}: {}; skipping",
-                                path, e
-                            );
-                            return WalkState::Skip;
+
+                    if self.collect_git_metadata {
+                        let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
+                        match enumerator.run(&mut self.progress) {
+                            Err(e) => {
+                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                return WalkState::Skip;
+                            }
+                            Ok(r) => self.local_git_repos.push(r),
                         }
-                        Ok(v) => v.blobs,
-                    };
-                    let path = path.to_owned();
-                    self.local_git_repos.push(GitRepoResult { path, blobs })
+                    } else {
+                        let enumerator = GitRepoEnumerator::new(path, &repository);
+                        match enumerator.run(&mut self.progress) {
+                            Err(e) => {
+                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                return WalkState::Skip;
+                            }
+                            Ok(r) => self.local_git_repos.push(r),
+                        }
+                    }
                 }
                 Ok(None) => {}
             }
@@ -186,11 +184,14 @@ pub struct FilesystemEnumerator {
     // bug in `ignore` where max filesize is not applied to top-level file inputs, only inputs that
     // appear under a directory.
     max_file_size: Option<u64>,
+
+    collect_git_metadata: bool,
 }
 
 impl FilesystemEnumerator {
     pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
     pub const DEFAULT_FOLLOW_LINKS: bool = false;
+    pub const DEFAULT_COLLECT_GIT_METADATA: bool = true;
 
     /// Create a new `FilesystemEnumerator` with the given set of input roots using default
     /// settings.
@@ -211,6 +212,7 @@ impl FilesystemEnumerator {
         Ok(FilesystemEnumerator {
             walk_builder: builder,
             max_file_size,
+            collect_git_metadata: Self::DEFAULT_COLLECT_GIT_METADATA,
         })
     }
 
@@ -243,6 +245,12 @@ impl FilesystemEnumerator {
         self
     }
 
+    /// Enable or disable whether detailed Git metadata will be collected.
+    pub fn collect_git_metadata(&mut self, collect_git_metadata: bool) -> &mut Self {
+        self.collect_git_metadata = collect_git_metadata;
+        self
+    }
+
     /// Specify an ad-hoc filtering function to control which entries are enumerated.
     ///
     /// This can be used to skip entire directories.
@@ -257,13 +265,12 @@ impl FilesystemEnumerator {
     pub fn run(&self, progress: &Progress) -> Result<FilesystemEnumeratorResult> {
         let files = Mutex::new(Vec::new());
         let git_repos = Mutex::new(Vec::new());
-        let seen_blobs = BlobIdSet::new();
 
         let mut visitor_builder = VisitorBuilder {
+            collect_git_metadata: self.collect_git_metadata,
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,
-            seen_blobs: &seen_blobs,
             progress: progress.clone(),
         };
 
@@ -285,54 +292,5 @@ pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
         Err(gix::open::Error::NotARepository { .. }) => Ok(None),
         Err(err) => Err(err.into()),
         Ok(repo) => Ok(Some(repo)),
-    }
-}
-
-pub struct GitRepoEnumeratorResult {
-    pub blobs: Vec<(BlobId, u64)>,
-}
-
-pub struct GitRepoEnumerator<'a> {
-    repo: &'a gix::Repository,
-}
-
-impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(repo: &'a gix::Repository) -> Self {
-        GitRepoEnumerator { repo }
-    }
-
-    pub fn run(
-        &self,
-        seen_blobs: &BlobIdSet,
-        progress: &mut Progress,
-    ) -> Result<GitRepoEnumeratorResult> {
-        use gix::prelude::HeaderExt;
-
-        let mut blobs: Vec<(BlobId, u64)> = Vec::with_capacity(1024 * 1024);
-
-        let odb = &self.repo.objects;
-        for oid in odb
-            .iter()
-            .context("failed to iterate object database")?
-            .with_ordering(
-                gix::odb::store::iter::Ordering::PackAscendingOffsetThenLooseLexicographical,
-            )
-        {
-            let oid = oid.context("failed to read oid")?;
-            let blob_id = BlobId::from(&oid);
-            if !seen_blobs.insert(blob_id) {
-                continue;
-            }
-            let hdr = odb
-                .header(oid)
-                .with_context(|| format!("Failed to read object header {oid}"))?;
-            if hdr.kind() == gix::object::Kind::Blob {
-                let obj_size = hdr.size();
-                progress.inc(obj_size);
-                blobs.push((blob_id, obj_size));
-            }
-        }
-
-        Ok(GitRepoEnumeratorResult { blobs })
     }
 }

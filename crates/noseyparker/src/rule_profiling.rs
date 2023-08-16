@@ -10,6 +10,7 @@ pub struct RuleProfile {
 }
 
 impl RuleProfile {
+    /// Update this rule profile by combining it with the contents of another one.
     pub fn update(&mut self, other: &Self) {
         if other.raw_match_counts.len() >= self.raw_match_counts.len() {
             self.raw_match_counts.resize(other.raw_match_counts.len(), 0);
@@ -34,11 +35,13 @@ impl RuleProfile {
         }
     }
 
+    #[inline]
     pub fn increment_match_count(&mut self, rule_id: usize, count: u64) {
         self.resize_to_fit(rule_id);
         self.raw_match_counts[rule_id] += count;
     }
 
+    #[inline]
     pub fn increment_stage2_duration(&mut self, rule_id: usize, duration: Duration) {
         self.resize_to_fit(rule_id);
         self.stage2_durations[rule_id] += duration;
@@ -56,6 +59,7 @@ impl RuleProfile {
             .collect()
     }
 
+    #[inline]
     pub fn time_stage2(&mut self, rule_id: usize) -> RuleStage2Timer<'_> {
         RuleStage2Timer::new(self, rule_id)
     }
@@ -66,8 +70,15 @@ impl RuleProfile {
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug)]
 pub struct RuleProfileEntry {
+    /// The rule ID this entry corresponds to
     pub rule_id: usize,
+
+    /// How many raw matches for this rule were produced by the first stage of matching using
+    /// Vectorscan?
     pub raw_match_count: u64,
+
+    /// How much wall clock time was consumed when evaluating this rule in the second stage of
+    /// matching using `regex`?
     pub stage2_duration: Duration,
 }
 
@@ -82,6 +93,7 @@ pub struct RuleStage2Timer<'a> {
 }
 
 impl <'a> RuleStage2Timer<'a> {
+    #[inline]
     pub fn new(rule_stats: &'a mut RuleProfile, rule_id: usize) -> Self {
         RuleStage2Timer {
             rule_id,
@@ -92,6 +104,7 @@ impl <'a> RuleStage2Timer<'a> {
 }
 
 impl <'a> Drop for RuleStage2Timer<'a> {
+    #[inline]
     fn drop(&mut self) {
         self.rule_stats.increment_stage2_duration(self.rule_id, self.start_time.elapsed());
     }

@@ -13,4 +13,6 @@ mod snippet_length;
 // TODO: add test for scanning with `--git-clone-mode bare` and `--git-clone-mode mirror`
 // TODO: add test for scanning with `--github-api-url`
 // TODO: add tests for SARIF output format
+
 // TODO: add tests for blob metadata recording
+// TODO: add tests for rerunning with changing `--blob-metadata` and `--git-blob-provenance` options

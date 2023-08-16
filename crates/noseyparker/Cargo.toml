@@ -24,10 +24,16 @@ libmagic = ["content_guesser/libmagic"]
 anyhow = { version = "1.0" }
 atoi = "2.0"
 bstr = { version = "1.0", features = ["serde"] }
+# bumpalo = { version = "3.13", features = ["collections"] }
 chrono = { version = "0.4", default_features = false, features = ["std"] }
 console = "0.15"
 content_guesser = { path = "../content-guesser" }
-gix = { version = "0.47", features = ["max-performance"] }
+fixedbitset = "0.4"
+gix = { version = "0.51", features = ["max-performance", "serde"] }
+
+# XXX enable this if you want verbose-object-parsing-errors for debugging gix parsing errors
+# gix-object = { version = "0.33", features = ["verbose-object-parsing-errors"] }
+
 hex = "0.4"
 hyperx = "1.4"
 include_dir = { version = "0.7", features = ["glob"] }
@@ -37,12 +43,15 @@ indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
 mime = "0.3"
+petgraph = "0.6"
+roaring = "0.10"
 regex = "1.7"
 reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
 rusqlite = { version = "0.29", features = ["bundled", "backup"] }
 secrecy = "0.8.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
+smallvec = { version = "1.11", features = ["const_generics", "const_new", "union"] }
 thiserror = "1"
 tokio = "1.23"
 tracing = "0.1"

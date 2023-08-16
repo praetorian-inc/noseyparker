@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to eventually use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
 ## Unreleased
@@ -14,11 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - Amazon Resource Name
   - AWS S3 Bucket (subdomain style)
   - AWS S3 Bucket (path style)
   - Google Cloud Storage Bucket (subdomain style)
   - Google Cloud Storage Bucket (path style)
   - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
+
+- Rules are now required to have a globally-unique identifier ([#62](https://github.com/praetorian-inc/noseyparker/pull/62))
 
 - Two new advanced global command-line parameters have been exposed:
 
@@ -27,16 +30,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The snippet length for matches found by the `scan` command can now be controlled with the new `--snippet-length BYTES` parameter.
 
-- The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode MODE` parameter.
+- The Git repository cloning behavior in the `scan` command can now be controlled with the new `--git-clone-mode {mirror,bare}` parameter.
 
-- In the `scan` command, basic blob metadata is recorded in the datastore for each discovered blob, including blob size in bytes and guessed mime type and charset when available.
-  A path-based mechanism is used to guess mime type; at present, this only works for plain file inputs (i.e., not for blobs found in Git history).
-  Optionally, if the `libmagic` Cargo feature is enabled, libmagic (the guts of the `file` command-line program) is used to guess mime type and charset based on content for blobs from all sources.
-  This metadata is recorded for each blob in which matches are found, but this behavior can be enabled for all blobs using the new `--record-all-blobs true` parameter.
-  This newly-recorded metadata is included in output of the `report` command.
+- The `scan` command now collects additional metadata about blobs.
+  This metadata includes size in bytes and guessed mime type based on filename extension.
+  Optionally, if the non-default `libmagic` Cargo feature is enabled, the mime type and charset are guessed by passing the content of the blob through `libmagic` (the guts of the `file` command-line program).
 
+  By default, all this additional metadata is recorded into the datastore for each blob in which matches are found.
+  This can be more precisely controlled using the new `--blob-metadata={all,matching,none}` parameter.
+
+  This newly-collected metadata is included in output of the `report` command.
+
+- The `scan` command now collects additional metadata about blobs found within Git repositories.
+  Specifically, for each blob found in Git repository history, the set of commits where it was introduced and the accompanying pathname for the blob is collected ([#16](https://github.com/praetorian-inc/noseyparker/issues/16)).
+  This is enabled by default, but can be controlled using the new `--git-blob-provenance={first-seen,minimal}` parameter.
+
+  This newly-collected metadata is included in output of the `report` command.
 
 ### Changes
+- The datastore schema has been changed in an incompatible way such that migrating existing datastores to the new version is not possible.
+  This was necessary to support the significantly increased metadata that is now collected when scanning.
+  Datastores from earlier releases of Nosey Parker cannot be used with this release; instead, the inputs will have to be rescanned with a new datastore.
+
+- The JSON and JSONL output formats for the `report` command have changed slightly.
+  In particular, the `.matches[].provenance` field is now an array of objects instead of a single object, making it possible to handle situations where a blob is discovered multiple ways.
+  The `provenenance` objects have some renamed fields, and contain significantly more metadata than before.
+
+
 - Existing rules were modified to reduce both false positives and false negatives:
 
   - Generic Password (double quoted)
@@ -53,9 +73,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Scanning performance has been improved on particular workloads by as much as 2x by recording matches to the datastore in larger batches.
   This is particularly relevant to heavy multithreaded scanning workloads where the inputs have many matches.
 
-
 ### Fixes
 - Python is no longer required as a build-time dependency for `vectorscan-sys`.
+
+- A typo was fixed in the Okta API Key rule that caused it to truncate the secret.
+
+- The `scan` command now correctly reports the number of newly-seen matches when reusing an existing datastore.
 
 
 ## [v0.13.0](https://github.com/praetorian-inc/noseyparker/releases/v0.13.0) (2023-04-24)

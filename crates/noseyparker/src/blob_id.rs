@@ -4,9 +4,15 @@ use serde::{Deserialize, Serialize};
 // -------------------------------------------------------------------------------------------------
 // BlobId
 // -------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Deserialize, Serialize)]
 #[serde(into="String", try_from="&str")]
 pub struct BlobId([u8; 20]);
+
+impl std::fmt::Debug for BlobId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "BlobId({})", self.hex())
+    }
+}
 
 impl BlobId {
     /// Create a new BlobId computed from the given input.
@@ -55,6 +61,7 @@ impl BlobId {
 }
 
 impl From<BlobId> for String where {
+    #[inline]
     fn from(blob_id: BlobId) -> String {
         blob_id.hex()
     }
@@ -63,29 +70,51 @@ impl From<BlobId> for String where {
 impl TryFrom<&str> for BlobId where {
     type Error = anyhow::Error;
 
+    #[inline]
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         BlobId::from_hex(s)
     }
 }
 
 impl std::fmt::Display for BlobId {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.hex())
     }
 }
 
 impl<'a> From<&'a gix::ObjectId> for BlobId {
-     fn from(id: &'a gix::ObjectId) -> Self {
-         BlobId(
-             id.as_bytes()
-                 .try_into()
-                 .expect("oid should be a 20-byte value"),
-         )
-     }
+    #[inline]
+    fn from(id: &'a gix::ObjectId) -> Self {
+        BlobId(
+            id.as_bytes()
+                .try_into()
+                .expect("oid should be a 20-byte value"),
+        )
+    }
+}
+
+impl From<gix::ObjectId> for BlobId {
+    #[inline]
+    fn from(id: gix::ObjectId) -> Self {
+        BlobId(
+            id.as_bytes()
+                .try_into()
+                .expect("oid should be a 20-byte value"),
+        )
+    }
 }
 
 impl<'a> From<&'a BlobId> for gix::ObjectId {
+    #[inline]
     fn from(blob_id: &'a BlobId) -> Self {
+        gix::hash::ObjectId::from(blob_id.as_bytes())
+    }
+}
+
+impl From<BlobId> for gix::ObjectId {
+    #[inline]
+    fn from(blob_id: BlobId) -> Self {
         gix::hash::ObjectId::from(blob_id.as_bytes())
     }
 }

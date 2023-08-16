@@ -6,7 +6,7 @@ use crate::blob::Blob;
 use crate::blob_id_set::BlobIdSet;
 use crate::location::OffsetSpan;
 use crate::matcher_stats::MatcherStats;
-use crate::provenance::Provenance;
+use crate::provenance_set::ProvenanceSet;
 use crate::rules::Rule;
 use crate::rules_database::RulesDatabase;
 
@@ -31,27 +31,28 @@ struct RawMatch {
 ///
 /// It is mostly made up of references and small data.
 /// For a representation that is more friendly for human consumption, see `Match`.
-pub struct BlobMatch<'r, 'b> {
+pub struct BlobMatch<'a> {
     /// The rule that was matched
-    pub rule: &'r Rule,
+    pub rule: &'a Rule,
 
     /// The blob that was matched
-    pub blob: &'b Blob,
+    pub blob: &'a Blob,
 
     /// The matching input in `blob.input`
-    pub matching_input: &'b [u8],
+    pub matching_input: &'a [u8],
 
     /// The location of the matching input in `blob.input`
     pub matching_input_offset_span: OffsetSpan,
 
     /// The capture groups from the match
-    pub captures: regex::bytes::Captures<'b>,
+    pub captures: regex::bytes::Captures<'a>,
 }
 
 struct UserData {
     /// A scratch vector for raw matches from Vectorscan, to minimize allocation
     raw_matches_scratch: Vec<RawMatch>,
 
+    /// The length of the input being scanned
     input_len: u64,
 }
 
@@ -77,6 +78,7 @@ pub struct Matcher<'a> {
     /// The set of blobs that have been seen
     seen_blobs: &'a BlobIdSet,
 
+    /// Data passed to the Vectorscan callback
     user_data: UserData,
 }
 
@@ -113,22 +115,17 @@ impl<'a> Matcher<'a> {
         })
     }
 
-    #[inline]
     fn scan_bytes_raw(&mut self, input: &[u8]) -> Result<()> {
         self.user_data.raw_matches_scratch.clear();
         self.user_data.input_len = input.len().try_into().unwrap();
-        self.vs_scanner.scan(input, |id: u32, from: u64, to: u64, _flags: u32| {
+        self.vs_scanner.scan(input, |rule_id: u32, from: u64, to: u64, _flags: u32| {
             // let start_idx = if from == vectorscan_sys::HS_OFFSET_PAST_HORIZON { 0 } else { from };
             //
             // NOTE: `from` is only going to be meaningful here if we start compiling rules
             // with the HS_SOM_LEFTMOST flag. But it doesn't seem to hurt to use the 0-value
             // provided when that flag is not used.
             let start_idx = from.min(self.user_data.input_len);
-            self.user_data.raw_matches_scratch.push(RawMatch {
-                rule_id: id,
-                start_idx,
-                end_idx: to,
-            });
+            self.user_data.raw_matches_scratch.push(RawMatch { rule_id, start_idx, end_idx: to });
             vectorscan::Scan::Continue
         })?;
         Ok(())
@@ -136,23 +133,27 @@ impl<'a> Matcher<'a> {
 
     /// Scan a blob.
     ///
-    /// `provenance` is used only for diagnostic purposes if something goes wrong.
-    // #[inline]
+    /// If the blob was already scanned, `None` is returned.
+    /// Otherwise, the matches found within the blob are returned.
+    ///
+    /// NOTE: `provenance` is used only for diagnostic purposes if something goes wrong.
     pub fn scan_blob<'b>(
         &mut self,
         blob: &'b Blob,
-        provenance: &Provenance,
-    ) -> Result<Vec<BlobMatch<'a, 'b>>> {
+        provenance: &ProvenanceSet,
+    ) -> Result<Option<Vec<BlobMatch<'b>>>>
+        where 'a: 'b
+    {
         // -----------------------------------------------------------------------------------------
         // Update local stats
         // -----------------------------------------------------------------------------------------
         self.local_stats.blobs_seen += 1;
-        let nbytes = blob.bytes.len() as u64;
+        let nbytes: u64 = blob.bytes.len().try_into().unwrap();
         self.local_stats.bytes_seen += nbytes;
 
         if !self.seen_blobs.insert(blob.id) {
             // debug!("Blob {} already seen; skipping", &blob.id);
-            return Ok(Vec::new());
+            return Ok(None);
         }
 
         self.local_stats.blobs_scanned += 1;
@@ -166,7 +167,7 @@ impl<'a> Matcher<'a> {
         let raw_matches_scratch = &mut self.user_data.raw_matches_scratch;
         if raw_matches_scratch.is_empty() {
             // No matches! We can exit early and save work.
-            return Ok(Vec::new());
+            return Ok(Some(Vec::new()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -182,7 +183,6 @@ impl<'a> Matcher<'a> {
         //
         // Also deduplicate overlapping matches with the same rule
         // -----------------------------------------------------------------------------------------
-
         raw_matches_scratch.sort_by_key(|m| {
             debug_assert!(m.start_idx <= m.end_idx);
             (m.rule_id, m.end_idx, m.end_idx - m.start_idx)
@@ -196,13 +196,13 @@ impl<'a> Matcher<'a> {
         // suppress overlapping matches in a single pass
         let matches = raw_matches_scratch.iter().rev()
             .filter_map(|&RawMatch{ rule_id, start_idx, end_idx }| {
-                let rule_id = rule_id as usize;
+                let rule_id: usize = rule_id.try_into().unwrap();
 
                 #[cfg(feature = "rule_profiling")]
                 let _rule_profiler = self.local_stats.rule_stats.time_stage2(rule_id);
 
-                let start_idx = start_idx as usize;
-                let end_idx = end_idx as usize;
+                let start_idx: usize = start_idx.try_into().unwrap();
+                let end_idx: usize = end_idx.try_into().unwrap();
                 let rule = &rules[rule_id];
                 let re = &anchored_regexes[rule_id];
                 // second-stage regex match
@@ -216,20 +216,15 @@ impl<'a> Matcher<'a> {
                             error!("\
                                 Regex failed to match where vectorscan did; something is probably odd about the rule:\n\
                                 Blob: {}\n\
-                                Provenance: {:?}\n\
-                                Offsets: [{}..{}]\n\
-                                Rule id: {}\n\
+                                Provenance: {}\n\
+                                Offsets: [{start_idx}..{end_idx}]\n\
+                                Rule id: {rule_id}\n\
                                 Rule name: {:?}:\n\
-                                Regex: {:?}:\n\
-                                Snippet: {:?}",
+                                Regex: {re:?}:\n\
+                                Snippet: {cxt:?}",
                                 &blob.id,
-                                provenance,
-                                start_idx,
-                                end_idx,
-                                rule_id,
+                                provenance.first(),
                                 rule.name,
-                                re,
-                                cxt,
                             );
                         // });
 
@@ -242,14 +237,10 @@ impl<'a> Matcher<'a> {
                 let matching_input_offset_span = OffsetSpan::from_range(matching_input.range());
 
                 // deduplicate overlaps
-                let suppress = match &previous {
-                    None => false,
-                    Some((prev_rule_id, prev_loc)) => {
-                        *prev_rule_id == rule_id && prev_loc.fully_contains(&matching_input_offset_span)
+                if let Some((prev_rule_id, prev_loc)) = previous {
+                    if prev_rule_id == rule_id && prev_loc.fully_contains(&matching_input_offset_span) {
+                        return None
                     }
-                };
-                if suppress {
-                    return None;
                 }
 
                 // Not a duplicate! Turn the RawMatch into a BlobMatch
@@ -257,13 +248,13 @@ impl<'a> Matcher<'a> {
                     rule,
                     blob,
                     matching_input: matching_input.as_bytes(),
-                    matching_input_offset_span: matching_input_offset_span.clone(),
+                    matching_input_offset_span,
                     captures,
                 };
                 previous = Some((rule_id, matching_input_offset_span));
                 Some(m)
-            });
-        Ok(matches.collect())
+            }).collect();
+        Ok(Some(matches))
     }
 }
 

@@ -20,7 +20,7 @@ impl OffsetPoint {
 // OffsetSpan
 // -------------------------------------------------------------------------------------------------
 /// A non-empty span within a bytestring
-#[derive(Debug, PartialEq, Eq, Hash, Serialize, Deserialize, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct OffsetSpan {
     pub start: usize,
     pub end: usize,

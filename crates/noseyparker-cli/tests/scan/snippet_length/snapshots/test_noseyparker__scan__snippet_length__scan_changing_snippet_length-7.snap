@@ -32,10 +32,12 @@ expression: json_output
           }
         },
         "match_content": "AKIADEADBEEFDEADBEEF",
-        "provenance": {
-          "kind": "file",
-          "path": "<ROOT>/input.txt"
-        },
+        "provenance": [
+          {
+            "kind": "file",
+            "path": "<ROOT>/input.txt"
+          }
+        ],
         "rule_name": "AWS API Key",
         "snippet": {
           "after": "\n\nfunction lorem",

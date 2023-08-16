@@ -116,7 +116,7 @@ pub fn match_scan_stats(
 /// Create a `RegexPredicate` for matching a "nothing was scanned" scan stats output message from
 /// Nosey Parker.
 pub fn match_nothing_scanned() -> RegexPredicate {
-    match_scan_stats("0B", 0, 0, 0)
+    match_scan_stats("0 B", 0, 0, 0)
 }
 
 /// A type to represent a mock scanning environment for testing Nosey Parker.

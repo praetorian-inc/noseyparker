@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
+use bstr::ByteSlice;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
+use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -8,7 +10,7 @@ use tracing::{debug, debug_span, error, info, warn};
 
 use crate::args;
 
-use noseyparker::blob::Blob;
+use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_set::BlobIdSet;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
@@ -19,13 +21,16 @@ use noseyparker::github;
 use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
-use noseyparker::matcher::{BlobMatch, Matcher};
+use noseyparker::matcher::Matcher;
 use noseyparker::matcher_stats::MatcherStats;
 use noseyparker::progress::Progress;
-use noseyparker::provenance::Provenance;
+use noseyparker::provenance::{CommitKind, Provenance};
+use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules::Rules;
 use noseyparker::rules_database::RulesDatabase;
 use noseyparker::{content_guesser, content_guesser::Guesser};
+
+type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
 
 /// This command scans multiple filesystem inputs for secrets.
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
@@ -236,6 +241,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 path != datastore_path
             });
 
+            // Determine whether to collect git metadata or not
+            let collect_git_metadata = match args.metadata_args.git_blob_provenance {
+                args::GitBlobProvenanceMode::FirstSeen => true,
+                args::GitBlobProvenanceMode::Minimal => false,
+            };
+            ie.collect_git_metadata(collect_git_metadata);
+
             Ok(ie)
         }()
         .context("Failed to initialize filesystem enumerator")?;
@@ -275,34 +287,12 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         Ok((matcher, guesser))
     };
 
-    // a function to convert BlobMatch into regular Match
-    let convert_blob_matches =
-        |blob: &Blob, matches: Vec<BlobMatch>, provenance: Provenance| -> Vec<Match> {
-            // assert!(!matches.is_empty());
-            let loc_mapping = {
-                match matches
-                    .iter()
-                    .map(|m| m.matching_input_offset_span.end)
-                    .max()
-                {
-                    Some(max_end) => location::LocationMapping::new(&blob.bytes[0..max_end]),
-                    None => return Vec::new(),
-                }
-            };
-
-            matches
-                .into_iter()
-                .flat_map(|m| Match::new(&loc_mapping, m, &provenance, args.snippet_length))
-                .collect()
-        };
-
     // FIXME: have this print out aggregate rate at finish
     let mut progress =
         Progress::new_bytes_bar(total_blob_bytes, "Scanning content", progress_enabled);
 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
     // let channel_size = std::cmp::max(args.num_jobs * 32, 1024);
-    type DatastoreMessage = (BlobMetadata, Vec<Match>);
     // let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
     let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
 
@@ -312,140 +302,59 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         std::thread::Builder::new()
             .name("Datastore Writer".to_string())
             .spawn(move || {
-                let mut num_matches = 0u64;
-                let mut num_added = 0usize;
+                let mut num_matches_added: u64 = 0;
 
-                // keep reading until all the senders hang up; panic if recording matches fails
+                // Big idea: keep reading until all the senders hang up; panic if recording matches
+                // fails.
                 //
-                // accumulate messages in batches to avoid an excessive number of tiny datastore
-                // transactions (which kills performance)
+                // Accumulate messages in batches to avoid an excessive number of tiny datastore
+                // transactions (which kills performance); try to commit at least every second.
 
                 let mut last_tx_time = std::time::Instant::now();
 
+                // FIXME: expose the following as CLI parameters
                 const BUF_SIZE: usize = 16384;
-                let mut batch_matches: Vec<Vec<Match>> = Vec::with_capacity(BUF_SIZE);
-                let mut batch_matches_count: usize = 0;
-                let mut batch_metadata: Vec<BlobMetadata> = Vec::with_capacity(BUF_SIZE);
-
-                // Try to commit at least every second
                 const COMMIT_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
 
-                for (metadata, matches) in recv_ds.iter() {
-                    batch_matches_count += matches.len();
-                    batch_matches.push(matches);
+                let mut batch: Vec<DatastoreMessage> = Vec::with_capacity(BUF_SIZE);
+                let mut matches_in_batch: usize = 0;
 
-                    batch_metadata.push(metadata);
+                for message in recv_ds.iter() {
+                    matches_in_batch += message.2.len();
+                    batch.push(message);
 
-                    if batch_matches_count >= BUF_SIZE
-                        || batch_metadata.len() >= BUF_SIZE
+                    if batch.len() >= BUF_SIZE
+                        || matches_in_batch >= BUF_SIZE
                         || last_tx_time.elapsed() >= COMMIT_INTERVAL
                     {
-                        let mut committed = false;
-                        if batch_matches_count > 0 {
-                            // let t1 = std::time::Instant::now();
-                            num_matches += batch_matches_count as u64;
-                            num_added += datastore
-                                .record_matches(batch_matches.iter().flatten())
-                                .expect("should be able to record matches to the datastore");
-                            // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
-                            batch_matches.clear();
-                            batch_matches_count = 0;
-                            committed = true;
-                        }
-
-                        if !batch_metadata.is_empty() {
-                            // let t1 = std::time::Instant::now();
-                            datastore
-                                .record_blob_metadata(&batch_metadata)
-                                .expect("should be able to record blob metadata to the datastore");
-                            // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
-                            batch_metadata.clear();
-                            committed = true;
-                        }
-
-                        if committed {
-                            last_tx_time = std::time::Instant::now();
-                        }
+                        num_matches_added += datastore
+                            .record(batch.as_slice())
+                            .expect("should be able to record findings to the datastore");
+                        batch.clear();
+                        matches_in_batch = 0;
+                        last_tx_time = std::time::Instant::now();
                     }
                 }
 
-                // record any remaining batched up items
-                if !batch_matches.is_empty() {
-                    // let t1 = std::time::Instant::now();
-                    num_matches += batch_matches_count as u64;
-                    num_added += datastore
-                        .record_matches(batch_matches.iter().flatten())
-                        .expect("should be able to record matches to the datastore");
-                    // debug!("*** commit matches: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_matches_count, recv_ds.len());
-                    batch_matches.clear();
-                    // batch_matches_count = 0;
+                if !batch.is_empty() {
+                    num_matches_added += datastore
+                        .record(batch.as_slice())
+                        .expect("should be able to record findings to the datastore");
+                    // batch.clear();
+                    // matches_in_batch = 0;
+                    // last_tx_time = std::time::Instant::now();
                 }
 
-                if !batch_metadata.is_empty() {
-                    // let t1 = std::time::Instant::now();
-                    datastore
-                        .record_blob_metadata(&batch_metadata)
-                        .expect("should be able to record blob metadata to the datastore");
-                    // debug!("*** commit metadata: {:.3}s {} {}", t1.elapsed().as_secs_f64(), batch_metadata.len(), recv_ds.len());
-                    batch_metadata.clear();
-                }
+                let num_matches = datastore
+                    .get_num_matches()
+                    .expect("should be able to count number of matches in datastore");
 
                 datastore
                     .analyze()
                     .expect("should be able to analyze the datastore");
-                // FIXME: `num_added` is not computed correctly
-                (datastore, num_matches, num_added as u64)
+                (datastore, num_matches, num_matches_added)
             })
             .expect("should be able to start datastore writer thread")
-    };
-
-    let run_matcher = |matcher_guesser: &mut (Matcher, Guesser),
-                       provenance: Provenance,
-                       blob: Blob|
-     -> Result<()> {
-        #[allow(unused_variables)]
-        let (matcher, guesser) = matcher_guesser;
-
-        let matches = match matcher.scan_blob(&blob, &provenance) {
-            Err(e) => {
-                error!("Failed to scan blob {} from {}: {}", blob.id, provenance, e);
-                return Ok(());
-            }
-            Ok(v) => v,
-        };
-
-        if matches.is_empty() && !args.record_all_blobs {
-            return Ok(());
-        }
-
-        let (mime_essence, charset) = {
-            let input = match &provenance {
-                Provenance::File { path } => {
-                    content_guesser::Input::from_path_and_bytes(path, &blob.bytes)
-                }
-                Provenance::GitRepo { .. } => content_guesser::Input::from_bytes(&blob.bytes),
-            };
-            let guess = guesser.guess(input);
-            match guess.best_guess() {
-                None => (None, None),
-                Some(m) => {
-                    let essence = m.essence_str().to_owned();
-                    let charset = m.get_param(mime::CHARSET).map(|n| n.to_string());
-                    (Some(essence), charset)
-                }
-            }
-        };
-
-        let metadata = BlobMetadata {
-            id: blob.id,
-            num_bytes: blob.len(),
-            mime_essence,
-            charset,
-        };
-        let matches = convert_blob_matches(&blob, matches, provenance);
-        send_ds.send((metadata, matches))?;
-
-        Ok(())
     };
 
     // ---------------------------------------------------------------------------------------------
@@ -467,11 +376,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 Ok(v) => v,
             };
             progress.inc(file_result.num_bytes);
-            let provenance = Provenance::File {
-                path: fname.clone(),
-            };
 
-            run_matcher(matcher, provenance, blob)?;
+            run_matcher(
+                matcher,
+                ProvenanceSet::new(Provenance::from_file(fname.clone()), Vec::new()),
+                blob,
+                &send_ds,
+                args.snippet_length,
+                args.metadata_args.blob_metadata,
+                progress,
+            )?;
 
             Ok(())
         },
@@ -482,7 +396,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     inputs
         .git_repos
-        .par_iter()
+        .into_par_iter()
         .try_for_each(|git_repo_result| -> Result<()> {
             let repository = match open_git_repo(&git_repo_result.path) {
                 Ok(Some(repository)) => repository.into_sync(),
@@ -502,37 +416,80 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 }
             };
 
-            git_repo_result.blobs.par_iter().try_for_each_init(
+            git_repo_result.blobs.into_par_iter().try_for_each_init(
                 || {
                     let repo = repository.to_thread_local();
                     let matcher = make_matcher().expect("should be able to create a matcher");
                     (repo, matcher, progress.clone())
                 },
-                |(repo, matcher, progress), (blob_id, size)| -> Result<()> {
-                    progress.inc(*size);
-                    let path = &git_repo_result.path;
+                |(repo, matcher, progress), md| -> Result<()> {
+                    let size = md.num_bytes;
+                    let blob_id = md.blob_oid;
+                    progress.inc(size);
+                    let repo_path = &git_repo_result.path;
                     // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
                     let blob = match repo.find_object(blob_id) {
                         Err(e) => {
                             error!(
-                                "Failed to read blob {} from Git repository at {}: {}",
-                                blob_id,
-                                path.display(),
-                                e
+                                "Failed to read blob {blob_id} from Git repository at {}: {e}",
+                                repo_path.display(),
                             );
                             return Ok(());
                         }
                         Ok(mut blob) => {
                             let data = std::mem::take(&mut blob.data); // avoid a copy
-                            Blob::new(*blob_id, data)
+                            Blob::new(BlobId::from(&blob_id), data)
                         }
                     };
-                    let provenance = Provenance::GitRepo {
-                        path: path.to_path_buf(),
+
+                    let provenance = {
+                        let mut it = md.first_seen.iter();
+                        if let Some(e) = it.next() {
+                            let commit_metadata = git_repo_result
+                                .commit_metadata
+                                .get(&e.commit_oid)
+                                .expect("should have commit metadata");
+                            let p = Provenance::from_git_repo_and_commit_metadata(
+                                repo_path.clone(),
+                                CommitKind::FirstSeen,
+                                commit_metadata.clone(),
+                                e.path.clone(),
+                            );
+
+                            let ps = it
+                                .map(|e| {
+                                    let commit_metadata = git_repo_result
+                                        .commit_metadata
+                                        .get(&e.commit_oid)
+                                        .expect("should have commit metadata");
+                                    Provenance::from_git_repo_and_commit_metadata(
+                                        repo_path.clone(),
+                                        CommitKind::FirstSeen,
+                                        commit_metadata.clone(),
+                                        e.path.clone(),
+                                    )
+                                })
+                                .collect();
+
+                            ProvenanceSet::new(p, ps)
+                        } else {
+                            ProvenanceSet::new(
+                                Provenance::from_git_repo(repo_path.clone()),
+                                Vec::new(),
+                            )
+                        }
                     };
 
-                    run_matcher(matcher, provenance, blob)?;
+                    run_matcher(
+                        matcher,
+                        provenance,
+                        blob,
+                        &send_ds,
+                        args.snippet_length,
+                        args.metadata_args.blob_metadata,
+                        progress,
+                    )?;
 
                     Ok(())
                 },
@@ -602,4 +559,123 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     }
 
     Ok(())
+}
+
+#[derive(Default)]
+struct MetadataResult {
+    mime_essence: Option<String>,
+    charset: Option<String>,
+}
+
+impl MetadataResult {
+    fn from_blob_and_provenance(
+        guesser: &Guesser,
+        blob: &Blob,
+        provenance: &ProvenanceSet,
+    ) -> MetadataResult {
+        let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| match p {
+            Provenance::File(e) => Some(e.path.as_path()),
+            Provenance::GitRepo(e) => match &e.commit_provenance {
+                Some(md) => md.blob_path.to_path().ok(),
+                None => None,
+            },
+        });
+
+        let input = match blob_path {
+            None => content_guesser::Input::from_bytes(&blob.bytes),
+            Some(blob_path) => content_guesser::Input::from_path_and_bytes(blob_path, &blob.bytes),
+        };
+
+        let guess = guesser.guess(input);
+        match guess.best_guess() {
+            None => MetadataResult::default(),
+            Some(m) => MetadataResult {
+                mime_essence: Some(m.essence_str().to_owned()),
+                charset: m.get_param(mime::CHARSET).map(|n| n.to_string()),
+            },
+        }
+    }
+}
+
+fn run_matcher(
+    matcher_guesser: &mut (Matcher, Guesser),
+    provenance: ProvenanceSet,
+    blob: Blob,
+    send_ds: &crossbeam_channel::Sender<DatastoreMessage>,
+    snippet_length: usize,
+    blob_metadata_recording_mode: args::BlobMetadataMode,
+    progress: &Progress,
+) -> Result<()> {
+    let (matcher, guesser) = matcher_guesser;
+
+    match matcher.scan_blob(&blob, &provenance) {
+        Err(e) => {
+            progress.suspend(|| {
+                error!("Failed to scan blob {} from {}: {e}", blob.id, provenance.first())
+            });
+            Ok(())
+        }
+
+        // blob already seen; all we need to do is record its provenance
+        Ok(None) => {
+            let metadata = BlobMetadata {
+                id: blob.id,
+                num_bytes: blob.len(),
+                mime_essence: None,
+                charset: None,
+            };
+            send_ds.send((provenance, metadata, Vec::new()))?;
+            Ok(())
+        }
+
+        // blob has not been seen; need to record blob metadata, provenance, and matches
+        Ok(Some(matches)) => {
+            if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {
+                return Ok(());
+            }
+
+            let metadata = match blob_metadata_recording_mode {
+                args::BlobMetadataMode::None => BlobMetadata {
+                    id: blob.id,
+                    num_bytes: blob.len(),
+                    mime_essence: None,
+                    charset: None,
+                },
+                _ => {
+                    let md = MetadataResult::from_blob_and_provenance(guesser, &blob, &provenance);
+                    BlobMetadata {
+                        id: blob.id,
+                        num_bytes: blob.len(),
+                        mime_essence: md.mime_essence,
+                        charset: md.charset,
+                    }
+                }
+            };
+
+            // Convert each BlobMatch into a regular Match
+            let matches = match matches
+                .iter()
+                .map(|m| m.matching_input_offset_span.end)
+                .max()
+            {
+                Some(max_end) => {
+                    // compute the location mapping only on the input that's necessary to look at
+                    let loc_mapping = location::LocationMapping::new(&blob.bytes[0..max_end]);
+
+                    let capacity: usize = matches.iter().map(|m| m.captures.len() - 1).sum();
+                    let mut new_matches = Vec::with_capacity(capacity);
+                    new_matches.extend(
+                        matches
+                            .iter()
+                            .flat_map(|m| Match::convert(&loc_mapping, m, snippet_length))
+                    );
+                    new_matches
+                }
+                None => Vec::new(),
+            };
+
+            send_ds.send((provenance, metadata, matches))?;
+            Ok(())
+        }
+    }
 }
