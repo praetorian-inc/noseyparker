@@ -415,7 +415,8 @@ impl Display for MatchGroup {
                                 indented(&mut f).with_str("    "),
                                 "{}     {} <{}>\n\
                                  {}       {}\n\
-                                 {}    {}",
+                                 {}    {}\n\
+                                 {}       {}",
                                 STYLE_HEADING.apply_to("Author:"),
                                 cmd.author_name,
                                 cmd.author_email,
@@ -423,6 +424,8 @@ impl Display for MatchGroup {
                                 atime,
                                 STYLE_HEADING.apply_to("Summary:"),
                                 msg,
+                                STYLE_HEADING.apply_to("Path:"),
+                                cs.blob_path,
                             )?;
                             writeln!(f)?;
                         }
