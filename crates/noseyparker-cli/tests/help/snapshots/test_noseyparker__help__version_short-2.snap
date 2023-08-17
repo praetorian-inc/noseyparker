@@ -1,6 +1,6 @@
 ---
-source: crates/noseyparker-cli/tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
-noseyparker 0.13.0-dev
+noseyparker 0.14.0
 
