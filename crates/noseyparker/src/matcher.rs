@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use tracing::error;
 
 use crate::blob::Blob;
-use crate::blob_id_set::BlobIdSet;
+use crate::blob_id_map::BlobIdMap;
 use crate::location::OffsetSpan;
 use crate::matcher_stats::MatcherStats;
 use crate::provenance_set::ProvenanceSet;
@@ -76,7 +76,7 @@ pub struct Matcher<'a> {
     global_stats: Option<&'a Mutex<MatcherStats>>,
 
     /// The set of blobs that have been seen
-    seen_blobs: &'a BlobIdSet,
+    seen_blobs: &'a BlobIdMap<bool>,
 
     /// Data passed to the Vectorscan callback
     user_data: UserData,
@@ -92,6 +92,12 @@ impl<'a> Drop for Matcher<'a> {
     }
 }
 
+pub enum ScanResult<'a> {
+    SeenWithMatches,
+    SeenSansMatches,
+    New(Vec<BlobMatch<'a>>),
+}
+
 impl<'a> Matcher<'a> {
     /// Create a new `Matcher` from the given `RulesDatabase`.
     ///
@@ -99,7 +105,7 @@ impl<'a> Matcher<'a> {
     /// when it is dropped.
     pub fn new(
         rules_db: &'a RulesDatabase,
-        seen_blobs: &'a BlobIdSet,
+        seen_blobs: &'a BlobIdMap<bool>,
         global_stats: Option<&'a Mutex<MatcherStats>>,
     ) -> Result<Self> {
         let raw_matches_scratch = Vec::with_capacity(16384);
@@ -141,7 +147,7 @@ impl<'a> Matcher<'a> {
         &mut self,
         blob: &'b Blob,
         provenance: &ProvenanceSet,
-    ) -> Result<Option<Vec<BlobMatch<'b>>>>
+    ) -> Result<ScanResult<'b>>
         where 'a: 'b
     {
         // -----------------------------------------------------------------------------------------
@@ -151,9 +157,9 @@ impl<'a> Matcher<'a> {
         let nbytes: u64 = blob.bytes.len().try_into().unwrap();
         self.local_stats.bytes_seen += nbytes;
 
-        if !self.seen_blobs.insert(blob.id) {
+        if let Some(had_matches) = self.seen_blobs.get(&blob.id) {
             // debug!("Blob {} already seen; skipping", &blob.id);
-            return Ok(None);
+            return Ok(if had_matches { ScanResult::SeenWithMatches } else { ScanResult::SeenSansMatches });
         }
 
         self.local_stats.blobs_scanned += 1;
@@ -167,7 +173,8 @@ impl<'a> Matcher<'a> {
         let raw_matches_scratch = &mut self.user_data.raw_matches_scratch;
         if raw_matches_scratch.is_empty() {
             // No matches! We can exit early and save work.
-            return Ok(Some(Vec::new()));
+            self.seen_blobs.insert(blob.id, false);
+            return Ok(ScanResult::New(Vec::new()));
         }
 
         // -----------------------------------------------------------------------------------------
@@ -194,7 +201,7 @@ impl<'a> Matcher<'a> {
         let mut previous: Option<(usize, OffsetSpan)> = None;
         // note that we walk _backwards_ over the raw matches: this allows us to detect and
         // suppress overlapping matches in a single pass
-        let matches = raw_matches_scratch.iter().rev()
+        let matches: Vec<_> = raw_matches_scratch.iter().rev()
             .filter_map(|&RawMatch{ rule_id, start_idx, end_idx }| {
                 let rule_id: usize = rule_id.try_into().unwrap();
 
@@ -254,7 +261,8 @@ impl<'a> Matcher<'a> {
                 previous = Some((rule_id, matching_input_offset_span));
                 Some(m)
             }).collect();
-        Ok(Some(matches))
+        self.seen_blobs.insert(blob.id, !matches.is_empty());
+        Ok(ScanResult::New(matches))
     }
 }
 
@@ -282,7 +290,7 @@ mod test {
         let rules = Rules { rules };
         let rules_db = RulesDatabase::from_rules(rules)?;
         let input = "some test data for vectorscan";
-        let seen_blobs = BlobIdSet::new();
+        let seen_blobs = BlobIdMap::new();
         let mut matcher = Matcher::new(&rules_db, &seen_blobs, None)?;
         matcher.scan_bytes_raw(input.as_bytes())?;
         assert_eq!(

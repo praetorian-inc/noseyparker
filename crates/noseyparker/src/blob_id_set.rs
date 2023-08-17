@@ -34,7 +34,7 @@ impl BlobIdSet {
 
     /// Add the given `BlobId` to the set.
     ///
-    /// Returns `true` if and only if the item was actually added.
+    /// Returns `true` if and only if the set was modified by this operation.
     #[inline]
     pub fn insert(&self, blob_id: BlobId) -> bool {
         let bucket: u8 = blob_id.as_bytes()[0];

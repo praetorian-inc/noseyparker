@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
-use rusqlite::{Connection, Transaction};
+use rusqlite::Connection;
 use serde::Serialize;
 use std::ffi::OsString;
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
@@ -14,7 +14,7 @@ use crate::git_commit_metadata::CommitMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
-use crate::provenance::{CommitKind, Provenance};
+use crate::provenance::{CommitKind, CommitProvenance, Provenance};
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
@@ -124,6 +124,7 @@ impl Datastore {
 
     /// Analyze the datastore's sqlite database, potentially allowing for better query planning
     pub fn analyze(&self) -> Result<()> {
+        let _span = debug_span!("Datastore::analyze", "{}", self.root_dir.display()).entered();
         self.conn.execute("analyze", [])?;
         // self.conn.execute("pragma wal_checkpoint(truncate)", [])?;
         Ok(())
@@ -132,26 +133,20 @@ impl Datastore {
 
 type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<Match>);
 
-// Public implementation, recording functions
-impl Datastore {
-    /// Record the given data into the datastore.
-    /// Returns the number of matches that were newly added.
-    ///
-    /// The given data is recorded in a single transaction.
-    pub fn record(&mut self, batch: &[BatchEntry]) -> Result<u64> {
-        let _span =
-            debug_span!("Datastore::record_metadata_and_matches", "{}", self.root_dir.display())
-                .entered();
+pub struct Transaction<'a> {
+    inner: rusqlite::Transaction<'a>,
+}
 
-        let tx = self.conn.transaction()?;
-        let num_matches_added = Self::record_inner(&tx, batch)?;
-        tx.commit()?;
-
-        Ok(num_matches_added)
+impl <'a> Transaction<'a> {
+    pub fn commit(self) -> Result<()> {
+        self.inner.commit()?;
+        Ok(())
     }
 
-    pub fn record_inner(tx: &Transaction, batch: &[BatchEntry]) -> Result<u64> {
-        let mut add_blob_get_id = tx.prepare_cached(indoc! {r#"
+    /// Record the given data into the datastore.
+    /// Returns the number of matches that were newly added.
+    pub fn record(&self, batch: &[BatchEntry]) -> Result<u64> {
+        let mut add_blob_get_id = self.inner.prepare_cached(indoc! {r#"
             insert into blob(blob_id, size, mime_essence, charset)
             values (?, ?, ?, ?)
             on conflict do update set
@@ -161,97 +156,220 @@ impl Datastore {
             returning id
         "#})?;
 
-        let mut add_git_commit = tx.prepare_cached(indoc! {r#"
-            insert into git_commit(
-                commit_id,
-                commit_date,
-                committer_name,
-                committer_email,
-                author_date,
-                author_name,
-                author_email,
-                message
-            ) values (?, ?, ?, ?, ?, ?, ?, ?)
-            on conflict do nothing
-        "#})?;
+        let mut add_git_commit = {
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select id from git_commit where commit_id = ?
+            "#})?;
 
-        let mut get_git_commit_id = tx.prepare_cached(indoc! {r#"
-            select id from git_commit where commit_id = ?
-        "#})?;
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert into git_commit(
+                    commit_id,
+                    commit_date,
+                    committer_name,
+                    committer_email,
+                    author_date,
+                    author_name,
+                    author_email,
+                    message
+                ) values (?, ?, ?, ?, ?, ?, ?, ?)
+                returning id
+            "#})?;
 
-        let mut contains_match = tx.prepare_cached(indoc! {r#"
-            select * from match
-            where
-                blob_id = ? and
-                start_byte = ? and
-                end_byte = ? and
-                group_index = ? and
-                rule_name = ?
-        "#})?;
+            move |c: &CommitProvenance| -> rusqlite::Result<i64> {
+                let commit_id = c.commit_metadata.commit_id.to_string();
+                let params = (
+                    &commit_id,
+                    c.commit_metadata.committer_timestamp.seconds,
+                    c.commit_metadata.committer_name.as_slice(),
+                    c.commit_metadata.committer_email.as_slice(),
+                    c.commit_metadata.author_timestamp.seconds,
+                    c.commit_metadata.author_name.as_slice(),
+                    c.commit_metadata.author_email.as_slice(),
+                    c.commit_metadata.message.as_slice(),
+                );
+                get.query((&commit_id, ))?.next()?.map_or_else(
+                    || set.query_row(params, |row| row.get(0)),
+                    |row| row.get(0),
+                )
+            }
+        };
 
-        let mut add_match = tx.prepare_cached(indoc! {r#"
-            insert or replace into match(
-                blob_id,
-                start_byte,
-                end_byte,
-                start_line,
-                start_column,
-                end_line,
-                end_column,
-                before_snippet,
-                matching_input,
-                after_snippet,
-                group_index,
-                group_input,
-                rule_name
-            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        "#})?;
+        let mut add_match = {
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select
+                    start_line,
+                    start_column,
+                    end_line,
+                    end_column,
+                    before_snippet,
+                    matching_input,
+                    after_snippet,
+                    group_input
+                from match
+                where
+                    blob_id = ? and
+                    start_byte = ? and
+                    end_byte = ? and
+                    group_index = ? and
+                    rule_name = ?
+            "#})?;
 
-        let mut add_provenance_payload_file = tx.prepare_cached(indoc! {r#"
-            insert into provenance_payload_file(path)
-            values (?)
-            on conflict do nothing
-        "#})?;
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert or replace into match(
+                    blob_id,
+                    start_byte,
+                    end_byte,
+                    group_index,
+                    rule_name,
 
-        let mut get_provenance_payload_file_id = tx.prepare_cached(indoc! {r#"
-            select id from provenance_payload_file
-            where path = ?
-        "#})?;
+                    start_line,
+                    start_column,
+                    end_line,
+                    end_column,
+                    before_snippet,
+                    matching_input,
+                    after_snippet,
+                    group_input
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "#})?;
 
-        let mut add_provenance_payload_git_repo = tx.prepare_cached(indoc! {r#"
-            insert into provenance_payload_git_repo(repo_path)
-            values (?)
-            on conflict do nothing
-        "#})?;
+            move |blob_id: i64, m: &Match| -> rusqlite::Result<bool> {
+                let params = (
+                    blob_id,
+                    m.location.offset_span.start,
+                    m.location.offset_span.end,
+                    m.capture_group_index,
+                    &m.rule_name,
+                );
 
-        let mut get_provenance_payload_git_repo_id = tx.prepare_cached(indoc! {r#"
-            select id from provenance_payload_git_repo
-            where repo_path = ?
-        "#})?;
+                let full_params = (
+                    blob_id,
+                    m.location.offset_span.start,
+                    m.location.offset_span.end,
+                    m.capture_group_index,
+                    &m.rule_name,
 
-        let mut add_provenance_payload_git_commit = tx.prepare_cached(indoc! {r#"
-            insert into provenance_payload_git_commit(repo_path, commit_id, blob_path)
-            values (?, ?, ?)
-            on conflict do nothing
-        "#})?;
+                    m.location.source_span.start.line,
+                    m.location.source_span.start.column,
+                    m.location.source_span.end.line,
+                    m.location.source_span.end.column,
+                    m.snippet.before.as_slice(),
+                    m.snippet.matching.as_slice(),
+                    m.snippet.after.as_slice(),
+                    m.match_content.as_slice(),
+                );
 
-        let mut get_provenance_payload_git_commit_id = tx.prepare_cached(indoc! {r#"
-            select id from provenance_payload_git_commit
-            where repo_path = ? and commit_id = ? and blob_path = ?
-        "#})?;
+                let mut new = false;
+                // only insert the match data if it's different than what's there already
+                let different = match get.query(params)?.next()? {
+                    None => {
+                        new = true;
+                        true
+                    },
+                    Some(row) => {
+                        row.get_ref(0)?.as_i64()? != full_params.5 as i64 ||
+                        row.get_ref(1)?.as_i64()? != full_params.6 as i64 ||
+                        row.get_ref(2)?.as_i64()? != full_params.7 as i64 ||
+                        row.get_ref(3)?.as_i64()? != full_params.8 as i64 ||
+                        row.get_ref(4)?.as_bytes()? != full_params.9 ||
+                        row.get_ref(5)?.as_bytes()? != full_params.10 ||
+                        row.get_ref(6)?.as_bytes()? != full_params.11 ||
+                        row.get_ref(7)?.as_bytes()? != full_params.12
+                    }
+                };
 
-        let mut add_provenance = tx.prepare_cached(indoc! {r#"
-            insert into provenance(payload_kind, payload_id)
-            values (?, ?)
-            on conflict do nothing
-        "#})?;
+                if different {
+                    set.execute(full_params)?;
+                }
+                Ok(new)
+            }
+        };
 
-        let mut get_provenance_id = tx.prepare_cached(indoc! {r#"
-            select id from provenance
-            where payload_kind = ? and payload_id = ?
-        "#})?;
+        let mut add_provenance_payload_file = {
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert into provenance_payload_file(path)
+                values (?)
+                returning id
+            "#})?;
 
-        let mut add_provenance_id = tx.prepare_cached(indoc! {r#"
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select id from provenance_payload_file
+                where path = ?
+            "#})?;
+
+            move |path: &[u8]| -> rusqlite::Result<i64> {
+                let params = (path, );
+                get.query(params)?.next()?.map_or_else(
+                    || set.query_row(params, |r| r.get(0)),
+                    |row| row.get(0),
+                )
+            }
+        };
+
+        let mut add_provenance_payload_git_repo = {
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select id from provenance_payload_git_repo
+                where repo_path = ?
+            "#})?;
+
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert into provenance_payload_git_repo(repo_path)
+                values (?)
+                returning id
+            "#})?;
+
+            move |repo_path: &[u8]| -> rusqlite::Result<i64> {
+                let params = (repo_path, );
+                get.query(params)?.next()?.map_or_else(
+                    || set.query_row(params, |r| r.get(0)),
+                    |row| row.get(0),
+                )
+            }
+        };
+
+        let mut add_provenance_payload_git_commit = {
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select id from provenance_payload_git_commit
+                where repo_path = ? and commit_id = ? and blob_path = ?
+            "#})?;
+
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert into provenance_payload_git_commit(repo_path, commit_id, blob_path)
+                values (?, ?, ?)
+                returning id
+            "#})?;
+
+            move |repo_path: &[u8], commit_id: i64, blob_path: &[u8]| -> rusqlite::Result<i64> {
+                let params = (repo_path, commit_id, blob_path);
+                get.query(params)?.next()?.map_or_else(
+                    || set.query_row(params, |r| r.get(0)),
+                    |row| row.get(0),
+                )
+            }
+        };
+
+        let mut add_provenance = {
+            let mut set = self.inner.prepare_cached(indoc! {r#"
+                insert into provenance(payload_kind, payload_id)
+                values (?, ?)
+                returning id
+            "#})?;
+
+            let mut get = self.inner.prepare_cached(indoc! {r#"
+                select id from provenance
+                where payload_kind = ? and payload_id = ?
+            "#})?;
+
+            move |kind: &str, payload_id: i64| -> rusqlite::Result<i64> {
+                let params = (kind, payload_id);
+                get.query(params)?.next()?.map_or_else(
+                    || set.query_row(params, |r| r.get(0)),
+                    |row| row.get(0),
+                )
+            }
+        };
+
+        let mut add_provenance_id = self.inner.prepare_cached(indoc! {r#"
             insert into blob_provenance(blob_id, provenance_id, kind)
             values (?, ?, ?)
             on conflict do nothing
@@ -272,56 +390,23 @@ impl Datastore {
                 let (provenance_id, kind) = match p {
                     Provenance::File(e) => {
                         let path = e.path.as_os_str().as_bytes();
-                        add_provenance_payload_file.execute((&path,))?;
-                        let payload_id: i64 =
-                            get_provenance_payload_file_id.query_row((&path,), |r| r.get(0))?;
-
-                        let params = ("file", payload_id);
-                        add_provenance.execute(params)?;
-                        let provenance_id: i64 =
-                            get_provenance_id.query_row(params, |r| r.get(0))?;
+                        let payload_id = add_provenance_payload_file(&path)?;
+                        let provenance_id = add_provenance("file", payload_id)?;
                         (provenance_id, None)
                     }
                     Provenance::GitRepo(e) => {
                         let repo_path = e.repo_path.as_os_str().as_bytes();
                         match &e.commit_provenance {
                             None => {
-                                let params = (repo_path,);
-                                add_provenance_payload_git_repo.execute(params)?;
-                                let payload_id: i64 = get_provenance_payload_git_repo_id
-                                    .query_row(params, |r| r.get(0))?;
-
-                                let params = ("git_repo", payload_id);
-                                add_provenance.execute(params)?;
-                                let provenance_id: i64 =
-                                    get_provenance_id.query_row(params, |r| r.get(0))?;
+                                let payload_id = add_provenance_payload_git_repo(repo_path)?;
+                                let provenance_id = add_provenance("git_repo", payload_id)?;
                                 (provenance_id, None)
                             }
                             Some(c) => {
-                                let commit_id = c.commit_metadata.commit_id.to_string();
-                                add_git_commit.execute((
-                                    &commit_id,
-                                    c.commit_metadata.committer_timestamp.seconds,
-                                    c.commit_metadata.committer_name.as_slice(),
-                                    c.commit_metadata.committer_email.as_slice(),
-                                    c.commit_metadata.author_timestamp.seconds,
-                                    c.commit_metadata.author_name.as_slice(),
-                                    c.commit_metadata.author_email.as_slice(),
-                                    c.commit_metadata.message.as_slice(),
-                                ))?;
-                                let commit_id: i64 =
-                                    get_git_commit_id.query_row((&commit_id,), |r| r.get(0))?;
-
+                                let commit_id = add_git_commit(&c)?;
                                 let blob_path = c.blob_path.as_slice();
-                                let params = (repo_path, commit_id, blob_path);
-                                add_provenance_payload_git_commit.execute(params)?;
-                                let payload_id: i64 = get_provenance_payload_git_commit_id
-                                    .query_row(params, |r| r.get(0))?;
-
-                                let params = ("git_commit", payload_id);
-                                add_provenance.execute(params)?;
-                                let provenance_id: i64 =
-                                    get_provenance_id.query_row(params, |r| r.get(0))?;
+                                let payload_id = add_provenance_payload_git_commit(repo_path, commit_id, blob_path)?;
+                                let provenance_id = add_provenance("git_commit", payload_id)?;
                                 (provenance_id, Some(c.commit_kind))
                             }
                         }
@@ -333,36 +418,21 @@ impl Datastore {
 
             // record matches
             for m in ms {
-                let bytes = &m.location.offset_span;
-
-                let will_add = !contains_match
-                    .exists((&blob_id, bytes.start, bytes.end, m.capture_group_index, &m.rule_name))
-                    .context("Failed to check if match exists")?;
-                if will_add {
+                if add_match(blob_id, m)? {
                     num_matches_added += 1;
                 }
-
-                add_match
-                    .execute((
-                        blob_id,
-                        bytes.start,
-                        bytes.end,
-                        m.location.source_span.start.line,
-                        m.location.source_span.start.column,
-                        m.location.source_span.end.line,
-                        m.location.source_span.end.column,
-                        m.snippet.before.as_slice(),
-                        m.snippet.matching.as_slice(),
-                        m.snippet.after.as_slice(),
-                        m.capture_group_index,
-                        m.match_content.as_slice(),
-                        &m.rule_name,
-                    ))
-                    .context("Failed to add match")?;
             }
         }
 
         Ok(num_matches_added)
+    }
+}
+
+// Public implementation, recording functions
+impl Datastore {
+    pub fn begin(&mut self) -> Result<Transaction> {
+        let inner = self.conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        Ok(Transaction { inner })
     }
 }
 

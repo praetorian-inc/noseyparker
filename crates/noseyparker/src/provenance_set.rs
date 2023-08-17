@@ -8,7 +8,6 @@ use crate::provenance::Provenance;
 
 /// A non-empty set of `Provenance` entries.
 pub struct ProvenanceSet {
-
     provenance: Provenance,
     more_provenance: Vec<Provenance>,
 }

@@ -1,6 +1,7 @@
 pub mod blob;
 pub mod blob_appearance;
 pub mod blob_id;
+pub mod blob_id_map;
 pub mod blob_id_set;
 pub mod blob_metadata;
 pub mod bstring_escape;
