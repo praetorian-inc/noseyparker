@@ -1,4 +1,5 @@
 use bstr::BString;
+use tracing::debug;
 
 use crate::blob_id::BlobId;
 use crate::location::{LocationMapping, Location};
@@ -66,7 +67,13 @@ impl Match {
             .enumerate()
             .skip(1)
             .filter_map(move |(group_index, group)| {
-                let group = group?; // XXX should we warn on empty match groups?
+                let group = match group {
+                    Some(group) => group,
+                    None => {
+                        debug!("blob {}: empty match group at index {group_index}: {} {}", blob_match.blob.id, blob_match.rule.id, blob_match.rule.name);
+                        return None;
+                    }
+                };
                 Some(Match {
                     blob_id: blob_match.blob.id,
                     rule_name: blob_match.rule.name.clone(),
