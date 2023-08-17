@@ -390,7 +390,7 @@ impl <'a> Transaction<'a> {
                 let (provenance_id, kind) = match p {
                     Provenance::File(e) => {
                         let path = e.path.as_os_str().as_bytes();
-                        let payload_id = add_provenance_payload_file(&path)?;
+                        let payload_id = add_provenance_payload_file(path)?;
                         let provenance_id = add_provenance("file", payload_id)?;
                         (provenance_id, None)
                     }
@@ -403,7 +403,7 @@ impl <'a> Transaction<'a> {
                                 (provenance_id, None)
                             }
                             Some(c) => {
-                                let commit_id = add_git_commit(&c)?;
+                                let commit_id = add_git_commit(c)?;
                                 let blob_path = c.blob_path.as_slice();
                                 let payload_id = add_provenance_payload_git_commit(repo_path, commit_id, blob_path)?;
                                 let provenance_id = add_provenance("git_commit", payload_id)?;

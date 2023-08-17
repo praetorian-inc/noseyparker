@@ -68,7 +68,7 @@ impl <V: Copy> BlobIdMap<V> {
     #[inline]
     pub fn get(&self, blob_id: &BlobId) -> Option<V> {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.maps[bucket as usize].lock().unwrap().get(&ObjectId::from(blob_id)).map(|v| *v)
+        self.maps[bucket as usize].lock().unwrap().get(&ObjectId::from(blob_id)).copied()
     }
 }
 
