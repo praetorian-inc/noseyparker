@@ -400,8 +400,8 @@ impl Display for MatchGroup {
                         if let Some(cs) = &e.commit_provenance {
                             let cmd = &cs.commit_metadata;
                             let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
-                            let ctime = cmd
-                                .committer_timestamp
+                            let atime = cmd
+                                .author_timestamp
                                 .format(time::macros::format_description!("[year]-[month]-[day]"));
                             writeln!(
                                 f,
@@ -414,17 +414,13 @@ impl Display for MatchGroup {
                             writeln!(
                                 indented(&mut f).with_str("    "),
                                 "{}     {} <{}>\n\
-                                 {}  {} <{}>\n\
                                  {}       {}\n\
                                  {}    {}",
                                 STYLE_HEADING.apply_to("Author:"),
                                 cmd.author_name,
                                 cmd.author_email,
-                                STYLE_HEADING.apply_to("Committer:"),
-                                cmd.committer_name,
-                                cmd.committer_email,
                                 STYLE_HEADING.apply_to("Date:"),
-                                ctime,
+                                atime,
                                 STYLE_HEADING.apply_to("Summary:"),
                                 msg,
                             )?;
