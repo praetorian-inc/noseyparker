@@ -1,9 +1,4 @@
 .buildx-cache
-.git
-.gitattributes
-.github
-.gitignore
-.gitattributes
 CHANGELOG.md
 README.md
 docs

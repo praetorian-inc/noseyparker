@@ -1,7 +1,15 @@
 ################################################################################
 # Build `noseyparker`
+#
+# We use the oldest Debian-based image that can build Nosey Parker without trouble.
+# This is done in an effort to link against an older glibc, so that the built
+# binary (which is *not* statically linked, but does not dynamically link with
+# non-standard runtime libraries) can be copied out of the container and run on
+# more Linux machines than would otherwise be possible.
+#
+# See https://github.com/praetorian-inc/noseyparker/issues/58.
 ################################################################################
-FROM rust:1.70 AS builder
+FROM rust:1.71-bullseye AS builder
 
 # Install dependencies
 #
