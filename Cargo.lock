@@ -438,7 +438,7 @@ dependencies = [
 
 [[package]]
 name = "content_guesser"
-version = "0.13.0-dev"
+version = "0.14.0"
 dependencies = [
  "magic",
  "mime",
@@ -2351,7 +2351,7 @@ checksum = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
 
 [[package]]
 name = "noseyparker"
-version = "0.13.0-dev"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "atoi",
@@ -2389,7 +2389,7 @@ dependencies = [
 
 [[package]]
 name = "noseyparker-cli"
-version = "0.13.0-dev"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -3759,7 +3759,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vectorscan"
-version = "0.13.0-dev"
+version = "0.14.0"
 dependencies = [
  "bitflags 2.4.0",
  "foreign-types 0.5.0",
@@ -3769,7 +3769,7 @@ dependencies = [
 
 [[package]]
 name = "vectorscan-sys"
-version = "0.13.0-dev"
+version = "0.14.0"
 dependencies = [
  "bindgen",
  "cmake",

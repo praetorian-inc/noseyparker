@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+
+## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)
+
+A prebuilt multiplatform Docker image for this release is available for x86_64 and ARM64 architectures:
+```
+docker pull ghcr.io/praetorian-inc/noseyparker:v0.14.0
+```
+
 ### Additions
 - Running `noseyparker --version` now emits many compile-time details about the build, which can be useful for troubleshooting ([#48](https://github.com/praetorian-inc/noseyparker/issues/48)).
 
