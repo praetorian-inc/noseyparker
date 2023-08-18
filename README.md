@@ -26,15 +26,12 @@ A prebuilt multiplatform Docker image is available for the latest release for x8
 docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-A prebuilt Docker image is available for the most recent commit for x86_64:
-
-```
-docker pull ghcr.io/praetorian-inc/noseyparker:edge
-```
+A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
 
 **Note:** The Docker image runs noticeably slower than a native binary, particularly on macOS.
 
-### Building from source
+<details>
+<summary><h3>Building from source</h3></summary>
 
 **1. Prerequisites**
 This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS running on both Intel and ARM processors.
@@ -50,23 +47,37 @@ Required dependencies:
 cargo build --release
 ```
 This will produce an optimized binary at `target/release/noseyparker`.
+</details>
 
 ## Usage quick start
 
-**Note:** If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
+### Overview
 
-```
-docker run -v "$PWD":/scan/ ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
-```
-
-### The datastore
-Most Nosey Parker commands use a _datastore_.
-This is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
+#### The datastore
+Most Nosey Parker commands use a _datastore_, which is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
 A datastore will be implicitly created by the `scan` command if needed.
-You can also create a datastore explicitly using the `datastore init -d PATH` command.
+
+The usual workflow is to create a datastore with the `scan` command, and then pass that populated datastore to the `report` command to render results in the desired format.
+
+#### Getting help
+Running the `noseyparker` binary without arguments prints top-level help and exits.
+You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
+More detailed help is available with the `help` command or long-form `--help` option.
 
 
-### Scanning filesystem content for secrets
+#### Docker usage note
+If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
+
+```
+docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
+```
+
+The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
+
+
+<details>
+<summary><h3>Scanning filesystem content for secrets</h3></summary>
+ 
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
 
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
@@ -88,8 +99,11 @@ Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 n
 
 Run the `report` command next to show finding details.
 ```
+</details>
 
-### Scanning Git repos by URL, GitHub username, or GitHub organization name
+<details>
+<summary><h3>Scanning Git repos by URL, GitHub username, or GitHub organization name</h3></summary>
+
 Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
 The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
 
@@ -107,8 +121,11 @@ These input specifiers will use an optional GitHub token if available in the `NP
 Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
 
 See `noseyparker help scan` for more details.
+</details>
 
-### Summarizing findings
+<details>
+<summary><h3>Summarizing findings</h3></summary>
+ 
 Nosey Parker prints out a summary of its findings when it finishes
 scanning.  You can also run this step separately:
 ```
@@ -124,9 +141,12 @@ $ noseyparker summarize --datastore np.cpython
 ```
 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
+</details>
 
 
-### Reporting detailed findings
+<details>
+<summary><h3>Reporting detailed findings</h3></summary>
+
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
 ```
@@ -175,9 +195,11 @@ Showing 3/29 occurrences:
 
 (Note: the findings above are synthetic, invalid secrets.)
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
+</details>
 
+<details>
+<summary><h3>Enumerating repositories from GitHub</h3></summary>
 
-### Enumerating repositories from GitHub
 To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
 This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
 For example:
@@ -199,18 +221,12 @@ Providing an access token gives a higher API rate limit and may make additional 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 
 See `noseyparker help github` for more details.
-
-
-### Getting help
-Running the `noseyparker` binary without arguments prints top-level help and exits.
-You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
-
-**Tip: More detailed help is available with the `help` command or long-form `--help` option.**
-
-Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
+</details>
 
 
 ## Contributing
+Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
+
 Contributions are welcome, particularly new regex rules.
 Developing new regex rules is detailed in a [separate document](docs/RULES.md).
 
