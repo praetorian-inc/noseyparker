@@ -56,7 +56,7 @@ This will produce an optimized binary at `target/release/noseyparker`.
 **Note:** If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
 ```
-docker run -v "$PWD":/opt/ ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
+docker run -v "$PWD":/scan/ ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 ### The datastore
@@ -71,6 +71,7 @@ Nosey Parker has built-in support for scanning files, recursively scanning direc
 
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
 Nosey Parker will create a new datastore at `np.cpython` and saves its findings there.
+(The name `np.cpython` is nonessential; it can be whatever you want.)
 ```
 $ noseyparker scan --datastore np.cpython cpython.git
 Found 28.30 GiB from 18 plain files and 427,712 blobs from 1 Git repos [00:00:04]
@@ -206,12 +207,14 @@ You can get abbreviated help for a particular command by running `noseyparker CO
 
 **Tip: More detailed help is available with the `help` command or long-form `--help` option.**
 
+Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
+
 
 ## Contributing
 Contributions are welcome, particularly new regex rules.
 Developing new regex rules is detailed in a [separate document](docs/RULES.md).
 
-If you are considering making significant code changes, please [open an issue](https://github.com/praetorian-inc/noseyparker/issues/new) first to start discussion.
+If you are considering making significant code changes, please [open an issue](https://github.com/praetorian-inc/noseyparker/issues/new) or [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose) first.
 
 
 ## License
@@ -219,4 +222,4 @@ Nosey Parker is licensed under the [Apache License, Version 2.0](LICENSE).
 
 Any contribution intentionally submitted for inclusion in Nosey Parker by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
 
-Nosey Parker also includes vendored copies of several other packages released under the Apache License and other permissive licenses; see `LICENSE` for details.
+Nosey Parker also includes vendored copies of several other packages released under the Apache License and other permissive licenses; see [`LICENSE`](LICENSE) for details.
