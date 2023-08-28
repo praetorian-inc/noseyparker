@@ -59,7 +59,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
 
         push: true
-        tags: ghcr.io/praetorian-inc/noseyparker:experimental-multiplatform
+        tags: ghcr.io/${{ github.repository }}:experimental-multiplatform
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}
