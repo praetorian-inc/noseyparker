@@ -26,6 +26,7 @@ macro_rules! unwrap_or_continue {
         match $arg {
             Ok(v) => v,
             Err(e) => {
+                #[allow(clippy::redundant_closure_call)]
                 $on_error(e);
                 continue;
             }

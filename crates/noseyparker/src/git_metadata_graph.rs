@@ -510,7 +510,7 @@ impl GitMetadataGraph {
         // Massage intermediate accumulated results into output format
         let commit_metadata = cg
             .node_weights()
-            .zip(blobs_introduced.into_iter())
+            .zip(blobs_introduced)
             .map(|(md, intro)| RepoMetadata {
                 commit_oid: md.oid,
                 introduced_blobs: intro,
