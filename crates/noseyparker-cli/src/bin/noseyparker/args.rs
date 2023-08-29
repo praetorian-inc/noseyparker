@@ -41,6 +41,8 @@ fn get_long_version() -> &'static str {
     )
 }
 
+const DEFAULT_DATASTORE: &str = "datastore.np";
+
 // -----------------------------------------------------------------------------
 // command-line args
 // -----------------------------------------------------------------------------
@@ -72,16 +74,41 @@ pub struct CommandLineArgs {
 
 impl CommandLineArgs {
     pub fn parse_args() -> Self {
-        let mut s = Self::parse();
+        let mut cmd = <Self as clap::CommandFactory>::command();
+        let matches = cmd.get_matches_mut();
+
+        use clap::parser::ValueSource;
+
+        // Make sure that if the `scan` command is specified and the default datastore is used,
+        // that the datastore does not already exist.
+        // See #74.
+        if let Some(("scan", sub_matches)) = matches.subcommand() {
+            let datastore_value: &PathBuf = sub_matches
+                .get_one("datastore")
+                .expect("datastore arg should be present");
+            if let Some(ValueSource::DefaultValue) = sub_matches.value_source("datastore") {
+                if datastore_value.exists() {
+                    cmd.error(clap::error::ErrorKind::InvalidValue,
+                              format!("the default datastore at {} exists; \
+                                       explicitly specify the datastore if you wish to update it",
+                                      datastore_value.display())).exit();
+                }
+            }
+        }
+
+        let mut args = match <Self as clap::FromArgMatches>::from_arg_matches(&matches) {
+            Ok(args) => args,
+            Err(e) => e.exit(),
+        };
 
         // If `NO_COLOR` is set in the environment, disable colored output
         //
         // https://no-color.org/
         if std::env::var("NO_COLOR").is_ok() {
-            s.global_args.color = Mode::Never
+            args.global_args.color = Mode::Never
         }
 
-        s
+        args
     }
 }
 
@@ -243,7 +270,7 @@ pub struct GitHubArgs {
     #[arg(
         long,
         value_name = "URL",
-        default_value_t = Url::parse("https://api.github.com").expect("default API url should parse"),
+        default_value = "https://api.github.com",
         visible_alias="api-url"
     )]
     pub github_api_url: Url,
@@ -337,7 +364,7 @@ pub enum DatastoreCommand {
 
 #[derive(Args, Debug)]
 pub struct DatastoreInitArgs {
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
     /// Initialize the datastore at specified path
     pub datastore: PathBuf,
 }
@@ -358,8 +385,7 @@ pub struct ScanArgs {
     /// Use the specified datastore
     ///
     /// The datastore will be created if it does not exist.
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
-    // FIXME: choose a good default value for this?
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
     pub datastore: PathBuf,
 
     /// Use N parallel scanning jobs
@@ -566,7 +592,7 @@ impl ContentFilteringArgs {
 #[derive(Args, Debug)]
 pub struct SummarizeArgs {
     /// Use the specified datastore
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
     pub datastore: PathBuf,
 
     #[command(flatten)]
@@ -579,7 +605,7 @@ pub struct SummarizeArgs {
 #[derive(Args, Debug)]
 pub struct ReportArgs {
     /// Use the specified datastore
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"))]
+    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
     pub datastore: PathBuf,
 
     #[command(flatten)]

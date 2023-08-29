@@ -4,13 +4,14 @@ expression: stdout
 ---
 Report detailed scan findings
 
-Usage: noseyparker report [OPTIONS] --datastore <PATH>
+Usage: noseyparker report [OPTIONS]
 
 Options:
   -d, --datastore <PATH>
           Use the specified datastore
           
           [env: NP_DATASTORE=]
+          [default: datastore.np]
 
   -h, --help
           Print help (see a summary with '-h')

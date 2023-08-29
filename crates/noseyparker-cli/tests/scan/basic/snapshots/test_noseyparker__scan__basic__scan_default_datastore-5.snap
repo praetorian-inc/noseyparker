@@ -1,0 +1,10 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stderr
+---
+error: the default datastore at datastore.np exists; explicitly specify the datastore if you wish to update it
+
+Usage: noseyparker [OPTIONS] <COMMAND>
+
+For more information, try '--help'.
+

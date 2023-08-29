@@ -93,7 +93,7 @@ fn scan_file_maxsize() {
     .stdout(match_nothing_scanned());
 }
 
-// NOTE: this one fails if you are running as root
+// FIXME: this one fails if you are running as root
 #[cfg(unix)]
 #[test]
 fn scan_unreadable_file() {
@@ -145,10 +145,84 @@ fn scan_secrets1() {
         assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath()));
     });
 
-
     let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
     let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
     assert_json_snapshot!(json_output, {
         "[].matches[].provenance[].path" => "<ROOT>/input.txt"
     });
+}
+
+#[test]
+fn scan_default_datastore() {
+    let scan_env = ScanEnv::new();
+    let input = scan_env.input_file("input.txt");
+
+    let ds = scan_env.root.child("datastore.np");
+    ds.assert(predicates::path::missing());
+
+    // first scan with the default datastore
+    noseyparker!("scan", input.path())
+        .current_dir(scan_env.root.path())
+        .assert()
+        .success()
+        .stdout(match_scan_stats("0 B", 1, 0, 0));
+
+    ds.assert(predicates::path::is_dir());
+    input.assert(predicates::path::is_file());
+
+    // Make sure that summarization and reporting works without an explicit datastore
+    let cmd = noseyparker!("report", "--format=json")
+        .current_dir(scan_env.root.path())
+        .assert()
+        .success();
+    let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+    assert_json_snapshot!(json_output);
+
+    let cmd = noseyparker!("summarize", "--format=json")
+        .current_dir(scan_env.root.path())
+        .assert()
+        .success();
+    let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+    assert_json_snapshot!(json_output);
+
+    // now try to scan again with the existing default datastore
+    assert_cmd_snapshot!(noseyparker!("scan", input.path())
+        .current_dir(scan_env.root.path())
+        .assert()
+        .failure());
+
+    // Finally, try to scan again with the existing default datastore, explicitly specifying it
+    noseyparker!("scan", "-d", ds.path(), input.path())
+        .current_dir(scan_env.root.path())
+        .assert()
+        .success()
+        .stdout(match_scan_stats("0 B", 1, 0, 0));
+}
+
+#[test]
+fn summarize_nonexistent_default_datastore() {
+    let scan_env = ScanEnv::new();
+    let ds = scan_env.root.child("datastore.np");
+    ds.assert(predicates::path::missing());
+
+    assert_cmd_snapshot!(noseyparker!("summarize")
+        .current_dir(scan_env.root.path())
+        .assert()
+        .failure());
+
+    ds.assert(predicates::path::missing());
+}
+
+#[test]
+fn report_nonexistent_default_datastore() {
+    let scan_env = ScanEnv::new();
+    let ds = scan_env.root.child("datastore.np");
+    ds.assert(predicates::path::missing());
+
+    assert_cmd_snapshot!(noseyparker!("report")
+        .current_dir(scan_env.root.path())
+        .assert()
+        .failure());
+
+    ds.assert(predicates::path::missing());
 }

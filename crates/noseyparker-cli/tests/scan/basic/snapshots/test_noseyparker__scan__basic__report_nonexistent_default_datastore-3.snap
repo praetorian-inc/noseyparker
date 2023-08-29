@@ -1,0 +1,11 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stderr
+---
+Error: Failed to open datastore at datastore.np
+
+Caused by:
+    0: Failed to open database at datastore.np/datastore.db
+    1: unable to open database file: datastore.np/datastore.db
+    2: Error code 14: Unable to open the database file
+

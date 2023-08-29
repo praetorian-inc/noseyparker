@@ -35,7 +35,7 @@ unauthenticated access is used. An optional personal access token can be specifi
 `NP_GITHUB_TOKEN` environment variable. Using a personal access token gives higher rate limits and
 may make additional content accessible.
 
-Usage: noseyparker scan [OPTIONS] --datastore <PATH> [INPUT]...
+Usage: noseyparker scan [OPTIONS] [INPUT]...
 
 Options:
   -d, --datastore <PATH>
@@ -44,6 +44,7 @@ Options:
           The datastore will be created if it does not exist.
           
           [env: NP_DATASTORE=]
+          [default: datastore.np]
 
   -j, --jobs <N>
           Use N parallel scanning jobs

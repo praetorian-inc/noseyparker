@@ -1,0 +1,5 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stdout
+---
+

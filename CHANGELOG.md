@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Additions
+
+- A default value (`datastore.np`) is now set for commands that take a datastore option ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
+  This makes simpler `noseyparker` command-line invocations possible.
+
 
 ## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)
 
