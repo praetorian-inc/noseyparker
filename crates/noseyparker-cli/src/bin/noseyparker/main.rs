@@ -7,6 +7,7 @@ mod cmd_github;
 mod cmd_report;
 mod cmd_rules;
 mod cmd_scan;
+mod cmd_shell_completions;
 mod cmd_summarize;
 
 use args::GlobalArgs;
@@ -80,6 +81,7 @@ fn try_main() -> Result<()> {
         args::Command::Scan(args) => cmd_scan::run(global_args, args),
         args::Command::Summarize(args) => cmd_summarize::run(global_args, args),
         args::Command::Report(args) => cmd_report::run(global_args, args),
+        args::Command::ShellCompletions(args) => cmd_shell_completions::run(global_args, args),
     }
 }
 
