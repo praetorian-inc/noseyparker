@@ -168,6 +168,10 @@ pub enum Command {
     #[command(display_order = 30)]
     /// Manage rules
     Rules(RulesArgs),
+
+    #[command(display_order = 30)]
+    /// Generate shell completions
+    ShellCompletions(ShellCompletionsArgs),
 }
 
 // -----------------------------------------------------------------------------
@@ -610,6 +614,39 @@ pub struct ReportArgs {
 
     #[command(flatten)]
     pub output_args: OutputArgs,
+}
+
+
+// -----------------------------------------------------------------------------
+// `shell_completions` command
+// -----------------------------------------------------------------------------
+#[derive(ValueEnum, Debug, Clone)]
+#[clap(rename_all = "lower")]
+pub enum ShellFormat {
+    Bash,
+    Zsh,
+    Fish,
+    PowerShell,
+    Elvish
+}
+
+impl std::fmt::Display for ShellFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            ShellFormat::Bash => "bash",
+            ShellFormat::Zsh => "zsh",
+            ShellFormat::Fish => "fish",
+            ShellFormat::PowerShell => "powershell",
+            ShellFormat::Elvish => "elvish",
+        };
+        write!(f, "{s}")
+    }
+}
+
+#[derive(Args, Debug)]
+pub struct ShellCompletionsArgs {
+    #[arg(long, short, value_name = "SHELL")]
+    pub shell: ShellFormat,
 }
 
 // -----------------------------------------------------------------------------

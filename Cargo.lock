@@ -385,6 +385,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap_complete"
+version = "4.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "586a385f7ef2f8b4d86bddaa0c094794e7ccbfe5ffef1f434fe928143fc783a5"
+dependencies = [
+ "clap",
+]
+
+[[package]]
 name = "clap_derive"
 version = "4.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2396,6 +2405,7 @@ dependencies = [
  "assert_fs",
  "bstr",
  "clap",
+ "clap_complete",
  "console",
  "crossbeam-channel",
  "ignore",

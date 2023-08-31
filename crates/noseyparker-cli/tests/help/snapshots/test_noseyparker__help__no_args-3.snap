@@ -8,13 +8,14 @@ and Git history.
 Usage: noseyparker [OPTIONS] <COMMAND>
 
 Commands:
-  scan       Scan content for secrets
-  summarize  Summarize scan findings
-  report     Report detailed scan findings
-  github     Interact with GitHub
-  datastore  Manage datastores
-  rules      Manage rules
-  help       Print this message or the help of the given subcommand(s)
+  scan               Scan content for secrets
+  summarize          Summarize scan findings
+  report             Report detailed scan findings
+  github             Interact with GitHub
+  datastore          Manage datastores
+  rules              Manage rules
+  shell-completions  Generate shell completions
+  help               Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help (see more with '--help')
