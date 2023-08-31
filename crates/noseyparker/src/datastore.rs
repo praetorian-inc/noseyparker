@@ -215,7 +215,7 @@ impl <'a> Transaction<'a> {
             "#})?;
 
             let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert or replace into match(
+                insert into match(
                     blob_id,
                     start_byte,
                     end_byte,
@@ -231,6 +231,15 @@ impl <'a> Transaction<'a> {
                     after_snippet,
                     group_input
                 ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                on conflict do update set
+                    start_line = excluded.start_line,
+                    start_column = excluded.start_column,
+                    end_line = excluded.end_line,
+                    end_column = excluded.end_column,
+                    before_snippet = excluded.before_snippet,
+                    matching_input = excluded.matching_input,
+                    after_snippet = excluded.after_snippet,
+                    group_input = excluded.group_input
             "#})?;
 
             move |blob_id: i64, m: &Match| -> rusqlite::Result<bool> {
@@ -260,7 +269,8 @@ impl <'a> Transaction<'a> {
                 );
 
                 let mut new = false;
-                // only insert the match data if it's different than what's there already
+                // to reduce database writes, only insert the match data if it's different than
+                // what's there already
                 let different = match get.query(params)?.next()? {
                     None => {
                         new = true;
@@ -749,9 +759,6 @@ impl Datastore {
             Ok(())
         };
 
-        // -----------------------------------------------------------------------------------------
-        // migration 3
-        // -----------------------------------------------------------------------------------------
         let user_version: u64 = get_user_version()?;
         if user_version == 1 || user_version == 2 {
             bail!(
@@ -759,10 +766,13 @@ impl Datastore {
                   the new format; rescanning the inputs with a new datastore will be required."
             );
         }
-        if user_version > 3 {
+        if user_version > 4 {
             bail!("Unknown schema version {user_version}");
         }
 
+        // -----------------------------------------------------------------------------------------
+        // migration 3
+        // -----------------------------------------------------------------------------------------
         if user_version == 0 {
             let new_user_version = 3;
             debug!("Migrating database schema from version {user_version} to {new_user_version}");
@@ -929,7 +939,85 @@ impl Datastore {
             set_user_version(new_user_version)?;
         }
 
+        // -----------------------------------------------------------------------------------------
+        // migration 4
+        // -----------------------------------------------------------------------------------------
+        let user_version = get_user_version()?;
+        if user_version == 3 {
+            let new_user_version = 4;
+            debug!("Migrating database schema from version {user_version} to {new_user_version}");
+            // Add an explicit `id` primary key to the match table.
+            //
+            // Sqlite doesn't allow adding a primary key via `alter table`, so we do a roundabout
+            // migration by renaming, creating a new table, copying, an dropping the old one.
+            tx.execute_batch(indoc! {r#"
+                alter table match rename to old_match;
+
+                create table match
+                -- This table is a representation of the matches found from scanning.
+                --
+                -- See the `noseyparker::match_type::Match` type in noseyparker for correspondence.
+                (
+                    id integer primary key,
+                    blob_id integer not null references blob(id),
+
+                    start_byte integer not null,
+                    end_byte integer not null,
+
+                    start_line integer not null,
+                    start_column integer not null,
+
+                    end_line integer not null,
+                    end_column integer not null,
+
+                    before_snippet blob not null,
+                    matching_input blob not null,
+                    after_snippet blob not null,
+
+                    group_index integer not null,
+                    group_input blob not null,
+
+                    rule_name text not null,
+
+                    -- NOTE: Checking just these fields ought to be sufficient to ensure that
+                    --       entries in the table are unique.
+                    unique (
+                        blob_id,
+                        start_byte,
+                        end_byte,
+                        group_index,
+                        rule_name
+                    )
+                ) strict;
+
+                insert into match (
+                    blob_id,
+                    start_byte,
+                    end_byte,
+                    start_line,
+                    start_column,
+                    end_line,
+                    end_column,
+                    before_snippet,
+                    matching_input,
+                    after_snippet,
+                    group_index,
+                    group_input,
+                    rule_name
+                ) select * from old_match;
+
+                drop table old_match;
+
+                -- An index to allow quick grouping of equivalent matches
+                create index match_grouping_index on match (group_input, rule_name);
+
+            "#})?;
+            set_user_version(new_user_version)?;
+        }
+
+        assert_eq!(get_user_version()?, 4);
         tx.commit()?;
+
         Ok(())
     }
 }
