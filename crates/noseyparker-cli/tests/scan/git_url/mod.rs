@@ -18,7 +18,6 @@ fn git_binary_missing() {
 
     let path = "https://github.com/praetorian-inc/noseyparker";
     noseyparker!("scan", "-d", scan_env.dspath(), "--git-url", path)
-        .env_clear()
         .env("PATH", "/dev/null")
         .assert()
         .failure()
