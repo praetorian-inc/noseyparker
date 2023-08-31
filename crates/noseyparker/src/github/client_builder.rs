@@ -14,7 +14,7 @@ pub struct ClientBuilder {
 
 impl ClientBuilder {
     /// The user agent string sent when accessing the GitHub REST API
-    const USER_AGENT: &str = "noseyparker";
+    const USER_AGENT: &'static str = "noseyparker";
 
     /// Create a new `ClientBuilder` that uses unauthenticated access to <https://api.github.com>.
     pub fn new() -> Self {
