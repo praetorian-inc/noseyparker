@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A default value (`datastore.np`) is now set for commands that take a datastore option ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
   This makes simpler `noseyparker` command-line invocations possible.
 
+- A new `shell-completions` command has been added, which generates shell-specific completion scripts for zsh, bash, fish, powershell, and elvish ([#76](https://github.com/praetorian-inc/noseyparker/pull/76)).
+  These generated completion scripts make discovery of Nosey Parker's command-line API simpler.
+  Thank you @Coruscant11!
+
 
 ## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)
 
