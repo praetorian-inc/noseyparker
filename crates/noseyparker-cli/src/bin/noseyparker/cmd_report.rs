@@ -15,12 +15,16 @@ use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 
-use crate::args::{GlobalArgs, ReportArgs, Reportable};
+use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat, Reportable};
 
 pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     let datastore = Datastore::open(&args.datastore)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
-    DetailsReporter(datastore).report(&args.output_args)
+    let output = args
+        .output_args
+        .get_writer()
+        .context("Failed to get output writer")?;
+    DetailsReporter(datastore).report(args.output_args.format, output)
 }
 
 struct DetailsReporter(Datastore);
@@ -42,6 +46,19 @@ impl DetailsReporter {
 }
 
 impl Reportable for DetailsReporter {
+    type Format = ReportOutputFormat;
+
+    fn report<W: std::io::Write>(&self, format: Self::Format, writer: W) -> Result<()> {
+        match format {
+            ReportOutputFormat::Human => self.human_format(writer),
+            ReportOutputFormat::Json => self.json_format(writer),
+            ReportOutputFormat::Jsonl => self.jsonl_format(writer),
+            ReportOutputFormat::Sarif => self.sarif_format(writer),
+        }
+    }
+}
+
+impl DetailsReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore = &self.0;
         let group_metadata = datastore

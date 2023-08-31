@@ -1,13 +1,25 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use indicatif::HumanCount;
 
 use noseyparker::datastore::{Datastore, MatchSummary};
 
-use crate::args::{GlobalArgs, Reportable, SummarizeArgs};
+use crate::args::{GlobalArgs, Reportable, SummarizeArgs, SummarizeOutputFormat};
 
 struct MatchSummaryReporter(MatchSummary);
 
 impl Reportable for MatchSummaryReporter {
+    type Format = SummarizeOutputFormat;
+
+    fn report<W: std::io::Write>(&self, format: Self::Format, writer: W) -> Result<()> {
+        match format {
+            SummarizeOutputFormat::Human => self.human_format(writer),
+            SummarizeOutputFormat::Json => self.json_format(writer),
+            SummarizeOutputFormat::Jsonl => self.jsonl_format(writer),
+        }
+    }
+}
+
+impl MatchSummaryReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let summary = &self.0;
         writeln!(writer)?;
@@ -31,16 +43,16 @@ impl Reportable for MatchSummaryReporter {
         }
         Ok(())
     }
-
-    fn sarif_format<W: std::io::Write>(&self, _writer: W) -> Result<()> {
-        bail!("SARIF output not supported for this command")
-    }
 }
 
 pub fn run(_global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
     let datastore = Datastore::open(&args.datastore)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
-    MatchSummaryReporter(datastore.summarize()?).report(&args.output_args)
+    let output = args
+        .output_args
+        .get_writer()
+        .context("Failed to get output writer")?;
+    MatchSummaryReporter(datastore.summarize()?).report(args.output_args.format, output)
 }
 
 pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {

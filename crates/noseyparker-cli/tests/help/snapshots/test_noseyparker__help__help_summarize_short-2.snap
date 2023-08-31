@@ -13,7 +13,7 @@ Options:
 Output Options:
   -o, --output <PATH>    Write output to the specified path
   -f, --format <FORMAT>  Write output in the specified format [default: human] [possible values:
-                         human, json, jsonl, sarif]
+                         human, json, jsonl]
 
 Global Options:
   -v, --verbose...       Enable verbose output

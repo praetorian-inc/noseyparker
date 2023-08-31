@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
 use std::io::IsTerminal;
 use std::path::PathBuf;
@@ -299,7 +299,7 @@ pub struct GitHubReposListArgs {
     pub repo_specifiers: GitHubRepoSpecifiers,
 
     #[command(flatten)]
-    pub output_args: OutputArgs,
+    pub output_args: OutputArgs<GitHubOutputFormat>,
 }
 
 #[derive(Args, Debug, Clone)]
@@ -600,7 +600,7 @@ pub struct SummarizeArgs {
     pub datastore: PathBuf,
 
     #[command(flatten)]
-    pub output_args: OutputArgs,
+    pub output_args: OutputArgs<SummarizeOutputFormat>,
 }
 
 // -----------------------------------------------------------------------------
@@ -613,7 +613,7 @@ pub struct ReportArgs {
     pub datastore: PathBuf,
 
     #[command(flatten)]
-    pub output_args: OutputArgs,
+    pub output_args: OutputArgs<ReportOutputFormat>,
 }
 
 
@@ -654,7 +654,7 @@ pub struct ShellCompletionsArgs {
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Output Options")]
-pub struct OutputArgs {
+pub struct OutputArgs<Format: ValueEnum + Send + Sync + 'static> {
     /// Write output to the specified path
     ///
     /// If this argument is not provided, stdout will be used.
@@ -663,11 +663,11 @@ pub struct OutputArgs {
 
     /// Write output in the specified format
     // FIXME: make this optional, and if not specified, infer from the extension of the output file
-    #[arg(long, short, value_name="FORMAT", default_value_t=OutputFormat::Human)]
-    pub format: OutputFormat,
+    #[arg(long, short, value_name="FORMAT", default_value="human")]
+    pub format: Format,
 }
 
-impl OutputArgs {
+impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
     /// Get a writer for the specified output destination.
     pub fn get_writer(&self) -> std::io::Result<Box<dyn std::io::Write>> {
         use std::fs::File;
@@ -681,13 +681,30 @@ impl OutputArgs {
             }
         }
     }
+
+    /*
+    pub fn report(&self, format: Format::Format) -> Result<()> {
+        let writer = self
+            .get_writer()
+            .context("Failed to open output destination for writing")?;
+
+        match self.format.report(format, writer) {
+            Ok(()) => Ok(()),
+            Err(e) => match e.downcast_ref::<std::io::Error>() {
+                // Ignore SIGPIPE errors, like those that can come from piping to `head`
+                Some(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
+                _ => Err(e)?,
+            },
+        }
+    }
+    */
 }
 
 // -----------------------------------------------------------------------------
-// output format
+// report output format
 // -----------------------------------------------------------------------------
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum OutputFormat {
+pub enum ReportOutputFormat {
     /// A text-based format designed for humans
     Human,
 
@@ -706,13 +723,69 @@ pub enum OutputFormat {
     Sarif,
 }
 
-impl std::fmt::Display for OutputFormat {
+impl std::fmt::Display for ReportOutputFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            OutputFormat::Human => "human",
-            OutputFormat::Json => "json",
-            OutputFormat::Jsonl => "jsonl",
-            OutputFormat::Sarif => "sarif",
+            ReportOutputFormat::Human => "human",
+            ReportOutputFormat::Json => "json",
+            ReportOutputFormat::Jsonl => "jsonl",
+            ReportOutputFormat::Sarif => "sarif",
+        };
+        write!(f, "{s}")
+    }
+}
+
+// -----------------------------------------------------------------------------
+// summarize output format
+// -----------------------------------------------------------------------------
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum SummarizeOutputFormat {
+    /// A text-based format designed for humans
+    Human,
+
+    /// Pretty-printed JSON format
+    Json,
+
+    /// JSON Lines format
+    ///
+    /// This is a sequence of JSON objects, one per line.
+    Jsonl,
+}
+
+impl std::fmt::Display for SummarizeOutputFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            SummarizeOutputFormat::Human => "human",
+            SummarizeOutputFormat::Json => "json",
+            SummarizeOutputFormat::Jsonl => "jsonl",
+        };
+        write!(f, "{s}")
+    }
+}
+
+// -----------------------------------------------------------------------------
+// github output format
+// -----------------------------------------------------------------------------
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum GitHubOutputFormat {
+    /// A text-based format designed for humans
+    Human,
+
+    /// Pretty-printed JSON format
+    Json,
+
+    /// JSON Lines format
+    ///
+    /// This is a sequence of JSON objects, one per line.
+    Jsonl,
+}
+
+impl std::fmt::Display for GitHubOutputFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            GitHubOutputFormat::Human => "human",
+            GitHubOutputFormat::Json => "json",
+            GitHubOutputFormat::Jsonl => "jsonl",
         };
         write!(f, "{s}")
     }
@@ -721,31 +794,8 @@ impl std::fmt::Display for OutputFormat {
 // -----------------------------------------------------------------------------
 // report writer
 // -----------------------------------------------------------------------------
-// FIXME: refactor this to avoid having to implement bogus methods
 pub trait Reportable {
-    fn human_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
-    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
-    fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
-    fn sarif_format<W: std::io::Write>(&self, writer: W) -> Result<()>;
+    type Format;
 
-    fn report(&self, output_args: &OutputArgs) -> Result<()> {
-        let writer = output_args
-            .get_writer()
-            .context("Failed to open output destination for writing")?;
-
-        let result = match &output_args.format {
-            OutputFormat::Human => self.human_format(writer),
-            OutputFormat::Json => self.json_format(writer),
-            OutputFormat::Jsonl => self.jsonl_format(writer),
-            OutputFormat::Sarif => self.sarif_format(writer),
-        };
-        match result {
-            Ok(()) => Ok(()),
-            Err(e) => match e.downcast_ref::<std::io::Error>() {
-                // Ignore SIGPIPE errors, like those that can come from piping to `head`
-                Some(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
-                _ => Err(e)?,
-            },
-        }
-    }
+    fn report<W: std::io::Write>(&self, format: Self::Format, writer: W) -> Result<()>;
 }
