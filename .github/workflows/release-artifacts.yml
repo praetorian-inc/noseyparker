@@ -3,7 +3,8 @@ name: Release Artifacts
 on:
   push:
     # The multiplatform Docker image is expensive to build (3h), so we are not
-    # currently running it for every commit to `main`
+    # currently running it for every commit to `main`.
+    # See #39 for more context.
     #
     # branches: [ "main" ]
 
@@ -59,7 +60,9 @@ jobs:
         platforms: linux/amd64,linux/arm64
 
         push: true
-        tags: ghcr.io/${{ github.repository }}:experimental-multiplatform
+        tags:
+        - ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        - ghcr.io/${{ github.repository }}:latest
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}

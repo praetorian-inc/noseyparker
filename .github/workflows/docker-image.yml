@@ -3,7 +3,6 @@ name: Docker
 on:
   push:
     branches: [ "main" ]
-    tags: [ "v*.*.*" ]
   pull_request:
     branches: [ "main" ]
 
@@ -11,16 +10,31 @@ jobs:
   build:
     name: Docker
     runs-on: ubuntu-22.04
+
+    env:
+    - NP_TAG: ghcr.io/${{ github.repository }}:edge
+
     steps:
     - uses: actions/checkout@v3
-    # - uses: docker/setup-qemu-action@v2  # for multi-platform build
+
+    # The following for multi-platform build; disabled here because it takes so long; see #39.
+    #
+    # The docker image built for noseyparker releases is done in the
+    # `release-artifacts.yml` file.
+    #
+    # - uses: docker/setup-qemu-action@v2
+
     - uses: docker/setup-buildx-action@v2
 
     - name: Build Docker image
       uses: docker/build-push-action@v4
       with:
-        tags: noseyparker
+        tags: ${{ env: NP_TAG }}
+
+        # For multi-platform builds
+        #
         # platforms: linux/amd64,linux/arm64
+
         load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -34,7 +48,7 @@ jobs:
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
     - name: Test the Docker image
-      run: docker run --rm noseyparker --help
+      run: docker run --rm "$NP_TAG" --help
 
     - name: Login to github container registry
       if: github.event_name != 'pull_request'
@@ -47,17 +61,4 @@ jobs:
     - name: Push the image to `edge`
       if: github.event_name == 'push' && github.ref_name == 'main'
       run: |
-        docker tag noseyparker ghcr.io/${{ github.repository }}:edge
-        docker push ghcr.io/${{ github.repository }}:edge
-
-    - name: Push the image to `${{ github.ref_name }}`
-      if: github.ref_type == 'tag'
-      run: |
-        docker tag noseyparker ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-        docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-
-    - name: Push the image to `latest`
-      if: github.ref_type == 'tag'
-      run: |
-        docker tag noseyparker ghcr.io/${{ github.repository }}:latest
-        docker push ghcr.io/${{ github.repository }}:latest
+        docker push "$NP_TAG"
