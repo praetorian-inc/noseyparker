@@ -29,7 +29,7 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v4
       with:
-        tags: ${{ env: NP_TAG }}
+        tags: ${{ env.NP_TAG }}
 
         # For multi-platform builds
         #
