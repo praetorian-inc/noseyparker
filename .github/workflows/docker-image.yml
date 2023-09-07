@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-    - NP_TAG: ghcr.io/${{ github.repository }}:edge
+      NP_TAG: ghcr.io/${{ github.repository }}:edge
 
     steps:
     - uses: actions/checkout@v3
