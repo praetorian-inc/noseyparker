@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)
 
-A [prebuilt multiplatform Docker image](https://github.com/praetorian-inc/noseyparker/pkgs/container/noseyparker/119658519?tag=v0.14.0) for this release is available for x86_64 and ARM64 architectures:
+A [prebuilt multiplatform Docker image](https://github.com/praetorian-inc/noseyparker/pkgs/container/noseyparker/119700654?tag=v0.14.0) for this release is available for x86_64 and ARM64 architectures:
 ```
 docker pull ghcr.io/praetorian-inc/noseyparker:v0.14.0
 ```
