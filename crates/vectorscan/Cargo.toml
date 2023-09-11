@@ -6,7 +6,7 @@ publish.workspace = true
 
 license = "Apache-2.0 OR MIT"
 name = "vectorscan"
-version.workspace = true
+version = "0.0.0"
 
 [dependencies]
 bitflags = "2.0"
