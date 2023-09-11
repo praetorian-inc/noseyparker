@@ -24,20 +24,28 @@ pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
         .output_args
         .get_writer()
         .context("Failed to get output writer")?;
-    DetailsReporter(datastore).report(args.output_args.format, output)
+    let max_matches = if args.max_matches <= 0 {
+        None
+    } else {
+        Some(args.max_matches.try_into().unwrap())
+    };
+    let reporter = DetailsReporter { datastore, max_matches };
+    reporter.report(args.output_args.format, output)
 }
 
-struct DetailsReporter(Datastore);
+struct DetailsReporter {
+    datastore: Datastore,
+    max_matches: Option<usize>,
+}
 
 impl DetailsReporter {
     fn get_matches(
         &self,
         metadata: &MatchGroupMetadata,
-        limit: Option<usize>,
     ) -> Result<Vec<ReportMatch>> {
         Ok(self
-            .0
-            .get_match_group_data(metadata, limit)
+            .datastore
+            .get_match_group_data(metadata, self.max_matches)
             .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
             .into_iter()
             .map(|(p, md, m)| ReportMatch { ps: p, md, m })
@@ -60,7 +68,7 @@ impl Reportable for DetailsReporter {
 
 impl DetailsReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore = &self.0;
+        let datastore = &self.datastore;
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
@@ -68,7 +76,7 @@ impl DetailsReporter {
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
             let finding_num = finding_num + 1;
-            let matches = self.get_matches(&metadata, Some(3))?;
+            let matches = self.get_matches(&metadata)?;
             let match_group = MatchGroup { metadata, matches };
             writeln!(
                 &mut writer,
@@ -81,7 +89,7 @@ impl DetailsReporter {
     }
 
     fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
-        let datastore = &self.0;
+        let datastore = &self.datastore;
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
@@ -90,7 +98,7 @@ impl DetailsReporter {
         let es = group_metadata
             .into_iter()
             .map(|metadata| {
-                let matches = self.get_matches(&metadata, None)?;
+                let matches = self.get_matches(&metadata)?;
                 Ok(MatchGroup { metadata, matches })
             })
             .collect::<Result<Vec<MatchGroup>, anyhow::Error>>()?;
@@ -99,13 +107,13 @@ impl DetailsReporter {
     }
 
     fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore = &self.0;
+        let datastore = &self.datastore;
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         for metadata in group_metadata.into_iter() {
-            let matches = self.get_matches(&metadata, None)?;
+            let matches = self.get_matches(&metadata)?;
             let match_group = MatchGroup { metadata, matches };
 
             serde_json::to_writer(&mut writer, &match_group)?;
@@ -115,7 +123,7 @@ impl DetailsReporter {
     }
 
     fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore: &Datastore = &self.0;
+        let datastore: &Datastore = &self.datastore;
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
@@ -124,7 +132,7 @@ impl DetailsReporter {
         let results: Vec<sarif::Result> = group_metadata
             .into_iter()
             .map(|metadata| {
-                let matches = self.get_matches(&metadata, None)?;
+                let matches = self.get_matches(&metadata)?;
 
                 let first_match_blob_id = match matches.first() {
                     Some(entry) => entry.m.blob_id.to_string(),

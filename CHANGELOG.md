@@ -9,12 +9,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
-- A default value (`datastore.np`) is now set for commands that take a datastore option ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
+- A default value (`datastore.np`) is now set for commands that take a datastore parameter ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
   This makes simpler `noseyparker` command-line invocations possible.
 
 - A new `shell-completions` command has been added, which generates shell-specific completion scripts for zsh, bash, fish, powershell, and elvish ([#76](https://github.com/praetorian-inc/noseyparker/pull/76)).
   These generated completion scripts make discovery of Nosey Parker's command-line API simpler.
   Thank you @Coruscant11!
+
+- The `report` command supports a new `--max-matches=N` parameter to control the maximum number of matches that will be output for any single finding ([#75](https://github.com/praetorian-inc/noseyparker/issues/75)).
+  A negative number means "no limit".
+
+
+### Changes
+
+- All the output formats for the `report` command now respect the new `--max-matches=N` parameter.
+  Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).
 
 
 ## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)

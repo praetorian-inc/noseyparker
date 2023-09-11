@@ -33,6 +33,13 @@ Output Options:
           - jsonl: JSON Lines format
           - sarif: SARIF format
 
+      --max-matches <N>
+          Limit the number of matches per finding to at most N
+          
+          A negative value means "no limit".
+          
+          [default: 3]
+
 Global Options:
   -v, --verbose...
           Enable verbose output

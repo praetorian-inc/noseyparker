@@ -614,6 +614,12 @@ pub struct ReportArgs {
 
     #[command(flatten)]
     pub output_args: OutputArgs<ReportOutputFormat>,
+
+    /// Limit the number of matches per finding to at most N
+    ///
+    /// A negative value means "no limit".
+    #[arg(long, default_value_t = 3, value_name = "N")]
+    pub max_matches: i64,
 }
 
 
