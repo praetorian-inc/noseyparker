@@ -62,6 +62,7 @@ jobs:
           os: ubuntu-20.04
           rust: stable
           profile: release
+          features: release
           install_dependencies: |
             true
 
@@ -73,6 +74,7 @@ jobs:
           os: ubuntu-22.04
           rust: stable
           profile: test
+          features:
           install_dependencies: |
             true
 
@@ -84,6 +86,7 @@ jobs:
           os: macos-12
           rust: stable
           profile: test
+          features:
           install_dependencies: |
             true
 
@@ -108,7 +111,7 @@ jobs:
 
     - name: Build tests
       if: ${{ matrix.run_tests }}
-      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --timings
+      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Run tests
       if: ${{ matrix.run_tests }}
@@ -117,23 +120,23 @@ jobs:
         # spurious failures from rate limiting when testing Nosey Parker's github
         # enumeration capabilities.
         NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cargo test --locked --verbose --profile=${{ matrix.profile }} --timings
+      run: cargo test --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Build
       # We only `cargo build` separately if we are running the rule checker.
       # Otherwise this seems to just be wasted compute time!
       if: ${{ matrix.check_rules }}
-      run: cargo build --locked --verbose --profile=${{ matrix.profile }} --timings
+      run: cargo build --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Check rules
       if: ${{ matrix.check_rules }}
-      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --timings -- rules check crates/noseyparker/data/default/rules --warnings-as-errors
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings -- rules check crates/noseyparker/data/default/rules --warnings-as-errors
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}
       env:
         RUSTDOCFLAGS: -D warnings
-      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --timings --no-deps --document-private-items
+      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings --no-deps --document-private-items
 
     # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
     - name: Upload build timings

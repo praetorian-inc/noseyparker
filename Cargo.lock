@@ -2498,6 +2498,7 @@ dependencies = [
  "indoc",
  "insta",
  "lazy_static",
+ "log",
  "mime",
  "noseyparker",
  "predicates",

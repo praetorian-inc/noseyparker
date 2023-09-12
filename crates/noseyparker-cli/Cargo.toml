@@ -23,6 +23,12 @@ build = "build.rs"
 rule_profiling = ["noseyparker/rule_profiling"]
 libmagic = ["noseyparker/libmagic"]
 
+# Compile out `trace`-level log and tracing messages in release builds
+disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug"]
+
+release = ["disable_trace"]
+
+
 [[bin]]
 name = "noseyparker"
 
@@ -45,6 +51,7 @@ indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
+log = { version = "0.4", optional = true }
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"

@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `report` command supports a new `--max-matches=N` parameter to control the maximum number of matches that will be output for any single finding ([#75](https://github.com/praetorian-inc/noseyparker/issues/75)).
   A negative number means "no limit".
 
+- A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
+  This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
+
 
 ### Changes
 
