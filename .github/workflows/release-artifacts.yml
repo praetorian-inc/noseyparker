@@ -47,7 +47,7 @@ jobs:
         load: true
 
     - name: Test the Docker image
-      run: docker run --rm noseyparker:test --help
+      run: docker run --rm noseyparker:test --version
 
     # This shouldn't end up building linux/amd64 again; it should get it from the cache
     - name: Build multiplatform Docker image

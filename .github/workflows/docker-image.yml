@@ -29,15 +29,15 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v4
       with:
-        tags: ${{ env.NP_TAG }}
-
-        # For multi-platform builds
-        #
-        # platforms: linux/amd64,linux/arm64
-
-        load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+        context: .
+        tags: ${{ env.NP_TAG }}
+        push: false
+        # For multi-platform builds
+        # platforms: linux/amd64,linux/arm64
+        load: true
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}
@@ -48,7 +48,7 @@ jobs:
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
     - name: Test the Docker image
-      run: docker run --rm "$NP_TAG" --help
+      run: docker run --rm "$NP_TAG" --version
 
     - name: Login to github container registry
       if: github.event_name != 'pull_request'
