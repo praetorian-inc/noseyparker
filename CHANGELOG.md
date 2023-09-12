@@ -8,7 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Additions
-
 - A default value (`datastore.np`) is now set for commands that take a datastore parameter ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
   This makes simpler `noseyparker` command-line invocations possible.
 
@@ -22,11 +21,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
   This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
 
-
 ### Changes
-
 - All the output formats for the `report` command now respect the new `--max-matches=N` parameter.
   Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).
+
+### Fixes
+- Fixed a bug in the `report` command when `--format=sarif` is used which caused some metadata to be unintentionally omitted from the output.
 
 
 ## [v0.14.0](https://github.com/praetorian-inc/noseyparker/releases/v0.14.0) (2023-08-17)

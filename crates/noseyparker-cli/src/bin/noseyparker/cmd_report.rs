@@ -160,24 +160,28 @@ impl DetailsReporter {
                             let source_span = &m.location.source_span;
                             // let offset_span = &m.location.offset_span;
 
-                            let mut properties = sarif::PropertyBagBuilder::default();
-                            properties.additional_properties([
+                            let mut additional_properties = vec![
                                 (String::from("blob_metadata"), serde_json::json!(md)),
-                            ]);
+                            ];
 
                             let uri = match p {
                                 Provenance::File(e) => e.path.to_string_lossy().into_owned(),
                                 Provenance::GitRepo(e) => {
                                     if let Some(p) = e.commit_provenance {
-                                        properties.additional_properties([
-                                            (String::from("commit_provenance"), serde_json::json!(p)),
-                                        ]);
+                                        additional_properties.push((
+                                            String::from("commit_provenance"),
+                                            serde_json::json!(p),
+                                        ));
                                     }
                                     e.repo_path.to_string_lossy().into_owned()
                                 }
                             };
 
-                            let properties = properties.build()?;
+                            let additional_properties =
+                                std::collections::BTreeMap::from_iter(additional_properties);
+                            let properties = sarif::PropertyBagBuilder::default()
+                                .additional_properties(additional_properties)
+                                .build()?;
 
                             let location = sarif::LocationBuilder::default()
                                 .physical_location(
