@@ -29,7 +29,7 @@ chrono = { version = "0.4", default_features = false, features = ["std"] }
 console = "0.15"
 content_guesser = { path = "../content-guesser" }
 fixedbitset = "0.4"
-gix = { version = "0.51", features = ["max-performance", "serde"] }
+gix = { version = "0.53", features = ["max-performance", "serde"] }
 
 # XXX enable this if you want verbose-object-parsing-errors for debugging gix parsing errors
 # gix-object = { version = "0.33", features = ["verbose-object-parsing-errors"] }

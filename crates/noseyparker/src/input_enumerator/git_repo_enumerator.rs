@@ -174,7 +174,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                 }
 
                 Kind::Commit => {
-                    let commit = unwrap_or_continue!(odb.find_commit(oid, &mut scratch), |e| {
+                    let commit = unwrap_or_continue!(odb.find_commit(&oid, &mut scratch), |e| {
                         warn!("Failed to find commit {oid}: {e}");
                     });
 
@@ -202,7 +202,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
                 Kind::Tree => {
                     let tree_idx = metadata_graph.get_tree_idx(oid);
-                    let tree_ref = unwrap_or_continue!(odb.find_tree(oid, &mut scratch), |e| {
+                    let tree_ref = unwrap_or_continue!(odb.find_tree(&oid, &mut scratch), |e| {
                         warn!("Failed to find tree {oid}: {e}");
                     });
                     for child in tree_ref.entries {
