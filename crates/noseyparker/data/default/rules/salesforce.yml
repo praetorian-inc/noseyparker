@@ -1,0 +1,30 @@
+rules:
+
+- name: Salesforce Access Token
+  id: np.salesforce.1
+  pattern: |
+    (?x)
+    \b
+    (
+      00[a-zA-Z0-9]{13}             (?# organization ID )
+      !
+      [a-zA-Z0-9._]{96}             (?# opaque token )
+    )
+    (?: \b | $ | [^a-zA-Z0-9._] )
+
+  references:
+  - https://help.salesforce.com/s/articleView?id=sf.remoteaccess_access_tokens.htm&type=5
+  - https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart_oauth.htm
+
+  examples:
+  - 00DE0X0A0M0PeLE!CJoAQOx1GCLf1UIt4UU9y0VOPLUZAYN6I8DsdGEDyHh5cO02egObcAhIDHYiGCfi94c53oFbr4HB.xZfuYRGhvNuxobAAXRe
+  - |
+      === Org Description
+      KEY               VALUE
+      ────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      Access Token      00DE0X0A0M0PeLE!AQcAQH0dMHEXAMPLEzmpkb58urFRkgeBGsxL_QJWwYMfAbUeeG7c1EXAMPLEDUkWe6H34r1AAwOR8B8fLEz6nEXAMPLEAAAA
+      Client Id         PlatformCLI
+      Connected Status  Connected
+      Id                00D5fORGIDEXAMPLE
+      Instance Url      https://MyDomainName.my.salesforce.com
+      Username          juliet.capulet@empathetic-wolf-g5qddtr.com

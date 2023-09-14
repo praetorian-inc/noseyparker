@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
   This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
 
+- New rules have been added:
+
+  - Salesforce Access Token
+
 ### Changes
 - All the output formats for the `report` command now respect the new `--max-matches=N` parameter.
   Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).

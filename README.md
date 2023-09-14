@@ -4,7 +4,7 @@ Nosey Parker is a command-line tool that finds secrets and sensitive information
 
 **Key features:**
 - It supports scanning files, directories, and the entire history of Git repositories
-- It uses regular expression matching with a set of 104 patterns chosen for high signal-to-noise based on experience and feedback from offensive security engagements
+- It uses regular expression matching with a set of 105 patterns chosen for high signal-to-noise based on experience and feedback from offensive security engagements
 - It groups matches together that share the same secret, further emphasizing signal over noise
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source history in less than 2 minutes on an older MacBook Pro
 
@@ -77,7 +77,7 @@ The Docker container runs with `/scan` as its working directory, so mounting `$P
 
 <details>
 <summary><h3>Scanning filesystem content for secrets</h3></summary>
- 
+
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
 
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
@@ -125,7 +125,7 @@ See `noseyparker help scan` for more details.
 
 <details>
 <summary><h3>Summarizing findings</h3></summary>
- 
+
 Nosey Parker prints out a summary of its findings when it finishes
 scanning.  You can also run this step separately:
 ```
