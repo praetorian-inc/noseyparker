@@ -174,7 +174,7 @@ namespace projections
             };
 
             template <typename Parameters, typename T>
-            inline void setup(Parameters const& par, par_aea<T>& proj_parm) 
+            inline void setup(Parameters const& par, par_aea<T>& proj_parm)
             {
                 T cosphi, sinphi;
                 int secant;

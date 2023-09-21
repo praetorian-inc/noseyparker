@@ -12,8 +12,6 @@
 namespace boost {
 namespace multiprecision {
 
-using complex128 = number<complex_adaptor<float128_backend>, et_off>;
-
 template <>
 struct component_type<number<complex_adaptor<float128_backend> > >
 {

@@ -20,7 +20,7 @@ namespace std{ using ::sqrt; using ::fabs; using ::acos; using ::asin; using ::a
 namespace boost{ namespace math{
 
 template<class T> 
-inline std::complex<T> asin(const std::complex<T>& z)
+[[deprecated("Replaced by C++11")]] inline std::complex<T> asin(const std::complex<T>& z)
 {
    //
    // This implementation is a transcription of the pseudo-code in:

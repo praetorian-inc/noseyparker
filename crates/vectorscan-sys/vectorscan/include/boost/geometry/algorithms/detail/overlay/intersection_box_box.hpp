@@ -63,7 +63,7 @@ struct intersection_box_box
         // Set dimensions of output coordinate
         set<min_corner, Dimension>(box_out, min1 < min2 ? min2 : min1);
         set<max_corner, Dimension>(box_out, max1 > max2 ? max2 : max1);
-        
+
         return intersection_box_box<Dimension + 1, DimensionCount>
                ::apply(box1, box2, robust_policy, box_out, strategy);
     }

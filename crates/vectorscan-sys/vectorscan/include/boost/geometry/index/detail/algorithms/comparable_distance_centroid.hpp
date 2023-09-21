@@ -55,7 +55,7 @@ struct sum_for_indexable_dimension<Point, BoxIndexable, box_tag, comparable_dist
         point_coord_t pt_c = geometry::get<DimensionIndex>(pt);
         indexable_coord_t ind_c_min = geometry::get<geometry::min_corner, DimensionIndex>(i);
         indexable_coord_t ind_c_max = geometry::get<geometry::max_corner, DimensionIndex>(i);
-        
+
         indexable_coord_t ind_c_avg = ind_c_min + (ind_c_max - ind_c_min) / 2;
         // TODO: awulkiew - is (ind_c_min + ind_c_max) / 2 safe?
 

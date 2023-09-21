@@ -465,6 +465,13 @@ namespace boost { namespace math {
                for (k = n; k > 0; k--)             // backward recurrence for J
                {
                   next = 2 * (u + k) * current / x - prev;
+                  //
+                  // We can't allow next to completely cancel out or the subsequent logic breaks.
+                  // Pretend that one bit did not cancel:
+                  if (next == 0)
+                  {
+                     next = prev * tools::epsilon<T>() / 2;
+                  }
                   prev = current;
                   current = next;
                }

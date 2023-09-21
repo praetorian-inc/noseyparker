@@ -1,4 +1,4 @@
-// Copyright Antony Polukhin, 2016-2022.
+// Copyright Antony Polukhin, 2016-2023.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -85,29 +85,32 @@ BOOST_SYMBOL_VISIBLE inline ::backtrace_state* construct_state(const program_loc
     // and multiple threads concurrently work with state. I failed to localize the root cause:
     // https://gcc.gnu.org/bugzilla//show_bug.cgi?id=87653
 
+#define BOOST_STACKTRACE_DETAIL_IS_MT 1
 
-#if !defined(BOOST_HAS_THREADS) || defined(BOOST_STACKTRACE_BACKTRACE_FORCE_STATIC)
-    static
+#if !defined(BOOST_HAS_THREADS)
+#   define BOOST_STACKTRACE_DETAIL_STORAGE static
+#   undef BOOST_STACKTRACE_DETAIL_IS_MT
+#   define BOOST_STACKTRACE_DETAIL_IS_MT 0
+#elif defined(BOOST_STACKTRACE_BACKTRACE_FORCE_STATIC)
+#   define BOOST_STACKTRACE_DETAIL_STORAGE static
+#elif !defined(BOOST_NO_CXX11_THREAD_LOCAL)
+#   define BOOST_STACKTRACE_DETAIL_STORAGE thread_local
+#elif defined(__GNUC__) && !defined(__clang__)
+#   define BOOST_STACKTRACE_DETAIL_STORAGE static __thread
 #else
-
-    // Result of `construct_state()` invocation is not stored by the callers, so `thread_local`
-    // gives a single `state` per thread and that state is not shared between threads in any way.
-
-#   ifndef BOOST_NO_CXX11_THREAD_LOCAL
-    thread_local
-#   elif defined(__GNUC__) && !defined(__clang__)
-    static __thread
-#   else
-    /* just a local variable */
-#   endif
-
+#   define BOOST_STACKTRACE_DETAIL_STORAGE /* just a local variable */
 #endif
-      ::backtrace_state* state = ::backtrace_create_state(
+
+    BOOST_STACKTRACE_DETAIL_STORAGE ::backtrace_state* state = ::backtrace_create_state(
         prog_location.name(),
-        0,
+        BOOST_STACKTRACE_DETAIL_IS_MT,
         boost::stacktrace::detail::libbacktrace_error_callback,
         0
     );
+
+#undef BOOST_STACKTRACE_DETAIL_IS_MT
+#undef BOOST_STACKTRACE_DETAIL_STORAGE
+
     return state;
 }
 

@@ -1,4 +1,4 @@
-// Copyright Antony Polukhin, 2016-2022.
+// Copyright Antony Polukhin, 2016-2023.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -129,7 +129,7 @@ class debugging_symbols: boost::noncopyable {
             return;
         }
 
-        // No cheking: QueryInterface sets the output parameter to NULL in case of error.
+        // No checking: QueryInterface sets the output parameter to NULL in case of error.
         iclient->QueryInterface(__uuidof(IDebugSymbols), idebug.to_void_ptr_ptr());
     }
 

@@ -65,7 +65,7 @@ public:
             <
                 0,
                 dimension<Point>::value
-            >::apply(point1, point2, box);        
+            >::apply(point1, point2, box);
     }
 
 };

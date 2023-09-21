@@ -4,8 +4,9 @@
 // Contributed and/or modified by Yaghyavardhan Singh Khangarot,
 //   as part of Google Summer of Code 2018 program.
 
-// This file was modified by Oracle on 2018-2021.
-// Modifications copyright (c) 2018-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2018-2023.
+// Modifications copyright (c) 2018-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -15,16 +16,11 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DISCRETE_FRECHET_DISTANCE_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DISCRETE_FRECHET_DISTANCE_HPP
 
-#include <algorithm>
-
 #ifdef BOOST_GEOMETRY_DEBUG_FRECHET_DISTANCE
 #include <iostream>
 #endif
 
-#include <iterator>
-#include <utility>
 #include <vector>
-#include <limits>
 
 #include <boost/geometry/algorithms/detail/dummy_geometries.hpp>
 #include <boost/geometry/algorithms/detail/throw_on_empty_input.hpp>

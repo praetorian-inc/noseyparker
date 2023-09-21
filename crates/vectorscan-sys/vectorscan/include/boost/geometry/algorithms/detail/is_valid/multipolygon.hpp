@@ -1,7 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014-2021, Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2014-2021, Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -27,7 +28,7 @@
 #include <boost/geometry/core/ring_type.hpp>
 #include <boost/geometry/core/tags.hpp>
 
-#include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/constexpr.hpp>
 #include <boost/geometry/util/range.hpp>
 
 #include <boost/geometry/geometries/box.hpp>
@@ -282,10 +283,12 @@ public:
     {
         using debug_phase = debug_validity_phase<MultiPolygon>;
 
-        if (BOOST_GEOMETRY_CONDITION(AllowEmptyMultiGeometries)
-            && boost::empty(multipolygon))
+        if BOOST_GEOMETRY_CONSTEXPR (AllowEmptyMultiGeometries)
         {
-            return visitor.template apply<no_failure>();
+            if (boost::empty(multipolygon))
+            {
+                return visitor.template apply<no_failure>();
+            }
         }
 
         // check validity of all polygons ring
@@ -302,7 +305,7 @@ public:
 
         using has_valid_turns =  has_valid_self_turns
             <
-                MultiPolygon, 
+                MultiPolygon,
                 typename Strategy::cs_tag
             >;
 

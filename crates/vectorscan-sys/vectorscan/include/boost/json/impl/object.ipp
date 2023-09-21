@@ -10,10 +10,10 @@
 #ifndef BOOST_JSON_IMPL_OBJECT_IPP
 #define BOOST_JSON_IMPL_OBJECT_IPP
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/json/object.hpp>
 #include <boost/json/detail/digest.hpp>
 #include <boost/json/detail/except.hpp>
-#include <boost/json/detail/hash_combine.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -22,7 +22,8 @@
 #include <stdexcept>
 #include <type_traits>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 template<class CharRange>
@@ -447,11 +448,11 @@ insert(
 {
     auto const n0 = size();
     if(init.size() > max_size() - n0)
-        detail::throw_length_error(
-            "object too large",
-            BOOST_CURRENT_LOCATION);
-    reserve(n0 + init.size());
-    revert_insert r(*this);
+    {
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_CURRENT_LOCATION;
+        detail::throw_system_error( error::object_too_large, &loc );
+    }
+    revert_insert r( *this, n0 + init.size() );
     if(t_->is_small())
     {
         for(auto& iv : init)
@@ -681,23 +682,6 @@ if_contains(
 //
 //----------------------------------------------------------
 
-auto
-object::
-insert_impl(
-    pilfered<key_value_pair> p) ->
-        std::pair<iterator, bool>
-{
-    // caller is responsible
-    // for preventing aliasing.
-    reserve(size() + 1);
-    auto const result =
-        detail::find_in_object(*this, p.get().key());
-    if(result.first)
-        return { result.first, false };
-    return { insert_impl(
-        p, result.second), true };
-}
-
 key_value_pair*
 object::
 insert_impl(
@@ -723,10 +707,10 @@ insert_impl(
     return pv;
 }
 
-// rehash to at least `n` buckets
-void
+// allocate new table, copy elements there, and rehash them
+object::table*
 object::
-rehash(std::size_t new_capacity)
+reserve_impl(std::size_t new_capacity)
 {
     BOOST_ASSERT(
         new_capacity > t_->capacity);
@@ -741,8 +725,7 @@ rehash(std::size_t new_capacity)
             size() * sizeof(
                 key_value_pair));
     t->size = t_->size;
-    table::deallocate(t_, sp_);
-    t_ = t;
+    std::swap(t_, t);
 
     if(! t_->is_small())
     {
@@ -759,6 +742,8 @@ rehash(std::size_t new_capacity)
             head = i;
         }
     }
+
+    return t;
 }
 
 bool
@@ -785,9 +770,10 @@ growth(
     std::size_t new_size) const
 {
     if(new_size > max_size())
-        detail::throw_length_error(
-            "object too large",
-            BOOST_CURRENT_LOCATION);
+    {
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_CURRENT_LOCATION;
+        detail::throw_system_error( error::object_too_large, &loc );
+    }
     std::size_t const old = capacity();
     if(old > max_size() - old / 2)
         return new_size;
@@ -889,7 +875,8 @@ reindex_relocate(
         index_t>(dst - begin());
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 //----------------------------------------------------------
 //
@@ -901,16 +888,7 @@ std::size_t
 std::hash<::boost::json::object>::operator()(
     ::boost::json::object const& jo) const noexcept
 {
-    std::size_t seed = jo.size();
-    for (const auto& kv_pair : jo) {
-        auto const hk = ::boost::json::detail::digest(
-            kv_pair.key().begin(), kv_pair.key().end(), 0);
-        auto const hkv = ::boost::json::detail::hash_combine(
-            hk,
-            std::hash<::boost::json::value>{}(kv_pair.value()));
-        seed = ::boost::json::detail::hash_combine_commutative(seed, hkv);
-    }
-    return seed;
+    return ::boost::hash< ::boost::json::object >()( jo );
 }
 
 //----------------------------------------------------------

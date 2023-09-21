@@ -6,8 +6,10 @@
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_GEOMETRY_STRATEGIES_CARTESIAN_BUFFER_HPP
-#define BOOST_GEOMETRY_STRATEGIES_CARTESIAN_BUFFER_HPP
+#ifndef BOOST_GEOMETRY_STRATEGIES_BUFFER_HPP
+#define BOOST_GEOMETRY_STRATEGIES_BUFFER_HPP
+
+#include <cstdint>
 
 namespace boost { namespace geometry
 {
@@ -55,6 +57,27 @@ namespace strategy { namespace buffer
 */
 enum buffer_side_selector { buffer_side_left, buffer_side_right };
 
+// Default number of points in a circle
+constexpr std::size_t default_points_per_circle = 90u;
+
+inline std::size_t get_point_count_for_join(std::size_t count)
+{
+    std::size_t const min_count = 4u;
+    return count > min_count ? count : min_count;
+}
+
+inline std::size_t get_point_count_for_end(std::size_t count)
+{
+    std::size_t const min_count = 4u;
+    return count > min_count ? count : min_count;
+}
+
+inline std::size_t get_point_count_for_circle(std::size_t count)
+{
+    std::size_t const min_count = 3u;
+    return count > min_count ? count : min_count;
+}
+
 /*!
 \brief Enumerates types of pieces (parts of buffer) around geometries
 \ingroup enum
@@ -101,4 +124,4 @@ enum result_code
 
 }} // namespace boost::geometry
 
-#endif // BOOST_GEOMETRY_STRATEGIES_CARTESIAN_BUFFER_HPP
+#endif // BOOST_GEOMETRY_STRATEGIES_BUFFER_HPP

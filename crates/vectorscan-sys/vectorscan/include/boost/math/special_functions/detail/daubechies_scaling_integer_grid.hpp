@@ -9,7 +9,7 @@
 #ifndef BOOST_MATH_DAUBECHIES_SCALING_INTEGER_GRID_HPP
 #define BOOST_MATH_DAUBECHIES_SCALING_INTEGER_GRID_HPP
 #include <array>
-#include <float.h>
+#include <cfloat>
 #include <boost/math/tools/config.hpp>
 /*
 In order to keep the character count as small as possible and speed up

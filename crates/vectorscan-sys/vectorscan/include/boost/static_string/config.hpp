@@ -147,15 +147,51 @@
 #endif
 
 #ifndef BOOST_STATIC_STRING_STANDALONE
+#include <boost/config.hpp>
 #include <boost/assert.hpp>
 #include <boost/container_hash/hash.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/utility/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/throw_exception.hpp>
+
+#if !defined(BOOST_NO_CXX17_HDR_STRING_VIEW) || \
+     defined(BOOST_STATIC_STRING_CXX17_STRING_VIEW)
+#include <string_view>
+#define BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+#endif
 #else
 #include <cassert>
 #include <stdexcept>
+
+/*
+ * Replicate the logic from Boost.Config
+ */
+// GNU libstdc++3:
+#if defined(__GLIBCPP__) || defined(__GLIBCXX__)
+#if (BOOST_LIBSTDCXX_VERSION < 70100) || (__cplusplus <= 201402L)
+#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#endif
+// libc++:
+#elif defined(_LIBCPP_VERSION)
+#if (_LIBCPP_VERSION < 4000) || (__cplusplus <= 201402L)
+#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#endif
+// MSVC uses logic from catch all for BOOST_NO_CXX17_HDR_STRING_VIEW
+// catch all:
+#elif !defined(_YVALS) && !defined(_CPPLIB_VER)
+#if (!defined(__has_include) || (__cplusplus < 201700))
+#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#elif !__has_include(<string_view>)
+#  define BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW
+#endif
+#endif
+
+#if !defined(BOOST_STATIC_STRING_NO_CXX17_HDR_STRING_VIEW) || \
+     defined(BOOST_STATIC_STRING_CXX17_STRING_VIEW)
 #include <string_view>
+#define BOOST_STATIC_STRING_HAS_STD_STRING_VIEW
+#endif
 #endif
 
 // Compiler bug prevents constexpr from working with clang 4.x and 5.x
@@ -192,6 +228,12 @@ defined(BOOST_STATIC_STRING_CPP14)
 #define BOOST_STATIC_STRING_GCC5_BAD_CONSTEXPR
 #endif
 
+// Define the basic string_view type used by the library
+// Conversions to and from other available string_view types
+// are still defined.
+#if !defined(BOOST_STATIC_STRING_STANDALONE) || \
+     defined(BOOST_STATIC_STRING_HAS_STD_STRING_VIEW)
+#define BOOST_STATIC_STRING_HAS_ANY_STRING_VIEW
 namespace boost {
 namespace static_strings {
 
@@ -205,4 +247,6 @@ using basic_string_view =
 #endif
 } // static_strings
 } // boost
+#endif
+
 #endif

@@ -164,7 +164,7 @@ public:
     segment_ratio& operator=(segment_ratio const&) = default;
     segment_ratio(segment_ratio&&) = default;
     segment_ratio& operator=(segment_ratio&&) = default;
-    
+
     // These are needed because in intersection strategies ratios are assigned
     // in fractions and if a user passes CalculationType then ratio Type in
     // turns is taken from geometry coordinate_type and the one used in

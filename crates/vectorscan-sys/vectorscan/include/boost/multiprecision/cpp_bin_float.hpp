@@ -44,12 +44,6 @@ namespace boost {
 namespace multiprecision {
 namespace backends {
 
-enum digit_base_type
-{
-   digit_base_2  = 2,
-   digit_base_10 = 10
-};
-
 #ifdef BOOST_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4522 6326) // multiple assignment operators specified, comparison of two constants
@@ -96,7 +90,7 @@ struct is_cpp_bin_float_explicitly_constructible_from_type<Float, bit_count, tru
 
 } // namespace detail
 
-template <unsigned Digits, digit_base_type DigitBase = digit_base_10, class Allocator = void, class Exponent = int, Exponent MinExponent = 0, Exponent MaxExponent = 0>
+template <unsigned Digits, digit_base_type DigitBase, class Allocator, class Exponent, Exponent MinExponent, Exponent MaxExponent>
 class cpp_bin_float
 {
  public:
@@ -2013,32 +2007,13 @@ inline boost::multiprecision::number<boost::multiprecision::backends::cpp_bin_fl
    return res;
 }
 
-using backends::cpp_bin_float;
-using backends::digit_base_10;
-using backends::digit_base_2;
-
 template <unsigned Digits, backends::digit_base_type DigitBase, class Exponent, Exponent MinE, Exponent MaxE, class Allocator>
 struct number_category<cpp_bin_float<Digits, DigitBase, Allocator, Exponent, MinE, MaxE> > : public std::integral_constant<int, boost::multiprecision::number_kind_floating_point>
 {};
 
-template <unsigned Digits, backends::digit_base_type DigitBase, class Allocator, class Exponent, Exponent MinE, Exponent MaxE>
-struct expression_template_default<cpp_bin_float<Digits, DigitBase, Allocator, Exponent, MinE, MaxE> >
-{
-   static constexpr expression_template_option value = std::is_void<Allocator>::value ? et_off : et_on;
-};
-
 template <unsigned Digits, backends::digit_base_type DigitBase, class Allocator, class Exponent, Exponent MinE, Exponent MaxE, class Allocator2, class Exponent2, Exponent MinE2, Exponent MaxE2>
 struct is_equivalent_number_type<cpp_bin_float<Digits, DigitBase, Allocator, Exponent, MinE, MaxE>, cpp_bin_float<Digits, DigitBase, Allocator2, Exponent2, MinE2, MaxE2> >
    : public std::integral_constant<bool, true> {};
-
-using cpp_bin_float_50 = number<backends::cpp_bin_float<50> > ;
-using cpp_bin_float_100 = number<backends::cpp_bin_float<100> >;
-
-using cpp_bin_float_single = number<backends::cpp_bin_float<24, backends::digit_base_2, void, std::int16_t, -126, 127>, et_off>       ;
-using cpp_bin_float_double = number<backends::cpp_bin_float<53, backends::digit_base_2, void, std::int16_t, -1022, 1023>, et_off>     ;
-using cpp_bin_float_double_extended = number<backends::cpp_bin_float<64, backends::digit_base_2, void, std::int16_t, -16382, 16383>, et_off>   ;
-using cpp_bin_float_quad = number<backends::cpp_bin_float<113, backends::digit_base_2, void, std::int16_t, -16382, 16383>, et_off>  ;
-using cpp_bin_float_oct = number<backends::cpp_bin_float<237, backends::digit_base_2, void, std::int32_t, -262142, 262143>, et_off>;
 
 } // namespace multiprecision
 
@@ -2146,9 +2121,6 @@ class numeric_limits<boost::multiprecision::number<boost::multiprecision::cpp_bi
       static number_type value = get_max();
       return value;
    }
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif
    static constexpr number_type lowest()
    {
       return -(max)();

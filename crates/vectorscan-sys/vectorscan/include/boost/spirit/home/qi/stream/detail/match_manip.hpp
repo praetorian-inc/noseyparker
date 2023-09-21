@@ -16,6 +16,7 @@
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/mpl/bool.hpp>
 
+#include <iosfwd>
 #include <iterator>
 #include <string>
 

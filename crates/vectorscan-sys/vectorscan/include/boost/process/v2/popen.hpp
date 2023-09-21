@@ -110,42 +110,6 @@ struct basic_popen : basic_process<Executor>
     }
 
     /// Construct a child from a property list and launch it using the default process launcher.
-    template<typename ... Inits>
-    explicit basic_popen(
-            executor_type executor,
-            const filesystem::path& exe,
-            std::initializer_list<wstring_view> args,
-            Inits&&... inits)
-            : basic_process<Executor>(executor)
-    {
-        this->basic_process<Executor>::operator=(
-                default_process_launcher()(
-                        this->get_executor(), exe, args,
-                        std::forward<Inits>(inits)...,
-                        process_stdio{stdin_, stdout_}
-                ));
-    }
-
-
-    /// Construct a child from a property list and launch it using the default process launcher.
-    template<typename Launcher, typename ... Inits>
-    explicit basic_popen(
-            Launcher && launcher, 
-            executor_type executor,
-            const filesystem::path& exe,
-            std::initializer_list<wstring_view> args,
-            Inits&&... inits)
-            : basic_process<Executor>(executor)
-    {
-        this->basic_process<Executor>::operator=(
-                std::forward<Launcher>(launcher)(
-                        this->get_executor(), exe, args,
-                        std::forward<Inits>(inits)...,
-                        process_stdio{stdin_, stdout_}
-                ));
-    }
-
-    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename Args, typename ... Inits>
     explicit basic_popen(
             executor_type executor,

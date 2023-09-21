@@ -129,7 +129,7 @@ namespace projections
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(mill, mill_entry)
         }
-        
+
     } // namespace detail
     #endif // doxygen
 

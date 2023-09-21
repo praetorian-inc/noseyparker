@@ -85,10 +85,10 @@ template <class> struct is_vec;
         enum { value = true };\
         };
 
-BOOST_QVM_GNUC_VEC_TYPE(float,2);
-BOOST_QVM_GNUC_VEC_TYPE(float,4);
-BOOST_QVM_GNUC_VEC_TYPE(double,2);
-BOOST_QVM_GNUC_VEC_TYPE(double,4);
+BOOST_QVM_GNUC_VEC_TYPE(float,2)
+BOOST_QVM_GNUC_VEC_TYPE(float,4)
+BOOST_QVM_GNUC_VEC_TYPE(double,2)
+BOOST_QVM_GNUC_VEC_TYPE(double,4)
 
 #undef BOOST_QVM_GNUC_VEC_TYPE
 

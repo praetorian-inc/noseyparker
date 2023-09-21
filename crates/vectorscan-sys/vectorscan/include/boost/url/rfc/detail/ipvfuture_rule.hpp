@@ -11,7 +11,7 @@
 #define BOOST_URL_RFC_DETAIL_IPVFUTURE_RULE_HPP
 
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 
 namespace boost {
 namespace urls {
@@ -32,9 +32,9 @@ struct ipvfuture_rule_t
 {
     struct value_type
     {
-        string_view str;
-        string_view major;
-        string_view minor;
+        core::string_view str;
+        core::string_view major;
+        core::string_view minor;
     };
 
     auto
@@ -42,7 +42,7 @@ struct ipvfuture_rule_t
         char const*& it,
         char const* const end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr ipvfuture_rule_t ipvfuture_rule{};

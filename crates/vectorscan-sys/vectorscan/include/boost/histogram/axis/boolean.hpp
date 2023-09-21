@@ -39,10 +39,14 @@ class boolean : public iterator_mixin<boolean<MetaData>>,
 
 public:
   /** Construct a boolean axis.
-   *
-   * @param meta description of the axis.
+
+    @param meta description of the axis.
+
+    The constructor is nothrow if meta is nothrow move constructible.
    */
-  explicit boolean(metadata_type meta = {}) : metadata_base(std::move(meta)) {}
+  explicit boolean(metadata_type meta = {}) noexcept(
+      std::is_nothrow_move_constructible<metadata_type>::value)
+      : metadata_base(std::move(meta)) {}
 
   /// Return index for value argument.
   index_type index(value_type x) const noexcept { return static_cast<index_type>(x); }

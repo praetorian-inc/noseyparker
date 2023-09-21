@@ -9,14 +9,13 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
-namespace detail {
+namespace detail
+{
 
 BOOST_PROCESS_V2_DECL error_code get_last_error();
-BOOST_PROCESS_V2_DECL void throw_last_error();
-BOOST_PROCESS_V2_DECL void throw_last_error(const char * msg);
-BOOST_PROCESS_V2_DECL void throw_last_error(const std::string & msg);
 
 }
+
 BOOST_PROCESS_V2_END_NAMESPACE
 
 #if defined(BOOST_PROCESS_V2_HEADER_ONLY)

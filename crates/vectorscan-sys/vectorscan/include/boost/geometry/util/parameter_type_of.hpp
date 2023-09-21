@@ -58,7 +58,7 @@ struct parameter_type_of
                 <
                     int,
                     (base_index_type::value + Index)
-                >            
+                >
         > indexed_type;
 
     typedef typename std::remove_reference

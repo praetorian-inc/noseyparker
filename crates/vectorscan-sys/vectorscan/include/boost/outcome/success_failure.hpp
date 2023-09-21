@@ -1,5 +1,5 @@
 /* Type sugar for success and failure
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (25 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (25 commits)
 File Created: July 2017
 
 

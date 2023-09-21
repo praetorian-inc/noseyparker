@@ -157,46 +157,72 @@ namespace boost { namespace spirit { namespace tag
 ///////////////////////////////////////////////////////////////////////////
 //  Unicode Scripts
 ///////////////////////////////////////////////////////////////////////////
+    struct adlam { BOOST_SPIRIT_IS_TAG() };
+    struct caucasian_albanian { BOOST_SPIRIT_IS_TAG() };
+    struct ahom { BOOST_SPIRIT_IS_TAG() };
     struct arabic { BOOST_SPIRIT_IS_TAG() };
     struct imperial_aramaic { BOOST_SPIRIT_IS_TAG() };
     struct armenian { BOOST_SPIRIT_IS_TAG() };
     struct avestan { BOOST_SPIRIT_IS_TAG() };
     struct balinese { BOOST_SPIRIT_IS_TAG() };
     struct bamum { BOOST_SPIRIT_IS_TAG() };
+    struct bassa_vah { BOOST_SPIRIT_IS_TAG() };
+    struct batak { BOOST_SPIRIT_IS_TAG() };
     struct bengali { BOOST_SPIRIT_IS_TAG() };
+    struct bhaiksuki { BOOST_SPIRIT_IS_TAG() };
     struct bopomofo { BOOST_SPIRIT_IS_TAG() };
+    struct brahmi { BOOST_SPIRIT_IS_TAG() };
     struct braille { BOOST_SPIRIT_IS_TAG() };
     struct buginese { BOOST_SPIRIT_IS_TAG() };
     struct buhid { BOOST_SPIRIT_IS_TAG() };
+    struct chakma { BOOST_SPIRIT_IS_TAG() };
     struct canadian_aboriginal { BOOST_SPIRIT_IS_TAG() };
     struct carian { BOOST_SPIRIT_IS_TAG() };
     struct cham { BOOST_SPIRIT_IS_TAG() };
     struct cherokee { BOOST_SPIRIT_IS_TAG() };
+    struct chorasmian { BOOST_SPIRIT_IS_TAG() };
     struct coptic { BOOST_SPIRIT_IS_TAG() };
+    struct cypro_minoan { BOOST_SPIRIT_IS_TAG() };
     struct cypriot { BOOST_SPIRIT_IS_TAG() };
     struct cyrillic { BOOST_SPIRIT_IS_TAG() };
     struct devanagari { BOOST_SPIRIT_IS_TAG() };
+    struct dives_akuru { BOOST_SPIRIT_IS_TAG() };
+    struct dogra { BOOST_SPIRIT_IS_TAG() };
     struct deseret { BOOST_SPIRIT_IS_TAG() };
+    struct duployan { BOOST_SPIRIT_IS_TAG() };
     struct egyptian_hieroglyphs { BOOST_SPIRIT_IS_TAG() };
+    struct elbasan { BOOST_SPIRIT_IS_TAG() };
+    struct elymaic { BOOST_SPIRIT_IS_TAG() };
     struct ethiopic { BOOST_SPIRIT_IS_TAG() };
     struct georgian { BOOST_SPIRIT_IS_TAG() };
     struct glagolitic { BOOST_SPIRIT_IS_TAG() };
+    struct gunjala_gondi { BOOST_SPIRIT_IS_TAG() };
+    struct masaram_gondi { BOOST_SPIRIT_IS_TAG() };
     struct gothic { BOOST_SPIRIT_IS_TAG() };
+    struct grantha { BOOST_SPIRIT_IS_TAG() };
     struct greek { BOOST_SPIRIT_IS_TAG() };
     struct gujarati { BOOST_SPIRIT_IS_TAG() };
     struct gurmukhi { BOOST_SPIRIT_IS_TAG() };
     struct hangul { BOOST_SPIRIT_IS_TAG() };
     struct han { BOOST_SPIRIT_IS_TAG() };
     struct hanunoo { BOOST_SPIRIT_IS_TAG() };
+    struct hatran { BOOST_SPIRIT_IS_TAG() };
     struct hebrew { BOOST_SPIRIT_IS_TAG() };
     struct hiragana { BOOST_SPIRIT_IS_TAG() };
+    struct anatolian_hieroglyphs { BOOST_SPIRIT_IS_TAG() };
+    struct pahawh_hmong { BOOST_SPIRIT_IS_TAG() };
+    struct nyiakeng_puachue_hmong { BOOST_SPIRIT_IS_TAG() };
     struct katakana_or_hiragana { BOOST_SPIRIT_IS_TAG() };
+    struct old_hungarian { BOOST_SPIRIT_IS_TAG() };
     struct old_italic { BOOST_SPIRIT_IS_TAG() };
     struct javanese { BOOST_SPIRIT_IS_TAG() };
     struct kayah_li { BOOST_SPIRIT_IS_TAG() };
     struct katakana { BOOST_SPIRIT_IS_TAG() };
+    struct kawi { BOOST_SPIRIT_IS_TAG() };
     struct kharoshthi { BOOST_SPIRIT_IS_TAG() };
     struct khmer { BOOST_SPIRIT_IS_TAG() };
+    struct khojki { BOOST_SPIRIT_IS_TAG() };
+    struct khitan_small_script { BOOST_SPIRIT_IS_TAG() };
     struct kannada { BOOST_SPIRIT_IS_TAG() };
     struct kaithi { BOOST_SPIRIT_IS_TAG() };
     struct tai_tham { BOOST_SPIRIT_IS_TAG() };
@@ -204,38 +230,75 @@ namespace boost { namespace spirit { namespace tag
     struct latin { BOOST_SPIRIT_IS_TAG() };
     struct lepcha { BOOST_SPIRIT_IS_TAG() };
     struct limbu { BOOST_SPIRIT_IS_TAG() };
+    struct linear_a { BOOST_SPIRIT_IS_TAG() };
     struct linear_b { BOOST_SPIRIT_IS_TAG() };
     struct lisu { BOOST_SPIRIT_IS_TAG() };
     struct lycian { BOOST_SPIRIT_IS_TAG() };
     struct lydian { BOOST_SPIRIT_IS_TAG() };
+    struct mahajani { BOOST_SPIRIT_IS_TAG() };
+    struct makasar { BOOST_SPIRIT_IS_TAG() };
+    struct mandaic { BOOST_SPIRIT_IS_TAG() };
+    struct manichaean { BOOST_SPIRIT_IS_TAG() };
+    struct marchen { BOOST_SPIRIT_IS_TAG() };
+    struct medefaidrin { BOOST_SPIRIT_IS_TAG() };
+    struct mende_kikakui { BOOST_SPIRIT_IS_TAG() };
+    struct meroitic_cursive { BOOST_SPIRIT_IS_TAG() };
+    struct meroitic_hieroglyphs { BOOST_SPIRIT_IS_TAG() };
     struct malayalam { BOOST_SPIRIT_IS_TAG() };
+    struct modi { BOOST_SPIRIT_IS_TAG() };
     struct mongolian { BOOST_SPIRIT_IS_TAG() };
+    struct mro { BOOST_SPIRIT_IS_TAG() };
     struct meetei_mayek { BOOST_SPIRIT_IS_TAG() };
+    struct multani { BOOST_SPIRIT_IS_TAG() };
     struct myanmar { BOOST_SPIRIT_IS_TAG() };
+    struct nag_mundari { BOOST_SPIRIT_IS_TAG() };
+    struct nandinagari { BOOST_SPIRIT_IS_TAG() };
+    struct old_north_arabian { BOOST_SPIRIT_IS_TAG() };
+    struct nabataean { BOOST_SPIRIT_IS_TAG() };
+    struct newa { BOOST_SPIRIT_IS_TAG() };
     struct nko { BOOST_SPIRIT_IS_TAG() };
+    struct nushu { BOOST_SPIRIT_IS_TAG() };
     struct ogham { BOOST_SPIRIT_IS_TAG() };
     struct ol_chiki { BOOST_SPIRIT_IS_TAG() };
     struct old_turkic { BOOST_SPIRIT_IS_TAG() };
     struct oriya { BOOST_SPIRIT_IS_TAG() };
+    struct osage { BOOST_SPIRIT_IS_TAG() };
     struct osmanya { BOOST_SPIRIT_IS_TAG() };
+    struct old_uyghur { BOOST_SPIRIT_IS_TAG() };
+    struct palmyrene { BOOST_SPIRIT_IS_TAG() };
+    struct pau_cin_hau { BOOST_SPIRIT_IS_TAG() };
+    struct old_permic { BOOST_SPIRIT_IS_TAG() };
     struct phags_pa { BOOST_SPIRIT_IS_TAG() };
     struct inscriptional_pahlavi { BOOST_SPIRIT_IS_TAG() };
+    struct psalter_pahlavi { BOOST_SPIRIT_IS_TAG() };
     struct phoenician { BOOST_SPIRIT_IS_TAG() };
+    struct miao { BOOST_SPIRIT_IS_TAG() };
     struct inscriptional_parthian { BOOST_SPIRIT_IS_TAG() };
     struct rejang { BOOST_SPIRIT_IS_TAG() };
+    struct hanifi_rohingya { BOOST_SPIRIT_IS_TAG() };
     struct runic { BOOST_SPIRIT_IS_TAG() };
     struct samaritan { BOOST_SPIRIT_IS_TAG() };
     struct old_south_arabian { BOOST_SPIRIT_IS_TAG() };
     struct saurashtra { BOOST_SPIRIT_IS_TAG() };
+    struct signwriting { BOOST_SPIRIT_IS_TAG() };
     struct shavian { BOOST_SPIRIT_IS_TAG() };
+    struct sharada { BOOST_SPIRIT_IS_TAG() };
+    struct siddham { BOOST_SPIRIT_IS_TAG() };
+    struct khudawadi { BOOST_SPIRIT_IS_TAG() };
     struct sinhala { BOOST_SPIRIT_IS_TAG() };
+    struct sogdian { BOOST_SPIRIT_IS_TAG() };
+    struct old_sogdian { BOOST_SPIRIT_IS_TAG() };
+    struct sora_sompeng { BOOST_SPIRIT_IS_TAG() };
+    struct soyombo { BOOST_SPIRIT_IS_TAG() };
     struct sundanese { BOOST_SPIRIT_IS_TAG() };
     struct syloti_nagri { BOOST_SPIRIT_IS_TAG() };
     struct syriac { BOOST_SPIRIT_IS_TAG() };
     struct tagbanwa { BOOST_SPIRIT_IS_TAG() };
+    struct takri { BOOST_SPIRIT_IS_TAG() };
     struct tai_le { BOOST_SPIRIT_IS_TAG() };
     struct new_tai_lue { BOOST_SPIRIT_IS_TAG() };
     struct tamil { BOOST_SPIRIT_IS_TAG() };
+    struct tangut { BOOST_SPIRIT_IS_TAG() };
     struct tai_viet { BOOST_SPIRIT_IS_TAG() };
     struct telugu { BOOST_SPIRIT_IS_TAG() };
     struct tifinagh { BOOST_SPIRIT_IS_TAG() };
@@ -243,11 +306,19 @@ namespace boost { namespace spirit { namespace tag
     struct thaana { BOOST_SPIRIT_IS_TAG() };
     struct thai { BOOST_SPIRIT_IS_TAG() };
     struct tibetan { BOOST_SPIRIT_IS_TAG() };
+    struct tirhuta { BOOST_SPIRIT_IS_TAG() };
+    struct tangsa { BOOST_SPIRIT_IS_TAG() };
+    struct toto { BOOST_SPIRIT_IS_TAG() };
     struct ugaritic { BOOST_SPIRIT_IS_TAG() };
     struct vai { BOOST_SPIRIT_IS_TAG() };
+    struct vithkuqi { BOOST_SPIRIT_IS_TAG() };
+    struct warang_citi { BOOST_SPIRIT_IS_TAG() };
+    struct wancho { BOOST_SPIRIT_IS_TAG() };
     struct old_persian { BOOST_SPIRIT_IS_TAG() };
     struct cuneiform { BOOST_SPIRIT_IS_TAG() };
+    struct yezidi { BOOST_SPIRIT_IS_TAG() };
     struct yi { BOOST_SPIRIT_IS_TAG() };
+    struct zanabazar_square { BOOST_SPIRIT_IS_TAG() };
     struct inherited { BOOST_SPIRIT_IS_TAG() };
     struct common { BOOST_SPIRIT_IS_TAG() };
     struct unknown { BOOST_SPIRIT_IS_TAG() };
@@ -402,46 +473,72 @@ namespace boost { namespace spirit { namespace char_class
 ///////////////////////////////////////////////////////////////////////////
 //  Unicode Scripts
 ///////////////////////////////////////////////////////////////////////////
+    BOOST_SPIRIT_UNICODE_CLASSIFY(adlam)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(caucasian_albanian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(ahom)
     BOOST_SPIRIT_UNICODE_CLASSIFY(arabic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(imperial_aramaic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(armenian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(avestan)
     BOOST_SPIRIT_UNICODE_CLASSIFY(balinese)
     BOOST_SPIRIT_UNICODE_CLASSIFY(bamum)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(bassa_vah)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(batak)
     BOOST_SPIRIT_UNICODE_CLASSIFY(bengali)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(bhaiksuki)
     BOOST_SPIRIT_UNICODE_CLASSIFY(bopomofo)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(brahmi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(braille)
     BOOST_SPIRIT_UNICODE_CLASSIFY(buginese)
     BOOST_SPIRIT_UNICODE_CLASSIFY(buhid)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(chakma)
     BOOST_SPIRIT_UNICODE_CLASSIFY(canadian_aboriginal)
     BOOST_SPIRIT_UNICODE_CLASSIFY(carian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(cham)
     BOOST_SPIRIT_UNICODE_CLASSIFY(cherokee)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(chorasmian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(coptic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(cypro_minoan)
     BOOST_SPIRIT_UNICODE_CLASSIFY(cypriot)
     BOOST_SPIRIT_UNICODE_CLASSIFY(cyrillic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(devanagari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(dives_akuru)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(dogra)
     BOOST_SPIRIT_UNICODE_CLASSIFY(deseret)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(duployan)
     BOOST_SPIRIT_UNICODE_CLASSIFY(egyptian_hieroglyphs)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(elbasan)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(elymaic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(ethiopic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(georgian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(glagolitic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(gunjala_gondi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(masaram_gondi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(gothic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(grantha)
     BOOST_SPIRIT_UNICODE_CLASSIFY(greek)
     BOOST_SPIRIT_UNICODE_CLASSIFY(gujarati)
     BOOST_SPIRIT_UNICODE_CLASSIFY(gurmukhi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(hangul)
     BOOST_SPIRIT_UNICODE_CLASSIFY(han)
     BOOST_SPIRIT_UNICODE_CLASSIFY(hanunoo)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(hatran)
     BOOST_SPIRIT_UNICODE_CLASSIFY(hebrew)
     BOOST_SPIRIT_UNICODE_CLASSIFY(hiragana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(anatolian_hieroglyphs)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(pahawh_hmong)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(nyiakeng_puachue_hmong)
     BOOST_SPIRIT_UNICODE_CLASSIFY(katakana_or_hiragana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(old_hungarian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(old_italic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(javanese)
     BOOST_SPIRIT_UNICODE_CLASSIFY(kayah_li)
     BOOST_SPIRIT_UNICODE_CLASSIFY(katakana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(kawi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(kharoshthi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(khmer)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(khojki)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(khitan_small_script)
     BOOST_SPIRIT_UNICODE_CLASSIFY(kannada)
     BOOST_SPIRIT_UNICODE_CLASSIFY(kaithi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tai_tham)
@@ -449,38 +546,75 @@ namespace boost { namespace spirit { namespace char_class
     BOOST_SPIRIT_UNICODE_CLASSIFY(latin)
     BOOST_SPIRIT_UNICODE_CLASSIFY(lepcha)
     BOOST_SPIRIT_UNICODE_CLASSIFY(limbu)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(linear_a)
     BOOST_SPIRIT_UNICODE_CLASSIFY(linear_b)
     BOOST_SPIRIT_UNICODE_CLASSIFY(lisu)
     BOOST_SPIRIT_UNICODE_CLASSIFY(lycian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(lydian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(mahajani)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(makasar)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(mandaic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(manichaean)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(marchen)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(medefaidrin)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(mende_kikakui)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(meroitic_cursive)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(meroitic_hieroglyphs)
     BOOST_SPIRIT_UNICODE_CLASSIFY(malayalam)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(modi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(mongolian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(mro)
     BOOST_SPIRIT_UNICODE_CLASSIFY(meetei_mayek)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(multani)
     BOOST_SPIRIT_UNICODE_CLASSIFY(myanmar)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(nag_mundari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(nandinagari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(old_north_arabian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(nabataean)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(newa)
     BOOST_SPIRIT_UNICODE_CLASSIFY(nko)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(nushu)
     BOOST_SPIRIT_UNICODE_CLASSIFY(ogham)
     BOOST_SPIRIT_UNICODE_CLASSIFY(ol_chiki)
     BOOST_SPIRIT_UNICODE_CLASSIFY(old_turkic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(oriya)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(osage)
     BOOST_SPIRIT_UNICODE_CLASSIFY(osmanya)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(old_uyghur)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(palmyrene)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(pau_cin_hau)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(old_permic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(phags_pa)
     BOOST_SPIRIT_UNICODE_CLASSIFY(inscriptional_pahlavi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(psalter_pahlavi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(phoenician)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(miao)
     BOOST_SPIRIT_UNICODE_CLASSIFY(inscriptional_parthian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(rejang)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(hanifi_rohingya)
     BOOST_SPIRIT_UNICODE_CLASSIFY(runic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(samaritan)
     BOOST_SPIRIT_UNICODE_CLASSIFY(old_south_arabian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(saurashtra)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(signwriting)
     BOOST_SPIRIT_UNICODE_CLASSIFY(shavian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(sharada)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(siddham)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(khudawadi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(sinhala)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(sogdian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(old_sogdian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(sora_sompeng)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(soyombo)
     BOOST_SPIRIT_UNICODE_CLASSIFY(sundanese)
     BOOST_SPIRIT_UNICODE_CLASSIFY(syloti_nagri)
     BOOST_SPIRIT_UNICODE_CLASSIFY(syriac)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tagbanwa)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(takri)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tai_le)
     BOOST_SPIRIT_UNICODE_CLASSIFY(new_tai_lue)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tamil)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(tangut)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tai_viet)
     BOOST_SPIRIT_UNICODE_CLASSIFY(telugu)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tifinagh)
@@ -488,11 +622,19 @@ namespace boost { namespace spirit { namespace char_class
     BOOST_SPIRIT_UNICODE_CLASSIFY(thaana)
     BOOST_SPIRIT_UNICODE_CLASSIFY(thai)
     BOOST_SPIRIT_UNICODE_CLASSIFY(tibetan)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(tirhuta)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(tangsa)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(toto)
     BOOST_SPIRIT_UNICODE_CLASSIFY(ugaritic)
     BOOST_SPIRIT_UNICODE_CLASSIFY(vai)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(vithkuqi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(warang_citi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(wancho)
     BOOST_SPIRIT_UNICODE_CLASSIFY(old_persian)
     BOOST_SPIRIT_UNICODE_CLASSIFY(cuneiform)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(yezidi)
     BOOST_SPIRIT_UNICODE_CLASSIFY(yi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY(zanabazar_square)
     BOOST_SPIRIT_UNICODE_CLASSIFY(inherited)
     BOOST_SPIRIT_UNICODE_CLASSIFY(common)
     BOOST_SPIRIT_UNICODE_CLASSIFY(unknown)
@@ -646,46 +788,72 @@ namespace boost { namespace spirit { namespace char_class
 ///////////////////////////////////////////////////////////////////////////
 //  Unicode Scripts
 ///////////////////////////////////////////////////////////////////////////
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(adlam)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(caucasian_albanian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(ahom)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(arabic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(imperial_aramaic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(armenian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(avestan)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(balinese)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(bamum)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(bassa_vah)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(batak)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(bengali)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(bhaiksuki)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(bopomofo)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(brahmi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(braille)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(buginese)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(buhid)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(chakma)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(canadian_aboriginal)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(carian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cham)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cherokee)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(chorasmian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(coptic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cypro_minoan)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cypriot)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cyrillic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(devanagari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(dives_akuru)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(dogra)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(deseret)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(duployan)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(egyptian_hieroglyphs)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(elbasan)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(elymaic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(ethiopic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(georgian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(glagolitic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(gunjala_gondi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(masaram_gondi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(gothic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(grantha)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(greek)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(gujarati)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(gurmukhi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hangul)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(han)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hanunoo)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hatran)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hebrew)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hiragana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(anatolian_hieroglyphs)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(pahawh_hmong)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nyiakeng_puachue_hmong)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(katakana_or_hiragana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_hungarian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_italic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(javanese)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(kayah_li)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(katakana)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(kawi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(kharoshthi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(khmer)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(khojki)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(khitan_small_script)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(kannada)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(kaithi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tai_tham)
@@ -693,38 +861,75 @@ namespace boost { namespace spirit { namespace char_class
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(latin)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(lepcha)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(limbu)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(linear_a)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(linear_b)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(lisu)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(lycian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(lydian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(mahajani)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(makasar)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(mandaic)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(manichaean)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(marchen)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(medefaidrin)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(mende_kikakui)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(meroitic_cursive)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(meroitic_hieroglyphs)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(malayalam)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(modi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(mongolian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(mro)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(meetei_mayek)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(multani)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(myanmar)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nag_mundari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nandinagari)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_north_arabian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nabataean)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(newa)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nko)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(nushu)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(ogham)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(ol_chiki)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_turkic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(oriya)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(osage)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(osmanya)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_uyghur)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(palmyrene)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(pau_cin_hau)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_permic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(phags_pa)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(inscriptional_pahlavi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(psalter_pahlavi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(phoenician)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(miao)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(inscriptional_parthian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(rejang)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(hanifi_rohingya)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(runic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(samaritan)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_south_arabian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(saurashtra)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(signwriting)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(shavian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(sharada)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(siddham)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(khudawadi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(sinhala)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(sogdian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_sogdian)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(sora_sompeng)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(soyombo)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(sundanese)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(syloti_nagri)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(syriac)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tagbanwa)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(takri)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tai_le)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(new_tai_lue)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tamil)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tangut)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tai_viet)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(telugu)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tifinagh)
@@ -732,11 +937,19 @@ namespace boost { namespace spirit { namespace char_class
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(thaana)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(thai)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tibetan)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tirhuta)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(tangsa)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(toto)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(ugaritic)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(vai)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(vithkuqi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(warang_citi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(wancho)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(old_persian)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(cuneiform)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(yezidi)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(yi)
+    BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(zanabazar_square)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(inherited)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(common)
     BOOST_SPIRIT_UNICODE_CLASSIFY_WHAT(unknown)

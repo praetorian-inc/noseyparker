@@ -80,7 +80,7 @@ struct io_context_ref : handler_base_ext
     void on_success(Executor& exec)
     {
         ios.notify_fork(boost::asio::io_context::fork_parent);
-        //must be on the heap so I can move it into the lambda.
+        //must be on the heap, so I can move it into the lambda.
         auto asyncs = boost::fusion::filter_if<
                         is_async_handler<
                         typename std::remove_reference< boost::mpl::_ > ::type

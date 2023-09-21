@@ -32,7 +32,7 @@ namespace detail {
     @endcode
 
     @par Specification
-    @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-4.2
+    @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-4.2"
         >4.2. Relative Reference (rfc3986)</a>
     @li <a href="https://www.rfc-editor.org/errata/eid5428"
         >Errata ID: 5428 (rfc3986)</a>
@@ -55,7 +55,7 @@ struct relative_part_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr relative_part_rule_t relative_part_rule{};

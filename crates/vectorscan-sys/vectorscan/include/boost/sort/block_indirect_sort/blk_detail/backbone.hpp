@@ -14,15 +14,15 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_BACKBONE_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_BACKBONE_HPP
 
+#include <ciso646>
 #include <atomic>
+#include <future>
+#include <iostream>
+#include <iterator>
 #include <boost/sort/pdqsort/pdqsort.hpp>
 #include <boost/sort/common/util/atomic.hpp>
 #include <boost/sort/common/util/algorithm.hpp>
 #include <boost/sort/common/stack_cnc.hpp>
-#include <future>
-#include <iostream>
-#include <iterator>
-
 #include <boost/sort/block_indirect_sort/blk_detail/block.hpp>
 
 namespace boost

@@ -1,4 +1,4 @@
-// Copyright Antony Polukhin, 2016-2022.
+// Copyright Antony Polukhin, 2016-2023.
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -135,7 +135,7 @@ public:
     ///
     /// @b Async-Handler-Safety: Safe if Allocator construction, copying, Allocator::allocate and Allocator::deallocate are async signal safe.
     ///
-    /// @param a Allocator that would be passed to underlying storeage.
+    /// @param a Allocator that would be passed to underlying storage.
     BOOST_FORCEINLINE explicit basic_stacktrace(const allocator_type& a) BOOST_NOEXCEPT
         : impl_(a)
     {
@@ -152,7 +152,7 @@ public:
     ///
     /// @param max_depth Max call sequence depth to collect.
     ///
-    /// @param a Allocator that would be passed to underlying storeage.
+    /// @param a Allocator that would be passed to underlying storage.
     ///
     /// @throws Nothing. Note that default construction of allocator may throw, however it is
     /// performed outside the constructor and exception in `allocator_type()` would not result in calling `std::terminate`.
@@ -320,7 +320,7 @@ public:
 
     /// Constructs stacktrace from raw memory dump. Terminating zero frame is discarded.
     ///
-    /// @param begin Begining of the memory where the stacktrace was saved using the boost::stacktrace::safe_dump_to
+    /// @param begin Beginning of the memory where the stacktrace was saved using the boost::stacktrace::safe_dump_to
     ///
     /// @param buffer_size_in_bytes Size of the memory. Usually the same value that was passed to the boost::stacktrace::safe_dump_to
     ///

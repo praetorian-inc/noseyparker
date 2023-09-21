@@ -70,7 +70,7 @@ using ::boost::process::detail::get_used_handles;
 
 ///This handler is invoked before the process in launched, to setup parameters. The required signature is `void(Exec &)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
-///This handler is invoked if an error occured. The required signature is `void(auto & exec, const std::error_code&)`, where `Exec` is a template parameter.
+///This handler is invoked if an error occurred. The required signature is `void(auto & exec, const std::error_code&)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;
 ///This handler is invoked if launching the process has succeeded. The required signature is `void(auto & exec)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_success_> on_success;

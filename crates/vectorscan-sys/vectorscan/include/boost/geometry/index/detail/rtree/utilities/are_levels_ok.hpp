@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019.
-// Modifications copyright (c) 2019 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2023.
+// Modifications copyright (c) 2019-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,6 +17,7 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_UTILITIES_ARE_LEVELS_OK_HPP
 
 #include <boost/geometry/index/detail/rtree/node/node.hpp>
+#include <boost/geometry/index/detail/rtree/utilities/view.hpp>
 
 namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree { namespace utilities {
 
@@ -99,7 +101,7 @@ bool are_levels_ok(Rtree const& tree)
     visitors::are_levels_ok<
         typename RTV::members_holder
     > v;
-    
+
     rtv.apply_visitor(v);
 
     return v.result;

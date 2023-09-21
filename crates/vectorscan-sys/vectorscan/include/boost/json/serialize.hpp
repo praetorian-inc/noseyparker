@@ -11,11 +11,13 @@
 #define BOOST_JSON_SERIALIZE_HPP
 
 #include <boost/json/detail/config.hpp>
+#include <boost/json/serialize_options.hpp>
 #include <boost/json/value.hpp>
 #include <iosfwd>
 #include <string>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** Return a string representing a serialized element.
 
@@ -32,29 +34,33 @@ BOOST_JSON_NS_BEGIN
     @return The serialized string
 
     @param t The value to serialize
+
+    @param opts The options for the serializer. If this parameter
+    is omitted, the serializer will output only standard JSON.
 */
 /** @{ */
 BOOST_JSON_DECL
 std::string
-serialize(value const& t);
+serialize(value const& t, serialize_options const& opts = {});
 
 BOOST_JSON_DECL
 std::string
-serialize(array const& t);
+serialize(array const& t, serialize_options const& opts = {});
 
 BOOST_JSON_DECL
 std::string
-serialize(object const& t);
+serialize(object const& t, serialize_options const& opts = {});
 
 BOOST_JSON_DECL
 std::string
-serialize(string const& t);
+serialize(string const& t, serialize_options const& opts = {});
 
 BOOST_JSON_DECL
 std::string
-serialize(string_view t);
+serialize(string_view t, serialize_options const& opts = {});
 /** @} */
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

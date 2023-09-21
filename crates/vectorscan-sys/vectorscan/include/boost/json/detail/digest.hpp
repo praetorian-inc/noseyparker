@@ -10,7 +10,8 @@
 #ifndef BOOST_JSON_DETAIL_DIGEST_HPP
 #define BOOST_JSON_DETAIL_DIGEST_HPP
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 // Calculate salted digest of string
@@ -35,6 +36,7 @@ digest(
 }
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

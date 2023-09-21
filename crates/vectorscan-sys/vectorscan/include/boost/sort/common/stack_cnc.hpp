@@ -13,8 +13,10 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_STACK_CNC_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_STACK_CNC_HPP
 
-#include <boost/sort/common/spinlock.hpp>
+#include <ciso646>
 #include <vector>
+#include <boost/sort/common/spinlock.hpp>
+
 
 namespace boost
 {

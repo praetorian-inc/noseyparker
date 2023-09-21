@@ -90,7 +90,7 @@ namespace projections
                 }
 
             };
-            
+
 
             // Putnins P5
             template <typename Parameters, typename T>
@@ -98,7 +98,7 @@ namespace projections
             {
                 proj_parm.A = 2.;
                 proj_parm.B = 1.;
-                
+
                 par.es = 0.;
             }
 
@@ -108,7 +108,7 @@ namespace projections
             {
                 proj_parm.A = 1.5;
                 proj_parm.B = 0.5;
-                
+
                 par.es = 0.;
             }
 

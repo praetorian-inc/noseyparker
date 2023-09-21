@@ -93,7 +93,7 @@ namespace projections
 
     }} // namespace detail::tcea
     #endif // doxygen
-    
+
     /*!
         \brief Transverse Cylindrical Equal Area projection
         \ingroup projections
@@ -125,7 +125,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(tcea_entry, tcea_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(tcea_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(tcea, tcea_entry)

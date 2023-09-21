@@ -11,12 +11,14 @@
 #define BOOST_JSON_SERIALIZER_HPP
 
 #include <boost/json/detail/config.hpp>
-#include <boost/json/value.hpp>
 #include <boost/json/detail/format.hpp>
 #include <boost/json/detail/stack.hpp>
 #include <boost/json/detail/stream.hpp>
+#include <boost/json/serialize_options.hpp>
+#include <boost/json/value.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** A serializer for JSON.
 
@@ -78,6 +80,7 @@ class serializer
     value const* jv_ = nullptr;
     detail::stack st_;
     const_stream cs0_;
+    serialize_options opts_;
     char buf_[detail::max_number_chars + 1];
     bool done_ = false;
 
@@ -113,7 +116,7 @@ public:
     BOOST_JSON_DECL
     ~serializer() noexcept;
 
-    /** Default constructor
+    /** Constructor
 
         This constructs a serializer with no value.
         The value may be set later by calling @ref reset.
@@ -125,9 +128,48 @@ public:
 
         @par Exception Safety
         No-throw guarantee.
+
+        @param opts The options for the serializer. If this parameter
+        is omitted, the serializer will output only standard JSON.
     */
     BOOST_JSON_DECL
-    serializer() noexcept;
+    serializer( serialize_options const& opts = {} ) noexcept;
+
+    /** Constructor
+
+        This constructs a serializer with no value.
+        The value may be set later by calling @ref reset.
+        If serialization is attempted with no value,
+        the output is as if a null value is serialized.
+
+        @par Complexity
+        Constant.
+
+        @par Exception Safety
+        No-throw guarantee.
+
+        @param sp A pointer to the @ref memory_resource
+        to use when producing partial output.
+        Shared ownership of the memory resource
+        is retained until the serializer is
+        destroyed.
+
+        @param buf An optional static buffer to
+        use for temporary storage when producing
+        partial output.
+
+        @param buf_size The number of bytes of
+        valid memory pointed to by `buf`.
+
+        @param opts The options for the serializer. If this parameter
+        is omitted, the serializer will output only standard JSON.
+    */
+    BOOST_JSON_DECL
+    serializer(
+        storage_ptr sp,
+        unsigned char* buf = nullptr,
+        std::size_t buf_size = 0,
+        serialize_options const& opts = {}) noexcept;
 
     /** Returns `true` if the serialization is complete
 
@@ -285,6 +327,7 @@ public:
 #endif
 };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

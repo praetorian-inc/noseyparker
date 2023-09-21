@@ -42,7 +42,7 @@
 
 namespace boost { namespace geometry { namespace projections
 {
-    
+
 namespace detail {
 
 /* determine small q */

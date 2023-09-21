@@ -13,13 +13,14 @@
 #ifndef __BOOST_SORT_COMMON_REARRANGE_HPP
 #define __BOOST_SORT_COMMON_REARRANGE_HPP
 
-//#include <boost/sort/common/atomic.hpp>
-#include <boost/sort/common/util/traits.hpp>
+#include <ciso646>
 #include <functional>
 #include <iterator>
 #include <type_traits>
 #include <vector>
 #include <cassert>
+#include <boost/sort/common/util/traits.hpp>
+
 
 namespace boost
 {

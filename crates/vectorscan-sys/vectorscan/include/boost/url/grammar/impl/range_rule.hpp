@@ -11,9 +11,9 @@
 #define BOOST_URL_GRAMMAR_IMPL_RANGE_HPP
 
 #include <boost/url/detail/except.hpp>
-#include <boost/url/detail/empty_value.hpp>
 #include <boost/url/grammar/error.hpp>
 #include <boost/url/grammar/recycled.hpp>
+#include <boost/core/empty_value.hpp>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <exception>
@@ -59,21 +59,21 @@ struct range<T>::
     }
 
     virtual
-    result<T>
+    system::result<T>
     first(
         char const*&,
         char const*) const noexcept
     {
-        return error_code{};
+        return system::error_code{};
     }
 
     virtual
-    result<T> 
+    system::result<T>
     next(
         char const*&,
         char const*) const noexcept
     {
-        return error_code{};
+        return system::error_code{};
     }
 };
 
@@ -84,12 +84,12 @@ template<class T>
 template<class R, bool Small>
 struct range<T>::impl1
     : any_rule
-    , private urls::detail::empty_value<R>
+    , private empty_value<R>
 {
     explicit
     impl1(R const& next) noexcept
-        : urls::detail::empty_value<R>(
-            urls::detail::empty_init,
+        : empty_value<R>(
+            empty_init,
             next)
     {
     }
@@ -113,7 +113,7 @@ private:
         ::new(dest) impl1(*this);
     }
 
-    result<T>
+    system::result<T>
     first(
         char const*& it,
         char const* end)
@@ -123,7 +123,7 @@ private:
             it, end, this->get());
     }
 
-    result<T>
+    system::result<T>
     next(
         char const*& it,
         char const* end)
@@ -188,7 +188,7 @@ private:
         ::new(dest) impl1(*this);
     }
 
-    result<T>
+    system::result<T>
     first(
         char const*& it,
         char const* end)
@@ -198,7 +198,7 @@ private:
             it, end, this->get().r);
     }
 
-    result<T>
+    system::result<T>
     next(
         char const*& it,
         char const* end)
@@ -217,16 +217,16 @@ template<
     class R0, class R1, bool Small>
 struct range<T>::impl2
     : any_rule
-    , private urls::detail::empty_value<R0, 0>
-    , private urls::detail::empty_value<R1, 1>
+    , private empty_value<R0, 0>
+    , private empty_value<R1, 1>
 {
     impl2(
         R0 const& first,
         R1 const& next) noexcept
-        : urls::detail::empty_value<R0,0>(
-            urls::detail::empty_init, first)
-        , urls::detail::empty_value<R1,1>(
-            urls::detail::empty_init, next)
+        : empty_value<R0,0>(
+            empty_init, first)
+        , empty_value<R1,1>(
+            empty_init, next)
     {
     }
 
@@ -249,25 +249,25 @@ private:
         ::new(dest) impl2(*this);
     }
 
-    result<T>
+    system::result<T>
     first(
         char const*& it,
         char const* end)
             const noexcept override
     {
         return grammar::parse(it, end,
-            urls::detail::empty_value<
+            empty_value<
                 R0,0>::get());
     }
 
-    result<T>
+    system::result<T>
     next(
         char const*& it,
         char const* end)
             const noexcept override
     {
         return grammar::parse(it, end,
-            urls::detail::empty_value<
+            empty_value<
                 R1,1>::get());
     }
 };
@@ -330,7 +330,7 @@ private:
         ::new(dest) impl2(*this);
     }
 
-    result<T>
+    system::result<T>
     first(
         char const*& it,
         char const* end)
@@ -340,7 +340,7 @@ private:
             it, end, get().first);
     }
 
-    result<T>
+    system::result<T>
     next(
         char const*& it,
         char const* end)
@@ -372,9 +372,9 @@ public:
 
     iterator() = default;
     iterator(
-        iterator const&) noexcept = default;
+        iterator const&) = default;
     iterator& operator=(
-        iterator const&) noexcept = default;
+        iterator const&) = default;
 
     reference
     operator*() const noexcept
@@ -384,7 +384,7 @@ public:
 
     bool
     operator==(
-        iterator other) const noexcept
+        iterator const& other) const noexcept
     {
         // can't compare iterators
         // from different containers!
@@ -395,7 +395,7 @@ public:
 
     bool
     operator!=(
-        iterator other) const noexcept
+        iterator const& other) const noexcept
     {
         return !(*this == other);
     }
@@ -427,7 +427,7 @@ private:
 
     range<T> const* r_ = nullptr;
     char const* p_ = nullptr;
-    result<T> rv_;
+    system::result<T> rv_;
 
     iterator(
         range<T> const& r) noexcept
@@ -458,7 +458,7 @@ template<class T>
 template<class R>
 range<T>::
 range(
-    string_view s,
+    core::string_view s,
     std::size_t n,
     R const& next)
     : s_(s)
@@ -480,7 +480,7 @@ template<
     class R0, class R1>
 range<T>::
 range(
-    string_view s,
+    core::string_view s,
     std::size_t n,
     R0 const& first,
     R1 const& next)
@@ -604,7 +604,7 @@ range_rule_t<R>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<value_type>
+        system::result<value_type>
 {
     using T = typename R::value_type;
 
@@ -628,7 +628,7 @@ parse(
         }
         // good
         return range<T>(
-            string_view(it0, it - it0),
+            core::string_view(it0, it - it0),
                 n, next_);
     }
     for(;;)
@@ -661,7 +661,7 @@ parse(
     }
     // good
     return range<T>(
-        string_view(it0, it - it0),
+        core::string_view(it0, it - it0),
             n, next_);
 }
 
@@ -673,7 +673,7 @@ range_rule_t<R0, R1>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<range<typename
+        system::result<range<typename
             R0::value_type>>
 {
     using T = typename R0::value_type;
@@ -698,7 +698,7 @@ parse(
         }
         // good
         return range<T>(
-            string_view(it0, it - it0),
+            core::string_view(it0, it - it0),
                 n, first_, next_);
     }
     for(;;)
@@ -731,7 +731,7 @@ parse(
     }
     // good
     return range<T>(
-        string_view(it0, it - it0),
+        core::string_view(it0, it - it0),
             n, first_, next_);
 }
 

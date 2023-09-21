@@ -47,7 +47,7 @@ assign(FwdIt first, FwdIt last)
         std::is_convertible<
             typename std::iterator_traits<
                 FwdIt>::reference,
-            string_view>::value,
+            core::string_view>::value,
         "Type requirements not met");
 
     u_->edit_segments(
@@ -75,7 +75,7 @@ insert(
         std::is_convertible<
             typename std::iterator_traits<
                 FwdIt>::reference,
-            string_view>::value,
+            core::string_view>::value,
         "Type requirements not met");
 
     return insert(
@@ -115,7 +115,7 @@ replace(
         std::is_convertible<
             typename std::iterator_traits<
                 FwdIt>::reference,
-            string_view>::value,
+            core::string_view>::value,
         "Type requirements not met");
 
     return u_->edit_segments(
@@ -131,7 +131,7 @@ inline
 void
 segments_ref::
 push_back(
-    string_view s)
+    core::string_view s)
 {
     insert(end(), s);
 }

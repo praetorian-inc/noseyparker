@@ -5,9 +5,9 @@
 // Copyright (c) 2009-2013 Mateusz Loskot, London, UK.
 // Copyright (c) 2013-2014 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2017-2020.
-// Modifications copyright (c) 2017-2020 Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2017-2023.
+// Modifications copyright (c) 2017-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,8 +16,6 @@
 
 #ifndef BOOST_GEOMETRY_ALGORITHMS_REMOVE_SPIKES_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_REMOVE_SPIKES_HPP
-
-#include <deque>
 
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
@@ -28,16 +26,13 @@
 #include <boost/variant/variant_fwd.hpp>
 
 #include <boost/geometry/core/closure.hpp>
-#include <boost/geometry/core/coordinate_type.hpp>
 #include <boost/geometry/core/cs.hpp>
 #include <boost/geometry/core/interior_rings.hpp>
-#include <boost/geometry/core/point_order.hpp>
 #include <boost/geometry/core/tags.hpp>
 
 #include <boost/geometry/geometries/concepts/check.hpp>
 
 #include <boost/geometry/algorithms/detail/point_is_spike_or_equal.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 #include <boost/geometry/algorithms/clear.hpp>
 
 #include <boost/geometry/strategies/default_strategy.hpp>
@@ -88,11 +83,10 @@ struct range_remove_spikes
         std::vector<point_type> cleaned;
         cleaned.reserve(n);
 
-        for (typename boost::range_iterator<Range const>::type it = boost::begin(range);
-            it != boost::end(range); ++it)
+        for (auto const& p : range)
         {
             // Add point
-            cleaned.push_back(*it);
+            cleaned.push_back(p);
 
             while(cleaned.size() >= 3
                   && detail::is_spike_or_equal(range::at(cleaned, cleaned.size() - 3),
@@ -105,9 +99,8 @@ struct range_remove_spikes
             }
         }
 
-        typedef typename std::vector<point_type>::iterator cleaned_iterator;
-        cleaned_iterator cleaned_b = cleaned.begin();
-        cleaned_iterator cleaned_e = cleaned.end();
+        auto cleaned_b = cleaned.begin();
+        auto cleaned_e = cleaned.end();
         std::size_t cleaned_count = cleaned.size();
 
         // For a closed-polygon, remove closing point, this makes checking first point(s) easier and consistent
@@ -178,11 +171,9 @@ struct polygon_remove_spikes
         typedef range_remove_spikes per_range;
         per_range::apply(exterior_ring(polygon), strategy);
 
-        typename interior_return_type<Polygon>::type
-            rings = interior_rings(polygon);
+        auto&& rings = interior_rings(polygon);
 
-        for (typename detail::interior_iterator<Polygon>::type
-                it = boost::begin(rings); it != boost::end(rings); ++it)
+        for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
         {
             per_range::apply(*it, strategy);
         }
@@ -196,10 +187,7 @@ struct multi_remove_spikes
     template <typename MultiGeometry, typename SideStrategy>
     static inline void apply(MultiGeometry& multi, SideStrategy const& strategy)
     {
-        for (typename boost::range_iterator<MultiGeometry>::type
-                it = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             SingleVersion::apply(*it, strategy);
         }

@@ -18,7 +18,8 @@
 #include <algorithm>
 #include <iterator>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 class value;
 class string;
@@ -378,6 +379,7 @@ using string_comp_op_requirement
         bool>::type;
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

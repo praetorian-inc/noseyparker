@@ -11,7 +11,7 @@
 /**
  * \file boost/process/async_system.hpp
  *
- * Defines the asynchrounous version of the system function.
+ * Defines the asynchronous version of the system function.
  */
 
 #ifndef BOOST_PROCESS_ASYNC_SYSTEM_HPP

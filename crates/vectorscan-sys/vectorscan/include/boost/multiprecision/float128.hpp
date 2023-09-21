@@ -138,14 +138,6 @@ struct bits_of<float128_type>
 
 #endif
 
-namespace backends {
-
-struct float128_backend;
-
-}
-
-using backends::float128_backend;
-
 template <>
 struct number_category<backends::float128_backend> : public std::integral_constant<int, number_kind_floating_point>
 {};
@@ -154,8 +146,6 @@ template <>
 struct number_category<float128_type> : public std::integral_constant<int, number_kind_floating_point>
 {};
 #endif
-
-using float128 = number<float128_backend, et_off>;
 
 namespace quad_constants {
 constexpr float128_type quad_min = static_cast<float128_type>(1) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) * static_cast<float128_type>(DBL_MIN) / 1073741824;

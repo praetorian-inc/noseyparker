@@ -1,4 +1,5 @@
 //  Copyright Paul A. Bristow 2007.
+//  Copyright Matt Borland 2023.
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,6 +20,7 @@
 #endif
 
 #include <utility>
+#include <limits>
 #include <cmath>
 
 namespace boost{ namespace math{
@@ -169,6 +171,26 @@ inline RealType cdf(const rayleigh_distribution<RealType, Policy>& dist, const R
 } // cdf
 
 template <class RealType, class Policy>
+inline RealType logcdf(const rayleigh_distribution<RealType, Policy>& dist, const RealType& x)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   RealType result = 0;
+   RealType sigma = dist.sigma();
+   static const char* function = "boost::math::logcdf(const rayleigh_distribution<%1%>&, %1%)";
+   if(false == detail::verify_sigma(function, sigma, &result, Policy()))
+   {
+      return -std::numeric_limits<RealType>::infinity();
+   }
+   if(false == detail::verify_rayleigh_x(function, x, &result, Policy()))
+   {
+      return -std::numeric_limits<RealType>::infinity();
+   }
+   result = log1p(-exp(-x * x / ( 2 * sigma * sigma)), Policy());   
+   return result;
+} // logcdf
+
+template <class RealType, class Policy>
 inline RealType quantile(const rayleigh_distribution<RealType, Policy>& dist, const RealType& p)
 {
    BOOST_MATH_STD_USING // for ADL of std functions
@@ -217,6 +239,31 @@ inline RealType cdf(const complemented2_type<rayleigh_distribution<RealType, Pol
    result =  exp(-ea);
    return result;
 } // cdf complement
+
+template <class RealType, class Policy>
+inline RealType logcdf(const complemented2_type<rayleigh_distribution<RealType, Policy>, RealType>& c)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   RealType result = 0;
+   RealType sigma = c.dist.sigma();
+   static const char* function = "boost::math::logcdf(const rayleigh_distribution<%1%>&, %1%)";
+   if(false == detail::verify_sigma(function, sigma, &result, Policy()))
+   {
+      return -std::numeric_limits<RealType>::infinity();
+   }
+   RealType x = c.param;
+   if(false == detail::verify_rayleigh_x(function, x, &result, Policy()))
+   {
+      return -std::numeric_limits<RealType>::infinity();
+   }
+   RealType ea = x * x / (2 * sigma * sigma);
+   // Fix for VC11/12 x64 bug in exp(float):
+   if (ea >= tools::max_value<RealType>())
+      return 0;
+   result = -ea;
+   return result;
+} // logcdf complement
 
 template <class RealType, class Policy>
 inline RealType quantile(const complemented2_type<rayleigh_distribution<RealType, Policy>, RealType>& c)

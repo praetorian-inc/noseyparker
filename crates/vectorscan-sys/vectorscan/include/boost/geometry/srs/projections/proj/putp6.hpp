@@ -110,7 +110,7 @@ namespace projections
                 }
 
             };
-            
+
 
             // Putnins P6
             template <typename Parameters, typename T>
@@ -121,7 +121,7 @@ namespace projections
                 proj_parm.A   = 4.;
                 proj_parm.B   = 2.1471437182129378784;
                 proj_parm.D   = 2.;
-                
+
                 par.es = 0.;
             }
 
@@ -134,7 +134,7 @@ namespace projections
                 proj_parm.A   = 6.;
                 proj_parm.B   = 5.61125;
                 proj_parm.D   = 3.;
-                
+
                 par.es = 0.;
             }
 

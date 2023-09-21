@@ -3,9 +3,10 @@
 // Copyright (c) 2015 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2017 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2017, 2019.
-// Modifications copyright (c) 2017, 2019 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2017-2023.
+// Modifications copyright (c) 2017-2023 Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -17,6 +18,7 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
 #include <vector>
 
 #include <boost/geometry/algorithms/detail/overlay/approximately_equals.hpp>
@@ -127,10 +129,10 @@ struct less_false
     }
 };
 
-template <typename Point, typename SideStrategy, typename LessOnSame, typename Compare>
+template <typename PointOrigin, typename PointTurn, typename SideStrategy, typename LessOnSame, typename Compare>
 struct less_by_side
 {
-    less_by_side(const Point& p1, const Point& p2, SideStrategy const& strategy)
+    less_by_side(const PointOrigin& p1, const PointTurn& p2, SideStrategy const& strategy)
         : m_origin(p1)
         , m_turn_point(p2)
         , m_strategy(strategy)
@@ -209,8 +211,8 @@ struct less_by_side
     }
 
 private :
-    Point const& m_origin;
-    Point const& m_turn_point;
+    PointOrigin const& m_origin;
+    PointTurn const& m_turn_point;
     SideStrategy const& m_strategy;
 };
 
@@ -379,7 +381,8 @@ public :
         }
     }
 
-    void apply(Point const& turn_point)
+    template <typename PointTurn>
+    void apply(PointTurn const& turn_point)
     {
         // We need three compare functors:
         // 1) to order clockwise (union) or counter clockwise (intersection)
@@ -388,8 +391,8 @@ public :
         //    to give colinear points
 
         // Sort by side and assign rank
-        less_by_side<Point, SideStrategy, less_by_index, Compare> less_unique(m_origin, turn_point, m_strategy);
-        less_by_side<Point, SideStrategy, less_false, Compare> less_non_unique(m_origin, turn_point, m_strategy);
+        less_by_side<Point, PointTurn, SideStrategy, less_by_index, Compare> less_unique(m_origin, turn_point, m_strategy);
+        less_by_side<Point, PointTurn, SideStrategy, less_false, Compare> less_non_unique(m_origin, turn_point, m_strategy);
 
         std::sort(m_ranked_points.begin(), m_ranked_points.end(), less_unique);
 
@@ -475,7 +478,7 @@ public :
 
         // Move iterator after rank==0
         bool has_first = false;
-        typename container_type::iterator it = m_ranked_points.begin() + 1;
+        auto it = m_ranked_points.begin() + 1;
         for (; it != m_ranked_points.end() && it->rank == 0; ++it)
         {
             has_first = true;
@@ -486,8 +489,7 @@ public :
             // Reverse first part (having rank == 0), if any,
             // but skip the very first row
             std::reverse(m_ranked_points.begin() + 1, it);
-            for (typename container_type::iterator fit = m_ranked_points.begin();
-                 fit != it; ++fit)
+            for (auto fit = m_ranked_points.begin(); fit != it; ++fit)
             {
                 BOOST_ASSERT(fit->rank == 0);
             }

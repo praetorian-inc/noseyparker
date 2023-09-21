@@ -13,13 +13,15 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_RANGE_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_RANGE_HPP
 
-#include <boost/sort/common/util/algorithm.hpp>
-#include <boost/sort/common/util/merge.hpp>
-#include <boost/sort/common/util/traits.hpp>
+#include <ciso646>
 #include <cassert>
 #include <functional>
 #include <memory>
 #include <vector>
+#include <boost/sort/common/util/algorithm.hpp>
+#include <boost/sort/common/util/merge.hpp>
+#include <boost/sort/common/util/traits.hpp>
+
 
 namespace boost
 {

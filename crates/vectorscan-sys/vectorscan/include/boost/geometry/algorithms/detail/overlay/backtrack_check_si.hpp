@@ -38,21 +38,11 @@ namespace detail { namespace overlay
 template <typename Turns>
 inline void clear_visit_info(Turns& turns)
 {
-    typedef typename boost::range_value<Turns>::type tp_type;
-
-    for (typename boost::range_iterator<Turns>::type
-        it = boost::begin(turns);
-        it != boost::end(turns);
-        ++it)
+    for (auto& turn : turns)
     {
-        for (typename boost::range_iterator
-            <
-                typename tp_type::container_type
-            >::type op_it = boost::begin(it->operations);
-            op_it != boost::end(it->operations);
-            ++op_it)
+        for (auto& op : turn.operations)
         {
-            op_it->visited.clear();
+            op.visited.clear();
         }
     }
 }

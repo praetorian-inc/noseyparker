@@ -14,7 +14,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error_types.hpp>
 #include <boost/url/grammar/charset.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/static_assert.hpp>
 #include <limits>
 #include <type_traits>
@@ -35,7 +35,7 @@ namespace grammar {
     @par Example
     Rules are used with the function @ref parse.
     @code
-    result< unsigned short > rv = parse( "32767", unsigned_rule< unsigned short >{} );
+    system::result< unsigned short > rv = parse( "32767", unsigned_rule< unsigned short >{} );
     @endcode
 
     @par BNF
@@ -69,7 +69,7 @@ struct unsigned_rule
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 #endif
 

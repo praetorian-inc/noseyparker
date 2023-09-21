@@ -51,9 +51,9 @@ namespace util
             pair<boost::mpl::int_<1>, boost::mpl::int_<1> >,
             pair<boost::mpl::int_<1>, boost::mpl::int_<0> >,
             pair<boost::mpl::int_<0>, boost::mpl::int_<1> >,
-            pair<boost::mpl::int_<0>, boost::mpl::int_<0> >        
+            pair<boost::mpl::int_<0>, boost::mpl::int_<0> >
         > result_types;
-        
+
         BOOST_MPL_ASSERT(( boost::mpl::equal<combinations, result_types> ));
     \endcode
 */

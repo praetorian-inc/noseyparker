@@ -42,9 +42,9 @@ namespace dispatch
 
 template
 <
-    typename Geometry1, 
-    typename Geometry2, 
-    typename Tag1, 
+    typename Geometry1,
+    typename Geometry2,
+    typename Tag1,
     typename Tag2
 >
 struct closest_points
@@ -62,8 +62,8 @@ struct closest_points
             <
                 Geometry2, Geometry1, Tag2, Tag1, false
             >::apply(g2, g1, shortest_seg, strategy);
-        
-        detail::closest_points::swap_segment_points::apply(shortest_seg);        
+
+        detail::closest_points::swap_segment_points::apply(shortest_seg);
     }
 };
 

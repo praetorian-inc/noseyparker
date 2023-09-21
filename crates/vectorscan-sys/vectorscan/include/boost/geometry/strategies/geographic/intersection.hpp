@@ -215,7 +215,7 @@ private:
                 : Policy::disjoint()
                 ;
         }
-        
+
         calc_t const a1_lon = get_as_radian<0>(a1);
         calc_t const a1_lat = get_as_radian<1>(a1);
         calc_t const a2_lon = get_as_radian<0>(a2);
@@ -315,7 +315,7 @@ private:
         // NOTE: at this point the segments may still be disjoint
         // NOTE: at this point one of the segments may be degenerated
 
-        bool collinear = sides.collinear();       
+        bool collinear = sides.collinear();
 
         if (! collinear)
         {
@@ -525,7 +525,7 @@ private:
             // distance for ratio
             dist_1_o = dist_1_2 - dist_1_o;
         }
-        
+
         return Policy::one_degenerate(segment, segment_ratio<CalcT>(dist_1_o, dist_1_2), degenerated_a);
     }
 
@@ -764,7 +764,7 @@ private:
         {
             return false;
         }
-        
+
         typedef typename FormulaPolicy::template inverse<CalcT, true, false, false, false, false> inverse_dist;
 
         ip_flag = ipi_inters;
@@ -801,7 +801,7 @@ private:
             dist_a1_ip = res_a1_a2.distance;
             dist_b1_ip = inverse_dist::apply(b1_lon, b1_lat, lon, lat, spheroid).distance; // for consistency
             ip_flag = ipi_at_a2;
-        }        
+        }
 
         return true;
     }

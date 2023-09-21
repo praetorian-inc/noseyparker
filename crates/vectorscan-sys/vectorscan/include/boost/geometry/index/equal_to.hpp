@@ -16,6 +16,8 @@
 #include <boost/geometry/algorithms/detail/equals/interface.hpp>
 #include <boost/geometry/index/indexable.hpp>
 
+#include <tuple>
+
 namespace boost { namespace geometry { namespace index { namespace detail
 {
 
@@ -151,10 +153,10 @@ struct equal_to
 {
     /*! \brief The type of result returned by function object. */
     typedef bool result_type;
-    
+
     /*!
     \brief Compare values. If Value is a Geometry geometry::equals() function is used.
-    
+
     \param l First value.
     \param r Second value.
     \return true if values are equal.
@@ -183,7 +185,7 @@ struct equal_to<std::pair<T1, T2>, false>
 
     /*!
     \brief Compare values. If pair<> Value member is a Geometry geometry::equals() function is used.
-    
+
     \param l First value.
     \param r Second value.
     \return true if values are equal.
@@ -214,7 +216,7 @@ struct equal_to<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>, false>
 
     /*!
     \brief Compare values. If tuple<> Value member is a Geometry geometry::equals() function is used.
-    
+
     \param l First value.
     \param r Second value.
     \return true if values are equal.
@@ -230,10 +232,6 @@ struct equal_to<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>, false>
 };
 
 }}}} // namespace boost::geometry::index::detail
-
-#if !defined(BOOST_NO_CXX11_HDR_TUPLE) && !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-
-#include <tuple>
 
 namespace boost { namespace geometry { namespace index { namespace detail {
 
@@ -277,7 +275,7 @@ struct equal_to<std::tuple<Args...>, false>
 
     /*!
     \brief Compare values. If tuple<> Value member is a Geometry geometry::equals() function is used.
-    
+
     \param l First value.
     \param r Second value.
     \return true if values are equal.
@@ -293,7 +291,6 @@ struct equal_to<std::tuple<Args...>, false>
 
 }}}} // namespace boost::geometry::index::detail
 
-#endif // !defined(BOOST_NO_CXX11_HDR_TUPLE) && !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
 namespace boost { namespace geometry { namespace index {
 
@@ -313,10 +310,10 @@ struct equal_to
 {
     /*! \brief The type of result returned by function object. */
     typedef typename detail::equal_to<Value>::result_type result_type;
-    
+
     /*!
     \brief Compare Values.
-    
+
     \param l First value.
     \param r Second value.
     \return true if Values are equal.

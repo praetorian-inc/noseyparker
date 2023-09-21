@@ -14,7 +14,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/string_token.hpp>
 #include <array>
 #include <cstdint>
@@ -168,7 +168,7 @@ public:
     */
     BOOST_URL_DECL
     ipv6_address(
-        string_view s);
+        core::string_view s);
 
     /** Return the address as bytes, in network byte order
     */
@@ -242,7 +242,7 @@ public:
         @param dest_size The size of the output buffer.
     */
     BOOST_URL_DECL
-    string_view
+    core::string_view
     to_buffer(
         char* dest,
         std::size_t dest_size) const;
@@ -388,9 +388,9 @@ operator<<(
     @param s The string to parse.
 */
 BOOST_URL_DECL
-result<ipv6_address>
+system::result<ipv6_address>
 parse_ipv6_address(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 } // urls
 } // boost

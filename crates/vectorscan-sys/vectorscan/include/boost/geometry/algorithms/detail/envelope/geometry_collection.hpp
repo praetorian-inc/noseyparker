@@ -36,7 +36,7 @@ struct envelope<Collection, geometry_collection_tag>
                              Strategies const& strategies)
     {
         using strategy_t = decltype(strategies.envelope(geometry, mbr));
-        
+
         typename strategy_t::template state<Box> state;
         detail::visit_breadth_first([&](auto const& g)
         {

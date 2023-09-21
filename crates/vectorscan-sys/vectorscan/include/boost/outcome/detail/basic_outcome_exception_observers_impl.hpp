@@ -1,5 +1,5 @@
 /* Exception observers for outcome type
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (6 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (6 commits)
 File Created: Oct 2017
 
 

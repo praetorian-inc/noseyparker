@@ -9,9 +9,9 @@
 #include "char_traits.hpp"
 // memcpy
 #include <cstring>
-#include <fstream>
 #include "size_t.hpp"
 #include "state_machine.hpp"
+#include <iosfwd>
 
 namespace boost
 {

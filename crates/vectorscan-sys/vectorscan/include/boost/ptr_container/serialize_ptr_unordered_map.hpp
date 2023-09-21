@@ -24,13 +24,13 @@ namespace serialization
 template<class Archive, class Key, class T, class Hash, class Pred, class CloneAllocator, class Allocator>
 void serialize(Archive& ar, ptr_unordered_map<Key, T, Hash, Pred, CloneAllocator, Allocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+   core::split_free(ar, c, version);
 }
 
 template<class Archive, class Key, class T, class Hash, class Pred, class CloneAllocator, class Allocator>
 void serialize(Archive& ar, ptr_unordered_multimap<Key, T, Hash, Pred, CloneAllocator, Allocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+   core::split_free(ar, c, version);
 }
 
 } // namespace serialization

@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2015 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2015 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
@@ -207,7 +208,7 @@ struct convex_hull
                              OutputGeometry& out,
                              Strategy const& strategy)
     {
-        detail::convex_hull::input_geometry_proxy<Geometry> in_proxy(geometry);        
+        detail::convex_hull::input_geometry_proxy<Geometry> in_proxy(geometry);
         detail::convex_hull::graham_andrew
             <
                 typename point_type<Geometry>::type
@@ -224,7 +225,7 @@ struct convex_hull<Box, box_tag>
     template <typename OutputGeometry, typename Strategy>
     static inline void apply(Box const& box,
                              OutputGeometry& out,
-                             Strategy const& strategy)
+                             Strategy const& )
     {
         static bool const Close
             = geometry::closure<OutputGeometry>::value == closed;

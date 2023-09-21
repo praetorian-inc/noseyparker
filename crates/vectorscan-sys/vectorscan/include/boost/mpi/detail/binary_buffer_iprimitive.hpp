@@ -100,7 +100,7 @@ public:
       #endif
       s.resize(l);
       // note breaking a rule here - could be a problem on some platform
-      load_impl(const_cast<char *>(s.data()),l);
+      load_impl(const_cast<CharType *>(s.data()), l*sizeof(CharType));
     }
 
 private:

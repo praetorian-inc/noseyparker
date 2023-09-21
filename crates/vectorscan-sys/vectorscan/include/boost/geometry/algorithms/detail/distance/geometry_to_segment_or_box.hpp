@@ -54,7 +54,7 @@ template
 >
 struct segment_or_box_point_range_closure
     : not_implemented<SegmentOrBox>
-{};    
+{};
 
 template <typename Segment>
 struct segment_or_box_point_range_closure<Segment, segment_tag>
@@ -163,16 +163,10 @@ public:
                                     Strategies const& strategies,
                                     bool check_intersection = true)
     {
-        typedef geometry::point_iterator<Geometry const> point_iterator_type;
         typedef geometry::segment_iterator
             <
                 Geometry const
             > segment_iterator_type;
-
-        typedef typename boost::range_const_iterator
-            <
-                std::vector<segment_or_box_point>
-            >::type seg_or_box_const_iterator;
 
         typedef assign_new_min_iterator<SegmentOrBox> assign_new_value;
 
@@ -196,32 +190,27 @@ public:
 
         assign_segment_or_box_points
             <
-                SegmentOrBox, 
+                SegmentOrBox,
                 std::vector<segment_or_box_point>
             >::apply(segment_or_box, seg_or_box_points);
 
         // consider all distances of the points in the geometry to the
         // segment or box
         comparable_return_type cd_min1(0);
-        point_iterator_type pit_min;
-        seg_or_box_const_iterator it_min1 = boost::const_begin(seg_or_box_points);
-        seg_or_box_const_iterator it_min2 = it_min1;
-        ++it_min2;
+        auto pit_min = points_begin(geometry);
+        auto it_min1 = boost::const_begin(seg_or_box_points);
+        auto it_min2 = it_min1 + 1;
         bool first = true;
 
-        for (point_iterator_type pit = points_begin(geometry);
+        for (auto pit = pit_min;
              pit != points_end(geometry); ++pit, first = false)
         {
             comparable_return_type cd;
-            std::pair
-                <
-                    seg_or_box_const_iterator, seg_or_box_const_iterator
-                > it_pair
-                = point_to_point_range::apply(*pit,
-                                              boost::const_begin(seg_or_box_points),
-                                              boost::const_end(seg_or_box_points),
-                                              cstrategy,
-                                              cd);
+            auto it_pair = point_to_point_range::apply(*pit,
+                boost::const_begin(seg_or_box_points),
+                boost::const_end(seg_or_box_points),
+                cstrategy,
+                cd);
 
             if (first || cd < cd_min1)
             {
@@ -236,10 +225,10 @@ public:
         // segments of the geometry
         comparable_return_type cd_min2(0);
         segment_iterator_type sit_min;
-        seg_or_box_const_iterator it_min;
+        auto it_min = boost::const_begin(seg_or_box_points);
 
         first = true;
-        for (seg_or_box_const_iterator it = boost::const_begin(seg_or_box_points);
+        for (auto it = boost::const_begin(seg_or_box_points);
              it != boost::const_end(seg_or_box_points); ++it, first = false)
         {
             comparable_return_type cd;
@@ -282,7 +271,7 @@ public:
     }
 
 
-    static inline return_type apply(SegmentOrBox const& segment_or_box, Geometry const& geometry, 
+    static inline return_type apply(SegmentOrBox const& segment_or_box, Geometry const& geometry,
                                     Strategies const& strategies, bool check_intersection = true)
     {
         return apply(geometry, segment_or_box, strategies, check_intersection);
@@ -299,14 +288,7 @@ class geometry_to_segment_or_box
 {
 private:
     typedef detail::closest_feature::geometry_to_range base_type;
-
-    typedef typename boost::range_iterator
-        <
-            MultiPoint const
-        >::type iterator_type;
-
     typedef detail::closest_feature::geometry_to_range geometry_to_range;
-
     typedef distance::strategy_t<MultiPoint, SegmentOrBox, Strategies> strategy_type;
 
 public:
@@ -318,7 +300,7 @@ public:
     {
         distance::creturn_t<MultiPoint, SegmentOrBox, Strategies> cd_min;
 
-        iterator_type it_min
+        auto const it_min
             = geometry_to_range::apply(segment_or_box,
                                        boost::begin(multipoint),
                                        boost::end(multipoint),

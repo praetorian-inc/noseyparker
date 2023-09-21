@@ -7,7 +7,7 @@
 #ifndef BOOST_HISTOGRAM_DETAIL_REDUCE_COMMAND_HPP
 #define BOOST_HISTOGRAM_DETAIL_REDUCE_COMMAND_HPP
 
-#include <boost/histogram/detail/span.hpp>
+#include <boost/core/span.hpp>
 #include <boost/histogram/fwd.hpp>
 #include <boost/throw_exception.hpp>
 #include <cassert>

@@ -214,7 +214,7 @@ struct relate<default_strategy, false>
                 Geometry1,
                 Geometry2
             >::type strategy_type;
-        
+
         dispatch::relate
             <
                 Geometry1,

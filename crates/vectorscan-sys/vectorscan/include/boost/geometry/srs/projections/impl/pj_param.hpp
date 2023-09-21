@@ -205,7 +205,7 @@ inline bool _pj_param_i(Params const& params, Name const& name, int & par)
     {
         set_value(par, *it);
         return true;
-    }    
+    }
     return false;
 }
 
@@ -214,12 +214,12 @@ template <typename T, typename Params, typename Name>
 inline bool _pj_param_f(Params const& params, Name const& name, T & par)
 {
     check_name(name);
-    typename Params::const_iterator it = pj_param_find(params, name);        
+    typename Params::const_iterator it = pj_param_find(params, name);
     if (it != params.end())
     {
         set_value(par, *it);
         return true;
-    }    
+    }
     return false;
 }
 
@@ -228,19 +228,19 @@ template <typename T, typename Params, typename Name>
 inline bool _pj_param_r(Params const& params, Name const& name, T & par)
 {
     check_name(name);
-    typename Params::const_iterator it = pj_param_find(params, name);        
+    typename Params::const_iterator it = pj_param_find(params, name);
     if (it != params.end())
     {
         set_value_r(par, *it);
         return true;
-    }    
+    }
     return false;
 }
 
 /* bool input */
 inline bool _pj_get_param_b(srs::detail::proj4_parameters const& pl, std::string const& name)
 {
-    srs::detail::proj4_parameters::const_iterator it = pj_param_find(pl, name);        
+    srs::detail::proj4_parameters::const_iterator it = pj_param_find(pl, name);
     if (it != pl.end())
     {
         switch (it->value[0])
@@ -253,7 +253,7 @@ inline bool _pj_get_param_b(srs::detail::proj4_parameters const& pl, std::string
             BOOST_THROW_EXCEPTION( projection_exception(error_invalid_boolean_param) );
             return false;
         }
-    }    
+    }
     return false;
 }
 
@@ -270,12 +270,12 @@ inline bool _pj_get_param_b(srs::dpar::parameters<T> const& pl, srs::dpar::name_
 /* string input */
 inline bool pj_param_s(srs::detail::proj4_parameters const& pl, std::string const& name, std::string & par)
 {
-    srs::detail::proj4_parameters::const_iterator it = pj_param_find(pl, name);        
+    srs::detail::proj4_parameters::const_iterator it = pj_param_find(pl, name);
     if (it != pl.end())
     {
         par = it->value;
         return true;
-    }    
+    }
     return false;
 }
 
@@ -363,7 +363,7 @@ inline bool _pj_get_param_b(srs::spar::parameters<Ps...> const& params)
 //    {
 //        par = static_cast<Value>(it->template get_value<int>());
 //        return true;
-//    }    
+//    }
 //    return false;
 //}
 

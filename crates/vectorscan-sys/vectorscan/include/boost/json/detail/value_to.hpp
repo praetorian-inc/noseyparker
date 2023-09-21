@@ -20,17 +20,8 @@
 # include <optional>
 #endif
 
-BOOST_JSON_NS_BEGIN
-
-template<class T, class U,
-    typename std::enable_if<
-        ! std::is_reference<T>::value &&
-    std::is_same<U, value>::value>::type>
-T value_to(U const&);
-
-template<class T>
-typename result_for<T, value>::type
-try_value_to(const value& jv);
+namespace boost {
+namespace json {
 
 namespace detail {
 
@@ -45,40 +36,37 @@ using reserve_implementation = mp11::mp_cond<
     mp11::mp_true,         mp11::mp_int<0>>;
 
 template<class T>
-error_code
+error
 try_reserve(
     T&,
     std::size_t size,
     mp11::mp_int<2>)
 {
-    error_code ec;
     constexpr std::size_t N = std::tuple_size<remove_cvref<T>>::value;
     if ( N != size )
-    {
-        BOOST_JSON_FAIL(ec, error::size_mismatch);
-    }
-    return ec;
+        return error::size_mismatch;
+    return error();
 }
 
 template<typename T>
-error_code
+error
 try_reserve(
     T& cont,
     std::size_t size,
     mp11::mp_int<1>)
 {
     cont.reserve(size);
-    return error_code();
+    return error();
 }
 
 template<typename T>
-error_code
+error
 try_reserve(
     T&,
     std::size_t,
     mp11::mp_int<0>)
 {
-    return error_code();
+    return error();
 }
 
 
@@ -117,37 +105,37 @@ inserter(
     T& target,
     mp11::mp_int<0>)
 {
-    return std::inserter(target, end(target));
+    return std::inserter( target, target.end() );
 }
 
 // identity conversion
-inline
+template< class Ctx >
 result<value>
 value_to_impl(
+    value_conversion_tag,
     try_value_to_tag<value>,
     value const& jv,
-    value_conversion_tag)
+    Ctx const& )
 {
     return jv;
 }
 
-inline
+template< class Ctx >
 value
 value_to_impl(
-    value_to_tag<value>,
-    value const& jv,
-    value_conversion_tag)
+    value_conversion_tag, value_to_tag<value>, value const& jv, Ctx const& )
 {
     return jv;
 }
 
 // object
-inline
+template< class Ctx >
 result<object>
 value_to_impl(
+    object_conversion_tag,
     try_value_to_tag<object>,
     value const& jv,
-    object_conversion_tag)
+    Ctx const& )
 {
     object const* obj = jv.if_object();
     if( obj )
@@ -158,12 +146,13 @@ value_to_impl(
 }
 
 // array
-inline
+template< class Ctx >
 result<array>
 value_to_impl(
+    array_conversion_tag,
     try_value_to_tag<array>,
     value const& jv,
-    array_conversion_tag)
+    Ctx const& )
 {
     array const* arr = jv.if_array();
     if( arr )
@@ -174,12 +163,13 @@ value_to_impl(
 }
 
 // string
-inline
+template< class Ctx >
 result<string>
 value_to_impl(
+    string_conversion_tag,
     try_value_to_tag<string>,
     value const& jv,
-    string_conversion_tag)
+    Ctx const& )
 {
     string const* str = jv.if_string();
     if( str )
@@ -190,12 +180,10 @@ value_to_impl(
 }
 
 // bool
-inline
+template< class Ctx >
 result<bool>
 value_to_impl(
-    try_value_to_tag<bool>,
-    value const& jv,
-    bool_conversion_tag)
+    bool_conversion_tag, try_value_to_tag<bool>, value const& jv, Ctx const& )
 {
     auto b = jv.if_bool();
     if( b )
@@ -206,12 +194,10 @@ value_to_impl(
 }
 
 // integral and floating point
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
-    try_value_to_tag<T>,
-    value const& jv,
-    number_conversion_tag)
+    number_conversion_tag, try_value_to_tag<T>, value const& jv, Ctx const& )
 {
     error_code ec;
     auto const n = jv.to_number<T>(ec);
@@ -221,12 +207,13 @@ value_to_impl(
 }
 
 // null-like conversion
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    null_like_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    null_like_conversion_tag)
+    Ctx const& )
 {
     if( jv.is_null() )
         return {boost::system::in_place_value, T{}};
@@ -236,12 +223,13 @@ value_to_impl(
 }
 
 // string-like types
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    string_like_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    string_like_conversion_tag)
+    Ctx const& )
 {
     auto str = jv.if_string();
     if( str )
@@ -252,31 +240,36 @@ value_to_impl(
 }
 
 // map-like containers
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    map_like_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    map_like_conversion_tag)
+    Ctx const& ctx )
 {
-    error_code ec;
-
     object const* obj = jv.if_object();
     if( !obj )
     {
+        error_code ec;
         BOOST_JSON_FAIL(ec, error::not_object);
         return {boost::system::in_place_error, ec};
     }
 
     T res;
-    ec = detail::try_reserve(res, obj->size(), reserve_implementation<T>());
-    if( ec.failed() )
+    error const e = detail::try_reserve(
+        res, obj->size(), reserve_implementation<T>());
+    if( e != error() )
+    {
+        error_code ec;
+        BOOST_JSON_FAIL( ec, e );
         return {boost::system::in_place_error, ec};
+    }
 
     auto ins = detail::inserter(res, inserter_implementation<T>());
     for( key_value_pair const& kv: *obj )
     {
-        auto elem_res = try_value_to<mapped_type<T>>(kv.value());
+        auto elem_res = try_value_to<mapped_type<T>>( kv.value(), ctx );
         if( elem_res.has_error() )
             return {boost::system::in_place_error, elem_res.error()};
         *ins++ = value_type<T>{
@@ -286,61 +279,37 @@ value_to_impl(
     return res;
 }
 
-template<class T>
-T
-value_to_impl(
-    value_to_tag<T>,
-    value const& jv,
-    map_like_conversion_tag)
-{
-    error_code ec;
-
-    object const* obj = jv.if_object();
-    if( !obj )
-    {
-        BOOST_JSON_FAIL(ec, error::not_object);
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-    }
-
-    T result;
-    ec = detail::try_reserve(result, obj->size(), reserve_implementation<T>());
-    if( ec.failed() )
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-
-    auto ins = detail::inserter(result, inserter_implementation<T>());
-    for( key_value_pair const& kv: *obj )
-        *ins++ = value_type<T>{
-            key_type<T>(kv.key()),
-            value_to<mapped_type<T>>(kv.value())};
-    return result;
-}
-
 // all other containers
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    sequence_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    sequence_conversion_tag)
+    Ctx const& ctx )
 {
-    error_code ec;
-
     array const* arr = jv.if_array();
     if( !arr )
     {
+        error_code ec;
         BOOST_JSON_FAIL(ec, error::not_array);
         return {boost::system::in_place_error, ec};
     }
 
     T result;
-    ec = detail::try_reserve(result, arr->size(), reserve_implementation<T>());
-    if( ec.failed() )
+    error const e = detail::try_reserve(
+        result, arr->size(), reserve_implementation<T>());
+    if( e != error() )
+    {
+        error_code ec;
+        BOOST_JSON_FAIL( ec, e );
         return {boost::system::in_place_error, ec};
+    }
 
     auto ins = detail::inserter(result, inserter_implementation<T>());
     for( value const& val: *arr )
     {
-        auto elem_res = try_value_to<value_type<T>>(val);
+        auto elem_res = try_value_to<value_type<T>>( val, ctx );
         if( elem_res.has_error() )
             return {boost::system::in_place_error, elem_res.error()};
         *ins++ = std::move(*elem_res);
@@ -348,55 +317,30 @@ value_to_impl(
     return result;
 }
 
-template<class T>
-T
-value_to_impl(
-    value_to_tag<T>,
-    value const& jv,
-    sequence_conversion_tag)
-{
-    error_code ec;
-
-    array const* arr = jv.if_array();
-    if( !arr )
-    {
-        BOOST_JSON_FAIL(ec, error::not_array);
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-    }
-
-    T result;
-    ec = detail::try_reserve(result, arr->size(), reserve_implementation<T>());
-    if( ec.failed() )
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-
-    auto ins = detail::inserter(result, inserter_implementation<T>());
-    for( value const& val: *arr )
-        *ins++ = value_to<value_type<T>>(val);
-    return result;
-}
-
 // tuple-like types
-template <class T>
+template< class T, class Ctx >
 result<T>
-try_make_tuple_elem(value const& jv, error_code& ec)
+try_make_tuple_elem(value const& jv, Ctx const& ctx, error_code& ec)
 {
     if( ec.failed() )
         return {boost::system::in_place_error, ec};
 
-    auto result = try_value_to<T>(jv);
+    auto result = try_value_to<T>( jv, ctx );
     ec = result.error();
     return result;
 }
 
-template <class T, std::size_t... Is>
+template <class T, class Ctx, std::size_t... Is>
 result<T>
-try_make_tuple_like(array const& arr, boost::mp11::index_sequence<Is...>)
+try_make_tuple_like(
+    array const& arr, Ctx const& ctx, boost::mp11::index_sequence<Is...>)
 {
     error_code ec;
     auto items = std::make_tuple(
-        try_make_tuple_elem<tuple_element_t<Is, T>>(
-            arr[Is], ec)
-        ...);
+        try_make_tuple_elem<
+            typename std::decay<tuple_element_t<Is, T>>::type >(
+                arr[Is], ctx, ec)
+            ...);
     if( ec.failed() )
         return {boost::system::in_place_error, ec};
 
@@ -404,19 +348,13 @@ try_make_tuple_like(array const& arr, boost::mp11::index_sequence<Is...>)
         boost::system::in_place_value, T(std::move(*std::get<Is>(items))...)};
 }
 
-template <class T, std::size_t... Is>
-T
-make_tuple_like(array const& arr, boost::mp11::index_sequence<Is...>)
-{
-    return T(value_to<tuple_element_t<Is, T>>(arr[Is])...);
-}
-
-template <class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    tuple_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    tuple_conversion_tag)
+    Ctx const& ctx )
 {
     error_code ec;
 
@@ -435,37 +373,22 @@ value_to_impl(
     }
 
     return try_make_tuple_like<T>(
-        *arr, boost::mp11::make_index_sequence<N>());
+        *arr, ctx, boost::mp11::make_index_sequence<N>());
 }
 
-template <class T>
-T
-value_to_impl(
-    value_to_tag<T>,
-    value const& jv,
-    tuple_conversion_tag)
-{
-    error_code ec;
+template< class T>
+struct is_optional
+    : std::false_type
+{ };
 
-    array const* arr = jv.if_array();
-    if( !arr )
-    {
-        BOOST_JSON_FAIL(ec, error::not_array);
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-    }
+#ifndef BOOST_NO_CXX17_HDR_OPTIONAL
+template< class T>
+struct is_optional< std::optional<T> >
+    : std::true_type
+{ };
+#endif // BOOST_NO_CXX17_HDR_OPTIONAL
 
-    constexpr std::size_t N = std::tuple_size<remove_cvref<T>>::value;
-    if( N != arr->size() )
-    {
-        BOOST_JSON_FAIL(ec, error::size_mismatch);
-        throw_system_error(ec, BOOST_CURRENT_LOCATION);
-    }
-
-    return make_tuple_like<T>(
-        *arr, boost::mp11::make_index_sequence<N>());
-}
-
-template< class T >
+template< class Ctx, class T, bool non_throwing = true >
 struct to_described_member
 {
     using Ds = describe::describe_members<
@@ -475,42 +398,62 @@ struct to_described_member
     using described_member_t = remove_cvref<decltype(
         std::declval<T&>().* D::pointer )>;
 
-    result<T>& res;
+    using result_type = mp11::mp_eval_if_c< !non_throwing, T, result, T >;
+
+    result_type& res;
     object const& obj;
+    std::size_t count;
+    Ctx const& ctx;
 
     template< class I >
     void
-    operator()(I) const
+    operator()(I)
     {
         if( !res )
             return;
 
         using D = mp11::mp_at<Ds, I>;
+        using M = described_member_t<D>;
+
         auto const found = obj.find(D::name);
         if( found == obj.end() )
         {
-            error_code ec;
-            BOOST_JSON_FAIL(ec, error::unknown_name);
-            res = {boost::system::in_place_error, ec};
+            BOOST_IF_CONSTEXPR( !is_optional<M>::value )
+            {
+                error_code ec;
+                BOOST_JSON_FAIL(ec, error::unknown_name);
+                res = {boost::system::in_place_error, ec};
+            }
             return;
         }
 
-        using M = described_member_t<D>;
-        auto member_res = try_value_to<M>(found->value());
+#if defined(__GNUC__) && BOOST_GCC_VERSION >= 80000 && BOOST_GCC_VERSION < 11000
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunused"
+# pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+        auto member_res = try_value_to<M>( found->value(), ctx );
+#if defined(__GNUC__) && BOOST_GCC_VERSION >= 80000 && BOOST_GCC_VERSION < 11000
+# pragma GCC diagnostic pop
+#endif
         if( member_res )
+        {
             (*res).* D::pointer = std::move(*member_res);
+            ++count;
+        }
         else
             res = {boost::system::in_place_error, member_res.error()};
     }
 };
 
 // described classes
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    described_class_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    described_class_conversion_tag)
+    Ctx const& ctx )
 {
     result<T> res;
 
@@ -523,11 +466,16 @@ value_to_impl(
         return res;
     }
 
-    to_described_member<T> member_converter{res, *obj};
-    using Ds = typename decltype(member_converter)::Ds;
+    to_described_member< Ctx, T > member_converter{ res, *obj, 0u, ctx };
 
+    using Ds = typename decltype(member_converter)::Ds;
     constexpr std::size_t N = mp11::mp_size<Ds>::value;
-    if( obj->size() != N )
+    mp11::mp_for_each< mp11::mp_iota_c<N> >(member_converter);
+
+    if( !res )
+        return res;
+
+    if( member_converter.count != obj->size() )
     {
         error_code ec;
         BOOST_JSON_FAIL(ec, error::size_mismatch);
@@ -535,17 +483,17 @@ value_to_impl(
         return res;
     }
 
-    mp11::mp_for_each< mp11::mp_iota_c<N> >(member_converter);
     return res;
 }
 
 // described enums
-template<class T>
+template< class T, class Ctx >
 result<T>
 value_to_impl(
+    described_enum_conversion_tag,
     try_value_to_tag<T>,
     value const& jv,
-    described_enum_conversion_tag)
+    Ctx const& )
 {
     T val = {};
     (void)jv;
@@ -570,59 +518,210 @@ value_to_impl(
 }
 
 //----------------------------------------------------------
-// User-provided conversion
-template<class T>
-typename std::enable_if<
-    mp11::mp_valid<has_user_conversion_to_impl, T>::value,
-    T>::type
+// User-provided conversions; throwing -> throwing
+template< class T, class Ctx >
+mp11::mp_if< mp11::mp_valid<has_user_conversion_to_impl, T>, T >
 value_to_impl(
-    value_to_tag<T> tag,
-    value const& jv,
-    user_conversion_tag)
+    user_conversion_tag, value_to_tag<T> tag, value const& jv, Ctx const&)
 {
     return tag_invoke(tag, jv);
 }
 
-template<class T>
-typename std::enable_if<
-    !mp11::mp_valid<has_user_conversion_to_impl, T>::value,
-    T>::type
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if<
+    mp11::mp_valid< has_context_conversion_to_impl, typename Sup::type, T>, T >
 value_to_impl(
-    value_to_tag<T>,
+    context_conversion_tag,
+    value_to_tag<T> tag,
     value const& jv,
-    user_conversion_tag)
+    Ctx const& ctx )
+{
+    return tag_invoke( tag, jv, Sup::get(ctx) );
+}
+
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if<
+    mp11::mp_valid<
+        has_full_context_conversion_to_impl, typename Sup::type, T>,
+    T>
+value_to_impl(
+    full_context_conversion_tag,
+    value_to_tag<T> tag,
+    value const& jv,
+    Ctx const& ctx )
+{
+    return tag_invoke( tag, jv, Sup::get(ctx), ctx );
+}
+
+//----------------------------------------------------------
+// User-provided conversions; throwing -> nonthrowing
+template< class T, class Ctx >
+mp11::mp_if_c< !mp11::mp_valid<has_user_conversion_to_impl, T>::value, T>
+value_to_impl(
+    user_conversion_tag, value_to_tag<T>, value const& jv, Ctx const& )
 {
     auto res = tag_invoke(try_value_to_tag<T>(), jv);
     if( res.has_error() )
-        throw_system_error(res.error(), BOOST_CURRENT_LOCATION);
+        throw_system_error( res.error() );
     return std::move(*res);
 }
 
-template<class T>
-typename std::enable_if<
-    mp11::mp_valid<has_nonthrowing_user_conversion_to_impl, T>::value,
-    result<T>>::type
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if_c<
+    !mp11::mp_valid<
+        has_context_conversion_to_impl, typename Sup::type, T>::value,
+    T>
 value_to_impl(
-    try_value_to_tag<T>,
+    context_conversion_tag, value_to_tag<T>, value const& jv, Ctx const& ctx )
+{
+    auto res = tag_invoke( try_value_to_tag<T>(), jv, Sup::get(ctx) );
+    if( res.has_error() )
+        throw_system_error( res.error() );
+    return std::move(*res);
+}
+
+template< class Ctx >
+std::tuple<allow_exceptions, Ctx>
+make_throwing_context(Ctx const& ctx)
+{
+    return std::tuple<allow_exceptions, Ctx>(allow_exceptions(), ctx);
+}
+
+template< class... Ctxes >
+std::tuple<allow_exceptions, Ctxes...>
+make_throwing_context(std::tuple<Ctxes...> const& ctx)
+{
+    return std::tuple_cat(std::make_tuple( allow_exceptions() ), ctx);
+}
+
+template< class... Ctxes >
+std::tuple<allow_exceptions, Ctxes...> const&
+make_throwing_context(std::tuple<allow_exceptions, Ctxes...> const& ctx)
+    noexcept
+{
+    return ctx;
+}
+
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if_c<
+    !mp11::mp_valid<
+        has_full_context_conversion_to_impl, typename Sup::type, T>::value,
+    T>
+value_to_impl(
+    full_context_conversion_tag,
+    value_to_tag<T>,
     value const& jv,
-    user_conversion_tag)
+    Ctx const& ctx )
+{
+    auto res = tag_invoke(
+        try_value_to_tag<T>(),
+        jv,
+        Sup::get(ctx),
+        make_throwing_context(ctx));
+    if( res.has_error() )
+        throw_system_error( res.error() );
+    return std::move(*res);
+}
+
+//----------------------------------------------------------
+// User-provided conversions; nonthrowing -> nonthrowing
+template< class T, class Ctx >
+mp11::mp_if<
+    mp11::mp_valid<has_nonthrowing_user_conversion_to_impl, T>, result<T> >
+value_to_impl(
+    user_conversion_tag, try_value_to_tag<T>, value const& jv, Ctx const& )
 {
     return tag_invoke(try_value_to_tag<T>(), jv);
 }
 
-template<class T>
-typename std::enable_if<
-    !mp11::mp_valid<has_nonthrowing_user_conversion_to_impl, T>::value,
-    result<T>>::type
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if<
+    mp11::mp_valid<
+        has_nonthrowing_context_conversion_to_impl, typename Sup::type, T>,
+    result<T> >
 value_to_impl(
-    try_value_to_tag<T>,
+    context_conversion_tag,
+    try_value_to_tag<T> tag,
     value const& jv,
-    user_conversion_tag)
+    Ctx const& ctx )
 {
+    return tag_invoke( tag, jv, Sup::get(ctx) );
+}
+
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if<
+    mp11::mp_valid<
+        has_nonthrowing_full_context_conversion_to_impl,
+        typename Sup::type,
+        T>,
+    result<T> >
+value_to_impl(
+    full_context_conversion_tag,
+    try_value_to_tag<T> tag,
+    value const& jv,
+    Ctx const& ctx )
+{
+    return tag_invoke( tag, jv, Sup::get(ctx), ctx );
+}
+
+//----------------------------------------------------------
+// User-provided conversions; nonthrowing -> throwing
+
+template< class Ctx >
+struct does_allow_exceptions : std::false_type
+{ };
+
+template< class... Ctxes >
+struct does_allow_exceptions< std::tuple<allow_exceptions, Ctxes...> >
+    : std::true_type
+{ };
+
+template< class T, class... Args >
+result<T>
+wrap_conversion_exceptions( std::true_type, value_to_tag<T>, Args&& ... args )
+{
+    return {
+        boost::system::in_place_value,
+        tag_invoke( value_to_tag<T>(), static_cast<Args&&>(args)... )};
+}
+
+template< class T, class... Args >
+result<T>
+wrap_conversion_exceptions( std::false_type, value_to_tag<T>, Args&& ... args )
+{
+#ifndef BOOST_NO_EXCEPTIONS
     try
     {
-        return {
-            boost::system::in_place_value, tag_invoke(value_to_tag<T>(), jv)};
+#endif
+        return wrap_conversion_exceptions(
+            std::true_type(),
+            value_to_tag<T>(),
+            static_cast<Args&&>(args)... );
+#ifndef BOOST_NO_EXCEPTIONS
     }
     catch( std::bad_alloc const&)
     {
@@ -638,15 +737,70 @@ value_to_impl(
         BOOST_JSON_FAIL(ec, error::exception);
         return {boost::system::in_place_error, ec};
     }
+#endif
+}
+
+template< class T, class Ctx >
+mp11::mp_if_c<
+    !mp11::mp_valid<has_nonthrowing_user_conversion_to_impl, T>::value,
+    result<T> >
+value_to_impl(
+    user_conversion_tag, try_value_to_tag<T>, value const& jv, Ctx const& )
+{
+    return wrap_conversion_exceptions(
+        does_allow_exceptions<Ctx>(), value_to_tag<T>(), jv);
+}
+
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if_c<
+    !mp11::mp_valid<
+        has_nonthrowing_context_conversion_to_impl,
+        typename Sup::type,
+        T>::value,
+    result<T> >
+value_to_impl(
+    context_conversion_tag,
+    try_value_to_tag<T>,
+    value const& jv,
+    Ctx const& ctx )
+{
+    return wrap_conversion_exceptions(
+        does_allow_exceptions<Ctx>(), value_to_tag<T>(), jv, Sup::get(ctx) );
+}
+
+template<
+    class T,
+    class Ctx,
+    class Sup = supported_context<Ctx, T, value_to_conversion>
+>
+mp11::mp_if_c<
+    !mp11::mp_valid<
+        has_nonthrowing_full_context_conversion_to_impl,
+        typename Sup::type,
+        T>::value,
+    result<T> >
+value_to_impl(
+    full_context_conversion_tag,
+    try_value_to_tag<T>,
+    value const& jv,
+    Ctx const& ctx )
+{
+    return wrap_conversion_exceptions(
+        does_allow_exceptions<Ctx>(),
+        value_to_tag<T>(),
+        jv,
+        Sup::get(ctx),
+        ctx);
 }
 
 // no suitable conversion implementation
-template<class T>
+template< class T, class Ctx >
 T
-value_to_impl(
-    value_to_tag<T>,
-    value const&,
-    no_conversion_tag)
+value_to_impl( no_conversion_tag, value_to_tag<T>, value const&, Ctx const& )
 {
     static_assert(
         !std::is_same<T, T>::value,
@@ -654,34 +808,34 @@ value_to_impl(
 }
 
 // generic wrapper over non-throwing implementations
-template<class T, class Impl>
+template< class Impl, class T, class Ctx >
 T
-value_to_impl(
-    value_to_tag<T>,
-    value const& jv,
-    Impl impl)
+value_to_impl( Impl impl, value_to_tag<T>, value const& jv, Ctx const& ctx )
 {
-    return value_to_impl(try_value_to_tag<T>(), jv, impl).value();
+    return value_to_impl(
+        impl, try_value_to_tag<T>(), jv, make_throwing_context(ctx) ).value();
 }
 
-template<class T>
-using value_to_implementation
-    = conversion_implementation<T, value_to_conversion>;
+template< class Ctx, class T >
+using value_to_category = conversion_category<
+    Ctx, T, value_to_conversion >;
 
 } // detail
 
 // std::optional
 #ifndef BOOST_NO_CXX17_HDR_OPTIONAL
-template<class T>
-result<std::optional<T>>
+template< class T, class Ctx1, class Ctx2 >
+result< std::optional<T> >
 tag_invoke(
-    try_value_to_tag<std::optional<T>>,
-    value const& jv)
+    try_value_to_tag< std::optional<T> >,
+    value const& jv,
+    Ctx1 const&,
+    Ctx2 const& ctx)
 {
     if( jv.is_null() )
         return std::optional<T>();
     else
-        return try_value_to<T>(jv);
+        return try_value_to<T>(jv, ctx);
 }
 
 inline
@@ -700,11 +854,13 @@ tag_invoke(
 
 // std::variant
 #ifndef BOOST_NO_CXX17_HDR_VARIANT
-template<class... Ts>
+template< class... Ts, class Ctx1, class Ctx2 >
 result< std::variant<Ts...> >
 tag_invoke(
     try_value_to_tag< std::variant<Ts...> >,
-    value const& jv)
+    value const& jv,
+    Ctx1 const&,
+    Ctx2 const& ctx)
 {
     error_code ec;
     BOOST_JSON_FAIL(ec, error::exhausted_variants);
@@ -716,19 +872,16 @@ tag_invoke(
             return;
 
         using T = std::variant_alternative_t<I.value, Variant>;
-        auto attempt = try_value_to<T>(jv);
-        if( attempt )
+        auto attempt = try_value_to<T>(jv, ctx);
+        if( attempt)
             res.emplace(std::in_place_index_t<I>(), std::move(*attempt));
     });
 
-    if( res.has_error() )
-    {
-        res = {system::in_place_error, ec};
-    }
     return res;
 }
 #endif // BOOST_NO_CXX17_HDR_VARIANT
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

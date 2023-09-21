@@ -19,10 +19,10 @@ namespace boost { namespace geometry
 namespace detail { namespace make
 {
 
-template <typename Type, typename Coordinate>
+template <typename Type, typename Coordinate1, typename Coordinate2>
 inline
-model::infinite_line<Type> make_infinite_line(Coordinate const& x1,
-    Coordinate const& y1, Coordinate const& x2, Coordinate const& y2)
+model::infinite_line<Type> make_infinite_line(Coordinate1 const& x1,
+    Coordinate1 const& y1, Coordinate2 const& x2, Coordinate2 const& y2)
 {
     model::infinite_line<Type> result;
     result.a = y1 - y2;
@@ -31,9 +31,9 @@ model::infinite_line<Type> make_infinite_line(Coordinate const& x1,
     return result;
 }
 
-template <typename Type, typename Point>
+template <typename Type, typename PointA, typename PointB>
 inline
-model::infinite_line<Type> make_infinite_line(Point const& a, Point const& b)
+model::infinite_line<Type> make_infinite_line(PointA const& a, PointB const& b)
 {
     return make_infinite_line<Type>(geometry::get<0>(a), geometry::get<1>(a),
         geometry::get<0>(b), geometry::get<1>(b));
@@ -49,9 +49,9 @@ model::infinite_line<Type> make_infinite_line(Segment const& segment)
         geometry::get<1, 1>(segment));
 }
 
-template <typename Type, typename Point>
+template <typename Type, typename PointA, typename PointB, typename PointC>
 inline
-model::infinite_line<Type> make_perpendicular_line(Point const& a, Point const& b, Point const& c)
+model::infinite_line<Type> make_perpendicular_line(PointA const& a, PointB const& b, PointC const& c)
 {
     // https://www.math-only-math.com/equation-of-a-line-perpendicular-to-a-line.html
     model::infinite_line<Type> const line = make_infinite_line<Type>(a, b);

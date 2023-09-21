@@ -88,7 +88,7 @@ struct parallel_stable_sort
     //-----------------------------------------------------------------------------
     void destroy_all()
     {
-        if (ptr != nullptr) std::return_temporary_buffer(ptr);
+        if (ptr != nullptr) std::free (ptr);
     };
     //
     //-----------------------------------------------------------------------------
@@ -157,7 +157,9 @@ parallel_stable_sort <Iter_t, Compare>
         return;
     };
 
-    ptr = std::get_temporary_buffer<value_t>(nptr).first;
+    ptr = reinterpret_cast <value_t*> 
+				(std::malloc (nptr * sizeof(value_t)));
+    
     if (ptr == nullptr) throw std::bad_alloc();
 
     //---------------------------------------------------------------------

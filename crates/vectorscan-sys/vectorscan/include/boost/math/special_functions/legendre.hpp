@@ -66,7 +66,7 @@ T legendre_imp(unsigned l, T x, const Policy& pol, bool second = false)
    while(n < l)
    {
       std::swap(p0, p1);
-      p1 = boost::math::legendre_next(n, x, p0, p1);
+      p1 = static_cast<T>(boost::math::legendre_next(n, x, p0, p1));
       ++n;
    }
    return p1;
@@ -115,7 +115,7 @@ T legendre_p_prime_imp(unsigned l, T x, const Policy& pol, T* Pn
     while(n < l - 1)
     {
        std::swap(p0, p1);
-       p1 = boost::math::legendre_next(n, x, p0, p1);
+       p1 = static_cast<T>(boost::math::legendre_next(n, x, p0, p1));
        ++n;
        if (odd)
        {
@@ -131,7 +131,7 @@ T legendre_p_prime_imp(unsigned l, T x, const Policy& pol, T* Pn
     if (Pn)
     {
         std::swap(p0, p1);
-        *Pn = boost::math::legendre_next(n, x, p0, p1);
+        *Pn = static_cast<T>(boost::math::legendre_next(n, x, p0, p1));
     }
     return p_prime;
 }
@@ -322,7 +322,7 @@ T legendre_p_imp(int l, int m, T x, T sin_theta_power, const Policy& pol)
    }
    if (-m == l)
    {
-      return pow((1 - x * x) / 4, T(l) / 2) / boost::math::tgamma(l + 1, pol);
+      return pow((1 - x * x) / 4, T(l) / 2) / boost::math::tgamma<T>(l + 1, pol);
    }
    if(m < 0)
    {

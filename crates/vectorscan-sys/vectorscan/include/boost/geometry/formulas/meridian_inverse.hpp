@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2017-2018 Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2017-2018 Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -118,14 +119,14 @@ public :
         CT M = a/(1+n);
         CT C0 = 1;
 
-        if (Order == 0)
+        if (BOOST_GEOMETRY_CONDITION(Order == 0))
         {
            return M * C0 * lat;
         }
 
         CT C2 = -1.5 * n;
 
-        if (Order == 1)
+        if (BOOST_GEOMETRY_CONDITION(Order == 1))
         {
             return M * (C0 * lat + C2 * sin(2*lat));
         }
@@ -134,7 +135,7 @@ public :
         C0 += .25 * n2;
         CT C4 = 0.9375 * n2;
 
-        if (Order == 2)
+        if (BOOST_GEOMETRY_CONDITION(Order == 2))
         {
             return M * (C0 * lat + C2 * sin(2*lat) + C4 * sin(4*lat));
         }
@@ -143,7 +144,7 @@ public :
         C2 += 0.1875 * n3;
         CT C6 = -0.729166667 * n3;
 
-        if (Order == 3)
+        if (BOOST_GEOMETRY_CONDITION(Order == 3))
         {
             return M * (C0 * lat + C2 * sin(2*lat) + C4 * sin(4*lat)
                       + C6 * sin(6*lat));
@@ -153,7 +154,7 @@ public :
         C4 -= 0.234375 * n4;
         CT C8 = 0.615234375 * n4;
 
-        if (Order == 4)
+        if (BOOST_GEOMETRY_CONDITION(Order == 4))
         {
             return M * (C0 * lat + C2 * sin(2*lat) + C4 * sin(4*lat)
                       + C6 * sin(6*lat) + C8 * sin(8*lat));

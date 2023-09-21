@@ -27,8 +27,8 @@ static const error_category& shell_category = get_shell_category();
  * In v1, this was possible directly when starting a process,
  * but has been removed based on the security risks associated with this.
  * 
- * By making the shell parsing explicity, it is encouraged
- * that a user runs a sanity check on the executable before launching it.
+ * By making the shell parsing explicitly, it encourages
+ * a user to run a sanity check on the executable before launching it.
  * 
  * @par Example
  * @code {.cpp}
@@ -79,8 +79,10 @@ struct shell
         : buffer_(std::move(lhs.buffer_)),
           input_(std::move(lhs.input_)),
           argc_(boost::exchange(lhs.argc_, 0)),
-          argv_(boost::exchange(lhs.argv_, nullptr)),
-          reserved_(boost::exchange(lhs.reserved_, 0))  
+          argv_(boost::exchange(lhs.argv_, nullptr))
+#if defined(BOOST_PROCESS_V2_POSIX)
+        , free_argv_(boost::exchange(lhs.free_argv_, nullptr))
+#endif
     {
     }
     shell& operator=(shell && lhs) noexcept
@@ -90,7 +92,9 @@ struct shell
         input_ = std::move(lhs.input_);
         argc_  = boost::exchange(lhs.argc_, 0);
         argv_ = boost::exchange(lhs.argv_, nullptr);
-        reserved_ = boost::exchange(lhs.reserved_, 0);
+#if defined(BOOST_PROCESS_V2_POSIX)
+        free_argv_ = boost::exchange(lhs.free_argv_, nullptr);
+#endif
         return *this;
     }
 
@@ -116,6 +120,9 @@ struct shell
     BOOST_PROCESS_V2_DECL ~shell();
 
   private:
+
+    friend struct make_cmd_shell_;
+
     BOOST_PROCESS_V2_DECL void parse_();
     
     // storage in case we need a conversion
@@ -124,7 +131,10 @@ struct shell
     // impl details
     int argc_ = 0;
     char_type  ** argv_ = nullptr;
-    int reserved_ = 0;
+
+#if defined(BOOST_PROCESS_V2_POSIX)
+    void(*free_argv_)(int, char **);
+#endif
     
 };
 

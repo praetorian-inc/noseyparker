@@ -1,5 +1,5 @@
 //
-// boost/process/v2/poxix/detail/close_handles.hpp
+// boost/process/v2/posix/detail/close_handles.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2022 Klemens D. Morgenstern (klemens dot morgenstern at gmx dot net)

@@ -167,24 +167,24 @@ private:
     };
 
     //! A scope guard that implements active operation management
-    class scoped_feeding_opereation
+    class scoped_feeding_operation
     {
     private:
         asynchronous_sink& m_self;
 
     public:
         //! Initializing constructor
-        explicit scoped_feeding_opereation(asynchronous_sink& self) : m_self(self)
+        explicit scoped_feeding_operation(asynchronous_sink& self) : m_self(self)
         {
         }
         //! Destructor
-        ~scoped_feeding_opereation()
+        ~scoped_feeding_operation()
         {
             m_self.complete_feeding_operation();
         }
 
-        BOOST_DELETED_FUNCTION(scoped_feeding_opereation(scoped_feeding_opereation const&))
-        BOOST_DELETED_FUNCTION(scoped_feeding_opereation& operator= (scoped_feeding_opereation const&))
+        BOOST_DELETED_FUNCTION(scoped_feeding_operation(scoped_feeding_operation const&))
+        BOOST_DELETED_FUNCTION(scoped_feeding_operation& operator= (scoped_feeding_operation const&))
     };
 
     //! A scope guard that resets a flag on destructor
@@ -384,7 +384,7 @@ public:
                 return;
         }
 
-        scoped_feeding_opereation guard(*this);
+        scoped_feeding_operation guard(*this);
 
         // Now start the feeding loop
         while (true)
@@ -455,7 +455,7 @@ public:
                 return;
         }
 
-        scoped_feeding_opereation guard(*this);
+        scoped_feeding_operation guard(*this);
 
         // Now start the feeding loop
         do_feed_records();
@@ -488,7 +488,7 @@ public:
             m_FlushRequested.store(true, boost::memory_order_relaxed);
         }
 
-        scoped_feeding_opereation guard(*this);
+        scoped_feeding_operation guard(*this);
 
         do_feed_records();
     }

@@ -127,7 +127,7 @@ public:
     {
         covered_by_areal predicate(areal, strategies);
 
-        if (! boost::empty(multipoint) && 
+        if (! boost::empty(multipoint) &&
             std::none_of(boost::begin(multipoint), boost::end(multipoint), predicate))
         {
             return detail::distance::point_or_segment_range_to_geometry_rtree

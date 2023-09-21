@@ -45,8 +45,6 @@ inline void check_tommath_result(ErrType v)
 
 } // namespace detail
 
-struct tommath_int;
-
 void eval_multiply(tommath_int& t, const tommath_int& o);
 void eval_add(tommath_int& t, const tommath_int& o);
 
@@ -907,15 +905,10 @@ inline std::size_t hash_value(const tommath_int& val)
 
 } // namespace backends
 
-using boost::multiprecision::backends::tommath_int;
-
 template <>
 struct number_category<tommath_int> : public std::integral_constant<int, number_kind_integer>
 {};
 
-using tom_int = number<tommath_int>          ;
-using tommath_rational = rational_adaptor<tommath_int>;
-using tom_rational = number<tommath_rational>     ;
 }
 } // namespace boost::multiprecision
 

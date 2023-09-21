@@ -42,7 +42,7 @@ struct query_part_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>
+        system::result<value_type>
     {
         if( it == end ||
             *it != '?')

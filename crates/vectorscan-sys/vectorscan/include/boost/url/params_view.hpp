@@ -184,7 +184,7 @@ public:
     */
     BOOST_URL_DECL
     params_view(
-        string_view s);
+        core::string_view s);
 
     /** Constructor
 
@@ -251,7 +251,7 @@ public:
     */
     BOOST_URL_DECL
     params_view(
-        string_view s,
+        core::string_view s,
         encoding_opts opt);
 
     /** Assignment

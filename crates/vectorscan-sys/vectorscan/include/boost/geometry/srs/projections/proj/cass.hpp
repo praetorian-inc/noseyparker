@@ -47,6 +47,7 @@
 #include <boost/geometry/srs/projections/impl/factory_entry.hpp>
 #include <boost/geometry/srs/projections/impl/pj_generic_inverse.hpp>
 #include <boost/geometry/srs/projections/impl/pj_mlfn.hpp>
+#include <boost/geometry/srs/projections/impl/pj_param.hpp>
 
 namespace boost { namespace geometry
 {

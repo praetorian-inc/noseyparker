@@ -13,15 +13,19 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_BLOCK_INDIRECT_SORT_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_BLOCK_INDIRECT_SORT_HPP
 
+#include <ciso646>
 #include <atomic>
+#include <cstdlib>
+#include <future>
+#include <iterator>
+
 #include <boost/sort/block_indirect_sort/blk_detail/merge_blocks.hpp>
 #include <boost/sort/block_indirect_sort/blk_detail/move_blocks.hpp>
 #include <boost/sort/block_indirect_sort/blk_detail/parallel_sort.hpp>
 #include <boost/sort/pdqsort/pdqsort.hpp>
 #include <boost/sort/common/util/traits.hpp>
 #include <boost/sort/common/util/algorithm.hpp>
-#include <future>
-#include <iterator>
+
 
 // This value is the minimal number of threads for to use the
 // block_indirect_sort algorithm
@@ -141,7 +145,7 @@ struct block_indirect_sort
                 destroy(rglobal_buf);
                 construct = false;
             };
-            std::return_temporary_buffer(ptr);
+            std::free (ptr);
             ptr = nullptr;
         };
     }
@@ -223,7 +227,7 @@ block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
 
         uint32_t nbits_size = (nbits64(sizeof(value_t)) >> 1);
         if (nbits_size > 5) nbits_size = 5;
-        size_t max_per_thread = 1 << (18 - nbits_size);
+        size_t max_per_thread = (size_t) 1 << (18 - nbits_size);
 
         if (nelem < (max_per_thread) or nthread < 2)
         {
@@ -233,8 +237,9 @@ block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
         };
 
         //----------- creation of the temporary buffer --------------------
-        ptr = std::get_temporary_buffer<value_t>(Block_size * nthread).first;
-        if (ptr == nullptr)
+        ptr = reinterpret_cast <value_t*>
+              (std::malloc (Block_size * nthread * sizeof(value_t)));
+		if (ptr == nullptr)
         {
             bk.error = true;
             throw std::bad_alloc();
@@ -271,7 +276,7 @@ block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
         // thread local buffer
         for (uint32_t i = 0; i < nthread; ++i)
         {
-            auto f1 = [=, &vbuf]( )
+            auto f1 = [&vbuf,i, this]( )
             {   bk.exec (vbuf[i], this->counter);};
             vfuture[i] = std::async(std::launch::async, f1);
         };
@@ -322,7 +327,8 @@ void block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
     //-------------------------------------------------------------------------
     if (level_thread != 0)
     {
-        auto f1 = [=, &son_counter]( )
+        auto f1 = [this, &son_counter, pos_index_mid,
+                   pos_index2, level_thread]( )
         {
             split_range (pos_index_mid, pos_index2, level_thread - 1);
             bscu::atomic_sub (son_counter, 1);
@@ -334,9 +340,9 @@ void block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
     else
     {
         Iter_t mid = first + ((nblock >> 1) * Block_size);
-        auto f1 = [=, &son_counter]( )
+        auto f1 = [this, &son_counter, mid, last]( )
         {
-            parallel_sort_t (bk, mid, last);
+            parallel_sort_t (this->bk, mid, last);
             bscu::atomic_sub (son_counter, 1);
         };
         bk.works.emplace_back(f1);
@@ -364,7 +370,7 @@ void block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
     }
     else
     {
-        size_t level_thread = nbits64(nthread - 1) - 1;
+        uint32_t level_thread = nbits64 (nthread - 1) - 1;
         split_range(0, bk.nblock, level_thread - 1);
         if (bk.error) return;
         move_blocks_t k(bk);
@@ -443,7 +449,7 @@ void block_indirect_sort(Iter_t first, Iter_t last)
 //
 //-----------------------------------------------------------------------------
 //  function : block_indirect_sort
-/// @brief invocation of block_indirtect_sort with 3 parameters. The third is 
+/// @brief invocation of block_indirtect_sort with 3 parameters. The third is
 ///        the number of threads
 ///
 /// @param first : iterator to the first element of the range to sort
@@ -460,7 +466,7 @@ void block_indirect_sort(Iter_t first, Iter_t last, uint32_t nthread)
 //
 //-----------------------------------------------------------------------------
 //  function : block_indirect_sort
-/// @brief invocation of block_indirtect_sort with 3 parameters. The third is 
+/// @brief invocation of block_indirtect_sort with 3 parameters. The third is
 ///        the comparison object
 ///
 /// @param first : iterator to the first element of the range to sort
@@ -479,7 +485,7 @@ void block_indirect_sort(Iter_t first, Iter_t last, Compare comp)
 //
 //-----------------------------------------------------------------------------
 //  function : block_indirect_sort
-/// @brief invocation of block_indirtect_sort with 4 parameters. 
+/// @brief invocation of block_indirtect_sort with 4 parameters.
 ///
 /// @param first : iterator to the first element of the range to sort
 /// @param last : iterator after the last element to the range to sort

@@ -12,7 +12,6 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 
 namespace boost {
@@ -35,7 +34,7 @@ namespace grammar {
         parse(
             char const*& it,
             char const* end) const ->
-                result<value_type>
+                system::result<value_type>
     };
 
     static_assert( is_rule<U>::value, "Requirements not met" );
@@ -52,8 +51,8 @@ template<class T, class = void>
 struct is_rule : std::false_type {};
 
 template<class T>
-struct is_rule<T, boost::void_t<decltype(
-    std::declval<result<typename T::value_type>&>() =
+struct is_rule<T, void_t<decltype(
+    std::declval<system::result<typename T::value_type>&>() =
         std::declval<T const&>().parse(
             std::declval<char const*&>(),
             std::declval<char const*>())

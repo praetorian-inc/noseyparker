@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2015-2021, Oracle and/or its affiliates.
+// Copyright (c) 2015-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
@@ -20,7 +20,6 @@
 #include <boost/geometry/algorithms/detail/visit.hpp>
 
 #include <boost/geometry/core/exterior_ring.hpp>
-#include <boost/geometry/core/geometry_types.hpp>
 #include <boost/geometry/core/interior_rings.hpp>
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tags.hpp>
@@ -81,8 +80,8 @@ struct multi_is_empty
     template <typename MultiGeometry>
     static inline bool apply(MultiGeometry const& multigeometry)
     {
-        return std::all_of(boost::begin(multigeometry), 
-                           boost::end(multigeometry), 
+        return std::all_of(boost::begin(multigeometry),
+                           boost::end(multigeometry),
                            []( auto const& range ){ return Policy::apply(range); });
     }
 };

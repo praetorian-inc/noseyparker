@@ -36,15 +36,15 @@ struct parse_sequence
 
     using V = mp11::mp_remove<
         std::tuple<
-            result<typename R0::value_type>,
-            result<typename Rn::value_type>...>,
-        result<void>>;
+            system::result<typename R0::value_type>,
+            system::result<typename Rn::value_type>...>,
+        system::result<void>>;
 
     template<std::size_t I>
     using is_void = std::is_same<
         mp11::mp_at_c<L, I>, void>;
 
-    error_code ec;
+    system::error_code ec;
     R const& rn;
     V vn;
 
@@ -53,7 +53,7 @@ struct parse_sequence
         R const& rn_) noexcept
         : rn(rn_)
         , vn(mp11::mp_fill<
-            V, error_code>{})
+            V, system::error_code>{})
     {
     }
 
@@ -65,7 +65,7 @@ struct parse_sequence
     {
     }
 
-    // for result<void>
+    // for system::result<void>
     template<
         std::size_t Ir,
         std::size_t Iv>
@@ -77,7 +77,7 @@ struct parse_sequence
         mp11::mp_size_t<Iv> const&,
         mp11::mp_true const&)
     {
-        result<void> rv =
+        system::result<void> rv =
             grammar::parse(
                 it, end, get<Ir>(rn));
         if( !rv )
@@ -142,7 +142,7 @@ struct parse_sequence
 
     auto
     make_result() noexcept ->
-        result<typename tuple_rule_t<
+        system::result<typename tuple_rule_t<
             R0, Rn...>::value_type>
     {
         if(ec.failed())
@@ -165,9 +165,9 @@ struct parse_sequence<false, R0, Rn...>
     using V = mp11::mp_first<
         mp11::mp_remove<
             mp11::mp_list<
-                result<typename R0::value_type>,
-                result<typename Rn::value_type>...>,
-            result<void>>>;
+                system::result<typename R0::value_type>,
+                system::result<typename Rn::value_type>...>,
+            system::result<void>>>;
 
     template<std::size_t I>
     using is_void = std::is_same<
@@ -180,7 +180,7 @@ struct parse_sequence<false, R0, Rn...>
     parse_sequence(
         R const& rn_) noexcept
         : rn(rn_)
-        , v(error_code{})
+        , v(system::error_code{})
     {
     }
 
@@ -192,7 +192,7 @@ struct parse_sequence<false, R0, Rn...>
     {
     }
 
-    // for result<void>
+    // for system::result<void>
     template<
         std::size_t Ir,
         std::size_t Iv>
@@ -205,7 +205,7 @@ struct parse_sequence<false, R0, Rn...>
         mp11::mp_size_t<Iv> const&,
         mp11::mp_true const&)
     {
-        result<void> rv =
+        system::result<void> rv =
             grammar::parse(
                 it, end, get<Ir>(rn));
         if( !rv )
@@ -270,7 +270,7 @@ tuple_rule_t<R0, Rn...>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<value_type>
+        system::result<value_type>
 {
     detail::parse_sequence<
         IsList, R0, Rn...> t(this->get());

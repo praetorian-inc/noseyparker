@@ -61,7 +61,7 @@ struct indexed_loop
 
         std::less<coordinate_type> less;
         std::greater<coordinate_type> greater;
-        
+
         if (less(coord, get<min_corner, Dimension>(box)))
         {
             set<min_corner, Dimension>(box, coord);

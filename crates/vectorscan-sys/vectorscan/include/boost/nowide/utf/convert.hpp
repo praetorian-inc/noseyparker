@@ -90,6 +90,17 @@ namespace nowide {
             return result;
         }
 
+        /// Convert the UTF sequence in the input string from \a CharIn to \a CharOut
+        /// and return it as a string
+        ///
+        /// Any illegal sequences are replaced with the replacement character, see #BOOST_NOWIDE_REPLACEMENT_CHARACTER
+        /// \tparam CharOut Output character type
+        template<typename CharOut, typename CharIn>
+        std::basic_string<CharOut> convert_string(const std::basic_string<CharIn>& s)
+        {
+            return convert_string<CharOut>(s.data(), s.data() + s.size());
+        }
+
     } // namespace utf
 } // namespace nowide
 } // namespace boost

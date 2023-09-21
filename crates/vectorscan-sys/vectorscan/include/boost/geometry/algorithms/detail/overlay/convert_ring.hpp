@@ -86,6 +86,7 @@ struct convert_ring<polygon_tag>
 
             if (geometry::num_points(source) >= min_num_points)
             {
+                // TODO: resize and .size() and .back() should not be called here
                 interior_rings(destination).resize(
                             interior_rings(destination).size() + 1);
                 geometry::convert(source, interior_rings(destination).back());

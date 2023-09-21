@@ -16,6 +16,7 @@
 #include <boost/spirit/home/qi/parser.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/spirit/home/qi/stream/detail/match_manip.hpp>
+#include <iosfwd>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace boost { namespace spirit { namespace qi

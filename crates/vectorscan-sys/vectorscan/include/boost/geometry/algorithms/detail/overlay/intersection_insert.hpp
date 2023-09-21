@@ -59,6 +59,7 @@
 #if defined(BOOST_GEOMETRY_DEBUG_FOLLOW)
 #include <boost/geometry/algorithms/detail/overlay/debug_turn_info.hpp>
 #include <boost/geometry/io/wkt/wkt.hpp>
+#include <boost/geometry/util/for_each_with_index.hpp>
 #endif
 
 namespace boost { namespace geometry
@@ -145,11 +146,10 @@ struct intersection_linestring_linestring_point
         geometry::get_intersection_points(linestring1, linestring2,
                                           robust_policy, turns, strategy);
 
-        for (typename boost::range_iterator<std::deque<turn_info> const>::type
-            it = boost::begin(turns); it != boost::end(turns); ++it)
+        for (auto const& turn : turns)
         {
             PointOut p;
-            geometry::convert(it->point, p);
+            geometry::convert(turn.point, p);
             *out++ = p;
         }
         return out;
@@ -212,11 +212,10 @@ struct intersection_of_linestring_with_areal
         bool found_union = false;
         bool found_front = false;
 
-        for (typename Turns::const_iterator it = turns.begin();
-                it != turns.end(); ++it)
+        for (auto const& turn : turns)
         {
-            method_type const method = it->method;
-            operation_type const op = it->operations[0].operation;
+            method_type const method = turn.method;
+            operation_type const op = turn.operations[0].operation;
 
             if (method == method_crosses)
             {
@@ -240,7 +239,7 @@ struct intersection_of_linestring_with_areal
                 return false;
             }
 
-            if (it->operations[0].position == position_front)
+            if (turn.operations[0].position == position_front)
             {
                 found_front = true;
             }
@@ -378,14 +377,12 @@ struct intersection_of_linestring_with_areal
 
             return out;
         }
-        
+
 #if defined(BOOST_GEOMETRY_DEBUG_FOLLOW)
-        int index = 0;
-        for(typename std::deque<turn_info>::const_iterator
-            it = turns.begin(); it != turns.end(); ++it)
+        for_each_with_index(turns, [](auto index, auto const& turn)
         {
-            debug_follow(*it, it->operations[0], index++);
-        }
+            debug_follow(turn, turn.operations[0], index);
+        });
 #endif
 
         return follower::apply
@@ -402,10 +399,9 @@ template <typename Turns, typename OutputIterator>
 inline OutputIterator intersection_output_turn_points(Turns const& turns,
                                                       OutputIterator out)
 {
-    for (typename Turns::const_iterator
-            it = turns.begin(); it != turns.end(); ++it)
+    for (auto const& turn : turns)
     {
-        *out++ = it->point;
+        *out++ = turn.point;
     }
 
     return out;
@@ -1543,7 +1539,7 @@ inline OutputIterator intersection_insert(Geometry1 const& geometry1,
         <
             Geometry1, Geometry2
         >::type strategy_type;
-    
+
     return intersection_insert<GeometryOut>(geometry1, geometry2, out,
                                             strategy_type());
 }

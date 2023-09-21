@@ -588,7 +588,7 @@ namespace boost
             }
 #endif
             n = (std::min)(n, 1500);
-            T d = pow(3 + sqrt(T(8)), n);
+            T d = pow(3 + sqrt(T(8)), T(n));
             d = (d + 1 / d) / 2;
             T b = -1;
             T c = -d;
@@ -706,7 +706,7 @@ namespace boost
             }
 #endif
             n = (std::min)(n, 1500);
-            RealType d = pow(3 + sqrt(RealType(8)), n);
+            RealType d = pow(3 + sqrt(RealType(8)), RealType(n));
             d = (d + 1 / d) / 2;
             RealType b = -1;
             RealType c = -d;
@@ -949,7 +949,7 @@ namespace boost
             // Now look back at the results from T1 and T2 and see if either gave better
             // results than we could get from the 64-bit precision versions.
             //
-            if((std::min)(p1.second, p2.second) < 1e-20)
+            if((std::min)(p1.second, p2.second) < RealType(1e-20))
             {
                return p1.second < p2.second ? p1.first : p2.first;
             }
@@ -993,7 +993,7 @@ namespace boost
             const RealType fabs_a = fabs(a);
             const RealType fabs_ah = fabs_a*h;
 
-            RealType val = 0.0; // avoid compiler warnings, 0.0 will be overwritten in any case
+            RealType val = static_cast<RealType>(0.0f); // avoid compiler warnings, 0.0 will be overwritten in any case
 
             if(fabs_a <= 1)
             {
@@ -1001,7 +1001,7 @@ namespace boost
             } // if(fabs_a <= 1.0)
             else 
             {
-               if( h <= 0.67 )
+               if( h <= RealType(0.67) )
                {
                   const RealType normh = owens_t_znorm1(h, pol);
                   const RealType normah = owens_t_znorm1(fabs_ah, pol);

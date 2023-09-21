@@ -73,8 +73,8 @@ inline auto native_environment_impl<Char>::get(const pointer_type id) -> string_
 
     if (size == sizeof(buf)) //the return size gives the size without the null, so I know this went wrong
     {
-        /*limit defined here https://msdn.microsoft.com/en-us/library/windows/desktop/ms683188(v=vs.85).aspx
-         * but I used 32768 so it is a multiple of 4096.
+        /* limit defined here https://msdn.microsoft.com/en-us/library/windows/desktop/ms683188(v=vs.85).aspx
+         * but I used 32768, so it is a multiple of 4096.
          */
         constexpr static std::size_t max_size = 32768;
         //Handle variables longer then buf.
@@ -90,12 +90,12 @@ inline auto native_environment_impl<Char>::get(const pointer_type id) -> string_
                 ::boost::process::detail::throw_last_error("GetEnvironmentVariable() failed");
             else
                 return std::basic_string<Char>(
-                        buf.data(), buf.data()+ size + 1);
+                        buf.data(), buf.data()+ size);
 
         }
 
     }
-    return std::basic_string<Char>(buf, buf+size+1);
+    return std::basic_string<Char>(buf, buf+size);
 }
 
 template<typename Char>
@@ -232,7 +232,7 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 template<typename Char>
 inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_type
 {
-    if (id.size() >= _data.size()) //ok, so it's impossible id is in there.
+    if (id.size() >= _data.size()) //ok, so it is impossible id is in there.
         return string_type(_data.data());
 
     if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == equal_sign<Char>()))
@@ -273,7 +273,7 @@ template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
     //ok, we need to check the size of data first
-    if (id.size() >= _data.size()) //ok, so it's impossible id is in there.
+    if (id.size() >= _data.size()) //ok, so it is impossible id is in there.
         return;
 
     //check if it's the first one, spares us the search.

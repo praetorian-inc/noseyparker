@@ -22,7 +22,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
  * @tparam Executor The asio executor of the process handle
  * @param proc The process to be run.
  * @return int The exit code of the process
- * @exception system_error An error that might have occured during the wait.
+ * @exception system_error An error that might have occurred during the wait.
  */
 template<typename Executor>
 inline int execute(basic_process<Executor> proc)
@@ -92,13 +92,13 @@ struct execute_op
 /** This function asynchronously for a process to complete.
  * 
  * Cancelling the execution will signal the child process to exit
- * with the following intepretations:
+ * with the following interpretations:
  * 
  *  - cancellation_type::total    -> interrupt
  *  - cancellation_type::partial  -> request_exit
  *  - cancellation_type::terminal -> terminate
  * 
- * It is to note that `async_execute` will us the lowest seelected cancellation 
+ * It is to note that `async_execute` will us the lowest selected cancellation
  * type. A subprocess might ignore anything not terminal.
  */
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor,

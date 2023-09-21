@@ -221,7 +221,7 @@ subresultant_gcd(polynomial<T> u, polynomial<T> v)
  * The multi-precision constraint is enforced via numeric_limits.
  *
  * Note that intermediate terms in the evaluation can grow arbitrarily large, hence the need for
- * unbounded integers, otherwise numeric loverflow would break the algorithm.
+ * unbounded integers, otherwise numeric overflow would break the algorithm.
  *
  * @tparam  T   A multi-precision integral type.
  */

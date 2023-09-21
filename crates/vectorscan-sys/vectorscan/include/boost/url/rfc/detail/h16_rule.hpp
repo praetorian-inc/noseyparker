@@ -46,7 +46,7 @@ struct h16_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr h16_rule_t h16_rule{};

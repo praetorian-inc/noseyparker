@@ -15,6 +15,7 @@
 #include <boost/archive/detail/oserializer.hpp>
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
+#include <boost/serialization/library_version_type.hpp>
 #include <boost/serialization/item_version_type.hpp>
 
 namespace boost { namespace mpi { namespace detail {
@@ -48,7 +49,6 @@ protected:
 
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_id_optional_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::version_type)
-BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::library_version_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_id_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_id_reference_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::object_id_type)
@@ -56,6 +56,7 @@ BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::object_reference_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::tracking_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_name_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::collection_size_type)
+BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::library_version_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::item_version_type)
 
     void save_override(std::string const & s)       

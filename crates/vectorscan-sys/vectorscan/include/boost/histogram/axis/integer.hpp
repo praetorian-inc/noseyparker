@@ -31,11 +31,15 @@ namespace axis {
 
 /** Axis for an interval of integer values with unit steps.
 
-   Binning is a O(1) operation. This axis bins faster than a regular axis.
+  Binning is a O(1) operation. This axis bins even faster than a regular axis.
 
-   @tparam Value     input value type. Must be integer or floating point.
-   @tparam MetaData  type to store meta data.
-   @tparam Options   see boost::histogram::axis::option.
+  The options `growth` and `circular` are mutually exclusive. If the axis uses
+  integers and either `growth` or `circular` are set, the axis cannot have
+  the options `underflow` or `overflow` set.
+
+  @tparam Value     input value type. Must be integer or floating point.
+  @tparam MetaData  type to store meta data.
+  @tparam Options   see boost::histogram::axis::option.
  */
 template <class Value, class MetaData, class Options>
 class integer : public iterator_mixin<integer<Value, MetaData, Options>>,
@@ -47,23 +51,6 @@ class integer : public iterator_mixin<integer<Value, MetaData, Options>>,
   using options_type =
       detail::replace_default<Options, decltype(option::underflow | option::overflow)>;
 
-  static_assert(std::is_integral<value_type>::value ||
-                    std::is_floating_point<value_type>::value,
-                "integer axis requires floating point or integral type");
-
-  static_assert(!options_type::test(option::circular | option::growth) ||
-                    (options_type::test(option::circular) ^
-                     options_type::test(option::growth)),
-                "circular and growth options are mutually exclusive");
-
-  static_assert(std::is_floating_point<value_type>::value ||
-                    (!options_type::test(option::circular) &&
-                     !options_type::test(option::growth)) ||
-                    (!options_type::test(option::overflow) &&
-                     !options_type::test(option::underflow)),
-                "circular or growing integer axis with integral type "
-                "cannot have entries in underflow or overflow bins");
-
   using local_index_type = std::conditional_t<std::is_integral<value_type>::value,
                                               index_type, real_index_type>;
 
@@ -72,18 +59,37 @@ public:
 
   /** Construct over semi-open integer interval [start, stop).
 
-     @param start    first integer of covered range.
-     @param stop     one past last integer of covered range.
-     @param meta     description of the axis (optional).
-     @param options  see boost::histogram::axis::option (optional).
+    @param start    first integer of covered range.
+    @param stop     one past last integer of covered range.
+    @param meta     description of the axis (optional).
+    @param options  see boost::histogram::axis::option (optional).
+
+    The constructor throws `std::invalid_argument` if start is not less than stop.
+
+    The arguments meta and alloc are passed by value. If you move either of them into the
+    axis and the constructor throws, their values are lost. Do not move if you cannot
+    guarantee that the bin description is not valid.
    */
   integer(value_type start, value_type stop, metadata_type meta = {},
           options_type options = {})
       : metadata_base(std::move(meta))
       , size_(static_cast<index_type>(stop - start))
       , min_(start) {
-    (void)options;
-    if (!(stop >= start))
+    static_assert(
+        std::is_integral<value_type>::value || std::is_floating_point<value_type>::value,
+        "integer axis requires floating point or integral type");
+
+    static_assert(!(options.test(option::circular) && options.test(option::growth)),
+                  "circular and growth options are mutually exclusive");
+
+    static_assert(
+        std::is_floating_point<value_type>::value ||
+            !((options.test(option::growth) || options.test(option::circular)) &&
+              (options.test(option::overflow) || options.test(option::underflow))),
+        "circular or growing integer axis with integral type "
+        "cannot have entries in underflow or overflow bins");
+
+    if (!(stop >= start)) // double negation so it works with NaN
       BOOST_THROW_EXCEPTION(std::invalid_argument("stop >= start required"));
   }
 
@@ -157,10 +163,9 @@ public:
   static constexpr bool inclusive() noexcept {
     // If axis has underflow and overflow, it is inclusive.
     // If axis is growing or circular:
-    // - it is inclusive if value_type is int.
-    // - it is not inclusive if value_type is float, because of nan and inf.
-    constexpr bool full_flow =
-        options() & option::underflow && options() & option::overflow;
+    // - it is inclusive if value_type is an integer.
+    // - it is not inclusive if value_type is floating point, because of nan and inf.
+    constexpr bool full_flow = options_type().test(option::underflow | option::overflow);
     return full_flow || (std::is_integral<value_type>::value &&
                          (options() & (option::growth | option::circular)));
   }

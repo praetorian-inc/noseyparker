@@ -77,7 +77,7 @@ inline void pick_seeds(Elements const& elements,
             content_type free_content = ( index::detail::content(enlarged_box)
                                             - index::detail::content(bounded_ind1) )
                                                 - index::detail::content(bounded_ind2);
-                
+
             if ( greatest_free_content < free_content )
             {
                 greatest_free_content = free_content;
@@ -121,7 +121,7 @@ struct redistribute_elements<MembersHolder, quadratic_tag>
 
         elements_type & elements1 = rtree::elements(n);
         elements_type & elements2 = rtree::elements(second_node);
-        
+
         BOOST_GEOMETRY_INDEX_ASSERT(elements1.size() == parameters.get_max_elements() + 1, "unexpected elements number");
 
         // copy original elements - use in-memory storage (std::allocator)
@@ -130,7 +130,7 @@ struct redistribute_elements<MembersHolder, quadratic_tag>
             container_type;
         container_type elements_copy(elements1.begin(), elements1.end());                                   // MAY THROW, STRONG (alloc, copy)
         container_type elements_backup(elements1.begin(), elements1.end());                                 // MAY THROW, STRONG (alloc, copy)
-        
+
         // calculate initial seeds
         size_t seed1 = 0;
         size_t seed2 = 0;
@@ -277,7 +277,7 @@ struct redistribute_elements<MembersHolder, quadratic_tag>
         It out_it = first;
         out_content_increase1 = 0;
         out_content_increase2 = 0;
-        
+
         // find element with greatest difference between increased group's boxes areas
         for ( It el_it = first ; el_it != last ; ++el_it )
         {

@@ -13,7 +13,8 @@
 #include <boost/json/detail/config.hpp>
 #include <boost/json/memory_resource.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** Return a pointer to the null resource.
 
@@ -30,6 +31,7 @@ BOOST_JSON_DECL
 memory_resource*
 get_null_resource() noexcept;
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

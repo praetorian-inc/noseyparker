@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2021, Oracle and/or its affiliates.
+// Copyright (c) 2021-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 
@@ -14,9 +14,11 @@
 #include <utility>
 
 #include <boost/geometry/algorithms/detail/closest_feature/range_to_range.hpp>
+#include <boost/geometry/algorithms/detail/closest_points/utilities.hpp>
 #include <boost/geometry/algorithms/detail/distance/is_comparable.hpp>
 #include <boost/geometry/algorithms/detail/distance/iterator_selector.hpp>
 #include <boost/geometry/algorithms/detail/distance/strategy_utils.hpp>
+#include <boost/geometry/algorithms/dispatch/closest_points.hpp>
 
 #include <boost/geometry/core/assert.hpp>
 #include <boost/geometry/core/point_type.hpp>
@@ -86,7 +88,7 @@ public:
                                     cd);
         dispatch::closest_points
                 <
-                    point_or_segment_type,                    
+                    point_or_segment_type,
                     typename std::iterator_traits
                         <
                             typename selector_type::iterator_type

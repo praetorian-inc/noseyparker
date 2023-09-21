@@ -33,7 +33,7 @@ T find_inverse_s(T p, T q)
    //
    BOOST_MATH_STD_USING
    T t;
-   if(p < 0.5)
+   if(p < T(0.5))
    {
       t = sqrt(-2 * log(p));
    }
@@ -44,7 +44,7 @@ T find_inverse_s(T p, T q)
    static const double a[4] = { 3.31125922108741, 11.6616720288968, 4.28342155967104, 0.213623493715853 };
    static const double b[5] = { 1, 6.61053765625462, 6.40691597760039, 1.27364489782223, 0.3611708101884203e-1 };
    T s = t - tools::evaluate_polynomial(a, t) / tools::evaluate_polynomial(b, t);
-   if(p < 0.5)
+   if(p < T(0.5))
       s = -s;
    return s;
 }
@@ -120,7 +120,7 @@ T find_inverse_gamma(T a, T p, T q, const Policy& pol, bool* p_has_10_digits)
       T b = q * g;
       BOOST_MATH_INSTRUMENT_VARIABLE(g);
       BOOST_MATH_INSTRUMENT_VARIABLE(b);
-      if((b > 0.6) || ((b >= 0.45) && (a >= 0.3)))
+      if((b >T(0.6)) || ((b >= T(0.45)) && (a >= T(0.3))))
       {
          // DiDonato & Morris Eq 21:
          //
@@ -130,7 +130,7 @@ T find_inverse_gamma(T a, T p, T q, const Policy& pol, bool* p_has_10_digits)
          // q.  Fortunately the second form works perfectly well in this case.
          //
          T u;
-         if((b * q > 1e-8) && (q > 1e-5))
+         if((b * q > T(1e-8)) && (q > T(1e-5)))
          {
             u = pow(p * g * a, 1 / a);
             BOOST_MATH_INSTRUMENT_VARIABLE(u);
@@ -236,7 +236,7 @@ T find_inverse_gamma(T a, T p, T q, const Policy& pol, bool* p_has_10_digits)
             T D = (std::max)(T(2), T(a * (a - 1)));
             T lg = boost::math::lgamma(a, pol);
             T lb = log(q) + lg;
-            if(lb < -D * 2.3)
+            if(lb < -D * T(2.3))
             {
                // DiDonato and Morris Eq 25:
                T y = -lb;
@@ -293,7 +293,7 @@ T find_inverse_gamma(T a, T p, T q, const Policy& pol, bool* p_has_10_digits)
          if((z <= 0.01 * ap1) || (z > 0.7 * ap1))
          {
             result = z;
-            if(z <= 0.002 * ap1)
+            if(z <= T(0.002) * ap1)
                *p_has_10_digits = true;
             BOOST_MATH_INSTRUMENT_VARIABLE(result);
          }
@@ -326,7 +326,7 @@ struct gamma_p_inverse_func
       // be inaccurate anyway (because there's not enough information in p)
       // but at least we will converge on the (inaccurate) answer quickly.
       //
-      if(p > 0.9)
+      if(p > T(0.9))
       {
          p = 1 - p;
          invert = !invert;
@@ -437,7 +437,7 @@ T gamma_p_inv_imp(T a, T p, const Policy& pol)
       digits /= 2;
       digits -= 1;
    }
-   if((a < 0.125) && (fabs(gamma_p_derivative(a, guess, pol)) > 1 / sqrt(tools::epsilon<T>())))
+   if((a < T(0.125)) && (fabs(gamma_p_derivative(a, guess, pol)) > 1 / sqrt(tools::epsilon<T>())))
       digits = policies::digits<T, Policy>() - 2;
    //
    // Go ahead and iterate:

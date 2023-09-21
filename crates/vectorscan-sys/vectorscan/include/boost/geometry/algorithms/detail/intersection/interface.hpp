@@ -127,7 +127,7 @@ struct intersection
                 Geometry2,
                 typename Strategy::cs_tag
             >::type rescale_policy_type;
-        
+
         rescale_policy_type robust_policy
             = geometry::get_rescale_policy<rescale_policy_type>(
                     geometry1, geometry2, strategy);
@@ -225,7 +225,7 @@ struct intersection<default_strategy, false>
 
 namespace resolve_dynamic
 {
-    
+
 template
 <
     typename Geometry1, typename Geometry2,
@@ -240,7 +240,7 @@ struct intersection
     {
         concepts::check<Geometry1 const>();
         concepts::check<Geometry2 const>();
-        
+
         return resolve_strategy::intersection
             <
                 Strategy
@@ -283,7 +283,7 @@ struct intersection<Geometry1, DynamicGeometry2, Tag1, dynamic_geometry_tag>
             result = intersection
                 <
                     Geometry1,
-                    util::remove_cref_t<decltype(g2)>                    
+                    util::remove_cref_t<decltype(g2)>
                 >::apply(geometry1, g2, geometry_out, strategy);
         }, geometry2);
         return result;
@@ -310,9 +310,9 @@ struct intersection<DynamicGeometry1, DynamicGeometry2, dynamic_geometry_tag, dy
         return result;
     }
 };
-    
+
 } // namespace resolve_dynamic
-    
+
 
 /*!
 \brief \brief_calc2{intersection}

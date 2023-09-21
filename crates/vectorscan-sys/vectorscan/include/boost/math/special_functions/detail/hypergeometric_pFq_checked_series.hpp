@@ -146,7 +146,13 @@
                  return std::make_pair(r, r);
               }
               std::pair<Real, Real> r = hypergeometric_pFq_checked_series_impl(aj, bj, Real(1 / z), pol, termination, log_scale);
+              
+              #if (defined(__GNUC__) && __GNUC__ == 13)
+              Real mul = pow(-z, Real(-*aj.begin()));
+              #else
               Real mul = pow(-z, -*aj.begin());
+              #endif
+              
               r.first *= mul;
               r.second *= mul;
               return r;
@@ -247,7 +253,7 @@
               if (have_no_correct_bits)
               {
                  // We have no correct bits in the result... just give up!
-                 result = boost::math::policies::raise_evaluation_error("boost::math::hypergeometric_pFq<%1%>", "Cancellation is so severe that no bits in the reuslt are correct, last result was %1%", Real(result * exp(Real(log_scale))), pol);
+                 result = boost::math::policies::raise_evaluation_error("boost::math::hypergeometric_pFq<%1%>", "Cancellation is so severe that no bits in the result are correct, last result was %1%", Real(result * exp(Real(log_scale))), pol);
                  return std::make_pair(result, result);
               }
               else

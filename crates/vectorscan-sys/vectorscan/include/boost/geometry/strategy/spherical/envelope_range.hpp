@@ -188,9 +188,9 @@ inline void spheroidal_ring(Range const& range, Box& mbr,
     geometry::detail::closed_view<Range const> closed_range(range);
 
     spheroidal_linestring(closed_range, mbr, envelope_strategy, expand_strategy);
-    
+
     using coord_t = typename geometry::coordinate_type<Box>::type;
-    using point_t = typename geometry::point_type<Box>::type;    
+    using point_t = typename geometry::point_type<Box>::type;
     using units_t = typename geometry::detail::cs_angular_units<point_t>::type;
     using constants_t = math::detail::constants_on_spheroid<coord_t, units_t>;
     coord_t const two_pi = constants_t::period();

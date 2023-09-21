@@ -18,10 +18,6 @@
 
 #include <boost/config.hpp>
 
-
-#ifndef BOOST_NO_CXX11_HDR_ARRAY
-
-
 #define BOOST_GEOMETRY_ADAPTED_STD_ARRAY_TAG_DEFINED
 
 
@@ -120,16 +116,6 @@ struct access<std::array<CoordinateType, DimensionCount>, Dimension>
         typedef CoordinateSystem type; \
     }; \
     }}}
-
-
-#else
-
-
-#warning "This file requires compiler and library support for the ISO C++ 2011 standard."
-
-
-#endif // BOOST_NO_CXX11_HDR_ARRAY
-
 
 #endif // BOOST_GEOMETRY_GEOMETRIES_ADAPTED_STD_ARRAY_HPP
 

@@ -14,7 +14,8 @@
 #include <atomic>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 #ifdef _MSC_VER
@@ -80,6 +81,7 @@ public:
 #endif
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

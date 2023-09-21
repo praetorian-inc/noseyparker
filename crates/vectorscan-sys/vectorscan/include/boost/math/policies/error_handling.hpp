@@ -82,7 +82,7 @@ namespace detail
 {
 
 template <class T>
-std::string prec_format(const T& val)
+inline std::string prec_format(const T& val)
 {
    typedef typename boost::math::policies::precision<T, boost::math::policies::policy<> >::type prec_type;
    std::stringstream ss;
@@ -94,6 +94,18 @@ std::string prec_format(const T& val)
    ss << val;
    return ss.str();
 }
+
+#ifdef BOOST_MATH_USE_CHARCONV_FOR_CONVERSION
+
+template <>
+inline std::string prec_format<std::float128_t>(const std::float128_t& val)
+{
+   char buffer[128] {};
+   const auto r = std::to_chars(buffer, buffer + sizeof(buffer), val);
+   return std::string(buffer, r.ptr);
+}
+
+#endif
 
 inline void replace_all_in_string(std::string& result, const char* what, const char* with)
 {

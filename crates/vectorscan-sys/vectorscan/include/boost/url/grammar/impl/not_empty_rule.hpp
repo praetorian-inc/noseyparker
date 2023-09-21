@@ -23,7 +23,7 @@ not_empty_rule_t<R>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<value_type>
+        system::result<value_type>
 {
     if(it == end)
     {

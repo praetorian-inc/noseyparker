@@ -11,7 +11,8 @@
 #define BOOST_URL_GRAMMAR_STRING_VIEW_BASE_HPP
 
 #include <boost/url/detail/config.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/url/detail/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <cstddef>
 #include <iterator>
 #include <string>
@@ -37,13 +38,13 @@ class string_view_base
 protected:
     /** The referenced character buffer
     */
-    string_view s_;
+    core::string_view s_;
 
     /** Constructor
     */
     constexpr
     string_view_base(
-        string_view s) noexcept
+        core::string_view s) noexcept
         : s_(s)
     {
     }
@@ -109,14 +110,14 @@ public:
     typedef std::ptrdiff_t difference_type;
 
     /// A constant used to represent "no position"
-    static constexpr std::size_t npos = string_view::npos;
+    static constexpr std::size_t npos = core::string_view::npos;
 
     //--------------------------------------------
 
     /** Conversion
     */
     operator
-    string_view() const noexcept
+    core::string_view() const noexcept
     {
         return s_;
     }
@@ -151,7 +152,7 @@ public:
 
     /** Return an iterator to the beginning
 
-        See `string_view::begin`
+        See `core::string_view::begin`
     */
     BOOST_CONSTEXPR const_iterator begin() const noexcept
     {
@@ -160,7 +161,7 @@ public:
 
     /** Return an iterator to the end
 
-        See `string_view::end`
+        See `core::string_view::end`
     */
     BOOST_CONSTEXPR const_iterator end() const noexcept
     {
@@ -169,7 +170,7 @@ public:
 
     /** Return an iterator to the beginning
 
-        See `string_view::cbegin`
+        See `core::string_view::cbegin`
     */
     BOOST_CONSTEXPR const_iterator cbegin() const noexcept
     {
@@ -178,7 +179,7 @@ public:
 
     /** Return an iterator to the end
 
-        See `string_view::cend`
+        See `core::string_view::cend`
     */
     BOOST_CONSTEXPR const_iterator cend() const noexcept
     {
@@ -187,7 +188,7 @@ public:
 
     /** Return a reverse iterator to the end
 
-        See `string_view::rbegin`
+        See `core::string_view::rbegin`
     */
 #ifdef __cpp_lib_array_constexpr
     constexpr
@@ -199,7 +200,7 @@ public:
 
     /** Return a reverse iterator to the beginning
 
-        See `string_view::rend`
+        See `core::string_view::rend`
     */
 #ifdef __cpp_lib_array_constexpr
     constexpr
@@ -211,7 +212,7 @@ public:
 
     /** Return a reverse iterator to the end
 
-        See `string_view::crbegin`
+        See `core::string_view::crbegin`
     */
 #ifdef __cpp_lib_array_constexpr
     constexpr
@@ -223,7 +224,7 @@ public:
 
     /** Return a reverse iterator to the beginning
 
-        See `string_view::crend`
+        See `core::string_view::crend`
     */
 #ifdef __cpp_lib_array_constexpr
     constexpr
@@ -237,7 +238,7 @@ public:
 
     /** Return the size
 
-        See `string_view::size`
+        See `core::string_view::size`
     */
     BOOST_CONSTEXPR size_type size() const noexcept
     {
@@ -246,7 +247,7 @@ public:
 
     /** Return the size
 
-        See `string_view::length`
+        See `core::string_view::length`
     */
     BOOST_CONSTEXPR size_type length() const noexcept
     {
@@ -255,7 +256,7 @@ public:
 
     /** Return the maximum allowed size
 
-        See `string_view::max_size`
+        See `core::string_view::max_size`
     */
     BOOST_CONSTEXPR size_type max_size() const noexcept
     {
@@ -264,7 +265,7 @@ public:
 
     /** Return true if the string is empty
 
-        See `string_view::size`
+        See `core::string_view::size`
     */
     BOOST_CONSTEXPR bool empty() const noexcept
     {
@@ -275,7 +276,7 @@ public:
 
     /** Access a character
 
-        See `string_view::operator[]`
+        See `core::string_view::operator[]`
     */
     BOOST_CXX14_CONSTEXPR const_reference
         operator[]( size_type pos ) const noexcept
@@ -285,7 +286,7 @@ public:
 
     /** Access a character
 
-        See `string_view::at`
+        See `core::string_view::at`
     */
     BOOST_CXX14_CONSTEXPR const_reference
         at( size_type pos ) const
@@ -295,7 +296,7 @@ public:
 
     /** Return the first character
 
-        See `string_view::front`
+        See `core::string_view::front`
     */
     BOOST_CXX14_CONSTEXPR const_reference
         front() const noexcept
@@ -305,7 +306,7 @@ public:
 
     /** Return the last character
 
-        See `string_view::back`
+        See `core::string_view::back`
     */
     BOOST_CXX14_CONSTEXPR const_reference
         back() const noexcept
@@ -315,7 +316,7 @@ public:
 
     /** Return a pointer to the character buffer
 
-        See `string_view::data`
+        See `core::string_view::data`
     */
     BOOST_CONSTEXPR const_pointer
         data() const noexcept
@@ -327,7 +328,7 @@ public:
 
     /** Copy the characters to another buffer
 
-        See `string_view::copy`
+        See `core::string_view::copy`
     */
     BOOST_CXX14_CONSTEXPR size_type copy(
         char* s, size_type n, size_type pos = 0 ) const
@@ -337,10 +338,10 @@ public:
 
     /** Return a view to part of the string
 
-        See `string_view::substr`
+        See `core::string_view::substr`
     */
-    BOOST_CXX14_CONSTEXPR string_view substr(
-        size_type pos = 0, size_type n = string_view::npos ) const
+    BOOST_CXX14_CONSTEXPR core::string_view substr(
+        size_type pos = 0, size_type n = core::string_view::npos ) const
     {
         return s_.substr(pos, n);
     }
@@ -349,30 +350,30 @@ public:
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CXX14_CONSTEXPR int
-        compare( string_view str ) const noexcept
+        compare( core::string_view str ) const noexcept
     {
         return s_.compare(str);
     }
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CONSTEXPR int compare(
-        size_type pos1, size_type n1, string_view str ) const
+        size_type pos1, size_type n1, core::string_view str ) const
     {
         return s_.compare(pos1, n1, str);
     }
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CONSTEXPR int compare(
-        size_type pos1, size_type n1, string_view str,
+        size_type pos1, size_type n1, core::string_view str,
         size_type pos2, size_type n2 ) const
     {
         return s_.compare(pos1, n1, str, pos2, n2);
@@ -380,7 +381,7 @@ public:
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CONSTEXPR int compare(
         char const* s ) const noexcept
@@ -390,7 +391,7 @@ public:
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CONSTEXPR int compare(
         size_type pos1, size_type n1, char const* s ) const
@@ -400,7 +401,7 @@ public:
 
     /** Return the result of comparing to another string
 
-        See `string_view::compare`
+        See `core::string_view::compare`
     */
     BOOST_CONSTEXPR int compare(
         size_type pos1, size_type n1,
@@ -413,17 +414,17 @@ public:
 
     /** Return true if a matching prefix exists
 
-        See `string_view::starts_with`
+        See `core::string_view::starts_with`
     */
     BOOST_CONSTEXPR bool starts_with(
-        string_view x ) const noexcept
+        core::string_view x ) const noexcept
     {
         return s_.starts_with(x);
     }
 
     /** Return true if a matching prefix exists
 
-        See `string_view::starts_with`
+        See `core::string_view::starts_with`
     */
     BOOST_CONSTEXPR bool starts_with(
         char x ) const noexcept
@@ -433,7 +434,7 @@ public:
 
     /** Return true if a matching prefix exists
 
-        See `string_view::starts_with`
+        See `core::string_view::starts_with`
     */
     BOOST_CONSTEXPR bool starts_with(
         char const* x ) const noexcept
@@ -445,17 +446,17 @@ public:
 
     /** Return true if a matching suffix exists
 
-        See `string_view::ends_with`
+        See `core::string_view::ends_with`
     */
     BOOST_CONSTEXPR bool ends_with(
-        string_view x ) const noexcept
+        core::string_view x ) const noexcept
     {
         return s_.ends_with(x);
     }
 
     /** Return true if a matching suffix exists
 
-        See `string_view::ends_with`
+        See `core::string_view::ends_with`
     */
     BOOST_CONSTEXPR bool ends_with(
         char x ) const noexcept
@@ -465,7 +466,7 @@ public:
 
     /** Return true if a matching suffix exists
 
-        See `string_view::ends_with`
+        See `core::string_view::ends_with`
     */
     BOOST_CONSTEXPR bool ends_with(
         char const* x ) const noexcept
@@ -477,17 +478,17 @@ public:
 
     /** Return the position of matching characters
 
-        See `string_view::find`
+        See `core::string_view::find`
     */
     BOOST_CONSTEXPR size_type find(
-        string_view str, size_type pos = 0 ) const noexcept
+        core::string_view str, size_type pos = 0 ) const noexcept
     {
         return s_.find(str, pos);
     }
 
     /** Return the position of matching characters
 
-        See `string_view::find`
+        See `core::string_view::find`
     */
     BOOST_CXX14_CONSTEXPR size_type find(
         char c, size_type pos = 0 ) const noexcept
@@ -497,7 +498,7 @@ public:
 
     /** Return the position of matching characters
 
-        See `string_view::find`
+        See `core::string_view::find`
     */
     BOOST_CXX14_CONSTEXPR size_type find(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -507,7 +508,7 @@ public:
 
     /** Return the position of matching characters
 
-        See `string_view::find`
+        See `core::string_view::find`
     */
     BOOST_CONSTEXPR size_type find(
         char const* s, size_type pos = 0 ) const noexcept
@@ -519,27 +520,27 @@ public:
 
     /** Return the position of matching characters
 
-        See `string_view::rfind`
+        See `core::string_view::rfind`
     */
     BOOST_CONSTEXPR size_type rfind(
-        string_view str, size_type pos = string_view::npos ) const noexcept
+        core::string_view str, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.rfind(str, pos);
     }
 
     /** Return the position of matching characters
 
-        See `string_view::rfind`
+        See `core::string_view::rfind`
     */
     BOOST_CXX14_CONSTEXPR size_type rfind(
-        char c, size_type pos = string_view::npos ) const noexcept
+        char c, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.rfind(c, pos);
     }
 
     /** Return the position of matching characters
 
-        See `string_view::rfind`
+        See `core::string_view::rfind`
     */
     BOOST_CXX14_CONSTEXPR size_type rfind(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -549,10 +550,10 @@ public:
 
     /** Return the position of matching characters
 
-        See `string_view::rfind`
+        See `core::string_view::rfind`
     */
     BOOST_CONSTEXPR size_type rfind(
-        char const* s, size_type pos = string_view::npos ) const noexcept
+        char const* s, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.rfind(s, pos);
     }
@@ -561,17 +562,17 @@ public:
 
     /** Return the position of the first match
 
-        See `string_view::find_first_of`
+        See `core::string_view::find_first_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_of(
-        string_view str, size_type pos = 0 ) const noexcept
+        core::string_view str, size_type pos = 0 ) const noexcept
     {
         return s_.find_first_of(str, pos);
     }
 
     /** Return the position of the first match
 
-        See `string_view::find_first_of`
+        See `core::string_view::find_first_of`
     */
     BOOST_CONSTEXPR size_type find_first_of(
         char c, size_type pos = 0 ) const noexcept
@@ -581,7 +582,7 @@ public:
 
     /** Return the position of the first match
 
-        See `string_view::find_first_of`
+        See `core::string_view::find_first_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_of(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -591,7 +592,7 @@ public:
 
     /** Return the position of the first match
 
-        See `string_view::find_first_of`
+        See `core::string_view::find_first_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_of(
         char const* s, size_type pos = 0 ) const noexcept
@@ -603,27 +604,27 @@ public:
 
     /** Return the position of the last match
 
-        See `string_view::find_last_of`
+        See `core::string_view::find_last_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_of(
-        string_view str, size_type pos = string_view::npos ) const noexcept
+        core::string_view str, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_of(str, pos);
     }
 
     /** Return the position of the last match
 
-        See `string_view::find_last_of`
+        See `core::string_view::find_last_of`
     */
     BOOST_CONSTEXPR size_type find_last_of(
-        char c, size_type pos = string_view::npos ) const noexcept
+        char c, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_of(c, pos);
     }
 
     /** Return the position of the last match
 
-        See `string_view::find_last_of`
+        See `core::string_view::find_last_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_of(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -633,10 +634,10 @@ public:
 
     /** Return the position of the last match
 
-        See `string_view::find_last_of`
+        See `core::string_view::find_last_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_of(
-        char const* s, size_type pos = string_view::npos ) const noexcept
+        char const* s, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_of(s, pos);
     }
@@ -645,17 +646,17 @@ public:
 
     /** Return the position of the first non-match
 
-        See `string_view::find_first_not_of`
+        See `core::string_view::find_first_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_not_of(
-        string_view str, size_type pos = 0 ) const noexcept
+        core::string_view str, size_type pos = 0 ) const noexcept
     {
         return s_.find_first_not_of(str, pos);
     }
 
     /** Return the position of the first non-match
 
-        See `string_view::find_first_not_of`
+        See `core::string_view::find_first_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_not_of(
         char c, size_type pos = 0 ) const noexcept
@@ -665,7 +666,7 @@ public:
 
     /** Return the position of the first non-match
 
-        See `string_view::find_first_not_of`
+        See `core::string_view::find_first_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_not_of(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -675,7 +676,7 @@ public:
 
     /** Return the position of the first non-match
 
-        See `string_view::find_first_not_of`
+        See `core::string_view::find_first_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_first_not_of(
         char const* s, size_type pos = 0 ) const noexcept
@@ -687,27 +688,27 @@ public:
 
     /** Return the position of the last non-match
 
-        See `string_view::find_last_not_of`
+        See `core::string_view::find_last_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_not_of(
-        string_view str, size_type pos = string_view::npos ) const noexcept
+        core::string_view str, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_not_of(str, pos);
     }
 
     /** Return the position of the last non-match
 
-        See `string_view::find_last_not_of`
+        See `core::string_view::find_last_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_not_of(
-        char c, size_type pos = string_view::npos ) const noexcept
+        char c, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_not_of(c, pos);
     }
 
     /** Return the position of the last non-match
 
-        See `string_view::find_last_not_of`
+        See `core::string_view::find_last_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_not_of(
         char const* s, size_type pos, size_type n ) const noexcept
@@ -717,10 +718,10 @@ public:
 
     /** Return the position of the last non-match
 
-        See `string_view::find_last_not_of`
+        See `core::string_view::find_last_not_of`
     */
     BOOST_CXX14_CONSTEXPR size_type find_last_not_of(
-        char const* s, size_type pos = string_view::npos ) const noexcept
+        char const* s, size_type pos = core::string_view::npos ) const noexcept
     {
         return s_.find_last_not_of(s, pos);
     }
@@ -729,16 +730,16 @@ public:
 
     /** Return true if matching characters are found
 
-        See `string_view::contains`
+        See `core::string_view::contains`
     */
-    BOOST_CONSTEXPR bool contains( string_view sv ) const noexcept
+    BOOST_CONSTEXPR bool contains( core::string_view sv ) const noexcept
     {
         return s_.contains(sv);
     }
 
     /** Return true if matching characters are found
 
-        See `string_view::contains`
+        See `core::string_view::contains`
     */
     BOOST_CXX14_CONSTEXPR bool contains( char c ) const noexcept
     {
@@ -747,7 +748,7 @@ public:
 
     /** Return true if matching characters are found
 
-        See `string_view::contains`
+        See `core::string_view::contains`
     */
     BOOST_CONSTEXPR bool contains( char const* s ) const noexcept
     {
@@ -759,8 +760,8 @@ public:
 private:
     template<class S0, class S1>
     using is_match = std::integral_constant<bool,
-        std::is_convertible<S0, string_view>::value &&
-        std::is_convertible<S1, string_view>::value && (
+        std::is_convertible<S0, core::string_view>::value &&
+        std::is_convertible<S1, core::string_view>::value && (
             (std::is_base_of<string_view_base,
                 typename std::decay<S0>::type>::value &&
             std::is_convertible<S0 const volatile*,
@@ -777,7 +778,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) == string_view(s1);
+        return urls::detail::to_sv(s0) == urls::detail::to_sv(s1);
     }
 
     template<class S0, class S1>
@@ -786,7 +787,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) != string_view(s1);
+        return urls::detail::to_sv(s0) != urls::detail::to_sv(s1);
     }
 
     template<class S0, class S1>
@@ -795,7 +796,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) < string_view(s1);
+        return urls::detail::to_sv(s0) < urls::detail::to_sv(s1);
     }
 
     template<class S0, class S1>
@@ -804,7 +805,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) <= string_view(s1);
+        return urls::detail::to_sv(s0) <= urls::detail::to_sv(s1);
     }
 
     template<class S0, class S1>
@@ -813,7 +814,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) > string_view(s1);
+        return urls::detail::to_sv(s0) > urls::detail::to_sv(s1);
     }
 
     template<class S0, class S1>
@@ -822,7 +823,7 @@ public:
         typename std::enable_if<
             is_match<S0, S1>::value, bool>::type
     {
-        return string_view(s0) >= string_view(s1);
+        return urls::detail::to_sv(s0) >= urls::detail::to_sv(s1);
     }
 #endif
 
@@ -857,6 +858,19 @@ operator<<(
     string_view_base const& s);
 
 } // grammar
+
+#ifndef BOOST_URL_DOCS
+namespace detail {
+template <>
+inline
+core::string_view
+to_sv(grammar::string_view_base const& s) noexcept
+{
+    return s.operator core::string_view();
+}
+} // detail
+#endif
+
 } // urls
 } // boost
 

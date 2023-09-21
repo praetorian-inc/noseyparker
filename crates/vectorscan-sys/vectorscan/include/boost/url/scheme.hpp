@@ -11,7 +11,7 @@
 #define BOOST_URL_SCHEME_HPP
 
 #include <boost/url/detail/config.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <cinttypes>
 
 namespace boost {
@@ -139,7 +139,7 @@ enum class scheme : unsigned short
 */
 BOOST_URL_DECL
 scheme
-string_to_scheme(string_view s) noexcept;
+string_to_scheme(core::string_view s) noexcept;
 
 /** Return the normalized string for a known scheme
 
@@ -148,7 +148,7 @@ string_to_scheme(string_view s) noexcept;
     @param s The known scheme constant
 */
 BOOST_URL_DECL
-string_view
+core::string_view
 to_string(scheme s) noexcept;
 
 /** Return the default port for a known scheme

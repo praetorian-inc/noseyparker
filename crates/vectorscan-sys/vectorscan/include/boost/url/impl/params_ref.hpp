@@ -166,35 +166,6 @@ insert(
             FwdIt>::iterator_category{});
 }
 
-inline
-auto
-params_ref::
-erase(
-    iterator pos) noexcept ->
-    iterator
-{
-    return erase(
-        pos,
-        std::next(pos));
-}
-
-inline
-auto
-params_ref::
-erase(
-    iterator first,
-    iterator last) noexcept ->
-        iterator
-{
-    string_view s("", 0);
-    return iterator(
-        u_->edit_params(
-            first.it_,
-            last.it_,
-            detail::query_iter(s)),
-        opt_);
-}
-
 template<class FwdIt>
 auto
 params_ref::

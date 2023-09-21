@@ -7,11 +7,11 @@
 #define BOOST_SPIRIT_SUPPORT_DETAIL_LEXER_DEBUG_HPP
 
 #include <map>
-#include <ostream>
 #include "rules.hpp"
 #include "size_t.hpp"
 #include "state_machine.hpp"
 #include "string_token.hpp"
+#include <ios>
 #include <vector>
 
 namespace boost

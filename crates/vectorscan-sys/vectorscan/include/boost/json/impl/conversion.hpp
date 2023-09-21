@@ -22,11 +22,13 @@
 
 #include <iterator>
 #include <utility>
+#include <tuple>
 #ifndef BOOST_NO_CXX17_HDR_VARIANT
 # include <variant>
 #endif // BOOST_NO_CXX17_HDR_VARIANT
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 #ifdef __cpp_lib_nonmember_container_access
@@ -134,6 +136,8 @@ using value_from_conversion = mp11::mp_true;
 using value_to_conversion = mp11::mp_false;
 
 struct user_conversion_tag { };
+struct context_conversion_tag : user_conversion_tag { };
+struct full_context_conversion_tag : context_conversion_tag { };
 struct native_conversion_tag { };
 struct value_conversion_tag : native_conversion_tag { };
 struct object_conversion_tag : native_conversion_tag { };
@@ -150,24 +154,60 @@ struct described_class_conversion_tag { };
 struct described_enum_conversion_tag { };
 struct no_conversion_tag { };
 
+template<class... Args>
+using supports_tag_invoke = decltype(tag_invoke( std::declval<Args>()... ));
+
 template<class T>
-using has_user_conversion_from_impl
-    = decltype(tag_invoke(
-        value_from_tag(), std::declval<value&>(), std::declval<T&&>()));
+using has_user_conversion_from_impl = supports_tag_invoke<
+    value_from_tag, value&, T&& >;
 template<class T>
-using has_user_conversion_to_impl
-    = decltype(tag_invoke(value_to_tag<T>(), std::declval<value const &>()));
+using has_user_conversion_to_impl = supports_tag_invoke<
+    value_to_tag<T>, value const& >;
 template<class T>
-using has_nonthrowing_user_conversion_to_impl
-    = decltype(tag_invoke(
-        try_value_to_tag<T>(), std::declval<value const&>() ));
-template<class T, class Dir>
-using has_user_conversion = mp11::mp_if<
+using has_nonthrowing_user_conversion_to_impl = supports_tag_invoke<
+    try_value_to_tag<T>, value const& >;
+template< class T, class Dir >
+using has_user_conversion1 = mp11::mp_if<
     std::is_same<Dir, value_from_conversion>,
     mp11::mp_valid<has_user_conversion_from_impl, T>,
     mp11::mp_or<
         mp11::mp_valid<has_user_conversion_to_impl, T>,
         mp11::mp_valid<has_nonthrowing_user_conversion_to_impl, T>>>;
+
+template< class Ctx, class T >
+using has_context_conversion_from_impl = supports_tag_invoke<
+    value_from_tag, value&, T&&, Ctx const& >;
+template< class Ctx, class T >
+using has_context_conversion_to_impl = supports_tag_invoke<
+    value_to_tag<T>, value const&, Ctx const& >;
+template< class Ctx, class T >
+using has_nonthrowing_context_conversion_to_impl = supports_tag_invoke<
+    try_value_to_tag<T>, value const&, Ctx const& >;
+template< class Ctx, class T, class Dir >
+using has_user_conversion2 = mp11::mp_if<
+    std::is_same<Dir, value_from_conversion>,
+    mp11::mp_valid<has_context_conversion_from_impl, Ctx, T>,
+    mp11::mp_or<
+        mp11::mp_valid<has_context_conversion_to_impl, Ctx, T>,
+        mp11::mp_valid<has_nonthrowing_context_conversion_to_impl, Ctx, T>>>;
+
+template< class Ctx, class T >
+using has_full_context_conversion_from_impl = supports_tag_invoke<
+    value_from_tag, value&, T&&, Ctx const&, Ctx const& >;
+template< class Ctx, class T >
+using has_full_context_conversion_to_impl = supports_tag_invoke<
+    value_to_tag<T>, value const&, Ctx const&,  Ctx const& >;
+template< class Ctx, class T >
+using has_nonthrowing_full_context_conversion_to_impl = supports_tag_invoke<
+    try_value_to_tag<T>, value const&, Ctx const&, Ctx const& >;
+template< class Ctx, class T, class Dir >
+using has_user_conversion3 = mp11::mp_if<
+    std::is_same<Dir, value_from_conversion>,
+    mp11::mp_valid<has_full_context_conversion_from_impl, Ctx, T>,
+    mp11::mp_or<
+        mp11::mp_valid<has_full_context_conversion_to_impl, Ctx, T>,
+        mp11::mp_valid<
+            has_nonthrowing_full_context_conversion_to_impl, Ctx, T>>>;
 
 template< class T >
 using described_non_public_members = describe::describe_members<
@@ -176,51 +216,84 @@ template< class T >
 using described_bases = describe::describe_bases<
     T, describe::mod_any_access>;
 
-template<class T, class Dir>
-using conversion_implementation = mp11::mp_cond<
-    // user conversion (via tag_invoke)
-    has_user_conversion<T, Dir>, user_conversion_tag,
-    // native conversions (constructors and member functions of value)
-    std::is_same<T, value>,      value_conversion_tag,
-    std::is_same<T, array>,      array_conversion_tag,
-    std::is_same<T, object>,     object_conversion_tag,
-    std::is_same<T, string>,     string_conversion_tag,
-    std::is_same<T, bool>,       bool_conversion_tag,
-    std::is_arithmetic<T>,       number_conversion_tag,
-    // generic conversions
-    is_null_like<T>,             null_like_conversion_tag,
-    is_string_like<T>,           string_like_conversion_tag,
-    is_map_like<T>,              map_like_conversion_tag,
-    is_sequence_like<T>,         sequence_conversion_tag,
-    is_tuple_like<T>,            tuple_conversion_tag,
-    is_described_class<T>,       described_class_conversion_tag,
-    is_described_enum<T>,        described_enum_conversion_tag,
-    // failed to find a suitable implementation
-    mp11::mp_true,                   no_conversion_tag>;
+template< class Ctx, class T, class Dir >
+struct conversion_category_impl
+{
+    using type = mp11::mp_cond<
+        // user conversion (via tag_invoke)
+        has_user_conversion3<Ctx, T, Dir>, full_context_conversion_tag,
+        has_user_conversion2<Ctx, T, Dir>, context_conversion_tag,
+        has_user_conversion1<T, Dir>,      user_conversion_tag,
+        // native conversions (constructors and member functions of value)
+        std::is_same<T, value>,            value_conversion_tag,
+        std::is_same<T, array>,            array_conversion_tag,
+        std::is_same<T, object>,           object_conversion_tag,
+        std::is_same<T, string>,           string_conversion_tag,
+        std::is_same<T, bool>,             bool_conversion_tag,
+        std::is_arithmetic<T>,             number_conversion_tag,
+        // generic conversions
+        is_null_like<T>,                   null_like_conversion_tag,
+        is_string_like<T>,                 string_like_conversion_tag,
+        is_map_like<T>,                    map_like_conversion_tag,
+        is_sequence_like<T>,               sequence_conversion_tag,
+        is_tuple_like<T>,                  tuple_conversion_tag,
+        is_described_class<T>,             described_class_conversion_tag,
+        is_described_enum<T>,              described_enum_conversion_tag,
+        // failed to find a suitable implementation
+        mp11::mp_true,                     no_conversion_tag>;
+};
+template< class Ctx, class T, class Dir >
+using conversion_category =
+    typename conversion_category_impl< Ctx, T, Dir >::type;
+
+template< class T >
+using any_conversion_tag = mp11::mp_not<
+    std::is_same< T, no_conversion_tag > >;
+
+template< class T, class Dir, class... Ctxs >
+struct conversion_category_impl< std::tuple<Ctxs...>, T, Dir >
+{
+    using ctxs = mp11::mp_list< remove_cvref<Ctxs>... >;
+    using cats = mp11::mp_list<
+        conversion_category<remove_cvref<Ctxs>, T, Dir>... >;
+
+    template< class I >
+    using exists = mp11::mp_less< I, mp11::mp_size<cats> >;
+
+    using context2 = mp11::mp_find< cats, full_context_conversion_tag >;
+    using context1 = mp11::mp_find< cats, context_conversion_tag >;
+    using context0 = mp11::mp_find< cats, user_conversion_tag >;
+    using index = mp11::mp_cond<
+        exists<context2>, context2,
+        exists<context1>, context1,
+        exists<context0>, context0,
+        mp11::mp_true, mp11::mp_find_if< cats, any_conversion_tag > >;
+    using type = mp11::mp_eval_or<
+        no_conversion_tag,
+        mp11::mp_at, cats, index >;
+};
+
+struct no_context
+{};
+
+struct allow_exceptions
+{};
 
 template <class T, class Dir>
 using can_convert = mp11::mp_not<
     std::is_same<
-        detail::conversion_implementation<T, Dir>,
+        detail::conversion_category<no_context, T, Dir>,
         detail::no_conversion_tag>>;
-
-template<class T>
-using value_from_implementation
-    = conversion_implementation<T, value_from_conversion>;
-
-template<class T>
-using value_to_implementation
-    = conversion_implementation<T, value_to_conversion>;
 
 template<class Impl1, class Impl2>
 using conversion_round_trips_helper = mp11::mp_or<
     std::is_same<Impl1, Impl2>,
-    std::is_same<user_conversion_tag, Impl1>,
-    std::is_same<user_conversion_tag, Impl2>>;
-template<class T, class Dir>
+    std::is_base_of<user_conversion_tag, Impl1>,
+    std::is_base_of<user_conversion_tag, Impl2>>;
+template< class Ctx, class T, class Dir >
 using conversion_round_trips  = conversion_round_trips_helper<
-    conversion_implementation<T, Dir>,
-    conversion_implementation<T, mp11::mp_not<Dir>>>;
+    conversion_category<Ctx, T, Dir>,
+    conversion_category<Ctx, T, mp11::mp_not<Dir>>>;
 
 template< class T1, class T2 >
 struct copy_cref_helper
@@ -257,6 +330,37 @@ using forwarded_value_helper = mp11::mp_if<
 template< class Rng >
 using forwarded_value = forwarded_value_helper<
     Rng, iterator_traits< Rng > >;
+
+template< class Ctx, class T, class Dir >
+struct supported_context
+{
+    using type = Ctx;
+
+    static
+    type const&
+    get( Ctx const& ctx ) noexcept
+    {
+        return ctx;
+    }
+};
+
+template< class T, class Dir, class... Ctxs >
+struct supported_context< std::tuple<Ctxs...>, T, Dir >
+{
+    using Ctx = std::tuple<Ctxs...>;
+    using impl = conversion_category_impl<Ctx, T, Dir>;
+    using index = typename impl::index;
+    using next_supported = supported_context<
+        mp11::mp_at< typename impl::ctxs, index >, T, Dir >;
+    using type = typename next_supported::type;
+
+    static
+    type const&
+    get( Ctx const& ctx ) noexcept
+    {
+        return next_supported::get( std::get<index::value>( ctx ) );
+    }
+};
 
 } // namespace detail
 
@@ -321,6 +425,7 @@ struct is_described_enum
     : describe::has_describe_enumerators<T>
 { };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif // BOOST_JSON_IMPL_CONVERSION_HPP

@@ -10,7 +10,8 @@
 #ifndef BOOST_JSON_IMPL_VALUE_REF_HPP
 #define BOOST_JSON_IMPL_VALUE_REF_HPP
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 template<class T>
 value
@@ -51,6 +52,7 @@ from_rvalue(
         std::move(sp));
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

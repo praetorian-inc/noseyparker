@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2015-2022 Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2015-2022 Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -380,7 +381,7 @@ public:
             return pi;
         }
 
-        if (LongSegment && lat1r != lat2r) // not for segments parallel to equator
+        if (BOOST_GEOMETRY_CONDITION(LongSegment) && lat1r != lat2r) // not for segments parallel to equator
         {
             CT const cbet1 = cos(lat1r);
             CT const sbet1 = sin(lat1r);

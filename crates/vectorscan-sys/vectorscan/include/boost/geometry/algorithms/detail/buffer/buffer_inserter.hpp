@@ -1,7 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2012-2020 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2022 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2022-2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2022.
 // Modifications copyright (c) 2017-2022 Oracle and/or its affiliates.
@@ -44,7 +44,7 @@
 #include <boost/geometry/strategies/buffer.hpp>
 #include <boost/geometry/strategies/side.hpp>
 
-#include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/constexpr.hpp>
 #include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/type_traits.hpp>
 
@@ -58,7 +58,7 @@ namespace boost { namespace geometry
 namespace detail { namespace buffer
 {
 
-template <typename RangeIn, typename RangeOut, typename DistanceStrategy, typename Strategies>
+template <typename RangeIn, typename DistanceStrategy, typename RangeOut, typename Strategies>
 inline void simplify_input(RangeIn const& range,
                            DistanceStrategy const& distance,
                            RangeOut& simplified,
@@ -354,10 +354,7 @@ struct buffer_multi
             RobustPolicy const& robust_policy,
             Strategies const& strategies)
     {
-        for (typename boost::range_iterator<Multi const>::type
-                it = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             Policy::apply(*it, collection,
                 distance_strategy, segment_strategy,
@@ -945,17 +942,17 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
 {
     boost::ignore_unused(visit_pieces_policy);
 
-    typedef detail::buffer::buffered_piece_collection
-    <
-        typename geometry::ring_type<GeometryOutput>::type,
-        Strategies,
-        DistanceStrategy,
-        RobustPolicy
-    > collection_type;
+    using collection_type = detail::buffer::buffered_piece_collection
+        <
+            typename geometry::ring_type<GeometryOutput>::type,
+            Strategies,
+            DistanceStrategy,
+            RobustPolicy
+        >;
     collection_type collection(strategies, distance_strategy, robust_policy);
     collection_type const& const_collection = collection;
 
-    bool const areal = util::is_areal<GeometryInput>::value;
+    static constexpr bool areal = util::is_areal<GeometryInput>::value;
 
     dispatch::buffer_inserter
         <
@@ -972,7 +969,7 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
                  robust_policy, strategies);
 
     collection.get_turns();
-    if (BOOST_GEOMETRY_CONDITION(areal))
+    if BOOST_GEOMETRY_CONSTEXPR (areal)
     {
         collection.check_turn_in_original();
     }
@@ -992,7 +989,7 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
     // phase 1: turns (after enrichment/clustering)
     visit_pieces_policy.apply(const_collection, 1);
 
-    if (BOOST_GEOMETRY_CONDITION(areal))
+    if BOOST_GEOMETRY_CONSTEXPR (areal)
     {
         collection.deflate_check_turns();
     }
@@ -1004,8 +1001,7 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
     // - the output is counter clockwise
     // and avoid reversing twice
     bool reverse = distance_strategy.negative() && areal;
-    if (BOOST_GEOMETRY_CONDITION(
-            geometry::point_order<GeometryOutput>::value == counterclockwise))
+    if BOOST_GEOMETRY_CONSTEXPR (geometry::point_order<GeometryOutput>::value == counterclockwise)
     {
         reverse = ! reverse;
     }
@@ -1014,9 +1010,12 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
         collection.reverse();
     }
 
-    if (BOOST_GEOMETRY_CONDITION(distance_strategy.negative() && areal))
+    if BOOST_GEOMETRY_CONSTEXPR (areal)
     {
-        collection.discard_nonintersecting_deflated_rings();
+        if (distance_strategy.negative())
+        {
+            collection.discard_nonintersecting_deflated_rings();
+        }
     }
 
     collection.template assign<GeometryOutput>(out);

@@ -82,6 +82,7 @@
 #include <boost/geometry/algorithms/for_each.hpp>
 #include <boost/geometry/algorithms/intersection.hpp>
 #include <boost/geometry/algorithms/intersects.hpp>
+#include <boost/geometry/algorithms/is_convex.hpp>
 #include <boost/geometry/algorithms/is_empty.hpp>
 #include <boost/geometry/algorithms/is_simple.hpp>
 #include <boost/geometry/algorithms/is_valid.hpp>
@@ -94,6 +95,7 @@
 #include <boost/geometry/algorithms/num_segments.hpp>
 #include <boost/geometry/algorithms/overlaps.hpp>
 #include <boost/geometry/algorithms/perimeter.hpp>
+#include <boost/geometry/algorithms/point_on_surface.hpp>
 #include <boost/geometry/algorithms/relate.hpp>
 #include <boost/geometry/algorithms/relation.hpp>
 #include <boost/geometry/algorithms/remove_spikes.hpp>
@@ -128,5 +130,8 @@
 #include <boost/geometry/io/svg/write.hpp>
 #include <boost/geometry/io/wkt/read.hpp>
 #include <boost/geometry/io/wkt/write.hpp>
+
+#include <boost/geometry/algorithms/is_convex.hpp>
+#include <boost/geometry/algorithms/point_on_surface.hpp>
 
 #endif // BOOST_GEOMETRY_GEOMETRY_HPP

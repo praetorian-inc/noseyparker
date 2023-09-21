@@ -2,6 +2,7 @@
 
 // Copyright John Maddock 2006.
 // Copyright Paul A. Bristow 2006.
+// Copyright Matt Borland 2023.
 
 // Use, modification and distribution are subject to the
 // Boost Software License, Version 1.0.
@@ -241,7 +242,7 @@ namespace boost
         {
           return result;
         }
-        return ibeta_inva(beta, x, probability, Policy());
+        return static_cast<RealType>(ibeta_inva(beta, x, probability, Policy()));
       } // RealType find_alpha(beta, a, probability)
 
       static RealType find_beta(
@@ -264,7 +265,7 @@ namespace boost
         {
           return result;
         }
-        return ibeta_invb(alpha, x, probability, Policy());
+        return static_cast<RealType>(ibeta_invb(alpha, x, probability, Policy()));
       } //  RealType find_beta(alpha, x, probability)
 
     private:
@@ -390,13 +391,40 @@ namespace boost
       }
       using boost::math::beta;
 
-      // Corner case: check_x ensures x element of [0, 1], but PDF is 0 for x = 0 and x = 1. PDF EQN:
+      // Corner cases: check_x ensures x element of [0, 1], but PDF is 0 for x = 0 and x = 1. PDF EQN:
       // https://wikimedia.org/api/rest_v1/media/math/render/svg/125fdaa41844a8703d1a8610ac00fbf3edacc8e7
-      if(x == 0 || x == 1)
+      if(x == 0)
       {
-        return RealType(0);
+        if (a == 1)
+        {
+          return static_cast<RealType>(1 / beta(a, b));
+        }
+        else if (a < 1)
+        {
+          policies::raise_overflow_error<RealType>(function, nullptr, Policy());
+        }
+        else
+        {
+          return RealType(0);
+        }
       }
-      return ibeta_derivative(a, b, x, Policy());
+      else if (x == 1)
+      {
+        if (b == 1)
+        {
+          return static_cast<RealType>(1 / beta(a, b));
+        }
+        else if (b < 1)
+        {
+          policies::raise_overflow_error<RealType>(function, nullptr, Policy());
+        }
+        else
+        {
+          return RealType(0);
+        }
+      }
+      
+      return static_cast<RealType>(ibeta_derivative(a, b, x, Policy()));
     } // pdf
 
     template <class RealType, class Policy>
@@ -427,7 +455,7 @@ namespace boost
       {
         return 1;
       }
-      return ibeta(a, b, x, Policy());
+      return static_cast<RealType>(ibeta(a, b, x, Policy()));
     } // beta cdf
 
     template <class RealType, class Policy>
@@ -454,16 +482,16 @@ namespace boost
       }
       if (x == 0)
       {
-        return 1;
+        return RealType(1);
       }
       else if (x == 1)
       {
-        return 0;
+        return RealType(0);
       }
       // Calculate cdf beta using the incomplete beta function.
       // Use of ibeta here prevents cancellation errors in calculating
       // 1 - x if x is very small, perhaps smaller than machine epsilon.
-      return ibetac(a, b, x, Policy());
+      return static_cast<RealType>(ibetac(a, b, x, Policy()));
     } // beta cdf
 
     template <class RealType, class Policy>
@@ -492,13 +520,13 @@ namespace boost
       // Special cases:
       if (p == 0)
       {
-        return 0;
+        return RealType(0);
       }
       if (p == 1)
       {
-        return 1;
+        return RealType(1);
       }
-      return ibeta_inv(a, b, p, static_cast<RealType*>(nullptr), Policy());
+      return static_cast<RealType>(ibeta_inv(a, b, p, static_cast<RealType*>(nullptr), Policy()));
     } // quantile
 
     template <class RealType, class Policy>
@@ -528,14 +556,14 @@ namespace boost
       // Special cases:
       if(q == 1)
       {
-        return 0;
+        return RealType(0);
       }
       if(q == 0)
       {
-        return 1;
+        return RealType(1);
       }
 
-      return ibetac_inv(a, b, q, static_cast<RealType*>(nullptr), Policy());
+      return static_cast<RealType>(ibetac_inv(a, b, q, static_cast<RealType*>(nullptr), Policy()));
     } // Quantile Complement
 
   } // namespace math

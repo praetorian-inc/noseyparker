@@ -154,7 +154,7 @@ inline int range_in_geometry(Point1 const& first_point1,
         // check points of geometry1 until point inside/outside is found
         // NOTE: skip first point because it should be already tested above
         result = range_in_geometry(geometry1, geometry2, strategy, true);
-    }    
+    }
     return result;
 }
 

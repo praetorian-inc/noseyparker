@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2017 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2020-2021.
-// Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2020-2023.
+// Modifications copyright (c) 2020-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -15,6 +16,9 @@
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_ALGORITHMS_PATH_INTERSECTION_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_ALGORITHMS_PATH_INTERSECTION_HPP
 
+
+#include <boost/geometry/algorithms/detail/assign_indexed_point.hpp>
+#include <boost/geometry/algorithms/detail/distance/interface.hpp>
 
 #include <boost/geometry/core/static_assert.hpp>
 
@@ -64,9 +68,9 @@ struct path_intersection<Indexable, Linestring, box_tag, linestring_tag>
     static inline bool apply(Indexable const& b, Linestring const& path, comparable_distance_type & comparable_distance)
     {
         typedef typename ::boost::range_value<Linestring>::type point_type;
-        typedef typename ::boost::range_const_iterator<Linestring>::type const_iterator;        
+        typedef typename ::boost::range_const_iterator<Linestring>::type const_iterator;
         typedef typename ::boost::range_size<Linestring>::type size_type;
-        
+
         const size_type count = ::boost::size(path);
 
         if ( count == 2 )

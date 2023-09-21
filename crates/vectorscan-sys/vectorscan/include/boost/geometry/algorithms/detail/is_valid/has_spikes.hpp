@@ -56,7 +56,9 @@ struct has_spikes
                                                      Strategy const& strategy)
     {
         if (first == last)
+        {
             return last;
+        }
         auto const& front = *first;
         ++first;
         return std::find_if(first, last, [&](auto const& pt) {
@@ -71,18 +73,12 @@ struct has_spikes
     {
         boost::ignore_unused(visitor);
 
-        typedef typename boost::range_iterator<View const>::type iterator;
+        auto cur = boost::begin(view);
+        auto prev = find_different_from_first(boost::rbegin(view),
+                                              boost::rend(view),
+                                              strategy);
 
-        iterator cur = boost::begin(view);
-        typename boost::range_reverse_iterator
-            <
-                View const
-            >::type prev = find_different_from_first(boost::rbegin(view),
-                                                     boost::rend(view),
-                                                     strategy);
-
-        iterator next = find_different_from_first(cur, boost::end(view),
-                                                  strategy);
+        auto next = find_different_from_first(cur, boost::end(view), strategy);
         if (detail::is_spike_or_equal(*next, *cur, *prev, strategy.side()))
         {
             return ! visitor.template apply<failure_spikes>(is_linear, *cur);
@@ -131,8 +127,7 @@ struct has_spikes
             // also in geographic cases going over the pole
             if (detail::is_spike_or_equal(*next, *cur, *prev, strategy.side()))
             {
-                return
-                    ! visitor.template apply<failure_spikes>(is_linestring, *cur);
+                return ! visitor.template apply<failure_spikes>(is_linestring, *cur);
             }
             prev = cur;
             cur = next;

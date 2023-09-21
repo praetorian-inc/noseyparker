@@ -38,9 +38,9 @@ inline T cyl_bessel_j_prime_imp(T v, T x, const Policy& pol)
    if (x == 0)
    {
       if (v == 1)
-         return 0.5;
+         return static_cast<T>(0.5);
       else if (v == -1)
-         return -0.5;
+         return static_cast<T>(-0.5);
       else if (floor(v) == v || v > 1)
          return 0;
       else return boost::math::policies::raise_domain_error<T>(
@@ -126,7 +126,7 @@ inline T cyl_bessel_i_prime_imp(T v, T x, const Policy& pol)
    if (x == 0)
    {
       if (v == 1 || v == -1)
-         return 0.5;
+         return static_cast<T>(0.5);
       else if (floor(v) == v || v > 1)
          return 0;
       else return boost::math::policies::raise_domain_error<T>(

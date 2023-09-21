@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2009-2011 Artyom Beilis (Tonkikh)
+// Copyright (c) 2022-2023 Alexander Grund
 //
 // Distributed under the Boost Software License, Version 1.0.
 // https://www.boost.org/LICENSE_1_0.txt
@@ -10,7 +11,7 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/utf.hpp>
 #include <boost/assert.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <locale>
 #include <memory>
 #include <typeinfo>
@@ -22,19 +23,18 @@ namespace boost { namespace locale {
 
         /// \brief Return default system locale name in POSIX format.
         ///
-        /// This function tries to detect the locale using, LC_CTYPE, LC_ALL and LANG environment
-        /// variables in this order and if all of them unset, in POSIX platforms it returns "C"
-        ///
-        /// On Windows additionally to check the above environment variables, this function
-        /// tries to creates locale name from ISO-339 and ISO-3199 country codes defined
-        /// for user default locale.
-        /// If \a use_utf8_on_windows is true it sets the encoding to UTF-8, otherwise, if system
-        /// locale supports ANSI code-page it defines the ANSI encoding like windows-1252, otherwise it fall-backs
-        /// to UTF-8 encoding if ANSI code-page is not available.
+        /// This function tries to detect the locale using LC_ALL, LC_CTYPE and LANG environment
+        /// variables in this order and if all of them are unset, on POSIX platforms it returns "C".
+        /// On Windows additionally to the above environment variables, this function
+        /// tries to create the locale name from ISO-639 and ISO-3166 country codes defined
+        /// for the users default locale.
+        /// If \a use_utf8_on_windows is true it sets the encoding to UTF-8,
+        /// otherwise, if the system locale supports ANSI codepages it defines the ANSI encoding, e.g. windows-1252,
+        /// otherwise (if ANSI codepage is not available) it uses UTF-8 encoding.
         BOOST_LOCALE_DECL
         std::string get_system_locale(bool use_utf8_on_windows = false);
 
-        /// \brief Installs information facet to locale in based on locale name \a name
+        /// \brief Installs information facet to locale \a in based on locale name \a name
         ///
         /// This function installs boost::locale::info facet into the locale \a in and returns
         /// newly created locale.
@@ -43,7 +43,7 @@ namespace boost { namespace locale {
         ///
         /// The name has following format: language[_COUNTRY][.encoding][\@variant]
         /// Where language is ISO-639 language code like "en" or "ru", COUNTRY is ISO-3166
-        /// country identifier like "US" or "RU". the Encoding is a charracter set name
+        /// country identifier like "US" or "RU". the Encoding is a character set name
         /// like UTF-8 or ISO-8859-1. Variant is backend specific variant like \c euro or
         /// calendar=hebrew.
         ///
@@ -69,11 +69,11 @@ namespace boost { namespace locale {
             /// This value should be returned when an illegal input sequence or code-point is observed:
             /// For example if a UCS-32 code-point is in the range reserved for UTF-16 surrogates
             /// or an invalid UTF-8 sequence is found
-            static constexpr uint32_t illegal = utf::illegal;
+            static constexpr utf::code_point illegal = utf::illegal;
 
             /// This value is returned in following cases: The of incomplete input sequence was found or
             /// insufficient output buffer was provided so complete output could not be written.
-            static constexpr uint32_t incomplete = utf::incomplete;
+            static constexpr utf::code_point incomplete = utf::incomplete;
 
             virtual ~base_converter();
 
@@ -111,7 +111,7 @@ namespace boost { namespace locale {
             /// if invalid input sequence found, i.e. there is a sequence [\a begin, \a code_point_end) such as \a
             /// code_point_end <= \a end that is illegal for this encoding, \a illegal is returned and begin stays
             /// unchanged. For example if *begin = 0xFF and begin < end for UTF-8, then \a illegal is returned.
-            virtual uint32_t to_unicode(const char*& begin, const char* end)
+            virtual utf::code_point to_unicode(const char*& begin, const char* end)
             {
                 if(begin == end)
                     return incomplete;
@@ -133,7 +133,7 @@ namespace boost { namespace locale {
             /// -# If end - begin >= N, c1, ... cN are written starting at begin and N is returned
             /// -# If end - begin < N, incomplete is returned, it is unspecified what would be
             ///    stored in bytes in range [begin,end)
-            virtual uint32_t from_unicode(uint32_t u, char* begin, const char* end)
+            virtual utf::len_or_error from_unicode(utf::code_point u, char* begin, const char* end)
             {
                 if(begin == end)
                     return incomplete;
@@ -145,7 +145,7 @@ namespace boost { namespace locale {
         };
 
         /// This function creates a \a base_converter that can be used for conversion between UTF-8 and
-        /// unicode code points
+        /// Unicode code points
         BOOST_LOCALE_DECL std::unique_ptr<base_converter> create_utf8_converter();
 
         BOOST_DEPRECATED("This function is deprecated, use 'create_utf8_converter()'")
@@ -186,15 +186,10 @@ namespace boost { namespace locale {
             return create_codecvt(in, std::unique_ptr<base_converter>(cvt), type);
         }
 
-        /// This function creates a \a base_converter that can be used for conversion between UTF-8 and
-        /// unicode code points
+        BOOST_DEPRECATED("This function is deprecated, use 'create_utf8_converter()'")
         BOOST_LOCALE_DECL base_converter* create_utf8_converter_new_ptr();
 
-        /// This function creates a \a base_converter that can be used for conversion between single byte
-        /// character encodings like ISO-8859-1, koi8-r, windows-1255 and Unicode code points,
-        ///
-        /// If \a encoding is not supported, empty pointer is returned. You should check if
-        /// the returned pointer is NULL.
+        BOOST_DEPRECATED("This function is deprecated, use 'create_simple_converter()'")
         BOOST_LOCALE_DECL base_converter* create_simple_converter_new_ptr(const std::string& encoding);
 
         /// Install utf8 codecvt to UTF-16 or UTF-32 into locale \a in and return
@@ -205,8 +200,8 @@ namespace boost { namespace locale {
         /// This function installs codecvt that can be used for conversion between single byte
         /// character encodings like ISO-8859-1, koi8-r, windows-1255 and Unicode code points,
         ///
-        /// Throws boost::locale::conv::invalid_charset_error if the character set is not supported or isn't single byte
-        /// character set
+        /// \throws boost::locale::conv::invalid_charset_error: Character set is not supported or isn't a single
+        /// byte character set
         BOOST_LOCALE_DECL
         std::locale create_simple_codecvt(const std::locale& in, const std::string& encoding, char_facet_t type);
     } // namespace util

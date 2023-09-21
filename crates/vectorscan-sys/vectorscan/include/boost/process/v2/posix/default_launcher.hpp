@@ -8,6 +8,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/posix/detail/close_handles.hpp>
+#include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
@@ -313,7 +314,7 @@ struct default_launcher
         auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "default_launcher");
+            v2::detail::throw_error(ec, "default_launcher");
 
         return proc;
     }
@@ -344,7 +345,7 @@ struct default_launcher
         auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "default_launcher");
+            v2::detail::throw_error(ec, "default_launcher");
 
         return proc;
     }
@@ -364,12 +365,12 @@ struct default_launcher
             pipe_guard pg;
             if (::pipe(pg.p))
             {
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 return basic_process<Executor>{exec};
             }
             if (::fcntl(pg.p[1], F_SETFD, FD_CLOEXEC))
             {
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 return basic_process<Executor>{exec};
             }
             ec = detail::on_setup(*this, executable, argv, inits ...);
@@ -390,7 +391,7 @@ struct default_launcher
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 return basic_process<Executor>{exec};
             }
             else if (pid == 0)
@@ -406,7 +407,7 @@ struct default_launcher
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
                 ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);
                 return basic_process<Executor>{exec};
@@ -422,12 +423,12 @@ struct default_launcher
                 int err = errno;
                 if ((err != EAGAIN) && (err != EINTR))
                 {
-                    ec.assign(err, system_category());
+                    BOOST_PROCESS_V2_ASSIGN_EC(ec, err, system_category())
                     break;
                 }
             }
             if (count != 0)
-                ec.assign(child_error, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, child_error, system_category())
 
             if (ec)
             {

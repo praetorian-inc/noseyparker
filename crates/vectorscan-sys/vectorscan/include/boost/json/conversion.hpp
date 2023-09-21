@@ -11,10 +11,19 @@
 #define BOOST_JSON_CONVERSION_HPP
 
 #include <boost/json/detail/config.hpp>
+#include <boost/json/fwd.hpp>
 
 #include <type_traits>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
+
+namespace detail {
+
+template< class Ctx, class T, class Dir >
+struct supported_context;
+
+} // namespace detail
 
 /** Customization point tag.
 
@@ -322,7 +331,8 @@ struct is_described_class;
 template<class T>
 struct is_described_enum;
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #include <boost/json/impl/conversion.hpp>
 

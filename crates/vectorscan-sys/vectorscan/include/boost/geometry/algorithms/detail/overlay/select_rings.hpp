@@ -24,7 +24,6 @@
 #include <boost/geometry/core/tags.hpp>
 
 #include <boost/geometry/algorithms/detail/covered_by/implementation.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 #include <boost/geometry/algorithms/detail/overlay/range_in_geometry.hpp>
 #include <boost/geometry/algorithms/detail/overlay/ring_properties.hpp>
 #include <boost/geometry/algorithms/detail/overlay/overlay_type.hpp>
@@ -119,10 +118,8 @@ namespace dispatch
 
             per_ring::apply(exterior_ring(polygon), geometry, id, ring_properties, strategy);
 
-            typename interior_return_type<Polygon const>::type
-                rings = interior_rings(polygon);
-            for (typename detail::interior_iterator<Polygon const>::type
-                    it = boost::begin(rings); it != boost::end(rings); ++it)
+            auto const& rings = interior_rings(polygon);
+            for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
             {
                 id.ring_index++;
                 per_ring::apply(*it, geometry, id, ring_properties, strategy);
@@ -139,10 +136,8 @@ namespace dispatch
 
             per_ring::apply(exterior_ring(polygon), id, ring_properties, strategy);
 
-            typename interior_return_type<Polygon const>::type
-                rings = interior_rings(polygon);
-            for (typename detail::interior_iterator<Polygon const>::type
-                    it = boost::begin(rings); it != boost::end(rings); ++it)
+            auto const& rings = interior_rings(polygon);
+            for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
             {
                 id.ring_index++;
                 per_ring::apply(*it, id, ring_properties, strategy);
@@ -158,15 +153,10 @@ namespace dispatch
                     ring_identifier id, RingPropertyMap& ring_properties,
                     Strategy const& strategy)
         {
-            typedef typename boost::range_iterator
-                <
-                    Multi const
-                >::type iterator_type;
-
             typedef select_rings<polygon_tag, typename boost::range_value<Multi>::type> per_polygon;
 
             id.multi_index = 0;
-            for (iterator_type it = boost::begin(multi); it != boost::end(multi); ++it)
+            for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
             {
                 id.ring_index = -1;
                 per_polygon::apply(*it, geometry, id, ring_properties, strategy);
@@ -254,15 +244,13 @@ inline void update_ring_selection(Geometry1 const& geometry1,
 {
     selected_ring_properties.clear();
 
-    for (typename RingPropertyMap::const_iterator it = boost::begin(all_ring_properties);
-        it != boost::end(all_ring_properties);
-        ++it)
+    for (auto const& pair : all_ring_properties)
     {
-        ring_identifier const& id = it->first;
+        ring_identifier const& id = pair.first;
 
         ring_turn_info info;
 
-        typename TurnInfoMap::const_iterator tcit = turn_info_map.find(id);
+        auto tcit = turn_info_map.find(id);
         if (tcit != turn_info_map.end())
         {
             info = tcit->second; // Copy by value
@@ -281,12 +269,12 @@ inline void update_ring_selection(Geometry1 const& geometry1,
         {
             // within
             case 0 :
-                info.within_other = range_in_geometry(it->second.point,
+                info.within_other = range_in_geometry(pair.second.point,
                                                       geometry1, geometry2,
                                                       strategy) > 0;
                 break;
             case 1 :
-                info.within_other = range_in_geometry(it->second.point,
+                info.within_other = range_in_geometry(pair.second.point,
                                                       geometry2, geometry1,
                                                       strategy) > 0;
                 break;
@@ -294,7 +282,7 @@ inline void update_ring_selection(Geometry1 const& geometry1,
 
         if (decide<OverlayType>::include(id, info))
         {
-            typename RingPropertyMap::mapped_type properties = it->second; // Copy by value
+            auto properties = pair.second; // Copy by value
             properties.reversed = decide<OverlayType>::reversed(id, info);
             selected_ring_properties[id] = properties;
         }
@@ -321,7 +309,7 @@ inline void select_rings(Geometry1 const& geometry1, Geometry2 const& geometry2,
 {
     typedef typename geometry::tag<Geometry1>::type tag1;
     typedef typename geometry::tag<Geometry2>::type tag2;
-    
+
     RingPropertyMap all_ring_properties;
     dispatch::select_rings<tag1, Geometry1>::apply(geometry1, geometry2,
                 ring_identifier(0, -1, -1), all_ring_properties,

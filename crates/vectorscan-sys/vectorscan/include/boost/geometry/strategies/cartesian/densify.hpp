@@ -61,7 +61,7 @@ public:
             >::type calc_t;
 
         typedef model::point<calc_t, geometry::dimension<Point>::value, cs::cartesian> calc_point_t;
-        
+
         assert_dimension_equal<calc_point_t, out_point_t>();
 
         calc_point_t cp0, dir01;
@@ -89,7 +89,7 @@ public:
         for (signed_size_type i = 0 ; i < n ; ++i)
         {
             out_point_t out;
-            
+
             calc_t const num = calc_t(i + 1);
             geometry::detail::for_each_dimension<out_point_t>([&](auto index)
             {

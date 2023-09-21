@@ -28,7 +28,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail { namespace is_valid
 {
@@ -89,8 +89,8 @@ struct range_has_invalid_coordinate
         bool const has_valid_coordinates = std::none_of
             (
                 geometry::points_begin(geometry), points_end,
-                []( auto const& point ){ 
-                    return point_has_invalid_coordinate::apply(point); 
+                []( auto const& point ){
+                    return point_has_invalid_coordinate::apply(point);
                 }
             );
 

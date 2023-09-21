@@ -37,8 +37,7 @@ class calculate_polygon_sum
     static inline ReturnType sum_interior_rings(Rings const& rings, Strategy const& strategy)
     {
         ReturnType sum = ReturnType(0);
-        for (typename boost::range_iterator<Rings const>::type
-                it = boost::begin(rings); it != boost::end(rings); ++it)
+        for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
         {
             sum += Policy::apply(*it, strategy);
         }

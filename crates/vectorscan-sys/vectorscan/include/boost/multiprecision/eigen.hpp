@@ -239,30 +239,9 @@ struct ScalarBinaryOpTraits<boost::multiprecision::detail::expression<tag, Arg1,
    using ReturnType = boost::multiprecision::number<Backend, ExpressionTemplates>;
 };
 
-namespace internal {
-template <typename Scalar>
-struct conj_retval;
-
-template <typename Scalar, bool IsComplex>
-struct conj_impl;
-
-template <class tag, class Arg1, class Arg2, class Arg3, class Arg4>
-struct conj_retval<boost::multiprecision::detail::expression<tag, Arg1, Arg2, Arg3, Arg4> >
-{
-   using type = typename boost::multiprecision::detail::expression<tag, Arg1, Arg2, Arg3, Arg4>::result_type;
-};
-
-template <class tag, class Arg1, class Arg2, class Arg3, class Arg4>
-struct conj_impl<boost::multiprecision::detail::expression<tag, Arg1, Arg2, Arg3, Arg4>, true>
-{
-   EIGEN_DEVICE_FUNC
-   static inline typename boost::multiprecision::detail::expression<tag, Arg1, Arg2, Arg3, Arg4>::result_type run(const typename boost::multiprecision::detail::expression<tag, Arg1, Arg2, Arg3, Arg4>& x)
-   {
-      return conj(x);
-   }
-};
-
-} // namespace internal
+namespace numext {
+   using boost::multiprecision::conj;
+}
 
 } // namespace Eigen
 

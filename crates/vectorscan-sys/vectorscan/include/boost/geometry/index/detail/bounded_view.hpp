@@ -71,7 +71,7 @@ public:
     bounded_view_base(Segment const& segment, Strategy const& )
         : m_segment(segment)
     {}
-    
+
     template <std::size_t Dimension>
     inline coordinate_type get_min() const
     {

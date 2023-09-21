@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2018-2020.
 // Modifications copyright (c) 2018-2020 Oracle and/or its affiliates.
@@ -18,20 +19,18 @@
 #ifndef BOOST_GEOMETRY_STRATEGIES_AGNOSTIC_POINT_IN_BOX_BY_SIDE_HPP
 #define BOOST_GEOMETRY_STRATEGIES_AGNOSTIC_POINT_IN_BOX_BY_SIDE_HPP
 
-#include <boost/array.hpp>
+#include <array>
+
 #include <boost/core/ignore_unused.hpp>
 
+#include <boost/geometry/algorithms/assign.hpp>
 #include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/coordinate_dimension.hpp>
-
-#include <boost/geometry/algorithms/assign.hpp>
-
-#include <boost/geometry/strategies/side.hpp>
-
 #include <boost/geometry/strategies/covered_by.hpp>
-#include <boost/geometry/strategies/within.hpp>
 #include <boost/geometry/strategies/geographic/side.hpp>
+#include <boost/geometry/strategies/side.hpp>
 #include <boost/geometry/strategies/spherical/ssf.hpp>
+#include <boost/geometry/strategies/within.hpp>
 
 
 namespace boost { namespace geometry { namespace strategy
@@ -86,7 +85,7 @@ inline bool point_in_box_by_side(Point const& point, Box const& box,
     // Create (counterclockwise) array of points, the fifth one closes it
     // Every point should be on the LEFT side (=1), or ON the border (=0),
     // So >= 1 or >= 0
-    boost::array<typename point_type<Box>::type, 5> bp;
+    std::array<typename point_type<Box>::type, 5> bp;
     geometry::detail::assign_box_corners_oriented<true>(box, bp);
     bp[4] = bp[0];
 

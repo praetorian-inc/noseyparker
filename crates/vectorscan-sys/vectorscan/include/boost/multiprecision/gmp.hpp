@@ -18,10 +18,12 @@
 #include <boost/multiprecision/detail/no_exceptions_support.hpp>
 #include <boost/multiprecision/detail/assert.hpp>
 #include <boost/multiprecision/detail/fpclassify.hpp>
+#include <boost/multiprecision/detail/string_helpers.hpp>
 #include <algorithm>
 #include <cctype>
 #include <cfloat>
 #include <climits>
+#include <clocale>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -353,6 +355,33 @@ struct gmp_float_imp
       }
       if (s && (*s == '+'))
          ++s;  // Leading "+" sign not supported by mpf_set_str:
+      //
+      // Validate the string as mpf_set_str does a poor job of this:
+      //
+      static const char* digits = "0123456789";
+      const char* p = s;
+      if (*s == '-')
+         ++s;
+      s += boost::multiprecision::detail::find_first_not_of(s, s + std::strlen(s), digits);
+      std::lconv const* l = std::localeconv();
+      std::size_t len = strlen(l->decimal_point);
+      if (std::find(l->decimal_point, l->decimal_point + len, *s) != l->decimal_point + len)
+      {
+         ++s;
+         s += boost::multiprecision::detail::find_first_not_of(s, s + std::strlen(s), digits);
+      }
+      if ((*s == 'e') || (*s == 'E'))
+      {
+         ++s;
+         if ((*s == '+') || (*s == '-'))
+            ++s;
+         s += boost::multiprecision::detail::find_first_not_of(s, s + std::strlen(s), digits);
+      }
+      if(*s)
+         BOOST_MP_THROW_EXCEPTION(std::runtime_error(std::string("The string \"") + s + std::string("\"could not be interpreted as a valid floating point number.")));
+
+      s = p;
+
       if (0 != mpf_set_str(m_data, s, 10))
          BOOST_MP_THROW_EXCEPTION(std::runtime_error(std::string("The string \"") + s + std::string("\"could not be interpreted as a valid floating point number.")));
       return *this;
@@ -575,9 +604,6 @@ public:
 };
 
 } // namespace detail
-
-struct gmp_int;
-struct gmp_rational;
 
 template <unsigned digits10>
 struct gmp_float : public detail::gmp_float_imp<digits10>
@@ -3268,10 +3294,6 @@ inline gmp_int& gmp_int::operator=(const gmp_rational& o)
 
 } //namespace backends
 
-using boost::multiprecision::backends::gmp_float;
-using boost::multiprecision::backends::gmp_int;
-using boost::multiprecision::backends::gmp_rational;
-
 template <expression_template_option ExpressionTemplates>
 struct component_type<number<gmp_rational, ExpressionTemplates> >
 {
@@ -3364,14 +3386,6 @@ template <>
 struct is_variable_precision<backends::gmp_float<0> > : public std::integral_constant<bool, true>
 {};
 } // namespace detail
-
-using mpf_float_50 = number<gmp_float<50> >;
-using mpf_float_100 = number<gmp_float<100> >;
-using mpf_float_500 = number<gmp_float<500> >;
-using mpf_float_1000 = number<gmp_float<1000> >;
-using mpf_float = number<gmp_float<0> >;
-using mpz_int = number<gmp_int>;
-using mpq_rational = number<gmp_rational>;
 
 } // namespace multiprecision
 

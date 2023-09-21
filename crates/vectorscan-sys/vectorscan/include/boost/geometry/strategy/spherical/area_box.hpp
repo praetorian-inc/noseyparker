@@ -73,7 +73,7 @@ public:
                         RadiusOrSphere
                     >::apply(radius_or_sphere))
     {}
-    
+
     template <typename Box>
     inline auto apply(Box const& box) const
     {

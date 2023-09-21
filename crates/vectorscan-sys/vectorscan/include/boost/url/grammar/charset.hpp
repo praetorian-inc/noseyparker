@@ -12,7 +12,6 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/grammar/detail/charset.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 #include <type_traits>
@@ -52,7 +51,7 @@ template<class T, class = void>
 struct is_charset : std::false_type {};
 
 template<class T>
-struct is_charset<T, boost::void_t<
+struct is_charset<T, void_t<
     decltype(
     std::declval<bool&>() =
         std::declval<T const&>().operator()(

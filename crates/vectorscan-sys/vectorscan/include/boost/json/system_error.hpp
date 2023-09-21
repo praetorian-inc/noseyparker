@@ -18,7 +18,8 @@
 #include <boost/system/result.hpp>
 #include <boost/system/system_error.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /// The type of error code used by the library.
 using error_code = boost::system::error_code;
@@ -218,6 +219,7 @@ result_from_errno(int e, boost::source_location const* loc) noexcept
     return {system::in_place_error, ec};
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

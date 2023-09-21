@@ -157,7 +157,7 @@ private:
 
     private:
         MultiPolygon const& m_multipolygon;
-        OutputIterator& m_oit;        
+        OutputIterator& m_oit;
         Strategy const& m_strategy;
     };
 

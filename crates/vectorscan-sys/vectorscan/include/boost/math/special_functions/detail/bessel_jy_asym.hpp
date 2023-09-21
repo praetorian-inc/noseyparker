@@ -155,7 +155,7 @@ inline bool asymptotic_bessel_large_x_limit(const T& v, const T& x)
 }
 
 template <class T, class Policy>
-void temme_asyptotic_y_small_x(T v, T x, T* Y, T* Y1, const Policy& pol)
+void temme_asymptotic_y_small_x(T v, T x, T* Y, T* Y1, const Policy& pol)
 {
    T c = 1;
    T p = (v / boost::math::sin_pi(v, pol)) * pow(x / 2, -v) / boost::math::tgamma(1 - v, pol);
@@ -175,7 +175,7 @@ void temme_asyptotic_y_small_x(T v, T x, T* Y, T* Y1, const Policy& pol)
       p /= k - v;
       q /= k + v;
       c *= c_mult / k;
-      T c1 = pow(-x * x / 4, k) / factorial<T>(k, pol);
+      T c1 = pow(-x * x / 4, T(k)) / factorial<T>(k, pol);
       g = f + g_prefix * q;
       h = -k * g + p;
       y += c * g;

@@ -31,7 +31,7 @@ struct interior_iterator
 {
     typedef typename boost::range_iterator
         <
-            typename geometry::interior_type<Geometry>::type        
+            typename geometry::interior_type<Geometry>::type
         >::type type;
 };
 

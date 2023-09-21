@@ -18,7 +18,6 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/extended_type_info.hpp>
 #include <vector>
 
 namespace boost{

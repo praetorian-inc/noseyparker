@@ -97,7 +97,7 @@ namespace projections
             inline void setup_putp3(Parameters& par, par_putp3<T>& proj_parm)
             {
                 proj_parm.A = 4. * RPISQ;
-                
+
                 par.es = 0.;
             }
 
@@ -106,7 +106,7 @@ namespace projections
             inline void setup_putp3p(Parameters& par, par_putp3<T>& proj_parm)
             {
                 proj_parm.A = 2. * RPISQ;
-                
+
                 par.es = 0.;
             }
 

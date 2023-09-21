@@ -22,7 +22,7 @@ namespace boost { namespace geometry
 {
 
 namespace strategies { namespace distance
-{  
+{
 
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail

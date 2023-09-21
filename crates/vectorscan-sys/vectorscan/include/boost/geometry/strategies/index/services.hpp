@@ -17,7 +17,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace strategies { namespace index { namespace services
 {
 

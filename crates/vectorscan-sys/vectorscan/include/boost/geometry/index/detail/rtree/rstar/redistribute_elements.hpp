@@ -132,7 +132,7 @@ struct choose_split_axis_and_index_for_corner
 
         // copy elements
         Elements elements_copy(elements);                                                                       // MAY THROW, STRONG (alloc, copy)
-        
+
         size_t const index_first = parameters.get_min_elements();
         size_t const index_last = parameters.get_max_elements() - parameters.get_min_elements() + 2;
 
@@ -167,7 +167,7 @@ struct choose_split_axis_and_index_for_corner
                                                 translator, strategy);
             Box box2 = rtree::elements_box<Box>(elements_copy.begin() + i, elements_copy.end(),
                                                 translator, strategy);
-            
+
             sum_of_margins += index::detail::comparable_margin(box1) + index::detail::comparable_margin(box2);
 
             content_type ovl = index::detail::intersection_content(box1, box2, strategy);
@@ -427,7 +427,7 @@ struct redistribute_elements<MembersHolder, rstar_tag>
     {
         typedef typename rtree::elements_type<Node>::type elements_type;
         typedef typename elements_type::value_type element_type;
-        
+
         elements_type & elements1 = rtree::elements(n);
         elements_type & elements2 = rtree::elements(second_node);
 

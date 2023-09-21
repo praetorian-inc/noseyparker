@@ -26,6 +26,7 @@
 
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/assert.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/utility/addressof.hpp>
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/detail/type_traits.hpp>

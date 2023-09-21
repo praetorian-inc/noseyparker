@@ -204,7 +204,7 @@ namespace projections
             inline void s_forward(T const& lp_lon, T lp_lat, T& xy_x, T& xy_y, Par const& /*par*/, ProjParm const& proj_parm)
             {
                 static const T half_pi = detail::half_pi<T>();
-                    
+
                 T coslam, cosphi, sinphi;
 
                 sinphi = sin(lp_lat);
@@ -248,7 +248,7 @@ namespace projections
             {
                 static const T pi = detail::pi<T>();
                 static const T half_pi = detail::half_pi<T>();
-                    
+
                 T cosc, c_rh, sinc;
 
                 if ((c_rh = boost::math::hypot(xy_x, xy_y)) > pi) {

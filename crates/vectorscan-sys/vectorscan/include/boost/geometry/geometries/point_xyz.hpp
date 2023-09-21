@@ -70,7 +70,7 @@ public:
     /// Set y-value
     void y(CoordinateType const& v)
     { this->template set<1>(v); }
-    
+
     /// Set z-value
     void z(CoordinateType const& v)
     { this->template set<2>(v); }

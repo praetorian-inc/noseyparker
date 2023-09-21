@@ -1,7 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2015-2020, Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2015-2023, Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -13,12 +14,11 @@
 #ifndef BOOST_GEOMETRY_STRATEGY_SPHERICAL_ENVELOPE_MULTIPOINT_HPP
 #define BOOST_GEOMETRY_STRATEGY_SPHERICAL_ENVELOPE_MULTIPOINT_HPP
 
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
-#include <boost/algorithm/minmax_element.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/empty.hpp>
 #include <boost/range/end.hpp>
@@ -42,6 +42,7 @@
 #include <boost/geometry/algorithms/detail/expand/point.hpp>
 
 #include <boost/geometry/strategy/cartesian/envelope_point.hpp>
+#include <boost/geometry/strategy/cartesian/expand_point.hpp>
 #include <boost/geometry/strategies/normalize.hpp>
 #include <boost/geometry/strategy/spherical/envelope_box.hpp>
 #include <boost/geometry/strategy/spherical/envelope_point.hpp>
@@ -62,8 +63,7 @@ private:
         template <typename Point>
         inline bool operator()(Point const& point1, Point const& point2) const
         {
-            return math::smaller(geometry::get<Dim>(point1),
-                                 geometry::get<Dim>(point2));
+            return math::smaller(geometry::get<Dim>(point1), geometry::get<Dim>(point2));
         }
     };
 
@@ -73,12 +73,6 @@ private:
                                                  bool& has_north_pole,
                                                  OutputIterator oit)
     {
-        typedef typename boost::range_value<MultiPoint>::type point_type;
-        typedef typename boost::range_iterator
-            <
-                MultiPoint const
-            >::type iterator_type;
-
         // analyze point coordinates:
         // (1) normalize point coordinates
         // (2) check if any point is the north or the south pole
@@ -89,20 +83,16 @@ private:
         has_south_pole = false;
         has_north_pole = false;
 
-        for (iterator_type it = boost::begin(multipoint);
-             it != boost::end(multipoint);
-             ++it)
+        for (auto it = boost::begin(multipoint); it != boost::end(multipoint); ++it)
         {
-            point_type point;
+            typename boost::range_value<MultiPoint>::type point;
             normalize::spherical_point::apply(*it, point);
 
-            if (math::equals(geometry::get<1>(point),
-                             Constants::min_latitude()))
+            if (math::equals(geometry::get<1>(point), Constants::min_latitude()))
             {
                 has_south_pole = true;
             }
-            else if (math::equals(geometry::get<1>(point),
-                                  Constants::max_latitude()))
+            else if (math::equals(geometry::get<1>(point), Constants::max_latitude()))
             {
                 has_north_pole = true;
             }
@@ -118,12 +108,8 @@ private:
                                     Value& max_gap_left,
                                     Value& max_gap_right)
     {
-        typedef typename boost::range_iterator
-            <
-                SortedRange const
-            >::type iterator_type;
-
-        iterator_type it1 = boost::begin(sorted_range), it2 = it1;
+        auto it1 = boost::begin(sorted_range);
+        auto it2 = it1;
         ++it2;
         max_gap_left = geometry::get<0>(*it1);
         max_gap_right = geometry::get<0>(*it2);
@@ -155,16 +141,9 @@ private:
                                               CoordinateType& lon_min,
                                               CoordinateType& lon_max)
     {
-        typedef typename boost::range_iterator
-            <
-                PointRange const
-            >::type iterator_type;
-
         // compute min and max longitude values
-        std::pair<iterator_type, iterator_type> min_max_longitudes
-            = boost::minmax_element(boost::begin(range),
-                                    boost::end(range),
-                                    lon_less);
+        auto const min_max_longitudes
+            = std::minmax_element(boost::begin(range), boost::end(range), lon_less);
 
         lon_min = geometry::get<0>(*min_max_longitudes.first);
         lon_max = geometry::get<0>(*min_max_longitudes.second);
@@ -212,20 +191,16 @@ private:
         else if (has_south_pole)
         {
             lat_min = Constants::min_latitude();
-            lat_max
-                = geometry::get<1>(*std::max_element(first, last, lat_less));
+            lat_max = geometry::get<1>(*std::max_element(first, last, lat_less));
         }
         else if (has_north_pole)
         {
-            lat_min
-                = geometry::get<1>(*std::min_element(first, last, lat_less));
+            lat_min = geometry::get<1>(*std::min_element(first, last, lat_less));
             lat_max = Constants::max_latitude();
         }
         else
         {
-            std::pair<Iterator, Iterator> min_max_latitudes
-                = boost::minmax_element(first, last, lat_less);
-
+            auto const min_max_latitudes = std::minmax_element(first, last, lat_less);
             lat_min = geometry::get<1>(*min_max_latitudes.first);
             lat_max = geometry::get<1>(*min_max_latitudes.second);
         }
@@ -237,11 +212,6 @@ public:
     {
         typedef typename point_type<MultiPoint>::type point_type;
         typedef typename coordinate_type<MultiPoint>::type coordinate_type;
-        typedef typename boost::range_iterator
-            <
-                MultiPoint const
-            >::type iterator_type;
-
         typedef math::detail::constants_on_spheroid
             <
                 coordinate_type,
@@ -332,7 +302,7 @@ public:
         geometry::detail::envelope::envelope_indexed_box_on_spheroid<max_corner, 2>::apply(helper_mbr, mbr);
 
         // compute envelope for higher coordinates
-        iterator_type it = boost::begin(multipoint);
+        auto it = boost::begin(multipoint);
         geometry::detail::envelope::envelope_one_point<2, dimension<Box>::value>::apply(*it, mbr);
 
         for (++it; it != boost::end(multipoint); ++it)

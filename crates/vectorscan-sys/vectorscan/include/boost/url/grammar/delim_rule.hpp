@@ -11,7 +11,7 @@
 #define BOOST_URL_GRAMMAR_DELIM_RULE_HPP
 
 #include <boost/url/detail/config.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/charset.hpp>
 #include <boost/url/grammar/error.hpp>
 #include <boost/url/grammar/type_traits.hpp>
@@ -26,20 +26,20 @@ namespace grammar {
     This matches the specified character.
     The value is a reference to the character
     in the underlying buffer, expressed as a
-    @ref string_view. The function @ref squelch
+    `core::string_view`. The function @ref squelch
     may be used to turn this into `void` instead.
     If there is no more input, the error code
     @ref error::need_more is returned.
 
     @par Value Type
     @code
-    using value_type = string_view;
+    using value_type = core::string_view;
     @endcode
 
     @par Example
     Rules are used with the function @ref parse.
     @code
-    result< string_view > rv = parse( ".", delim_rule('.') );
+    system::result< core::string_view > rv = parse( ".", delim_rule('.') );
     @endcode
 
     @par BNF
@@ -60,7 +60,7 @@ delim_rule( char ch ) noexcept;
 #else
 struct ch_delim_rule
 {
-    using value_type = string_view;
+    using value_type = core::string_view;
 
     constexpr
     ch_delim_rule(char ch) noexcept
@@ -69,7 +69,7 @@ struct ch_delim_rule
     }
 
     BOOST_URL_DECL
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const noexcept;
@@ -94,20 +94,20 @@ delim_rule( char ch ) noexcept
     belongs to the specified character set.
     The value is a reference to the character
     in the underlying buffer, expressed as a
-    @ref string_view. The function @ref squelch
+    `core::string_view`. The function @ref squelch
     may be used to turn this into `void` instead.
     If there is no more input, the error code
     @ref error::need_more is returned.
 
     @par Value Type
     @code
-    using value_type = string_view;
+    using value_type = core::string_view;
     @endcode
 
     @par Example
     Rules are used with the function @ref parse.
     @code
-    result< string_view > rv = parse( "X", delim_rule( alpha_chars ) );
+    system::result< core::string_view > rv = parse( "X", delim_rule( alpha_chars ) );
     @endcode
 
     @param cs The character set to use.
@@ -126,7 +126,7 @@ delim_rule( CharSet const& cs ) noexcept;
 template<class CharSet>
 struct cs_delim_rule
 {
-    using value_type = string_view;
+    using value_type = core::string_view;
 
     constexpr
     cs_delim_rule(
@@ -135,7 +135,7 @@ struct cs_delim_rule
     {
     }
 
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const noexcept
@@ -152,7 +152,7 @@ struct cs_delim_rule
             BOOST_URL_RETURN_EC(
                 error::mismatch);
         }
-        return string_view{
+        return core::string_view{
             it++, 1 };
     }
 

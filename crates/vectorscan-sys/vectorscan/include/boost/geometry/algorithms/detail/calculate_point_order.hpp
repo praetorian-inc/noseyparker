@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2019-2021, Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2019-2021, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -36,7 +37,7 @@ struct clean_point
         , m_is_azi_valid(false), m_is_azi_diff_valid(false)
     {}
 
-    typename boost::iterators::iterator_reference<Iter>::type ref() const
+    decltype(auto) ref() const
     {
         return *m_iter;
     }
@@ -108,8 +109,6 @@ struct calculate_point_order_by_azimuth
         typedef typename boost::range_iterator<Ring const>::type iter_t;
         typedef typename Strategy::template result_type<Ring>::type calc_t;
         typedef clean_point<iter_t, calc_t> clean_point_t;
-        typedef std::vector<clean_point_t> cleaned_container_t;
-        typedef typename cleaned_container_t::iterator cleaned_iter_t;
 
         calc_t const zero = 0;
         calc_t const pi = math::pi<calc_t>();
@@ -121,21 +120,21 @@ struct calculate_point_order_by_azimuth
         }
 
         // non-duplicated, non-spike points
-        cleaned_container_t cleaned;
+        std::vector<clean_point_t> cleaned;
         cleaned.reserve(count);
 
         for (iter_t it = boost::begin(ring); it != boost::end(ring); ++it)
         {
             // Add point
             cleaned.push_back(clean_point_t(it));
-            
+
             while (cleaned.size() >= 3)
             {
-                cleaned_iter_t it0 = cleaned.end() - 3;
-                cleaned_iter_t it1 = cleaned.end() - 2;
-                cleaned_iter_t it2 = cleaned.end() - 1;
+                auto it0 = cleaned.end() - 3;
+                auto it1 = cleaned.end() - 2;
+                auto it2 = cleaned.end() - 1;
 
-                calc_t diff;                
+                calc_t diff;
                 if (get_or_calculate_azimuths_difference(*it0, *it1, *it2, diff, strategy)
                     && ! math::equals(math::abs(diff), pi))
                 {
@@ -148,7 +147,7 @@ struct calculate_point_order_by_azimuth
                     // TODO: angles have to be invalidated only if spike is detected
                     // for duplicates it'd be ok to leave them
                     it0->set_azimuth_invalid();
-                    it0->set_azimuth_difference_invalid();                    
+                    it0->set_azimuth_difference_invalid();
                     it2->set_azimuth_difference_invalid();
                     cleaned.erase(it1);
                 }
@@ -156,8 +155,8 @@ struct calculate_point_order_by_azimuth
         }
 
         // filter-out duplicates and spikes at the front and back of cleaned
-        cleaned_iter_t cleaned_b = cleaned.begin();
-        cleaned_iter_t cleaned_e = cleaned.end();
+        auto cleaned_b = cleaned.begin();
+        auto cleaned_e = cleaned.end();
         std::size_t cleaned_count = cleaned.size();
         bool found = false;
         do
@@ -165,10 +164,10 @@ struct calculate_point_order_by_azimuth
             found = false;
             while(cleaned_count >= 3)
             {
-                cleaned_iter_t it0 = cleaned_e - 2;
-                cleaned_iter_t it1 = cleaned_e - 1;
-                cleaned_iter_t it2 = cleaned_b;
-                cleaned_iter_t it3 = cleaned_b + 1;
+                auto it0 = cleaned_e - 2;
+                auto it1 = cleaned_e - 1;
+                auto it2 = cleaned_b;
+                auto it3 = cleaned_b + 1;
 
                 calc_t diff = 0;
                 if (! get_or_calculate_azimuths_difference(*it0, *it1, *it2, diff, strategy)
@@ -212,10 +211,10 @@ struct calculate_point_order_by_azimuth
 
         // calculate the sum of external angles
         calc_t angles_sum = zero;
-        for (cleaned_iter_t it = cleaned_b; it != cleaned_e; ++it)
+        for (auto it = cleaned_b; it != cleaned_e; ++it)
         {
-            cleaned_iter_t it0 = (it == cleaned_b ? cleaned_e - 1 : it - 1);
-            cleaned_iter_t it2 = (it == cleaned_e - 1 ? cleaned_b : it + 1);
+            auto it0 = (it == cleaned_b ? cleaned_e - 1 : it - 1);
+            auto it2 = (it == cleaned_e - 1 ? cleaned_b : it + 1);
 
             calc_t diff = 0;
             get_or_calculate_azimuths_difference(*it0, *it, *it2, diff, strategy);
@@ -269,7 +268,7 @@ private:
             razi = p0.reverse_azimuth();
             return true;
         }
-        
+
         if (strategy.apply(p0.ref(), p1.ref(), azi, razi))
         {
             p0.set_azimuths(azi, razi);
@@ -336,7 +335,7 @@ namespace detail
 template <typename Ring, typename Strategy>
 inline geometry::order_selector calculate_point_order(Ring const& ring, Strategy const& strategy)
 {
-    concepts::check<Ring>();
+    concepts::check<Ring const>();
 
     return dispatch::calculate_point_order<Strategy>::apply(ring, strategy);
 }
@@ -349,7 +348,7 @@ inline geometry::order_selector calculate_point_order(Ring const& ring)
             typename geometry::cs_tag<Ring>::type
         >::type strategy_type;
 
-    concepts::check<Ring>();
+    concepts::check<Ring const>();
 
     return dispatch::calculate_point_order<strategy_type>::apply(ring, strategy_type());
 }

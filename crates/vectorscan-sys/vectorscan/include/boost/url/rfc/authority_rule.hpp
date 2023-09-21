@@ -27,7 +27,7 @@ namespace urls {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< authority_view > rv = grammar::parse( "user:pass@example.com:8080", authority_rule );
+    system::result< authority_view > rv = grammar::parse( "user:pass@example.com:8080", authority_rule );
     @endcode
 
     @par BNF
@@ -57,7 +57,7 @@ struct authority_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr authority_rule_t authority_rule{};

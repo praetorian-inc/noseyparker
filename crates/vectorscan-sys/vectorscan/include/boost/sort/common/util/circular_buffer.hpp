@@ -13,6 +13,7 @@
 #ifndef __BOOST_SORT_COMMON_UTIL_CIRCULAR_BUFFER_HPP
 #define __BOOST_SORT_COMMON_UTIL_CIRCULAR_BUFFER_HPP
 
+#include <ciso646>
 #include <memory>
 #include <cassert>
 #include <exception>
@@ -70,7 +71,7 @@ struct circular_buffer
     circular_buffer(void)
     : ptr(nullptr), nelem(0), first_pos(0), initialized(false)
     {
-        ptr = std::get_temporary_buffer < Value_t > (NMAX).first;
+        ptr = static_cast <Value_t*> (std::malloc (NMAX * sizeof(Value_t)));
         if (ptr == nullptr) throw std::bad_alloc();
     };
     //
@@ -84,7 +85,7 @@ struct circular_buffer
         {   for (size_t i = 0; i < NMAX; ++i) (ptr + i)->~Value_t();
             initialized = false;
         };
-        std::return_temporary_buffer(ptr);
+        std::free(static_cast <void*> (ptr));
     }
     ;
     //

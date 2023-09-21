@@ -14,8 +14,8 @@
 #endif
 
 #include <boost/config.hpp> /* keep it first to prevent nasty warns in MSVC */
+#include <boost/container_hash/hash_fwd.hpp>
 #include <boost/core/enable_if.hpp>
-#include <boost/functional/hash_fwd.hpp>
 #include <boost/multi_index/detail/access_specifier.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>

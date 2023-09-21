@@ -9,10 +9,10 @@
 #include "char_traits.hpp"
 #include "consts.hpp"
 #include "internals.hpp"
-#include <iostream>
 #include "runtime_error.hpp"
 #include "size_t.hpp"
 #include "state_machine.hpp"
+#include <iosfwd>
 #include <vector>
 
 namespace boost

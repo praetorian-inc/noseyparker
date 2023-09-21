@@ -69,7 +69,11 @@ void shell::parse_()
 {
     argv_ = ::CommandLineToArgvW(input_.c_str(), &argc_);
     if (argv_ == nullptr)
-        detail::throw_last_error();
+    {
+        error_code ec;
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+        throw system_error(ec, "shell::parse");
+    }
 }
 
 shell::~shell()
@@ -96,21 +100,23 @@ void shell::parse_()
     {
         argc_ = static_cast<int>(we.we_wordc);
         argv_ = we.we_wordv;
-        reserved_ = static_cast<int>(we.we_offs); 
     }
+
+    free_argv_ = +[](int argc, char ** argv)
+    {
+        wordexp_t we{
+                .we_wordc = static_cast<std::size_t>(argc),
+                .we_wordv = argv,
+                .we_offs = 0
+        };
+        wordfree(&we);
+    };
 }
 
 shell::~shell()
 {
-    if (argv_ != nullptr)
-    {
-        wordexp_t we{
-            .we_wordc = static_cast<std::size_t>(argc_),
-            .we_wordv = argv_,
-            .we_offs = static_cast<std::size_t>(reserved_)
-        };
-        wordfree(&we);
-    }
+    if (argv_ != nullptr && free_argv_ != nullptr)
+        free_argv_(argc_, argv_);
 }
 
 auto shell::args() const -> args_type

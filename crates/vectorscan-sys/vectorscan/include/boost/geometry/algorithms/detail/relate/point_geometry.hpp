@@ -169,7 +169,7 @@ struct geometry_point
 //            //}
 //            return result("F0FFFF**T");
 //        }
-//        else 
+//        else
 //        {
 //            /*if ( box_has_interior<Box>::apply(box) )
 //            {
@@ -195,7 +195,7 @@ struct geometry_point
 //            return result("0FTFFTFFT");
 //        else if ( geometry::covered_by(point, box) )
 //            return result("FF*0F*FFT");
-//        else 
+//        else
 //            return result("FF*FFT0FT");
 //    }
 //};

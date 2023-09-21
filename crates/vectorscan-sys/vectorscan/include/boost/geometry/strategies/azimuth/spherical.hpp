@@ -30,7 +30,7 @@ class spherical : strategies::detail::spherical_base<void>
     using base_t = strategies::detail::spherical_base<void>;
 
 public:
-    
+
     static auto azimuth()
     {
         return strategy::azimuth::spherical<CalculationType>();

@@ -13,7 +13,8 @@
 #include <boost/json/detail/handler.hpp>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 template<class... Args>
@@ -197,6 +198,7 @@ on_comment(
 }
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

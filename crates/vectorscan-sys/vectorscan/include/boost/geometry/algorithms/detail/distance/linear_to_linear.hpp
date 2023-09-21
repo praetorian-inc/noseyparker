@@ -102,7 +102,7 @@ template <typename Linear1, typename Linear2, typename Strategy, typename Strate
 struct distance
     <
         Linear1, Linear2, Strategy,
-        linear_tag, linear_tag, 
+        linear_tag, linear_tag,
         StrategyTag, false
     > : detail::distance::linear_to_linear
         <

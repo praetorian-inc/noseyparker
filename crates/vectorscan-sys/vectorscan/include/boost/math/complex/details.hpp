@@ -16,7 +16,6 @@
 #include <limits>
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/math/special_functions/sign.hpp>
 #include <boost/math/constants/constants.hpp>
 
 namespace boost{ namespace math{ namespace detail{

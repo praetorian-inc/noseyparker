@@ -106,7 +106,7 @@ struct basic_cstring_ref
     BOOST_CXX14_CONSTEXPR const_reference at(size_type pos) const
     {
         if (pos >= size())
-            throw std::out_of_range("cstring-view out of range");
+            throw_exception(std::out_of_range("cstring-view out of range"));
         return view_[pos];
     }
     BOOST_CONSTEXPR const_reference front() const  {return *view_;}

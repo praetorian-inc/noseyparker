@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <string_view>
 #include <iomanip>
+#include <optional>
 
 #if defined(ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
@@ -51,6 +52,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_category.hpp>
 #include <boost/system/system_error.hpp>
+#include <boost/optional.hpp>
 
 #if defined(BOOST_WINDOWS_API)
 #define BOOST_PROCESS_V2_WINDOWS 1
@@ -72,11 +74,9 @@
 
 #if defined(BOOST_PROCESS_USE_STD_FS)
 #include <filesystem>
-#include <optional>
 #else
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/optional.hpp>
 #endif
 
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { namespace v2 {
@@ -97,6 +97,14 @@ namespace filesystem = std::filesystem;
 using std::quoted;
 using std::optional;
 
+#define BOOST_PROCESS_V2_RETURN_EC(ev)                                                                  \
+  return ::BOOST_PROCESS_V2_NAMESPACE::error_code(ev, ::BOOST_PROCESS_V2_NAMESPACE::system_category()); \
+
+#define BOOST_PROCESS_V2_ASSIGN_EC(ec, ...) ec.assign(__VA_ARGS__);
+#define BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)                         \
+  ec.assign(::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error());   \
+
+
 #else
 
 using boost::system::error_code ;
@@ -111,6 +119,25 @@ namespace filesystem = std::filesystem;
 #else
 namespace filesystem = boost::filesystem;
 #endif
+
+#define BOOST_PROCESS_V2_RETURN_EC(ev)                                                                     \
+{                                                                                                          \
+  static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));                                           \
+  return ::BOOST_PROCESS_V2_NAMESPACE::error_code(ev, ::BOOST_PROCESS_V2_NAMESPACE::system_category(), &loc##__LINE__);   \
+}
+
+#define BOOST_PROCESS_V2_ASSIGN_EC(ec, ...)                       \
+{                                                                 \
+  static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));  \
+  ec.assign(__VA_ARGS__,  &loc##__LINE__);                        \
+}
+
+#define BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)                                         \
+{                                                                                      \
+  static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));                       \
+  ec.assign(::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error(), &loc##__LINE__);   \
+}
+
 
 #endif
 
@@ -149,7 +176,5 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #else
 #define BOOST_PROCESS_V2_HAS_PROCESS_HANDLE 1
 #endif
-
-
 
 #endif //BOOST_PROCESS_V2_DETAIL_CONFIG_HPP

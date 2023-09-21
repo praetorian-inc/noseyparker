@@ -202,7 +202,7 @@
    limitations under the License.
 
 
-This product bundles Boost 1.81.0, which is available under the Boost Software
+This product bundles Boost 1.83.0, which is available under the Boost Software
 License Version 1.0. For details, see `vectorscan-sys/vectorscan/include/boost`.
 
 This product bundles Vectorscan 5.4.8, which is available under a "3-clause

@@ -20,13 +20,15 @@
 # include <optional>
 #endif
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 namespace detail {
 
-template <class T>
+template< class Ctx, class T >
 struct append_tuple_element {
     array& arr;
+    Ctx const& ctx;
     T&& t;
 
     template<std::size_t I>
@@ -35,44 +37,52 @@ struct append_tuple_element {
     {
         using std::get;
         arr.emplace_back(value_from(
-            get<I>(std::forward<T>(t)), arr.storage()));
+            get<I>(std::forward<T>(t)), ctx, arr.storage() ));
     }
 };
 
 //----------------------------------------------------------
 // User-provided conversion
 
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    user_conversion_tag)
+value_from_impl( user_conversion_tag, value& jv, T&& from, Ctx const& )
 {
-    tag_invoke(value_from_tag(), jv, std::forward<T>(from));
+    tag_invoke( value_from_tag(), jv, static_cast<T&&>(from) );
 }
 
+template< class T, class Ctx >
+void
+value_from_impl( context_conversion_tag, value& jv, T&& from, Ctx const& ctx)
+{
+    using Sup = supported_context<Ctx, T, value_from_conversion>;
+    tag_invoke( value_from_tag(), jv, static_cast<T&&>(from), Sup::get(ctx) );
+}
+
+template< class T, class Ctx >
+void
+value_from_impl(
+    full_context_conversion_tag, value& jv, T&& from, Ctx const& ctx)
+{
+    using Sup = supported_context<Ctx, T, value_from_conversion>;
+    tag_invoke(
+        value_from_tag(), jv, static_cast<T&&>(from), Sup::get(ctx), ctx );
+}
 
 //----------------------------------------------------------
 // Native conversion
 
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    native_conversion_tag)
+value_from_impl( native_conversion_tag, value& jv, T&& from, Ctx const& )
 {
     jv = std::forward<T>(from);
 }
 
 // null-like types
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&&,
-    null_like_conversion_tag)
+value_from_impl( null_like_conversion_tag, value& jv, T&&, Ctx const& )
 {
     // do nothing
     BOOST_ASSERT(jv.is_null());
@@ -80,73 +90,62 @@ value_from_helper(
 }
 
 // string-like types
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    string_like_conversion_tag)
+value_from_impl( string_like_conversion_tag, value& jv, T&& from, Ctx const& )
 {
     auto sv = static_cast<string_view>(from);
     jv.emplace_string().assign(sv);
 }
 
 // map-like types
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    map_like_conversion_tag)
+value_from_impl( map_like_conversion_tag, value& jv, T&& from, Ctx const& ctx )
 {
     using std::get;
     object& obj = jv.emplace_object();
     obj.reserve(detail::try_size(from, size_implementation<T>()));
     for (auto&& elem : from)
-        obj.emplace(get<0>(elem), value_from(
-            get<1>(elem), obj.storage()));
+        obj.emplace(
+            get<0>(elem),
+            value_from( get<1>(elem), ctx, obj.storage() ));
 }
 
 // ranges
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    sequence_conversion_tag)
+value_from_impl( sequence_conversion_tag, value& jv, T&& from, Ctx const& ctx )
 {
     array& result = jv.emplace_array();
     result.reserve(detail::try_size(from, size_implementation<T>()));
+    using ForwardedValue = forwarded_value<T&&>;
     for (auto&& elem : from)
         result.emplace_back(
             value_from(
-                static_cast< forwarded_value<T&&> >(elem),
+                // not a static_cast in order to appease clang < 4.0
+                ForwardedValue(elem),
+                ctx,
                 result.storage() ));
 }
 
 // tuple-like types
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    tuple_conversion_tag)
+value_from_impl( tuple_conversion_tag, value& jv, T&& from, Ctx const& ctx )
 {
     constexpr std::size_t n =
         std::tuple_size<remove_cvref<T>>::value;
     array& arr = jv.emplace_array();
     arr.reserve(n);
     mp11::mp_for_each<mp11::mp_iota_c<n>>(
-        append_tuple_element<T>{arr, std::forward<T>(from)});
+        append_tuple_element< Ctx, T >{ arr, ctx, std::forward<T>(from) });
 }
 
 // no suitable conversion implementation
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value&,
-    T&&,
-    no_conversion_tag)
+value_from_impl( no_conversion_tag, value&, T&&, Ctx const& )
 {
     static_assert(
         !std::is_same<T, T>::value,
@@ -154,26 +153,29 @@ value_from_helper(
 }
 
 #ifndef BOOST_NO_CXX17_HDR_VARIANT
+template< class Ctx >
 struct value_from_visitor
 {
     value& jv;
+    Ctx const& ctx;
 
     template<class T>
     void
     operator()(T&& t)
     {
-        value_from(static_cast<T&&>(t), jv);
+        value_from( static_cast<T&&>(t), ctx, jv );
     }
 };
 #endif // BOOST_NO_CXX17_HDR_VARIANT
 
-template< class T >
+template< class Ctx, class T >
 struct from_described_member
 {
     using Ds = describe::describe_members<
         remove_cvref<T>, describe::mod_public | describe::mod_inherited>;
 
     object& obj;
+    Ctx const& ctx;
     T&& from;
 
     template< class I >
@@ -185,20 +187,20 @@ struct from_described_member
             D::name,
             value_from(
                 static_cast<T&&>(from).* D::pointer,
+                ctx,
                 obj.storage()));
     }
 };
 
 // described classes
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T&& from,
-    described_class_conversion_tag)
+value_from_impl(
+    described_class_conversion_tag, value& jv, T&& from, Ctx const& ctx )
 {
     object& obj = jv.emplace_object();
-    from_described_member<T> member_converter{obj, static_cast<T&&>(from)};
+    from_described_member<Ctx, T> member_converter{
+        obj, ctx, static_cast<T&&>(from)};
 
     using Ds = typename decltype(member_converter)::Ds;
     constexpr std::size_t N = mp11::mp_size<Ds>::value;
@@ -207,12 +209,10 @@ value_from_helper(
 }
 
 // described enums
-template<class T>
+template< class T, class Ctx >
 void
-value_from_helper(
-    value& jv,
-    T from,
-    described_enum_conversion_tag)
+value_from_impl(
+    described_enum_conversion_tag, value& jv, T from, Ctx const& )
 {
     (void)jv;
     (void)from;
@@ -231,31 +231,34 @@ value_from_helper(
 #endif
 }
 
+//----------------------------------------------------------
+// Contextual conversions
+
+template< class Ctx, class T >
+using value_from_category = conversion_category<
+    Ctx, T, value_from_conversion >;
+
 } // detail
 
 #ifndef BOOST_NO_CXX17_HDR_OPTIONAL
-template<class T>
+template< class T, class Ctx >
 void
 tag_invoke(
-    value_from_tag,
-    value& jv,
-    std::optional<T> const& from)
+    value_from_tag, value& jv, std::optional<T> const& from, Ctx const& ctx )
 {
     if( from )
-        value_from(*from, jv);
+        value_from( *from, ctx, jv );
     else
         jv = nullptr;
 }
 
-template<class T>
+template< class T, class Ctx >
 void
 tag_invoke(
-    value_from_tag,
-    value& jv,
-    std::optional<T>&& from)
+    value_from_tag, value& jv, std::optional<T>&& from, Ctx const& ctx )
 {
     if( from )
-        value_from(std::move(*from), jv);
+        value_from( std::move(*from), ctx, jv );
     else
         jv = nullptr;
 }
@@ -275,27 +278,27 @@ tag_invoke(
 
 #ifndef BOOST_NO_CXX17_HDR_VARIANT
 // std::variant
-template<class... Ts>
+template< class Ctx, class... Ts >
 void
 tag_invoke(
-    value_from_tag,
-    value& jv,
-    std::variant<Ts...>&& from)
+    value_from_tag, value& jv, std::variant<Ts...>&& from, Ctx const& ctx )
 {
-    std::visit(detail::value_from_visitor{jv}, std::move(from));
+    std::visit( detail::value_from_visitor<Ctx>{ jv, ctx }, std::move(from) );
 }
 
-template<class... Ts>
+template< class Ctx, class... Ts >
 void
 tag_invoke(
     value_from_tag,
     value& jv,
-    std::variant<Ts...> const& from)
+    std::variant<Ts...> const& from,
+    Ctx const& ctx )
 {
-    std::visit(detail::value_from_visitor{jv}, from);
+    std::visit( detail::value_from_visitor<Ctx>{ jv, ctx }, from );
 }
 #endif // BOOST_NO_CXX17_HDR_VARIANT
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

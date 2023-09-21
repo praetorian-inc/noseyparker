@@ -84,6 +84,7 @@ namespace boost {
          return hypergeometric_pFq<std::initializer_list<R>, Real>(aj, bj, z, p_abs_error);
       }
 
+#ifndef BOOST_NO_EXCEPTIONS
       template <class T>
       struct scoped_precision
       {
@@ -187,7 +188,7 @@ namespace boost {
       {
          return hypergeometric_pFq_precision< std::initializer_list<Real>, Real>(aj, bj, z, digits10, timeout, boost::math::policies::policy<>());
       }
-
+#endif
    }
 } // namespaces
 

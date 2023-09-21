@@ -86,7 +86,7 @@ struct envelope_box_on_spheroid
         // BoxIn can be non-mutable
         typename helper_geometry<BoxIn>::type box_in_normalized;
         geometry::convert(box_in, box_in_normalized);
-        
+
         if (! is_inverse_spheroidal_coordinates(box_in))
         {
             strategy::normalize::spherical_box::apply(box_in, box_in_normalized);

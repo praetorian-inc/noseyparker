@@ -212,7 +212,7 @@ public:
         CT const sign = bet3 >= c0
                       ? c1
                       : cminus1;
-        
+
         CT const dlon_max = omg13 - sign * f * sin_alp0 * I3;
 
         return dlon_max;

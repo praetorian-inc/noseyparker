@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2016 Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2016 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -60,7 +61,7 @@ public:
 
         return apply(lon_a1, lat_a1, lon_a2, lat_a2, lon_b1, lat_b1, lon_b2, lat_b2, lon, lat, spheroid);
     }
-    
+
     template <typename Spheroid>
     static inline bool apply(CT const& lona1, CT const& lata1,
                              CT const& lona2, CT const& lata2,
@@ -80,7 +81,7 @@ public:
             CT xa1, ya1, xa2, ya2;
             CT xb1, yb1, xb2, yb2;
             CT x, y;
-            double lat1, lon1;
+            CT lon1, lat1;
 
             bool ok = gnom_t::forward(lon, lat, lona1, lata1, xa1, ya1, spheroid)
                    && gnom_t::forward(lon, lat, lona2, lata2, xa2, ya2, spheroid)
@@ -93,7 +94,7 @@ public:
             {
                 return false;
             }
-            
+
             if (math::equals(lat1, lat) && math::equals(lon1, lon))
             {
                 break;
@@ -137,7 +138,7 @@ private:
 
         x = get<0>(p) / z;
         y = get<1>(p) / z;
-        
+
         return true;
     }
 };

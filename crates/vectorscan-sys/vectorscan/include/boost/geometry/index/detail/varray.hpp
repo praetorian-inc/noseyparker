@@ -1,7 +1,7 @@
 // Boost.Container varray
 //
 // Copyright (c) 2011-2013 Andrew Hundt.
-// Copyright (c) 2012-2015 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2012-2023 Adam Wulkiewicz, Lodz, Poland.
 //
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020, Oracle and/or its affiliates.
@@ -18,14 +18,10 @@
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/detail/workaround.hpp>
 
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-#include <boost/move/detail/fwd_macros.hpp>
-#endif
-
 #include <boost/concept_check.hpp>
 #include <boost/config.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <boost/swap.hpp>
+#include <boost/core/swap.hpp>
 #include <boost/integer.hpp>
 
 // TODO - use std::reverse_iterator and std::iterator_traits
@@ -49,7 +45,7 @@
 */
 
 namespace boost { namespace geometry { namespace index { namespace detail {
-    
+
 namespace varray_detail {
 
 template <typename Value, std::size_t Capacity>
@@ -58,10 +54,10 @@ struct varray_traits
     typedef Value value_type;
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
-    typedef Value * pointer;
-    typedef const Value * const_pointer;
-    typedef Value & reference;
-    typedef const Value & const_reference;
+    typedef Value* pointer;
+    typedef const Value* const_pointer;
+    typedef Value& reference;
+    typedef const Value& const_reference;
 
     typedef std::false_type use_memop_in_swap_and_move;
     typedef std::false_type use_optimized_swap;
@@ -99,7 +95,7 @@ struct checker
     static inline void check_not_empty(Varray const& v)
     {
         BOOST_GEOMETRY_INDEX_ASSERT(!v.empty(), "the container is empty");
-        
+
         ::boost::ignore_unused(v);
     }
 
@@ -127,12 +123,12 @@ varray is a sequence container like boost::container::vector with contiguous sto
 change in size, along with the static allocation, low overhead, and fixed capacity of boost::array.
 
 A varray is a sequence that supports random access to elements, constant time insertion and
-removal of elements at the end, and linear time insertion and removal of elements at the beginning or 
+removal of elements at the end, and linear time insertion and removal of elements at the beginning or
 in the middle. The number of elements in a varray may vary dynamically up to a fixed capacity
-because elements are stored within the object itself similarly to an array. However, objects are 
+because elements are stored within the object itself similarly to an array. However, objects are
 initialized as they are inserted into varray unlike C arrays or std::array which must construct
 all elements on instantiation. The behavior of varray enables the use of statically allocated
-elements in cases with complex object lifetime requirements that would otherwise not be trivially 
+elements in cases with complex object lifetime requirements that would otherwise not be trivially
 possible.
 
 \par Error Handling
@@ -171,19 +167,6 @@ class varray
 
     template <typename V, std::size_t C>
     friend class varray;
-
-    BOOST_COPYABLE_AND_MOVABLE(varray)
-
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-public:
-    template <std::size_t C>
-    varray & operator=(varray<Value, C> & sv)
-    {
-        typedef varray<Value, C> other;
-        this->operator=(static_cast<const ::boost::rv<other> &>(const_cast<const other &>(sv)));
-        return *this;
-    }
-#endif
 
 public:
     //! @brief The type of elements stored in the container.
@@ -284,7 +267,7 @@ public:
         : m_size(0)
     {
         BOOST_CONCEPT_ASSERT((boost_concepts::ForwardTraversal<Iterator>)); // Make sure you passed a ForwardIterator
-        
+
         this->assign(first, last);                                                    // may throw
     }
 
@@ -323,7 +306,7 @@ public:
         : m_size(other.size())
     {
         errh::check_capacity(*this, other.size());                                  // may throw
-        
+
         namespace sv = varray_detail;
         sv::uninitialized_copy(other.begin(), other.end(), this->begin());          // may throw
     }
@@ -337,7 +320,7 @@ public:
     //!
     //! @par Complexity
     //! Linear O(N).
-    varray & operator=(BOOST_COPY_ASSIGN_REF(varray) other)
+    varray& operator=(varray const& other)
     {
         this->assign(other.begin(), other.end());                                     // may throw
 
@@ -359,7 +342,7 @@ public:
     //! @par Complexity
     //!   Linear O(N).
     template <std::size_t C>
-    varray & operator=(BOOST_COPY_ASSIGN_REF_2_TEMPL_ARGS(varray, value_type, C) other)
+    varray& operator=(varray<value_type, C> const& other)
     {
         this->assign(other.begin(), other.end());                                     // may throw
 
@@ -371,15 +354,15 @@ public:
     //! @param other    The varray which content will be moved to this one.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor throws.
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor throws.
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move is \c false_type - default.
     //! @endinternal
     //!
     //! @par Complexity
     //!   Linear O(N).
-    varray(BOOST_RV_REF(varray) other)
+    varray(varray&& other)
     {
         typedef typename
         vt::use_memop_in_swap_and_move use_memop_in_swap_and_move;
@@ -394,8 +377,8 @@ public:
     //! @param other    The varray which content will be moved to this one.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor throws.
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor throws.
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move is false_type - default.
     //! @endinternal
@@ -406,7 +389,7 @@ public:
     //! @par Complexity
     //!   Linear O(N).
     template <std::size_t C>
-    varray(BOOST_RV_REF_2_TEMPL_ARGS(varray, value_type, C) other)
+    varray(varray<value_type, C>&& other)
         : m_size(other.m_size)
     {
         errh::check_capacity(*this, other.size());                                  // may throw
@@ -422,15 +405,15 @@ public:
     //! @param other    The varray which content will be moved to this one.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor or move assignment throws.
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor or copy assignment throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor or move assignment throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor or copy assignment throws.
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move is \c false_type - default.
     //! @endinternal
     //!
     //! @par Complexity
     //!   Linear O(N).
-    varray & operator=(BOOST_RV_REF(varray) other)
+    varray& operator=(varray&& other)
     {
         if ( &other == this )
             return *this;
@@ -450,8 +433,8 @@ public:
     //! @param other    The varray which content will be moved to this one.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor or move assignment throws.
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor or copy assignment throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor or move assignment throws.
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor or copy assignment throws.
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move is \c false_type - default.
     //! @endinternal
@@ -462,7 +445,7 @@ public:
     //! @par Complexity
     //!   Linear O(N).
     template <std::size_t C>
-    varray & operator=(BOOST_RV_REF_2_TEMPL_ARGS(varray, value_type, C) other)
+    varray& operator=(varray<value_type, C>&& other)
     {
         errh::check_capacity(*this, other.size());                                  // may throw
 
@@ -492,15 +475,15 @@ public:
     //! @param other    The varray which content will be swapped with this one's content.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor or move assignment throws,
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor or copy assignment throws,
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor or move assignment throws,
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor or copy assignment throws,
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move and \c use_optimized_swap are \c false_type - default.
     //! @endinternal
     //!
     //! @par Complexity
     //!   Linear O(N).
-    void swap(varray & other)
+    void swap(varray& other)
     {
         typedef typename
         vt::use_optimized_swap use_optimized_swap;
@@ -515,8 +498,8 @@ public:
     //! @param other    The varray which content will be swapped with this one's content.
     //!
     //! @par Throws
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c true and Value's move constructor or move assignment throws,
-    //!   @li If \c boost::has_nothrow_move<Value>::value is \c false and Value's copy constructor or copy assignment throws,
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c true and Value's move constructor or move assignment throws,
+    //!   @li If \c std::is_nothrow_move_constructible<Value>::value is \c false and Value's copy constructor or copy assignment throws,
     //! @internal
     //!   @li It throws only if \c use_memop_in_swap_and_move and \c use_optimized_swap are \c false_type - default.
     //! @endinternal
@@ -527,7 +510,7 @@ public:
     //! @par Complexity
     //!   Linear O(N).
     template <std::size_t C>
-    void swap(varray<value_type, C> & other)
+    void swap(varray<value_type, C>& other)
     {
         errh::check_capacity(*this, other.size());
         errh::check_capacity(other, this->size());
@@ -535,7 +518,7 @@ public:
         typedef typename
         vt::use_optimized_swap use_optimized_swap;
 
-        this->swap_dispatch(other, use_optimized_swap()); 
+        this->swap_dispatch(other, use_optimized_swap());
     }
 
     //! @pre <tt>count <= capacity()</tt>
@@ -597,7 +580,7 @@ public:
         else
         {
             errh::check_capacity(*this, count);                                     // may throw
-            
+
             std::uninitialized_fill(this->end(), this->begin() + count, value);     // may throw
         }
         m_size = count; // update end
@@ -641,7 +624,7 @@ public:
         typedef typename vt::disable_trivial_init dti;
 
         errh::check_capacity(*this, m_size + 1);                                    // may throw
-        
+
         namespace sv = varray_detail;
         sv::construct(dti(), this->end(), value);                                          // may throw
         ++m_size; // update end
@@ -661,14 +644,14 @@ public:
     //!
     //! @par Complexity
     //!   Constant O(1).
-    void push_back(BOOST_RV_REF(value_type) value)
+    void push_back(value_type&& value)
     {
         typedef typename vt::disable_trivial_init dti;
 
         errh::check_capacity(*this, m_size + 1);                                    // may throw
 
         namespace sv = varray_detail;
-        sv::construct(dti(), this->end(), ::boost::move(value));                           // may throw
+        sv::construct(dti(), this->end(), std::move(value));                        // may throw
         ++m_size; // update end
     }
 
@@ -724,8 +707,8 @@ public:
         else
         {
             // TODO - should move be used only if it's nonthrowing?
-            value_type & r = *(this->end() - 1);
-            sv::construct(dti(), this->end(), boost::move(r));                      // may throw
+            value_type& r = *(this->end() - 1);
+            sv::construct(dti(), this->end(), std::move(r));                        // may throw
             ++m_size; // update end
             sv::move_backward(position, this->end() - 2, this->end() - 1);          // may throw
             sv::assign(position, value);                                            // may throw
@@ -751,7 +734,7 @@ public:
     //!
     //! @par Complexity
     //!   Constant or linear.
-    iterator insert(iterator position, BOOST_RV_REF(value_type) value)
+    iterator insert(iterator position, value_type&& value)
     {
         typedef typename vt::disable_trivial_init dti;
         namespace sv = varray_detail;
@@ -761,17 +744,17 @@ public:
 
         if ( position == this->end() )
         {
-            sv::construct(dti(), position, boost::move(value));                     // may throw
+            sv::construct(dti(), position, std::move(value));                       // may throw
             ++m_size; // update end
         }
         else
         {
             // TODO - should move be used only if it's nonthrowing?
-            value_type & r = *(this->end() - 1);
-            sv::construct(dti(), this->end(), boost::move(r));                      // may throw
+            value_type& r = *(this->end() - 1);
+            sv::construct(dti(), this->end(), std::move(r));                        // may throw
             ++m_size; // update end
             sv::move_backward(position, this->end() - 2, this->end() - 1);          // may throw
-            sv::assign(position, boost::move(value));                               // may throw
+            sv::assign(position, std::move(value));                                 // may throw
         }
 
         return position;
@@ -811,7 +794,7 @@ public:
             namespace sv = varray_detail;
 
             difference_type to_move = std::distance(position, this->end());
-            
+
             // TODO - should following lines check for exception and revert to the old size?
 
             if ( count < static_cast<size_type>(to_move) )
@@ -912,9 +895,9 @@ public:
 
         errh::check_iterator_end_eq(*this, first);
         errh::check_iterator_end_eq(*this, last);
-        
+
         difference_type n = std::distance(first, last);
-        
+
         //TODO - add invalid range check?
         //BOOST_GEOMETRY_INDEX_ASSERT(0 <= n, "invalid range");
         //TODO - add this->size() check?
@@ -979,8 +962,6 @@ public:
         m_size = count; // update end
     }
 
-#if !defined(BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE)
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
     //! @pre <tt>size() < capacity()</tt>
     //!
     //! @brief Inserts a Value constructed with
@@ -997,14 +978,14 @@ public:
     //! @par Complexity
     //!   Constant O(1).
     template<class ...Args>
-    void emplace_back(BOOST_FWD_REF(Args) ...args)
+    void emplace_back(Args&& ...args)
     {
         typedef typename vt::disable_trivial_init dti;
 
         errh::check_capacity(*this, m_size + 1);                                    // may throw
 
         namespace sv = varray_detail;
-        sv::construct(dti(), this->end(), ::boost::forward<Args>(args)...);                // may throw
+        sv::construct(dti(), this->end(), std::forward<Args>(args)...);             // may throw
         ++m_size; // update end
     }
 
@@ -1027,7 +1008,7 @@ public:
     //! @par Complexity
     //!   Constant or linear.
     template<class ...Args>
-    iterator emplace(iterator position, BOOST_FWD_REF(Args) ...args)
+    iterator emplace(iterator position, Args&& ...args)
     {
         typedef typename vt::disable_trivial_init dti;
 
@@ -1038,7 +1019,7 @@ public:
 
         if ( position == this->end() )
         {
-            sv::construct(dti(), position, ::boost::forward<Args>(args)...);               // may throw
+            sv::construct(dti(), position, std::forward<Args>(args)...);            // may throw
             ++m_size; // update end
         }
         else
@@ -1046,75 +1027,20 @@ public:
             // TODO - should following lines check for exception and revert to the old size?
 
             // TODO - should move be used only if it's nonthrowing?
-            value_type & r = *(this->end() - 1);
-            sv::construct(dti(), this->end(), boost::move(r));                             // may throw
+            value_type& r = *(this->end() - 1);
+            sv::construct(dti(), this->end(), std::move(r));                        // may throw
             ++m_size; // update end
             sv::move_backward(position, this->end() - 2, this->end() - 1);          // may throw
 
             aligned_storage<sizeof(value_type), alignment_of<value_type>::value> temp_storage;
-            value_type * val_p = static_cast<value_type *>(temp_storage.address());
-            sv::construct(dti(), val_p, ::boost::forward<Args>(args)...);                  // may throw
+            value_type* val_p = static_cast<value_type*>(temp_storage.address());
+            sv::construct(dti(), val_p, std::forward<Args>(args)...);               // may throw
             sv::scoped_destructor<value_type> d(val_p);
-            sv::assign(position, ::boost::move(*val_p));                            // may throw
+            sv::assign(position, std::move(*val_p));                                // may throw
         }
 
         return position;
     }
-
-#else // !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
-
-    #define BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE(N)                                        \
-    BOOST_MOVE_TMPL_LT##N BOOST_MOVE_CLASS##N BOOST_MOVE_GT##N                                   \
-    void emplace_back(BOOST_MOVE_UREF##N)                                                        \
-    {                                                                                            \
-        typedef typename vt::disable_trivial_init dti;                                           \
-                                                                                                 \
-        errh::check_capacity(*this, m_size + 1);                                    /*may throw*/\
-                                                                                                 \
-        namespace sv = varray_detail;                                                            \
-        sv::construct(dti(), this->end() BOOST_MOVE_I##N BOOST_MOVE_FWD##N );       /*may throw*/\
-        ++m_size; /*update end*/                                                                 \
-    }                                                                                            \
-    \
-    BOOST_MOVE_TMPL_LT##N BOOST_MOVE_CLASS##N BOOST_MOVE_GT##N                                      \
-    iterator emplace(iterator position BOOST_MOVE_I##N BOOST_MOVE_UREF##N)                          \
-    {                                                                                               \
-        typedef typename vt::disable_trivial_init dti;                                              \
-        namespace sv = varray_detail;                                                               \
-                                                                                                    \
-        errh::check_iterator_end_eq(*this, position);                                               \
-        errh::check_capacity(*this, m_size + 1);                                       /*may throw*/\
-                                                                                                    \
-        if ( position == this->end() )                                                              \
-        {                                                                                           \
-            sv::construct(dti(), position BOOST_MOVE_I##N BOOST_MOVE_FWD##N );         /*may throw*/\
-            ++m_size; /*update end*/                                                                \
-        }                                                                                           \
-        else                                                                                        \
-        {                                                                                           \
-            /* TODO - should following lines check for exception and revert to the old size? */     \
-            /* TODO - should move be used only if it's nonthrowing? */                              \
-                                                                                                    \
-            value_type & r = *(this->end() - 1);                                                    \
-            sv::construct(dti(), this->end(), boost::move(r));                         /*may throw*/\
-            ++m_size; /*update end*/                                                                \
-            sv::move_backward(position, this->end() - 2, this->end() - 1);             /*may throw*/\
-                                                                                                    \
-            aligned_storage<sizeof(value_type), alignment_of<value_type>::value> temp_storage;      \
-            value_type * val_p = static_cast<value_type *>(temp_storage.address());                 \
-            sv::construct(dti(), val_p BOOST_MOVE_I##N BOOST_MOVE_FWD##N );            /*may throw*/\
-            sv::scoped_destructor<value_type> d(val_p);                                             \
-            sv::assign(position, ::boost::move(*val_p));                               /*may throw*/\
-        }                                                                                           \
-                                                                                                    \
-        return position;                                                                            \
-    }                                                                                               \
-    
-    BOOST_MOVE_ITERATE_0TO9(BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE)
-    #undef BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE
-
-#endif // !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
-#endif // !BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE
 
     //! @brief Removes all elements from the container.
     //!
@@ -1309,7 +1235,7 @@ public:
         return boost::addressof(*(this->ptr()));
     }
 
-    
+
     //! @brief Returns iterator to the first element.
     //!
     //! @return iterator to the first element contained in the vector.
@@ -1500,19 +1426,19 @@ private:
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void move_ctor_dispatch(varray<value_type, C> & other, std::true_type /*use_memop*/)
+    void move_ctor_dispatch(varray<value_type, C>& other, std::true_type /*use_memop*/)
     {
         ::memcpy(this->data(), other.data(), sizeof(Value) * other.m_size);
         m_size = other.m_size;
     }
 
     // @par Throws
-    //   @li If boost::has_nothrow_move<Value>::value is true and Value's move constructor throws
-    //   @li If boost::has_nothrow_move<Value>::value is false and Value's copy constructor throws.
+    //   @li If std::is_nothrow_move_constructible<Value>::value is true and Value's move constructor throws
+    //   @li If std::is_nothrow_move_constructible<Value>::value is false and Value's copy constructor throws.
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void move_ctor_dispatch(varray<value_type, C> & other, std::false_type /*use_memop*/)
+    void move_ctor_dispatch(varray<value_type, C>& other, std::false_type /*use_memop*/)
     {
         namespace sv = varray_detail;
         sv::uninitialized_move_if_noexcept(other.begin(), other.end(), this->begin());                  // may throw
@@ -1524,7 +1450,7 @@ private:
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void move_assign_dispatch(varray<value_type, C> & other, std::true_type /*use_memop*/)
+    void move_assign_dispatch(varray<value_type, C>& other, std::true_type /*use_memop*/)
     {
         this->clear();
 
@@ -1533,12 +1459,12 @@ private:
     }
 
     // @par Throws
-    //   @li If boost::has_nothrow_move<Value>::value is true and Value's move constructor or move assignment throws
-    //   @li If boost::has_nothrow_move<Value>::value is false and Value's copy constructor or move assignment throws.
+    //   @li If std::is_nothrow_move_constructible<Value>::value is true and Value's move constructor or move assignment throws
+    //   @li If std::is_nothrow_move_constructible<Value>::value is false and Value's copy constructor or move assignment throws.
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void move_assign_dispatch(varray<value_type, C> & other, std::false_type /*use_memop*/)
+    void move_assign_dispatch(varray<value_type, C>& other, std::false_type /*use_memop*/)
     {
         namespace sv = varray_detail;
         if ( m_size <= static_cast<size_type>(other.size()) )
@@ -1560,7 +1486,7 @@ private:
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void swap_dispatch(varray<value_type, C> & other, std::true_type /*use_optimized_swap*/)
+    void swap_dispatch(varray<value_type, C>& other, std::true_type /*use_optimized_swap*/)
     {
         typedef std::conditional_t
             <
@@ -1568,9 +1494,9 @@ private:
                 aligned_storage_type,
                 typename varray<value_type, C>::aligned_storage_type
             > storage_type;
-        
+
         storage_type temp;
-        Value * temp_ptr = reinterpret_cast<Value*>(temp.address());
+        Value* temp_ptr = reinterpret_cast<Value*>(temp.address());
 
         ::memcpy(temp_ptr, this->data(), sizeof(Value) * this->size());
         ::memcpy(this->data(), other.data(), sizeof(Value) * other.size());
@@ -1585,7 +1511,7 @@ private:
     // @par Complexity
     //   Linear O(N).
     template <std::size_t C>
-    void swap_dispatch(varray<value_type, C> & other, std::false_type /*use_optimized_swap*/)
+    void swap_dispatch(varray<value_type, C>& other, std::false_type /*use_optimized_swap*/)
     {
         namespace sv = varray_detail;
 
@@ -1615,7 +1541,7 @@ private:
                 sizeof(value_type),
                 boost::alignment_of<value_type>::value
             > temp_storage;
-            value_type * temp_ptr = reinterpret_cast<value_type*>(temp_storage.address());
+            value_type* temp_ptr = reinterpret_cast<value_type*>(temp_storage.address());
 
             ::memcpy(temp_ptr, boost::addressof(*first_sm), sizeof(value_type));
             ::memcpy(boost::addressof(*first_sm), boost::addressof(*first_la), sizeof(value_type));
@@ -1635,12 +1561,15 @@ private:
         //                            "incompatible ranges");
 
         namespace sv = varray_detail;
+
         for (; first_sm != last_sm ; ++first_sm, ++first_la)
         {
-            //boost::swap(*first_sm, *first_la);                                    // may throw
-            value_type temp(boost::move(*first_sm));                                // may throw
-            *first_sm = boost::move(*first_la);                                     // may throw
-            *first_la = boost::move(temp);                                          // may throw
+            //std::iter_swap(first_sm, first_la);
+            //std::swap(*first_sm, *first_la);                                      // may throw
+            //boost::swap(*first_sm, *first_la);
+            value_type temp(std::move(*first_sm));                                  // may throw
+            *first_sm = std::move(*first_la);                                       // may throw
+            *first_la = std::move(temp);                                            // may throw
         }
         sv::uninitialized_move(first_la, last_la, first_sm);                        // may throw
         sv::destroy(first_la, last_la);
@@ -1657,9 +1586,9 @@ private:
     void insert_dispatch(iterator position, Iterator first, Iterator last, boost::random_access_traversal_tag const&)
     {
         BOOST_CONCEPT_ASSERT((boost_concepts::RandomAccessTraversal<Iterator>)); // Make sure you passed a RandomAccessIterator
-        
+
         errh::check_iterator_end_eq(*this, position);
-        
+
         typename boost::iterator_difference<Iterator>::type
             count = std::distance(first, last);
 
@@ -1694,7 +1623,7 @@ private:
 
             std::ptrdiff_t d = std::distance(position, this->begin() + Capacity);
             std::size_t count = sv::uninitialized_copy_s(first, last, position, d);                     // may throw
-            
+
             errh::check_capacity(*this, count <= static_cast<std::size_t>(d) ? m_size + count : Capacity + 1);  // may throw
 
             m_size += count;
@@ -1703,7 +1632,7 @@ private:
         {
             typename boost::iterator_difference<Iterator>::type
                 count = std::distance(first, last);
-            
+
             errh::check_capacity(*this, m_size + count);                                                // may throw
 
             this->insert_in_the_middle(position, first, last, count);                                   // may throw
@@ -1872,7 +1801,7 @@ public:
     }
 
     // basic
-    varray & operator=(varray const& /*other*/)
+    varray& operator=(varray const& /*other*/)
     {
         //errh::check_capacity(*this, other.size());
         return *this;
@@ -1880,7 +1809,7 @@ public:
 
     // basic
     template <size_t C>
-    varray & operator=(varray<value_type, C> const& other)
+    varray& operator=(varray<value_type, C> const& other)
     {
         errh::check_capacity(*this, other.size());                                  // may throw
         return *this;
@@ -1901,7 +1830,7 @@ public:
         errh::check_capacity(*this, count);                                         // may throw
     }
 
-    
+
     // nothrow
     void reserve(size_type count)
     {
@@ -2031,8 +1960,8 @@ public:
     }
 
     // nothrow
-    Value * data() { return boost::addressof(*(this->ptr())); }
-    const Value * data() const { return boost::addressof(*(this->ptr())); }
+    Value* data() { return boost::addressof(*(this->ptr())); }
+    const Value* data() const { return boost::addressof(*(this->ptr())); }
 
     // nothrow
     iterator begin() { return this->ptr(); }
@@ -2183,7 +2112,7 @@ bool operator>= (varray<V, C1> const& x, varray<V, C2> const& y)
 //! @par Complexity
 //!   Linear O(N).
 template<typename V, std::size_t C1, std::size_t C2>
-inline void swap(varray<V, C1> & x, varray<V, C2> & y)
+inline void swap(varray<V, C1>& x, varray<V, C2>& y)
 {
     x.swap(y);
 }

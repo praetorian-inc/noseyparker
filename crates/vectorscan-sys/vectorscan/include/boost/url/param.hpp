@@ -241,7 +241,7 @@ struct param
         @endcode
 
         @code
-        param qp( "key", optional<string_view>("value") );
+        param qp( "key", optional<core::string_view>("value") );
         @endcode
 
         @code
@@ -268,15 +268,15 @@ struct param
         Calls to allocate may throw.
 
         @tparam OptionalString An optional string
-        type, such as @ref string_view,
+        type, such as `core::string_view`,
         `std::nullptr`, @ref no_value_t, or
-        `optional<string_view>`.
+        `optional<core::string_view>`.
 
         @param key, value The key and value to set.
     */
     template <class OptionalString>
     param(
-        string_view key,
+        core::string_view key,
         OptionalString const& value)
         : param(key, detail::get_optional_string(value))
     {
@@ -334,13 +334,13 @@ struct param
 
     // aggregate construction
     param(
-        string_view key,
-        string_view value,
+        core::string_view key,
+        core::string_view value,
         bool has_value) noexcept
         : key(key)
         , value(has_value
             ? value
-            : string_view())
+            : core::string_view())
         , has_value(has_value)
     {
     }
@@ -348,7 +348,7 @@ struct param
 
 private:
     param(
-        string_view key,
+        core::string_view key,
         detail::optional_string const& value)
         : param(key, value.s, value.b)
     {
@@ -411,7 +411,7 @@ struct param_view
         the authority that has final control
         over how the query is interpreted.
     */
-    string_view key;
+    core::string_view key;
 
     /** The value
 
@@ -419,7 +419,7 @@ struct param_view
         @ref has_value equal to true.
         An empty value is distinct from no value.
     */
-    string_view value;
+    core::string_view value;
 
     /** True if a value is present
 
@@ -484,15 +484,15 @@ struct param_view
         Throws nothing.
 
         @tparam OptionalString An optional string
-        type, such as @ref string_view,
+        type, such as `core::string_view`,
         `std::nullptr`, @ref no_value_t, or
-        `optional<string_view>`.
+        `optional<core::string_view>`.
 
         @param key, value The key and value to set.
     */
     template <class OptionalString>
     param_view(
-        string_view key,
+        core::string_view key,
         OptionalString const& value) noexcept
         : param_view(key, detail::get_optional_string(value))
     {
@@ -568,13 +568,13 @@ struct param_view
 
     // aggregate construction
     param_view(
-        string_view key_,
-        string_view value_,
+        core::string_view key_,
+        core::string_view value_,
         bool has_value_) noexcept
         : key(key_)
         , value(has_value_
             ? value_
-            : string_view())
+            : core::string_view())
         , has_value(has_value_)
     {
     }
@@ -582,7 +582,7 @@ struct param_view
 
 private:
     param_view(
-        string_view key,
+        core::string_view key,
         detail::optional_string const& value)
         : param_view(key, value.s, value.b)
     {
@@ -748,7 +748,7 @@ struct param_pct_view
 
         @par Example
         @code
-        param_pct_view qp( "key", optional<string_view>("value") );
+        param_pct_view qp( "key", optional<core::string_view>("value") );
         @endcode
 
         @par Postconditions
@@ -766,9 +766,9 @@ struct param_pct_view
         `key` or `value` contains an invalid percent-encoding.
 
         @tparam OptionalString An optional
-        @ref string_view type, such as
-        `boost::optional<string_view>` or
-        `std::optional<string_view>`.
+        `core::string_view` type, such as
+        `boost::optional<core::string_view>` or
+        `std::optional<core::string_view>`.
 
         @param key, value The key and value to set.
     */

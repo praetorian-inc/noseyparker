@@ -1,6 +1,8 @@
 // Boost.Geometry
 // This file is manually converted from PROJ4
 
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
+
 // This file was modified by Oracle on 2018, 2019.
 // Modifications copyright (c) 2018-2019, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -41,11 +43,11 @@
 #define BOOST_GEOMETRY_SRS_PROJECTIONS_IMPL_PJ_GRIDINFO_HPP
 
 
-#include <boost/algorithm/string.hpp>
-
 #include <boost/geometry/core/assert.hpp>
 #include <boost/geometry/util/math.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/cstdint.hpp>
 
 #include <algorithm>
@@ -190,18 +192,18 @@ template <typename IStream>
 bool pj_gridinfo_load_ctable(IStream & is, pj_gi_load & gi)
 {
     pj_ctable & ct = gi.ct;
-    
+
     // Move the input stream by the size of the proj4 original CTABLE
     std::size_t header_size = 80
                             + 2 * sizeof(pj_ctable::lp_t)
                             + sizeof(pj_ctable::ilp_t)
                             + sizeof(pj_ctable::flp_t*);
     is.seekg(header_size);
-    
+
     // read all the actual shift values
     std::size_t a_size = ct.lim.lam * ct.lim.phi;
     ct.cvs.resize(a_size);
-    
+
     std::size_t ch_size = sizeof(pj_ctable::flp_t) * a_size;
     is.read(reinterpret_cast<char*>(&ct.cvs[0]), ch_size);
 
@@ -213,7 +215,7 @@ bool pj_gridinfo_load_ctable(IStream & is, pj_gi_load & gi)
     }
 
     return true;
-} 
+}
 
 /************************************************************************/
 /*                  pj_gridinfo_load_ctable2()                          */
@@ -274,7 +276,7 @@ inline bool pj_gridinfo_load_ntv1(IStream & is, pj_gi_load & gi)
 
     std::vector<double> row_buf(r_size);
     gi.ct.cvs.resize(gi.ct.lim.lam * gi.ct.lim.phi);
-    
+
     for (boost::int32_t row = 0; row < gi.ct.lim.phi; row++ )
     {
         is.read(reinterpret_cast<char*>(&row_buf[0]), ch_size);
@@ -366,7 +368,7 @@ inline bool pj_gridinfo_load_gtx(IStream & is, pj_gi_load & gi)
 {
     boost::int32_t words = gi.ct.lim.lam * gi.ct.lim.phi;
     std::size_t const ch_size = sizeof(float) * words;
-    
+
     is.seekg(gi.grid_offset);
 
     // TODO: Consider changing this unintuitive code
@@ -827,12 +829,12 @@ inline bool pj_gridinfo_init_ctable2(std::string const& gridname,
     memcpy( &ct.ll,  header +  96, 40 );
 
     // do some minimal validation to ensure the structure isn't corrupt
-    if ( (ct.lim.lam < 1) || (ct.lim.lam > 100000) 
+    if ( (ct.lim.lam < 1) || (ct.lim.lam > 100000)
       || (ct.lim.phi < 1) || (ct.lim.phi > 100000) )
     {
         return false;
     }
-    
+
     // trim white space and newlines off id
     boost::trim_right_if(ct.id, is_trimmable_char());
 
@@ -879,12 +881,12 @@ inline bool pj_gridinfo_init_ctable(std::string const& gridname,
     memcpy( &ct.ll, header + 80, 40 );
 
     // do some minimal validation to ensure the structure isn't corrupt
-    if ( (ct.lim.lam < 1) || (ct.lim.lam > 100000) 
+    if ( (ct.lim.lam < 1) || (ct.lim.lam > 100000)
       || (ct.lim.phi < 1) || (ct.lim.phi > 100000) )
     {
         return false;
     }
-    
+
     // trim white space and newlines off id
     boost::trim_right_if(ct.id, is_trimmable_char());
 
@@ -923,7 +925,7 @@ inline bool pj_gridinfo_init(std::string const& gridname,
     if ( is.fail() ) {
         return false;
     }
-    
+
     is.seekg(0);
 
     // Determine file type.

@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2008-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2020.
 // Modifications copyright (c) 2017-2020, Oracle and/or its affiliates.
@@ -14,10 +15,10 @@
 #define BOOST_GEOMETRY_SRS_PROJECTION_HPP
 
 
+#include <memory>
 #include <string>
 #include <type_traits>
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
 
 #include <boost/geometry/algorithms/convert.hpp>
@@ -41,7 +42,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace projections
 {
 
@@ -378,7 +379,7 @@ private:
         return result;
     }
 
-    boost::shared_ptr<vprj_t> m_ptr;
+    std::shared_ptr<vprj_t> m_ptr;
 };
 
 template <typename StaticParameters, typename CT>
@@ -392,7 +393,7 @@ class static_proj_wrapper_base
         <
             StaticParameters
         >::type proj_tag;
-    
+
     typedef typename projections::detail::static_projection_type
         <
             proj_tag,
@@ -498,7 +499,7 @@ public:
 namespace srs
 {
 
-    
+
 /*!
     \brief Representation of projection
     \details Either dynamic or static projection representation

@@ -103,10 +103,6 @@ template
 >
 inline void get_ring_turn_info(TurnInfoMap& turn_info_map, Turns const& turns, Clusters const& clusters)
 {
-    typedef typename boost::range_value<Turns>::type turn_type;
-    typedef typename turn_type::turn_operation_type turn_operation_type;
-    typedef typename turn_type::container_type container_type;
-
     static const operation_type target_operation
             = operation_from_overlay<OverlayType>::value;
     static const operation_type opposite_operation
@@ -114,13 +110,8 @@ inline void get_ring_turn_info(TurnInfoMap& turn_info_map, Turns const& turns, C
             ? operation_intersection
             : operation_union;
 
-    for (typename boost::range_iterator<Turns const>::type
-            it = boost::begin(turns);
-         it != boost::end(turns);
-         ++it)
+    for (auto const& turn : turns)
     {
-        turn_type const& turn = *it;
-
         bool cluster_checked = false;
         bool has_blocked = false;
 
@@ -130,12 +121,8 @@ inline void get_ring_turn_info(TurnInfoMap& turn_info_map, Turns const& turns, C
             continue;
         }
 
-        for (typename boost::range_iterator<container_type const>::type
-                op_it = boost::begin(turn.operations);
-            op_it != boost::end(turn.operations);
-            ++op_it)
+        for (auto const& op : turn.operations)
         {
-            turn_operation_type const& op = *op_it;
             ring_identifier const ring_id = ring_id_by_seg_id(op.seg_id);
 
             if (! is_self_turn<OverlayType>(turn)

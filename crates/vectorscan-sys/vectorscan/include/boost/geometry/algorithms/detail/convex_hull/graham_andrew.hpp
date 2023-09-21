@@ -2,8 +2,8 @@
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2014-2021.
-// Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014-2023.
+// Modifications copyright (c) 2014-2023 Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -148,8 +148,6 @@ class graham_andrew
 {
     typedef InputPoint point_type;
     typedef typename std::vector<point_type> container_type;
-    typedef typename std::vector<point_type>::const_iterator iterator;
-    typedef typename std::vector<point_type>::const_reverse_iterator rev_iterator;
 
     class partitions
     {
@@ -192,8 +190,7 @@ private:
 
         point_type most_left, most_right;
 
-        // TODO: User-defined CS-specific less-compare
-        geometry::less<point_type> less;
+        geometry::less_exact<point_type, -1, Strategy> less;
 
         detail::convex_hull::get_extremes(in_proxy, most_left, most_right, less);
 
@@ -228,9 +225,9 @@ private:
             SideStrategy const& side)
     {
         output.push_back(left);
-        for(iterator it = input.begin(); it != input.end(); ++it)
+        for (auto const& i : input)
         {
-            add_to_hull<Factor>(*it, output, side);
+            add_to_hull<Factor>(i, output, side);
         }
         add_to_hull<Factor>(right, output, side);
     }
@@ -244,7 +241,7 @@ private:
         std::size_t output_size = output.size();
         while (output_size >= 3)
         {
-            rev_iterator rit = output.rbegin();
+            auto rit = output.rbegin();
             point_type const last = *rit++;
             point_type const& last2 = *rit++;
 

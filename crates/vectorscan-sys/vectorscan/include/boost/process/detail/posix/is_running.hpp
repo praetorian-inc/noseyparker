@@ -34,7 +34,7 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
 
     if (ret == -1)
     {
-        if (errno != ECHILD) //because it no child is running, than this one isn't either, obviously.
+        if (errno != ECHILD) //because it no child is running, then this one isn't either, obviously.
             ec = ::boost::process::detail::get_last_error();
         return false;
     }

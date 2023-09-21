@@ -12,7 +12,7 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/type_traits.hpp>
 
 namespace boost {
@@ -38,7 +38,7 @@ namespace grammar {
         @ref result.
 */
 template<class Rule>
-result<typename Rule::value_type>
+system::result<typename Rule::value_type>
 parse(
     char const*& it,
     char const* end,
@@ -62,9 +62,9 @@ parse(
         @ref result.
 */
 template<class Rule>
-result<typename Rule::value_type>
+system::result<typename Rule::value_type>
 parse(
-    string_view s,
+    core::string_view s,
     Rule const& r);
 
 //------------------------------------------------
@@ -80,7 +80,7 @@ struct rule_ref
     using value_type =
         typename Rule::value_type;
 
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const

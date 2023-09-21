@@ -88,7 +88,7 @@ namespace projections
 
                     /* Calculation of geocentric latitude. */
                     lp_lat = atan (this->m_proj_parm.radius_p2 * tan (lp_lat));
-                
+
                     /* Calculation of the three components of the vector from satellite to
                     ** position on earth surface (lon,lat).*/
                     r = (this->m_proj_parm.radius_p) / boost::math::hypot(this->m_proj_parm.radius_p * cos (lp_lat), sin (lp_lat));
@@ -121,7 +121,7 @@ namespace projections
 
                     /* Setting three components of vector from satellite to position.*/
                     Vx = -1.0;
-                        
+
                     if(this->m_proj_parm.flip_axis) {
                         Vz = tan (xy_y / this->m_proj_parm.radius_g_1);
                         Vy = tan (xy_x / this->m_proj_parm.radius_g_1) * boost::math::hypot(1.0, Vz);
@@ -207,7 +207,7 @@ namespace projections
                         Vy = tan (xy_x / (this->m_proj_parm.radius_g - 1.0));
                         Vz = tan (xy_y / (this->m_proj_parm.radius_g - 1.0)) * sqrt (1.0 + Vy * Vy);
                     }
-                    
+
                     /* Calculation of terms in cubic equation and determinant.*/
                     a   = Vy * Vy + Vz * Vz + Vx * Vx;
                     b   = 2 * this->m_proj_parm.radius_g * Vx;
@@ -274,7 +274,7 @@ namespace projections
                 if (par.phi0 != 0.0)
                     BOOST_THROW_EXCEPTION( projection_exception(error_unknown_prime_meridian) );
 
-                
+
                 proj_parm.flip_axis = geos_flip_axis(params);
 
                 proj_parm.radius_g_1 = proj_parm.h / par.a;
@@ -353,7 +353,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI2(geos_entry, geos_spheroid, geos_ellipsoid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(geos_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(geos, geos_entry);

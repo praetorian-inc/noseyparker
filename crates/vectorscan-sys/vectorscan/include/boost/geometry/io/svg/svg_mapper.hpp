@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2009-2015 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2015-2021.
 // Modifications copyright (c) 2015-2020, Oracle and/or its affiliates.
@@ -18,6 +19,7 @@
 #define BOOST_GEOMETRY_IO_SVG_MAPPER_HPP
 
 #include <cstdio>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
@@ -25,7 +27,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/config.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <boost/geometry/core/static_assert.hpp>
 #include <boost/geometry/core/tags.hpp>
@@ -160,10 +161,7 @@ struct svg_map<multi_tag, Multi, SvgPoint>
                     std::string const& style, double size,
                     Multi const& multi, TransformStrategy const& strategy)
     {
-        for (typename boost::range_iterator<Multi const>::type it
-            = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             svg_map
                 <
@@ -290,7 +288,7 @@ class svg_mapper : boost::noncopyable
         > transformer_type;
 
     model::box<Point> m_bounding_box;
-    boost::scoped_ptr<transformer_type> m_matrix;
+    std::unique_ptr<transformer_type> m_matrix;
     std::ostream& m_stream;
 
     SvgCoordinateType const m_width;
@@ -343,7 +341,7 @@ class svg_mapper : boost::noncopyable
     }
 
 public :
-    
+
     /*!
     \brief Constructor, initializing the SVG map. Opens and initializes the SVG.
          Should be called explicitly.
@@ -466,19 +464,17 @@ public :
         {
             // Multi-line modus
 
-            std::vector<std::string> splitted;
-            boost::split(splitted, s, boost::is_any_of("\n"));
-            for (std::vector<std::string>::const_iterator it
-                = splitted.begin();
-                it != splitted.end();
-                ++it, offset_y += lineheight)
+            std::vector<std::string> split;
+            boost::split(split, s, boost::is_any_of("\n"));
+            for (auto const& item : split)
             {
                  m_stream
                     << "<tspan x=\"" << get<0>(map_point) + offset_x
                     << "\""
                     << " y=\"" << get<1>(map_point) + offset_y
                     << "\""
-                    << ">" << *it << "</tspan>";
+                    << ">" << item << "</tspan>";
+                offset_y += lineheight;
             }
         }
         m_stream << "</text>" << std::endl;

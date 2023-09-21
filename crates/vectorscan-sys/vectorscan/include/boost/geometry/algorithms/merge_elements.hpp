@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2022, Oracle and/or its affiliates.
+// Copyright (c) 2022-2023, Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -29,7 +30,6 @@
 #include <boost/geometry/strategies/relate/cartesian.hpp>
 #include <boost/geometry/strategies/relate/geographic.hpp>
 #include <boost/geometry/strategies/relate/spherical.hpp>
-#include <boost/geometry/strategies/spherical/compare.hpp>
 
 
 namespace boost { namespace geometry
@@ -172,7 +172,7 @@ inline void merge(RandomIt const first, RandomIt const last, MultiGeometry& out,
 
     auto const less = [](auto const& l, auto const& r)
     {
-        return geometry::less<void, -1, typename Strategy::cs_tag>()(l.first, r.first);
+        return geometry::less<void, -1, Strategy>()(l.first, r.first);
     };
 
     std::vector<merge_data<RandomIt>> stack_in;

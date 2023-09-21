@@ -89,7 +89,7 @@ public:
     {
       unsigned int l = static_cast<unsigned int>(s.size());
       save(l);
-      save_impl(s.data(),s.size());
+      save_impl(s.data(),s.size()*sizeof(CharType));
     }
 
 private:

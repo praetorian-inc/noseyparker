@@ -70,7 +70,7 @@ struct preceding_check<0, Geometry, spherical_tag>
         calc_t const value = get<0>(point);
         calc_t const other_min = get<min_corner, 0>(other_box);
         calc_t const other_max = get<max_corner, 0>(other_box);
-        
+
         bool const pt_covered = strategy::within::detail::covered_by_range
                                     <
                                         Point, 0, spherical_tag

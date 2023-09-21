@@ -1,7 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2013-2017 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2013-2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021, Oracle and/or its affiliates.
@@ -249,10 +249,7 @@ struct cartesian_segments
                 assign_b(point, a, b);
             }
 
-#if defined(BOOST_GEOMETRY_USE_RESCALING)
-            return;
-#endif
-
+#ifndef BOOST_GEOMETRY_USE_RESCALING
             // Verify nearly collinear cases (the threshold is arbitrary
             // but influences performance). If the intersection is located
             // outside the segments, then it should be moved.
@@ -267,6 +264,7 @@ struct cartesian_segments
                 assign_if_exceeds(point, a);
                 assign_if_exceeds(point, b);
             }
+#endif
         }
 
         CoordinateType dx_a, dy_a;
@@ -452,7 +450,7 @@ struct cartesian_segments
 
         sides.set<1>(side_strategy_type::apply(p1, p2, q1),
                      side_strategy_type::apply(p1, p2, q2));
-        
+
         if (sides.same<1>())
         {
             // Both points are at same side of other segment, we can leave
@@ -670,7 +668,7 @@ private:
         int const a2_wrt_b = position_value(oa_2, ob_1, ob_2);
         int const b1_wrt_a = position_value(ob_1, oa_1, oa_2);
         int const b2_wrt_a = position_value(ob_2, oa_1, oa_2);
-        
+
         // fix the ratios if necessary
         // CONSIDER: fixing ratios also in other cases, if they're inconsistent
         // e.g. if ratio == 1 or 0 (so IP at the endpoint)
@@ -687,7 +685,7 @@ private:
         {
             ra_from.assign(1, 1);
             rb_to.assign(0, 1);
-        } 
+        }
 
         if (a2_wrt_b == 1)
         {

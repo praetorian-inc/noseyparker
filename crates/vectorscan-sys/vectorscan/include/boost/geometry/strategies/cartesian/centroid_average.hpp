@@ -72,7 +72,7 @@ public :
     struct state_type
     {
         typedef sum<GeometryPoint, ResultPoint> type;
-    };    
+    };
 
     template <typename GeometryPoint, typename ResultPoint>
     static inline void apply(GeometryPoint const& p,

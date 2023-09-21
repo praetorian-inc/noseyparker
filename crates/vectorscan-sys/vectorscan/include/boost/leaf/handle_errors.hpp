@@ -733,7 +733,7 @@ try_handle_some( TryBlock && try_block, H && ... h ) noexcept
         using R = typename std::decay<decltype(std::declval<TryBlock>()())>::type;
         auto rr = ctx.template handle_error<R>(id, std::forward<H>(h)..., [&r]()->R { return std::move(r); });
         if( !rr )
-            ctx.propagate(id);
+            ctx.propagate(rr.error());
         return rr;
     }
 }
@@ -869,7 +869,7 @@ try_handle_some( TryBlock && try_block, H && ... h )
         using R = typename std::decay<decltype(std::declval<TryBlock>()())>::type;
         auto rr = ctx.template handle_error<R>(id, std::forward<H>(h)..., [&r]()->R { return std::move(r); });
         if( !rr )
-            ctx.propagate(id);
+            ctx.propagate(rr.error());
         return rr;
     }
 }

@@ -101,7 +101,7 @@ inline bool pj_gridlist_merge_gridfile(std::string const& gridname,
 {
     // Try to find in the existing list of loaded grids.  Add all
     // matching grids as with NTv2 we can get many grids from one
-    // file (one shared gridname).    
+    // file (one shared gridname).
     if (pj_gridlist_find_all(gridname, grids.gridinfo, gridindexes))
         return true;
 
@@ -118,7 +118,7 @@ inline bool pj_gridlist_merge_gridfile(std::string const& gridname,
 
     // Add the grid now that it is loaded.
     pj_gridlist_add_seq_inc(gridindexes, orig_size, grids.gridinfo.size());
-    
+
     return true;
 }
 
@@ -132,10 +132,10 @@ inline bool pj_gridlist_merge_gridfile(std::string const& gridname,
 {
     // Try to find in the existing list of loaded grids.  Add all
     // matching grids as with NTv2 we can get many grids from one
-    // file (one shared gridname).    
+    // file (one shared gridname).
     {
         typename SharedGrids::read_locked lck_grids(grids);
-        
+
         if (pj_gridlist_find_all(gridname, lck_grids.gridinfo, gridindexes))
             return true;
     }
@@ -145,7 +145,7 @@ inline bool pj_gridlist_merge_gridfile(std::string const& gridname,
     stream_policy.open(is, gridname);
 
     pj_gridinfo new_grids;
-    
+
     if (! pj_gridinfo_init(gridname, is, new_grids))
     {
         return false;
@@ -171,9 +171,9 @@ inline bool pj_gridlist_merge_gridfile(std::string const& gridname,
         for (std::size_t i = 0 ; i < new_grids.size() ; ++ i)
             new_grids[i].swap(lck_grids.gridinfo[i + orig_size]);
     }
-    
+
     pj_gridlist_add_seq_inc(gridindexes, orig_size, new_size);
-    
+
     return true;
 }
 
@@ -200,7 +200,7 @@ inline void pj_gridlist_from_nadgrids(srs::detail::nadgrids const& nadgrids,
             it != nadgrids.end() ; ++it)
     {
         bool required = (*it)[0] != '@';
-        
+
         std::string name(it->begin() + (required ? 0 : 1), it->end());
 
         if ( ! pj_gridlist_merge_gridfile(name, stream_policy, grids, gridindexes,

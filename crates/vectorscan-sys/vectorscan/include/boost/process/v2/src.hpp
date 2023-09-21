@@ -10,11 +10,16 @@
 #include <boost/process/v2/detail/config.hpp>
 
 #if defined(BOOST_PROCESS_V2_HEADER_ONLY)
-# error Do not compile Beast library source with BOOST_BEAST_HEADER_ONLY defined
+# error Do not compile Process V2 library source with BOOST_PROCESS_V2_HEADER_ONLY defined. You should probably define BOOST_PROCESS_V2_SEPARATE_COMPILATION
 #endif
 
 #include <boost/process/v2/impl/error.ipp>
 #include <boost/process/v2/impl/pid.ipp>
+#include <boost/process/v2/ext/impl/exe.ipp>
+#include <boost/process/v2/ext/impl/cwd.ipp>
+#include <boost/process/v2/ext/impl/cmd.ipp>
+#include <boost/process/v2/ext/impl/env.ipp>
+#include <boost/process/v2/ext/detail/impl/proc_info.ipp>
 #include <boost/process/v2/detail/impl/environment.ipp>
 #include <boost/process/v2/detail/impl/last_error.ipp>
 #include <boost/process/v2/detail/impl/throw_error.ipp>

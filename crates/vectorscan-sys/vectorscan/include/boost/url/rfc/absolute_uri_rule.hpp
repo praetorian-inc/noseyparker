@@ -27,7 +27,7 @@ namespace urls {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< url_view > rv = grammar::parse( "http://example.com/index.htm?id=1", absolute_uri_rule );
+    system::result< url_view > rv = grammar::parse( "http://example.com/index.htm?id=1", absolute_uri_rule );
     @endcode
 
     @par BNF
@@ -62,7 +62,7 @@ struct absolute_uri_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr absolute_uri_rule_t absolute_uri_rule{};

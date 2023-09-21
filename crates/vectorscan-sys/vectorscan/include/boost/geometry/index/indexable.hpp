@@ -21,6 +21,8 @@
 
 #include <boost/geometry/util/type_traits.hpp>
 
+#include <tuple>
+
 namespace boost { namespace geometry { namespace index { namespace detail
 {
 
@@ -63,7 +65,7 @@ struct indexable
 
     /*!
     \brief Return indexable extracted from the value.
-    
+
     \param v The value.
     \return The indexable.
     */
@@ -105,7 +107,7 @@ struct indexable<std::pair<Indexable, Second>, false>
 
     /*!
     \brief Return indexable extracted from the value.
-    
+
     \param v The value.
     \return The indexable.
     */
@@ -164,7 +166,7 @@ struct indexable_boost_tuple
 
     /*!
     \brief Return indexable extracted from the value.
-    
+
     \param v The value.
     \return The indexable.
     */
@@ -251,10 +253,6 @@ struct indexable<boost::tuples::cons<Indexable, Tail>, false>
 
 }}}} // namespace boost::geometry::index::detail
 
-#if !defined(BOOST_NO_CXX11_HDR_TUPLE) && !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-
-#include <tuple>
-
 namespace boost { namespace geometry { namespace index { namespace detail {
 
 /*!
@@ -280,7 +278,7 @@ struct indexable<std::tuple<Indexable, Args...>, false>
 
     /*!
     \brief Return indexable extracted from the value.
-    
+
     \param v The value.
     \return The indexable.
     */
@@ -317,7 +315,6 @@ struct indexable<std::tuple<Indexable, Args...>, false>
 
 }}}} // namespace boost::geometry::index::detail
 
-#endif // !defined(BOOST_NO_CXX11_HDR_TUPLE) && !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
 namespace boost { namespace geometry { namespace index {
 
@@ -339,7 +336,7 @@ struct indexable
 
     /*!
     \brief Return indexable extracted from the value.
-    
+
     \param v The value.
     \return The indexable.
     */

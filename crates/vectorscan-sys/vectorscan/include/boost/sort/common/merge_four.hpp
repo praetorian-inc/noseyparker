@@ -13,12 +13,14 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_MERGE_FOUR_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_MERGE_FOUR_HPP
 
-#include <boost/sort/common/util/traits.hpp>
-#include <boost/sort/common/range.hpp>
+#include <ciso646>
 #include <functional>
 #include <iterator>
 #include <memory>
 #include <vector>
+#include <boost/sort/common/util/traits.hpp>
+#include <boost/sort/common/range.hpp>
+
 
 namespace boost
 {

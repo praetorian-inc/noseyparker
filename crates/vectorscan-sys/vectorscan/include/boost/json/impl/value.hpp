@@ -10,7 +10,8 @@
 #ifndef BOOST_JSON_IMPL_VALUE_HPP
 #define BOOST_JSON_IMPL_VALUE_HPP
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 value&
 value::at_pointer(string_view ptr) &
@@ -25,6 +26,7 @@ value::at_pointer(string_view ptr) &&
     return std::move( this->at_pointer(ptr) );
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif // BOOST_JSON_IMPL_VALUE_HPP

@@ -126,10 +126,10 @@ namespace projections
                     static const T two_pi = detail::two_pi<T>();
 
                     static const T C2_27 = vandg::C2_27<T>();
-                    static const T PI4_3 = vandg::PI4_3<T>();                    
+                    static const T PI4_3 = vandg::PI4_3<T>();
                     static const T TPISQ = vandg::TPISQ<T>();
                     static const T HPISQ = vandg::HPISQ<T>();
-                    
+
                     T t, c0, c1, c2, c3, al, r2, r, m, d, ay, x2, y2;
 
                     x2 = xy_x * xy_x;
@@ -210,7 +210,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(vandg_entry, vandg_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(vandg_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(vandg, vandg_entry)

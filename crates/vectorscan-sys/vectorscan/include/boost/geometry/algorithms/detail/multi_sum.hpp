@@ -31,15 +31,10 @@ namespace detail
 struct multi_sum
 {
     template <typename ReturnType, typename Policy, typename MultiGeometry, typename Strategy>
-    static inline ReturnType apply(MultiGeometry const& geometry, Strategy const& strategy)
+    static inline ReturnType apply(MultiGeometry const& multi, Strategy const& strategy)
     {
         ReturnType sum = ReturnType();
-        for (typename boost::range_iterator
-                <
-                    MultiGeometry const
-                >::type it = boost::begin(geometry);
-            it != boost::end(geometry);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             sum += Policy::apply(*it, strategy);
         }

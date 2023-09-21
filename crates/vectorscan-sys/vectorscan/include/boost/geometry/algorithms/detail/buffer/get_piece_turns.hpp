@@ -194,7 +194,6 @@ class piece_turn_visitor
     {
         typedef typename boost::range_value<Rings const>::type ring_type;
         typedef typename boost::range_value<Turns const>::type turn_type;
-        typedef typename boost::range_iterator<ring_type const>::type iterator;
 
         signed_size_type const piece1_first_index = piece1.first_seg_id.segment_index;
         signed_size_type const piece2_first_index = piece2.first_seg_id.segment_index;
@@ -213,12 +212,12 @@ class piece_turn_visitor
 
         // get geometry and iterators over these sections
         ring_type const& ring1 = m_rings[piece1.first_seg_id.multi_index];
-        iterator it1_first = boost::begin(ring1) + sec1_first_index;
-        iterator it1_beyond = boost::begin(ring1) + sec1_last_index + 1;
+        auto it1_first = boost::begin(ring1) + sec1_first_index;
+        auto it1_beyond = boost::begin(ring1) + sec1_last_index + 1;
 
         ring_type const& ring2 = m_rings[piece2.first_seg_id.multi_index];
-        iterator it2_first = boost::begin(ring2) + sec2_first_index;
-        iterator it2_beyond = boost::begin(ring2) + sec2_last_index + 1;
+        auto it2_first = boost::begin(ring2) + sec2_first_index;
+        auto it2_beyond = boost::begin(ring2) + sec2_last_index + 1;
 
         // Set begin/end of monotonic ranges, in both x/y directions
         signed_size_type index1 = sec1_first_index;
@@ -246,8 +245,8 @@ class piece_turn_visitor
         the_model.operations[0].seg_id = piece1.first_seg_id;
         the_model.operations[0].seg_id.segment_index = index1; // override
 
-        iterator it1 = it1_first;
-        for (iterator prev1 = it1++;
+        auto it1 = it1_first;
+        for (auto prev1 = it1++;
                 it1 != it1_beyond;
                 prev1 = it1++, the_model.operations[0].seg_id.segment_index++)
         {
@@ -257,8 +256,8 @@ class piece_turn_visitor
 
             unique_sub_range_from_piece<ring_type> unique_sub_range1(ring1, prev1, it1);
 
-            iterator it2 = it2_first;
-            for (iterator prev2 = it2++;
+            auto it2 = it2_first;
+            for (auto prev2 = it2++;
                     it2 != it2_beyond;
                     prev2 = it2++, the_model.operations[1].seg_id.segment_index++)
             {

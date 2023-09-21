@@ -114,7 +114,7 @@ namespace boost { namespace math { namespace detail {
             // At higher than double precision we need to be further away from the crossover location to
             // get full converge, but it's not clear how much further - indeed at quad precision it's
             // basically impossible to ever get forwards iteration to work.  Backwards seems to work
-            // OK as long as a > 1 whatever the precision tbough.
+            // OK as long as a > 1 whatever the precision though.
             //
             int domain = hypergeometric_1F1_negative_b_recurrence_region(a, b, z);
             if ((domain < 0) && ((a > 1) || (boost::math::policies::digits<T, Policy>() <= 64)))
@@ -123,10 +123,13 @@ namespace boost { namespace math { namespace detail {
             {
                if (boost::math::policies::digits<T, Policy>() <= 64)
                   return hypergeometric_1F1_from_function_ratio_negative_b_forwards(a, b, z, pol, log_scaling);
-               try 
+#ifndef BOOST_NO_EXCEPTIONS
+               try
+#endif
                {
                   return hypergeometric_1F1_checked_series_impl(a, b, z, pol, log_scaling);
                }
+#ifndef BOOST_NO_EXCEPTIONS
                catch (const evaluation_error&)
                {
                   //
@@ -134,6 +137,7 @@ namespace boost { namespace math { namespace detail {
                   //
                   return hypergeometric_1F1_from_function_ratio_negative_b_forwards(a, b, z, pol, log_scaling);
                }
+#endif
             }
             //
             // We could fall back to Tricomi's approximation if we're in the transition zone
@@ -413,13 +417,17 @@ namespace boost { namespace math { namespace detail {
       if (detail::hypergeometric_1F1_asym_region(a, b, z, pol))
       {
          long long saved_scale = log_scaling;
+#ifndef BOOST_NO_EXCEPTIONS
          try
+#endif
          {
             return hypergeometric_1F1_asym_large_z_series(a, b, z, pol, log_scaling);
          }
+#ifndef BOOST_NO_EXCEPTIONS
          catch (const evaluation_error&)
          {
          }
+#endif
          //
          // Very occasionally our convergence criteria don't quite go to full precision
          // and we have to try another method:
@@ -452,13 +460,28 @@ namespace boost { namespace math { namespace detail {
                return hypergeometric_1F1_checked_series_impl(a, b, z, pol, log_scaling);
             }
          }
-         // Let's otherwise make z positive (almost always)
-         // by Kummer's transformation
-         // (we also don't transform if z belongs to [-1,0])
-         long long scaling = lltrunc(z);
-         T r = exp(z - scaling) * detail::hypergeometric_1F1_imp<T>(b_minus_a, b, -z, pol, log_scaling);
-         log_scaling += scaling;
-         return r;
+         if ((b < 0) && (floor(b) == b))
+         {
+            // Negative integer b, so a must be a negative integer too.
+            // Kummer's transformation fails here!
+            if(a > -50)
+               return detail::hypergeometric_1F1_generic_series(a, b, z, pol, log_scaling, function);
+            // Is there anything better than this??
+            return hypergeometric_1F1_imp(a, float_next(b), z, pol, log_scaling);
+         }
+         else
+         {
+            // Let's otherwise make z positive (almost always)
+            // by Kummer's transformation
+            // (we also don't transform if z belongs to [-1,0])
+            // Also note that Kummer's transformation fails when b is 
+            // a negative integer, although this seems to be unmentioned
+            // in the literature...
+            long long scaling = lltrunc(z);
+            T r = exp(z - scaling) * detail::hypergeometric_1F1_imp<T>(b_minus_a, b, -z, pol, log_scaling);
+            log_scaling += scaling;
+            return r;
+         }
       }
       //
       // Check for initial divergence:

@@ -136,24 +136,24 @@ T log1p_imp(T const& x, const Policy& pol, const std::integral_constant<int, 53>
    // Maximum Relative Change in Control Points:   8.138e-004
    // Max Error found at double precision =        3.250766e-016
    static const T P[] = {
-       0.15141069795941984e-16L,
-       0.35495104378055055e-15L,
-       0.33333333333332835L,
-       0.99249063543365859L,
-       1.1143969784156509L,
-       0.58052937949269651L,
-       0.13703234928513215L,
-       0.011294864812099712L
+       static_cast<T>(0.15141069795941984e-16L),
+       static_cast<T>(0.35495104378055055e-15L),
+       static_cast<T>(0.33333333333332835L),
+       static_cast<T>(0.99249063543365859L),
+       static_cast<T>(1.1143969784156509L),
+       static_cast<T>(0.58052937949269651L),
+       static_cast<T>(0.13703234928513215L),
+       static_cast<T>(0.011294864812099712L)
      };
    static const T Q[] = {
-       1L,
-       3.7274719063011499L,
-       5.5387948649720334L,
-       4.159201143419005L,
-       1.6423855110312755L,
-       0.31706251443180914L,
-       0.022665554431410243L,
-       -0.29252538135177773e-5L
+       static_cast<T>(1L),
+       static_cast<T>(3.7274719063011499L),
+       static_cast<T>(5.5387948649720334L),
+       static_cast<T>(4.159201143419005L),
+       static_cast<T>(1.6423855110312755L),
+       static_cast<T>(0.31706251443180914L),
+       static_cast<T>(0.022665554431410243L),
+       static_cast<T>(-0.29252538135177773e-5L)
      };
 
    T result = 1 - x / 2 + tools::evaluate_polynomial(P, x) / tools::evaluate_polynomial(Q, x);

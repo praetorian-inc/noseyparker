@@ -14,7 +14,8 @@
 #include <boost/json/storage_ptr.hpp>
 #include <cstddef>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 class value;
 
@@ -68,7 +69,8 @@ public:
 
 } // detail
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 // includes are at the bottom of <boost/json/value.hpp>
 

@@ -36,11 +36,9 @@ struct nadgrids
         : base_t(first, last)
     {}
 
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
     nadgrids(std::initializer_list<std::string> l)
         : base_t(l)
     {}
-#endif
 
     nadgrids(std::string const& g0)
         : base_t(1)
@@ -88,14 +86,9 @@ struct towgs84
 
     towgs84()
         : m_size(0)
-#ifdef BOOST_GEOMETRY_CXX11_ARRAY_UNIFIED_INITIALIZATION
-        , m_data{0, 0, 0, 0, 0, 0, 0}
-    {}
-#else
     {
         std::fill(m_data, m_data + 7, T(0));
     }
-#endif
 
     template <typename It>
     towgs84(It first, It last)
@@ -103,12 +96,10 @@ struct towgs84
         assign(first, last);
     }
 
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
     towgs84(std::initializer_list<T> l)
     {
         assign(l.begin(), l.end());
     }
-#endif
 
     towgs84(T const& v0, T const& v1, T const& v2)
         : m_size(3)
@@ -144,12 +135,10 @@ struct towgs84
             m_data[m_size] = *first;
     }
 
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
     void assign(std::initializer_list<T> l)
     {
         assign(l.begin(), l.end());
     }
-#endif
 
     const_reference operator[](size_type i) const
     {

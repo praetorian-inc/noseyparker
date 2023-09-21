@@ -14,6 +14,7 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_BLOCK_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_BLOCK_HPP
 
+#include <ciso646>
 #include <boost/sort/common/range.hpp>
 
 namespace boost

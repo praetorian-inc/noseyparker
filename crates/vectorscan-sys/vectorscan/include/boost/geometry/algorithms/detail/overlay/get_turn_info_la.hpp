@@ -120,12 +120,12 @@ struct get_turn_info_linear_areal
                     replace_method_and_operations_tm(tp.method,
                                                      tp.operations[0].operation,
                                                      tp.operations[1].operation);
-                    
+
                     // this function assumes that 'u' must be set for a spike
                     calculate_spike_operation(tp.operations[0].operation,
                                               inters,
                                               umbrella_strategy);
-                    
+
                     *out++ = tp;
                 }
             }
@@ -148,7 +148,7 @@ struct get_turn_info_linear_areal
                 {
                     // do nothing
                 }
-                else 
+                else
                 {
                     using handler = touch<TurnInfo, verify_policy_la>;
                     handler::apply(range_p, range_q, tp,
@@ -178,7 +178,7 @@ struct get_turn_info_linear_areal
                             }
                             else
                             {
-                                tp.operations[0].operation = operation_union;                                
+                                tp.operations[0].operation = operation_union;
                             }
                         }
                     }
@@ -407,7 +407,7 @@ struct get_turn_info_linear_areal
         if ( is_p_spike )
         {
             int const pk_q1 = inters.sides().pk_wrt_q1();
-            
+
             bool going_in = pk_q1 < 0; // Pk on the right
             bool going_out = pk_q1 > 0; // Pk on the left
 
@@ -415,7 +415,7 @@ struct get_turn_info_linear_areal
 
             // special cases
             if ( qk_q1 < 0 ) // Q turning R
-            { 
+            {
                 // spike on the edge point
                 // if it's already known that the spike is going out this musn't be checked
                 if ( ! going_out
@@ -528,7 +528,7 @@ struct get_turn_info_linear_areal
                            || tp.operations[0].operation == operation_intersection ) : // i ???
                             true )
                        && inters.is_spike_p();
-        
+
         // TODO: throw an exception for spike in Areal?
         /*bool is_q_spike = ( ( Version == append_touches
                            && tp.operations[1].operation == operation_continue )
@@ -675,7 +675,7 @@ struct get_turn_info_linear_areal
     //       possible to define a spike on an endpoint. Areal geometries must
     //       NOT have spikes at all. One thing that could be done is to throw
     //       an exception when spike is detected in Areal geometry.
-    
+
     template <bool EnableFirst,
               bool EnableLast,
               typename UniqueSubRange1,
@@ -801,7 +801,7 @@ struct get_turn_info_linear_areal
           && ( ip_count > 1 ? (ip1.is_pj && !ip1.is_qi) : (ip0.is_pj && !ip0.is_qi) ) ) // prevents duplication
         {
             TurnInfo tp = tp_model;
-            
+
             if ( inters.i_info().count > 1 )
             {
                 //BOOST_GEOMETRY_ASSERT( result.template get<1>().dir_a == 0 && result.template get<1>().dir_b == 0 );
@@ -827,7 +827,7 @@ struct get_turn_info_linear_areal
                 {
                     side_pi_y = sides.apply(range_q.at(1), range_q.at(2), range_p.at(0)); // pi wrt q2
                     side_pi_x = sides.apply(range_q.at(0), range_q.at(1), range_p.at(0)); // pi wrt q1
-                    side_qz_x = sides.apply(range_q.at(0), range_q.at(1), range_q.at(2)); // qk wrt q1   
+                    side_qz_x = sides.apply(range_q.at(0), range_q.at(1), range_q.at(2)); // qk wrt q1
                 }
                 // 2. ip0 or pj in the middle of q1
                 else
@@ -853,7 +853,7 @@ struct get_turn_info_linear_areal
             tp.operations[0].operation = operation_blocked;
             tp.operations[0].position = position_back;
             tp.operations[1].position = position_middle;
-            
+
             // equals<> or collinear<> will assign the second point,
             // we'd like to assign the first one
             unsigned int ip_index = ip_count > 1 ? 1 : 0;

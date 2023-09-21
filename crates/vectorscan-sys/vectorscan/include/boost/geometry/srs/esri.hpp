@@ -19,7 +19,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace projections
 {
 

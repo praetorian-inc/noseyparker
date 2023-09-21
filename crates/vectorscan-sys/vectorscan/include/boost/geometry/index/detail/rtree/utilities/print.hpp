@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019-2021.
-// Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2023.
+// Modifications copyright (c) 2019-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -23,8 +24,12 @@
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tags.hpp>
 
+#include <boost/geometry/index/detail/rtree/node/node_elements.hpp>
+#include <boost/geometry/index/detail/rtree/node/variant_visitor.hpp>
+#include <boost/geometry/index/detail/rtree/utilities/view.hpp>
+
 namespace boost { namespace geometry { namespace index { namespace detail {
-    
+
 namespace utilities {
 
 namespace dispatch {
@@ -160,7 +165,7 @@ struct print
         elements_type const& elements = rtree::elements(n);
 
         spaces(level) << "INTERNAL NODE - L:" << level << " Ch:" << elements.size() << " @:" << &n << '\n';
-        
+
         for (typename elements_type::const_iterator it = elements.begin();
             it != elements.end(); ++it)
         {

@@ -202,7 +202,7 @@ namespace projections
             };
 
             template <typename Params, typename Parameters, typename T>
-            inline void setup(Params const& params, Parameters& par, par_nsper<T>& proj_parm) 
+            inline void setup(Params const& params, Parameters& par, par_nsper<T>& proj_parm)
             {
                 proj_parm.height = pj_get_param_f<T, srs::spar::h>(params, "h", srs::dpar::h);
                 if (proj_parm.height <= 0.)

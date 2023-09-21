@@ -75,6 +75,54 @@ void
 all_gather(const communicator& comm, const T* in_values, int n, T* out_values);
 
 /**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, const T& in_value, T* out_values,
+            const std::vector<int>& sizes);
+
+/**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, const T* in_values, T* out_values,
+            const std::vector<int>& sizes);
+
+/**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, std::vector<T> const& in_values,  std::vector<T>& out_values,
+           const std::vector<int>& sizes);
+
+/**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, const T& in_value, T* out_values,
+            const std::vector<int>& sizes, const std::vector<int>& displs);
+
+/**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, const T* in_values, T* out_values,
+            const std::vector<int>& sizes, const std::vector<int>& displs);
+
+/**
+ * \overload
+ */
+template<typename T>
+void
+all_gatherv(const communicator& comm, std::vector<T> const& in_values, std::vector<T>& out_values,
+            const std::vector<int>& sizes, const std::vector<int>& displs);
+
+/**
  *  @brief Combine the values stored by each process into a single
  *  value available to all processes.
  *
@@ -684,6 +732,7 @@ scan(const communicator& comm, const T* in_values, int n, T* out_values, Op op);
 #ifndef BOOST_MPI_COLLECTIVES_FORWARD_ONLY
 // Include implementations of each of the collectives
 #  include <boost/mpi/collectives/all_gather.hpp>
+#  include <boost/mpi/collectives/all_gatherv.hpp>
 #  include <boost/mpi/collectives/all_reduce.hpp>
 #  include <boost/mpi/collectives/all_to_all.hpp>
 #  include <boost/mpi/collectives/broadcast.hpp>

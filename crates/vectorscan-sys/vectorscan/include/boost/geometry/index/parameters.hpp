@@ -25,7 +25,7 @@
 
 namespace boost { namespace geometry { namespace index {
 
-namespace detail { 
+namespace detail {
 
 template <size_t MaxElements>
 struct default_min_elements_s
@@ -46,7 +46,7 @@ inline size_t default_min_elements_d_calc(size_t max_elements, size_t min_elemen
         size_t raw_value = (max_elements * 3) / 10;
         return 1 <= raw_value ? raw_value : 1;
     }
-    
+
     return min_elements;
 }
 
@@ -67,7 +67,7 @@ inline size_t default_rstar_reinserted_elements_d_calc(size_t max_elements, size
     {
         return (max_elements * 3) / 10;
     }
-    
+
     return reinserted_elements;
 }
 

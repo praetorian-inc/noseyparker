@@ -22,12 +22,13 @@ optional_rule_t<R>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<value_type>
+        system::result<value_type>
 {
     if(it == end)
         return boost::none;
     auto const it0 = it;
-    auto rv = r_.parse(it, end);
+    auto rv =
+        this->get().parse(it, end);
     if(rv)
         return value_type(*rv);
     it = it0;

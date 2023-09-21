@@ -515,7 +515,7 @@ struct linear_linear
                         bool const other_b = is_ip_on_boundary(it->point,
                                                                it->operations[other_op_id],
                                                                other_boundary_checker);
-                        
+
                         // if current IP is on boundary of the geometry
                         if ( this_b )
                         {

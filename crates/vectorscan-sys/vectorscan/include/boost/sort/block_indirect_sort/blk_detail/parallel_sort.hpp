@@ -14,6 +14,7 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_PARALLEL_SORT_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_PARALLEL_SORT_HPP
 
+#include <ciso646>
 #include <boost/sort/block_indirect_sort/blk_detail/backbone.hpp>
 #include <boost/sort/pdqsort/pdqsort.hpp>
 #include <boost/sort/common/pivot.hpp>
@@ -159,7 +160,7 @@ parallel_sort<Block_size, Iter_t, Compare>
     //-------------------max_per_thread ---------------------------
     uint32_t nbits_size = (nbits64(sizeof(value_t))) >> 1;
     if (nbits_size > 5) nbits_size = 5;
-    max_per_thread = 1 << (18 - nbits_size);
+    max_per_thread = (size_t) 1 << (18 - nbits_size);
 
     uint32_t level = ((nbits64(nelem / max_per_thread)) * 3) / 2;
 

@@ -1,4 +1,5 @@
-// Copyright (c) 2016-2022 Antony Polukhin
+// Copyright (c) 2016-2023 Antony Polukhin
+// Copyright (c) 2023 Denis Mikhailov
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,6 +21,7 @@
 
 #include <boost/pfr/detail/sequence_tuple.hpp>
 #include <boost/pfr/detail/size_t_.hpp>
+#include <type_traits> // for std::conditional_t, std::is_reference
 
 namespace boost { namespace pfr { namespace detail {
 
@@ -28,298 +30,801 @@ constexpr auto make_tuple_of_references(Args&&... args) noexcept {
   return sequence_tuple::tuple<Args&...>{ args... };
 }
 
+template<typename T, typename Arg>
+constexpr decltype(auto) add_cv_like(Arg& arg) noexcept {
+    if constexpr (std::is_const<T>::value && std::is_volatile<T>::value) {
+        return const_cast<const volatile Arg&>(arg);
+    }
+    else if constexpr (std::is_const<T>::value) {
+        return const_cast<const Arg&>(arg);
+    }
+    else if constexpr (std::is_volatile<T>::value) {
+        return const_cast<volatile Arg&>(arg);
+    }
+    else {
+        return const_cast<Arg&>(arg);
+    }
+}
+
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78939
+template<typename T, typename Sb, typename Arg>
+constexpr decltype(auto) workaround_cast(Arg& arg) noexcept {
+    using output_arg_t = std::conditional_t<!std::is_reference<Sb>(), decltype(detail::add_cv_like<T>(arg)), Sb>;
+    return const_cast<output_arg_t>(arg);
+}
+
 template <class T>
 constexpr auto tie_as_tuple(T& /*val*/, size_t_<0>) noexcept {
   return sequence_tuple::tuple<>{};
 }
 
 template <class T>
-constexpr auto tie_as_tuple(T& val, size_t_<1>, std::enable_if_t<std::is_class< std::remove_cv_t<T> >::value>* = 0) noexcept {
-  auto& [a] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a);
+constexpr auto tie_as_tuple(T& val, size_t_<1>, std::enable_if_t<std::is_class< std::remove_cv_t<T> >::value>* = nullptr) noexcept {
+  auto& [a] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  return ::boost::pfr::detail::make_tuple_of_references(detail::workaround_cast<T, decltype(a)>(a));
 }
 
 
 template <class T>
-constexpr auto tie_as_tuple(T& val, size_t_<1>, std::enable_if_t<!std::is_class< std::remove_cv_t<T> >::value>* = 0) noexcept {
+constexpr auto tie_as_tuple(T& val, size_t_<1>, std::enable_if_t<!std::is_class< std::remove_cv_t<T> >::value>* = nullptr) noexcept {
   return ::boost::pfr::detail::make_tuple_of_references( val );
 }
 
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<2>) noexcept {
-  auto& [a,b] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b);
+  auto& [a,b] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  return ::boost::pfr::detail::make_tuple_of_references(detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b));
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<3>) noexcept {
-  auto& [a,b,c] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c);
+  auto& [a,b,c] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<4>) noexcept {
-  auto& [a,b,c,d] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d);
+  auto& [a,b,c,d] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<5>) noexcept {
-  auto& [a,b,c,d,e] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e);
+  auto& [a,b,c,d,e] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<6>) noexcept {
-  auto& [a,b,c,d,e,f] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f);
+  auto& [a,b,c,d,e,f] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<7>) noexcept {
-  auto& [a,b,c,d,e,f,g] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g);
+  auto& [a,b,c,d,e,f,g] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<8>) noexcept {
-  auto& [a,b,c,d,e,f,g,h] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h);
+  auto& [a,b,c,d,e,f,g,h] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<9>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j);
+  auto& [a,b,c,d,e,f,g,h,j] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<10>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k);
+  auto& [a,b,c,d,e,f,g,h,j,k] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<11>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l);
+  auto& [a,b,c,d,e,f,g,h,j,k,l] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<12>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<13>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<14>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<15>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<16>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<17>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<18>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<19>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<20>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<21>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<22>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<23>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<24>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<25>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<26>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<27>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<28>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<29>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<30>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<31>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<32>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<33>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<34>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<35>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<36>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<37>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<38>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<39>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<40>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<41>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<42>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<43>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<44>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<45>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<46>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y)
+  );
 }
 
 template <class T>
 constexpr auto tie_as_tuple(T& val, size_t_<47>) noexcept {
-  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
-  return ::boost::pfr::detail::make_tuple_of_references(a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z);
+  auto& [a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+
+  return ::boost::pfr::detail::make_tuple_of_references(
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z)
+  );
 }
 
 template <class T>
@@ -327,11 +832,25 @@ constexpr auto tie_as_tuple(T& val, size_t_<48>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa)
   );
 }
 
@@ -340,11 +859,26 @@ constexpr auto tie_as_tuple(T& val, size_t_<49>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab)
   );
 }
 
@@ -353,11 +887,26 @@ constexpr auto tie_as_tuple(T& val, size_t_<50>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac)
   );
 }
 
@@ -366,11 +915,26 @@ constexpr auto tie_as_tuple(T& val, size_t_<51>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad)
   );
 }
 
@@ -379,11 +943,27 @@ constexpr auto tie_as_tuple(T& val, size_t_<52>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae)
   );
 }
 
@@ -392,11 +972,27 @@ constexpr auto tie_as_tuple(T& val, size_t_<53>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af)
   );
 }
 
@@ -405,11 +1001,27 @@ constexpr auto tie_as_tuple(T& val, size_t_<54>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag)
   );
 }
 
@@ -418,11 +1030,28 @@ constexpr auto tie_as_tuple(T& val, size_t_<55>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah)
   );
 }
 
@@ -431,11 +1060,28 @@ constexpr auto tie_as_tuple(T& val, size_t_<56>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj)
   );
 }
 
@@ -444,11 +1090,28 @@ constexpr auto tie_as_tuple(T& val, size_t_<57>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak)
   );
 }
 
@@ -457,11 +1120,29 @@ constexpr auto tie_as_tuple(T& val, size_t_<58>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al)
   );
 }
 
@@ -470,11 +1151,29 @@ constexpr auto tie_as_tuple(T& val, size_t_<59>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am)
   );
 }
 
@@ -483,11 +1182,29 @@ constexpr auto tie_as_tuple(T& val, size_t_<60>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an)
   );
 }
 
@@ -496,11 +1213,30 @@ constexpr auto tie_as_tuple(T& val, size_t_<61>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap)
   );
 }
 
@@ -509,11 +1245,30 @@ constexpr auto tie_as_tuple(T& val, size_t_<62>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq)
   );
 }
 
@@ -522,11 +1277,30 @@ constexpr auto tie_as_tuple(T& val, size_t_<63>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar)
   );
 }
 
@@ -535,11 +1309,31 @@ constexpr auto tie_as_tuple(T& val, size_t_<64>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as)
   );
 }
 
@@ -548,11 +1342,31 @@ constexpr auto tie_as_tuple(T& val, size_t_<65>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at)
   );
 }
 
@@ -561,11 +1375,31 @@ constexpr auto tie_as_tuple(T& val, size_t_<66>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au)
   );
 }
 
@@ -574,11 +1408,32 @@ constexpr auto tie_as_tuple(T& val, size_t_<67>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av)
   );
 }
 
@@ -587,11 +1442,32 @@ constexpr auto tie_as_tuple(T& val, size_t_<68>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw)
   );
 }
 
@@ -600,11 +1476,32 @@ constexpr auto tie_as_tuple(T& val, size_t_<69>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax)
   );
 }
 
@@ -613,11 +1510,33 @@ constexpr auto tie_as_tuple(T& val, size_t_<70>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay)
   );
 }
 
@@ -626,11 +1545,33 @@ constexpr auto tie_as_tuple(T& val, size_t_<71>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az)
   );
 }
 
@@ -639,11 +1580,33 @@ constexpr auto tie_as_tuple(T& val, size_t_<72>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA)
   );
 }
 
@@ -652,11 +1615,34 @@ constexpr auto tie_as_tuple(T& val, size_t_<73>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB)
   );
 }
 
@@ -665,11 +1651,34 @@ constexpr auto tie_as_tuple(T& val, size_t_<74>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC)
   );
 }
 
@@ -678,11 +1687,34 @@ constexpr auto tie_as_tuple(T& val, size_t_<75>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD)
   );
 }
 
@@ -691,11 +1723,35 @@ constexpr auto tie_as_tuple(T& val, size_t_<76>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE)
   );
 }
 
@@ -704,11 +1760,35 @@ constexpr auto tie_as_tuple(T& val, size_t_<77>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF)
   );
 }
 
@@ -717,11 +1797,35 @@ constexpr auto tie_as_tuple(T& val, size_t_<78>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG)
   );
 }
 
@@ -730,11 +1834,36 @@ constexpr auto tie_as_tuple(T& val, size_t_<79>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH)
   );
 }
 
@@ -743,11 +1872,36 @@ constexpr auto tie_as_tuple(T& val, size_t_<80>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ)
   );
 }
 
@@ -756,11 +1910,36 @@ constexpr auto tie_as_tuple(T& val, size_t_<81>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK)
   );
 }
 
@@ -769,11 +1948,37 @@ constexpr auto tie_as_tuple(T& val, size_t_<82>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL)
   );
 }
 
@@ -782,11 +1987,37 @@ constexpr auto tie_as_tuple(T& val, size_t_<83>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM)
   );
 }
 
@@ -795,11 +2026,37 @@ constexpr auto tie_as_tuple(T& val, size_t_<84>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN)
   );
 }
 
@@ -808,11 +2065,38 @@ constexpr auto tie_as_tuple(T& val, size_t_<85>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP)
   );
 }
 
@@ -821,11 +2105,38 @@ constexpr auto tie_as_tuple(T& val, size_t_<86>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ)
   );
 }
 
@@ -834,11 +2145,38 @@ constexpr auto tie_as_tuple(T& val, size_t_<87>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR)
   );
 }
 
@@ -847,11 +2185,39 @@ constexpr auto tie_as_tuple(T& val, size_t_<88>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS)
   );
 }
 
@@ -860,11 +2226,39 @@ constexpr auto tie_as_tuple(T& val, size_t_<89>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU)
   );
 }
 
@@ -873,11 +2267,39 @@ constexpr auto tie_as_tuple(T& val, size_t_<90>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV)
   );
 }
 
@@ -886,11 +2308,40 @@ constexpr auto tie_as_tuple(T& val, size_t_<91>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW)
   );
 }
 
@@ -899,11 +2350,40 @@ constexpr auto tie_as_tuple(T& val, size_t_<92>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX)
   );
 }
 
@@ -912,11 +2392,40 @@ constexpr auto tie_as_tuple(T& val, size_t_<93>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY)
   );
 }
 
@@ -925,11 +2434,41 @@ constexpr auto tie_as_tuple(T& val, size_t_<94>) noexcept {
   auto& [
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ)
   );
 }
 
@@ -939,12 +2478,41 @@ constexpr auto tie_as_tuple(T& val, size_t_<95>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba)
   );
 }
 
@@ -954,12 +2522,41 @@ constexpr auto tie_as_tuple(T& val, size_t_<96>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba,bb
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba,bb
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba),detail::workaround_cast<T, decltype(bb)>(bb)
   );
 }
 
@@ -969,12 +2566,42 @@ constexpr auto tie_as_tuple(T& val, size_t_<97>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba,bb,bc
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba,bb,bc
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba),detail::workaround_cast<T, decltype(bb)>(bb),
+    detail::workaround_cast<T, decltype(bc)>(bc)
   );
 }
 
@@ -984,12 +2611,42 @@ constexpr auto tie_as_tuple(T& val, size_t_<98>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba,bb,bc,bd
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba,bb,bc,bd
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba),detail::workaround_cast<T, decltype(bb)>(bb),
+    detail::workaround_cast<T, decltype(bc)>(bc),detail::workaround_cast<T, decltype(bd)>(bd)
   );
 }
 
@@ -999,12 +2656,42 @@ constexpr auto tie_as_tuple(T& val, size_t_<99>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba,bb,bc,bd,be
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba,bb,bc,bd,be
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba),detail::workaround_cast<T, decltype(bb)>(bb),
+    detail::workaround_cast<T, decltype(bc)>(bc),detail::workaround_cast<T, decltype(bd)>(bd),detail::workaround_cast<T, decltype(be)>(be)
   );
 }
 
@@ -1014,12 +2701,43 @@ constexpr auto tie_as_tuple(T& val, size_t_<100>) noexcept {
     a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
     aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
     ba,bb,bc,bd,be,bf
-  ] = val; // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
+  ] = const_cast<std::remove_cv_t<T>&>(val); // ====================> Boost.PFR: User-provided type is not a SimpleAggregate.
 
   return ::boost::pfr::detail::make_tuple_of_references(
-    a,b,c,d,e,f,g,h,j,k,l,m,n,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W,X,Y,Z,
-    aa,ab,ac,ad,ae,af,ag,ah,aj,ak,al,am,an,ap,aq,ar,as,at,au,av,aw,ax,ay,az,aA,aB,aC,aD,aE,aF,aG,aH,aJ,aK,aL,aM,aN,aP,aQ,aR,aS,aU,aV,aW,aX,aY,aZ,
-    ba,bb,bc,bd,be,bf
+    detail::workaround_cast<T, decltype(a)>(a),detail::workaround_cast<T, decltype(b)>(b),detail::workaround_cast<T, decltype(c)>(c),
+    detail::workaround_cast<T, decltype(d)>(d),detail::workaround_cast<T, decltype(e)>(e),detail::workaround_cast<T, decltype(f)>(f),
+    detail::workaround_cast<T, decltype(g)>(g),detail::workaround_cast<T, decltype(h)>(h),detail::workaround_cast<T, decltype(j)>(j),
+    detail::workaround_cast<T, decltype(k)>(k),detail::workaround_cast<T, decltype(l)>(l),detail::workaround_cast<T, decltype(m)>(m),
+    detail::workaround_cast<T, decltype(n)>(n),detail::workaround_cast<T, decltype(p)>(p),detail::workaround_cast<T, decltype(q)>(q),
+    detail::workaround_cast<T, decltype(r)>(r),detail::workaround_cast<T, decltype(s)>(s),detail::workaround_cast<T, decltype(t)>(t),
+    detail::workaround_cast<T, decltype(u)>(u),detail::workaround_cast<T, decltype(v)>(v),detail::workaround_cast<T, decltype(w)>(w),
+    detail::workaround_cast<T, decltype(x)>(x),detail::workaround_cast<T, decltype(y)>(y),detail::workaround_cast<T, decltype(z)>(z),
+    detail::workaround_cast<T, decltype(A)>(A),detail::workaround_cast<T, decltype(B)>(B),detail::workaround_cast<T, decltype(C)>(C),
+    detail::workaround_cast<T, decltype(D)>(D),detail::workaround_cast<T, decltype(E)>(E),detail::workaround_cast<T, decltype(F)>(F),
+    detail::workaround_cast<T, decltype(G)>(G),detail::workaround_cast<T, decltype(H)>(H),detail::workaround_cast<T, decltype(J)>(J),
+    detail::workaround_cast<T, decltype(K)>(K),detail::workaround_cast<T, decltype(L)>(L),detail::workaround_cast<T, decltype(M)>(M),
+    detail::workaround_cast<T, decltype(N)>(N),detail::workaround_cast<T, decltype(P)>(P),detail::workaround_cast<T, decltype(Q)>(Q),
+    detail::workaround_cast<T, decltype(R)>(R),detail::workaround_cast<T, decltype(S)>(S),detail::workaround_cast<T, decltype(U)>(U),
+    detail::workaround_cast<T, decltype(V)>(V),detail::workaround_cast<T, decltype(W)>(W),detail::workaround_cast<T, decltype(X)>(X),
+    detail::workaround_cast<T, decltype(Y)>(Y),detail::workaround_cast<T, decltype(Z)>(Z),detail::workaround_cast<T, decltype(aa)>(aa),
+    detail::workaround_cast<T, decltype(ab)>(ab),detail::workaround_cast<T, decltype(ac)>(ac),detail::workaround_cast<T, decltype(ad)>(ad),
+    detail::workaround_cast<T, decltype(ae)>(ae),detail::workaround_cast<T, decltype(af)>(af),detail::workaround_cast<T, decltype(ag)>(ag),
+    detail::workaround_cast<T, decltype(ah)>(ah),detail::workaround_cast<T, decltype(aj)>(aj),detail::workaround_cast<T, decltype(ak)>(ak),
+    detail::workaround_cast<T, decltype(al)>(al),detail::workaround_cast<T, decltype(am)>(am),detail::workaround_cast<T, decltype(an)>(an),
+    detail::workaround_cast<T, decltype(ap)>(ap),detail::workaround_cast<T, decltype(aq)>(aq),detail::workaround_cast<T, decltype(ar)>(ar),
+    detail::workaround_cast<T, decltype(as)>(as),detail::workaround_cast<T, decltype(at)>(at),detail::workaround_cast<T, decltype(au)>(au),
+    detail::workaround_cast<T, decltype(av)>(av),detail::workaround_cast<T, decltype(aw)>(aw),detail::workaround_cast<T, decltype(ax)>(ax),
+    detail::workaround_cast<T, decltype(ay)>(ay),detail::workaround_cast<T, decltype(az)>(az),detail::workaround_cast<T, decltype(aA)>(aA),
+    detail::workaround_cast<T, decltype(aB)>(aB),detail::workaround_cast<T, decltype(aC)>(aC),detail::workaround_cast<T, decltype(aD)>(aD),
+    detail::workaround_cast<T, decltype(aE)>(aE),detail::workaround_cast<T, decltype(aF)>(aF),detail::workaround_cast<T, decltype(aG)>(aG),
+    detail::workaround_cast<T, decltype(aH)>(aH),detail::workaround_cast<T, decltype(aJ)>(aJ),detail::workaround_cast<T, decltype(aK)>(aK),
+    detail::workaround_cast<T, decltype(aL)>(aL),detail::workaround_cast<T, decltype(aM)>(aM),detail::workaround_cast<T, decltype(aN)>(aN),
+    detail::workaround_cast<T, decltype(aP)>(aP),detail::workaround_cast<T, decltype(aQ)>(aQ),detail::workaround_cast<T, decltype(aR)>(aR),
+    detail::workaround_cast<T, decltype(aS)>(aS),detail::workaround_cast<T, decltype(aU)>(aU),detail::workaround_cast<T, decltype(aV)>(aV),
+    detail::workaround_cast<T, decltype(aW)>(aW),detail::workaround_cast<T, decltype(aX)>(aX),detail::workaround_cast<T, decltype(aY)>(aY),
+    detail::workaround_cast<T, decltype(aZ)>(aZ),detail::workaround_cast<T, decltype(ba)>(ba),detail::workaround_cast<T, decltype(bb)>(bb),
+    detail::workaround_cast<T, decltype(bc)>(bc),detail::workaround_cast<T, decltype(bd)>(bd),detail::workaround_cast<T, decltype(be)>(be),
+    detail::workaround_cast<T, decltype(bf)>(bf)
   );
 }
 

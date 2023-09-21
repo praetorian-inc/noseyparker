@@ -27,6 +27,7 @@
 # pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+#include <boost/endian/detail/requires_cxx11.hpp>
 #include <boost/endian/detail/endian_store.hpp>
 #include <boost/endian/detail/endian_load.hpp>
 #include <boost/core/scoped_enum.hpp>

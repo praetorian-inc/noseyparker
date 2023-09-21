@@ -444,7 +444,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
     }
     if (_ec)
     {
-        //if an error occured we need to reap the child process
+        //if an error occurred we need to reap the child process
         ::waitpid(this->pid, nullptr, WNOHANG);
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
         return child();

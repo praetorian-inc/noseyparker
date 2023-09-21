@@ -10,7 +10,6 @@
 #ifndef BOOST_URL_GRAMMAR_DETAIL_RECYCLED_HPP
 #define BOOST_URL_GRAMMAR_DETAIL_RECYCLED_HPP
 
-#include <mutex>
 #include <utility>
 
 namespace boost {
@@ -71,7 +70,7 @@ void
 recycled_add(
     std::size_t n) noexcept
 {
-    recycler_add_impl(n);
+    recycled_add_impl(n);
 }
 
 inline
@@ -79,7 +78,7 @@ void
 recycled_remove(
     std::size_t n) noexcept
 {
-    recycler_remove_impl(n);
+    recycled_remove_impl(n);
 }
 
 #else

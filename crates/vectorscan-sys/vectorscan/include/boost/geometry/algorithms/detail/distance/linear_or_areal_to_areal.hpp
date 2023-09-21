@@ -91,7 +91,7 @@ template <typename Linear, typename Areal, typename Strategy>
 struct distance
     <
         Linear, Areal, Strategy,
-        linear_tag, areal_tag, 
+        linear_tag, areal_tag,
         strategy_tag_distance_point_segment, false
     >
     : detail::distance::linear_to_areal
@@ -104,7 +104,7 @@ template <typename Areal, typename Linear, typename Strategy>
 struct distance
     <
         Areal, Linear, Strategy,
-        areal_tag, linear_tag, 
+        areal_tag, linear_tag,
         strategy_tag_distance_point_segment, false
     >
     : detail::distance::linear_to_areal
@@ -118,7 +118,7 @@ template <typename Areal1, typename Areal2, typename Strategy>
 struct distance
     <
         Areal1, Areal2, Strategy,
-        areal_tag, areal_tag, 
+        areal_tag, areal_tag,
         strategy_tag_distance_point_segment, false
     >
     : detail::distance::areal_to_areal

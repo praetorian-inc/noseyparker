@@ -14,12 +14,14 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_MERGE_VECTOR_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_MERGE_VECTOR_HPP
 
-#include <boost/sort/common/merge_four.hpp>
+
+#include <ciso646>
 #include <functional>
 #include <iterator>
 #include <memory>
 #include <type_traits>
 #include <vector>
+#include <boost/sort/common/merge_four.hpp>
 
 namespace boost
 {
@@ -99,7 +101,7 @@ void merge_level4(range<Iter1_t> dest, std::vector<range<Iter2_t> > &v_input,
 template<class Value_t, class Iter_t, class Compare>
 void uninit_merge_level4(range<Value_t *> dest,
                          std::vector<range<Iter_t> > &v_input,
-                         std::vector<range<Value_t *> > &v_output, Compare comp)
+                         std::vector <range<Value_t *> > &v_output, Compare comp)
 {
     typedef range<Value_t *> range1_t;
     typedef util::value_iter<Iter_t> type1;

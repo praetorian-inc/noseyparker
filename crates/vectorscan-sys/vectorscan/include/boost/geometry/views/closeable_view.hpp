@@ -4,8 +4,9 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2020-2021.
-// Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2020-2023.
+// Modifications copyright (c) 2020-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -124,17 +125,17 @@ namespace traits
 
 
 template <typename Range, closure_selector Close>
-struct tag<detail::closed_view<Range, Close> >
+struct tag<geometry::detail::closed_view<Range, Close> >
     : geometry::tag<Range>
 {};
 
 template <typename Range, closure_selector Close>
-struct point_order<detail::closed_view<Range, Close> >
+struct point_order<geometry::detail::closed_view<Range, Close> >
     : geometry::point_order<Range>
 {};
 
 template <typename Range, closure_selector Close>
-struct closure<detail::closed_view<Range, Close> >
+struct closure<geometry::detail::closed_view<Range, Close> >
 {
     static const closure_selector value = closed;
 };

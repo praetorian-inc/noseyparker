@@ -175,6 +175,32 @@ inline RealType cdf(const extreme_value_distribution<RealType, Policy>& dist, co
 } // cdf
 
 template <class RealType, class Policy>
+inline RealType logcdf(const extreme_value_distribution<RealType, Policy>& dist, const RealType& x)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const extreme_value_distribution<%1%>&, %1%)";
+
+   if((boost::math::isinf)(x))
+      return x < 0 ? 0.0f : 1.0f;
+   RealType a = dist.location();
+   RealType b = dist.scale();
+   RealType result = 0;
+   if(0 == detail::verify_scale_b(function, b, &result, Policy()))
+      return result;
+   if(0 == detail::check_finite(function, a, &result, Policy()))
+      return result;
+   if(0 == detail::check_finite(function, a, &result, Policy()))
+      return result;
+   if(0 == detail::check_x("boost::math::logcdf(const extreme_value_distribution<%1%>&, %1%)", x, &result, Policy()))
+      return result;
+
+   result = -exp((a-x)/b);
+
+   return result;
+} // logcdf
+
+template <class RealType, class Policy>
 RealType quantile(const extreme_value_distribution<RealType, Policy>& dist, const RealType& p)
 {
    BOOST_MATH_STD_USING // for ADL of std functions
@@ -221,6 +247,30 @@ inline RealType cdf(const complemented2_type<extreme_value_distribution<RealType
       return result;
 
    result = -boost::math::expm1(-exp((a-c.param)/b), Policy());
+
+   return result;
+}
+
+template <class RealType, class Policy>
+inline RealType logcdf(const complemented2_type<extreme_value_distribution<RealType, Policy>, RealType>& c)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const extreme_value_distribution<%1%>&, %1%)";
+
+   if((boost::math::isinf)(c.param))
+      return c.param < 0 ? 1.0f : 0.0f;
+   RealType a = c.dist.location();
+   RealType b = c.dist.scale();
+   RealType result = 0;
+   if(0 == detail::verify_scale_b(function, b, &result, Policy()))
+      return result;
+   if(0 == detail::check_finite(function, a, &result, Policy()))
+      return result;
+   if(0 == detail::check_x(function, c.param, &result, Policy()))
+      return result;
+
+   result = log1p(-exp(-exp((a-c.param)/b)), Policy());
 
    return result;
 }

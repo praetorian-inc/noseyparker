@@ -777,7 +777,6 @@ namespace spreadsort {
     float_sort(RandomAccessIter first, RandomAccessIter last, Div_type,
                Right_shift rshift)
     {
-      BOOST_STATIC_ASSERT(sizeof(boost::uintmax_t) >= sizeof(Div_type));
       boost::sort::pdqsort(first, last);
     }
 
@@ -819,7 +818,6 @@ namespace spreadsort {
     float_sort(RandomAccessIter first, RandomAccessIter last, Div_type,
                Right_shift rshift, Compare comp)
     {
-      BOOST_STATIC_ASSERT(sizeof(boost::uintmax_t) >= sizeof(Div_type));
       boost::sort::pdqsort(first, last, comp);
     }
   }

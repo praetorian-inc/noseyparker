@@ -175,7 +175,7 @@ private:
             traits::iter_visit<Geometry2>::apply([&](auto const& g2)
             {
                 TupleOut inters_result;
-                using g2_t = util::remove_cref_t<decltype(g2)>;                
+                using g2_t = util::remove_cref_t<decltype(g2)>;
                 intersection<G1, g2_t, TupleOut>::apply(g1, g2, inters_result, strategy);
 
                 // TODO: If possible merge based on adjacency lists, i.e. merge
@@ -218,7 +218,7 @@ private:
             <
                 Out, Out, typename Strategy::cs_tag
             >::type;
-        
+
         rescale_policy_type robust_policy
             = geometry::get_rescale_policy<rescale_policy_type>(
                     g1, g2, strategy);

@@ -33,6 +33,7 @@
 #include <boost/interprocess/detail/mpl.hpp>
 #include <boost/container/detail/type_traits.hpp>  //alignment_of, aligned_storage
 #include <boost/assert.hpp>
+#include <boost/static_assert.hpp>
 #include <iosfwd>
 
 #if defined(BOOST_GCC) && (BOOST_GCC >= 40600)

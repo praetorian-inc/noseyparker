@@ -92,7 +92,7 @@ public:
         typename RangeIterator,
         typename Strategy,
         typename Distance
-    >    
+    >
     static inline RangeIterator apply(Geometry const& geometry,
                                       RangeIterator first,
                                       RangeIterator last,
@@ -111,7 +111,7 @@ public:
         typename Geometry,
         typename RangeIterator,
         typename Strategy
-    >    
+    >
     static inline RangeIterator apply(Geometry const& geometry,
                                       RangeIterator first,
                                       RangeIterator last,

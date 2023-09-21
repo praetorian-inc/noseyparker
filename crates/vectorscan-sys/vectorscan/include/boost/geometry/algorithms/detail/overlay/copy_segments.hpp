@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
@@ -15,10 +16,10 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_COPY_SEGMENTS_HPP
 
 
+#include <array>
 #include <type_traits>
 #include <vector>
 
-#include <boost/array.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
@@ -167,10 +168,7 @@ public:
         }
 
         signed_size_type const count = to_index - from_index + 1;
-
-        typename boost::range_iterator<LineString const>::type
-            it = boost::begin(ls) + from_index;
-
+        auto it = boost::begin(ls) + from_index;
         for (signed_size_type i = 0; i < count; ++i, ++it)
         {
             append_to_output(current_output, *it, strategy, robust_policy,
@@ -238,7 +236,7 @@ struct copy_segments_box
             : 5 - index + to_index + 1;
 
         // Create array of points, the fifth one closes it
-        boost::array<typename point_type<Box>::type, 5> bp;
+        std::array<typename point_type<Box>::type, 5> bp;
         assign_box_corners_oriented<Reverse>(box, bp);
         bp[4] = bp[0];
 

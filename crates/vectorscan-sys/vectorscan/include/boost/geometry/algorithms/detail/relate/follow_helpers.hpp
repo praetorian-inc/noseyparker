@@ -256,11 +256,10 @@ public:
         segment_identifier const& other_id = turn.operations[other_op_id].seg_id;
         overlay::operation_type exit_op = turn.operations[op_id].operation;
 
-        typedef typename std::vector<point_info>::iterator point_iterator;
         // search for the entry point in the same range of other geometry
-        point_iterator entry_it = std::find_if(m_other_entry_points.begin(),
-                                               m_other_entry_points.end(),
-                                               same_single(other_id));
+        auto entry_it = std::find_if(m_other_entry_points.begin(),
+                                     m_other_entry_points.end(),
+                                     same_single(other_id));
 
         // this end point has corresponding entry point
         if ( entry_it != m_other_entry_points.end() )

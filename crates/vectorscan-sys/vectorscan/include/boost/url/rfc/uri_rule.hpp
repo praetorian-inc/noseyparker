@@ -27,7 +27,7 @@ namespace urls {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< url_view > rv = grammar::parse( "https://www.example.com/index.htm?id=guest#s1", uri_rule );
+    system::result< url_view > rv = grammar::parse( "https://www.example.com/index.htm?id=guest#s1", uri_rule );
     @endcode
 
     @par BNF
@@ -57,7 +57,7 @@ struct uri_rule_t
         char const*& it,
         char const* const end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr uri_rule_t uri_rule{};

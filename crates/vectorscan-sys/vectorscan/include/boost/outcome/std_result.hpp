@@ -1,5 +1,5 @@
 /* A very simple result type
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (8 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (8 commits)
 File Created: June 2017
 
 

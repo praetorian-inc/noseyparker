@@ -28,7 +28,7 @@
  * ERROR HANDLING
  *
  *    This component checks parameters for valid values.  If an invalid value
- *    is found, the error code is combined with the current error code using 
+ *    is found, the error code is combined with the current error code using
  *    the bitwise or.  This combining allows multiple error codes to be
  *    returned. The possible error codes are:
  *
@@ -47,13 +47,13 @@
  *    GEOCENTRIC is intended for reuse by any application that performs
  *    coordinate conversions between geodetic coordinates and geocentric
  *    coordinates.
- *    
+ *
  *
  * REFERENCES
- *    
+ *
  *    An Improved Algorithm for Geocentric to Geodetic Coordinate Conversion,
  *    Ralph Toms, February 1996  UCRL-JC-123138.
- *    
+ *
  *    Further information on GEOCENTRIC can be found in the Reuse Manual.
  *
  *    GEOCENTRIC originated from : U.S. Army Topographic Engineering Center
@@ -135,11 +135,11 @@ inline T AD_C()
 
 /***************************************************************************/
 /*
- *                              FUNCTIONS     
+ *                              FUNCTIONS
  */
 
 template <typename T>
-inline long pj_Set_Geocentric_Parameters (GeocentricInfo<T> & gi, T const& a, T const& b) 
+inline long pj_Set_Geocentric_Parameters (GeocentricInfo<T> & gi, T const& a, T const& b)
 
 { /* BEGIN Set_Geocentric_Parameters */
 /*
@@ -172,7 +172,7 @@ inline long pj_Set_Geocentric_Parameters (GeocentricInfo<T> & gi, T const& a, T 
 
 template <typename T>
 inline void pj_Get_Geocentric_Parameters (GeocentricInfo<T> const& gi,
-                                          T & a, 
+                                          T & a,
                                           T & b)
 { /* BEGIN Get_Geocentric_Parameters */
 /*
@@ -246,7 +246,7 @@ inline long pj_Convert_Geodetic_To_Geocentric (GeocentricInfo<T> const& gi,
 
 /*
  * The function Convert_Geocentric_To_Geodetic converts geocentric
- * coordinates (X, Y, Z) to geodetic coordinates (latitude, longitude, 
+ * coordinates (X, Y, Z) to geodetic coordinates (latitude, longitude,
  * and height), according to the current ellipsoid parameters.
  *
  *    X         : Geocentric X coordinate, in meters.         (input)
@@ -326,7 +326,7 @@ inline void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo<T> const& gi,
                 Latitude = PI_OVER_2;
                 Height = -Geocent_b;
                 return;
-            } 
+            }
         }
     }
     W2 = X*X + Y*Y;

@@ -60,7 +60,7 @@ namespace urls {
         @ref parse_uri_reference,
         @ref resolve.
 */
-class BOOST_SYMBOL_VISIBLE url
+class BOOST_URL_DECL url
     : public url_base
 {
     friend std::hash<url>;
@@ -82,7 +82,6 @@ public:
         buffer is destroyed, invalidating all
         references to it.
     */
-    BOOST_URL_DECL
     virtual ~url();
 
     /** Constructor
@@ -118,7 +117,6 @@ public:
         <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-4.2"
             >4.2. Relative Reference (rfc3986)</a>
     */
-    BOOST_URL_DECL
     url() noexcept;
 
     /** Constructor
@@ -168,9 +166,8 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-4.1"
             >4.1. URI Reference</a>
     */
-    BOOST_URL_DECL
     explicit
-    url(string_view s);
+    url(core::string_view s);
 
     /** Constructor
 
@@ -194,7 +191,6 @@ public:
 
         @param u The url to move from.
     */
-    BOOST_URL_DECL
     url(url&& u) noexcept;
 
     /** Constructor
@@ -272,7 +268,6 @@ public:
 
         @param u The url to assign from.
     */
-    BOOST_URL_DECL
     url&
     operator=(url&& u) noexcept;
 
@@ -362,7 +357,6 @@ public:
         @param other The object to swap with
 
     */
-    BOOST_URL_DECL
     void
     swap(url& other) noexcept;
 
@@ -412,7 +406,7 @@ public:
     //
 
     /// @copydoc url_base::set_scheme
-    url& set_scheme(string_view s) { url_base::set_scheme(s); return *this; }
+    url& set_scheme(core::string_view s) { url_base::set_scheme(s); return *this; }
     /// @copydoc url_base::set_scheme_id
     url& set_scheme_id(urls::scheme id) { url_base::set_scheme_id(id); return *this; }
     /// @copydoc url_base::remove_scheme
@@ -424,28 +418,28 @@ public:
     url& remove_authority() { url_base::remove_authority(); return *this; }
 
     /// @copydoc url_base::set_userinfo
-    url& set_userinfo(string_view s) { url_base::set_userinfo(s); return *this; }
+    url& set_userinfo(core::string_view s) { url_base::set_userinfo(s); return *this; }
     /// @copydoc url_base::set_encoded_userinfo
     url& set_encoded_userinfo(pct_string_view s) { url_base::set_encoded_userinfo(s); return *this; }
     /// @copydoc url_base::remove_userinfo
     url& remove_userinfo() noexcept { url_base::remove_userinfo(); return *this; }
     /// @copydoc url_base::set_user
-    url& set_user(string_view s) { url_base::set_user(s); return *this; }
+    url& set_user(core::string_view s) { url_base::set_user(s); return *this; }
     /// @copydoc url_base::set_encoded_user
     url& set_encoded_user(pct_string_view s) { url_base::set_encoded_user(s); return *this; }
     /// @copydoc url_base::set_password
-    url& set_password(string_view s) { url_base::set_password(s); return *this; }
+    url& set_password(core::string_view s) { url_base::set_password(s); return *this; }
     /// @copydoc url_base::set_encoded_password
     url& set_encoded_password(pct_string_view s) { url_base::set_encoded_password(s); return *this; }
     /// @copydoc url_base::remove_password
     url& remove_password() noexcept { url_base::remove_password(); return *this; }
 
     /// @copydoc url_base::set_host
-    url& set_host(string_view s) { url_base::set_host(s); return *this; }
+    url& set_host(core::string_view s) { url_base::set_host(s); return *this; }
     /// @copydoc url_base::set_encoded_host
     url& set_encoded_host(pct_string_view s) { url_base::set_encoded_host(s); return *this; }
     /// @copydoc url_base::set_host_address
-    url& set_host_address(string_view s) { url_base::set_host_address(s); return *this; }
+    url& set_host_address(core::string_view s) { url_base::set_host_address(s); return *this; }
     /// @copydoc url_base::set_encoded_host_address
     url& set_encoded_host_address(pct_string_view s) { url_base::set_encoded_host_address(s); return *this; }
     /// @copydoc url_base::set_host_ipv4
@@ -453,36 +447,40 @@ public:
     /// @copydoc url_base::set_host_ipv6
     url& set_host_ipv6(ipv6_address const& addr) { url_base::set_host_ipv6(addr); return *this; }
     /// @copydoc url_base::set_host_ipvfuture
-    url& set_host_ipvfuture(string_view s) { url_base::set_host_ipvfuture(s); return *this; }
+    url& set_host_ipvfuture(core::string_view s) { url_base::set_host_ipvfuture(s); return *this; }
     /// @copydoc url_base::set_host_name
-    url& set_host_name(string_view s) { url_base::set_host_name(s); return *this; }
+    url& set_host_name(core::string_view s) { url_base::set_host_name(s); return *this; }
     /// @copydoc url_base::set_encoded_host_name
     url& set_encoded_host_name(pct_string_view s) { url_base::set_encoded_host_name(s); return *this; }
     /// @copydoc url_base::set_port_number
     url& set_port_number(std::uint16_t n) { url_base::set_port_number(n); return *this; }
     /// @copydoc url_base::set_port
-    url& set_port(string_view s) { url_base::set_port(s); return *this; }
+    url& set_port(core::string_view s) { url_base::set_port(s); return *this; }
     /// @copydoc url_base::remove_port
     url& remove_port() noexcept { url_base::remove_port(); return *this; }
 
     /// @copydoc url_base::set_path_absolute
     //bool set_path_absolute(bool absolute);
     /// @copydoc url_base::set_path
-    url& set_path(string_view s) { url_base::set_path(s); return *this; }
+    url& set_path(core::string_view s) { url_base::set_path(s); return *this; }
     /// @copydoc url_base::set_encoded_path
     url& set_encoded_path(pct_string_view s) { url_base::set_encoded_path(s); return *this; }
 
     /// @copydoc url_base::set_query
-    url& set_query(string_view s) { url_base::set_query(s); return *this; }
+    url& set_query(core::string_view s) { url_base::set_query(s); return *this; }
     /// @copydoc url_base::set_encoded_query
     url& set_encoded_query(pct_string_view s) { url_base::set_encoded_query(s); return *this; }
+    /// @copydoc url_base::set_params
+    url& set_params(std::initializer_list<param_view> ps) { url_base::set_params(ps); return *this; }
+    /// @copydoc url_base::set_encoded_params
+    url& set_encoded_params(std::initializer_list< param_pct_view > ps) { url_base::set_encoded_params(ps); return *this; }
     /// @copydoc url_base::remove_query
     url& remove_query() noexcept { url_base::remove_query(); return *this; }
 
     /// @copydoc url_base::remove_fragment
     url& remove_fragment() noexcept { url_base::remove_fragment(); return *this; }
     /// @copydoc url_base::set_fragment
-    url& set_fragment(string_view s) { url_base::set_fragment(s); return *this; }
+    url& set_fragment(core::string_view s) { url_base::set_fragment(s); return *this; }
     /// @copydoc url_base::set_encoded_fragment
     url& set_encoded_fragment(pct_string_view s) { url_base::set_encoded_fragment(s); return *this; }
 
@@ -508,9 +506,9 @@ private:
     char* allocate(std::size_t);
     void deallocate(char* s);
 
-    BOOST_URL_DECL void clear_impl() noexcept override;
-    BOOST_URL_DECL void reserve_impl(std::size_t, op_t&) override;
-    BOOST_URL_DECL void cleanup(op_t&) override;
+    void clear_impl() noexcept override;
+    void reserve_impl(std::size_t, op_t&) override;
+    void cleanup(op_t&) override;
 };
 
 } // urls

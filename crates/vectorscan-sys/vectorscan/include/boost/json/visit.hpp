@@ -15,7 +15,8 @@
 #include <type_traits>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** Invoke a function object with the contents of a @ref value
 
@@ -41,7 +42,8 @@ visit(
         std::declval<Visitor>()(nullptr));
 /** @} */
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #include <boost/json/impl/visit.hpp>
 

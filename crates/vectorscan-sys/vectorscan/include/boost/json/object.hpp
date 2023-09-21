@@ -23,7 +23,8 @@
 #include <type_traits>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 class value;
 class value_ref;
@@ -171,13 +172,15 @@ public:
     /** Default constructor.
 
         The constructed object is empty with zero
-        capacity, using the default memory resource.
+        capacity, using the [default memory resource].
 
         @par Complexity
         Constant.
 
         @par Exception Safety
         No-throw guarantee.
+
+        [default memory resource]: json/allocators/storage_ptr.html#json.allocators.storage_ptr.default_memory_resource
     */
     object() noexcept
         : t_(&empty_)
@@ -893,15 +896,11 @@ public:
 
         @param new_capacity The new minimum capacity.
 
-        @throw std::length_error `new_capacity > max_size()`
+        @throw system_error `new_capacity > max_size()`
     */
+    inline
     void
-    reserve(std::size_t new_capacity)
-    {
-        if(new_capacity <= capacity())
-            return;
-        rehash(new_capacity);
-    }
+    reserve(std::size_t new_capacity);
 
     //------------------------------------------------------
     //
@@ -953,9 +952,9 @@ public:
 
         @param p The value to insert.
 
-        @throw std::length_error key is too long.
+        @throw system_error key is too long.
 
-        @throw std::length_error @ref size() >= max_size().
+        @throw system_error @ref size() >= max_size().
 
         @return A pair where `first` is an iterator
         to the existing or inserted element, and `second`
@@ -979,9 +978,9 @@ public:
         are two keys within the range that are equal to each other, only the
         first will be inserted.
 
-        If the size necessary to accomodate elements from the range exceeds
-        @ref capacity(), a rehashing can occur. In that case all iterators and
-        references are invalidated. Otherwise, they are not affected.
+        Insertion may result in rehashing of the container. In that case all
+        iterators and references are invalidated. Otherwise, they are not
+        affected.
 
         @par Precondition
         `first` and `last` are not iterators into `*this`.
@@ -996,7 +995,8 @@ public:
         Linear in `std::distance(first, last)`.
 
         @par Exception Safety
-        Basic guarantee.
+        Strong guarantee for forward iterators, basic guarantee for input
+        iterators.
         Calls to `memory_resource::allocate` may throw.
 
         @param first An input iterator pointing to the first
@@ -1030,8 +1030,7 @@ public:
         are two keys within the initializer list that are equal to each other,
         only the first will be inserted.
 
-        If the size necessary to accomodate elements from the initializer list
-        exceeds @ref capacity(), a rehashing can occur. In that case all
+        Insertion may result in rehashing of the container. In that case all
         iterators and references are invalidated. Otherwise, they are not
         affected.
 
@@ -1078,7 +1077,7 @@ public:
 
         @param m The value to insert or assign
 
-        @throw std::length_error if key is too long
+        @throw system_error if key is too long
     */
     template<class M>
     std::pair<iterator, bool>
@@ -1113,7 +1112,7 @@ public:
         This will be passed as `std::forward<Arg>(arg)` to
         the @ref value constructor.
 
-        @throw std::length_error if key is too long
+        @throw system_error if key is too long
     */
     template<class Arg>
     std::pair<iterator, bool>
@@ -1312,7 +1311,7 @@ public:
 
         @param key The key of the element to find.
 
-        @throw std::out_of_range if no such element exists.
+        @throw system_error if no such element exists.
     */
     /* @{ */
     inline
@@ -1593,10 +1592,9 @@ private:
         InputIt last,
         std::forward_iterator_tag);
 
-    BOOST_JSON_DECL
+    template< class... Args >
     std::pair<iterator, bool>
-    insert_impl(
-        pilfered<key_value_pair> p);
+    emplace_impl(string_view key, Args&& ... args );
 
     BOOST_JSON_DECL
     key_value_pair*
@@ -1605,8 +1603,8 @@ private:
         std::size_t hash);
 
     BOOST_JSON_DECL
-    void
-    rehash(std::size_t new_capacity);
+    table*
+    reserve_impl(std::size_t new_capacity);
 
     BOOST_JSON_DECL
     bool
@@ -1648,10 +1646,27 @@ private:
         key_value_pair* dst) noexcept;
 };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
+
+#ifndef BOOST_JSON_DOCS
+// boost::hash trait
+namespace boost
+{
+namespace container_hash
+{
+
+template< class T > struct is_unordered_range;
+
+template<>
+struct is_unordered_range< json::object >
+    : std::true_type
+{};
+
+} // namespace container_hash
+} // namespace boost
 
 // std::hash specialization
-#ifndef BOOST_JSON_DOCS
 namespace std {
 template <>
 struct hash< ::boost::json::object > {

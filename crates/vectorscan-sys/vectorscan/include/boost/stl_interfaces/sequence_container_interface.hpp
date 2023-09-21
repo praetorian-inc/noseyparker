@@ -20,7 +20,9 @@ namespace boost { namespace stl_interfaces { namespace detail {
 
     template<typename T, typename SizeType>
     struct n_iter : iterator_interface<
+#if !BOOST_STL_INTERFACES_USE_DEDUCED_THIS
                         n_iter<T, SizeType>,
+#endif
                         std::random_access_iterator_tag,
                         T>
     {
@@ -1020,6 +1022,19 @@ namespace boost { namespace stl_interfaces { BOOST_STL_INTERFACES_NAMESPACE_V2 {
     };
 
     // clang-format on
+
+}}}
+
+#endif
+
+#if defined(BOOST_STL_INTERFACES_DOXYGEN) || BOOST_STL_INTERFACES_USE_DEDUCED_THIS
+
+namespace boost { namespace stl_interfaces { BOOST_STL_INTERFACES_NAMESPACE_V3 {
+
+    // TODO: Reimplement using deduced this.
+    template<typename D,
+             element_layout Contiguity = element_layout::discontiguous>
+    using sequence_container_interface = v2::sequence_container_interface<D, Contiguity>;
 
 }}}
 

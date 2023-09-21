@@ -55,7 +55,8 @@
 #include <boost/json/detail/ryu/detail/d2s.hpp>
 #include <boost/json/detail/ryu/detail/d2s_intrinsics.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 namespace ryu {
@@ -670,7 +671,8 @@ static inline bool d2d_small_int(const uint64_t ieeeMantissa, const uint32_t iee
 int
 d2s_buffered_n(
     double f,
-    char* result) noexcept
+    char* result,
+    bool allow_infinity_and_nan) noexcept
 {
     using namespace detail;
     // Step 1: Decode the floating-point number, and unify normalized and subnormal cases.
@@ -690,7 +692,12 @@ d2s_buffered_n(
     const std::uint32_t ieeeExponent = (std::uint32_t)((bits >> DOUBLE_MANTISSA_BITS) & ((1u << DOUBLE_EXPONENT_BITS) - 1));
     // Case distinction; exit early for the easy cases.
     if (ieeeExponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u) || (ieeeExponent == 0 && ieeeMantissa == 0)) {
-        return copy_special_str(result, ieeeSign, ieeeExponent != 0, ieeeMantissa != 0);
+        // We changed how special numbers are output by default
+        if (allow_infinity_and_nan)
+            return copy_special_str(result, ieeeSign, ieeeExponent != 0, ieeeMantissa != 0);
+        else
+            return copy_special_str_conforming(result, ieeeSign, ieeeExponent != 0, ieeeMantissa != 0);
+
     }
 
     floating_decimal_64 v;
@@ -719,6 +726,7 @@ d2s_buffered_n(
 } // ryu
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

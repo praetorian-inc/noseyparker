@@ -313,7 +313,7 @@
     }
     if (ak - 1 == b)
     {
-       // When ak - 1 == b are recursion coefficients dissappear to zero and
+       // When ak - 1 == b are recursion coefficients disappear to zero and
        // we end up with a NaN result.  Reduce the recursion steps by 1 to
        // avoid this.  We rely on |b| small and therefore no infinite recursion.
        ak -= 1;

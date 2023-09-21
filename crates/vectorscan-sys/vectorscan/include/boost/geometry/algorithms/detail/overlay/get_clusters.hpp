@@ -39,9 +39,8 @@ private:
     template <typename T>
     static inline T threshold()
     {
-        // Tuned by cases of #1081. It should just be one epsilon to distinguish between
-        // different turn-points and real colocated clusters.
-        return T(1);
+        // Points within some epsilons are considered as equal.
+        return T(100);
     }
 public:
     // Returns true if point are considered equal (within an epsilon)

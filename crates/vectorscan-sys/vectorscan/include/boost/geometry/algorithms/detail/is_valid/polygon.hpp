@@ -1,9 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2017 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2017-2023 Adam Wulkiewicz, Lodz, Poland.
 
-// Copyright (c) 2014-2021, Oracle and/or its affiliates.
-
+// Copyright (c) 2014-2023, Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -35,7 +34,7 @@
 #include <boost/geometry/core/ring_type.hpp>
 #include <boost/geometry/core/tags.hpp>
 
-#include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/constexpr.hpp>
 #include <boost/geometry/util/range.hpp>
 #include <boost/geometry/util/sequence.hpp>
 
@@ -111,7 +110,7 @@ protected:
                                          VisitPolicy& visitor,
                                          Strategy const& strategy)
     {
-        return std::none_of(boost::begin(interior_rings), 
+        return std::none_of(boost::begin(interior_rings),
                             boost::end(interior_rings),
                             is_invalid_ring<VisitPolicy, Strategy>(visitor, strategy));
     }
@@ -367,7 +366,7 @@ protected:
     }
 
     struct has_holes_inside
-    {    
+    {
         template <typename TurnIterator, typename VisitPolicy, typename Strategy>
         static inline bool apply(Polygon const& polygon,
                                  TurnIterator first,
@@ -405,7 +404,7 @@ protected:
             typedef complement_graph
                 <
                     typename turn_type::point_type,
-                    typename Strategy::cs_tag
+                    Strategy
                 > graph;
 
             graph g(geometry::num_interior_rings(polygon) + 1);
@@ -447,7 +446,7 @@ public:
             return false;
         }
 
-        if (BOOST_GEOMETRY_CONDITION(CheckRingValidityOnly))
+        if BOOST_GEOMETRY_CONSTEXPR (CheckRingValidityOnly)
         {
             return true;
         }

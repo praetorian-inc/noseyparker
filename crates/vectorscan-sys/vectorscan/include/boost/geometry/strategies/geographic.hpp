@@ -28,7 +28,7 @@
 namespace boost { namespace geometry
 {
 
-    
+
 namespace strategies
 {
 

@@ -17,7 +17,8 @@
 #include <stdexcept>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 stream_parser::
 stream_parser(
@@ -89,8 +90,7 @@ write_some(
     auto const n = write_some(
         data, size, ec);
     if(ec)
-        detail::throw_system_error(ec,
-            BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
     return n;
 }
 
@@ -134,8 +134,7 @@ write(
     auto const n = write(
         data, size, ec);
     if(ec)
-        detail::throw_system_error(ec,
-            BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
     return n;
 }
 
@@ -153,8 +152,7 @@ finish()
     error_code ec;
     finish(ec);
     if(ec)
-        detail::throw_system_error(ec,
-            BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
 }
 
 void
@@ -178,6 +176,7 @@ release()
     return p_.handler().st.release();
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

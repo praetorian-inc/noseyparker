@@ -22,34 +22,161 @@ namespace urls {
 namespace error_types {
 #endif
 
-/// The type of error category used by the library
-using error_category = boost::system::error_category;
+/** The type of error category used by the library
 
-/// The type of error code used by the library
-using error_code = boost::system::error_code;
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `system::error_category` instead.
 
-/// The type of error condition used by the library
-using error_condition = boost::system::error_condition;
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
 
-/// The type of system error thrown by the library
-using system_error = boost::system::system_error;
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
 
-/// A function to return the generic error category used by the library
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+using error_category
+    BOOST_URL_DEPRECATED("Use system::error_category instead") =
+    boost::system::error_category;
+
+/** The type of error code used by the library
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `system::error_code` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+using error_code
+    BOOST_URL_DEPRECATED("Use system::error_code instead") =
+    boost::system::error_code;
+
+/** The type of error condition used by the library
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `system::error_condition` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+using error_condition
+    BOOST_URL_DEPRECATED("Use system::error_condition instead") =
+    boost::system::error_condition;
+
+/** The type of system error thrown by the library
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `system::system_error` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+using system_error
+    BOOST_URL_DEPRECATED("Use system::system_error instead") =
+    boost::system::system_error;
+
+/** A function to return the generic error category used by the library
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `core::string_view` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
 #ifdef BOOST_URL_DOCS
 error_category const& generic_category();
 #else
 using boost::system::generic_category;
 #endif
 
-/// A function to return the system error category used by the library
-#if BOOST_URL_DOCS
+/** A function to return the system error category used by the library
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `core::string_view` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+#ifdef BOOST_URL_DOCS
 error_category const& system_category();
 #else
 using boost::system::system_category;
 #endif
 
-/// The set of constants used for cross-platform error codes
-#if BOOST_URL_DOCS
+/** The set of constants used for cross-platform error codes
+
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `core::string_view` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+ */
+#ifdef BOOST_URL_DOCS
 enum errc
 {
     __see_below__
@@ -60,7 +187,22 @@ namespace errc = boost::system::errc;
 
 /** The type of result returned by library functions
 
-    This is an alias template used as the return type
+    @note This alias is no longer supported and
+    should not be used in new code. Please use
+    `system::result` instead.
+
+    This alias is included for backwards
+    compatibility with earlier versions of the
+    library.
+
+    However, it will be removed in future releases,
+    and using it in new code is not recommended.
+
+    Please use the updated version instead to
+    ensure compatibility with future versions of
+    the library.
+
+    @details This is an alias template used as the return type
     for functions that can either return a container,
     or fail with an error code. This is a brief
     synopsis of the type:
@@ -79,7 +221,7 @@ namespace errc = boost::system::errc;
         //
         // Return the error
         //
-        constexpr error_code error() const noexcept;
+        constexpr system::error_code error() const noexcept;
 
         //
         // Return true if the result contains a value
@@ -107,7 +249,7 @@ namespace errc = boost::system::errc;
     @par Usage
     Given the function @ref parse_uri with this signature:
     @code
-    result< url_view > parse_uri( string_view s ) noexcept;
+    system::result< url_view > parse_uri( core::string_view s ) noexcept;
     @endcode
 
     The following statement captures the value in a
@@ -119,10 +261,10 @@ namespace errc = boost::system::errc;
     This statement captures the result in a local
     variable and inspects the error condition:
     @code
-    result< url_view > rv = parse_uri( "http://example.com/path/to/file.txt" );
+    system::result< url_view > rv = parse_uri( "http://example.com/path/to/file.txt" );
 
     if(! rv )
-        std::cout << r.error();
+        std::cout << rv.error();
     else
         std::cout << *rv;
     @endcode
@@ -135,7 +277,9 @@ namespace errc = boost::system::errc;
 
 */
 template<class T>
-using result = boost::system::result<T, error_code>;
+using result
+    BOOST_URL_DEPRECATED("Use system::result<T> instead") =
+    boost::system::result<T, system::error_code>;
 
 #ifndef BOOST_URL_DOCS
 } // error_types

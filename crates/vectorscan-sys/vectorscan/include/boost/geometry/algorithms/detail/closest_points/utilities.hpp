@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2021, Oracle and/or its affiliates.
+// Copyright (c) 2021-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 
@@ -9,6 +9,9 @@
 
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_CLOSEST_POINTS_UTILITIES_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_CLOSEST_POINTS_UTILITIES_HPP
+
+#include <boost/geometry/algorithms/detail/assign_indexed_point.hpp>
+#include <boost/geometry/util/algorithm.hpp>
 
 #include <boost/geometry/strategies/distance.hpp>
 

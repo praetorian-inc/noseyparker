@@ -24,25 +24,35 @@ namespace detail {
 // |arg*r^-e| is between 1 and r (typically between 1 and 2), but for the exponent e returned by std::frexp, 
 // |arg*2^-e| is between 0.5 and 1. 
 template <typename T>
-inline constexpr T logb_impl(T arg) noexcept
+constexpr T logb_impl(T arg) noexcept
 {
     int exp = 0;
     boost::math::ccmath::frexp(arg, &exp);
 
-    return exp - 1;
+    return static_cast<T>(exp - 1);
 }
 
 } // Namespace detail
 
 template <typename Real, std::enable_if_t<!std::is_integral_v<Real>, bool> = true>
-inline constexpr Real logb(Real arg) noexcept
+constexpr Real logb(Real arg) noexcept
 {
     if(BOOST_MATH_IS_CONSTANT_EVALUATED(arg))
     {
-        return boost::math::ccmath::abs(arg) == Real(0) ? -std::numeric_limits<Real>::infinity() :
-               boost::math::ccmath::isinf(arg) ? std::numeric_limits<Real>::infinity() :
-               boost::math::ccmath::isnan(arg) ? std::numeric_limits<Real>::quiet_NaN() :
-               boost::math::ccmath::detail::logb_impl(arg);
+        if (boost::math::ccmath::abs(arg) == Real(0))
+        {
+            return -std::numeric_limits<Real>::infinity();
+        }
+        else if (boost::math::ccmath::isinf(arg))
+        {
+            return std::numeric_limits<Real>::infinity();
+        }
+        else if (boost::math::ccmath::isnan(arg))
+        {
+            return arg;
+        }
+        
+        return boost::math::ccmath::detail::logb_impl(arg);
     }
     else
     {
@@ -52,18 +62,18 @@ inline constexpr Real logb(Real arg) noexcept
 }
 
 template <typename Z, std::enable_if_t<std::is_integral_v<Z>, bool> = true>
-inline constexpr double logb(Z arg) noexcept
+constexpr double logb(Z arg) noexcept
 {
     return boost::math::ccmath::logb(static_cast<double>(arg));
 }
 
-inline constexpr float logbf(float arg) noexcept
+constexpr float logbf(float arg) noexcept
 {
     return boost::math::ccmath::logb(arg);
 }
 
 #ifndef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-inline constexpr long double logbl(long double arg) noexcept
+constexpr long double logbl(long double arg) noexcept
 {
     return boost::math::ccmath::logb(arg);
 }

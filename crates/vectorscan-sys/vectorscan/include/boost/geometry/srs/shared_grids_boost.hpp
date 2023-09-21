@@ -14,12 +14,13 @@
 #include <boost/geometry/srs/projections/grids.hpp>
 
 
-#include <boost/thread.hpp>
+#include <boost/thread/lock_types.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 
 namespace boost { namespace geometry
 {
-    
+
 namespace srs
 {
 

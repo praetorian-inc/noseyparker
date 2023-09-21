@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2008-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2022.
 // Modifications copyright (c) 2017-2022, Oracle and/or its affiliates.
@@ -15,9 +16,8 @@
 #define BOOST_GEOMETRY_PROJECTIONS_FACTORY_HPP
 
 #include <map>
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include <boost/geometry/core/static_assert.hpp>
 
@@ -182,7 +182,7 @@ private:
 
     typedef factory_key<Params> key;
     typedef typename key::type key_type;
-    typedef boost::shared_ptr<entry_base> entry_ptr;
+    typedef std::shared_ptr<entry_base> entry_ptr;
 
     typedef std::map<key_type, entry_ptr> entries_map;
 

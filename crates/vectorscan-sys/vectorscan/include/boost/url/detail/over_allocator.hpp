@@ -11,7 +11,7 @@
 #define BOOST_URL_DETAIL_OVER_ALLOCATOR_HPP
 
 #include <boost/config.hpp>
-#include <boost/url/detail/empty_value.hpp>
+#include <boost/core/empty_value.hpp>
 #include <boost/assert.hpp>
 #include <boost/type_traits/is_final.hpp>
 #include <boost/type_traits/type_with_alignment.hpp>
@@ -41,7 +41,7 @@ using allocator_traits = std::allocator_traits<Alloc>;
 
 template<class T, class Allocator>
 class over_allocator
-    : private detail::empty_value<Allocator>
+    : private empty_value<Allocator>
 {
     template<class U, class OtherAlloc>
     friend class over_allocator;
@@ -75,16 +75,16 @@ public:
     over_allocator(
         std::size_t extra,
         Allocator const& alloc)
-        : detail::empty_value<Allocator>(
-            detail::empty_init, alloc)
+        : empty_value<Allocator>(
+            empty_init, alloc)
         , extra_(extra)
     {
     }
 
     template<class U>
     over_allocator(over_allocator<U, Allocator> const& other) noexcept
-        : detail::empty_value<Allocator>(
-            detail::empty_init, other.get())
+        : empty_value<Allocator>(
+            empty_init, other.get())
         , extra_(other.extra_)
     {
     }

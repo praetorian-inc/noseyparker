@@ -81,7 +81,7 @@ RealType cdf_imp(const cauchy_distribution<RealType, Policy>& dist, const RealTy
    RealType mx = -fabs((x - location) / scale); // scale is > 0
    if(mx > -tools::epsilon<RealType>() / 8)
    {  // special case first: x extremely close to location.
-      return 0.5;
+      return static_cast<RealType>(0.5f);
    }
    result = -atan(1 / mx) / constants::pi<RealType>();
    return (((x > location) != complement) ? 1 - result : result);

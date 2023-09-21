@@ -13,7 +13,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/encoding_opts.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/string_token.hpp>
 #include <boost/url/grammar/string_view_base.hpp>
 #include <cstddef>
@@ -37,7 +37,7 @@ make_pct_string_view_unsafe(
         std::size_t) noexcept;
 
 namespace detail {
-string_view&
+core::string_view&
 ref(pct_string_view& s) noexcept;
 } // detail
 #endif
@@ -47,7 +47,7 @@ ref(pct_string_view& s) noexcept;
 /** A reference to a valid percent-encoded string
 
     Objects of this type behave like a
-    @ref string_view and have the same interface,
+    `core::string_view` and have the same interface,
     but offer an additional invariant: they can
     only be constructed from strings containing
     valid percent-escapes.
@@ -59,7 +59,7 @@ ref(pct_string_view& s) noexcept;
     @par Operators
     The following operators are supported between
     @ref pct_string_view and any object that is
-    convertible to @ref string_view
+    convertible to `core::string_view`
 
     @code
     bool operator==( pct_string_view, pct_string_view ) noexcept;
@@ -83,7 +83,7 @@ class pct_string_view final
             std::size_t) noexcept;
 
     friend
-    string_view&
+    core::string_view&
     detail::ref(pct_string_view&) noexcept;
 #endif
 
@@ -147,11 +147,11 @@ public:
 
         @par Postconditions
         @code
-        this->data() == string_view(s).data()
+        this->data() == core::string_view(s).data()
         @endcode
 
         @par Complexity
-        Linear in `string_view(s).size()`.
+        Linear in `core::string_view(s).size()`.
 
         @par Exception Safety
         Exceptions thrown on invalid input.
@@ -159,7 +159,7 @@ public:
         @throw system_error
         The string contains an invalid percent encoding.
 
-        @tparam String A type convertible to @ref string_view
+        @tparam String A type convertible to `core::string_view`
 
         @param s The string to construct from.
     */
@@ -169,14 +169,14 @@ public:
         , class = typename std::enable_if<
             std::is_convertible<
                 String,
-                string_view
+                core::string_view
                     >::value>::type
 #endif
     >
     pct_string_view(
         String const& s)
         : pct_string_view(
-            string_view(s))
+            detail::to_sv(s))
     {
     }
 
@@ -211,7 +211,7 @@ public:
         char const* s,
         std::size_t len)
         : pct_string_view(
-            string_view(s, len))
+            core::string_view(s, len))
     {
     }
 
@@ -239,7 +239,7 @@ public:
     */
     BOOST_URL_DECL
     pct_string_view(
-        string_view s);
+        core::string_view s);
 
     /** Assignment
 
@@ -265,9 +265,9 @@ public:
 
     friend
     BOOST_URL_DECL
-    result<pct_string_view>
+    system::result<pct_string_view>
     make_pct_string_view(
-        string_view s) noexcept;
+        core::string_view s) noexcept;
 
     //--------------------------------------------
 
@@ -391,7 +391,7 @@ namespace detail {
 // underlying string, to handle
 // self-intersection on modifiers.
 inline
-string_view&
+core::string_view&
 ref(pct_string_view& s) noexcept
 {
     return s.s_;
@@ -422,9 +422,9 @@ ref(pct_string_view& s) noexcept
     @param s The string to validate.
 */
 BOOST_URL_DECL
-result<pct_string_view>
+system::result<pct_string_view>
 make_pct_string_view(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 #ifndef BOOST_URL_DOCS
 // VFALCO semi-private for now
@@ -437,11 +437,23 @@ make_pct_string_view_unsafe(
 {
 #if 0
     BOOST_ASSERT(! make_pct_string_view(
-        string_view(data, size)).has_error());
+        core::string_view(data, size)).has_error());
 #endif
     return pct_string_view(
         data, size, decoded_size);
 }
+#endif
+
+#ifndef BOOST_URL_DOCS
+namespace detail {
+template <>
+inline
+core::string_view
+to_sv(pct_string_view const& s) noexcept
+{
+    return s.substr();
+}
+} // detail
 #endif
 
 } // urls

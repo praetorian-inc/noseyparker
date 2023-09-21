@@ -28,7 +28,7 @@ namespace urls {
         @ref encoded_size,
         @ref pct_string_view.
 */
-struct encoding_opts
+struct BOOST_URL_DECL encoding_opts
 {
     /** True if spaces encode to and from plus signs
 
@@ -71,11 +71,7 @@ struct encoding_opts
     encoding_opts(
         bool space_as_plus_ = false,
         bool lower_case_ = false,
-        bool disallow_null_ = false) noexcept
-        : space_as_plus(space_as_plus_)
-        , lower_case(lower_case_)
-        , disallow_null(disallow_null_)
-    {}
+        bool disallow_null_ = false) noexcept;
 #endif
 };
 

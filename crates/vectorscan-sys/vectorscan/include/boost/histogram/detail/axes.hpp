@@ -236,7 +236,7 @@ bool axes_equal_impl(const T& t, const U& u, mp11::index_sequence<Is...>) noexce
 template <class... Ts, class... Us>
 bool axes_equal_impl(const std::tuple<Ts...>& t, const std::tuple<Us...>& u) noexcept {
   return axes_equal_impl(
-      t, u, mp11::make_index_sequence<std::min(sizeof...(Ts), sizeof...(Us))>{});
+      t, u, mp11::make_index_sequence<(std::min)(sizeof...(Ts), sizeof...(Us))>{});
 }
 
 template <class... Ts, class U>

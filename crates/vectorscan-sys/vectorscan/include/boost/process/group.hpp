@@ -122,9 +122,11 @@ public:
     {
         boost::process::detail::api::wait(_group_handle, ec);
     }
+#if !defined(BOOST_PROCESS_NO_DEPRECATED)
     /** Wait for the process group to exit for period of time.
       *  \return True if all child processes exited while waiting.*/
     template< class Rep, class Period >
+    BOOST_DEPRECATED("wait_for is unreliable")
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
         return boost::process::detail::api::wait_for(_group_handle, rel_time);
@@ -132,6 +134,7 @@ public:
 
     /** \overload bool wait_for(const std::chrono::duration<Rep, Period>& timeout_time ) */
     template< class Rep, class Period >
+    BOOST_DEPRECATED("wait_for is unreliable")
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
     {
         return boost::process::detail::api::wait_for(_group_handle, rel_time, ec);
@@ -140,17 +143,19 @@ public:
     /** Wait for the process group to exit until a point in time.
       *  \return True if all child processes exited while waiting.*/
     template< class Clock, class Duration >
+    BOOST_DEPRECATED("wait_until is unreliable")
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
         return boost::process::detail::api::wait_until(_group_handle, timeout_time);
     }
     /** \overload bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time ) */
     template< class Clock, class Duration >
+    BOOST_DEPRECATED("wait_until is unreliable")
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time, std::error_code & ec) noexcept
     {
         return boost::process::detail::api::wait_until(_group_handle, timeout_time, ec);
     }
-
+#endif
     ///Check if the group has a valid handle.
     bool valid() const
     {

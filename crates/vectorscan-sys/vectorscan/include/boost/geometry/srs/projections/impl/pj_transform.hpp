@@ -1,6 +1,8 @@
 // Boost.Geometry
 // This file is manually converted from PROJ4
 
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
+
 // This file was modified by Oracle on 2017, 2018.
 // Modifications copyright (c) 2017-2018, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -49,6 +51,7 @@
 #include <boost/geometry/srs/projections/impl/projects.hpp>
 #include <boost/geometry/srs/projections/invalid_point.hpp>
 
+#include <boost/geometry/util/condition.hpp>
 #include <boost/geometry/util/range.hpp>
 
 #include <cstring>
@@ -249,7 +252,7 @@ inline bool pj_transform(SrcPrj const& srcprj, Par const& srcdefn,
 /* -------------------------------------------------------------------- */
 /*      Transform Z to meters if it isn't already.                      */
 /* -------------------------------------------------------------------- */
-    if( srcdefn.vto_meter != 1.0 && dimension > 2 )
+    if( BOOST_GEOMETRY_CONDITION(srcdefn.vto_meter != 1.0 && dimension > 2) )
     {
         for( std::size_t i = 0; i < point_count; i++ )
         {
@@ -261,10 +264,10 @@ inline bool pj_transform(SrcPrj const& srcprj, Par const& srcdefn,
 /* -------------------------------------------------------------------- */
 /*      Transform geocentric source coordinates to lat/long.            */
 /* -------------------------------------------------------------------- */
-    if( srcdefn.is_geocent )
+    if( BOOST_GEOMETRY_CONDITION(srcdefn.is_geocent) )
     {
         // Point should be cartesian 3D (ECEF)
-        if (dimension < 3)
+        if ( BOOST_GEOMETRY_CONDITION(dimension < 3) )
             BOOST_THROW_EXCEPTION( projection_exception(error_geocentric) );
             //return PJD_ERR_GEOCENTRIC;
 
@@ -454,10 +457,10 @@ inline bool pj_transform(SrcPrj const& srcprj, Par const& srcdefn,
 /* -------------------------------------------------------------------- */
 /*      Transform destination latlong to geocentric if required.        */
 /* -------------------------------------------------------------------- */
-    if( dstdefn.is_geocent )
+    if( BOOST_GEOMETRY_CONDITION(dstdefn.is_geocent) )
     {
         // Point should be cartesian 3D (ECEF)
-        if (dimension < 3)
+        if ( BOOST_GEOMETRY_CONDITION(dimension < 3) )
             BOOST_THROW_EXCEPTION( projection_exception(error_geocentric) );
             //return PJD_ERR_GEOCENTRIC;
 
@@ -470,7 +473,7 @@ inline bool pj_transform(SrcPrj const& srcprj, Par const& srcdefn,
             result = false;
         else
             BOOST_THROW_EXCEPTION( projection_exception(err) );
-            
+
         if( dstdefn.fr_meter != 1.0 )
         {
             for( std::size_t i = 0; i < point_count; i++ )
@@ -569,7 +572,7 @@ inline bool pj_transform(SrcPrj const& srcprj, Par const& srcdefn,
         {
             point_type & point = range::at(range, i);
             coord_t x = get_as_radian<0>(point);
-            
+
             if( is_invalid_point(point) )
                 continue;
 
@@ -770,7 +773,7 @@ inline int pj_geocentric_to_wgs84( Par const& defn,
         for(std::size_t i = 0; i < point_count; i++ )
         {
             point_type & point = range::at(rng, i);
-            
+
             if( is_invalid_point(point) )
                 continue;
 
@@ -925,7 +928,7 @@ inline bool pj_datum_transform(Par const& srcdefn,
 /* -------------------------------------------------------------------- */
 /*      Create a temporary Z array if one is not provided.              */
 /* -------------------------------------------------------------------- */
-    
+
     range_wrapper<Range> z_range(range);
 
 /* -------------------------------------------------------------------- */

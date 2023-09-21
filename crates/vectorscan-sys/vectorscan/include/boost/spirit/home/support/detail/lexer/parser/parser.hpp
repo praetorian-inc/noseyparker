@@ -15,6 +15,7 @@
 #include "tree/sequence_node.hpp"
 #include "../size_t.hpp"
 #include "tokeniser/re_tokeniser.hpp"
+#include <sstream>
 
 namespace boost
 {

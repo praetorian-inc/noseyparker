@@ -27,13 +27,13 @@ inline void handle_error(error_code & ec)
     switch (err)
     {
     case ERROR_INSUFFICIENT_BUFFER:
-        ec.assign(error::insufficient_buffer, error::utf8_category);
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error::insufficient_buffer, error::utf8_category)
         break;
     case ERROR_NO_UNICODE_TRANSLATION:
-        ec.assign(error::invalid_character, error::utf8_category);
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error::invalid_character, error::utf8_category)
         break;
     default:
-        ec.assign(err, system_category());
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, err, system_category())
     }
 }
 
@@ -128,7 +128,7 @@ inline int get_cont_octet_out_count_impl<4>(wchar_t word) {
 
     // Note that the following code will generate warnings on some platforms
     // where wchar_t is defined as UCS2.  The warnings are superfluous as the
-    // specialization is never instantitiated with such compilers, but this
+    // specialization is never instantiated with such compilers, but this
     // can cause problems if warnings are being treated as errors, so we guard
     // against that. Including <boost/detail/utf8_codecvt_facet.hpp> as we do
     // should be enough to get WCHAR_MAX defined.
@@ -242,7 +242,7 @@ std::size_t convert_to_utf8(const wchar_t * in, std::size_t size,
         if (*from  > max_wchar) {
             from_next = from;
             to_next = to;
-            ec.assign(error::invalid_character, error::get_utf8_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, error::invalid_character, error::get_utf8_category())
             return 0u;
         }
 
@@ -270,7 +270,7 @@ std::size_t convert_to_utf8(const wchar_t * in, std::size_t size,
         if (to == to_end && i != cont_octet_count) {
             from_next = from;
             to_next = to - (i + 1);
-            ec.assign(error::insufficient_buffer, error::get_utf8_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, error::insufficient_buffer, error::get_utf8_category())
             return 0u;
         }
         ++from;
@@ -280,7 +280,7 @@ std::size_t convert_to_utf8(const wchar_t * in, std::size_t size,
 
     // Were we done or did we run out of destination space
     if (from != from_end)
-        ec.assign(error::insufficient_buffer, error::get_utf8_category());
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error::insufficient_buffer, error::get_utf8_category())
 
     return to_next - out;
 }
@@ -315,7 +315,7 @@ std::size_t convert_to_wide(const  char   * in, std::size_t size,
         if (invalid_leading_octet(*from)) {
             from_next = from;
             to_next = to;
-            ec.assign(error::invalid_character, error::get_utf8_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, error::invalid_character, error::get_utf8_category())
             return 0u;
         }
 
@@ -339,7 +339,7 @@ std::size_t convert_to_wide(const  char   * in, std::size_t size,
             if (invalid_continuing_octet(*from)) {
                 from_next = from;
                 to_next = to;
-                ec.assign(error::invalid_character, error::get_utf8_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, error::invalid_character, error::get_utf8_category())
                 return 0u;
             }
 
@@ -356,7 +356,7 @@ std::size_t convert_to_wide(const  char   * in, std::size_t size,
             // rewind "from" to before the current character translation
             from_next = from - (i + 1);
             to_next = to;
-            ec.assign(error::insufficient_buffer, error::get_utf8_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, error::insufficient_buffer, error::get_utf8_category())
             return 0u;
         }
         *to++ = ucs_result;
@@ -365,7 +365,7 @@ std::size_t convert_to_wide(const  char   * in, std::size_t size,
     to_next = to;
 
     if (from != from_end)
-        ec.assign(error::insufficient_buffer, error::get_utf8_category());
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error::insufficient_buffer, error::get_utf8_category())
 
     return to_next - out;
 }

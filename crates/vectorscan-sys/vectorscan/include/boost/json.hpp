@@ -28,6 +28,7 @@
 #include <boost/json/pilfer.hpp>
 #include <boost/json/serialize.hpp>
 #include <boost/json/serializer.hpp>
+#include <boost/json/set_pointer_options.hpp>
 #include <boost/json/static_resource.hpp>
 #include <boost/json/storage_ptr.hpp>
 #include <boost/json/stream_parser.hpp>

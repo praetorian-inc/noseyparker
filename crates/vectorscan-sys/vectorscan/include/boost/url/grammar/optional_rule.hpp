@@ -13,6 +13,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/optional.hpp>
 #include <boost/url/error_types.hpp>
+#include <boost/core/empty_value.hpp>
 #include <boost/assert.hpp>
 
 namespace boost {
@@ -34,7 +35,7 @@ namespace grammar {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< optional< string_view > > rv = parse( "", optional_rule( token_rule( alpha_chars ) ) );
+    system::result< optional< core::string_view > > rv = parse( "", optional_rule( token_rule( alpha_chars ) ) );
     @endcode
 
     @par BNF
@@ -62,11 +63,12 @@ optional_rule( Rule r ) noexcept;
 #else
 template<class Rule>
 struct optional_rule_t
+    : private empty_value<Rule>
 {
-    using value_type = optional<
+    using value_type = boost::optional<
         typename Rule::value_type>;
 
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const;
@@ -83,11 +85,11 @@ private:
     constexpr
     optional_rule_t(
         Rule const& r) noexcept
-        : r_(r)
+        : empty_value<Rule>(
+            empty_init,
+            r)
     {
     }
-
-    Rule r_;
 };
 
 template<class Rule>

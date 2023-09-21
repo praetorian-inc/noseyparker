@@ -31,7 +31,8 @@
 #include <intrin.h>
 #endif
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 namespace ryu {
@@ -224,6 +225,7 @@ inline bool multipleOfPowerOf2(const uint64_t value, const uint32_t p) {
 } // ryu
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

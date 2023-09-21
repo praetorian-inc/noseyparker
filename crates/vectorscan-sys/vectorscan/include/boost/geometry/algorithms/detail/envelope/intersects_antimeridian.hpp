@@ -19,7 +19,7 @@
 #include <boost/geometry/algorithms/detail/normalize.hpp>
 
 
-namespace boost { namespace geometry                  
+namespace boost { namespace geometry
 {
 
 namespace detail { namespace envelope
@@ -38,7 +38,7 @@ struct intersects_antimeridian
             <
                 CoordinateType, Units
             > constants;
-    
+
         return
             math::equals(math::abs(lat1), constants::max_latitude())
             ||

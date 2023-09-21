@@ -12,7 +12,7 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/parse.hpp>
 #include <boost/url/grammar/type_traits.hpp>
 #include <boost/static_assert.hpp>
@@ -80,7 +80,7 @@ class range
     };
 
     small_buffer sb_;
-    string_view s_;
+    core::string_view s_;
     std::size_t n_ = 0;
 
     //--------------------------------------------
@@ -115,14 +115,14 @@ class range
 
     template<class R>
     range(
-        string_view s,
+        core::string_view s,
         std::size_t n,
         R const& r);
 
     template<
         class R0, class R1>
     range(
-        string_view s,
+        core::string_view s,
         std::size_t n,
         R0 const& first,
         R1 const& next);
@@ -263,7 +263,7 @@ public:
 
     /** Return the matching part of the string
     */
-    string_view
+    core::string_view
     string() const noexcept
     {
         return s_;
@@ -307,7 +307,7 @@ struct range_rule_t;
     @code
     // range    = 1*( ";" token )
 
-    result< range<string_view> > rv = parse( ";alpha;xray;charlie",
+    system::result< range<core::string_view> > rv = parse( ";alpha;xray;charlie",
         range_rule(
             tuple_rule(
                 squelch( delim_rule( ';' ) ),
@@ -361,7 +361,7 @@ struct range_rule_t<R>
     using value_type =
         range<typename R::value_type>;
 
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const;
@@ -445,7 +445,7 @@ range_rule(
     @code
     // range    = [ token ] *( "," token )
 
-    result< range< string_view > > rv = parse( "whiskey,tango,foxtrot",
+    system::result< range< core::string_view > > rv = parse( "whiskey,tango,foxtrot",
         range_rule(
             token_rule( alpha_chars ),          // first
             tuple_rule(                      // next
@@ -506,7 +506,7 @@ struct range_rule_t
     using value_type =
         range<typename R0::value_type>;
 
-    result<value_type>
+    system::result<value_type>
     parse(
         char const*& it,
         char const* end) const;

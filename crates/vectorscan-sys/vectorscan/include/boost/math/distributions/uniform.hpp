@@ -362,7 +362,7 @@ namespace boost{ namespace math
     RealType lower = dist.lower();
     RealType upper = dist.upper();
     RealType result = 0;  // of checks.
-    if(false == detail::check_uniform("boost::math::kurtosis_execess(const uniform_distribution<%1%>&)", lower, upper, &result, Policy()))
+    if(false == detail::check_uniform("boost::math::kurtosis_excess(const uniform_distribution<%1%>&)", lower, upper, &result, Policy()))
     {
       return result;
     }

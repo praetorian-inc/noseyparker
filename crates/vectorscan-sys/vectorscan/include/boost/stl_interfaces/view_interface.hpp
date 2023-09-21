@@ -213,6 +213,16 @@ namespace boost { namespace stl_interfaces { BOOST_STL_INTERFACES_NAMESPACE_V2 {
 
 }}}
 
+namespace boost { namespace stl_interfaces { BOOST_STL_INTERFACES_NAMESPACE_V3 {
+
+    /** A template alias for `std::ranges::view_interface`.  This only exists
+        to make migration from Boost.STLInterfaces to C++20 easier; switch to
+        the one in `std` as soon as you can. */
+    template<typename D, element_layout = element_layout::discontiguous>
+    using view_interface = std::ranges::view_interface<D>;
+
+}}}
+
 #endif
 
 #endif

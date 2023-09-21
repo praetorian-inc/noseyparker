@@ -167,7 +167,7 @@ struct experimental_elliptic_segments_calc_policy
 
             Point3d const v1 = normalized_vec(p1);
             Point3d const v2 = normalized_vec(p2);
-            
+
             is_forward = dot_product(normal, cross_product(v1, v2)) >= c0;
             return dot_product(v1, v2);
         }

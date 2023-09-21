@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2016-2019 Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2016-2019 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -67,7 +68,7 @@ public:
 
         CT sin_bet1 = one_minus_f * sin_lat1;
         CT sin_bet2 = one_minus_f * sin_lat2;
-            
+
         // equator
         if (math::equals(sin_bet1, c0) && math::equals(sin_bet2, c0))
         {
@@ -80,7 +81,7 @@ public:
                 CT m12 = azi_sign * sin(sig_12) * b;
                 reduced_length = m12;
             }
-                
+
             if (BOOST_GEOMETRY_CONDITION(EnableGeodesicScale))
             {
                 CT M12 = cos(sig_12);
@@ -162,7 +163,7 @@ private:
                            CT const& sin_sig2, CT const& cos_sig2,
                            CT const& cos_alp0_sqr, CT const& f)
     {
-        if (Order == 0)
+        if (BOOST_GEOMETRY_CONDITION(Order == 0))
         {
             return 0;
         }
@@ -176,15 +177,15 @@ private:
         CT const sin_2sig_12 = sin_2sig2 - sin_2sig1;
         CT const L1 = sig_12 - sin_2sig_12 / c2;
 
-        if (Order == 1)
+        if (BOOST_GEOMETRY_CONDITION(Order == 1))
         {
             return cos_alp0_sqr * f * L1;
         }
-        
+
         CT const sin_4sig1 = c2 * sin_2sig1 * (math::sqr(cos_sig1) - math::sqr(sin_sig1)); // sin(4sig1)
         CT const sin_4sig2 = c2 * sin_2sig2 * (math::sqr(cos_sig2) - math::sqr(sin_sig2)); // sin(4sig2)
         CT const sin_4sig_12 = sin_4sig2 - sin_4sig1;
-        
+
         CT const c8 = 8;
         CT const c12 = 12;
         CT const c16 = 16;
@@ -195,7 +196,7 @@ private:
                          + (c12 * cos_alp0_sqr - c24) * sig_12)
                        / c16;
 
-        if (Order == 2)
+        if (BOOST_GEOMETRY_CONDITION(Order == 2))
         {
             return cos_alp0_sqr * f * (L1 + f * L2);
         }
@@ -241,7 +242,7 @@ private:
                                 CT const& sin_sig2, CT const& cos_sig2,
                                 CT const& cos_alp0_sqr, CT const& ep_sqr)
     {
-        if (Order == 0)
+        if (BOOST_GEOMETRY_CONDITION(Order == 0))
         {
             return 0;
         }
@@ -259,21 +260,21 @@ private:
 
         CT const L1 = (c2 * sig_12 - sin_2sig_12) / c4;
 
-        if (Order == 1)
+        if (BOOST_GEOMETRY_CONDITION(Order == 1))
         {
             return c2a0ep2 * L1;
         }
 
         CT const c8 = 8;
         CT const c64 = 64;
-        
+
         CT const sin_4sig1 = c2 * sin_2sig1 * (math::sqr(cos_sig1) - math::sqr(sin_sig1)); // sin(4sig1)
         CT const sin_4sig2 = c2 * sin_2sig2 * (math::sqr(cos_sig2) - math::sqr(sin_sig2)); // sin(4sig2)
         CT const sin_4sig_12 = sin_4sig2 - sin_4sig1;
-        
+
         CT const L2 = (sin_4sig_12 - c8 * sin_2sig_12 + 12 * sig_12) / c64;
 
-        if (Order == 2)
+        if (BOOST_GEOMETRY_CONDITION(Order == 2))
         {
             return c2a0ep2 * (L1 + c2a0ep2 * L2);
         }

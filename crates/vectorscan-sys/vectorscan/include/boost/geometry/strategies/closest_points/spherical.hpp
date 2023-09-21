@@ -60,9 +60,9 @@ namespace services
 template <typename Geometry1, typename Geometry2>
 struct default_strategy
 <
-    Geometry1, 
-    Geometry2, 
-    spherical_equatorial_tag, 
+    Geometry1,
+    Geometry2,
+    spherical_equatorial_tag,
     spherical_equatorial_tag
 >
 {

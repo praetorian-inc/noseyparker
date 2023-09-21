@@ -1,5 +1,5 @@
 /* Tells C++ coroutines about Outcome's result
-(C) 2019-2022 Niall Douglas <http://www.nedproductions.biz/> (12 commits)
+(C) 2019-2023 Niall Douglas <http://www.nedproductions.biz/> (12 commits)
 File Created: Oct 2019
 
 
@@ -51,7 +51,11 @@ DEALINGS IN THE SOFTWARE.
   BOOST_OUTCOME_V2_NAMESPACE_END
 
 #ifndef BOOST_NO_EXCEPTIONS
-#include "status-code/system_code_from_exception.hpp"
+#if !BOOST_OUTCOME_USE_SYSTEM_STATUS_CODE && __has_include("status-code/status-code/system_code_from_exception.hpp")
+#include "status-code/status-code/system_code_from_exception.hpp"
+#else
+#include <status-code/system_code_from_exception.hpp>
+#endif
 BOOST_OUTCOME_V2_NAMESPACE_BEGIN
 namespace awaitables
 {

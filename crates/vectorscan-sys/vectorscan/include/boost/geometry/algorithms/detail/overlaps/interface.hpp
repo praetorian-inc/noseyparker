@@ -147,7 +147,7 @@ struct overlaps
             >::apply(geometry1, geometry2, strategy);
     }
 };
-    
+
 
 template <typename DynamicGeometry1, typename Geometry2, typename Tag2>
 struct overlaps<DynamicGeometry1, Geometry2, dynamic_geometry_tag, Tag2>
@@ -211,7 +211,7 @@ struct overlaps<DynamicGeometry1, DynamicGeometry2, dynamic_geometry_tag, dynami
     }
 };
 
-    
+
 } // namespace resolve_dynamic
 
 

@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2019 Tinko Bartels, Berlin, Germany.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // Contributed and/or modified by Tinko Bartels,
 //   as part of Google Summer of Code 2019 program.
@@ -22,6 +23,7 @@
 #include<array>
 
 #include <boost/geometry/core/access.hpp>
+#include <boost/geometry/util/condition.hpp>
 
 // The following code is based on "Adaptive Precision Floating-Point Arithmetic
 // and Fast Robust Geometric Predicates" by Richard Shewchuk,
@@ -294,7 +296,7 @@ inline RealNumber orient2dtail(vec2d<RealNumber> const& p1,
     t6_01[1] = two_product_tail(t3[0], t4[0], t6_01[0]);
     std::array<RealNumber, 4> tA_03 = two_two_expansion_diff(t5_01, t6_01);
     RealNumber det = std::accumulate(tA_03.begin(), tA_03.end(), static_cast<RealNumber>(0));
-    if (Robustness == 1)
+    if (BOOST_GEOMETRY_CONDITION(Robustness == 1))
     {
         return det;
     }
@@ -381,7 +383,7 @@ inline RealNumber orient2d(vec2d<RealNumber> const& p1,
     t6_01[0] = t3[0] * t4[0];
     RealNumber det = t5_01[0] - t6_01[0];
 
-    if (Robustness == 0)
+    if (BOOST_GEOMETRY_CONDITION(Robustness == 0))
     {
         return det;
     }

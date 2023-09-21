@@ -64,12 +64,6 @@
 
 namespace boost {
 namespace multiprecision {
-namespace backends {
-
-template <unsigned Digits10, class ExponentType = std::int32_t, class Allocator = void>
-class cpp_dec_float;
-
-} // namespace backends
 
 template <unsigned Digits10, class ExponentType, class Allocator>
 struct number_category<backends::cpp_dec_float<Digits10, ExponentType, Allocator> > : public std::integral_constant<int, number_kind_floating_point>
@@ -2094,6 +2088,7 @@ bool cpp_dec_float<Digits10, ExponentType, Allocator>::rd_string(const char* con
 #endif
 
       std::string str(s);
+      static const std::string valid_characters{"0123456789"};
 
       // TBD: Using several regular expressions may significantly reduce
       // the code complexity (and perhaps the run-time) of rd_string().
@@ -2106,11 +2101,13 @@ bool cpp_dec_float<Digits10, ExponentType, Allocator>::rd_string(const char* con
       if (((pos = str.find('e')) != std::string::npos) || ((pos = str.find('E')) != std::string::npos))
       {
          // Remove the exponent part from the string.
-         #ifndef BOOST_MP_STANDALONE
+#ifndef BOOST_MP_STANDALONE
          exp = boost::lexical_cast<exponent_type>(static_cast<const char*>(str.c_str() + (pos + 1u)));
-         #else
+#else
+         if (str.find_first_not_of(valid_characters, ((str[pos + 1] == '+') || (str[pos + 1] == '-')) ? pos + 2 : pos + 1) != std::string::npos)
+            BOOST_MP_THROW_EXCEPTION(std::runtime_error("Can not construct a floating point with non-numeric content"));
          exp = static_cast<exponent_type>(std::atoll(static_cast<const char*>(str.c_str() + (pos + 1u))));
-         #endif
+#endif
          
          str = str.substr(static_cast<std::size_t>(0u), pos);
       }
@@ -2179,6 +2176,12 @@ bool cpp_dec_float<Digits10, ExponentType, Allocator>::rd_string(const char* con
 
       if (pos != std::string::npos)
       {
+         // Check we have only digits either side of the point:
+         if (str.find_first_not_of(valid_characters) != pos)
+            BOOST_MP_THROW_EXCEPTION(std::runtime_error("Can not construct a floating point with non-numeric content"));
+         if (str.find_first_not_of(valid_characters, pos + 1) != std::string::npos)
+            BOOST_MP_THROW_EXCEPTION(std::runtime_error("Can not construct a floating point with non-numeric content"));
+
          // Remove all trailing insignificant zeros.
          const std::string::const_reverse_iterator rit_non_zero = std::find_if(str.rbegin(), str.rend(), char_is_nonzero_predicate);
 
@@ -2223,6 +2226,10 @@ bool cpp_dec_float<Digits10, ExponentType, Allocator>::rd_string(const char* con
       }
       else
       {
+         // We should have only digits:
+         if (str.find_first_not_of(valid_characters) != std::string::npos)
+            BOOST_MP_THROW_EXCEPTION(std::runtime_error("Can not construct a floating point with non-numeric content"));
+
          // Input string has no decimal point: Append decimal point.
          str.append(".");
       }
@@ -3525,11 +3532,6 @@ inline std::size_t hash_value(const cpp_dec_float<Digits10, ExponentType, Alloca
 
 } // namespace backends
 
-using boost::multiprecision::backends::cpp_dec_float;
-
-using cpp_dec_float_50 = number<cpp_dec_float<50> > ;
-using cpp_dec_float_100 = number<cpp_dec_float<100> >;
-
 namespace detail {
 
 template <unsigned Digits10, class ExponentType, class Allocator>
@@ -3653,7 +3655,7 @@ struct precision<boost::multiprecision::number<boost::multiprecision::cpp_dec_fl
    static constexpr std::int32_t cpp_dec_float_digits10 = boost::multiprecision::cpp_dec_float<Digits10, ExponentType, Allocator>::cpp_dec_float_digits10;
 
    using precision_type = typename Policy::precision_type                           ;
-   using digits_2 = digits2<((cpp_dec_float_digits10 + 1LL) * 1000LL) / 301LL>;
+   using digits_2 = digits2<static_cast<int>(((cpp_dec_float_digits10 + 1LL) * 1000LL) / 301LL)>;
    using type = typename std::conditional<
        ((digits_2::value <= precision_type::value) || (Policy::precision_type::value <= 0)),
        // Default case, full precision for RealType:

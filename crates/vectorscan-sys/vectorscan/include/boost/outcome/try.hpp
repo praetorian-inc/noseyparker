@@ -1,5 +1,5 @@
 /* Try operation macros
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (20 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (20 commits)
 File Created: July 2017
 
 
@@ -170,10 +170,13 @@ BOOST_OUTCOME_V2_NAMESPACE_END
 #define _OUTCOME_TRY_CALL_OVERLOAD(name, ...)                                                                                                                  \
   _OUTCOME_TRY_OVERLOAD_GLUE(_OUTCOME_TRY_OVERLOAD_MACRO(name, _OUTCOME_TRY_COUNT_ARGS_MAX8(__VA_ARGS__)), (__VA_ARGS__))
 
-#ifndef BOOST_OUTCOME_TRY_LIKELY_IF
-#if(__cplusplus >= 202000L || _HAS_CXX20) && (!defined(__clang__) || __clang_major__ >= 12) && (!defined(__GNUC__) || defined(__clang__) || __GNUC__ >= 9)
+#if !defined(BOOST_OUTCOME_TRY_LIKELY_IF) && defined(__has_cpp_attribute)
+#if __has_cpp_attribute(likely)
 #define BOOST_OUTCOME_TRY_LIKELY_IF(...) if(__VA_ARGS__) [[likely]]
-#elif defined(__clang__) || defined(__GNUC__)
+#endif
+#endif
+#ifndef BOOST_OUTCOME_TRY_LIKELY_IF
+#if defined(__clang__) || defined(__GNUC__)
 #define BOOST_OUTCOME_TRY_LIKELY_IF(...) if(__builtin_expect(!!(__VA_ARGS__), true))
 #else
 #define BOOST_OUTCOME_TRY_LIKELY_IF(...) if(__VA_ARGS__)

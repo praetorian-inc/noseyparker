@@ -44,6 +44,11 @@
 // unused function 'foo'
 #pragma GCC diagnostic ignored "-Wunused-function"
 
+#if defined(__clang__)
+// template argument uses unnamed type
+#pragma clang diagnostic ignored "-Wunnamed-type-template-args"
+#endif // defined(__clang__)
+
 #endif
 
 #endif // !defined(BOOST_FILESYSTEM_ENABLE_WARNINGS)

@@ -44,7 +44,7 @@ struct corner_by_epsilon
         typedef typename coordinate_type<Point>::type coord_type;
         coord_type const coord = get<I>(point);
         coord_type const seps = math::scaled_epsilon(coord);
-        
+
         set<I>(point, PlusOrMinus<coord_type>()(coord, seps));
 
         corner_by_epsilon<Point, PlusOrMinus, I+1>::apply(point);

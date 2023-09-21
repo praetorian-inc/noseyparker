@@ -23,6 +23,7 @@
 #include <boost/interprocess/detail/workaround.hpp>
 #include <boost/interprocess/errors.hpp>
 #include <boost/interprocess/permissions.hpp>
+#include <boost/static_assert.hpp>
 
 #include <climits>
 #include <string>

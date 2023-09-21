@@ -604,9 +604,9 @@ qvm_detail
         {
         typedef qvm_detail::translation_<OriginalMatrix> this_vector;
         typedef typename mat_traits<OriginalMatrix>::scalar_type scalar_type;
-        static int const dim=mat_traits<OriginalMatrix>::rows-1;
-        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols);
-        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows>=3);
+        static int const dim=mat_traits<OriginalMatrix>::cols-1;
+        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols || mat_traits<OriginalMatrix>::rows+1==mat_traits<OriginalMatrix>::cols);
+        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::cols>=3);
 
         template <int I>
         static
@@ -636,9 +636,9 @@ qvm_detail
         {
         typedef qvm_detail::translation_<OriginalMatrix> this_vector;
         typedef typename mat_traits<OriginalMatrix>::scalar_type scalar_type;
-        static int const dim=mat_traits<OriginalMatrix>::rows-1;
-        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols);
-        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows>=3);
+        static int const dim=mat_traits<OriginalMatrix>::cols-1;
+        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols || mat_traits<OriginalMatrix>::rows+1==mat_traits<OriginalMatrix>::cols);
+        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::cols>=3);
 
         template <int I>
         static
@@ -670,9 +670,9 @@ vec_traits< qvm_detail::translation_<OriginalMatrix> >:
     {
     typedef qvm_detail::translation_<OriginalMatrix> this_vector;
     typedef typename mat_traits<OriginalMatrix>::scalar_type scalar_type;
-    static int const dim=mat_traits<OriginalMatrix>::rows-1;
-    BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols);
-    BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows>=3);
+    static int const dim=mat_traits<OriginalMatrix>::cols-1;
+        BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::rows==mat_traits<OriginalMatrix>::cols || mat_traits<OriginalMatrix>::rows+1==mat_traits<OriginalMatrix>::cols);
+    BOOST_QVM_STATIC_ASSERT(mat_traits<OriginalMatrix>::cols>=3);
 
     template <int I>
     static
@@ -712,7 +712,7 @@ deduce_vec2<qvm_detail::translation_<OriginalMatrix>,qvm_detail::translation_<Or
 
 template <class A>
 typename enable_if_c<
-    is_mat<A>::value && mat_traits<A>::rows==mat_traits<A>::cols && mat_traits<A>::rows>=3,
+    is_mat<A>::value && (mat_traits<A>::rows==mat_traits<A>::cols || mat_traits<A>::rows+1==mat_traits<A>::cols) && mat_traits<A>::cols>=3,
     qvm_detail::translation_<A> const &>::type
 BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
 translation( A const & a )
@@ -722,7 +722,7 @@ translation( A const & a )
 
 template <class A>
 typename enable_if_c<
-    is_mat<A>::value && mat_traits<A>::rows==mat_traits<A>::cols && mat_traits<A>::rows>=3,
+    is_mat<A>::value && (mat_traits<A>::rows==mat_traits<A>::cols || mat_traits<A>::rows+1==mat_traits<A>::cols) && mat_traits<A>::cols>=3,
     qvm_detail::translation_<A> &>::type
 BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
 translation( A & a )

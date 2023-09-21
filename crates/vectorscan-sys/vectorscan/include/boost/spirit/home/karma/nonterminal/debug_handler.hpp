@@ -15,10 +15,6 @@
 #include <boost/spirit/home/karma/nonterminal/rule.hpp>
 #include <boost/spirit/home/karma/nonterminal/debug_handler_state.hpp>
 #include <boost/function.hpp>
-#include <boost/fusion/include/at.hpp>
-#include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/out.hpp>
-#include <iostream>
 
 namespace boost { namespace spirit { namespace karma
 {

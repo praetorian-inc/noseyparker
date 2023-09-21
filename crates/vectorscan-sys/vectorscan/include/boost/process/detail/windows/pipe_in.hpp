@@ -14,6 +14,8 @@
 #include <boost/winapi/handles.hpp>
 #include <boost/process/detail/used_handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
+#include <boost/system/error_code.hpp>
+
 
 namespace boost { namespace process { namespace detail { namespace windows {
 

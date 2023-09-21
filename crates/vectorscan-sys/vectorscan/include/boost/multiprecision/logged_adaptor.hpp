@@ -748,8 +748,6 @@ inline void assign_components(logged_adaptor<T>& result, const V& v1, const U& v
 
 } // namespace backends
 
-using backends::logged_adaptor;
-
 namespace detail {
    template <class Backend>
    struct is_variable_precision<logged_adaptor<Backend> > : public is_variable_precision<Backend>
@@ -772,9 +770,6 @@ namespace detail {
 template <class Backend>
 struct number_category<backends::logged_adaptor<Backend> > : public number_category<Backend>
 {};
-
-template <class Number>
-using logged_adaptor_t = number<logged_adaptor<typename Number::backend_type>, Number::et>;
 
 template <class Backend, expression_template_option ExpressionTemplates>
 struct component_type<number<logged_adaptor<Backend>, ExpressionTemplates>>

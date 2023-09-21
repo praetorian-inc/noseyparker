@@ -14,7 +14,8 @@
 #include <boost/json/memory_resource.hpp>
 #include <cstddef>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -39,7 +40,7 @@ BOOST_JSON_NS_BEGIN
 \n
     @par Example
 
-    This parses a JSON into a value which uses a local
+    This parses a JSON text into a value which uses a local
     stack buffer, then prints the result.
 
     @code
@@ -238,6 +239,7 @@ struct is_deallocate_trivial<
     static constexpr bool value = true;
 };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

@@ -110,7 +110,7 @@ struct get_turn_info_linear_linear
                                                   inters.swapped_sides(),
                                                   umbrella_strategy);
                     }
-                    
+
                     if ( tp.operations[0].operation == operation_blocked )
                     {
                         tp.operations[1].is_collinear = true;
@@ -123,7 +123,7 @@ struct get_turn_info_linear_linear
                     replace_method_and_operations_tm(tp.method,
                                                      tp.operations[0].operation,
                                                      tp.operations[1].operation);
-                    
+
                     *out++ = tp;
                 }
             }
@@ -149,7 +149,7 @@ struct get_turn_info_linear_linear
                 {
                     // do nothing
                 }
-                else 
+                else
                 {
                     handler::apply(range_p, range_q, tp,
                                    inters.i_info(), inters.d_info(),
@@ -169,7 +169,7 @@ struct get_turn_info_linear_linear
                         if ( inters.is_spike_p() && inters.is_spike_q() )
                         {
                             tp.operations[0].operation = operation_union;
-                            tp.operations[1].operation = operation_union; 
+                            tp.operations[1].operation = operation_union;
                         }
                         else
                         {
@@ -188,7 +188,7 @@ struct get_turn_info_linear_linear
                             }
                             else
                             {
-                                tp.operations[0].operation = operation_union;                                
+                                tp.operations[0].operation = operation_union;
                             }
                         }
                         else
@@ -207,7 +207,7 @@ struct get_turn_info_linear_linear
                             }
                             else
                             {
-                                tp.operations[1].operation = operation_union;                                
+                                tp.operations[1].operation = operation_union;
                             }
                         }
                         else
@@ -223,7 +223,7 @@ struct get_turn_info_linear_linear
                           && inters.is_spike_p() )
                         {
                             tp.operations[0].operation = operation_union;
-                            tp.operations[1].operation = operation_union; 
+                            tp.operations[1].operation = operation_union;
                         }
                     }
                     else if ( tp.operations[0].operation == operation_none
@@ -379,7 +379,7 @@ struct get_turn_info_linear_linear
                         // transform turn
                         turn_transformer_ec transformer(method_replace);
                         transformer(tp);
-                        
+
                         // conditionally handle spikes
                         if ( ! BOOST_GEOMETRY_CONDITION(handle_spikes)
                           || ! append_collinear_spikes(tp, inters,
@@ -524,7 +524,7 @@ struct get_turn_info_linear_linear
 
             return true;
         }
-        
+
         return false;
     }
 
@@ -567,9 +567,9 @@ struct get_turn_info_linear_linear
             {
                 tp.operations[0].is_collinear = true;
                 tp.operations[1].is_collinear = false;
-                
+
                 BOOST_GEOMETRY_ASSERT(inters.i_info().count > 1);
-                
+
                 base_turn_handler::assign_point(tp, method_touch_interior,
                                                 inters.i_info(), 1);
             }
@@ -598,7 +598,7 @@ struct get_turn_info_linear_linear
             {
                 tp.operations[0].is_collinear = false;
                 tp.operations[1].is_collinear = true;
-                
+
                 BOOST_GEOMETRY_ASSERT(inters.i_info().count > 0);
 
                 base_turn_handler::assign_point(tp, method_touch_interior, inters.i_info(), 0);
@@ -613,7 +613,7 @@ struct get_turn_info_linear_linear
 
             res = true;
         }
-        
+
         return res;
     }
 

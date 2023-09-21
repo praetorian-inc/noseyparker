@@ -14,7 +14,8 @@
 #include <boost/json/string_view.hpp>
 #include <iosfwd>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** Constants for identifying the type of a value
 
@@ -158,6 +159,7 @@ BOOST_JSON_INLINE_VARIABLE(object_kind, object_kind_t);
 */
 BOOST_JSON_INLINE_VARIABLE(string_kind, string_kind_t);
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

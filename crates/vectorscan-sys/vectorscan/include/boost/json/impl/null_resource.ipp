@@ -11,9 +11,10 @@
 #define BOOST_JSON_IMPL_NULL_RESOURCE_IPP
 
 #include <boost/json/null_resource.hpp>
-#include <boost/json/detail/except.hpp>
+#include <boost/throw_exception.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 namespace detail {
 
@@ -65,8 +66,7 @@ protected:
         std::size_t,
         std::size_t) override
     {
-        detail::throw_bad_alloc(
-            BOOST_CURRENT_LOCATION);
+        throw_exception( std::bad_alloc(), BOOST_CURRENT_LOCATION );
     }
 
     void
@@ -96,6 +96,7 @@ get_null_resource() noexcept
     return &mr;
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

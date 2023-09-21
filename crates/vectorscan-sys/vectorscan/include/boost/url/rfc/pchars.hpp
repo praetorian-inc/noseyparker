@@ -24,7 +24,7 @@ namespace urls {
     the functions @ref grammar::find_if and
     @ref grammar::find_if_not.
     @code
-    result< decode_view > rv = grammar::parse( "Program%20Files", pchars );
+    system::result< decode_view > rv = grammar::parse( "Program%20Files", pchars );
     @endcode
 
     @par BNF

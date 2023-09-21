@@ -145,13 +145,13 @@ T rising_factorial_imp(T x, int n, const Policy& pol)
    if(x == 0)
    {
       if(n < 0)
-         return -boost::math::tgamma_delta_ratio(x + 1, static_cast<T>(-n), pol);
+         return static_cast<T>(-boost::math::tgamma_delta_ratio(x + 1, static_cast<T>(-n), pol));
       else
          return 0;
    }
    if((x < 1) && (x + n < 0))
    {
-      T val = boost::math::tgamma_delta_ratio(1 - x, static_cast<T>(-n), pol);
+      const auto val = static_cast<T>(boost::math::tgamma_delta_ratio(1 - x, static_cast<T>(-n), pol));
       return (n & 1) ? T(-val) : val;
    }
    //
@@ -159,7 +159,7 @@ T rising_factorial_imp(T x, int n, const Policy& pol)
    // tgamma_delta_ratio is already optimised for that
    // use case:
    //
-   return 1 / boost::math::tgamma_delta_ratio(x, static_cast<T>(n), pol);
+   return 1 / static_cast<T>(boost::math::tgamma_delta_ratio(x, static_cast<T>(n), pol));
 }
 
 template <class T, class Policy>
@@ -206,7 +206,7 @@ inline T falling_factorial_imp(T x, unsigned n, const Policy& pol)
       unsigned n2 = itrunc((T)floor(xp1), pol);
       if(n2 == xp1)
          return 0;
-      T result = boost::math::tgamma_delta_ratio(xp1, -static_cast<T>(n2), pol);
+      auto result = static_cast<T>(boost::math::tgamma_delta_ratio(xp1, -static_cast<T>(n2), pol));
       x -= n2;
       result *= x;
       ++n2;
@@ -221,7 +221,7 @@ inline T falling_factorial_imp(T x, unsigned n, const Policy& pol)
    // because tgamma_delta_ratio is already optimised
    // for that use case:
    //
-   return boost::math::tgamma_delta_ratio(x + 1, -static_cast<T>(n), pol);
+   return static_cast<T>(boost::math::tgamma_delta_ratio(x + 1, -static_cast<T>(n), pol));
 }
 
 } // namespace detail
