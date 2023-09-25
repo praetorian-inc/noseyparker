@@ -1,32 +1,29 @@
 ################################################################################
 # Build `noseyparker`
 #
-# We use the alpine current, since its smaller than most debian releases.
+# We use the alpine current, since it's smaller than most debian releases.
 ################################################################################
 FROM rust:1.72-alpine3.18 AS builder
 
 # Install dependencies
-#
-# Note: clang is needed for `bindgen`, used by `vectorscan-sys`.
 RUN apk add --no-cache --no-interactive \
-        cmake \
-        ninja-build \
-        musl-dev \
-        make\ 
-        openssl \
         build-base \
-        openssl-dev \
+        cmake \
         git \
+        make \
+        musl-dev \
+        ninja-build \
+        openssl \
+        openssl-dev \
         perl \
-        &&\
-    apk cache clean 
+        && \
+    apk cache clean
 
 WORKDIR "/noseyparker"
 
 COPY . .
 
-RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse \
-    cargo install --root /usr/local --profile release --features release --locked --path crates/noseyparker-cli
+RUN cargo install --root /usr/local --profile release --features release --locked --path crates/noseyparker-cli
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
