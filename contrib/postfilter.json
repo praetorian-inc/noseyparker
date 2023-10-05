@@ -1,0 +1,521 @@
+{
+    "AWS API Key": 
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Age Recipient (X25519 public key)":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "Age Identity (X22519 secret key)":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "Artifactory API Key":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Azure Connection String":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution":"Reset the account or ID"
+        },
+    "Azure App Configuration Connection String":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution":"Reset the account or ID"
+        },
+    "CodeClimate":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "crates.io API Key":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "DigitalOcean Application Access Token":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "DigitalOcean Refresh Token":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        },
+    "Dynatrace Token":
+        {
+            "Priority": "Medium",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Facebook Secret Key":
+        {
+            "Priority": "Low",
+            "Skip": "True",
+            "Resolution": "NAN"
+        }, 
+    "Figma Personal Access Token":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Generic Secret":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Generic API Key":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Generic Username and Password (quoted)":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Generic Username and Password (unquoted)":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "Generic Password (single quoted)":
+        {
+            "Priority": "Medium",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "GitHub Personal Access Token":
+        {
+            "Priority": "High",
+            "Skip": "False",
+            "Resolution": "Reset the account or ID"
+        },
+    "GitHub OAuth Access Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitHub App Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitHub Refresh Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitHub Client ID":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitHub Secret Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitHub Personal Access Token (fine-grained permissions)":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "GitLab Runner Registration Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "GitLab Personal Access Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "GitLab Pipeline Trigger Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Google Client ID":
+    {
+        "Priority": "Medium",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Google OAuth Access Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Google API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Google Cloud Storage Bucket (subdomain style)":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Google Cloud Storage Bucket (path style)":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Hardcoded Gradle Credentials":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Grafana API Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Grafana Service Account Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "md5crypt Hash":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "bcrypt Hash":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Heroku API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "HuggingFace User Access Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Jenkins Token or Crumb":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "JSON Web Token (base64url-encoded)":
+    {
+        "Priority": "High",
+        "Skip": "True",
+        "Resolution": "Reset the account or ID"
+    },
+    "LinkedIn Client ID":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "LinkedIn Secret Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "MailChimp API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Mapbox Public Access Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Microsoft Teams Webhook":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "netrc Credentials":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "New Relic License Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "New Relic License Key (non-suffixed)":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "New Relic API Service Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "New Relic Admin API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "New Relic Insights Insert Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "New Relic Insights Query Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "New Relic REST API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "New Relic Pixie API Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "New Relic Pixie Deploy Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "NPM Access Token (fine-grained)":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "NuGet API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Credentials in ODBC Connection String":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Okta API Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "OpenAI API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "PEM-Encoded Private Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID or cert"
+    },
+    
+    "Postman API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "Credentials in PsExec":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "PyPI Upload Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "Salesforce Access Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "Square Access Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "StackHawk API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    
+    "Sauce Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Segment Public API Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "SendGrid API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Shopify Domain":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Shopify App Secret":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Shopify Access Token (Public App)":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Shopify Access Token (Custom App)":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Slack":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Slack Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Slack Webhook":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "SonarQube Token":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Square OAuth Secret":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Telegram Bot Token":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "Reset the account or ID"
+    },
+    "Twilio API Key":
+    {
+        "Priority": "High",
+        "Skip": "False",
+        "Resolution": "Reset the account or ID"
+    },
+    "Twitter Client ID":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    },
+    "Twitter Secret Key":
+    {
+        "Priority": "Low",
+        "Skip": "True",
+        "Resolution": "NAN"
+    }
+    
+}
