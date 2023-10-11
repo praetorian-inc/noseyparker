@@ -80,7 +80,7 @@ assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
 # criterion = "0.4"
 # escargot = "0.5"  # NOTE: much more capable but much slower than assert_cmd for `cargo run` tests
-insta = { version = "1.29", features = ["filters", "json", "redactions"] }
+insta = { version = "1.34", features = ["filters", "json", "redactions"] }
 predicates = "3.0"
 pretty_assertions = "1.3"
 
