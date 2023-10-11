@@ -6,7 +6,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error, info, warn};
+use tracing::{debug, debug_span, error, info, trace_span, warn};
 
 use crate::args;
 
@@ -36,9 +36,7 @@ type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
 /// and records found matches to a SQLite database from a single dedicated thread.
 pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> {
-    let _span = debug_span!("scan").entered();
-
-    debug!("Args: {args:#?}");
+    debug!("Args:\n{global_args:#?}\n{args:#?}");
 
     let progress_enabled = global_args.use_progress();
 
@@ -126,7 +124,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut input_roots = args.input_specifier_args.path_inputs.clone();
 
     if !repo_urls.is_empty() {
-        let clone_mode = match args.input_specifier_args.git_clone_mode {
+        let clone_mode = match args.input_specifier_args.git_clone {
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
         };
@@ -207,6 +205,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let mut ie = FilesystemEnumerator::new(&input_roots)?;
             ie.threads(args.num_jobs);
             ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
+            if args.input_specifier_args.git_history == args::GitHistoryMode::None {
+                ie.enumerate_git_history(false);
+            }
 
             // Load default ignore file. Note that we have to write it to a file first,
             // because the API for the `ignore` crate doesn't expose something that takes a
@@ -261,11 +262,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             blob_bytes + file_bytes
         };
         progress.finish_with_message(format!(
-            "Found {} from {} plain files and {} blobs from {} Git repos",
+            "Found {} from {} plain {} and {} blobs from {} Git {}",
             HumanBytes(total_bytes_found),
             HumanCount(inputs.files.len() as u64),
+            if inputs.files.len() == 1 { "file" } else { "files" },
             HumanCount(inputs.git_repos.iter().map(|r| r.num_blobs()).sum()),
             HumanCount(inputs.git_repos.len() as u64),
+            if inputs.git_repos.len() == 1 { "repo" } else { "repos" },
         ));
         inputs
     };
@@ -301,17 +304,16 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     // We create a separate thread for writing matches to the datastore.
     // The datastore uses SQLite, which does best with a single writer.
-    let datastore_writer = std::thread::Builder::new()
-        .name("Datastore Writer".to_string())
+    let datastore_writer_thread = std::thread::Builder::new()
+        .name("datastore".to_string())
         .spawn(move || -> Result<_> {
-            let _span = debug_span!("datastore_writer").entered();
+            let _span = debug_span!("datastore").entered();
             let mut total_recording_time: std::time::Duration = Default::default();
 
             let mut num_matches_added: u64 = 0;
             let mut total_messages: u64 = 0;
 
-            // Big idea: keep reading until all the senders hang up; panic if recording matches
-            // fails.
+            // Big idea: read until all the senders hang up; panic if recording matches fails.
             //
             // Record all messages in one big transaction to maximize throughput.
 
@@ -321,7 +323,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
             let tx = datastore.begin()?;
 
-            for message in recv_ds.iter() {
+            for message in recv_ds {
                 total_messages += 1;
                 matches_in_batch += message.2.len();
                 batch.push(message);
@@ -335,7 +337,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     matches_in_batch = 0;
                     let elapsed = t1.elapsed();
                     debug!(
-                        "recorded {num_added} matches from {batch_len} messages in {:.6}s",
+                        "Recorded {num_added} matches from {batch_len} messages in {:.6}s",
                         elapsed.as_secs_f64()
                     );
                     total_recording_time += elapsed;
@@ -353,7 +355,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
                 let elapsed = t1.elapsed();
                 debug!(
-                    "recorded {num_added} matches from {batch_len} messages in {:.6}s",
+                    "Recorded {num_added} matches from {batch_len} messages in {:.6}s",
                     elapsed.as_secs_f64()
                 );
                 total_recording_time += elapsed;
@@ -370,7 +372,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let analyzed_elapsed = t1.elapsed();
 
             debug!(
-                "summary: recorded {num_matches} matches from {total_messages} messages \
+                "Summary: recorded {num_matches} matches from {total_messages} messages \
                      in {:.6}s; committed in {:.6}s; analyzed in {:.6}s",
                 total_recording_time.as_secs_f64(),
                 commit_elapsed.as_secs_f64(),
@@ -380,17 +382,26 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             Ok((datastore, num_matches, num_matches_added))
         })?;
 
+    // A function to be immediately called, to allow syntactic simplification of error propagation
     let scan_inner = || -> Result<()> {
         // ---------------------------------------------------------------------------------------------
         // Scan plain files
         // ---------------------------------------------------------------------------------------------
         inputs.files.par_iter().try_for_each_init(
-            || {
-                let matcher = make_matcher().expect("should be able to create a matcher");
+            || -> Result<_> {
+                let matcher = make_matcher()?;
 
-                (matcher, progress.clone())
+                Ok((matcher, progress.clone()))
             },
-            |(matcher, progress), file_result: &FileResult| -> Result<()> {
+            |state: &mut Result<_>, file_result: &FileResult| -> Result<()> {
+                let _span = trace_span!("file-scan", path = file_result.path.display().to_string())
+                    .entered();
+
+                let (matcher, progress) = match state {
+                    Ok(state) => state,
+                    Err(e) => bail!("Failed to initialize worker: {e}"),
+                };
+
                 let fname = &file_result.path;
                 let blob = match Blob::from_file(fname) {
                     Err(e) => {
@@ -422,6 +433,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             .git_repos
             .into_par_iter()
             .try_for_each(|git_repo_result| -> Result<()> {
+                let span =
+                    trace_span!("git-scan", path = git_repo_result.path.display().to_string());
+                let _span = span.enter();
+
                 let repository = match open_git_repo(&git_repo_result.path) {
                     Ok(Some(repository)) => repository.into_sync(),
                     Ok(None) => {
@@ -441,17 +456,23 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 };
 
                 git_repo_result.blobs.into_par_iter().try_for_each_init(
-                    || {
+                    || -> Result<_> {
+                        let _span = span.enter();
                         let repo = repository.to_thread_local();
-                        let matcher = make_matcher().expect("should be able to create a matcher");
-                        (repo, matcher, progress.clone())
+                        let matcher = make_matcher()?;
+                        Ok((repo, matcher, progress.clone()))
                     },
-                    |(repo, matcher, progress), md| -> Result<()> {
+                    |state: &mut Result<_>, md| -> Result<()> {
+                        let _span = span.enter();
+                        let (repo, matcher, progress) = match state {
+                            Ok(state) => state,
+                            Err(e) => bail!("Failed to initialize worker: {e}"),
+                        };
+
                         let size = md.num_bytes;
                         let blob_id = md.blob_oid;
                         progress.inc(size);
                         let repo_path = &git_repo_result.path;
-                        // debug!("Scanning {} size {} from {:?}", oid, size, path);
 
                         let blob = match repo.find_object(blob_id) {
                             Err(e) => {
@@ -533,14 +554,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Get rid of the reference to the sending channel after starting the scanners,
     // to ensure things terminate as expected.
     drop(send_ds);
-    let (datastore, num_matches, num_new_matches) = datastore_writer
+    let (datastore, num_matches, num_new_matches) = datastore_writer_thread
         .join()
         .unwrap()
-        .context("failed to save results to the datastore")?;
+        .context("Failed to save results to the datastore")?;
     progress.finish();
 
     // now check the result of the scanners
-    scan_res.context("failed to scan inputs")?;
+    scan_res.context("Failed to scan inputs")?;
 
     // ---------------------------------------------------------------------------------------------
     // Finalize and report
@@ -643,6 +664,8 @@ fn run_matcher(
     blob_metadata_recording_mode: args::BlobMetadataMode,
     progress: &Progress,
 ) -> Result<()> {
+    let _span = trace_span!("matcher", blob_id = blob.id.hex()).entered();
+
     let (matcher, guesser) = matcher_guesser;
 
     match matcher.scan_blob(&blob, &provenance) {
@@ -654,9 +677,7 @@ fn run_matcher(
         }
 
         // blob already seen, but with no matches; nothing to do!
-        Ok(ScanResult::SeenSansMatches) => {
-            Ok(())
-        }
+        Ok(ScanResult::SeenSansMatches) => Ok(()),
 
         // blob already seen; all we need to do is record its provenance
         Ok(ScanResult::SeenWithMatches) => {
@@ -668,7 +689,7 @@ fn run_matcher(
             };
             send_ds
                 .send((provenance, metadata, Vec::new()))
-                .context("failed to save results")?;
+                .context("Failed to save results")?;
             Ok(())
         }
 
@@ -720,7 +741,7 @@ fn run_matcher(
 
             send_ds
                 .send((provenance, metadata, matches))
-                .context("failed to save results")?;
+                .context("Failed to save results")?;
             Ok(())
         }
     }

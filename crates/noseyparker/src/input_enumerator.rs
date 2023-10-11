@@ -33,6 +33,7 @@ pub struct FileResult {
 struct VisitorBuilder<'t> {
     max_file_size: Option<u64>,
     collect_git_metadata: bool,
+    enumerate_git_history: bool,
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
@@ -48,11 +49,11 @@ where
         Box::new(Visitor {
             max_file_size: self.max_file_size,
             collect_git_metadata: self.collect_git_metadata,
+            enumerate_git_history: self.enumerate_git_history,
             local_files: Vec::new(),
             local_git_repos: Vec::new(),
             global_files: self.global_files,
             global_git_repos: self.global_git_repos,
-
             progress: self.progress.clone(),
         })
     }
@@ -63,6 +64,7 @@ where
 // -------------------------------------------------------------------------------------------------
 struct Visitor<'t> {
     collect_git_metadata: bool,
+    enumerate_git_history: bool,
     max_file_size: Option<u64>,
 
     local_files: Vec<FileResult>,
@@ -114,6 +116,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             }
             Ok(v) => v,
         };
+        let is_dir = metadata.is_dir();
 
         if metadata.is_file() {
             let bytes = metadata.len();
@@ -127,36 +130,38 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                     num_bytes: bytes,
                 });
             }
-        } else if metadata.is_dir() {
-            match open_git_repo(path) {
-                Err(e) => {
-                    error!("Failed to open Git repository at {}: {e}; skipping", path.display());
-                    return WalkState::Skip;
-                }
-                Ok(Some(repository)) => {
-                    debug!("Found Git repo at {}", path.display());
+        } else if is_dir {
+            if self.enumerate_git_history {
+                match open_git_repo(path) {
+                    Err(e) => {
+                        error!("Failed to open Git repository at {}: {e}; skipping", path.display());
+                        return WalkState::Skip;
+                    }
+                    Ok(Some(repository)) => {
+                        debug!("Found Git repo at {}", path.display());
 
-                    if self.collect_git_metadata {
-                        let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
-                        match enumerator.run(&mut self.progress) {
-                            Err(e) => {
-                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
-                                return WalkState::Skip;
+                        if self.collect_git_metadata {
+                            let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
+                            match enumerator.run(&mut self.progress) {
+                                Err(e) => {
+                                    error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                    return WalkState::Skip;
+                                }
+                                Ok(r) => self.local_git_repos.push(r),
                             }
-                            Ok(r) => self.local_git_repos.push(r),
-                        }
-                    } else {
-                        let enumerator = GitRepoEnumerator::new(path, &repository);
-                        match enumerator.run(&mut self.progress) {
-                            Err(e) => {
-                                error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
-                                return WalkState::Skip;
+                        } else {
+                            let enumerator = GitRepoEnumerator::new(path, &repository);
+                            match enumerator.run(&mut self.progress) {
+                                Err(e) => {
+                                    error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                    return WalkState::Skip;
+                                }
+                                Ok(r) => self.local_git_repos.push(r),
                             }
-                            Ok(r) => self.local_git_repos.push(r),
                         }
                     }
+                    Ok(None) => {}
                 }
-                Ok(None) => {}
             }
         } else if metadata.is_symlink() {
             // No problem; just ignore it
@@ -186,12 +191,14 @@ pub struct FilesystemEnumerator {
     max_file_size: Option<u64>,
 
     collect_git_metadata: bool,
+    enumerate_git_history: bool,
 }
 
 impl FilesystemEnumerator {
     pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
     pub const DEFAULT_FOLLOW_LINKS: bool = false;
     pub const DEFAULT_COLLECT_GIT_METADATA: bool = true;
+    pub const DEFAULT_ENUMERATE_GIT_HISTORY: bool = true;
 
     /// Create a new `FilesystemEnumerator` with the given set of input roots using default
     /// settings.
@@ -213,6 +220,7 @@ impl FilesystemEnumerator {
             walk_builder: builder,
             max_file_size,
             collect_git_metadata: Self::DEFAULT_COLLECT_GIT_METADATA,
+            enumerate_git_history: Self::DEFAULT_ENUMERATE_GIT_HISTORY,
         })
     }
 
@@ -251,6 +259,12 @@ impl FilesystemEnumerator {
         self
     }
 
+    /// Enable or disable whether Git history is enumerated.
+    pub fn enumerate_git_history(&mut self, enumerate_git_history: bool) -> &mut Self {
+        self.enumerate_git_history = enumerate_git_history;
+        self
+    }
+
     /// Specify an ad-hoc filtering function to control which entries are enumerated.
     ///
     /// This can be used to skip entire directories.
@@ -268,6 +282,7 @@ impl FilesystemEnumerator {
 
         let mut visitor_builder = VisitorBuilder {
             collect_git_metadata: self.collect_git_metadata,
+            enumerate_git_history: self.enumerate_git_history,
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,

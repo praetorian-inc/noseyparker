@@ -18,12 +18,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `report` command supports a new `--max-matches=N` parameter to control the maximum number of matches that will be output for any single finding ([#75](https://github.com/praetorian-inc/noseyparker/issues/75)).
   A negative number means "no limit".
 
-- A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
-  This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
+- The `scan` command now supports a new `--git-history={full,none}` parameter to control whether encountered Git history will be scanned.
+  This defaults to `full`, but specifying a value of `none` will cause Git history to be ignored.
 
 - New rules have been added:
 
   - Salesforce Access Token
+
+- A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
+  This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
 
 - The `NP_LOG` environment variable is inspected at runtime to allow find-grain control over Nosey Parker's diagnostic output.
   The syntax of this variable are defined by the [`tracing-subscriber`](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/filter/struct.EnvFilter.html) Rust crate.

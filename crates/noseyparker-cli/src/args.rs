@@ -443,6 +443,20 @@ pub enum GitCloneMode {
     Mirror,
 }
 
+/// The method of handling history in discovered Git repositories
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
+pub enum GitHistoryMode {
+    /// Scan all history
+    Full,
+
+    // XXX: add an option to support bounded history, such as just blobs in the repo HEAD
+
+    /// Scan no history
+    None,
+}
+
+
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Metadata Collection Options")]
 pub struct MetadataArgs {
@@ -451,6 +465,9 @@ pub struct MetadataArgs {
     pub blob_metadata: BlobMetadataMode,
 
     /// Specify which Git commit provenance metadata will be collected
+    ///
+    /// This should not need to be changed unless you are running into performance problems on a
+    /// problematic Git repository input.
     #[arg(long, default_value_t=GitBlobProvenanceMode::FirstSeen, value_name="MODE")]
     pub git_blob_provenance: GitBlobProvenanceMode,
 }
@@ -536,8 +553,16 @@ pub struct InputSpecifierArgs {
     pub github_api_url: Url,
 
     /// Use the specified method for cloning Git repositories
-    #[arg(long, value_name = "MODE", display_order = 40, default_value_t=GitCloneMode::Bare)]
-    pub git_clone_mode: GitCloneMode,
+    #[arg(long, value_name = "MODE", display_order = 40, default_value_t=GitCloneMode::Bare, alias="git-clone-mode")]
+    pub git_clone: GitCloneMode,
+
+    /// Use the specified mode for handling Git history
+    ///
+    /// Git history can be completely ignored when scanning by using `--git-history=none`.
+    /// Note that this will interfere with other input specifiers that cause Git repositories to be automatically cloned.
+    /// For example, specifying an input with `--git-url=<URL>` while simultaneously using `--git-history=none` will not result in useful scanning.
+    #[arg(long, value_name = "MODE", display_order = 50, default_value_t=GitHistoryMode::Full)]
+    pub git_history: GitHistoryMode,
 }
 
 /// This struct represents options to control content discovery.
