@@ -40,10 +40,6 @@ env:
   CARGO_PROFILE_DEV_DEBUG: '0'
   CARGO_PROFILE_TEST_DEBUG: '0'
 
-  # Use Cargo 1.68's new "sparse" checkout mode, which is much faster at getting crates.io index information
-  # https://blog.rust-lang.org/inside-rust/2023/01/30/cargo-sparse-protocol.html
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: 'sparse'
-
 jobs:
   tests:
     name: CI
