@@ -30,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).
 
 - The release process is now codified in a shell script: `scripts/create-release.zsh`.
-  This emits a release tree at `release` in the top-level of the repository.
+  This emits a release tree at `release` in the top-level of the repository, which includes the prebuilt binary as well as shell completions.
 
 ### Fixes
 - Fixed a bug in the `report` command when `--format=sarif` is used which caused some metadata to be unintentionally omitted from the output.

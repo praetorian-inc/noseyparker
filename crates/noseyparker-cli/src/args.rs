@@ -1,7 +1,8 @@
 use anyhow::Result;
-use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum};
+use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint};
 use std::io::IsTerminal;
 use std::path::PathBuf;
+use strum::Display;
 use url::Url;
 
 use noseyparker::git_url::GitUrl;
@@ -242,22 +243,12 @@ impl GlobalArgs {
 }
 
 /// A generic auto/never/always mode value
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum Mode {
     Auto,
     Never,
     Always,
-}
-
-impl std::fmt::Display for Mode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Mode::Auto => "auto",
-            Mode::Never => "never",
-            Mode::Always => "always",
-        };
-        write!(f, "{s}")
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -275,7 +266,8 @@ pub struct GitHubArgs {
     #[arg(
         long,
         value_name = "URL",
-        default_value = "https://api.github.com",
+        value_hint = ValueHint::Url,
+        default_value = "https://api.github.com/",
         visible_alias="api-url"
     )]
     pub github_api_url: Url,
@@ -347,7 +339,7 @@ pub struct RulesCheckArgs {
     /// Treat warnings as errors
     pub warnings_as_errors: bool,
 
-    #[arg(num_args(1..), required(true))]
+    #[arg(num_args(1..), required(true), value_hint = ValueHint::AnyPath)]
     /// Files or directories to check
     pub inputs: Vec<PathBuf>,
 }
@@ -369,7 +361,14 @@ pub enum DatastoreCommand {
 
 #[derive(Args, Debug)]
 pub struct DatastoreInitArgs {
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::AnyPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
     /// Initialize the datastore at specified path
     pub datastore: PathBuf,
 }
@@ -390,7 +389,14 @@ pub struct ScanArgs {
     /// Use the specified datastore
     ///
     /// The datastore will be created if it does not exist.
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::AnyPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
     pub datastore: PathBuf,
 
     /// Use N parallel scanning jobs
@@ -410,7 +416,7 @@ pub struct ScanArgs {
     /// Directories are recursively walked and all discovered rule files will be loaded.
     ///
     /// This option can be repeated.
-    #[arg(long, short, value_name = "PATH")]
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
     pub rules: Vec<PathBuf>,
 
     #[command(flatten)]
@@ -424,7 +430,8 @@ pub struct ScanArgs {
 }
 
 /// The mode to use for cloning a Git repository
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum GitCloneMode {
     /// Match the behavior of `git clone --bare`
     Bare,
@@ -434,16 +441,6 @@ pub enum GitCloneMode {
     /// This will clone the most possible content.
     /// When cloning repositories hosted on GitHub, this mode may clone objects that come from forks.
     Mirror,
-}
-
-impl std::fmt::Display for GitCloneMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            GitCloneMode::Bare => "bare",
-            GitCloneMode::Mirror => "mirror",
-        };
-        write!(f, "{s}")
-    }
 }
 
 #[derive(Args, Debug)]
@@ -458,7 +455,8 @@ pub struct MetadataArgs {
     pub git_blob_provenance: GitBlobProvenanceMode,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum BlobMetadataMode {
     /// Record metadata for all encountered blobs
     All,
@@ -470,18 +468,8 @@ pub enum BlobMetadataMode {
     None,
 }
 
-impl std::fmt::Display for BlobMetadataMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            BlobMetadataMode::All => "all",
-            BlobMetadataMode::Matching => "matching",
-            BlobMetadataMode::None => "none",
-        };
-        write!(f, "{s}")
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum GitBlobProvenanceMode {
     /// The Git repository and set of commits and accompanying pathnames in which a blob is first
     /// seen
@@ -491,21 +479,16 @@ pub enum GitBlobProvenanceMode {
     Minimal,
 }
 
-impl std::fmt::Display for GitBlobProvenanceMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GitBlobProvenanceMode::FirstSeen => write!(f, "first-seen"),
-            GitBlobProvenanceMode::Minimal => write!(f, "minimal"),
-        }
-    }
-}
-
-
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Input Specifier Options")]
 pub struct InputSpecifierArgs {
     /// Scan the specified file, directory, or local Git repository
-    #[arg(value_name="INPUT", required_unless_present_any(["github_user", "github_organization", "git_url"]), display_order=1)]
+    #[arg(
+        value_name="INPUT",
+        value_hint=ValueHint::AnyPath,
+        required_unless_present_any(["github_user", "github_organization", "git_url"]),
+        display_order=1,
+    )]
     pub path_inputs: Vec<PathBuf>,
 
     /// Clone and scan the Git repository at the specified URL
@@ -513,7 +496,12 @@ pub struct InputSpecifierArgs {
     /// Only https URLs without credentials, query parameters, or fragment identifiers are supported.
     ///
     /// This option can be repeated.
-    #[arg(long, value_name = "URL", display_order = 10)]
+    #[arg(
+        long,
+        value_name = "URL",
+        value_hint = ValueHint::Url,
+        display_order = 10,
+    )]
     pub git_url: Vec<GitUrl>,
 
     /// Clone and scan accessible repositories belonging to the specified GitHub user
@@ -541,7 +529,8 @@ pub struct InputSpecifierArgs {
         long,
         visible_alias = "api-url",
         value_name = "URL",
-        default_value_t = Url::parse("https://api.github.com").expect("default API url should parse"),
+        value_hint = ValueHint::Url,
+        default_value = "https://api.github.com/",
         display_order = 30
     )]
     pub github_api_url: Url,
@@ -572,7 +561,7 @@ pub struct ContentFilteringArgs {
     /// The ignore file should contain gitignore-style rules.
     ///
     /// This option can be repeated.
-    #[arg(long, short, value_name = "FILE")]
+    #[arg(long, short, value_name = "FILE", value_hint = ValueHint::FilePath)]
     pub ignore: Vec<PathBuf>,
     /*
     /// Do not scan files that appear to be binary
@@ -597,7 +586,14 @@ impl ContentFilteringArgs {
 #[derive(Args, Debug)]
 pub struct SummarizeArgs {
     /// Use the specified datastore
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::AnyPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
     pub datastore: PathBuf,
 
     #[command(flatten)]
@@ -610,7 +606,14 @@ pub struct SummarizeArgs {
 #[derive(Args, Debug)]
 pub struct ReportArgs {
     /// Use the specified datastore
-    #[arg(long, short, value_name = "PATH", env("NP_DATASTORE"), default_value=DEFAULT_DATASTORE)]
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::AnyPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
     pub datastore: PathBuf,
 
     #[command(flatten)]
@@ -627,27 +630,15 @@ pub struct ReportArgs {
 // -----------------------------------------------------------------------------
 // `shell_completions` command
 // -----------------------------------------------------------------------------
-#[derive(ValueEnum, Debug, Clone)]
+#[derive(ValueEnum, Debug, Display, Clone)]
 #[clap(rename_all = "lower")]
+#[strum(serialize_all="lowercase")]
 pub enum ShellFormat {
     Bash,
     Zsh,
     Fish,
     PowerShell,
     Elvish
-}
-
-impl std::fmt::Display for ShellFormat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            ShellFormat::Bash => "bash",
-            ShellFormat::Zsh => "zsh",
-            ShellFormat::Fish => "fish",
-            ShellFormat::PowerShell => "powershell",
-            ShellFormat::Elvish => "elvish",
-        };
-        write!(f, "{s}")
-    }
 }
 
 #[derive(Args, Debug)]
@@ -665,7 +656,7 @@ pub struct OutputArgs<Format: ValueEnum + Send + Sync + 'static> {
     /// Write output to the specified path
     ///
     /// If this argument is not provided, stdout will be used.
-    #[arg(long, short, value_name = "PATH")]
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::FilePath)]
     pub output: Option<PathBuf>,
 
     /// Write output in the specified format
@@ -710,7 +701,8 @@ impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
 // -----------------------------------------------------------------------------
 // report output format
 // -----------------------------------------------------------------------------
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum ReportOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -730,22 +722,11 @@ pub enum ReportOutputFormat {
     Sarif,
 }
 
-impl std::fmt::Display for ReportOutputFormat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            ReportOutputFormat::Human => "human",
-            ReportOutputFormat::Json => "json",
-            ReportOutputFormat::Jsonl => "jsonl",
-            ReportOutputFormat::Sarif => "sarif",
-        };
-        write!(f, "{s}")
-    }
-}
-
 // -----------------------------------------------------------------------------
 // summarize output format
 // -----------------------------------------------------------------------------
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum SummarizeOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -759,21 +740,11 @@ pub enum SummarizeOutputFormat {
     Jsonl,
 }
 
-impl std::fmt::Display for SummarizeOutputFormat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            SummarizeOutputFormat::Human => "human",
-            SummarizeOutputFormat::Json => "json",
-            SummarizeOutputFormat::Jsonl => "jsonl",
-        };
-        write!(f, "{s}")
-    }
-}
-
 // -----------------------------------------------------------------------------
 // github output format
 // -----------------------------------------------------------------------------
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
 pub enum GitHubOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -785,17 +756,6 @@ pub enum GitHubOutputFormat {
     ///
     /// This is a sequence of JSON objects, one per line.
     Jsonl,
-}
-
-impl std::fmt::Display for GitHubOutputFormat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            GitHubOutputFormat::Human => "human",
-            GitHubOutputFormat::Json => "json",
-            GitHubOutputFormat::Jsonl => "jsonl",
-        };
-        write!(f, "{s}")
-    }
 }
 
 // -----------------------------------------------------------------------------

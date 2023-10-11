@@ -21,7 +21,7 @@ Options:
           If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
           include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
           
-          [default: https://api.github.com]
+          [default: https://api.github.com/]
           [aliases: api-url]
 
   -h, --help
