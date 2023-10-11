@@ -1,5 +1,15 @@
-.buildx-cache
-CHANGELOG.md
-README.md
-docs
-target
+# Allow-list dockerignore file
+# see https://stackoverflow.com/questions/28097064/dockerignore-ignore-everything-except-a-file-and-the-dockerfile
+
+# Ignore everything
+*
+
+# Explicitly list things we want to include
+!/.cargo
+!/.git
+!/Cargo.lock
+!/Cargo.toml
+!/LICENSE
+!/crates
+!/scripts
+!/share
