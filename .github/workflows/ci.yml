@@ -108,7 +108,7 @@ jobs:
           run_tests: true
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install dependencies
       run: ${{ matrix.install_dependencies }}
