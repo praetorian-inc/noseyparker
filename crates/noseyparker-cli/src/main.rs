@@ -17,10 +17,10 @@ mod cmd_summarize;
 use args::GlobalArgs;
 
 fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
-    use tracing_subscriber::filter::LevelFilter;
     use tracing_log::{AsLog, LogTracer};
+    use tracing_subscriber::{filter::LevelFilter, EnvFilter};
 
-    let filter = match global_args.verbose {
+    let level_filter = match global_args.verbose {
         0 => LevelFilter::WARN,
         1 => LevelFilter::INFO,
         2 => LevelFilter::DEBUG,
@@ -28,13 +28,20 @@ fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
     };
 
     LogTracer::builder()
-        .with_max_level(filter.as_log())
+        .with_max_level(level_filter.as_log())
         .init()?;
 
+    let env_filter = EnvFilter::builder()
+        .with_default_directive(level_filter.clone().into())
+        .with_env_var("NP_LOG")
+        .from_env()
+        .context("Failed to parse filters from NP_LOG environment variable")?;
+
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
-      .with_max_level(filter)
-      .with_ansi(global_args.use_color())
-      .finish();
+        // .with_max_level(level_filter)
+        .with_ansi(global_args.use_color())
+        .with_env_filter(env_filter)
+        .finish();
     tracing::subscriber::set_global_default(subscriber)?;
 
     Ok(())
@@ -66,8 +73,6 @@ fn configure_backtraces(global_args: &GlobalArgs) {
         std::env::set_var("RUST_BACKTRACE", "1");
     }
 }
-
-
 
 fn try_main() -> Result<()> {
     let args = &args::CommandLineArgs::parse_args();

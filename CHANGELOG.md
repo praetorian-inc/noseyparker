@@ -25,6 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - Salesforce Access Token
 
+- The `NP_LOG` environment variable is inspected at runtime to allow find-grain control over Nosey Parker's diagnostic output.
+  The syntax of this variable are defined by the [`tracing-subscriber`](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/filter/struct.EnvFilter.html) Rust crate.
+
 ### Changes
 - All the output formats for the `report` command now respect the new `--max-matches=N` parameter.
   Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).
