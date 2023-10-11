@@ -365,7 +365,7 @@ pub struct DatastoreInitArgs {
         long,
         short,
         value_name = "PATH",
-        value_hint = ValueHint::AnyPath,
+        value_hint = ValueHint::DirPath,
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
@@ -393,7 +393,7 @@ pub struct ScanArgs {
         long,
         short,
         value_name = "PATH",
-        value_hint = ValueHint::AnyPath,
+        value_hint = ValueHint::DirPath,
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
@@ -590,7 +590,7 @@ pub struct SummarizeArgs {
         long,
         short,
         value_name = "PATH",
-        value_hint = ValueHint::AnyPath,
+        value_hint = ValueHint::DirPath,
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
@@ -610,7 +610,7 @@ pub struct ReportArgs {
         long,
         short,
         value_name = "PATH",
-        value_hint = ValueHint::AnyPath,
+        value_hint = ValueHint::DirPath,
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
