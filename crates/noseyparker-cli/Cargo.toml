@@ -57,6 +57,7 @@ indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
 log = { version = "0.4", optional = true }
+mimalloc = "0.1"
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"

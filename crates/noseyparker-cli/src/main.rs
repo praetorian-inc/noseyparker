@@ -1,3 +1,7 @@
+use mimalloc::MiMalloc;
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 use anyhow::{Context, Result};
 use tracing::debug;
 
