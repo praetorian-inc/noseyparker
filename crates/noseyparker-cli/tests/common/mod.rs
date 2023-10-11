@@ -92,7 +92,7 @@ pub fn noseyparker_cmd() -> Command {
 */
 
 pub fn noseyparker_cmd() -> Command {
-    Command::cargo_bin("noseyparker").expect("noseyparker should be executable")
+    Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
 }
 
 /// Create a `RegexPredicate` from the given pattern.

@@ -34,19 +34,22 @@ A prebuilt Docker image is also available for the most recent commit for x86_64 
 <summary><h3>Building from source</h3></summary>
 
 **1. Prerequisites**
-This has been tested on several versions of Ubuntu Linux on x86_64 and on macOS running on both Intel and ARM processors.
+This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and ARM64.
 
 Required dependencies:
-- `cargo`: recommended approach:install from <https://rustup.rs>
-- `cmake`: needed for building the `vectorscan-sys` crate
+- `cargo`: recommended approach: install from <https://rustup.rs>
+- `cmake`: needed for building the `vectorscan-sys` crate and some other dependencies
 - `git`: needed for embedding version information into the `noseyparker` CLI
+- `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
+- `zsh`: needed for build scripts
 
-**2. Build using [Cargo](https://doc.rust-lang.org/cargo/)**
+**2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script**
+```
+rm -rf release && ./scripts/create-release.zsh
+```
 
-```
-cargo build --release
-```
-This will produce an optimized binary at `target/release/noseyparker`.
+If successful, this will produce a directory structure at `release` populated with release artifacts.
+The command-line program will be at `release/bin/noseyparker`.
 </details>
 
 ## Usage quick start

@@ -29,6 +29,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - All the output formats for the `report` command now respect the new `--max-matches=N` parameter.
   Previously, the output formats other than `human` would run without limit (i.e., as though `--max-matches=-1` had been specified).
 
+- The release process is now codified in a shell script: `scripts/create-release.zsh`.
+  This emits a release tree at `release` in the top-level of the repository.
+
 ### Fixes
 - Fixed a bug in the `report` command when `--format=sarif` is used which caused some metadata to be unintentionally omitted from the output.
 

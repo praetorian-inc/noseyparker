@@ -2454,6 +2454,7 @@ dependencies = [
  "content_guesser",
  "fixedbitset",
  "gix",
+ "gix-object",
  "hex",
  "hyperx",
  "ignore",

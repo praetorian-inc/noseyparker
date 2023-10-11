@@ -49,6 +49,7 @@ const DEFAULT_DATASTORE: &str = "datastore.np";
 #[derive(Parser, Debug)]
 #[command(
     name("noseyparker"),
+    bin_name("noseyparker"),
 
     author,   // retrieved from Cargo.toml `authors`
     version,  // retrieved from Cargo.toml `version`

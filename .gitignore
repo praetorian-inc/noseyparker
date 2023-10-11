@@ -10,3 +10,6 @@
 **/*.rs.bk
 
 .buildx-cache
+
+# scripts/create-release.zsh output directory
+/release
