@@ -53,42 +53,55 @@ jobs:
     strategy:
       matrix:
         build:
-        - macos-12.stable.test
-        - ubuntu-20.04.stable.release
-        - ubuntu-22.04.stable.test
+        - macos-13.arm64.stable.test
+        - macos-12.x86_64.stable.test
+        - ubuntu-20.04.x86_64.stable.release
+        - ubuntu-22.04.x86_64.stable.test
 
         include:
-        - build: ubuntu-20.04.stable.release
+        - build: ubuntu-20.04.x86_64.stable.release
           os: ubuntu-20.04
           rust: stable
           profile: release
           features: release
           install_dependencies: |
-            true
+            sudo apt-get install zsh
 
           check_docs: false
           check_rules: false
           run_tests: true
 
-        - build: ubuntu-22.04.stable.test
+        - build: ubuntu-22.04.x86_64.stable.test
           os: ubuntu-22.04
           rust: stable
           profile: test
           features:
           install_dependencies: |
-            true
+            sudo apt-get install zsh
 
           check_docs: true
           check_rules: true
           run_tests: true
 
-        - build: macos-12.stable.test
+        - build: macos-12.x86_64.stable.test
           os: macos-12
           rust: stable
           profile: test
           features:
           install_dependencies: |
-            true
+            brew install coreutils
+
+          check_docs: false
+          check_rules: false
+          run_tests: true
+
+        - build: macos-13.arm64.stable.test
+          os: macos-13-xlarge  # m1-based macos
+          rust: stable
+          profile: test
+          features:
+          install_dependencies: |
+            brew install coreutils
 
           check_docs: false
           check_rules: false
