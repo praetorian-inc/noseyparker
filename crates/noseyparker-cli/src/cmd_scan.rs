@@ -39,25 +39,28 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     debug!("Args:\n{global_args:#?}\n{args:#?}");
 
     let progress_enabled = global_args.use_progress();
+    let mut init_progress = Progress::new_spinner("Initializing...", progress_enabled);
 
     // ---------------------------------------------------------------------------------------------
     // Configure the Rayon global thread pool
     // ---------------------------------------------------------------------------------------------
-    debug!("Using {} parallel jobs", args.num_jobs);
+    init_progress.set_message("Initializing thread pool...");
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.num_jobs)
-        .thread_name(|idx| format!("Scanner {idx}"))
+        .thread_name(|idx| format!("scanner-{idx}"))
         .build_global()
-        .with_context(|| format!("Failed to configure Rayon with {} threads", args.num_jobs))?;
+        .context("Failed to initialize Rayon")?;
 
     // ---------------------------------------------------------------------------------------------
     // Open datastore
     // ---------------------------------------------------------------------------------------------
+    init_progress.set_message("Initializing datastore...");
     let mut datastore = Datastore::create_or_open(&args.datastore)?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
     // ---------------------------------------------------------------------------------------------
+    init_progress.set_message("Compiling rules...");
     let rules_db = {
         let mut rules = Rules::from_default_rules().context("Failed to load default rules")?;
         if !args.rules.is_empty() {
@@ -67,6 +70,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         }
         RulesDatabase::from_rules(rules).context("Failed to compile rules")?
     };
+
+    drop(init_progress);
 
     // ---------------------------------------------------------------------------------------------
     // Enumerate any mentioned GitHub repositories; gather list of all repos to clone or update

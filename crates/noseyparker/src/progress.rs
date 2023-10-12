@@ -13,6 +13,8 @@ pub const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(500);
 //
 //       See https://github.com/console-rs/indicatif/issues/394.
 
+// XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
+
 /// Wraps an `indicatif::ProgressBar` with a local buffer to reduce update contention overhead.
 /// Updates are batched an the progress bar is updated only every `PROGRESS_UPDATE_INTERVAL`.
 ///
@@ -27,6 +29,39 @@ pub struct Progress {
 }
 
 impl Progress {
+    pub fn new_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
+        let inner = if enabled {
+            let style = ProgressStyle::with_template(
+                "{spinner} {msg} [{elapsed_precise}]",
+            )
+            .expect("progress bar style template should compile");
+
+            let inner = ProgressBar::new_spinner()
+                .with_style(style)
+                .with_message(message);
+            inner.enable_steady_tick(PROGRESS_UPDATE_INTERVAL);
+
+            inner
+        } else {
+            ProgressBar::hidden()
+        };
+
+        let finish_style = ProgressStyle::with_template("{msg} [{elapsed_precise}]")
+            .expect("progress bar style template should compile");
+
+        Progress {
+            inc_since_sync: 0,
+            last_sync: Instant::now(),
+            inner,
+            finish_style: Some(finish_style),
+        }
+    }
+
+    #[inline]
+    pub fn set_message<T: Into<Cow<'static, str>>>(&mut self, message: T) {
+        self.inner.set_message(message);
+    }
+
     pub fn new_countup_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
         let inner = if enabled {
             let style = ProgressStyle::with_template(
