@@ -18,7 +18,7 @@ libmagic = ["magic"]
 path = "src/lib.rs"
 
 [dependencies]
-magic = { version = "0.13", optional = true }
+magic = { version = "0.16", optional = true }
 mime_guess = "2"
 mime = "0.3"
 thiserror = "1"
