@@ -79,6 +79,6 @@ pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {
         })
         .collect();
     table.set_format(f);
-    table.set_titles(row![lb -> "Rule", cb -> "Distinct Matches", cb -> "Total Matches"]);
+    table.set_titles(row![lb -> "Rule", cb -> "Total Findings", cb -> "Total Matches"]);
     table
 }
