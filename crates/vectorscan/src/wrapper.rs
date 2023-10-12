@@ -43,7 +43,7 @@ unsafe fn compile_error_drop(v: *mut hs::hs_compile_error_t) {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, Clone, Copy)]
     pub struct Flag: u32 {
         const CASELESS = hs::HS_FLAG_CASELESS;
         const DOTALL = hs::HS_FLAG_DOTALL;
