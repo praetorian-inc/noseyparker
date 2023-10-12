@@ -39,6 +39,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The release process is now codified in a shell script: `scripts/create-release.zsh`.
   This emits a release tree at `release` in the top-level of the repository, which includes the prebuilt binary as well as shell completions.
 
+- The `report` command has improved performance when using JSON output format.
+  Previously, the entire JSON output document needed to be accumulated in memory and then written in one step at the end.
+  Now, the JSON output document is written in a streaming fashion, one finding at a time.
+
 ### Fixes
 - Fixed a bug in the `report` command when `--format=sarif` is used which caused some metadata to be unintentionally omitted from the output.
 

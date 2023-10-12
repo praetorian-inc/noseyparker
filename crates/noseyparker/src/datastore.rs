@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
-use rusqlite::Connection;
+use rusqlite::{Connection, types::FromSqlError};
 use serde::Serialize;
 use std::ffi::OsString;
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
@@ -14,7 +14,7 @@ use crate::git_commit_metadata::CommitMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
-use crate::provenance::{CommitKind, CommitProvenance, Provenance};
+use crate::provenance::{CommitKind, CommitProvenance, Provenance, ProvenanceKind};
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
@@ -187,10 +187,9 @@ impl <'a> Transaction<'a> {
                     c.commit_metadata.author_email.as_slice(),
                     c.commit_metadata.message.as_slice(),
                 );
-                get.query((&commit_id, ))?.next()?.map_or_else(
-                    || set.query_row(params, |row| row.get(0)),
-                    |row| row.get(0),
-                )
+                get.query((&commit_id,))?
+                    .next()?
+                    .map_or_else(|| set.query_row(params, |row| row.get(0)), |row| row.get(0))
             }
         };
 
@@ -269,8 +268,8 @@ impl <'a> Transaction<'a> {
                 );
 
                 let mut new = false;
-                // to reduce database writes, only insert the match data if it's different than
-                // what's there already
+                // to reduce database writes, only insert the match data if it's meaningfully
+                // different than what's there already
                 let different = match get.query(params)?.next()? {
                     None => {
                         new = true;
@@ -308,11 +307,10 @@ impl <'a> Transaction<'a> {
             "#})?;
 
             move |path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (path, );
-                get.query(params)?.next()?.map_or_else(
-                    || set.query_row(params, |r| r.get(0)),
-                    |row| row.get(0),
-                )
+                let params = (path,);
+                get.query(params)?
+                    .next()?
+                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
             }
         };
 
@@ -329,11 +327,10 @@ impl <'a> Transaction<'a> {
             "#})?;
 
             move |repo_path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (repo_path, );
-                get.query(params)?.next()?.map_or_else(
-                    || set.query_row(params, |r| r.get(0)),
-                    |row| row.get(0),
-                )
+                let params = (repo_path,);
+                get.query(params)?
+                    .next()?
+                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
             }
         };
 
@@ -351,10 +348,9 @@ impl <'a> Transaction<'a> {
 
             move |repo_path: &[u8], commit_id: i64, blob_path: &[u8]| -> rusqlite::Result<i64> {
                 let params = (repo_path, commit_id, blob_path);
-                get.query(params)?.next()?.map_or_else(
-                    || set.query_row(params, |r| r.get(0)),
-                    |row| row.get(0),
-                )
+                get.query(params)?
+                    .next()?
+                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
             }
         };
 
@@ -370,12 +366,11 @@ impl <'a> Transaction<'a> {
                 where payload_kind = ? and payload_id = ?
             "#})?;
 
-            move |kind: &str, payload_id: i64| -> rusqlite::Result<i64> {
+            move |kind: ProvenanceKind, payload_id: i64| -> rusqlite::Result<i64> {
                 let params = (kind, payload_id);
-                get.query(params)?.next()?.map_or_else(
-                    || set.query_row(params, |r| r.get(0)),
-                    |row| row.get(0),
-                )
+                get.query(params)?
+                    .next()?
+                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
             }
         };
 
@@ -401,22 +396,28 @@ impl <'a> Transaction<'a> {
                     Provenance::File(e) => {
                         let path = e.path.as_os_str().as_bytes();
                         let payload_id = add_provenance_payload_file(path)?;
-                        let provenance_id = add_provenance("file", payload_id)?;
+                        let provenance_id = add_provenance(ProvenanceKind::File, payload_id)?;
                         (provenance_id, None)
                     }
                     Provenance::GitRepo(e) => {
                         let repo_path = e.repo_path.as_os_str().as_bytes();
                         match &e.commit_provenance {
+                            // no commit information; record just the repo
                             None => {
                                 let payload_id = add_provenance_payload_git_repo(repo_path)?;
-                                let provenance_id = add_provenance("git_repo", payload_id)?;
+                                let provenance_id =
+                                    add_provenance(ProvenanceKind::GitRepo, payload_id)?;
                                 (provenance_id, None)
                             }
+                            // detailed commit information
                             Some(c) => {
                                 let commit_id = add_git_commit(c)?;
                                 let blob_path = c.blob_path.as_slice();
-                                let payload_id = add_provenance_payload_git_commit(repo_path, commit_id, blob_path)?;
-                                let provenance_id = add_provenance("git_commit", payload_id)?;
+                                let payload_id = add_provenance_payload_git_commit(
+                                    repo_path, commit_id, blob_path,
+                                )?;
+                                let provenance_id =
+                                    add_provenance(ProvenanceKind::GitCommit, payload_id)?;
                                 (provenance_id, Some(c.commit_kind))
                             }
                         }
@@ -441,7 +442,9 @@ impl <'a> Transaction<'a> {
 // Public implementation, recording functions
 impl Datastore {
     pub fn begin(&mut self) -> Result<Transaction> {
-        let inner = self.conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        let inner = self
+            .conn
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         Ok(Transaction { inner })
     }
 }
@@ -515,7 +518,7 @@ impl Datastore {
         &self,
         metadata: &MatchGroupMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(ProvenanceSet, BlobMetadata, Match)>> {
+    ) -> Result<Vec<(ProvenanceSet, BlobMetadata, MatchId, Match)>> {
         let _span =
             debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
 
@@ -540,7 +543,10 @@ impl Datastore {
 
                 b.size,
                 b.mime_essence,
-                b.charset
+                b.charset,
+
+                m.id
+
             from match m
             inner join blob b on (m.blob_id = b.id)
             where m.group_input = ?1 and m.rule_name = ?2
@@ -548,6 +554,61 @@ impl Datastore {
             limit ?3
         "#})?;
 
+        let entries = get_blob_metadata_and_match.query_map(
+            (metadata.match_content.as_slice(), &metadata.rule_name, match_limit),
+            |row| {
+                let v0: String = row.get(0)?;
+                let blob_id = BlobId::from_hex(&v0).map_err(|e| FromSqlError::Other(e.into()))?;
+                let m = Match {
+                    blob_id,
+                    location: Location {
+                        offset_span: OffsetSpan {
+                            start: row.get(1)?,
+                            end: row.get(2)?,
+                        },
+                        source_span: SourceSpan {
+                            start: SourcePoint {
+                                line: row.get(3)?,
+                                column: row.get(4)?,
+                            },
+                            end: SourcePoint {
+                                line: row.get(5)?,
+                                column: row.get(6)?,
+                            },
+                        },
+                    },
+                    snippet: Snippet {
+                        before: BString::new(row.get(7)?),
+                        matching: BString::new(row.get(8)?),
+                        after: BString::new(row.get(9)?),
+                    },
+                    capture_group_index: row.get(10)?,
+                    match_content: metadata.match_content.clone(),
+                    rule_name: metadata.rule_name.clone(),
+                };
+                let num_bytes: usize = row.get(11)?;
+                let mime_essence: Option<String> = row.get(12)?;
+                let charset: Option<String> = row.get(13)?;
+                let b = BlobMetadata {
+                    id: blob_id,
+                    num_bytes,
+                    mime_essence,
+                    charset,
+                };
+                let id = MatchId(row.get(14)?);
+                Ok((b, id, m))
+            },
+        )?;
+        let mut es = Vec::new();
+        for e in entries {
+            let (md, id, m) = e?;
+            let ps = self.get_provenance_set(&md)?;
+            es.push((ps, md, id, m));
+        }
+        Ok(es)
+    }
+
+    fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
         let mut get_provenance = self.conn.prepare_cached(indoc! {r#"
             select distinct p.payload_kind, p.payload_id, bp.kind provenance_kind
             from
@@ -587,147 +648,96 @@ impl Datastore {
             where id = ?
         "#})?;
 
-        let entries = get_blob_metadata_and_match.query_map(
-            (metadata.match_content.as_slice(), &metadata.rule_name, match_limit),
-            |row| {
-                let v0: String = row.get(0)?;
-                let blob_id = BlobId::from_hex(&v0).expect("blob id from database should be valid");
-                let m = Match {
-                    blob_id,
-                    location: Location {
-                        offset_span: OffsetSpan {
-                            start: row.get(1)?,
-                            end: row.get(2)?,
-                        },
-                        source_span: SourceSpan {
-                            start: SourcePoint {
-                                line: row.get(3)?,
-                                column: row.get(4)?,
-                            },
-                            end: SourcePoint {
-                                line: row.get(5)?,
-                                column: row.get(6)?,
-                            },
-                        },
-                    },
-                    snippet: Snippet {
-                        before: BString::new(row.get(7)?),
-                        matching: BString::new(row.get(8)?),
-                        after: BString::new(row.get(9)?),
-                    },
-                    capture_group_index: row.get(10)?,
-                    match_content: metadata.match_content.clone(),
-                    rule_name: metadata.rule_name.clone(),
-                };
-                let num_bytes: usize = row.get(11)?;
-                let mime_essence: Option<String> = row.get(12)?;
-                let charset: Option<String> = row.get(13)?;
-                let b = BlobMetadata {
-                    id: blob_id,
-                    num_bytes,
-                    mime_essence,
-                    charset,
-                };
-                Ok((b, m))
-            },
-        )?;
-        let mut es = Vec::new();
-        for e in entries {
-            let (md, m) = e?;
-            let ps = {
-                let ps = get_provenance.query_map((md.id.hex(),), |row| {
-                    let payload_kind = row.get_ref(0)?.as_str()?;
-                    let payload_id: i64 = row.get(1)?;
-                    let provenance_kind: Option<CommitKind> = row.get(2)?;
-                    match payload_kind {
-                        "file" => {
-                            let path: Vec<u8> = get_provenance_payload_file
-                                .query_row((payload_id,), |r| r.get(0))?;
-                            let path = PathBuf::from(OsString::from_vec(path));
-                            Ok(Provenance::from_file(path))
-                        }
+        let ps = get_provenance.query_map((metadata.id.hex(),), |row| {
+            let payload_kind = row.get(0)?;
+            let payload_id: i64 = row.get(1)?;
+            let provenance_kind: Option<CommitKind> = row.get(2)?;
+            match payload_kind {
+                ProvenanceKind::File => {
+                    let path: Vec<u8> =
+                        get_provenance_payload_file.query_row((payload_id,), |r| r.get(0))?;
+                    let path = PathBuf::from(OsString::from_vec(path));
+                    Ok(Provenance::from_file(path))
+                }
 
-                        "git_repo" => {
-                            let path: Vec<u8> = get_provenance_payload_git_repo
-                                .query_row((payload_id,), |r| r.get(0))?;
-                            let path = PathBuf::from(OsString::from_vec(path));
-                            Ok(Provenance::from_git_repo(path))
-                        }
+                ProvenanceKind::GitRepo => {
+                    let path: Vec<u8> =
+                        get_provenance_payload_git_repo.query_row((payload_id,), |r| r.get(0))?;
+                    let path = PathBuf::from(OsString::from_vec(path));
+                    Ok(Provenance::from_git_repo(path))
+                }
 
-                        "git_commit" => {
-                            let mut rows =
-                                get_provenance_payload_git_commit.query((payload_id,))?;
-                            let row = rows.next()?.expect("FIXME");
-
+                ProvenanceKind::GitCommit => {
+                    let (repo_path, commit_id, blob_path) = get_provenance_payload_git_commit
+                        .query_row((payload_id,), |row| {
                             let repo_path: Vec<u8> = row.get(0)?;
                             let repo_path = PathBuf::from(OsString::from_vec(repo_path));
 
                             let commit_id: i64 = row.get(1)?;
+
                             let blob_path: Vec<u8> = row.get(2)?;
                             let blob_path = BString::from(blob_path);
 
-                            let commit_metadata: CommitMetadata = {
-                                let mut rows = get_commit_metadata.query((commit_id,))?;
-                                let row = rows.next()?.expect("FIXME");
+                            Ok((repo_path, commit_id, blob_path))
+                        })?;
 
-                                let get_bstring = |idx: usize| -> rusqlite::Result<BString> {
-                                    Ok(row.get_ref(idx)?.as_bytes()?.into())
-                                };
-
-                                let get_time = |idx: usize| -> rusqlite::Result<gix::date::Time> {
-                                    let epoch_seconds = row.get_ref(idx)?.as_i64()?;
-                                    Ok(gix::date::Time::new(epoch_seconds, 0))
-                                };
-
-                                let commit_id =
-                                    gix::ObjectId::from_hex(row.get_ref(0)?.as_bytes()?)
-                                        .expect("should have valid commit hash");
-                                let committer_name = get_bstring(1)?;
-                                let committer_email = get_bstring(2)?;
-                                let committer_timestamp = get_time(3)?;
-                                let author_name = get_bstring(4)?;
-                                let author_email = get_bstring(5)?;
-                                let author_timestamp = get_time(6)?;
-                                let message = get_bstring(7)?;
-
-                                CommitMetadata {
-                                    commit_id,
-                                    committer_name,
-                                    committer_email,
-                                    committer_timestamp,
-                                    author_name,
-                                    author_email,
-                                    author_timestamp,
-                                    message,
-                                }
+                    let commit_metadata: CommitMetadata =
+                        get_commit_metadata.query_row((commit_id,), |row| {
+                            let get_bstring = |idx: usize| -> rusqlite::Result<BString> {
+                                Ok(row.get_ref(idx)?.as_bytes()?.into())
                             };
 
-                            Ok(Provenance::from_git_repo_and_commit_metadata(
-                                repo_path,
-                                provenance_kind.expect("should have a provenance kind"),
-                                commit_metadata,
-                                blob_path,
-                            ))
-                        }
+                            let get_time = |idx: usize| -> rusqlite::Result<gix::date::Time> {
+                                let epoch_seconds = row.get_ref(idx)?.as_i64()?;
+                                Ok(gix::date::Time::new(epoch_seconds, 0))
+                            };
 
-                        _ => {
-                            panic!("unexpected payload kind {payload_kind:?}");
-                        }
-                    }
-                })?;
-                let mut results = Vec::new();
-                for p in ps {
-                    results.push(p?);
+                            let commit_id = gix::ObjectId::from_hex(row.get_ref(0)?.as_bytes()?)
+                                .map_err(|e| FromSqlError::Other(e.into()))?;
+
+                            let committer_name = get_bstring(1)?;
+                            let committer_email = get_bstring(2)?;
+                            let committer_timestamp = get_time(3)?;
+                            let author_name = get_bstring(4)?;
+                            let author_email = get_bstring(5)?;
+                            let author_timestamp = get_time(6)?;
+                            let message = get_bstring(7)?;
+
+                            Ok(CommitMetadata {
+                                commit_id,
+                                committer_name,
+                                committer_email,
+                                committer_timestamp,
+                                author_name,
+                                author_email,
+                                author_timestamp,
+                                message,
+                            })
+                        })?;
+
+                    let provenance_kind = provenance_kind.ok_or(FromSqlError::InvalidType)?;
+                    Ok(Provenance::from_git_repo_and_commit_metadata(
+                        repo_path,
+                        provenance_kind,
+                        commit_metadata,
+                        blob_path,
+                    ))
                 }
-                ProvenanceSet::try_from_iter(results)
-                    .expect("should have at least 1 provenance entry")
-            };
-
-            es.push((ps, md, m));
+            }
+        })?;
+        let mut results = Vec::new();
+        for p in ps {
+            results.push(p?);
         }
-        Ok(es)
+        match ProvenanceSet::try_from_iter(results) {
+            Some(ps) => Ok(ps),
+            None => bail!("should have at least 1 provenance entry"),
+        }
     }
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct MatchId(pub i64);
 
 // Private implementation
 impl Datastore {

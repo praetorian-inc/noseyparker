@@ -129,6 +129,36 @@ impl std::fmt::Display for CommitKind {
     }
 }
 
+/// What is the kind of a provenance object?
+#[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum ProvenanceKind {
+    GitRepo,
+    GitCommit,
+    File,
+}
+
+impl rusqlite::types::ToSql for ProvenanceKind {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        match self {
+            ProvenanceKind::GitRepo => Ok("git_repo".into()),
+            ProvenanceKind::GitCommit => Ok("git_commit".into()),
+            ProvenanceKind::File => Ok("file".into()),
+        }
+    }
+}
+
+impl rusqlite::types::FromSql for ProvenanceKind {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        match value.as_str()? {
+            "git_repo" => Ok(ProvenanceKind::GitRepo),
+            "git_commit" => Ok(ProvenanceKind::GitCommit),
+            "file" => Ok(ProvenanceKind::File),
+            _ => Err(rusqlite::types::FromSqlError::InvalidType),
+        }
+    }
+}
+
 /// How was a particular Git commit encountered?
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 pub struct CommitProvenance {

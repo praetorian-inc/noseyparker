@@ -6,10 +6,11 @@ use noseyparker::rules::Rules;
 use serde::Serialize;
 use serde_sarif::sarif;
 use std::fmt::{Display, Formatter, Write};
+use tracing::debug;
 
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
-use noseyparker::datastore::{Datastore, MatchGroupMetadata};
+use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId};
 use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
@@ -17,7 +18,9 @@ use noseyparker::provenance_set::ProvenanceSet;
 
 use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat, Reportable};
 
-pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
+pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
+    debug!("Args:\n{global_args:#?}\n{args:#?}");
+
     let datastore = Datastore::open(&args.datastore)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
     let output = args
@@ -29,7 +32,10 @@ pub fn run(_global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     } else {
         Some(args.max_matches.try_into().unwrap())
     };
-    let reporter = DetailsReporter { datastore, max_matches };
+    let reporter = DetailsReporter {
+        datastore,
+        max_matches,
+    };
     reporter.report(args.output_args.format, output)
 }
 
@@ -39,16 +45,13 @@ struct DetailsReporter {
 }
 
 impl DetailsReporter {
-    fn get_matches(
-        &self,
-        metadata: &MatchGroupMetadata,
-    ) -> Result<Vec<ReportMatch>> {
+    fn get_matches(&self, metadata: &MatchGroupMetadata) -> Result<Vec<ReportMatch>> {
         Ok(self
             .datastore
             .get_match_group_data(metadata, self.max_matches)
             .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
             .into_iter()
-            .map(|(p, md, m)| ReportMatch { ps: p, md, m })
+            .map(|(p, md, id, m)| ReportMatch { ps: p, md, id, m })
             .collect())
     }
 }
@@ -88,38 +91,164 @@ impl DetailsReporter {
         Ok(())
     }
 
-    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+    /// Write findings in JSON-like format to `writer`.
+    ///
+    /// If `begin` is supplied, it is written before any finding is.
+    /// If `sep` is supplied, it is written to separate each finding.
+    /// If `end` is suplied, it is written after all findings have been.
+    ///
+    /// This is flexible enough to express both JSON and JSONL output formats, and to do so without
+    /// having to accumulate all the findings into memory.
+    fn write_json_findings<W: std::io::Write>(
+        &self,
+        mut writer: W,
+        begin: Option<&str>,
+        sep: Option<&str>,
+        end: Option<&str>,
+    ) -> Result<()> {
         let datastore = &self.datastore;
         let group_metadata = datastore
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
-        // XXX is there some nice way to do this serialization without first building a vec?
-        let es = group_metadata
-            .into_iter()
-            .map(|metadata| {
-                let matches = self.get_matches(&metadata)?;
-                Ok(MatchGroup { metadata, matches })
-            })
-            .collect::<Result<Vec<MatchGroup>, anyhow::Error>>()?;
-        serde_json::to_writer_pretty(writer, &es)?;
+        if let Some(begin) = begin {
+            write!(writer, "{}", begin)?;
+        }
+
+        let mut first = true;
+
+        for metadata in group_metadata {
+            if !first {
+                if let Some(sep) = sep {
+                    write!(writer, "{}", sep)?;
+                }
+            }
+            first = false;
+
+            let matches = self.get_matches(&metadata)?;
+            let f = Finding::MatchGroup(MatchGroup::new(metadata, matches));
+            serde_json::to_writer(&mut writer, &f)?;
+        }
+
+        if let Some(end) = end {
+            write!(writer, "{}", end)?;
+        }
+
         Ok(())
     }
 
-    fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore = &self.datastore;
-        let group_metadata = datastore
-            .get_match_group_metadata()
-            .context("Failed to get match group metadata from datastore")?;
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        self.write_json_findings(writer, Some("[\n"), Some(",\n"), Some("\n]"))
+    }
 
-        for metadata in group_metadata.into_iter() {
-            let matches = self.get_matches(&metadata)?;
-            let match_group = MatchGroup { metadata, matches };
+    fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        self.write_json_findings(writer, None, Some("\n"), Some("\n"))
+    }
 
-            serde_json::to_writer(&mut writer, &match_group)?;
-            writeln!(writer)?;
-        }
-        Ok(())
+    fn make_sarif_result(&self, finding: &MatchGroup) -> Result<sarif::Result> {
+        let matches = &finding.matches;
+        let metadata = &finding.metadata;
+
+        let first_match_blob_id = match matches.first() {
+            Some(entry) => entry.m.blob_id.to_string(),
+            None => bail!("Failed to get group match data for group {metadata:?}"),
+        };
+        let message = sarif::MessageBuilder::default()
+            .text(format!(
+                "Rule {:?} found {} {}.\nFirst blob id matched: {}",
+                metadata.rule_name,
+                metadata.num_matches,
+                if metadata.num_matches == 1 {
+                    "match".to_string()
+                } else {
+                    "matches".to_string()
+                },
+                first_match_blob_id,
+            ))
+            .build()?;
+
+        // Will store every match location for the runs.results.location array property
+        let locations: Vec<sarif::Location> = matches
+            .iter()
+            .flat_map(|m| {
+                let ReportMatch { ps, md, m, .. } = m;
+                ps.iter().map(move |p| {
+                    let source_span = &m.location.source_span;
+                    // let offset_span = &m.location.offset_span;
+
+                    let mut additional_properties =
+                        vec![(String::from("blob_metadata"), serde_json::json!(md))];
+
+                    let uri = match p {
+                        Provenance::File(e) => e.path.to_string_lossy().into_owned(),
+                        Provenance::GitRepo(e) => {
+                            if let Some(p) = &e.commit_provenance {
+                                additional_properties.push((
+                                    String::from("commit_provenance"),
+                                    serde_json::json!(p),
+                                ));
+                            }
+                            e.repo_path.to_string_lossy().into_owned()
+                        }
+                    };
+
+                    let additional_properties =
+                        std::collections::BTreeMap::from_iter(additional_properties);
+                    let properties = sarif::PropertyBagBuilder::default()
+                        .additional_properties(additional_properties)
+                        .build()?;
+
+                    let location = sarif::LocationBuilder::default()
+                        .physical_location(
+                            sarif::PhysicalLocationBuilder::default()
+                                .artifact_location(
+                                    sarif::ArtifactLocationBuilder::default().uri(uri).build()?,
+                                )
+                                // .context_region() FIXME: fill this in with location info of surrounding context
+                                .region(
+                                    sarif::RegionBuilder::default()
+                                        .start_line(source_span.start.line as i64)
+                                        .start_column(source_span.start.column as i64)
+                                        .end_line(source_span.end.line as i64)
+                                        .end_column(source_span.end.column as i64 + 1)
+                                        // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
+                                        /*
+                                        .byte_offset(offset_span.start as i64)
+                                        .byte_length(offset_span.len() as i64)
+                                        */
+                                        .snippet(
+                                            sarif::ArtifactContentBuilder::default()
+                                                .text(m.snippet.matching.to_string())
+                                                .build()?,
+                                        )
+                                        .build()?,
+                                )
+                                .build()?,
+                        )
+                        .logical_locations([sarif::LogicalLocationBuilder::default()
+                            .kind("blob")
+                            .name(m.blob_id.to_string())
+                            .properties(properties)
+                            .build()?])
+                        .build()?;
+                    Ok(location)
+                })
+            })
+            .collect::<Result<_>>()?;
+
+        let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
+
+        // Build the result for the match
+        let result = sarif::ResultBuilder::default()
+            .rule_id(&metadata.rule_name)
+            // .occurrence_count(locations.len() as i64)  // FIXME: enable?
+            .message(message)
+            .kind(sarif::ResultKind::Review.to_string())
+            .locations(locations)
+            .level(sarif::ResultLevel::Warning.to_string())
+            .partial_fingerprints([("match_group_content/sha256/v1".to_string(), sha1_fingerprint)])
+            .build()?;
+        Ok(result)
     }
 
     fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
@@ -128,124 +257,16 @@ impl DetailsReporter {
             .get_match_group_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
-        // Will store every match for the runs.results array property
-        let results: Vec<sarif::Result> = group_metadata
-            .into_iter()
-            .map(|metadata| {
-                let matches = self.get_matches(&metadata)?;
-
-                let first_match_blob_id = match matches.first() {
-                    Some(entry) => entry.m.blob_id.to_string(),
-                    None => bail!("Failed to get group match data for group {metadata:?}"),
-                };
-                let message = sarif::MessageBuilder::default()
-                    .text(format!(
-                        "Rule {:?} found {} {}.\nFirst blob id matched: {}",
-                        metadata.rule_name,
-                        metadata.num_matches,
-                        if metadata.num_matches == 1 {
-                            "match".to_string()
-                        } else {
-                            "matches".to_string()
-                        },
-                        first_match_blob_id,
-                    ))
-                    .build()?;
-
-                // Will store every match location for the runs.results.location array property
-                let locations: Vec<sarif::Location> = matches
-                    .into_iter()
-                    .flat_map(|ReportMatch { ps, md, m }| {
-                        ps.into_iter().map(move |p| {
-                            let source_span = &m.location.source_span;
-                            // let offset_span = &m.location.offset_span;
-
-                            let mut additional_properties = vec![
-                                (String::from("blob_metadata"), serde_json::json!(md)),
-                            ];
-
-                            let uri = match p {
-                                Provenance::File(e) => e.path.to_string_lossy().into_owned(),
-                                Provenance::GitRepo(e) => {
-                                    if let Some(p) = e.commit_provenance {
-                                        additional_properties.push((
-                                            String::from("commit_provenance"),
-                                            serde_json::json!(p),
-                                        ));
-                                    }
-                                    e.repo_path.to_string_lossy().into_owned()
-                                }
-                            };
-
-                            let additional_properties =
-                                std::collections::BTreeMap::from_iter(additional_properties);
-                            let properties = sarif::PropertyBagBuilder::default()
-                                .additional_properties(additional_properties)
-                                .build()?;
-
-                            let location = sarif::LocationBuilder::default()
-                                .physical_location(
-                                    sarif::PhysicalLocationBuilder::default()
-                                        .artifact_location(
-                                            sarif::ArtifactLocationBuilder::default()
-                                                .uri(uri)
-                                                .build()?,
-                                        )
-                                        // .context_region() FIXME: fill this in with location info of surrounding context
-                                        .region(
-                                            sarif::RegionBuilder::default()
-                                                .start_line(source_span.start.line as i64)
-                                                .start_column(source_span.start.column as i64)
-                                                .end_line(source_span.end.line as i64)
-                                                .end_column(source_span.end.column as i64 + 1)
-                                                // FIXME: including byte offsets seems to confuse VSCode SARIF Viewer. Why?
-                                                /*
-                                                .byte_offset(offset_span.start as i64)
-                                                .byte_length(offset_span.len() as i64)
-                                                */
-                                                .snippet(
-                                                    sarif::ArtifactContentBuilder::default()
-                                                        .text(m.snippet.matching.to_string())
-                                                        .build()?,
-                                                )
-                                                .build()?,
-                                        )
-                                        .build()?,
-                                )
-                                .logical_locations([sarif::LogicalLocationBuilder::default()
-                                    .kind("blob")
-                                    .name(m.blob_id.to_string())
-                                    .properties(properties)
-                                    .build()?])
-                                .build()?;
-                            Ok(location)
-                        })
-                    })
-                    .collect::<Result<_>>()?;
-
-                let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
-
-                // Build the result for the match
-                let result = sarif::ResultBuilder::default()
-                    .rule_id(&metadata.rule_name)
-                    // .occurrence_count(locations.len() as i64)  // FIXME: enable?
-                    .message(message)
-                    .kind(sarif::ResultKind::Review.to_string())
-                    .locations(locations)
-                    .level(sarif::ResultLevel::Warning.to_string())
-                    .partial_fingerprints([(
-                        "match_group_content/sha256/v1".to_string(),
-                        sha1_fingerprint,
-                    )])
-                    .build()?;
-                Ok(result)
-            })
-            .collect::<Result<_>>()?;
+        let mut findings = Vec::with_capacity(group_metadata.len());
+        for metadata in group_metadata {
+            let matches = self.get_matches(&metadata)?;
+            let match_group = MatchGroup::new(metadata, matches);
+            findings.push(self.make_sarif_result(&match_group)?);
+        }
 
         let run = sarif::RunBuilder::default()
             .tool(noseyparker_sarif_tool()?)
-            // .artifacts([ ])  // FIXME: add an entry for each blob with findings here; for each scanned git repo, add "nested artifacts" for each blob
-            .results(results)
+            .results(findings)
             .build()?;
 
         let sarif = sarif::SarifBuilder::default()
@@ -313,7 +334,14 @@ fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
         .map_err(|e| e.into())
 }
 
-/// A group of matches that all have the same rule and capture group content
+#[derive(Serialize)]
+#[serde(tag = "type")]
+enum Finding {
+    /// A group of matches that all have the same rule and capture group content
+    #[serde(rename = "finding")]
+    MatchGroup(MatchGroup),
+}
+
 #[derive(Serialize)]
 struct MatchGroup {
     #[serde(flatten)]
@@ -331,6 +359,10 @@ struct ReportMatch {
 
     #[serde(flatten)]
     m: Match,
+
+    #[serde(skip)]
+    #[allow(dead_code)]
+    id: MatchId,
 }
 
 lazy_static! {
@@ -343,6 +375,9 @@ lazy_static! {
 }
 
 impl MatchGroup {
+    fn new(metadata: MatchGroupMetadata, matches: Vec<ReportMatch>) -> Self {
+        Self { metadata, matches }
+    }
     fn rule_name(&self) -> &str {
         &self.metadata.rule_name
     }
@@ -362,7 +397,7 @@ impl MatchGroup {
 
 impl Display for MatchGroup {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", STYLE_RULE.apply_to(self.rule_name()))?;
+        writeln!(f, "{}", STYLE_RULE.apply_to(self.rule_name()),)?;
 
         // write out the group on one line if it's single-line, and multiple lines otherwise
         let g = self.group_input();
@@ -392,12 +427,12 @@ impl Display for MatchGroup {
 
         // print matches
         let mut f = indented(f).with_str("    ");
-        for (i, ReportMatch { ps, md, m }) in self.matches.iter().enumerate() {
+        for (i, ReportMatch { ps, md, m, .. }) in self.matches.iter().enumerate() {
             let i = i + 1;
             writeln!(
                 f,
                 "{}",
-                STYLE_HEADING.apply_to(format!("Occurrence {}/{}", i, self.total_matches()))
+                STYLE_HEADING.apply_to(format!("Occurrence {i}/{}", self.total_matches())),
             )?;
 
             let blob_metadata = {
