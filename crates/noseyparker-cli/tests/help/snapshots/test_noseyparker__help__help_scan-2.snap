@@ -47,7 +47,7 @@ Options:
           [default: datastore.np]
 
   -j, --jobs <N>
-          Use N parallel scanning jobs
+          Use N parallel scanning threads
           
           [default: DEFAULT]
 

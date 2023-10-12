@@ -21,7 +21,7 @@ fn help_short() {
 fn help_scan() {
     with_settings!({
         filters => vec![
-            (r"(?m)(scanning jobs\s+)\[default: \d+\]", r"$1[default: DEFAULT]")
+            (r"(?m)(scanning threads\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
         ],
     }, {
         assert_cmd_snapshot!(noseyparker_success!("help", "scan"));
@@ -32,7 +32,7 @@ fn help_scan() {
 fn help_scan_short() {
     with_settings!({
         filters => vec![
-            (r"(?m)(scanning jobs\s+)\[default: \d+\]", r"$1[default: DEFAULT]")
+            (r"(?m)(scanning threads\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
         ],
     }, {
         assert_cmd_snapshot!(noseyparker_success!("scan", "-h"));
@@ -51,12 +51,24 @@ fn help_summarize_short() {
 
 #[test]
 fn help_report() {
-    assert_cmd_snapshot!(noseyparker_success!("help", "report"));
+    with_settings!({
+        filters => vec![
+            (r"(?m)(denoising threads when using the CPU\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("help", "report"));
+    });
 }
 
 #[test]
 fn help_report_short() {
-    assert_cmd_snapshot!(noseyparker_success!("report", "-h"));
+    with_settings!({
+        filters => vec![
+            (r"(?m)(denoising threads when using the CPU\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("report", "-h"));
+    });
 }
 
 

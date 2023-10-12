@@ -9,7 +9,7 @@ Usage: noseyparker scan [OPTIONS] [INPUT]...
 Options:
   -d, --datastore <PATH>        Use the specified datastore [env: NP_DATASTORE=] [default:
                                 datastore.np]
-  -j, --jobs <N>                Use N parallel scanning jobs [default: DEFAULT]
+  -j, --jobs <N>                Use N parallel scanning threads [default: DEFAULT]
       --snippet-length <BYTES>  Include up to the specified number of bytes before and after each
                                 match [default: 256]
   -r, --rules <PATH>            Use custom rules from the specified file or directory

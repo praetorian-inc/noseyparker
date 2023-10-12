@@ -399,7 +399,7 @@ pub struct ScanArgs {
     )]
     pub datastore: PathBuf,
 
-    /// Use N parallel scanning jobs
+    /// Use N parallel scanning threads
     #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
     pub num_jobs: usize,
 
