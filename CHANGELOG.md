@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - Mapbox Temporary Access Token
   - Salesforce Access Token
 
 - A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.

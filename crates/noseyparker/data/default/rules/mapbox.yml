@@ -25,11 +25,29 @@ rules:
   # NOTE: `pk` tokens are public and have read-only access.
   #       `sk` tokens are secret and should never be shared.
   #       `tk` tokens are temporary access tokens.
-  pattern: '(?i)(?s)mapbox.{0,30}([st]k\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})(?:[^a-z0-9\-+/=]|$)'
+  pattern: '(?i)(?s)mapbox.{0,30}(sk\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})(?:[^a-z0-9\-+/=]|$)'
 
   examples:
   - "  //mapboxgl.accessToken = 'sk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';"
   - 'export MAPBOX_SECRET_TOKEN=sk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g'
+
+  references:
+  - https://docs.mapbox.com/api/accounts/tokens/#token-format
+  - https://docs.mapbox.com/help/getting-started/access-tokens/
+  - https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely
+
+
+- name: Mapbox Temporary Access Token
+  id: np.mapbox.3
+
+  # NOTE: `pk` tokens are public and have read-only access.
+  #       `sk` tokens are secret and should never be shared.
+  #       `tk` tokens are temporary access tokens.
+  pattern: '(?i)(?s)mapbox.{0,30}(tk\.[a-z0-9\-+/=]{32,128}\.[a-z0-9\-+/=]{20,30})(?:[^a-z0-9\-+/=]|$)'
+
+  examples:
+  - "  //mapboxgl.accessToken = 'tk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';"
+  - 'export MAPBOX_SECRET_TOKEN=tk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g'
 
   references:
   - https://docs.mapbox.com/api/accounts/tokens/#token-format
