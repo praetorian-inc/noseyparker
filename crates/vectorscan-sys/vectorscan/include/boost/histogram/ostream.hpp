@@ -57,7 +57,7 @@ public:
       }
       count_ = 0;
       os_ << t;
-      *iter_ = std::max(*iter_, static_cast<int>(count_));
+      *iter_ = (std::max)(*iter_, static_cast<int>(count_));
     } else {
       assert(iter_ != end());
       os_ << std::setw(*iter_) << t;
@@ -109,7 +109,7 @@ void ostream_value_impl(OStream& os, const T& t,
                         decltype(static_cast<double>(t), priority<1>{})) {
   // a value from histogram cell
   const auto d = static_cast<double>(t);
-  if (std::numeric_limits<int>::min() <= d && d <= std::numeric_limits<int>::max()) {
+  if ((std::numeric_limits<int>::min)() <= d && d <= (std::numeric_limits<int>::max)()) {
     const auto i = static_cast<int>(d);
     if (i == d) {
       os << i;
@@ -167,7 +167,7 @@ void ostream_bin(OStream& os, const Axis&, axis::index_type i, B, priority<0>) {
 struct line {
   const char* ch;
   const int size;
-  line(const char* a, int b) : ch{a}, size{std::max(b, 0)} {}
+  line(const char* a, int b) : ch{a}, size{(std::max)(b, 0)} {}
 };
 
 template <class T>
@@ -243,8 +243,8 @@ void plot(OStream& os, const Histogram& h, int w_total, std::true_type) {
   for (auto&& v : indexed(h, coverage::all)) {
     auto w = static_cast<double>(*v);
     ostream_head(tos.row(), ax, v.index(), w);
-    vmin = std::min(vmin, w);
-    vmax = std::max(vmax, w);
+    vmin = (std::min)(vmin, w);
+    vmax = (std::max)(vmax, w);
   }
   tos.complete();
   if (vmax == 0) vmax = 1;
@@ -300,7 +300,7 @@ void ostream(OStream& os, const Histogram& h, const bool show_values = true) {
     tos.complete();
 
     const int w_item = std::accumulate(tos.begin(), tos.end(), 0) + 4 + h.rank();
-    const int nrow = std::max(1, 65 / w_item);
+    const int nrow = (std::max)(1, 65 / w_item);
     int irow = 0;
     for (auto&& v : indexed(h, coverage::all)) {
       os << (irow == 0 ? "\n  (" : " (");

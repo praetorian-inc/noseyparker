@@ -266,7 +266,7 @@ namespace projections
                 };
                 return result;
             }
-            
+
             template <typename T>
             inline const isea_geo<T> * vertex()
             {
@@ -1240,7 +1240,7 @@ namespace projections
                 pj_param_i<srs::spar::aperture>(params, "aperture", srs::dpar::aperture, proj_parm.dgg.aperture);
                 // TODO: this parameter is set below second time
                 pj_param_i<srs::spar::resolution>(params, "resolution", srs::dpar::resolution, proj_parm.dgg.resolution);
-                
+
                 isea_mode_init(params, proj_parm);
 
                 // TODO: pj_param_exists -> pj_get_param_b ?
@@ -1303,7 +1303,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_F(isea_entry, isea_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(isea_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(isea, isea_entry)

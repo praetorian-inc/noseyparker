@@ -554,7 +554,6 @@ namespace boost
 // for this distribution have been defined, in order to
 // keep compilers that support two-phase lookup happy.
 #include <boost/math/distributions/detail/derived_accessors.hpp>
-#include <boost/math/distributions/detail/inv_discrete_quantile.hpp>
 
 #endif // BOOST_MATH_SPECIAL_POISSON_HPP
 

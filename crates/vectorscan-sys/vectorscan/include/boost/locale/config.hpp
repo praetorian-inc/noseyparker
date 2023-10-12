@@ -65,4 +65,23 @@
 #    define BOOST_LOCALE_END_CONST_CONDITION
 #endif
 
+/// \cond INTERNAL
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+// Internal define to check if we have access to the Win32 API
+#    define BOOST_LOCALE_USE_WIN32_API 1
+#else
+#    define BOOST_LOCALE_USE_WIN32_API 0
+#endif
+
+// To be used to suppress false positives of UBSAN
+#if defined(__clang__) && defined(__has_attribute)
+#    if __has_attribute(no_sanitize)
+#        define BOOST_LOCALE_NO_SANITIZE(what) __attribute__((no_sanitize(what)))
+#    endif
+#endif
+#if !defined(BOOST_LOCALE_NO_SANITIZE)
+#    define BOOST_LOCALE_NO_SANITIZE(what)
+#endif
+/// \endcond
+
 #endif // boost/locale/config.hpp

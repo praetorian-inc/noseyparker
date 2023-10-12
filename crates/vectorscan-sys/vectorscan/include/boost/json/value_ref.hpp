@@ -17,7 +17,8 @@
 #include <type_traits>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 #ifndef BOOST_JSON_DOCS
 class value;
@@ -233,12 +234,12 @@ public:
     value_ref(bool b) noexcept;
 #else
     template<
-        class Bool
+        class T
         ,class = typename std::enable_if<
-            std::is_same<Bool, bool>::value>::type
+            std::is_same<T, bool>::value>::type
     >
     value_ref(
-        Bool b) noexcept
+        T b) noexcept
         : arg_(b)
         , cf_{&from_builtin<bool>, &arg_.bool_}
         , what_(what::cfunc)
@@ -464,7 +465,8 @@ private:
         storage_ptr const& sp);
 };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 // Must be included here for this file to stand alone
 #include <boost/json/value.hpp>

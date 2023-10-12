@@ -28,9 +28,9 @@
 #include <boost/geometry/geometries/ring.hpp>
 
 #include <boost/config.hpp>
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
+
 #include <initializer_list>
-#endif
+
 
 namespace boost { namespace geometry
 {
@@ -90,8 +90,6 @@ public:
     inline ring_type& outer() { return m_outer; }
     inline inner_container_type & inners() { return m_inners; }
 
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
-
     // default constructor definition is required only
     // if the constructor taking std::initializer_list is defined
 
@@ -128,8 +126,6 @@ public:
 //        return *this;
 //    }
 //#endif
-
-#endif
 
     /// Utility method, clears outer and inner rings
     inline void clear()

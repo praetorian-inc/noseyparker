@@ -10,6 +10,7 @@
 #include <limits>
 #include <type_traits>
 #include <boost/math/tools/is_constant_evaluated.hpp>
+#include <boost/math/tools/promotion.hpp>
 #include <boost/math/ccmath/isnan.hpp>
 
 namespace boost::math::ccmath {
@@ -17,7 +18,7 @@ namespace boost::math::ccmath {
 namespace detail {
 
 template <typename T>
-inline constexpr T fdim_impl(const T x, const T y) noexcept
+constexpr T fdim_impl(const T x, const T y) noexcept
 {
     if (x <= y)
     {
@@ -36,13 +37,20 @@ inline constexpr T fdim_impl(const T x, const T y) noexcept
 } // Namespace detail
 
 template <typename Real, std::enable_if_t<!std::is_integral_v<Real>, bool> = true>
-inline constexpr Real fdim(Real x, Real y) noexcept
+constexpr Real fdim(Real x, Real y) noexcept
 {
     if (BOOST_MATH_IS_CONSTANT_EVALUATED(x))
     {
-        return boost::math::ccmath::isnan(x) ? std::numeric_limits<Real>::quiet_NaN() :
-               boost::math::ccmath::isnan(y) ? std::numeric_limits<Real>::quiet_NaN() :
-               boost::math::ccmath::detail::fdim_impl(x, y);
+        if (boost::math::ccmath::isnan(x))
+        {
+            return x;
+        }
+        else if (boost::math::ccmath::isnan(y))
+        {
+            return y;
+        }
+
+        return boost::math::ccmath::detail::fdim_impl(x, y);
     }
     else
     {
@@ -52,28 +60,11 @@ inline constexpr Real fdim(Real x, Real y) noexcept
 }
 
 template <typename T1, typename T2>
-inline constexpr auto fdim(T1 x, T2 y) noexcept
+constexpr auto fdim(T1 x, T2 y) noexcept
 {
     if (BOOST_MATH_IS_CONSTANT_EVALUATED(x))
     {
-        // If the type is an integer (e.g. epsilon == 0) then set the epsilon value to 1 so that type is at a minimum 
-        // cast to double
-        constexpr auto T1p = std::numeric_limits<T1>::epsilon() > 0 ? std::numeric_limits<T1>::epsilon() : 1;
-        constexpr auto T2p = std::numeric_limits<T2>::epsilon() > 0 ? std::numeric_limits<T2>::epsilon() : 1;
-        
-        using promoted_type = 
-                              #ifndef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-                              std::conditional_t<T1p <= LDBL_EPSILON && T1p <= T2p, T1,
-                              std::conditional_t<T2p <= LDBL_EPSILON && T2p <= T1p, T2,
-                              #endif
-                              std::conditional_t<T1p <= DBL_EPSILON && T1p <= T2p, T1,
-                              std::conditional_t<T2p <= DBL_EPSILON && T2p <= T1p, T2, double
-                              #ifndef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-                              >>>>;
-                              #else
-                              >>;
-                              #endif
-
+        using promoted_type = boost::math::tools::promote_args_2_t<T1, T2>;
         return boost::math::ccmath::fdim(promoted_type(x), promoted_type(y));
     }
     else
@@ -83,13 +74,13 @@ inline constexpr auto fdim(T1 x, T2 y) noexcept
     }
 }
 
-inline constexpr float fdimf(float x, float y) noexcept
+constexpr float fdimf(float x, float y) noexcept
 {
     return boost::math::ccmath::fdim(x, y);
 }
 
 #ifndef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
-inline constexpr long double fdiml(long double x, long double y) noexcept
+constexpr long double fdiml(long double x, long double y) noexcept
 {
     return boost::math::ccmath::fdim(x, y);
 }

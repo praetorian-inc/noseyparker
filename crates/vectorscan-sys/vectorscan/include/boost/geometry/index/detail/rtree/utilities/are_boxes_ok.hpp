@@ -70,7 +70,7 @@ public:
 
         box_type box_exp = rtree::elements_box<box_type>(elements.begin(), elements.end(), m_tr,
                                                          index::detail::get_strategy(m_parameters));
-        
+
         if ( m_exact_match )
             result = m_is_root || geometry::equals(box_exp, m_box);
         else
@@ -90,7 +90,7 @@ public:
                 result = false;
                 return;
             }
-        
+
             box_type box_exp = rtree::values_box<box_type>(elements.begin(), elements.end(), m_tr,
                                                            index::detail::get_strategy(m_parameters));
 
@@ -124,7 +124,7 @@ bool are_boxes_ok(Rtree const& tree, bool exact_match = true)
     visitors::are_boxes_ok<
         typename RTV::members_holder
     > v(tree.parameters(), rtv.translator(), exact_match);
-    
+
     rtv.apply_visitor(v);
 
     return v.result;

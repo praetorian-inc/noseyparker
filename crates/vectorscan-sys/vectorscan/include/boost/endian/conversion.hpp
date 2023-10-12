@@ -8,6 +8,7 @@
 #ifndef BOOST_ENDIAN_CONVERSION_HPP
 #define BOOST_ENDIAN_CONVERSION_HPP
 
+#include <boost/endian/detail/requires_cxx11.hpp>
 #include <boost/endian/detail/endian_reverse.hpp>
 #include <boost/endian/detail/endian_load.hpp>
 #include <boost/endian/detail/endian_store.hpp>

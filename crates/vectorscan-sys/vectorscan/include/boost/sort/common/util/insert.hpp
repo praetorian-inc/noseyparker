@@ -13,10 +13,8 @@
 #ifndef __BOOST_SORT_COMMON_UTIL_INSERT_HPP
 #define __BOOST_SORT_COMMON_UTIL_INSERT_HPP
 
-//#include <boost/sort/spinsort/util/indirect.hpp>
-#include <boost/sort/common/util/insert.hpp>
-#include <boost/sort/common/util/traits.hpp>
-#include <boost/sort/common/util/algorithm.hpp>
+
+#include <ciso646>
 #include <cstdlib>
 #include <functional>
 #include <iterator>
@@ -24,6 +22,9 @@
 #include <type_traits>
 #include <vector>
 #include <cstddef>
+#include <boost/sort/common/util/insert.hpp>
+#include <boost/sort/common/util/traits.hpp>
+#include <boost/sort/common/util/algorithm.hpp>
 
 namespace boost
 {

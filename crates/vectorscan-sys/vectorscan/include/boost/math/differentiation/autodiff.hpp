@@ -1491,7 +1491,7 @@ fvar<RealType, Order> sqrt(fvar<RealType, Order> const& cr) {
   BOOST_IF_CONSTEXPR (order == 0)
     return fvar<RealType, Order>(*derivatives);
   else {
-    root_type numerator = 0.5;
+    root_type numerator = root_type(0.5);
     root_type powers = 1;
 #ifndef BOOST_NO_CXX17_IF_CONSTEXPR
     derivatives[1] = numerator / *derivatives;

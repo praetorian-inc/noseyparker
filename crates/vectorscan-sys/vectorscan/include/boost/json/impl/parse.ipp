@@ -17,7 +17,8 @@
 
 #include <istream>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 value
 parse(
@@ -59,8 +60,7 @@ parse(
     auto jv = parse(
         s, ec, std::move(sp), opt);
     if(ec)
-        detail::throw_system_error(ec,
-            BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
     return jv;
 }
 
@@ -76,29 +76,29 @@ parse(
     p.reset(std::move(sp));
 
     char read_buffer[BOOST_JSON_STACK_BUFFER_SIZE / 2];
-    while( true )
+    do
     {
-        if( is.rdstate() & std::ios::eofbit )
+        if( is.eof() )
         {
             p.finish(ec);
-            if( ec.failed() )
-                return nullptr;
             break;
         }
 
-        if( is.rdstate() != std::ios::goodbit )
+        if( !is )
         {
             BOOST_JSON_FAIL( ec, error::input_error );
-            return nullptr;
+            break;
         }
 
         is.read(read_buffer, sizeof(read_buffer));
         auto const consumed = is.gcount();
 
-        p.write(read_buffer, static_cast<std::size_t>(consumed), ec);
-        if( ec.failed() )
-            return nullptr;
+        p.write( read_buffer, static_cast<std::size_t>(consumed), ec );
     }
+    while( !ec.failed() );
+
+    if( ec.failed() )
+        return nullptr;
 
     return p.release();
 }
@@ -126,11 +126,11 @@ parse(
     auto jv = parse(
         is, ec, std::move(sp), opt);
     if(ec)
-        detail::throw_system_error(ec,
-            BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
     return jv;
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

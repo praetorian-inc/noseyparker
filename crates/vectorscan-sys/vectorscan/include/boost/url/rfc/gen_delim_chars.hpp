@@ -23,7 +23,7 @@ namespace urls {
     the functions @ref grammar::find_if and
     @ref grammar::find_if_not.
     @code
-    result< decode_view > rv = grammar::parse( "Program%20Files", pct_encoded_rule( gen_delim_chars ) );
+    system::result< decode_view > rv = grammar::parse( "Program%20Files", pct_encoded_rule( gen_delim_chars ) );
     @endcode
 
     @par BNF

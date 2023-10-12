@@ -8,7 +8,7 @@ use indoc::indoc;
 pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
-pub use insta::{assert_display_snapshot, assert_json_snapshot, assert_snapshot, with_settings};
+pub use insta::{assert_display_snapshot, assert_json_snapshot, assert_snapshot, with_settings, internals::Redaction};
 pub use predicates::str::{RegexPredicate, is_empty};
 pub use pretty_assertions::{assert_eq, assert_ne};
 pub use std::path::Path;
@@ -92,7 +92,7 @@ pub fn noseyparker_cmd() -> Command {
 */
 
 pub fn noseyparker_cmd() -> Command {
-    Command::cargo_bin("noseyparker").expect("noseyparker should be executable")
+    Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
 }
 
 /// Create a `RegexPredicate` from the given pattern.
@@ -263,4 +263,20 @@ pub fn create_empty_git_repo(destination: &Path) {
         .success()
         .stdout(is_empty())
         .stderr(is_empty());
+}
+
+
+pub fn get_report_stdout_filters() -> Vec<(&'static str, &'static str)> {
+    vec![
+        (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>"),
+        (r"(?m)^(\s*Blob: ).*$", r"$1 <BLOB>"),
+    ]
+}
+
+pub fn get_report_json_redactions() -> Vec<(&'static str, Redaction)> {
+    vec![
+        ("[].matches[].provenance[].path", Redaction::from("<ROOT>/input.txt")),
+        ("[].score", insta::rounded_redaction(3)),
+        ("[].matches[].score", insta::rounded_redaction(3)),
+    ]
 }

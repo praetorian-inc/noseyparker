@@ -278,7 +278,7 @@ public:
         <
             T,
             min_bit_size_type::value,
-            integral_types            
+            integral_types
         >::type type;
 };
 

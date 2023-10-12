@@ -197,9 +197,8 @@ OutputIterator clip_range_with_box(Box const& b, Range const& range,
 
     OutputLinestring line_out;
 
-    typedef typename boost::range_iterator<Range const>::type iterator_type;
-    iterator_type vertex = boost::begin(range);
-    for(iterator_type previous = vertex++;
+    auto vertex = boost::begin(range);
+    for (auto previous = vertex++;
             vertex != boost::end(range);
             ++previous, ++vertex)
     {

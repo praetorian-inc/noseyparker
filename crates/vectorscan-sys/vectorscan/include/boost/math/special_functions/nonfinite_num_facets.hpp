@@ -223,7 +223,6 @@ namespace boost {
           *it = fill;
       }
 
-    private:
       const int flags_;
     };
 
@@ -573,7 +572,6 @@ namespace boost {
         return !*s;
       } // bool match_string
 
-    private:
       const int flags_;
     }; //
 

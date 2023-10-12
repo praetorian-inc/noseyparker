@@ -2,9 +2,9 @@
 
 // Copyright (c) 2007-2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2015-2022.
-// Modifications copyright (c) 2015-2022 Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2015-2023.
+// Modifications copyright (c) 2015-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -16,12 +16,9 @@
 #define BOOST_GEOMETRY_ALGORITHMS_SYM_DIFFERENCE_HPP
 
 
-#include <algorithm>
 #include <iterator>
-#include <vector>
 
 #include <boost/geometry/algorithms/difference.hpp>
-#include <boost/geometry/algorithms/intersection.hpp>
 #include <boost/geometry/algorithms/union.hpp>
 #include <boost/geometry/geometries/adapted/boost_variant.hpp>
 #include <boost/geometry/geometries/multi_polygon.hpp>
@@ -31,7 +28,6 @@
 #include <boost/geometry/strategies/relate/cartesian.hpp>
 #include <boost/geometry/strategies/relate/geographic.hpp>
 #include <boost/geometry/strategies/relate/spherical.hpp>
-#include <boost/geometry/util/range.hpp>
 
 
 namespace boost { namespace geometry
@@ -706,7 +702,7 @@ struct sym_difference<default_strategy, false>
 
 namespace resolve_dynamic
 {
-    
+
 template
 <
     typename Geometry1, typename Geometry2,
@@ -781,7 +777,7 @@ struct sym_difference<DynamicGeometry1, DynamicGeometry2, dynamic_geometry_tag, 
         }, geometry1, geometry2);
     }
 };
-    
+
 } // namespace resolve_dynamic
 
 
@@ -850,7 +846,7 @@ inline void sym_difference(Geometry1 const& geometry1,
         <
             Geometry1,
             Geometry2
-        >::apply(geometry1, geometry2, output_collection, default_strategy());    
+        >::apply(geometry1, geometry2, output_collection, default_strategy());
 }
 
 

@@ -36,7 +36,7 @@ namespace urls {
     @li @ref params_encoded_ref
     @li @ref params_encoded_view
 */
-class params_base
+class BOOST_URL_DECL params_base
 {
     friend class url_view_base;
     friend class params_ref;
@@ -46,7 +46,6 @@ class params_base
     encoding_opts opt_;
 
     params_base() noexcept;
-    BOOST_URL_DECL
     params_base(
         detail::query_ref const& ref,
         encoding_opts opt) noexcept;
@@ -173,7 +172,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     pct_string_view
     buffer() const noexcept;
 
@@ -190,7 +188,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     bool
     empty() const noexcept;
 
@@ -207,7 +204,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     std::size_t
     size() const noexcept;
 
@@ -219,7 +215,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     iterator
     begin() const noexcept;
 
@@ -231,7 +226,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     iterator
     end() const noexcept;
 
@@ -267,7 +261,7 @@ public:
     */
     bool
     contains(
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
     /** Return the number of matching keys
@@ -299,10 +293,9 @@ public:
         here, the comparison is
         case-insensitive.
     */
-    BOOST_URL_DECL
     std::size_t
     count(
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
     /** Find a matching key
@@ -347,7 +340,7 @@ public:
     */
     iterator
     find(
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
     /** Find a matching key
@@ -393,7 +386,7 @@ public:
     iterator
     find(
         iterator from,
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
     /** Find a matching key
@@ -433,7 +426,7 @@ public:
     */
     iterator
     find_last(
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
     /** Find a matching key
@@ -480,22 +473,20 @@ public:
     iterator
     find_last(
         iterator before,
-        string_view key,
+        core::string_view key,
         ignore_case_param ic = {}) const noexcept;
 
 private:
-    BOOST_URL_DECL
     detail::params_iter_impl
     find_impl(
         detail::params_iter_impl,
-        string_view,
+        core::string_view,
         ignore_case_param) const noexcept;
 
-    BOOST_URL_DECL
     detail::params_iter_impl
     find_last_impl(
         detail::params_iter_impl,
-        string_view,
+        core::string_view,
         ignore_case_param) const noexcept;
 };
 

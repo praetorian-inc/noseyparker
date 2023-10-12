@@ -15,7 +15,8 @@
 #include <boost/container/pmr/memory_resource.hpp>
 #include <boost/container/pmr/polymorphic_allocator.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 #ifdef BOOST_JSON_DOCS
 
@@ -101,6 +102,7 @@ struct is_deallocate_trivial
     static constexpr bool value = false;
 };
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

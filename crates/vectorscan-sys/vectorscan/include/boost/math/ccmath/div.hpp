@@ -12,6 +12,14 @@
 #include <cstdint>
 #include <type_traits>
 
+#include <boost/math/tools/is_standalone.hpp>
+#ifndef BOOST_MATH_STANDALONE
+#include <boost/config.hpp>
+#ifdef BOOST_NO_CXX17_IF_CONSTEXPR
+#error "The header <boost/math/norms.hpp> can only be used in C++17 and later."
+#endif
+#endif
+
 namespace boost::math::ccmath {
 
 namespace detail {
@@ -20,7 +28,7 @@ template <typename ReturnType, typename Z>
 inline constexpr ReturnType div_impl(const Z x, const Z y) noexcept
 {
     // std::div_t/ldiv_t/lldiv_t/imaxdiv_t can be defined as either { Z quot; Z rem; }; or { Z rem; Z quot; };
-    // so don't use braced initialziation to guarantee compatibility
+    // so don't use braced initialization to guarantee compatibility
     ReturnType ans {0, 0};
 
     ans.quot = x / y;

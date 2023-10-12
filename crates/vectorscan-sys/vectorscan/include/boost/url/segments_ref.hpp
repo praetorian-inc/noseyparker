@@ -203,7 +203,7 @@ public:
     BOOST_URL_DECL
     segments_ref&
     operator=(std::initializer_list<
-        string_view> init);
+        core::string_view> init);
 
     /** Conversion
 
@@ -307,7 +307,7 @@ public:
     BOOST_URL_DECL
     void
     assign(std::initializer_list<
-        string_view> init);
+        core::string_view> init);
 
     /** Assign segments
 
@@ -327,7 +327,7 @@ public:
 
         @par Mandates
         @code
-        std::is_convertible< std::iterator_traits< FwdIt >::reference_type, string_view >::value == true
+        std::is_convertible< std::iterator_traits< FwdIt >::reference_type, core::string_view >::value == true
         @endcode
 
         @par Complexity
@@ -377,7 +377,7 @@ public:
     iterator
     insert(
         iterator before,
-        string_view s);
+        core::string_view s);
 
     /** Insert segments
 
@@ -425,7 +425,7 @@ public:
     iterator
     insert(
         iterator before,
-        std::initializer_list<string_view> init);
+        std::initializer_list<core::string_view> init);
 
     /** Insert segments
 
@@ -446,7 +446,7 @@ public:
 
         @par Mandates
         @code
-        std::is_convertible< std::iterator_traits< FwdIt >::reference_type, string_view >::value == true
+        std::is_convertible< std::iterator_traits< FwdIt >::reference_type, core::string_view >::value == true
         @endcode
 
         @par Complexity
@@ -555,7 +555,7 @@ public:
     iterator
     replace(
         iterator pos,
-        string_view s);
+        core::string_view s);
 
     /** Replace segments
 
@@ -586,7 +586,7 @@ public:
     replace(
         iterator from,
         iterator to,
-        string_view s);
+        core::string_view s);
 
     /** Replace segments
 
@@ -627,7 +627,7 @@ public:
         iterator from,
         iterator to,
         std::initializer_list<
-            string_view> init);
+            core::string_view> init);
 
     /** Replace segments
 
@@ -692,7 +692,7 @@ public:
     */
     void
     push_back(
-        string_view s);
+        core::string_view s);
 
     /** Remove the last segment
 

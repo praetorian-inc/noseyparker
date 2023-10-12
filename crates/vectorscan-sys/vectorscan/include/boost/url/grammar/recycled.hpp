@@ -17,6 +17,10 @@
 #include <type_traits>
 #include <stddef.h> // ::max_align_t
 
+#if !defined(BOOST_URL_DISABLE_THREADS)
+# include <mutex>
+#endif
+
 namespace boost {
 namespace urls {
 namespace grammar {
@@ -90,8 +94,14 @@ private:
     {
         T t;
         U* next = nullptr;
+
+#if !defined(BOOST_URL_DISABLE_THREADS)
         std::atomic<
             std::size_t> refs;
+#else
+        std::size_t refs;
+#endif
+
 
         U()
             : refs{1}
@@ -105,7 +115,10 @@ private:
     void release(U* u) noexcept;
 
     U* head_ = nullptr;
+
+#if !defined(BOOST_URL_DISABLE_THREADS)
     std::mutex m_;
+#endif
 };
 
 //------------------------------------------------

@@ -10,6 +10,10 @@
 #pragma once
 #endif
 
+#if (defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__))
+#  include <math.h>
+#endif
+
 #include <boost/math/tools/config.hpp>
 
 namespace boost{ namespace math{ namespace tools{

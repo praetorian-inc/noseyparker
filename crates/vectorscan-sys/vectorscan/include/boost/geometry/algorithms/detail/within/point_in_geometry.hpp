@@ -30,7 +30,6 @@
 
 #include <boost/geometry/algorithms/detail/assign_indexed_point.hpp>
 #include <boost/geometry/algorithms/detail/equals/point_point.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 
 #include <boost/geometry/geometries/concepts/check.hpp>
 #include <boost/geometry/strategies/concepts/within_concept.hpp>
@@ -49,13 +48,12 @@ int point_in_range(Point const& point, Range const& range, Strategy const& strat
 {
     typename Strategy::state_type state;
 
-    typedef typename boost::range_iterator<Range const>::type iterator_type;
-    iterator_type it = boost::begin(range);
-    iterator_type end = boost::end(range);
+    auto it = boost::begin(range);
+    auto const end = boost::end(range);
 
-    for ( iterator_type previous = it++ ; it != end ; ++previous, ++it )
+    for (auto previous = it++; it != end; ++previous, ++it)
     {
-        if ( ! strategy.apply(point, *previous, *it, state) )
+        if (! strategy.apply(point, *previous, *it, state))
         {
             break;
         }
@@ -202,13 +200,8 @@ struct point_in_geometry<Polygon, polygon_tag>
 
         if (code == 1)
         {
-            typename interior_return_type<Polygon const>::type
-                rings = interior_rings(polygon);
-            
-            for (typename detail::interior_iterator<Polygon const>::type
-                 it = boost::begin(rings);
-                 it != boost::end(rings);
-                 ++it)
+            auto const& rings = interior_rings(polygon);
+            for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
             {
                 int const interior_code = point_in_geometry
                     <
@@ -235,14 +228,16 @@ struct point_in_geometry<Geometry, multi_point_tag>
     int apply(Point const& point, Geometry const& geometry, Strategy const& strategy)
     {
         typedef typename boost::range_value<Geometry>::type point_type;
-        typedef typename boost::range_const_iterator<Geometry>::type iterator;
-        for ( iterator it = boost::begin(geometry) ; it != boost::end(geometry) ; ++it )
+        for (auto it = boost::begin(geometry); it != boost::end(geometry); ++it)
         {
             int pip = point_in_geometry<point_type>::apply(point, *it, strategy);
 
             //BOOST_GEOMETRY_ASSERT(pip != 0);
-            if ( pip > 0 ) // inside
+            if (pip > 0)
+            {
+                // inside
                 return 1;
+            }
         }
 
         return -1; // outside
@@ -259,14 +254,13 @@ struct point_in_geometry<Geometry, multi_linestring_tag>
 
         typedef typename boost::range_value<Geometry>::type linestring_type;
         typedef typename boost::range_value<linestring_type>::type point_type;
-        typedef typename boost::range_iterator<Geometry const>::type iterator;
-        iterator it = boost::begin(geometry);
-        for ( ; it != boost::end(geometry) ; ++it )
+        auto it = boost::begin(geometry);
+        for ( ; it != boost::end(geometry); ++it)
         {
             pip = point_in_geometry<linestring_type>::apply(point, *it, strategy);
 
             // inside or on the boundary
-            if ( pip >= 0 )
+            if (pip >= 0)
             {
                 ++it;
                 break;
@@ -274,24 +268,30 @@ struct point_in_geometry<Geometry, multi_linestring_tag>
         }
 
         // outside
-        if ( pip < 0 )
+        if (pip < 0)
+        {
             return -1;
+        }
 
         // TODO: the following isn't needed for covered_by()
 
         unsigned boundaries = pip == 0 ? 1 : 0;
 
-        for ( ; it != boost::end(geometry) ; ++it )
+        for (; it != boost::end(geometry); ++it)
         {
-            if ( boost::size(*it) < 2 )
+            if (boost::size(*it) < 2)
+            {
                 continue;
+            }
 
             point_type const& front = range::front(*it);
             point_type const& back = range::back(*it);
 
             // is closed_ring - no boundary
-            if ( detail::equals::equals_point_point(front, back, strategy) )
+            if (detail::equals::equals_point_point(front, back, strategy))
+            {
                 continue;
+            }
 
             // is point on boundary
             if ( detail::equals::equals_point_point(point, front, strategy)
@@ -316,14 +316,15 @@ struct point_in_geometry<Geometry, multi_polygon_tag>
         //int res = -1; // outside
 
         typedef typename boost::range_value<Geometry>::type polygon_type;
-        typedef typename boost::range_const_iterator<Geometry>::type iterator;
-        for ( iterator it = boost::begin(geometry) ; it != boost::end(geometry) ; ++it )
+        for (auto it = boost::begin(geometry); it != boost::end(geometry); ++it)
         {
             int pip = point_in_geometry<polygon_type>::apply(point, *it, strategy);
 
             // inside or on the boundary
-            if ( pip >= 0 )
+            if (pip >= 0)
+            {
                 return pip;
+            }
 
             // For invalid multi-polygons
             //if ( 1 == pip ) // inside polygon

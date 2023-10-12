@@ -1,7 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014-2022 Oracle and/or its affiliates.
+// Copyright (c) 2014-2023, Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -20,6 +21,10 @@
 #include <boost/geometry/geometries/helper_geometry.hpp>
 
 #include <boost/geometry/policies/compare.hpp>
+
+#include <boost/geometry/strategies/relate/cartesian.hpp>
+#include <boost/geometry/strategies/relate/geographic.hpp>
+#include <boost/geometry/strategies/relate/spherical.hpp>
 
 #include <boost/geometry/util/has_nan_coordinate.hpp>
 #include <boost/geometry/util/range.hpp>
@@ -157,7 +162,7 @@ public:
     template <typename Point>
     bool is_endpoint_boundary(Point const& pt) const
     {
-        using less_type = geometry::less<mutable_point_type, -1, typename Strategy::cs_tag>;
+        using less_type = geometry::less<mutable_point_type, -1, Strategy>;
 
         auto const multi_count = boost::size(m_geometry);
 

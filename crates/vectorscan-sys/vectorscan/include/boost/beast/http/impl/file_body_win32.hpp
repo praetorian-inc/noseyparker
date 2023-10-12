@@ -94,7 +94,7 @@ struct basic_file_body<file_win32>
         std::uint64_t
         size() const
         {
-            return size_;
+            return last_ - first_;
         }
 
         void
@@ -105,6 +105,9 @@ struct basic_file_body<file_win32>
 
         void
         reset(file_win32&& file, error_code& ec);
+
+        void
+        seek(std::uint64_t offset, error_code& ec);
     };
 
     //--------------------------------------------------------------------------
@@ -124,9 +127,9 @@ struct basic_file_body<file_win32>
                 basic_file_body<file_win32>, Fields>& sr,
             error_code& ec);
 
-        value_type& body_;  // The body we are reading from
-        std::uint64_t pos_; // The current position in the file
-        char buf_[4096];    // Small buffer for reading
+        value_type& body_;                       // The body we are reading from
+        std::uint64_t pos_;                      // The current position in the file
+        char buf_[BOOST_BEAST_FILE_BUFFER_SIZE]; // Small buffer for reading
 
     public:
         using const_buffers_type =
@@ -284,9 +287,27 @@ reset(file_win32&& file, error_code& ec)
             close();
             return;
         }
-        first_ = 0;
+
+        first_ = file_.pos(ec);
+        if(ec)
+        {
+            close();
+            return;
+        }
+
         last_ = size_;
     }
+}
+
+
+inline
+void
+basic_file_body<file_win32>::
+value_type::
+seek(std::uint64_t offset, error_code& ec)
+{
+  first_ = offset;
+  file_.seek(offset, ec);
 }
 
 //------------------------------------------------------------------------------
@@ -471,7 +492,7 @@ public:
     {
         if(ec)
         {
-            ec = make_win32_error(ec);
+            BOOST_BEAST_ASSIGN_EC(ec, make_win32_error(ec));
         }
         else if(! ec && ! header_)
         {
@@ -573,8 +594,8 @@ write_some(
         0);
     if(! bSuccess)
     {
-        ec = detail::make_win32_error(
-            boost::winapi::GetLastError());
+        BOOST_BEAST_ASSIGN_EC(ec, detail::make_win32_error(
+            boost::winapi::GetLastError()));
         return 0;
     }
     w.pos_ += nNumberOfBytesToWrite;

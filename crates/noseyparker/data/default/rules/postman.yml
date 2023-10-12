@@ -14,3 +14,5 @@ rules:
 
   references:
   - https://learning.postman.com/docs/developer/intro-api/
+  - https://learning.postman.com/docs/developer/postman-api/authentication/
+  - https://learning.postman.com/docs/administration/managing-your-team/managing-api-keys/

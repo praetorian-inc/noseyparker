@@ -1,6 +1,7 @@
 // Boost.Geometry
 
-// Copyright (c) 2018-2020, Oracle and/or its affiliates.
+// Copyright (c) 2018-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -10,13 +11,10 @@
 #ifndef BOOST_GEOMETRY_SRS_PROJECTIONS_STR_CAST_HPP
 #define BOOST_GEOMETRY_SRS_PROJECTIONS_STR_CAST_HPP
 
-#include <cstdlib>
-#include <string>
-#include <type_traits>
-
 #include <boost/config.hpp>
 #include <boost/geometry/core/exception.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/type_traits/remove_cv.hpp>
 
 namespace boost { namespace geometry
 {
@@ -74,11 +72,6 @@ struct str_cast_traits_strtox<T, false, false>
     }
 };
 
-// Assuming a compiler supporting r-value references
-// supports long long and strtoll, strtoull, strtof, strtold
-// If it's MSVC enable in MSVC++ 12.0 aka Visual Studio 2013
-// TODO: in MSVC-11.0 _strtoi64() intrinsic could be used
-#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && (!defined(_MSC_VER) || (_MSC_VER >= 1800))
 template <>
 struct str_cast_traits_strtox<long long, true, true>
 {
@@ -114,7 +107,6 @@ struct str_cast_traits_strtox<long double, false, false>
         return strtold(str, str_end);
     }
 };
-#endif // C++11 strtox supported
 
 template <typename T>
 struct str_cast_traits_generic

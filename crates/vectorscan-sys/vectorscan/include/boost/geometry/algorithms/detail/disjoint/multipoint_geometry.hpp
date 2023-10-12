@@ -2,7 +2,7 @@
 
 // Copyright (c) 2017 Adam Wulkiewicz, Lodz, Poland.
 
-// Copyright (c) 2014-2021, Oracle and/or its affiliates.
+// Copyright (c) 2014-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
@@ -63,16 +63,16 @@ namespace detail { namespace disjoint
 class multipoint_multipoint
 {
 private:
-    template <typename Iterator, typename CSTag>
+    template <typename Iterator, typename Strategy>
     class unary_not_disjoint_predicate
-        : geometry::less<void, -1, CSTag>
+        : geometry::less<void, -1, Strategy>
     {
     private:
-        typedef geometry::less<void, -1, CSTag> base_type;
+        using less_type = geometry::less<void, -1, Strategy>;
 
     public:
         unary_not_disjoint_predicate(Iterator first, Iterator last)
-            : base_type(), m_first(first), m_last(last)
+            : less_type(), m_first(first), m_last(last)
         {}
 
         template <typename Point>
@@ -81,7 +81,7 @@ private:
             return std::binary_search(m_first,
                                       m_last,
                                       point,
-                                      static_cast<base_type const&>(*this));
+                                      static_cast<less_type const&>(*this));
         }
 
     private:
@@ -96,8 +96,7 @@ public:
     {
         BOOST_GEOMETRY_ASSERT( boost::size(multipoint1) <= boost::size(multipoint2) );
 
-        using cs_tag = typename Strategy::cs_tag;
-        using less_type = geometry::less<void, -1, cs_tag>;
+        using less_type = geometry::less<void, -1, Strategy>;
         using point1_type = typename boost::range_value<MultiPoint1>::type;
 
         std::vector<point1_type> points1(boost::begin(multipoint1),
@@ -108,7 +107,7 @@ public:
         using predicate_type = unary_not_disjoint_predicate
             <
                 typename std::vector<point1_type>::const_iterator,
-                cs_tag
+                Strategy
             >;
 
         return none_of(boost::begin(multipoint2),
@@ -286,13 +285,12 @@ public:
         typedef typename point_type<MultiPoint>::type point1_type;
         typedef typename point_type<SingleGeometry>::type point2_type;
         typedef model::box<point2_type> box2_type;
-        
+
         box2_type box2;
         geometry::envelope(single_geometry, box2, strategy);
         geometry::detail::expand_by_epsilon(box2);
 
-        typedef typename boost::range_const_iterator<MultiPoint>::type iterator;
-        for ( iterator it = boost::begin(multi_point) ; it != boost::end(multi_point) ; ++it )
+        for (auto it = boost::begin(multi_point) ; it != boost::end(multi_point) ; ++it)
         {
             // The default strategy is enough for Point/Box
             if (! detail::disjoint::disjoint_point_box(*it, box2, strategy)
@@ -431,7 +429,7 @@ public:
         typedef model::box<point1_type> box1_type;
         typedef model::box<point2_type> box2_type;
         typedef std::pair<box2_type, std::size_t> box_pair_type;
-        
+
         std::size_t count2 = boost::size(multi_geometry);
         std::vector<box_pair_type> boxes(count2);
         for (std::size_t i = 0 ; i < count2 ; ++i)
@@ -530,7 +528,7 @@ struct disjoint
         {
             return detail::disjoint::multipoint_multipoint
                 ::apply(multipoint2, multipoint1, strategy);
-        } 
+        }
 
         return detail::disjoint::multipoint_multipoint
             ::apply(multipoint1, multipoint2, strategy);

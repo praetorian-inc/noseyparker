@@ -96,7 +96,7 @@ namespace projections
             };
 
             template <typename Parameters, typename T>
-            inline void setup(Parameters& par, par_urmfps<T>& proj_parm) 
+            inline void setup(Parameters& par, par_urmfps<T>& proj_parm)
             {
                 proj_parm.C_y = Cy / proj_parm.n;
                 par.es = 0.;
@@ -184,7 +184,7 @@ namespace projections
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(urmfps_entry, urmfps_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(wag1_entry, wag1_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(urmfps_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(urmfps, urmfps_entry)

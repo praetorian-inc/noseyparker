@@ -19,17 +19,14 @@
 #include <type_traits>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 /** A smart pointer to a @ref memory_resource
 
-    This container is used to hold a pointer to a
-    memory resource. The pointed-to resource is
-    always valid; default-constructed pointers
-    use the default memory resource, which calls
-    into the standard global system heap.
-    Depending on the means of construction, the
-    ownership will be either:
+    This container is used to hold a pointer to a memory resource. The
+    pointed-to resource is always valid. Depending on the means of
+    construction, the ownership will be either:
 
     @li Non-owning, when constructing from a raw
     pointer to @ref memory_resource or from a
@@ -154,15 +151,15 @@ public:
     /** Constructor
 
         This constructs a non-owning pointer that refers
-        to the default memory resource, which uses the
-        standard global system heap to allocate and
-        free memory.
+        to the [default memory resource].
 
         @par Complexity
         Constant.
 
         @par Exception Safety
         No-throw guarantee.
+
+        [default memory resource]: json/allocators/storage_ptr.html#json.allocators.storage_ptr.default_memory_resource
     */
     storage_ptr() noexcept
         : i_(0)
@@ -247,7 +244,7 @@ public:
         ownership will be transferred to `*this`.
 
         After construction, `other` will point
-        to the default memory resource.
+        to the [default memory resource].
 
         @par Complexity
         Constant.
@@ -256,6 +253,8 @@ public:
         No-throw guarantee.
 
         @param other The pointer to construct from.
+
+        [default memory resource]: json/allocators/storage_ptr.html#json.allocators.storage_ptr.default_memory_resource
     */
     storage_ptr(
         storage_ptr&& other) noexcept
@@ -303,7 +302,7 @@ public:
         ownership will be transferred to `*this`.
 
         After assignment, `other` will point
-        to the default memory resource.
+        to the [default memory resource].
         If `*this` previously had shared ownership,
         it is released before the function returns.
 
@@ -314,6 +313,8 @@ public:
         No-throw guarantee.
 
         @param other The storage pointer to move.
+
+        [default memory resource]: json/allocators/storage_ptr.html#json.allocators.storage_ptr.default_memory_resource
     */
     storage_ptr&
     operator=(
@@ -473,20 +474,20 @@ public:
 
     @par Mandates
     @code
-    std::is_base_of< memory_resource, T >::value == true
+    std::is_base_of< memory_resource, U >::value == true
     @endcode
 
     @par Complexity
-    Same as `new T( std::forward<Args>(args)... )`.
+    Same as `new U( std::forward<Args>(args)... )`.
 
     @par Exception Safety
     Strong guarantee.
 
-    @tparam T The type of memory resource to create.
+    @tparam U The type of memory resource to create.
 
-    @param args Parameters forwarded to the constructor of `T`.
+    @param args Parameters forwarded to the constructor of `U`.
 */
-template<class T, class... Args>
+template<class U, class... Args>
 storage_ptr
 make_shared_resource(Args&&... args)
 {
@@ -494,9 +495,9 @@ make_shared_resource(Args&&... args)
     // `T` is not a memory resource.
     BOOST_STATIC_ASSERT(
         std::is_base_of<
-            memory_resource, T>::value);
+            memory_resource, U>::value);
     return storage_ptr(new
-        detail::shared_resource_impl<T>(
+        detail::shared_resource_impl<U>(
             std::forward<Args>(args)...));
 }
 #if defined(_MSC_VER)
@@ -533,6 +534,7 @@ operator!=(
     return lhs.get() != rhs.get();
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

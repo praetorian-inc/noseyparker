@@ -128,7 +128,7 @@ public :
         assert_dimension_equal<Box1, Box2>();
 
         typename calculation_type<Box1, Box2>::type result(0);
-        
+
         detail::compute_pythagoras_box_box
             <
                 dimension<Box1>::value

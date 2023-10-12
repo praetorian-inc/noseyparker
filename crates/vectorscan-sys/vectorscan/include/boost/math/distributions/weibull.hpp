@@ -213,6 +213,27 @@ inline RealType cdf(const weibull_distribution<RealType, Policy>& dist, const Re
 }
 
 template <class RealType, class Policy>
+inline RealType logcdf(const weibull_distribution<RealType, Policy>& dist, const RealType& x)
+{
+   BOOST_MATH_STD_USING  // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const weibull_distribution<%1%>, %1%)";
+
+   RealType shape = dist.shape();
+   RealType scale = dist.scale();
+
+   RealType result = 0;
+   if(false == detail::check_weibull(function, scale, shape, &result, Policy()))
+      return result;
+   if(false == detail::check_weibull_x(function, x, &result, Policy()))
+      return result;
+
+   result = log1p(-exp(-pow(x / scale, shape)), Policy());
+
+   return result;
+}
+
+template <class RealType, class Policy>
 inline RealType quantile(const weibull_distribution<RealType, Policy>& dist, const RealType& p)
 {
    BOOST_MATH_STD_USING  // for ADL of std functions
@@ -253,6 +274,27 @@ inline RealType cdf(const complemented2_type<weibull_distribution<RealType, Poli
       return result;
 
    result = exp(-pow(c.param / scale, shape));
+
+   return result;
+}
+
+template <class RealType, class Policy>
+inline RealType logcdf(const complemented2_type<weibull_distribution<RealType, Policy>, RealType>& c)
+{
+   BOOST_MATH_STD_USING  // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const weibull_distribution<%1%>, %1%)";
+
+   RealType shape = c.dist.shape();
+   RealType scale = c.dist.scale();
+
+   RealType result = 0;
+   if(false == detail::check_weibull(function, scale, shape, &result, Policy()))
+      return result;
+   if(false == detail::check_weibull_x(function, c.param, &result, Policy()))
+      return result;
+
+   result = -pow(c.param / scale, shape);
 
    return result;
 }

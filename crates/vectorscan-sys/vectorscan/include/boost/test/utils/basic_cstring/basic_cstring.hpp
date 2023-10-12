@@ -548,19 +548,16 @@ inline typename basic_cstring<CharT>::size_type
 basic_cstring<CharT>::find( basic_cstring<CharT> str ) const
 {
     if( str.is_empty() || str.size() > size() )
-        return static_cast<size_type>(npos);
+        return npos;
 
-    const_iterator it   = begin();
     const_iterator last = end() - str.size() + 1;
 
-    while( it != last ) {
+    for( const_iterator it = begin(); it != last; ++it ) {
         if( traits_type::compare( it, str.begin(), str.size() ) == 0 )
-            break;
-
-        ++it;
+            return static_cast<size_type>(it - begin());
     }
 
-    return it == last ? npos : static_cast<size_type>(it - begin());
+    return npos;
 }
 
 //____________________________________________________________________________//
@@ -570,19 +567,18 @@ inline typename basic_cstring<CharT>::size_type
 basic_cstring<CharT>::rfind( basic_cstring<CharT> str ) const
 {
     if( str.is_empty() || str.size() > size() )
-        return static_cast<size_type>(npos);
+        return npos;
 
-    const_iterator it   = end() - str.size();
-    const_iterator last = begin()-1;
+    const_iterator first = begin();
 
-    while( it != last ) {
+    for( const_iterator it = end() - str.size(); it != first; --it ) {
         if( traits_type::compare( it, str.begin(), str.size() ) == 0 )
-            break;
-
-        --it;
+            return static_cast<size_type>(it - begin());
     }
-
-    return it == last ? static_cast<size_type>(npos) : static_cast<size_type>(it - begin());
+    if( traits_type::compare( first, str.begin(), str.size() ) == 0 )
+        return static_cast<size_type>(0);
+    else
+        return npos;
 }
 
 //____________________________________________________________________________//

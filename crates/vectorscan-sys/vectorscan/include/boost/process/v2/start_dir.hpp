@@ -11,6 +11,7 @@
 #define BOOST_PROCESS_v2_START_DIR_HPP
 
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/default_launcher.hpp>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE

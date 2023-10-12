@@ -6,6 +6,28 @@
 #ifndef BOOST_QVM_CONFIG_HPP_INCLUDED
 #define BOOST_QVM_CONFIG_HPP_INCLUDED
 
+#if defined( BOOST_STRICT_CONFIG ) || defined( BOOST_QVM_NO_WORKAROUNDS )
+#   define BOOST_QVM_WORKAROUND( symbol, test ) 0
+#else
+#   define BOOST_QVM_WORKAROUND( symbol, test ) ((symbol) != 0 && ((symbol) test))
+#endif
+
+#define BOOST_QVM_CLANG 0
+#if defined(__clang__)
+#   undef BOOST_QVM_CLANG
+#   define BOOST_QVM_CLANG (__clang_major__ * 100 + __clang_minor__)
+#endif
+
+#if BOOST_QVM_WORKAROUND( BOOST_QVM_CLANG, < 304 )
+#   define BOOST_QVM_DEPRECATED(msg)
+#elif defined(__GNUC__) || defined(__clang__)
+#   define BOOST_QVM_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#elif defined(_MSC_VER) && _MSC_VER >= 1900
+#   define BOOST_QVM_DEPRECATED(msg) [[deprecated(msg)]]
+#else
+#   define BOOST_QVM_DEPRECATED(msg)
+#endif
+
 #ifndef BOOST_QVM_FORCEINLINE
 #   if defined(_MSC_VER)
 #       define BOOST_QVM_FORCEINLINE __forceinline

@@ -36,7 +36,7 @@ struct process_creation_flags
   };
 };
 
-/// A flag to create a new process group. Necessary to allow interupts for the subproces.
+/// A flag to create a new process group. Necessary to allow interrupts for the subprocess.
 constexpr static process_creation_flags<CREATE_NEW_PROCESS_GROUP> create_new_process_group;
 
 }

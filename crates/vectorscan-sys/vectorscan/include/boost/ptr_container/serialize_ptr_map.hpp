@@ -18,13 +18,13 @@ namespace serialization
 template<class Archive, class Key, class T, class Compare, class CloneAllocator, class Allocator>
 void serialize(Archive& ar, ptr_map<Key, T, Compare, CloneAllocator, Allocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+   core::split_free(ar, c, version);
 }
 
 template<class Archive, class Key, class T, class Compare, class CloneAllocator, class Allocator>
 void serialize(Archive& ar, ptr_multimap<Key, T, Compare, CloneAllocator, Allocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+   core::split_free(ar, c, version);
 }
 
 } // namespace serialization

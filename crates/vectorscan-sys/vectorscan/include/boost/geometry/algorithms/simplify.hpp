@@ -3,9 +3,11 @@
 // Copyright (c) 2007-2015 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2015 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2018-2022.
-// Modifications copyright (c) 2018-2022 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2018-2023.
+// Modifications copyright (c) 2018-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -26,7 +28,6 @@
 #include <vector>
 
 #include <boost/core/addressof.hpp>
-#include <boost/core/ignore_unused.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
@@ -53,7 +54,6 @@
 #include <boost/geometry/geometries/adapted/boost_variant.hpp> // For backward compatibility
 #include <boost/geometry/geometries/concepts/check.hpp>
 
-#include <boost/geometry/strategies/concepts/simplify_concept.hpp>
 #include <boost/geometry/strategies/default_strategy.hpp>
 #include <boost/geometry/strategies/detail.hpp>
 #include <boost/geometry/strategies/distance/comparable.hpp>
@@ -482,7 +482,7 @@ public :
             // Do not duplicate the closing point
             auto rot_end = boost::end(ring);
             std::size_t rot_index = index;
-            if (is_closed_in && size > 1)
+            if (BOOST_GEOMETRY_CONDITION(is_closed_in) && size > 1)
             {
                 --rot_end;
                 if (rot_index == size - 1) { rot_index = 0; }
@@ -497,7 +497,7 @@ public :
             simplify_range<0>::apply(rotated, out, max_distance, impl, strategies);
 
             // Open output if needed
-            if (! is_closed_out && boost::size(out) > 1)
+            if (BOOST_GEOMETRY_CONDITION(! is_closed_out) && boost::size(out) > 1)
             {
                 range::pop_back(out);
             }
@@ -892,7 +892,7 @@ struct simplify_insert<default_strategy, false>
             <
                 Geometry
             >::type strategy_type;
-        
+
         simplify_insert
             <
                 strategy_type
@@ -935,7 +935,7 @@ struct simplify<GeometryIn, GeometryOut, dynamic_geometry_tag, dynamic_geometry_
         traits::visit<GeometryIn>::apply([&](auto const& g)
         {
             using geom_t = util::remove_cref_t<decltype(g)>;
-            using detail::simplify::static_geometry_type;            
+            using detail::simplify::static_geometry_type;
             using geom_out_t = typename static_geometry_type<geom_t, GeometryOut>::type;
             geom_out_t o;
             simplify<geom_t, geom_out_t>::apply(g, o, max_distance, strategy);
@@ -956,7 +956,7 @@ struct simplify<GeometryIn, GeometryOut, geometry_collection_tag, geometry_colle
         detail::visit_breadth_first([&](auto const& g)
         {
             using geom_t = util::remove_cref_t<decltype(g)>;
-            using detail::simplify::static_geometry_type;            
+            using detail::simplify::static_geometry_type;
             using geom_out_t = typename static_geometry_type<geom_t, GeometryOut>::type;
             geom_out_t o;
             simplify<geom_t, geom_out_t>::apply(g, o, max_distance, strategy);

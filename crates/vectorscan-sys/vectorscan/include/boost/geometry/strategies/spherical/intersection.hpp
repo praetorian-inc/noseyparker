@@ -197,7 +197,7 @@ struct ecef_segments
         vec3d_t const a2v = calc_policy.template to_cart3d<vec3d_t>(a2);
         vec3d_t const b1v = calc_policy.template to_cart3d<vec3d_t>(b1);
         vec3d_t const b2v = calc_policy.template to_cart3d<vec3d_t>(b2);
-        
+
         bool degen_neq_coords = false;
         side_info sides;
 
@@ -286,7 +286,7 @@ struct ecef_segments
         // NOTE: at this point the segments may still be disjoint
         // NOTE: at this point one of the segments may be degenerated
 
-        bool collinear = sides.collinear();       
+        bool collinear = sides.collinear();
 
         if (! collinear)
         {
@@ -324,7 +324,7 @@ struct ecef_segments
             sides.set<0>(0, 0);
             sides.set<1>(0, 0);
         }
-        
+
         if (collinear)
         {
             if (a_is_point)
@@ -360,7 +360,7 @@ struct ecef_segments
                 segment_ratio<calc_t> ra_to(dist_b1_a2, dist_b1_b2);
                 segment_ratio<calc_t> rb_from(dist_a1_b1, dist_a1_a2);
                 segment_ratio<calc_t> rb_to(dist_a1_b2, dist_a1_a2);
-                
+
                 // NOTE: this is probably not needed
                 int const a1_wrt_b = position_value(c0, dist_a1_b1, dist_a1_b2);
                 int const a2_wrt_b = position_value(dist_a1_a2, dist_a1_b1, dist_a1_b2);
@@ -526,7 +526,7 @@ private:
     {
         Vec3d ip1, ip2;
         calc_policy.intersection_points(plane1, plane2, ip1, ip2);
-        
+
         calculate_dist(a1v, a2v, plane1, ip1, dist_a1_ip);
         ip = ip1;
 
@@ -572,7 +572,7 @@ private:
                 ip_flag = ipi_at_a1;
                 return true;
             }
-            
+
             if (is_near_b2 && equals_point_point(a1, b2))
             {
                 dist_a1_ip = 0;
@@ -848,7 +848,7 @@ struct spherical_segments_calc_policy
         });
 
         return true;
-    }    
+    }
 };
 
 

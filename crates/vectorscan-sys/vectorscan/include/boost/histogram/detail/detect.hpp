@@ -93,6 +93,8 @@ BOOST_HISTOGRAM_DETAIL_DETECT(is_iterator,
 
 BOOST_HISTOGRAM_DETAIL_DETECT(is_streamable, (std::declval<std::ostream&>() << t));
 
+BOOST_HISTOGRAM_DETAIL_DETECT(is_allocator, (&T::allocate, &T::deallocate));
+
 BOOST_HISTOGRAM_DETAIL_DETECT(has_operator_preincrement, ++t);
 
 BOOST_HISTOGRAM_DETAIL_DETECT_BINARY(has_operator_equal, (cref<T>() == u));
@@ -164,7 +166,8 @@ template <class T>
 using is_sequence_of_any_axis =
     mp11::mp_and<is_iterable<T>, is_any_axis<mp11::mp_first<T>>>;
 
-// poor-mans concept checks
+// Poor-mans concept checks.
+// These must be structs not aliases, so their names pop up in compiler errors.
 template <class T, class = std::enable_if_t<is_storage<std::decay_t<T>>::value>>
 struct requires_storage {};
 
@@ -203,6 +206,9 @@ struct requires_axes {};
 template <class T, class U,
           class = std::enable_if_t<is_transform<std::decay_t<T>, U>::value>>
 struct requires_transform {};
+
+template <class T, class = std::enable_if_t<is_allocator<std::decay_t<T>>::value>>
+struct requires_allocator {};
 
 } // namespace detail
 } // namespace histogram

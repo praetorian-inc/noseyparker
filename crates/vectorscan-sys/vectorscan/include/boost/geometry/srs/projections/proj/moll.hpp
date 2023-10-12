@@ -119,7 +119,7 @@ namespace projections
             };
 
             template <typename Parameters, typename T>
-            inline void setup(Parameters& par, par_moll<T>& proj_parm, T const& p) 
+            inline void setup(Parameters& par, par_moll<T>& proj_parm, T const& p)
             {
                 T r, sp, p2 = p + p;
 
@@ -239,7 +239,7 @@ namespace projections
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(moll_entry, moll_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(wag4_entry, wag4_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(wag5_entry, wag5_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(moll_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(moll, moll_entry);

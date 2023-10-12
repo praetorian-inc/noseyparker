@@ -1,6 +1,6 @@
 // Boost.Geometry Index
 //
-// Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2023 Adam Wulkiewicz, Lodz, Poland.
 //
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020 Oracle and/or its affiliates.
@@ -12,7 +12,7 @@
 
 #include <type_traits>
 
-#include <boost/swap.hpp>
+#include <boost/core/swap.hpp>
 
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_UTILITIES_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_UTILITIES_HPP
@@ -31,7 +31,7 @@ static inline void assign_cond(T &, T const&, std::false_type) {}
 template<class T>
 static inline void move_cond(T & l, T & r, std::true_type)
 {
-    l = ::boost::move(r);
+    l = std::move(r);
 }
 
 template<class T>

@@ -14,8 +14,7 @@
 #ifndef BOOST_GEOMETRY_MULTI_IO_WKT_DETAIL_PREFIX_HPP
 #define BOOST_GEOMETRY_MULTI_IO_WKT_DETAIL_PREFIX_HPP
 
-
-#include <boost/geometry/io/wkt/detail/prefix.hpp>
-
+#include <boost/config/pragma_message.hpp>
+BOOST_PRAGMA_MESSAGE("This include file is deprecated and will be removed in the future.")
 
 #endif // BOOST_GEOMETRY_MULTI_IO_WKT_DETAIL_PREFIX_HPP

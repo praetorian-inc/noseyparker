@@ -276,7 +276,7 @@ namespace projections
             **/
             template <typename T>
             inline void healpix_sphere(T const& lp_lam, T const& lp_phi, T& xy_x, T& xy_y)
-            {               
+            {
                 static const T pi = detail::pi<T>();
                 static const T half_pi = detail::half_pi<T>();
                 static const T fourth_pi = detail::fourth_pi<T>();
@@ -307,7 +307,7 @@ namespace projections
             **/
             template <typename T>
             inline void healpix_sphere_inverse(T const& xy_x, T const& xy_y, T& lp_lam, T& lp_phi)
-            {                
+            {
                 static const T pi = detail::pi<T>();
                 static const T half_pi = detail::half_pi<T>();
                 static const T fourth_pi = detail::fourth_pi<T>();
@@ -827,7 +827,7 @@ namespace projections
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI2(healpix_entry, healpix_spheroid, healpix_ellipsoid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI2(rhealpix_entry, rhealpix_spheroid, rhealpix_ellipsoid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(healpix_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(healpix, healpix_entry)

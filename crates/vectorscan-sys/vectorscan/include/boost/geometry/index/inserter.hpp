@@ -34,7 +34,7 @@ public:
     inline explicit insert_iterator(Container & c)
         : container(&c)
     {}
-    
+
     insert_iterator & operator=(typename Container::value_type const& value)
     {
         container->insert(value);

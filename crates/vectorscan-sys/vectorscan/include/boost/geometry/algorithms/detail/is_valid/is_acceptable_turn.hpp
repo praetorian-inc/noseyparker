@@ -151,7 +151,7 @@ public:
                 || turn.method == method_touch_interior)
                 && turn.touch_only;
     }
-};   
+};
 
 
 }} // namespace detail::is_valid

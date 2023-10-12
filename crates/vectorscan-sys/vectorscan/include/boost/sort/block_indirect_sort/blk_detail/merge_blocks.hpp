@@ -14,12 +14,14 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_MERGE_BLOCKS_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_MERGE_BLOCKS_HPP
 
+#include <ciso646>
 #include <atomic>
-#include <boost/sort/block_indirect_sort/blk_detail/backbone.hpp>
-#include <boost/sort/common/range.hpp>
 #include <future>
 #include <iostream>
 #include <iterator>
+#include <boost/sort/block_indirect_sort/blk_detail/backbone.hpp>
+#include <boost/sort/common/range.hpp>
+
 
 namespace boost
 {
@@ -103,7 +105,7 @@ struct merge_blocks
                 {
                     this->merge_range_pos (rng_input);
                 }
-                catch (std::bad_alloc &ba)
+                catch (std::bad_alloc &)
                 {
                     error = true;
                 };

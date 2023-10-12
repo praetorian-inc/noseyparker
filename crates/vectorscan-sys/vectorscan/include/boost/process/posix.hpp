@@ -35,7 +35,7 @@ namespace boost {
 
 namespace boost { namespace process {
 
-///Namespace containing the posix exensions.
+///Namespace containing the posix extensions.
 namespace posix {
 
 /** This property lets you modify file-descriptors other than the standard ones (0,1,2).

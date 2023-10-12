@@ -126,7 +126,7 @@ T ellint_pi_imp(T v, T phi, T k, T vc, const Policy& pol)
          {
             return policies::raise_domain_error<T>(function, "Got k=1 and phi=%1% but the result is complex in that domain", phi, pol);
          }
-         if(boost::math::tools::fmod_workaround(m, T(2)) > 0.5)
+         if(boost::math::tools::fmod_workaround(m, T(2)) > T(0.5))
          {
             m += 1;
             sign = -1;
@@ -261,7 +261,7 @@ T ellint_pi_imp(T v, T phi, T k, T vc, const Policy& pol)
    t = sphi * sphi;
    y = 1 - k * k * t;
    z = 1;
-   if(v * t < 0.5)
+   if(v * t < T(0.5))
       p = 1 - v * t;
    else
       p = x + vc * t;

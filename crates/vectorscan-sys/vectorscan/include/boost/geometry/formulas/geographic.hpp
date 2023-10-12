@@ -29,7 +29,7 @@
 #include <boost/geometry/util/select_coordinate_type.hpp>
 
 namespace boost { namespace geometry {
-    
+
 namespace formula {
 
 template <typename Point3d, typename PointGeo, typename Spheroid>
@@ -107,11 +107,11 @@ inline PointGeo cart3d_to_geo(Point3d const& point_3d, Spheroid const& spheroid)
     calc_t const xy_l = math::sqrt(math::sqr(x) + math::sqr(y));
 
     calc_t const lonr = atan2(y, x);
-    
+
     // NOTE: Alternative version
     // http://www.iag-aig.org/attach/989c8e501d9c5b5e2736955baf2632f5/V60N2_5FT.pdf
     // calc_t const lonr = c2 * atan2(y, x + xy_l);
-    
+
     calc_t const latr = atan2(z, (c1 - e_sqr) * xy_l);
 
     // NOTE: If h is equal to 0 then there is no need to improve value of latitude
@@ -141,8 +141,8 @@ inline PointGeo cart3d_to_geo(Point3d const& point_3d, Spheroid const& spheroid)
 template <typename Point3d, typename Spheroid>
 inline Point3d projected_to_xy(Point3d const& point_3d, Spheroid const& spheroid)
 {
-    typedef typename coordinate_type<Point3d>::type coord_t;    
-    
+    typedef typename coordinate_type<Point3d>::type coord_t;
+
     // len_xy = sqrt(x^2 + y^2)
     // r = len_xy - |z / tan(lat)|
     // assuming h = 0
@@ -151,7 +151,7 @@ inline Point3d projected_to_xy(Point3d const& point_3d, Spheroid const& spheroid
     // r = e^2 * len_xy
     // x_res = r * cos(lon) = e^2 * len_xy * x / len_xy = e^2 * x
     // y_res = r * sin(lon) = e^2 * len_xy * y / len_xy = e^2 * y
-    
+
     coord_t const c0 = 0;
     coord_t const e_sqr = formula::eccentricity_sqr<coord_t>(spheroid);
 
@@ -178,7 +178,7 @@ inline Point3d projected_to_surface(Point3d const& direction, Spheroid const& sp
     //(x*x+y*y)/(a*a) + z*z/(b*b) = 1
     // x = d.x * t
     // y = d.y * t
-    // z = d.z * t        
+    // z = d.z * t
     coord_t const dx = get<0>(direction);
     coord_t const dy = get<1>(direction);
     coord_t const dz = get<2>(direction);
@@ -217,7 +217,7 @@ inline bool projected_to_surface(Point3d const& origin, Point3d const& direction
     //(x*x+y*y)/(a*a) + z*z/(b*b) = 1
     // x = o.x + d.x * t
     // y = o.y + d.y * t
-    // z = o.z + d.z * t        
+    // z = o.z + d.z * t
     coord_t const ox = get<0>(origin);
     coord_t const oy = get<1>(origin);
     coord_t const oz = get<2>(origin);

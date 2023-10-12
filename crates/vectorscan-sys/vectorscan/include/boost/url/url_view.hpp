@@ -24,7 +24,7 @@ namespace urls {
     strings constructed from a parsed, external
     character buffer whose storage is managed
     by the caller. That is, it acts like a
-    @ref string_view in terms of ownership.
+    `core::string_view` in terms of ownership.
     The caller is responsible for ensuring
     that the lifetime of the underlying
     character buffer extends until it is no
@@ -48,7 +48,7 @@ namespace urls {
     contain an error. The error can be converted to
     an exception by the caller if desired:
     @code
-    result< url_view > rv = parse_uri_reference( "https://www.example.com/index.htm?text=none#a1" );
+    system::result< url_view > rv = parse_uri_reference( "https://www.example.com/index.htm?text=none#a1" );
     @endcode
 
     @par BNF
@@ -71,7 +71,7 @@ namespace urls {
         @ref parse_uri,
         @ref parse_uri_reference.
 */
-class BOOST_SYMBOL_VISIBLE url_view
+class BOOST_URL_DECL url_view
     : public url_view_base
 {
     friend std::hash<url_view>;
@@ -143,7 +143,6 @@ public:
         <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-4.2"
             >4.2. Relative Reference (rfc3986)</a>
     */
-    BOOST_URL_DECL
     url_view() noexcept;
 
     /** Constructor
@@ -195,9 +194,30 @@ public:
         @see
             @ref parse_uri_reference.
     */
-    BOOST_URL_DECL
-    explicit
-    url_view(string_view s);
+    url_view(core::string_view s);
+
+    /// @copydoc url_view(core::string_view)
+    template<
+        class String
+#ifndef BOOST_URL_DOCS
+        , class = typename std::enable_if<
+            std::is_convertible<
+                String,
+                core::string_view
+                    >::value &&
+            !std::is_convertible<
+                String*,
+                url_view_base*
+                    >::value
+            >::type
+#endif
+    >
+    url_view(
+        String const& s)
+        : url_view(
+            detail::to_sv(s))
+    {
+    }
 
     /** Constructor
 
@@ -240,7 +260,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     url_view(
         url_view_base const& other) noexcept;
 
@@ -288,7 +307,6 @@ public:
         @par Exception Safety
         Throws nothing.
     */
-    BOOST_URL_DECL
     url_view& operator=(
         url_view_base const& other) noexcept;
 

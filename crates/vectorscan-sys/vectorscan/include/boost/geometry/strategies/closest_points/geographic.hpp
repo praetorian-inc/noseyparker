@@ -39,7 +39,7 @@ class geographic
     using base_t = strategies::distance::geographic<FormulaPolicy, Spheroid, CalculationType>;
 
 public:
-    
+
     geographic() = default;
 
     explicit geographic(Spheroid const& spheroid)
@@ -52,8 +52,8 @@ public:
     {
         return strategy::closest_points::geographic_cross_track
             <
-                FormulaPolicy, 
-                Spheroid, 
+                FormulaPolicy,
+                Spheroid,
                 CalculationType
             >(base_t::m_spheroid);
     }

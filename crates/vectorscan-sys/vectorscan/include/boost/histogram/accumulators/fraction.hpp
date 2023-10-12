@@ -89,7 +89,8 @@ public:
 
   /// Return standard interval with 68.3 % confidence level (Wilson score interval).
   interval_type confidence_interval() const noexcept {
-    return utility::wilson_interval<real_type>()(successes(), failures());
+    return utility::wilson_interval<real_type>()(static_cast<real_type>(successes()),
+                                                 static_cast<real_type>(failures()));
   }
 
   bool operator==(const fraction& rhs) const noexcept {

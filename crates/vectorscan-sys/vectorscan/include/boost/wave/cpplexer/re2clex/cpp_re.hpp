@@ -181,7 +181,10 @@ uchar *fill(Scanner<Iterator> *s, uchar *cursor)
         {
             if (NULL == s->lim)
                 s->lim = s->top;
-            memmove(s->bot, s->tok, s->lim - s->tok);
+            size_t length = s->lim - s->tok;
+            if(length > 0){
+                memmove(s->bot, s->tok, length);
+            }
             s->tok = s->cur = s->bot;
             s->ptr -= cnt;
             cursor -= cnt;
@@ -202,7 +205,10 @@ uchar *fill(Scanner<Iterator> *s, uchar *cursor)
                 return cursor;
             }
 
-            memmove(buf, s->tok, s->lim - s->tok);
+            size_t length = s->lim - s->tok;
+            if(length > 0){
+                memmove(buf, s->tok, length);
+            }
             s->tok = s->cur = buf;
             s->ptr = &buf[s->ptr - s->bot];
             cursor = &buf[cursor - s->bot];

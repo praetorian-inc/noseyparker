@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2020, Oracle and/or its affiliates.
+// Copyright (c) 2020-2023, Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -187,6 +188,14 @@ public:
     {
         return strategy::within::cartesian_box_box();
     }
+
+    template <typename ComparePolicy, typename EqualsPolicy>
+    using compare_type = typename strategy::compare::cartesian
+        <
+            ComparePolicy,
+            EqualsPolicy,
+            -1
+        >;
 };
 
 

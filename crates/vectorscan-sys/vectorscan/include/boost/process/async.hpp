@@ -5,7 +5,7 @@
 
 /** \file boost/process/async.hpp
 
-The header which provides the basic asynchrounous features.
+The header which provides the basic asynchronous features.
 It provides the on_exit property, which allows callbacks when the process exits.
 It also implements the necessary traits for passing an boost::asio::io_context,
 which is needed for asynchronous communication.

@@ -26,7 +26,7 @@ T cos_pi_imp(T x, const Policy&)
    BOOST_MATH_STD_USING // ADL of std names
    // cos of pi*x:
    bool invert = false;
-   if(fabs(x) < 0.25)
+   if(fabs(x) < T(0.25))
       return cos(constants::pi<T>() * x);
 
    if(x < 0)

@@ -5,7 +5,8 @@
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
 // This file was modified by Oracle on 2014-2021.
-// Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
+// Modifications copyright (c) 2014-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -47,7 +48,7 @@ struct closed_clockwise_view
 {
     using closed_view = detail::closed_view<Range const, Closure>;
     using view = detail::clockwise_view<closed_view const, Order>;
-    
+
     explicit inline closed_clockwise_view(Range const& r)
         : m_view(closed_view(r))
     {}
@@ -72,18 +73,18 @@ namespace traits
 {
 
 template <typename Range, closure_selector Closure, order_selector Order>
-struct tag<detail::closed_clockwise_view<Range, Closure, Order> >
+struct tag<geometry::detail::closed_clockwise_view<Range, Closure, Order> >
     : geometry::tag<Range>
 {};
 
 template <typename Range, closure_selector Closure, order_selector Order>
-struct point_order<detail::closed_clockwise_view<Range, Closure, Order> >
+struct point_order<geometry::detail::closed_clockwise_view<Range, Closure, Order> >
 {
     static const order_selector value = clockwise;
 };
 
 template <typename Range, closure_selector Closure, order_selector Order>
-struct closure<detail::closed_clockwise_view<Range, Closure, Order> >
+struct closure<geometry::detail::closed_clockwise_view<Range, Closure, Order> >
 {
     static const closure_selector value = closed;
 };

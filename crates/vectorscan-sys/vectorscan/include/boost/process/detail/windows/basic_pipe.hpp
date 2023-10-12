@@ -158,7 +158,7 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
         ::boost::process::detail::throw_last_error("create_named_pipe() failed");
 
     ::boost::winapi::HANDLE_ sink = boost::winapi::create_file(
-            name.c_str(),
+            name_.c_str(),
             ::boost::winapi::GENERIC_WRITE_, 0, nullptr,
             OPEN_EXISTING_,
             FILE_FLAG_OVERLAPPED_, //to allow read

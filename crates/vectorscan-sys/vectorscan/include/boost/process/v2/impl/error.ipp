@@ -55,7 +55,7 @@ struct exit_code_category final : public error_category
     }
     std::string message(int status) const
     {
-        switch (status)
+        switch (evaluate_exit_code(status))
         {
             case v2::detail::still_active:
                 return "still-active";

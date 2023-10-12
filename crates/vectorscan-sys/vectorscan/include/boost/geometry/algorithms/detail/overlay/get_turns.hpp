@@ -1,11 +1,10 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2014-2017 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2014-2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
-
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,10 +15,10 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_GET_TURNS_HPP
 
 
+#include <array>
 #include <cstddef>
 #include <map>
 
-#include <boost/array.hpp>
 #include <boost/concept_check.hpp>
 #include <boost/core/ignore_unused.hpp>
 #include <boost/range/begin.hpp>
@@ -29,7 +28,6 @@
 
 #include <boost/geometry/algorithms/detail/disjoint/box_box.hpp>
 #include <boost/geometry/algorithms/detail/disjoint/point_point.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 #include <boost/geometry/algorithms/detail/overlay/get_turn_info.hpp>
 #include <boost/geometry/algorithms/detail/overlay/get_turn_info_ll.hpp>
 #include <boost/geometry/algorithms/detail/overlay/get_turn_info_la.hpp>
@@ -570,7 +568,7 @@ struct get_turns_cs
 {
     typedef typename geometry::point_type<Range>::type range_point_type;
     typedef typename geometry::point_type<Box>::type box_point_type;
-    typedef boost::array<box_point_type, 4> box_array;
+    typedef std::array<box_point_type, 4> box_array;
 
     using view_type = detail::closed_clockwise_view
         <
@@ -842,10 +840,8 @@ struct get_turns_polygon_cs
 
         signed_size_type i = 0;
 
-        typename interior_return_type<Polygon const>::type
-            rings = interior_rings(polygon);
-        for (typename detail::interior_iterator<Polygon const>::type
-                it = boost::begin(rings); it != boost::end(rings); ++it, ++i)
+        auto const& rings = interior_rings(polygon);
+        for (auto it = boost::begin(rings); it != boost::end(rings); ++it, ++i)
         {
             intersector_type::apply(
                     source_id1, *it,
@@ -877,15 +873,8 @@ struct get_turns_multi_polygon_cs
             Turns& turns,
             InterruptPolicy& interrupt_policy)
     {
-        typedef typename boost::range_iterator
-            <
-                Multi const
-            >::type iterator_type;
-
         signed_size_type i = 0;
-        for (iterator_type it = boost::begin(multi);
-             it != boost::end(multi);
-             ++it, ++i)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it, ++i)
         {
             // Call its single version
             get_turns_polygon_cs

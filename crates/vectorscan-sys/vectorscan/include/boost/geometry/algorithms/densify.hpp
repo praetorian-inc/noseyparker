@@ -1,7 +1,9 @@
 // Boost.Geometry
 
-// Copyright (c) 2017-2021, Oracle and/or its affiliates.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2017-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -21,9 +23,7 @@
 #include <boost/geometry/algorithms/detail/visit.hpp>
 #include <boost/geometry/algorithms/not_implemented.hpp>
 #include <boost/geometry/core/closure.hpp>
-#include <boost/geometry/core/cs.hpp>
 #include <boost/geometry/core/exception.hpp>
-#include <boost/geometry/core/point_type.hpp>
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tags.hpp>
 #include <boost/geometry/core/visit.hpp>
@@ -33,7 +33,7 @@
 #include <boost/geometry/strategies/densify/geographic.hpp>
 #include <boost/geometry/strategies/densify/spherical.hpp>
 #include <boost/geometry/strategies/detail.hpp>
-#include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/constexpr.hpp>
 #include <boost/geometry/util/range.hpp>
 
 
@@ -78,21 +78,20 @@ struct densify_range
     static inline void apply(FwdRng const& rng, MutRng & rng_out,
                              T const& len, Strategies const& strategies)
     {
-        typedef typename boost::range_iterator<FwdRng const>::type iterator_t;
         typedef typename boost::range_value<FwdRng>::type point_t;
 
-        iterator_t it = boost::begin(rng);
-        iterator_t end = boost::end(rng);
+        auto it = boost::begin(rng);
+        auto const end = boost::end(rng);
 
         if (it == end) // empty(rng)
         {
             return;
         }
-            
+
         auto strategy = strategies.densify(rng);
         push_back_policy<MutRng> policy(rng_out);
 
-        iterator_t prev = it;
+        auto prev = it;
         for ( ++it ; it != end ; prev = it++)
         {
             point_t const& p0 = *prev;
@@ -103,7 +102,7 @@ struct densify_range
             strategy.apply(p0, p1, policy, len);
         }
 
-        if (BOOST_GEOMETRY_CONDITION(AppendLastPoint))
+        if BOOST_GEOMETRY_CONSTEXPR (AppendLastPoint)
         {
             convert_and_push_back(rng_out, *prev); // back(rng)
         }
@@ -123,16 +122,15 @@ struct densify_ring
         if (boost::size(ring) <= 1)
             return;
 
-        typedef typename point_type<Geometry>::type point_t;
-        point_t const& p0 = range::back(ring);
-        point_t const& p1 = range::front(ring);
+        auto const& p0 = range::back(ring);
+        auto const& p1 = range::front(ring);
 
         auto strategy = strategies.densify(ring);
         push_back_policy<GeometryOut> policy(ring_out);
 
         strategy.apply(p0, p1, policy, len);
 
-        if (BOOST_GEOMETRY_CONDITION(IsClosed2))
+        if BOOST_GEOMETRY_CONSTEXPR (IsClosed2)
         {
             convert_and_push_back(ring_out, p1);
         }
@@ -349,7 +347,7 @@ struct densify<default_strategy, false>
             <
                 Geometry
             >::type strategies_type;
-        
+
         dispatch::densify
             <
                 Geometry, Geometry

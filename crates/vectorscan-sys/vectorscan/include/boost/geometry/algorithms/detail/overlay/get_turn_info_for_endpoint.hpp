@@ -201,7 +201,7 @@ public:
         BOOST_STATIC_ASSERT(I < 2);
         return ips[I];
     }
-    
+
 private:
 
     // only if collinear (same_dirs)
@@ -287,7 +287,7 @@ struct get_turn_info_for_endpoint
 
         if ( intersections.template get<1>().p_operation == operation_none )
             return result_ignore_ip0;
-        
+
         bool append1_last
             = analyse_segment_and_assign_ip(range_p, range_q,
                                             intersections.template get<1>(),
@@ -436,7 +436,7 @@ struct get_turn_info_for_endpoint
 
                     if ( operations_both(operations, operation_continue) )
                     {
-                        if ( op1 != operation_union 
+                        if ( op1 != operation_union
                           || op2 != operation_union
                           || ! ( G1Index == 0 ? inters.is_spike_q() : inters.is_spike_p() ) )
                         {
@@ -544,7 +544,7 @@ struct get_turn_info_for_endpoint
                               OutputIterator out)
     {
         TurnInfo tp = tp_model;
-        
+
         //geometry::convert(ip, tp.point);
         //tp.method = method;
         base_turn_handler::assign_point(tp, method, result.intersection_points, ip_index);

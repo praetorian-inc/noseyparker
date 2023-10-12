@@ -57,7 +57,7 @@ namespace projections
     {
 
             static const double epsilon10 = 1.e-10;
-            
+
             template <typename T, typename Parameters>
             struct base_cc_spheroid
             {
@@ -130,7 +130,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(cc_entry, cc_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(cc_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(cc, cc_entry);

@@ -327,7 +327,7 @@ erase(Range && rng,
 
     std::size_t const count = static_cast<std::size_t>(diff);
     BOOST_GEOMETRY_ASSERT(count <= boost::size(rng));
-    
+
     if ( count > 0 )
     {
         typename boost::range_difference<Range>::type const

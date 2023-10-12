@@ -1,6 +1,7 @@
 // Boost.Geometry
 
-// Copyright (c) 2021, Oracle and/or its affiliates.
+// Copyright (c) 2021-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -10,6 +11,7 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_MINMAX_HEAP_HPP
 
 #include <iterator>
+#include <limits.h>
 #include <type_traits>
 #include <utility>
 
@@ -252,7 +254,7 @@ inline void pop_heap1(It first, diff_t<It> p, diff_t<It> size, val_t<It> val, Co
             p = m;
         }
     }
-    
+
     if (size >= 2 && p <= ((size - 2) >> 1)) // at least one child
     {
         diff_t<It> const l = 2 * p + 1;
@@ -298,7 +300,7 @@ inline void pop_heap1(It first, diff_t<It> p, diff_t<It> size, val_t<It> val, Co
             p = m;
         }
     }
-    
+
     *(first + p) = std::move(val);
 }
 
@@ -310,14 +312,14 @@ inline void pop_heap(It first, It el, It last, Compare comp)
     {
         return;
     }
-    
+
     --last;
     val_t<It> val = std::move(*last);
     *last = std::move(*el);
 
     // Ignore the last element
     --size;
-    
+
     diff_t<It> p = el - first;
     if (level(p) % 2 == 0) // is min level
     {

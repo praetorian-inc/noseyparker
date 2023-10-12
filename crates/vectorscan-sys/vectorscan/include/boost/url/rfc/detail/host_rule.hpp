@@ -42,7 +42,7 @@ struct host_rule_t
     {
         urls::host_type host_type =
             urls::host_type::none;
-        string_view match;
+        core::string_view match;
         unsigned char addr[16] = {};
         pct_string_view name;
     };
@@ -52,7 +52,7 @@ struct host_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr host_rule_t host_rule{};

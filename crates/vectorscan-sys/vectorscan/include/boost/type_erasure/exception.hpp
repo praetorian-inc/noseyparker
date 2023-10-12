@@ -11,6 +11,7 @@
 #ifndef BOOST_TYPE_ERASURE_EXCEPTION_HPP_INCLUDED
 #define BOOST_TYPE_ERASURE_EXCEPTION_HPP_INCLUDED
 
+#include <boost/config.hpp>
 #include <stdexcept>
 #include <typeinfo>
 #include <string>
@@ -24,7 +25,7 @@ namespace type_erasure {
  *
  * \see \call, \require_match
  */
-class bad_function_call : public ::std::invalid_argument
+class BOOST_SYMBOL_VISIBLE bad_function_call : public ::std::invalid_argument
 {
 public:
     bad_function_call() : ::std::invalid_argument("bad_function_call") {}
@@ -33,7 +34,7 @@ public:
 /**
  * Exception thrown when an \any_cast to a reference or value fails.
  */
-class bad_any_cast : public std::bad_cast {};
+class BOOST_SYMBOL_VISIBLE bad_any_cast : public std::bad_cast {};
 
 }
 }

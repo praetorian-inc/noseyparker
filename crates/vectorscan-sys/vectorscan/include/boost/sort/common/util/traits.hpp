@@ -12,6 +12,7 @@
 #ifndef __BOOST_SORT_COMMON_UTIL_TRAITS_HPP
 #define __BOOST_SORT_COMMON_UTIL_TRAITS_HPP
 
+#include <ciso646>
 #include <functional>
 #include <iterator>
 #include <type_traits>

@@ -80,7 +80,7 @@ struct default_strategy<Point, Geometry, point_tag, multi_point_tag>
 
 
 } // namespace point_in_geometry
-    
+
 namespace relate
 {
 

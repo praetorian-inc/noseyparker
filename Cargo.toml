@@ -30,3 +30,11 @@ opt-level = 3
 # release mode, even as dev dependency.
 [profile.dev.package.similar]
 opt-level = 3
+
+# `vectorscan` and `vectorscan-sys` benefit from being build in release mode,
+# even as a dev dependency: doing so saves about 6 seconds on each integration
+# test case!
+[profile.dev.package.vectorscan]
+opt-level = 3
+[profile.dev.package.vectorscan-sys]
+opt-level = 3

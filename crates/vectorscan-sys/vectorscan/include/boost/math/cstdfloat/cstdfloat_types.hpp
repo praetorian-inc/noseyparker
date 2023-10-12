@@ -12,14 +12,14 @@
 #ifndef BOOST_MATH_CSTDFLOAT_TYPES_2014_01_09_HPP_
   #define BOOST_MATH_CSTDFLOAT_TYPES_2014_01_09_HPP_
 
-  #include <float.h>
+  #include <cfloat>
   #include <limits>
   #include <boost/math/tools/config.hpp>
 
   // This is the beginning of the preamble.
 
   // In this preamble, the preprocessor is used to query certain
-  // preprocessor definitions from <float.h>. Based on the results
+  // preprocessor definitions from <cfloat>. Based on the results
   // of these queries, an attempt is made to automatically detect
   // the presence of built-in floating-point types having specified
   // widths. These are *thought* to be conformant with IEEE-754,

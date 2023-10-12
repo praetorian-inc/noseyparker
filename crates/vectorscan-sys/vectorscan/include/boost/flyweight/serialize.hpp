@@ -1,4 +1,4 @@
-/* Copyright 2006-2015 Joaquin M Lopez Munoz.
+/* Copyright 2006-2023 Joaquin M Lopez Munoz.
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -17,17 +17,17 @@
 #include <boost/flyweight/flyweight_fwd.hpp>
 #include <boost/flyweight/detail/archive_constructed.hpp>
 #include <boost/flyweight/detail/serialization_helper.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/split_free.hpp>
-#include <boost/throw_exception.hpp> 
+#include <boost/core/serialization.hpp>
+#include <boost/throw_exception.hpp>
 #include <memory>
+#include <stdexcept>
 
 /* Serialization routines for flyweight<T>. 
  */
 
 namespace boost{
-  
-namespace serialization{
+
+namespace flyweights{
 
 template<
   class Archive,
@@ -37,7 +37,7 @@ inline void serialize(
   Archive& ar,::boost::flyweights::flyweight<T,Arg1,Arg2,Arg3>& f,
   const unsigned int version)
 {
-  split_free(ar,f,version);              
+  core::split_free(ar,f,version);
 }                                               
 
 template<
@@ -80,8 +80,7 @@ void load(
   size_type n=0;
   ar>>make_nvp("item",n);
   if(n>hlp.size()){
-    throw_exception(
-      archive::archive_exception(archive::archive_exception::other_exception));
+    throw_exception(std::runtime_error("Invalid or corrupted archive"));
   }
   else if(n==hlp.size()){
     ::boost::flyweights::detail::archive_constructed<key_type> k(
@@ -91,7 +90,7 @@ void load(
   f=hlp[n];
 }
 
-} /* namespace serialization */
+} /* namespace flyweights */
 
 } /* namespace boost */
 

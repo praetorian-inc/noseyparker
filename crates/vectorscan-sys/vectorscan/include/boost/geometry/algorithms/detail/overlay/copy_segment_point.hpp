@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020-2021.
 // Modifications copyright (c) 2020-2021, Oracle and/or its affiliates.
@@ -14,7 +15,8 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_COPY_SEGMENT_POINT_HPP
 
 
-#include <boost/array.hpp>
+#include <array>
+
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
@@ -113,7 +115,7 @@ struct copy_segment_point_box
             SegmentIdentifier const& seg_id, signed_size_type offset,
             PointOut& point)
     {
-        boost::array<typename point_type<Box>::type, 4> bp;
+        std::array<typename point_type<Box>::type, 4> bp;
         assign_box_corners_oriented<Reverse>(box, bp);
 
         signed_size_type const target = circular_offset(4, seg_id.segment_index, offset);

@@ -2,6 +2,10 @@
 
 // Copyright (c) 2021 Tinko Bartels, Berlin, Germany.
 
+// This file was modified by Oracle on 2023.
+// Modifications copyright (c) 2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
+
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -9,8 +13,12 @@
 #ifndef BOOST_GEOMETRY_STRATEGY_CARTESIAN_SIDE_ROUNDED_INPUT_HPP
 #define BOOST_GEOMETRY_STRATEGY_CARTESIAN_SIDE_ROUNDED_INPUT_HPP
 
+#include <limits>
 
+#include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/config.hpp>
+
+#include <boost/geometry/util/math.hpp>
 
 #include <boost/geometry/strategies/side.hpp>
 

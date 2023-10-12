@@ -16,6 +16,14 @@
 #include <boost/math/ccmath/isnan.hpp>
 #include <boost/math/ccmath/abs.hpp>
 
+#include <boost/math/tools/is_standalone.hpp>
+#ifndef BOOST_MATH_STANDALONE
+#include <boost/config.hpp>
+#ifdef BOOST_NO_CXX17_IF_CONSTEXPR
+#error "The header <boost/math/norms.hpp> can only be used in C++17 and later."
+#endif
+#endif
+
 #ifdef __has_include
 #  if __has_include(<bit>)
 #    include <bit>

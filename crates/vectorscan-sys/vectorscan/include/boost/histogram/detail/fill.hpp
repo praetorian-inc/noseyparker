@@ -229,7 +229,7 @@ struct linearize_args<S, 1> {
 };
 
 template <class A>
-constexpr unsigned min(const unsigned n) noexcept {
+constexpr unsigned(min)(const unsigned n) noexcept {
   constexpr unsigned a = buffer_size<A>::value;
   return a < n ? a : n;
 }

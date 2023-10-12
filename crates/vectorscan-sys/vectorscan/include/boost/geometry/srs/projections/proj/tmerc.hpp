@@ -1,6 +1,7 @@
 // Boost.Geometry - gis-projections (based on PROJ4)
 
 // Copyright (c) 2008-2015 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017, 2018, 2019, 2022.
 // Modifications copyright (c) 2017-2022, Oracle and/or its affiliates.
@@ -41,14 +42,15 @@
 #ifndef BOOST_GEOMETRY_PROJECTIONS_TMERC_HPP
 #define BOOST_GEOMETRY_PROJECTIONS_TMERC_HPP
 
-#include <boost/geometry/util/math.hpp>
-
 #include <boost/geometry/srs/projections/impl/base_static.hpp>
 #include <boost/geometry/srs/projections/impl/base_dynamic.hpp>
 #include <boost/geometry/srs/projections/impl/projects.hpp>
 #include <boost/geometry/srs/projections/impl/factory_entry.hpp>
 #include <boost/geometry/srs/projections/impl/function_overloads.hpp>
 #include <boost/geometry/srs/projections/impl/pj_mlfn.hpp>
+
+#include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/math.hpp>
 
 
 namespace boost { namespace geometry
@@ -221,7 +223,7 @@ namespace projections
 
             /* Helper functions for "exact" transverse mercator */
             inline
-            static T gatg(const T *p1, int len_p1, T B, T cos_2B, T sin_2B) 
+            static T gatg(const T *p1, int len_p1, T B, T cos_2B, T sin_2B)
             {
                 T h = 0, h1, h2 = 0;
 
@@ -241,7 +243,7 @@ namespace projections
             static T clenS(const T *a, int size,
                             T sin_arg_r, T cos_arg_r,
                             T sinh_arg_i, T cosh_arg_i,
-                            T *R, T *I) 
+                            T *R, T *I)
             {
                 T r, i, hr, hr1, hr2, hi, hi1, hi2;
 
@@ -268,9 +270,9 @@ namespace projections
                 *I  = r*hi + i*hr;
                 return *R;
             }
-            
+
             /* Real Clenshaw summation */
-            static T clens(const T *a, int size, T arg_r) 
+            static T clens(const T *a, int size, T arg_r)
             {
                 T r, hr, hr1, hr2, cos_arg_r;
 
@@ -291,16 +293,16 @@ namespace projections
 
             /* Ellipsoidal, forward */
             //static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P)
-            inline void fwd(Parameters const& par, 
-                            T const& lp_lon, 
-                            T const& lp_lat, 
-                            T& xy_x, T& xy_y) const 
+            inline void fwd(Parameters const& /*par*/,
+                            T const& lp_lon,
+                            T const& lp_lat,
+                            T& xy_x, T& xy_y) const
             {
                 //PJ_XY xy = {0.0,0.0};
                 //const auto *Q = &(static_cast<struct tmerc_data*>(par.opaque)->exact);
 
                 /* ell. LAT, LNG -> Gaussian LAT, LNG */
-                T Cn  = gatg (this->m_proj_parm.cbg, proj_etmerc_order, lp_lat, 
+                T Cn  = gatg (this->m_proj_parm.cbg, proj_etmerc_order, lp_lat,
                     cos(2*lp_lat), sin(2*lp_lat));
                 /* Gaussian LAT, LNG -> compl. sph. LAT */
                 const T sin_Cn = sin (Cn);
@@ -382,10 +384,10 @@ namespace projections
 
 
             /* Ellipsoidal, inverse */
-            inline void inv(Parameters const& par, 
-                            T const& xy_x, 
-                            T const& xy_y, 
-                            T& lp_lon, 
+            inline void inv(Parameters const& /*par*/,
+                            T const& xy_x,
+                            T const& xy_y,
+                            T& lp_lon,
                             T& lp_lat) const
             {
                 //PJ_LP lp = {0.0,0.0};
@@ -625,7 +627,7 @@ namespace projections
 
             /* Origin northing minus true northing at the origin latitude */
             /* i.e. true northing = N - par.Zb                         */
-            proj_parm.Zb  = - proj_parm.Qn*(Z + base_tmerc_ellipsoid_exact<T, Parameters>::clens(proj_parm.gtu, proj_etmerc_order, 2*Z));  
+            proj_parm.Zb  = - proj_parm.Qn*(Z + base_tmerc_ellipsoid_exact<T, Parameters>::clens(proj_parm.gtu, proj_etmerc_order, 2*Z));
         }
 
     }} // namespace detail::tmerc
@@ -645,7 +647,7 @@ namespace projections
         \image html ex_tmerc.gif
     */
     //approximate tmerc algorithm
-    /* 
+    /*
     template <typename T, typename Parameters>
     struct tmerc_ellipsoid : public detail::tmerc::base_tmerc_ellipsoid<T, Parameters>
     {
@@ -695,10 +697,10 @@ namespace projections
 
         // Static projection
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_STATIC_PROJECTION_FI2(srs::spar::proj_tmerc, tmerc_spheroid, tmerc_ellipsoid)
-        
+
         // Factory entry(s) - dynamic projection
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI2(tmerc_entry, tmerc_spheroid, tmerc_ellipsoid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(tmerc_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(tmerc, tmerc_entry)

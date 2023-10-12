@@ -66,7 +66,7 @@ public:
         CT rho = m / M;
         x = sin(i_res.azimuth) * rho;
         y = cos(i_res.azimuth) * rho;
-        
+
         return true;
     }
 
@@ -78,7 +78,7 @@ public:
     {
         CT const a = get_radius<0>(spheroid);
         CT const ds_threshold = a * std::numeric_limits<CT>::epsilon(); // TODO: 0 for non-fundamental type
-        
+
         CT const azimuth = atan2(x, y);
         CT const rho = math::sqrt(math::sqr(x) + math::sqr(y)); // use hypot?
         CT distance = a * atan(rho / a);
@@ -95,7 +95,7 @@ public:
                 // found = false;
                 return found;
             }
-            
+
             CT const drho = m / M - rho; // rho = m / M
             CT const ds = drho * math::sqr(M); // drho/ds = 1/M^2
             distance -= ds;

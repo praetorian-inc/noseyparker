@@ -36,10 +36,7 @@ struct multi_modify_with_predicate
 {
     static inline void apply(MultiGeometry& multi, Predicate const& predicate)
     {
-        typedef typename boost::range_iterator<MultiGeometry>::type iterator_type;
-        for (iterator_type it = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             Policy::apply(*it, predicate);
         }

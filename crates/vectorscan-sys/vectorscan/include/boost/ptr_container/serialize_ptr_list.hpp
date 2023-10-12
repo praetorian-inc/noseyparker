@@ -18,7 +18,7 @@ namespace serialization
 template<class Archive, class T, class CloneAllocator, class Allocator>
 void serialize(Archive& ar, ptr_list<T, CloneAllocator, Allocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+   core::split_free(ar, c, version);
 }
 
 } // namespace serialization

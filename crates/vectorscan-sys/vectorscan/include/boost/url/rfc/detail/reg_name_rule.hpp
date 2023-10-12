@@ -12,6 +12,7 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/rfc/pct_encoded_rule.hpp>
+#include <boost/url/rfc/sub_delim_chars.hpp>
 #include <boost/url/rfc/unreserved_chars.hpp>
 
 namespace boost {

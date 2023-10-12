@@ -131,7 +131,7 @@ inline typename Functor::result_type kahan_sum_series(Functor& func, int bits) n
 
    typedef typename Functor::result_type result_type;
 
-   result_type factor = pow(result_type(2), bits);
+   result_type factor = pow(result_type(2), result_type(bits));
    result_type result = func();
    result_type next_term, y, t;
    result_type carry = 0;

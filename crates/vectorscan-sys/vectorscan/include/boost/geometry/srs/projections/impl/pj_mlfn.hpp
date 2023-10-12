@@ -95,7 +95,7 @@ inline en<T> pj_enfn(T const& es)
         en[3] = (t *= es) * (C66 - es * C68);
         en[4] = t * es * C88;
     }
-    
+
     return en;
 }
 

@@ -165,7 +165,7 @@ namespace projections
             };
 
             template <typename Parameters, typename T>
-            inline void setup(Parameters& par, par_gn_sinu_s<T>& proj_parm) 
+            inline void setup(Parameters& par, par_gn_sinu_s<T>& proj_parm)
             {
                 par.es = 0;
 
@@ -354,7 +354,7 @@ namespace projections
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI2(sinu_entry, sinu_spheroid, sinu_ellipsoid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(eck6_entry, eck6_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(mbtfps_entry, mbtfps_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(gn_sinu_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(gn_sinu, gn_sinu_entry);

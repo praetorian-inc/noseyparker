@@ -19,18 +19,24 @@ categories = ["command-line-utilities"]
 
 build = "build.rs"
 
+
 [features]
+# Enable scan-time per-rule profiling instrumentation
 rule_profiling = ["noseyparker/rule_profiling"]
+
+# Enable the file content classifier based on `libmagic`
+# Requires a aystem-wide `libmagic` to be available
 libmagic = ["noseyparker/libmagic"]
 
 # Compile out `trace`-level log and tracing messages in release builds
 disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug"]
 
+# Enable features that are desirable in a release build
 release = ["disable_trace"]
 
+# Enable additional debugging in the `gix` set of dependencies
+gix_debug = ["noseyparker/gix_debug"]
 
-[[bin]]
-name = "noseyparker"
 
 [build-dependencies]
 # Used for embedding compile-time version information into the `noseyparker` CLI
@@ -46,12 +52,12 @@ clap_complete = "4.4"
 console = "0.15"
 crossbeam-channel = "0.5"
 indenter = "0.3"
-# XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
 indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
 log = { version = "0.4", optional = true }
+mimalloc = "0.1"
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"
@@ -61,10 +67,11 @@ rlimit = "0.10.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-sarif = "0.4"
+strum = { version = "0.25", features = ["derive"] }
 time = "0.3"
 tracing = "0.1"
 tracing-log = "0.1"
-tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi"] }
+tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default_features = false }
 url = "2.3"
 vectorscan = { path = "../vectorscan" }
 
@@ -73,43 +80,8 @@ assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
 # criterion = "0.4"
 # escargot = "0.5"  # NOTE: much more capable but much slower than assert_cmd for `cargo run` tests
-insta = { version = "1.29", features = ["filters", "json", "redactions"] }
+insta = { version = "1.34", features = ["filters", "json", "redactions"] }
 predicates = "3.0"
 pretty_assertions = "1.3"
 
-
 # NOTE: See cargo-license to list dependency licenses: https://github.com/onur/cargo-license
-
-# Other dependencies that sounds possibly useful:
-#
-# aho-corasick                                  # text matching
-# base64
-# bytes
-# bzip2                                         # compression
-# clap_mangen                                   # documentation, arg parsing
-# clap_complete                                 # documentation, arg parsing
-# console                                       # reporting
-# csv                                           # data format
-# digest                                        # hashing
-# dirs                                          # filesystem, configuration
-# env_logger                                    # logging
-# flate2                                        # compression
-# handlebars                                    # templating
-# infer                                         # content type guesser
-# magic                                         # content type guesser
-# mime                                          # content type guesser
-# mime_guess                                    # content type guesser
-# nom                                           # parsing
-# pkg-config                                    # build-time configuration
-# pretty                                        # reporting
-# quickcheck                                    # testing
-# tar                                           # data format
-# tempfile                                      # filesystem
-# termcolor                                     # reporting
-# tinytemplate                                  # templating
-# thiserror                                     # error handling
-# toml                                          # data format, configuration
-# tree_magic                                    # content type guesser
-# unicode-normalization
-# uuid
-# xz2                                           # compression

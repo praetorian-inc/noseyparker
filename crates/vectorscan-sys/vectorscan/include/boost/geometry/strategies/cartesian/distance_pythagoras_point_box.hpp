@@ -123,7 +123,7 @@ public :
         assert_dimension_equal<Point, Box>();
 
         typename calculation_type<Point, Box>::type result(0);
-        
+
         detail::compute_pythagoras_point_box
             <
                 dimension<Point>::value

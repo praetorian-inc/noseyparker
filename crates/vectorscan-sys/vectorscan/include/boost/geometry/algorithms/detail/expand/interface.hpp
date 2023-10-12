@@ -100,7 +100,7 @@ struct expand<default_strategy, false>
 
 namespace resolve_dynamic
 {
-    
+
 template <typename Geometry, typename Tag = typename tag<Geometry>::type>
 struct expand
 {
@@ -112,7 +112,7 @@ struct expand
         concepts::check<Box>();
         concepts::check<Geometry const>();
         concepts::check_concepts_and_equal_dimensions<Box, Geometry const>();
-        
+
         resolve_strategy::expand<Strategy>::apply(box, geometry, strategy);
     }
 };
@@ -131,10 +131,10 @@ struct expand<Geometry, dynamic_geometry_tag>
         }, geometry);
     }
 };
-    
+
 } // namespace resolve_dynamic
-    
-    
+
+
 /*!
 \brief Expands (with strategy)
 \ingroup expand

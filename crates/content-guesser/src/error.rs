@@ -2,5 +2,5 @@
 pub enum GuesserError {
     #[cfg(feature = "libmagic")]
     #[error("libmagic error: {0}")]
-    MagicError(#[from] magic::MagicError),
+    MagicError(String),
 }

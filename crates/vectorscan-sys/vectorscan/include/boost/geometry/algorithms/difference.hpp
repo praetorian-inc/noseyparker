@@ -2,9 +2,9 @@
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2017-2022.
-// Modifications copyright (c) 2017-2022, Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2017-2023.
+// Modifications copyright (c) 2017-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -21,14 +21,13 @@
 #include <boost/geometry/algorithms/detail/overlay/intersection_insert.hpp>
 #include <boost/geometry/algorithms/detail/visit.hpp>
 #include <boost/geometry/core/geometry_types.hpp>
-#include <boost/geometry/geometries/adapted/boost_variant.hpp>
+#include <boost/geometry/geometries/adapted/boost_variant.hpp> // For backward compatibility
 #include <boost/geometry/policies/robustness/get_rescale_policy.hpp>
 #include <boost/geometry/strategies/default_strategy.hpp>
 #include <boost/geometry/strategies/detail.hpp>
 #include <boost/geometry/strategies/relate/cartesian.hpp>
 #include <boost/geometry/strategies/relate/geographic.hpp>
 #include <boost/geometry/strategies/relate/spherical.hpp>
-#include <boost/geometry/util/range.hpp>
 #include <boost/geometry/util/sequence.hpp>
 #include <boost/geometry/views/detail/geometry_collection_view.hpp>
 
@@ -431,7 +430,7 @@ private:
         {
             traits::iter_visit<Geometry2>::apply([&](auto const& g2)
             {
-                multi_out_minus_g2(out, g2, strategy);                
+                multi_out_minus_g2(out, g2, strategy);
             }, qit->second);
 
             if (boost::empty(out))
@@ -563,7 +562,7 @@ struct difference<Strategy, false>
                              Strategy const& strategy)
     {
         using strategies::relate::services::strategy_converter;
-        
+
         difference
             <
                 decltype(strategy_converter<Strategy>::get(strategy))
@@ -586,7 +585,7 @@ struct difference<default_strategy, false>
                 Geometry1,
                 Geometry2
             >::type strategy_type;
-        
+
         difference
             <
                 strategy_type

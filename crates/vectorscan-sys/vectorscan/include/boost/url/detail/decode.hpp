@@ -12,7 +12,7 @@
 #define BOOST_URL_DETAIL_DECODE_HPP
 
 #include <boost/url/encoding_opts.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <cstdlib>
 
 namespace boost {
@@ -27,14 +27,14 @@ decode_one(
 BOOST_URL_DECL
 std::size_t
 decode_bytes_unsafe(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 BOOST_URL_DECL
 std::size_t
 decode_unsafe(
     char* dest,
     char const* end,
-    string_view s,
+    core::string_view s,
     encoding_opts opt = {}) noexcept;
 
 } // detail

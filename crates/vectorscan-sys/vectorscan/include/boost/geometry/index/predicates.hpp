@@ -300,10 +300,8 @@ std::back_inserter(result));
 rt.query(index::intersects(box) && index::satisfies(is_red_o()),
 std::back_inserter(result));
 
-#ifndef BOOST_NO_CXX11_LAMBDAS
 rt.query(index::intersects(box) && index::satisfies([](Value const& v) { return v.is_red(); }),
 std::back_inserter(result));
-#endif
 \endverbatim
 
 \ingroup predicates
@@ -423,7 +421,7 @@ operator&&(std::tuple<Preds...> const& t, Pred const& p)
                 std::tuple<Preds...>, Pred
             >::apply(t, p);
 }
-    
+
 }} // namespace detail::predicates
 
 }}} // namespace boost::geometry::index

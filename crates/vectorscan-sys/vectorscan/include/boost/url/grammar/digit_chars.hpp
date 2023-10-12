@@ -23,7 +23,7 @@ namespace grammar {
     Character sets are used with rules and the
     functions @ref find_if and @ref find_if_not.
     @code
-    result< string_view > rv = parse( "2022", token_rule( digit_chars ) );
+    system::result< core::string_view > rv = parse( "2022", token_rule( digit_chars ) );
     @endcode
 
     @par BNF

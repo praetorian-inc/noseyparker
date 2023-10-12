@@ -48,6 +48,7 @@ BOOST_MATH_INSTRUMENT_LAMBERT_W_SMALL_Z_SERIES_ITERATIONS  // Show evaluation of
 //] [/boost_math_instrument_lambert_w_macros]
 */
 
+#include <boost/math/tools/config.hpp>
 #include <boost/math/policies/error_handling.hpp>
 #include <boost/math/policies/policy.hpp>
 #include <boost/math/tools/promotion.hpp>
@@ -184,7 +185,25 @@ template <typename T>
 inline double must_reduce_to_double(const T& z, const std::false_type&)
 { // try a lexical_cast and hope for the best:
 #ifndef BOOST_MATH_STANDALONE
+
+   #ifdef BOOST_MATH_USE_CHARCONV_FOR_CONVERSION
+
+   // Catches the C++23 floating point types
+   if constexpr (std::is_arithmetic_v<T>)
+   {
+      return static_cast<double>(z);
+   }
+   else
+   {
+      return boost::lexical_cast<double>(z);
+   }
+
+   #else
+   
    return boost::lexical_cast<double>(z);
+   
+   #endif
+
 #else
    static_assert(sizeof(T) == 0, "Unsupported in standalone mode: don't know how to cast your number type to a double.");
    return 0.0;
@@ -379,7 +398,7 @@ T lambert_w_singularity_series(const T p)
   }
 #endif // BOOST_MATH_INSTRUMENT_LAMBERT_W_TERMS
 
-  if (absp < 0.01159)
+  if (absp < T(0.01159))
   { // Only 6 near-singularity series terms are useful.
     return
       -1 +
@@ -391,7 +410,7 @@ T lambert_w_singularity_series(const T p)
                 p * q[6]
                 )))));
   }
-  else if (absp < 0.0766) // Use 10 near-singularity series terms.
+  else if (absp < T(0.0766)) // Use 10 near-singularity series terms.
   { // Use 10 near-singularity series terms.
     return
       -1 +
@@ -407,8 +426,7 @@ T lambert_w_singularity_series(const T p)
                         p * q[10]
                         )))))))));
   }
-  else
-  { // Use all 20 near-singularity series terms.
+   // Use all 20 near-singularity series terms.
     return
       -1 +
       p * (1 +
@@ -440,7 +458,7 @@ T lambert_w_singularity_series(const T p)
     //                                                p*q[24] +
     //                                                 p*q[25]
     //                                         )))))))))))))))))));
-  }
+
 } // template<typename T = double> T lambert_w_singularity_series(const T p)
 
 
@@ -683,7 +701,7 @@ z * (2.154990206091088289321708745358647e6L // z^20 distance -5 without term 20
 // N[InverseSeries[Series[z Exp[z],{z,0,34}]],50],
 // and are suffixed by L as they are assumed of type long double.
 // (This is NOT used for 128-bit quad boost::multiprecision::float128 type which required a suffix Q
-// nor multiprecision type cpp_bin_float_quad that can only be initialised at full precision of the type
+// nor multiprecision type cpp_bin_float_quad that can only be initialized at full precision of the type
 // constructed with a decimal digit string like "2.6666666666666666666666666666666666666666666666667".)
 
 template <typename T, typename Policy>
@@ -817,7 +835,7 @@ struct lambert_w0_small_z_series_term
     ++k;
     term *= -z / k;
     //T t = pow(z, k) * pow(T(k), -1 + k) / factorial<T>(k); // (z^k * k(k-1)^k) / k!
-    T result = term * pow(T(k), -1 + k); // term * k^(k-1)
+    T result = term * pow(T(k), T(-1 + k)); // term * k^(k-1)
                                          // std::cout << " k = " << k << ", term = " << term << ", result = " << result << std::endl;
     return result; //
   }
@@ -1025,7 +1043,7 @@ T lambert_w_positive_rational_float(T z)
    BOOST_MATH_STD_USING
    if (z < 2)
    {
-      if (z < 0.5)
+      if (z < T(0.5))
       { // 0.05 < z < 0.5
         // Maximum Deviation Found:                     2.993e-08
         // Expected Error Term : 2.993e-08
@@ -1101,7 +1119,7 @@ T lambert_w_positive_rational_float(T z)
       };
       return Y + boost::math::tools::evaluate_rational(P, Q, z);
    }
-   else if (z < 9897.12905874)  // 2.8 < log(z) < 9.2
+   else if (z < T(9897.12905874))  // 2.8 < log(z) < 9.2
    {
       // Max error in interpolated form: 1.771e-08
       static const T Y = -1.402973175e+00f;
@@ -1121,7 +1139,7 @@ T lambert_w_positive_rational_float(T z)
       T log_w = log(z);
       return log_w + Y + boost::math::tools::evaluate_polynomial(P, log_w) / boost::math::tools::evaluate_polynomial(Q, log_w);
    }
-   else if (z < 7.896296e+13)  // 9.2 < log(z) <= 32
+   else if (z < T(7.896296e+13))  // 9.2 < log(z) <= 32
    {
       // Max error in interpolated form: 5.821e-08
       static const T Y = -2.735729218e+00f;
@@ -1141,35 +1159,34 @@ T lambert_w_positive_rational_float(T z)
       T log_w = log(z);
       return log_w + Y + boost::math::tools::evaluate_polynomial(P, log_w) / boost::math::tools::evaluate_polynomial(Q, log_w);
    }
-   else // 32 < log(z) < 100
-   {
-      // Max error in interpolated form: 1.491e-08
-      static const T Y = -4.012863159e+00f;
-      static const T P[] = {
-         4.431629226e+00f,
-         2.756690487e-01f,
-         -2.992956930e-03f,
-         -4.912259384e-05f,
-      };
-      static const T Q[] = {
-         1.000000000e+00f,
-         2.015434591e-01f,
-         4.949426142e-03f,
-         1.609659944e-05f,
-         -5.111523436e-09f,
-      };
-      T log_w = log(z);
-      return log_w + Y + boost::math::tools::evaluate_polynomial(P, log_w) / boost::math::tools::evaluate_polynomial(Q, log_w);
-   }
+
+    // Max error in interpolated form: 1.491e-08
+    static const T Y = -4.012863159e+00f;
+    static const T P[] = {
+        4.431629226e+00f,
+        2.756690487e-01f,
+        -2.992956930e-03f,
+        -4.912259384e-05f,
+    };
+    static const T Q[] = {
+        1.000000000e+00f,
+        2.015434591e-01f,
+        4.949426142e-03f,
+        1.609659944e-05f,
+        -5.111523436e-09f,
+    };
+    T log_w = log(z);
+    return log_w + Y + boost::math::tools::evaluate_polynomial(P, log_w) / boost::math::tools::evaluate_polynomial(Q, log_w);
+
 }
 
 template <typename T, typename Policy>
 T lambert_w_negative_rational_float(T z, const Policy& pol)
 {
    BOOST_MATH_STD_USING
-   if (z > -0.27)
+   if (z > T(-0.27))
    {
-      if (z < -0.051)
+      if (z < T(-0.051))
       {
          // -0.27 < z < -0.051
          // Max error in interpolated form: 5.080e-08
@@ -1194,7 +1211,7 @@ T lambert_w_negative_rational_float(T z, const Policy& pol)
          return lambert_w0_small_z(z, pol);
       }
    }
-   else if (z > -0.3578794411714423215955237701)
+   else if (z > T(-0.3578794411714423215955237701))
    { // Very close to branch singularity.
      // Max error in interpolated form: 5.269e-08
       static const T Y = 1.220928431e-01f;
@@ -1214,11 +1231,8 @@ T lambert_w_negative_rational_float(T z, const Policy& pol)
       T d = z + 0.367879441171442321595523770161460867445811f;
       return -d / (Y + boost::math::tools::evaluate_polynomial(P, d) / boost::math::tools::evaluate_polynomial(Q, d));
    }
-   else
-   {
-      // z is very close (within 0.01) of the singularity at e^-1.
-      return lambert_w_singularity_series(get_near_singularity_param(z, pol));
-   }
+
+    return lambert_w_singularity_series(get_near_singularity_param(z, pol));
 }
 
 //! Lambert_w0 @b 'float' implementation, selected when T is 32-bit precision.
@@ -1237,7 +1251,7 @@ inline T lambert_w0_imp(T z, const Policy& pol, const std::integral_constant<int
     return boost::math::policies::raise_overflow_error<T>(function, "Expected a finite value but got %1%.", z, pol);
   }
 
-   if (z >= 0.05) // Fukushima switch point.
+   if (z >= T(0.05)) // Fukushima switch point.
    // if (z >= 0.045) // 34 terms makes 128-bit 'exact' below 0.045.
    { // Normal ranges using several rational polynomials.
       return lambert_w_positive_rational_float(z);
@@ -1248,10 +1262,8 @@ inline T lambert_w0_imp(T z, const Policy& pol, const std::integral_constant<int
          return boost::math::policies::raise_domain_error<T>(function, "Expected z >= -e^-1 (-0.367879...) but got %1%.", z, pol);
       return -1;
    }
-   else // z < 0.05
-   {
-      return lambert_w_negative_rational_float(z, pol);
-   }
+
+   return lambert_w_negative_rational_float(z, pol);
 } // T lambert_w0_imp(T z, const Policy& pol, const std::integral_constant<int, 1>&) for 32-bit usually float.
 
 template <typename T>
@@ -1855,7 +1867,7 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
   // Check that z argument value is not smaller than lookup_table G[64]
   // std::cout << "(z > wm1zs[63]) = " << std::boolalpha << (z > wm1zs[63]) << std::endl;
 
-  if (z >= wm1zs[63]) // wm1zs[63]  = -1.0264389699511282259046957018510946438e-26L  W = 64.00000000000000000
+  if (z >= T(wm1zs[63])) // wm1zs[63]  = -1.0264389699511282259046957018510946438e-26L  W = 64.00000000000000000
   {  // z >= -1.0264389699511303e-26 (but z != 0 and z >= std::numeric_limits<T>::min() and so NOT denormalized).
 
     // Some info on Lambert W-1 values for extreme values of z.
@@ -1940,14 +1952,14 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
     // Bracketing sequence  n = (2, 4, 8, 16, 32, 64) for W-1 branch. (0 is -infinity)
     // Since z is probably quite small, start with lowest n (=2).
     int n = 2;
-    if (wm1zs[n - 1] > z)
+    if (T(wm1zs[n - 1]) > z)
     {
       goto bisect;
     }
     for (int j = 1; j <= 5; ++j)
     {
       n *= 2;
-      if (wm1zs[n - 1] > z)
+      if (T(wm1zs[n - 1]) > z)
       {
         goto overshot;
       }
@@ -1967,7 +1979,7 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
         {
           break; // goto bisect;
         }
-        if (wm1zs[n - nh - 1] > z)
+        if (T(wm1zs[n - nh - 1]) > z)
         {
           n -= nh;
         }
@@ -2011,7 +2023,7 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
     using calc_type = typename std::conditional<std::is_constructible<lookup_t, T>::value, lookup_t, T>::type;
 
     calc_type w = -static_cast<calc_type>(n); // Equation 25,
-    calc_type y = static_cast<calc_type>(z * wm1es[n - 1]); // Equation 26,
+    calc_type y = static_cast<calc_type>(z * T(wm1es[n - 1])); // Equation 26,
                                                           // Perform the bisections fractional bisections for necessary precision.
     for (int j = 0; j < bisections; ++j)
     { // Equation 27.

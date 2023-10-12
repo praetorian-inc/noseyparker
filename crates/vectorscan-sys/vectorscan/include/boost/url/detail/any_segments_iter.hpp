@@ -26,7 +26,7 @@ struct BOOST_SYMBOL_VISIBLE
 protected:
     explicit
     any_segments_iter(
-        string_view s_ = {}) noexcept
+        core::string_view s_ = {}) noexcept
         : s(s_)
     {
     }
@@ -36,11 +36,11 @@ protected:
 public:
     // this is adjusted
     // when self-intersecting
-    string_view s;
+    core::string_view s;
 
     // the first segment,
     // to handle special cases
-    string_view front;
+    core::string_view front;
 
     // quick number of segments
     // 0 = zero
@@ -72,47 +72,6 @@ public:
 };
 
 //------------------------------------------------
-
-// iterates segments in a string
-struct BOOST_SYMBOL_VISIBLE
-    path_iter
-    : any_segments_iter
-{
-    virtual ~path_iter() = default;
-
-    explicit
-    path_iter(
-        string_view s) noexcept;
-
-protected:
-    std::size_t pos_;
-    std::size_t next_;
-
-    void increment() noexcept;
-    void rewind() noexcept override;
-    bool measure(std::size_t&) noexcept override;
-    void copy(char*&, char const*) noexcept override;
-};
-
-//------------------------------------------------
-
-// iterates segments in an encoded string
-struct BOOST_SYMBOL_VISIBLE
-    path_encoded_iter
-    : public path_iter
-{
-    virtual ~path_encoded_iter() = default;
-
-    explicit
-    path_encoded_iter(
-        pct_string_view s) noexcept;
-
-private:
-    bool measure(std::size_t&) noexcept override;
-    void copy(char*&, char const*) noexcept override;
-};
-
-//------------------------------------------------
 //
 // segment_iter
 //
@@ -128,7 +87,7 @@ struct BOOST_SYMBOL_VISIBLE
 
     explicit
     segment_iter(
-        string_view s) noexcept;
+        core::string_view s) noexcept;
 
 private:
     bool at_end_ = false;
@@ -148,10 +107,10 @@ struct segments_iter_base
 protected:
     BOOST_URL_DECL static void
     measure_impl(std::size_t&,
-        string_view, bool) noexcept;
+        core::string_view, bool) noexcept;
     BOOST_URL_DECL static void
     copy_impl(char*&, char const*,
-        string_view, bool) noexcept;
+        core::string_view, bool) noexcept;
 };
 
 // iterates segments in a
@@ -165,7 +124,7 @@ struct segments_iter
         std::is_convertible<
             typename std::iterator_traits<
                 FwdIt>::reference,
-            string_view>::value);
+            core::string_view>::value);
 
     segments_iter(
         FwdIt first,
@@ -207,7 +166,7 @@ private:
         if(it_ == end_)
             return false;
         measure_impl(n,
-            string_view(*it_),
+            detail::to_sv(*it_),
             encode_colons);
         ++it_;
         return true;
@@ -219,7 +178,7 @@ private:
         char const* end) noexcept override
     {
         copy_impl(dest, end,
-            string_view(*it_++),
+            detail::to_sv(*it_++),
             encode_colons);
     }
 };
@@ -262,10 +221,10 @@ struct segments_encoded_iter_base
 protected:
     BOOST_URL_DECL static void
     measure_impl(std::size_t&,
-        string_view, bool) noexcept;
+        core::string_view, bool) noexcept;
     BOOST_URL_DECL static void
     copy_impl(char*&, char const*,
-        string_view, bool) noexcept;
+        core::string_view, bool) noexcept;
 };
 
 // iterates segments in an
@@ -279,7 +238,7 @@ struct segments_encoded_iter
         std::is_convertible<
             typename std::iterator_traits<
                 FwdIt>::reference,
-            string_view>::value);
+            core::string_view>::value);
 
     segments_encoded_iter(
         FwdIt first,
@@ -292,7 +251,7 @@ struct segments_encoded_iter
         {
             // throw on invalid input
             front = pct_string_view(
-                string_view(*first));
+                detail::to_sv(*first));
             auto it = first;
             if(++it == last)
                 fast_nseg = 1;
@@ -325,7 +284,7 @@ private:
         // throw on invalid input
         measure_impl(n,
             pct_string_view(
-                string_view(*it_++)),
+                detail::to_sv(*it_++)),
             encode_colons);
         return true;
     }
@@ -336,7 +295,7 @@ private:
         char const* end) noexcept override
     {
         copy_impl(dest, end,
-            string_view(*it_++),
+            detail::to_sv(*it_++),
             encode_colons);
     }
 };

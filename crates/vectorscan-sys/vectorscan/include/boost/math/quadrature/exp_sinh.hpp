@@ -31,9 +31,9 @@ public:
       : m_imp(std::make_shared<detail::exp_sinh_detail<Real, Policy>>(max_refinements)) {}
 
     template<class F>
-    auto integrate(const F& f, Real a, Real b, Real tol = boost::math::tools::root_epsilon<Real>(), Real* error = nullptr, Real* L1 = nullptr, std::size_t* levels = nullptr)->decltype(std::declval<F>()(std::declval<Real>()))  const;
+    auto integrate(const F& f, Real a, Real b, Real tol = boost::math::tools::root_epsilon<Real>(), Real* error = nullptr, Real* L1 = nullptr, std::size_t* levels = nullptr) const ->decltype(std::declval<F>()(std::declval<Real>()));
     template<class F>
-    auto integrate(const F& f, Real tol = boost::math::tools::root_epsilon<Real>(), Real* error = nullptr, Real* L1 = nullptr, std::size_t* levels = nullptr)->decltype(std::declval<F>()(std::declval<Real>()))  const;
+    auto integrate(const F& f, Real tol = boost::math::tools::root_epsilon<Real>(), Real* error = nullptr, Real* L1 = nullptr, std::size_t* levels = nullptr) const ->decltype(std::declval<F>()(std::declval<Real>()));
 
 private:
     std::shared_ptr<detail::exp_sinh_detail<Real, Policy>> m_imp;
@@ -41,7 +41,7 @@ private:
 
 template<class Real, class Policy>
 template<class F>
-auto exp_sinh<Real, Policy>::integrate(const F& f, Real a, Real b, Real tolerance, Real* error, Real* L1, std::size_t* levels)->decltype(std::declval<F>()(std::declval<Real>()))  const
+auto exp_sinh<Real, Policy>::integrate(const F& f, Real a, Real b, Real tolerance, Real* error, Real* L1, std::size_t* levels) const ->decltype(std::declval<F>()(std::declval<Real>()))
 {
     typedef decltype(f(a)) K;
     static_assert(!std::is_integral<K>::value,
@@ -86,7 +86,7 @@ auto exp_sinh<Real, Policy>::integrate(const F& f, Real a, Real b, Real toleranc
 
 template<class Real, class Policy>
 template<class F>
-auto exp_sinh<Real, Policy>::integrate(const F& f, Real tolerance, Real* error, Real* L1, std::size_t* levels)->decltype(std::declval<F>()(std::declval<Real>())) const
+auto exp_sinh<Real, Policy>::integrate(const F& f, Real tolerance, Real* error, Real* L1, std::size_t* levels) const ->decltype(std::declval<F>()(std::declval<Real>()))
 {
     static const char* function = "boost::math::quadrature::exp_sinh<%1%>::integrate";
     using std::abs;

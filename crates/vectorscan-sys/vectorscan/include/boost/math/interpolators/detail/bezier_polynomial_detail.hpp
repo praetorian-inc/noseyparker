@@ -73,7 +73,7 @@ public:
             }
         }
 
-        decasteljau_recursion(scratch_space, scratch_space.size(), t);
+        decasteljau_recursion(scratch_space, control_points_.size() - 1, t);
         return scratch_space[0];
     }
 
@@ -112,7 +112,7 @@ public:
         using std::fma;
         // control_points_.size() == n + 1
         RandomAccessContainer c(control_points_.size() + 1);
-        // This is the constant of integration, chosen arbitarily to be zero:
+        // This is the constant of integration, chosen arbitrarily to be zero:
         for (Z j = 0; j < control_points_[0].size(); ++j) {
             c[0][j] = Real(0);
         }

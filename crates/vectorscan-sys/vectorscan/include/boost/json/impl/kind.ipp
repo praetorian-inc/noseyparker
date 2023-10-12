@@ -13,7 +13,8 @@
 #include <boost/json/kind.hpp>
 #include <ostream>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 string_view
 to_string(kind k) noexcept
@@ -39,6 +40,7 @@ operator<<(std::ostream& os, kind k)
     return os;
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

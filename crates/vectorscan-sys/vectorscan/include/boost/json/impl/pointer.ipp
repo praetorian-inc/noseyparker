@@ -12,7 +12,8 @@
 
 #include <boost/json/value.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 namespace detail {
 
@@ -22,11 +23,12 @@ public:
     class iterator;
 
     pointer_token(
-        char const* b,
-        char const* e) noexcept
-        : b_(b)
-        , e_(e)
+        string_view sv) noexcept
+        : b_( sv.begin() + 1 )
+        , e_( sv.end() )
     {
+        BOOST_ASSERT( !sv.empty() );
+        BOOST_ASSERT( *sv.data() == '/' );
     }
 
     iterator begin() const noexcept;
@@ -40,6 +42,12 @@ private:
 class pointer_token::iterator
 {
 public:
+    using value_type = char;
+    using reference = char;
+    using pointer = value_type*;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
+
     explicit iterator(char const* base) noexcept
         : base_(base)
     {
@@ -67,6 +75,13 @@ public:
         else
             ++base_;
         return *this;
+    }
+
+    iterator operator++(int) noexcept
+    {
+        iterator result = *this;
+        ++(*this);
+        return result;
     }
 
     char const* base() const noexcept
@@ -129,7 +144,9 @@ bool is_invalid_zero(
     ++b;
     if( b == e )
         return false;
-    return *b != '/';
+
+    BOOST_ASSERT( *b != '/' );
+    return true;
 }
 
 bool is_past_the_end_token(
@@ -140,17 +157,22 @@ bool is_past_the_end_token(
         return false;
 
     ++b;
-    if( b == e )
-        return true;
-    return *b == '/';
+    BOOST_ASSERT( (b == e) || (*b != '/') );
+    return b == e;
 }
 
 std::size_t
 parse_number_token(
-    char const*& b,
-    char const* e,
+    string_view sv,
     error_code& ec) noexcept
 {
+    BOOST_ASSERT( !sv.empty() );
+
+    char const* b = sv.begin();
+    BOOST_ASSERT( *b == '/' );
+
+    ++b;
+    char const* const e = sv.end();
     if( ( b == e )
         || is_invalid_zero(b, e) )
     {
@@ -160,6 +182,7 @@ parse_number_token(
 
     if( is_past_the_end_token(b, e) )
     {
+        ++b;
         BOOST_JSON_FAIL(ec, error::past_the_end);
         return {};
     }
@@ -168,9 +191,7 @@ parse_number_token(
     for( ; b != e; ++b )
     {
         char const c = *b;
-
-        if( '/' == c)
-            break;
+        BOOST_ASSERT( c != '/' );
 
         unsigned d = c - '0';
         if( d > 9 )
@@ -192,13 +213,23 @@ parse_number_token(
     return result;
 }
 
-pointer_token
-get_token(
-    char const* b,
-    char const* e,
+string_view
+next_segment(
+    string_view& sv,
     error_code& ec) noexcept
 {
-    char const* start = b;
+    if( sv.empty() )
+        return sv;
+
+    char const* const start = sv.begin();
+    char const* b = start;
+    if( *b++ != '/' )
+    {
+        BOOST_JSON_FAIL( ec, error::missing_slash );
+        return {};
+    }
+
+    char const* e = sv.end();
     for( ; b < e; ++b )
     {
         char const c = *b;
@@ -209,7 +240,7 @@ get_token(
         {
             if( ++b == e )
             {
-                BOOST_JSON_FAIL(ec, error::invalid_escape);
+                BOOST_JSON_FAIL( ec, error::invalid_escape );
                 break;
             }
 
@@ -220,7 +251,7 @@ get_token(
                 // valid escape sequence
                 continue;
             default: {
-                BOOST_JSON_FAIL(ec, error::invalid_escape);
+                BOOST_JSON_FAIL( ec, error::invalid_escape );
                 break;
             }
             }
@@ -228,7 +259,8 @@ get_token(
         }
     }
 
-    return pointer_token(start, b);
+    sv.remove_prefix( b - start );
+    return string_view( start, b );
 }
 
 value*
@@ -244,6 +276,69 @@ if_contains_token(object const& obj, pointer_token token)
     return &it->value();
 }
 
+template<
+    class Value,
+    class OnObject,
+    class OnArray,
+    class OnScalar >
+Value*
+walk_pointer(
+    Value& jv,
+    string_view sv,
+    error_code& ec,
+    OnObject on_object,
+    OnArray on_array,
+    OnScalar on_scalar)
+{
+    ec.clear();
+
+    string_view segment = detail::next_segment( sv, ec );
+
+    Value* result = &jv;
+    while( true )
+    {
+        if( ec.failed() )
+            return nullptr;
+
+        if( !result )
+        {
+            BOOST_JSON_FAIL(ec, error::not_found);
+            return nullptr;
+        }
+
+        if( segment.empty() )
+            break;
+
+        switch( result->kind() )
+        {
+        case kind::object: {
+            auto& obj = result->get_object();
+
+            detail::pointer_token const token( segment );
+            segment = detail::next_segment( sv, ec );
+
+            result = on_object( obj, token );
+            break;
+        }
+        case kind::array: {
+            auto const index = detail::parse_number_token( segment, ec );
+            segment = detail::next_segment( sv, ec );
+
+            auto& arr = result->get_array();
+            result = on_array( arr, index, ec );
+            break;
+        }
+        default: {
+            if( on_scalar( *result, segment ) )
+                break;
+            BOOST_JSON_FAIL( ec, error::value_is_scalar );
+        }}
+    }
+
+    BOOST_ASSERT( result );
+    return result;
+}
+
 } // namespace detail
 
 value const&
@@ -252,58 +347,33 @@ value::at_pointer(string_view ptr) const&
     error_code ec;
     auto const found = find_pointer(ptr, ec);
     if( !found )
-        detail::throw_system_error(ec, BOOST_CURRENT_LOCATION);
+        detail::throw_system_error( ec );
     return *found;
 }
 
 value const*
-value::find_pointer(string_view ptr, error_code& ec) const noexcept
+value::find_pointer( string_view sv, error_code& ec ) const noexcept
 {
-    ec.clear();
-
-    value const* result = this;
-    char const* cur = ptr.data();
-    char const* const end = cur + ptr.size();
-    while( end != cur )
-    {
-        if( *cur++ != '/' )
+    return detail::walk_pointer(
+        *this,
+        sv,
+        ec,
+        []( object const& obj, detail::pointer_token token )
         {
-            BOOST_JSON_FAIL(ec, error::missing_slash);
-            return nullptr;
-        }
-
-        if( auto const po = result->if_object() )
+            return detail::if_contains_token(obj, token);
+        },
+        []( array const& arr, std::size_t index, error_code& ec )
+            -> value const*
         {
-            auto const token = detail::get_token(cur, end, ec);
             if( ec )
                 return nullptr;
 
-            result = detail::if_contains_token(*po, token);
-            cur = token.end().base();
-        }
-        else if( auto const pa = result->if_array() )
+            return arr.if_contains(index);
+        },
+        []( value const&, string_view)
         {
-            auto const index = detail::parse_number_token(cur, end, ec);
-            if( ec )
-                return nullptr;
-
-            result = pa->if_contains(index);
-        }
-        else
-        {
-            BOOST_JSON_FAIL(ec, error::value_is_scalar);
-            return nullptr;
-        }
-
-        if( !result )
-        {
-            BOOST_JSON_FAIL(ec, error::not_found);
-            return nullptr;
-        }
-    }
-
-    BOOST_ASSERT(result);
-    return result;
+            return std::false_type();
+        });
 }
 
 value*
@@ -329,6 +399,103 @@ value::find_pointer(string_view ptr, std::error_code& ec) noexcept
     return const_cast<value*>(self.find_pointer(ptr, ec));
 }
 
-BOOST_JSON_NS_END
+value*
+value::set_at_pointer(
+    string_view sv,
+    value_ref ref,
+    error_code& ec,
+    set_pointer_options const& opts )
+{
+    value* result = detail::walk_pointer(
+        *this,
+        sv,
+        ec,
+        []( object& obj, detail::pointer_token token)
+        {
+            if( !obj.empty() )
+            {
+                key_value_pair* kv = detail::find_in_object( obj, token ).first;
+                if( kv )
+                    return &kv->value();
+            }
+
+            string key( token.begin(), token.end(), obj.storage() );
+            return &obj.emplace( std::move(key), nullptr ).first->value();
+        },
+        [ &opts ]( array& arr, std::size_t index, error_code& ec ) -> value*
+        {
+            if( ec == error::past_the_end )
+                index = arr.size();
+            else if( ec.failed() )
+                return nullptr;
+
+            if( index >= arr.size() )
+            {
+                std::size_t const n = index - arr.size();
+                if( n >= opts.max_created_elements )
+                    return nullptr;
+
+                arr.resize( arr.size() + n + 1 );
+            }
+
+            ec.clear();
+            return arr.data() + index;
+        },
+        [ &opts ]( value& jv, string_view segment )
+        {
+            if( jv.is_null() || opts.replace_any_scalar )
+            {
+                if( opts.create_arrays )
+                {
+                    error_code ec;
+                    detail::parse_number_token( segment, ec );
+                    if( !ec.failed() || ec == error::past_the_end )
+                    {
+                        jv = array( jv.storage() );
+                        return true;
+                    }
+                }
+
+                if( opts.create_objects )
+                {
+                    jv = object( jv.storage() );
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+    if( result )
+        *result = ref.make_value( storage() );
+    return result;
+}
+
+value*
+value::set_at_pointer(
+    string_view sv,
+    value_ref ref,
+    std::error_code& ec,
+    set_pointer_options const& opts )
+{
+    error_code jec;
+    value* result = set_at_pointer( sv, ref, jec, opts );
+    ec = jec;
+    return result;
+}
+
+value&
+value::set_at_pointer(
+    string_view sv, value_ref ref, set_pointer_options const& opts )
+{
+    error_code ec;
+    value* result = set_at_pointer( sv, ref, ec, opts );
+    if( !result )
+        detail::throw_system_error( ec );
+    return *result;
+}
+
+} // namespace json
+} // namespace boost
 
 #endif // BOOST_JSON_IMPL_POINTER_IPP

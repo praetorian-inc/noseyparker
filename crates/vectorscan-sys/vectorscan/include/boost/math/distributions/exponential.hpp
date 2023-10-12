@@ -164,6 +164,24 @@ inline RealType cdf(const exponential_distribution<RealType, Policy>& dist, cons
 } // cdf
 
 template <class RealType, class Policy>
+inline RealType logcdf(const exponential_distribution<RealType, Policy>& dist, const RealType& x)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const exponential_distribution<%1%>&, %1%)";
+
+   RealType result = 0;
+   RealType lambda = dist.lambda();
+   if(0 == detail::verify_lambda(function, lambda, &result, Policy()))
+      return result;
+   if(0 == detail::verify_exp_x(function, x, &result, Policy()))
+      return result;
+   result = boost::math::log1p(-exp(-x * lambda), Policy());
+
+   return result;
+} // cdf
+
+template <class RealType, class Policy>
 inline RealType quantile(const exponential_distribution<RealType, Policy>& dist, const RealType& p)
 {
    BOOST_MATH_STD_USING // for ADL of std functions
@@ -203,6 +221,27 @@ inline RealType cdf(const complemented2_type<exponential_distribution<RealType, 
    if (c.param >= tools::max_value<RealType>())
       return 0;
    result = exp(-c.param * lambda);
+
+   return result;
+}
+
+template <class RealType, class Policy>
+inline RealType logcdf(const complemented2_type<exponential_distribution<RealType, Policy>, RealType>& c)
+{
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   static const char* function = "boost::math::logcdf(const exponential_distribution<%1%>&, %1%)";
+
+   RealType result = 0;
+   RealType lambda = c.dist.lambda();
+   if(0 == detail::verify_lambda(function, lambda, &result, Policy()))
+      return result;
+   if(0 == detail::verify_exp_x(function, c.param, &result, Policy()))
+      return result;
+   // Workaround for VC11/12 bug:
+   if (c.param >= tools::max_value<RealType>())
+      return 0;
+   result = -c.param * lambda;
 
    return result;
 }

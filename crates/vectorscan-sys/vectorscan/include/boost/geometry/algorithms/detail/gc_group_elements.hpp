@@ -131,7 +131,7 @@ inline void gc_group_elements(GC1View const& gc1_view, GC2View const& gc2_view, 
     std::array<std::vector<bool>, 2> visited = {
         std::vector<bool>(boost::size(gc1_view), false),
         std::vector<bool>(boost::size(gc2_view), false)
-    };        
+    };
     for (auto const& elem : adjacent)
     {
         std::vector<gc_element_id> group;

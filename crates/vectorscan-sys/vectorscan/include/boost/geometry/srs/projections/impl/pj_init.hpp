@@ -2,6 +2,7 @@
 // This file is manually converted from PROJ4
 
 // Copyright (c) 2008-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2020.
 // Modifications copyright (c) 2017-2020, Oracle and/or its affiliates.
@@ -44,9 +45,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tuple/tuple.hpp>
-
 #include <boost/geometry/core/static_assert.hpp>
 
 #include <boost/geometry/srs/projections/dpar.hpp>
@@ -60,8 +58,8 @@
 #include <boost/geometry/srs/projections/proj4.hpp>
 #include <boost/geometry/srs/projections/spar.hpp>
 
-#include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/math.hpp>
 
 
 namespace boost { namespace geometry { namespace projections
@@ -481,14 +479,14 @@ inline void pj_init_axis(Params const& params, parameters<T> & projdef)
 // TODO: implement axis support for other types of parameters
 
 template <typename T>
-inline void pj_init_axis(srs::dpar::parameters<T> const& params, parameters<T> & projdef)
+inline void pj_init_axis(srs::dpar::parameters<T> const& , parameters<T> & )
 {}
 
 template <typename Params>
 struct pj_init_axis_static
 {
     template <typename T>
-    static void apply(Params const& , parameters<T> & projdef)
+    static void apply(Params const& , parameters<T> & )
     {}
 };
 

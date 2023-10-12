@@ -77,14 +77,14 @@ public:
     explicit geographic_box(Spheroid const& spheroid)
         : m_spheroid(spheroid)
     {}
-    
+
     template <typename Box>
     inline auto apply(Box const& box) const
     {
         typedef typename result_type<Box>::type return_type;
 
         return_type const c0 = 0;
-        
+
         return_type x_min = get_as_radian<min_corner, 0>(box); // lon
         return_type y_min = get_as_radian<min_corner, 1>(box); // lat
         return_type x_max = get_as_radian<max_corner, 0>(box);

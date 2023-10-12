@@ -72,7 +72,7 @@ private:
 
             helper_point_type1 point1_normalized;
             strategy::normalize::spherical_point::apply(point1, point1_normalized);
-            helper_point_type2 point2_normalized;            
+            helper_point_type2 point2_normalized;
             strategy::normalize::spherical_point::apply(point2, point2_normalized);
 
             return point_point_generic

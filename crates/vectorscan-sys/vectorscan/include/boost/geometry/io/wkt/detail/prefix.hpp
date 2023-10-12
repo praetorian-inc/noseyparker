@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2007-2022 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
@@ -56,6 +56,20 @@ struct prefix_multipolygon
 {
     static inline const char* apply() { return "MULTIPOLYGON"; }
 };
+
+struct prefix_segment
+{
+    static inline const char* apply() { return "SEGMENT"; }
+};
+struct prefix_box
+{
+    static inline const char* apply() { return "BOX"; }
+};
+struct prefix_geometrycollection
+{
+    static inline const char* apply() { return "GEOMETRYCOLLECTION"; }
+};
+
 
 }} // namespace wkt::impl
 #endif

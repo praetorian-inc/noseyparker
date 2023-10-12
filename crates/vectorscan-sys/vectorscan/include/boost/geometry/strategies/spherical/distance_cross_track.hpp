@@ -57,10 +57,10 @@ namespace detail
     struct compute_cross_track_pair
     {
         template <typename Point, typename PointOfSegment>
-        static inline auto apply(Point const& p, 
-                                 PointOfSegment const& sp1, 
+        static inline auto apply(Point const& p,
+                                 PointOfSegment const& sp1,
                                  PointOfSegment const& sp2)
-        {            
+        {
             CalculationType lon1 = geometry::get_as_radian<0>(sp1);
             CalculationType lat1 = geometry::get_as_radian<1>(sp1);
             CalculationType lon2 = geometry::get_as_radian<0>(sp2);
@@ -70,23 +70,23 @@ namespace detail
 
             CalculationType const crs_AD = geometry::formula::spherical_azimuth
                 <
-                    CalculationType, 
+                    CalculationType,
                     false
                 >(lon1, lat1, lon, lat).azimuth;
 
             auto result = geometry::formula::spherical_azimuth
                 <
-                    CalculationType, 
+                    CalculationType,
                     true
                 >(lon1, lat1, lon2, lat2);
 
             CalculationType crs_AB = result.azimuth;
-            CalculationType crs_BA = result.reverse_azimuth - 
+            CalculationType crs_BA = result.reverse_azimuth -
                 geometry::math::pi<CalculationType>();
 
             CalculationType crs_BD = geometry::formula::spherical_azimuth
                 <
-                    CalculationType, 
+                    CalculationType,
                     false
                 >(lon2, lat2, lon, lat).azimuth;
 
@@ -100,20 +100,20 @@ namespace detail
     struct compute_cross_track_distance
     {
         template <typename CalculationType>
-        static inline auto apply(CalculationType const& d_crs1, 
+        static inline auto apply(CalculationType const& d_crs1,
                                  CalculationType const& d1)
-        {       
+        {
             CalculationType const half(0.5);
             CalculationType const quarter(0.25);
 
             CalculationType sin_d_crs1 = sin(d_crs1);
             /*
               This is the straightforward obvious way to continue:
-              
+
               return_type discriminant
                   = 1.0 - 4.0 * (d1 - d1 * d1) * sin_d_crs1 * sin_d_crs1;
               return 0.5 - 0.5 * math::sqrt(discriminant);
-            
+
               Below we optimize the number of arithmetic operations
               and account for numerical robustness:
             */
@@ -123,7 +123,7 @@ namespace detail
         }
     };
 
-} 
+}
 #endif // DOXYGEN_NO_DETAIL
 
 
@@ -235,7 +235,7 @@ namespace comparable
   The distance d1 needed when the projection of the point D is within the
   segment must be the true distance. However, comparable::haversine<>
   returns a comparable distance instead of the one needed.
-  To remedy this, we implicitly compute what is needed. 
+  To remedy this, we implicitly compute what is needed.
   More precisely, we need to compute sin(true_d1):
 
   sin(true_d1) = sin(2 * asin(sqrt(d1)))
@@ -549,7 +549,7 @@ template
 class cross_track
 {
 public :
-    
+
     template <typename Point, typename PointOfSegment>
     struct return_type
         : promote_floating_point
@@ -582,8 +582,8 @@ public :
 
 
     template <typename Point, typename PointOfSegment>
-    inline auto apply(Point const& p, 
-                      PointOfSegment const& sp1, 
+    inline auto apply(Point const& p,
+                      PointOfSegment const& sp1,
                       PointOfSegment const& sp2) const
     {
 

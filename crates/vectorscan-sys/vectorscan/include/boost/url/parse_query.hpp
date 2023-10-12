@@ -14,7 +14,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error_types.hpp>
 #include <boost/url/params_encoded_view.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 
 namespace boost {
 namespace urls {
@@ -43,8 +43,8 @@ namespace urls {
         @ref params_encoded_view.
 */
 BOOST_URL_DECL
-result<params_encoded_view>
-parse_query(string_view s) noexcept;
+system::result<params_encoded_view>
+parse_query(core::string_view s) noexcept;
 
 } // urls
 } // boost

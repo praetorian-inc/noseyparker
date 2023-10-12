@@ -13,6 +13,7 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_SPINLOCK_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_SPINLOCK_HPP
 
+#include <ciso646>
 #include <atomic>
 #include <ctime>
 #include <functional>
@@ -69,7 +70,7 @@ class spinlock_t
     //-------------------------------------------------------------------------
     bool try_lock ( ) noexcept
     {
-        return not af.test_and_set (std::memory_order_acquire);
+        return !af.test_and_set (std::memory_order_acquire);
     };
     //
     //-------------------------------------------------------------------------

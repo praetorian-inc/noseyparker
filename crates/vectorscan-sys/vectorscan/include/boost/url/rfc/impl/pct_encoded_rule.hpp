@@ -25,7 +25,7 @@ parse_encoded(
     char const*& it,
     char const* end,
     CharSet const& cs) noexcept ->
-        result<pct_string_view>
+        system::result<pct_string_view>
 {
     auto const start = it;
     std::size_t n = 0;
@@ -91,7 +91,7 @@ pct_encoded_rule_t<CharSet>::
 parse(
     char const*& it,
     char const* end) const noexcept ->
-        result<value_type>
+        system::result<value_type>
 {
     return detail::parse_encoded(
         it, end, cs_);

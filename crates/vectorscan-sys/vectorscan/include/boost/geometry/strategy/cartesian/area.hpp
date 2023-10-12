@@ -62,7 +62,7 @@ public :
                 CalculationType
             >
     {};
-    
+
     template <typename Geometry>
     class state
     {
@@ -70,7 +70,7 @@ public :
 
         typedef typename result_type<Geometry>::type return_type;
 
-    public:        
+    public:
         inline state()
             : sum(0)
         {

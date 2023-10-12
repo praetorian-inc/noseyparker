@@ -8,6 +8,7 @@ Distributed under the Boost Software License, Version 1.0.
 #ifndef BOOST_SMART_PTR_ALLOCATE_UNIQUE_HPP
 #define BOOST_SMART_PTR_ALLOCATE_UNIQUE_HPP
 
+#include <boost/smart_ptr/detail/requires_cxx11.hpp>
 #include <boost/smart_ptr/detail/sp_noexcept.hpp>
 #include <boost/smart_ptr/detail/sp_nullptr_t.hpp>
 #include <boost/core/allocator_access.hpp>

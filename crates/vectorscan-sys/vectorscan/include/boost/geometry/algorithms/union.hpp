@@ -2,9 +2,9 @@
 
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2014-2022.
-// Modifications copyright (c) 2014-2022 Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2014-2023.
+// Modifications copyright (c) 2014-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -16,11 +16,8 @@
 #define BOOST_GEOMETRY_ALGORITHMS_UNION_HPP
 
 
-#include <boost/range/value_type.hpp>
-
 #include <boost/geometry/algorithms/detail/gc_group_elements.hpp>
 #include <boost/geometry/algorithms/detail/intersection/gc.hpp>
-#include <boost/geometry/algorithms/detail/intersection/multi.hpp>
 #include <boost/geometry/algorithms/detail/overlay/intersection_insert.hpp>
 #include <boost/geometry/algorithms/detail/overlay/linear_linear.hpp>
 #include <boost/geometry/algorithms/detail/overlay/overlay.hpp>
@@ -36,7 +33,6 @@
 #include <boost/geometry/strategies/relate/cartesian.hpp>
 #include <boost/geometry/strategies/relate/geographic.hpp>
 #include <boost/geometry/strategies/relate/spherical.hpp>
-#include <boost/geometry/util/range.hpp>
 #include <boost/geometry/util/type_traits_std.hpp>
 #include <boost/geometry/views/detail/geometry_collection_view.hpp>
 #include <boost/geometry/views/detail/random_access_view.hpp>
@@ -462,7 +458,7 @@ struct union_
     {
         detail::random_access_view<Geometry1 const> gc1_view(geometry1);
         detail::random_access_view<Geometry2 const> gc2_view(geometry2);
-        
+
         detail::gc_group_elements(gc1_view, gc2_view, strategy,
             [&](auto const& inters_group)
             {
@@ -763,7 +759,7 @@ struct union_<default_strategy, false>
 
 namespace resolve_dynamic
 {
-    
+
 template
 <
     typename Geometry1, typename Geometry2,
@@ -853,7 +849,7 @@ struct union_<DynamicGeometry1, DynamicGeometry2, dynamic_geometry_tag, dynamic_
     }
 };
 
-    
+
 } // namespace resolve_dynamic
 
 

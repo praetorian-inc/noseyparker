@@ -35,7 +35,7 @@ parse_variant(
     std::integral_constant<
         std::size_t, I> const&,
     std::false_type const&) ->
-        result<variant<
+        system::result<variant<
             typename R0::value_type,
             typename Rn::value_type...>>
 {
@@ -57,7 +57,7 @@ parse_variant(
     std::integral_constant<
         std::size_t, I> const&,
     std::true_type const&) ->
-        result<variant<
+        system::result<variant<
             typename R0::value_type,
             typename Rn::value_type...>>
 {
@@ -87,7 +87,7 @@ variant_rule_t<R0, Rn...>::
 parse(
     char const*& it,
     char const* end) const ->
-        result<value_type>
+        system::result<value_type>
 {
     return detail::parse_variant(
         it, end, rn_,

@@ -35,7 +35,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace srs
 {
 

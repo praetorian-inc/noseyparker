@@ -49,7 +49,7 @@ struct hier_part_rule_t
         char const*& it,
         char const* const end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr hier_part_rule_t hier_part_rule{};

@@ -334,8 +334,8 @@ public:
       constexpr axis::index_type start = opt::test(axis::option::underflow) ? -1 : 0;
       const auto stop = size + (opt::test(axis::option::overflow) ? 1 : 0);
 
-      ca->begin = std::max(start, detail::get<0>(*r_begin));
-      ca->end = std::min(stop, detail::get<1>(*r_begin));
+      ca->begin = (std::max)(start, detail::get<0>(*r_begin));
+      ca->end = (std::min)(stop, detail::get<1>(*r_begin));
       assert(ca->begin <= ca->end);
       ca->idx = ca->begin;
 

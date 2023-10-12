@@ -4,8 +4,9 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2020-2021.
-// Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2020-2023.
+// Modifications copyright (c) 2020-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -102,18 +103,18 @@ namespace traits
 
 
 template <typename Range, order_selector Order>
-struct tag<detail::clockwise_view<Range, Order> >
+struct tag<geometry::detail::clockwise_view<Range, Order> >
     : geometry::tag<Range>
 {};
 
 template <typename Range, order_selector Order>
-struct point_order<detail::clockwise_view<Range, Order> >
+struct point_order<geometry::detail::clockwise_view<Range, Order> >
 {
     static const order_selector value = clockwise;
 };
 
 template <typename Range, order_selector Order>
-struct closure<detail::clockwise_view<Range, Order> >
+struct closure<geometry::detail::clockwise_view<Range, Order> >
     : geometry::closure<Range>
 {};
 

@@ -32,6 +32,8 @@ BOOST_PROCESS_V2_DECL void terminate_if_running_(void * handle);
 BOOST_PROCESS_V2_DECL bool check_handle_(void* handle, error_code & ec);
 BOOST_PROCESS_V2_DECL bool check_pid_(pid_type pid_, error_code & ec);
 BOOST_PROCESS_V2_DECL void interrupt_(pid_type pid_, error_code & ec);
+BOOST_PROCESS_V2_DECL void suspend_(void * handle, error_code & ec);
+BOOST_PROCESS_V2_DECL void resume_(void * handle, error_code & ec);
 BOOST_PROCESS_V2_DECL void terminate_(void * handle, error_code & ec, native_exit_code_type & exit_code);
 BOOST_PROCESS_V2_DECL void request_exit_(pid_type pid_, error_code & ec);
 BOOST_PROCESS_V2_DECL void check_running_(void* handle, error_code & ec, native_exit_code_type & exit_status);
@@ -174,6 +176,32 @@ struct basic_process_handle_win
         request_exit(ec);
         if (ec)
             detail::throw_error(ec, "request_exit");
+    }
+
+    void suspend(error_code &ec)
+    {
+        detail::suspend_(handle_.native_handle(), ec);
+    }
+
+    void suspend()
+    {
+        error_code ec;
+        suspend(ec);
+        if (ec)
+            detail::throw_error(ec, "suspend");
+    }
+
+    void resume(error_code &ec)
+    {
+        detail::resume_(handle_.native_handle(), ec);
+    }
+
+    void resume()
+    {
+        error_code ec;
+        suspend(ec);
+        if (ec)
+            detail::throw_error(ec, "resume");
     }
 
     void terminate(native_exit_code_type &exit_status, error_code &ec)

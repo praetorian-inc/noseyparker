@@ -4,8 +4,9 @@
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2014-2021.
-// Modifications copyright (c) 2014-2021, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014-2023.
+// Modifications copyright (c) 2014-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -27,7 +28,6 @@
 #include <boost/geometry/algorithms/num_interior_rings.hpp>
 #include <boost/geometry/algorithms/detail/convert_point_to_point.hpp>
 #include <boost/geometry/algorithms/detail/signed_size_type.hpp>
-#include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/mutable_range.hpp>
 #include <boost/geometry/core/point_type.hpp>
 #include <boost/geometry/core/tags.hpp>
@@ -91,17 +91,15 @@ struct to_polygon_point
                              signed_size_type ring_index, signed_size_type = 0)
     {
         using ring_type = typename ring_type<Polygon>::type;
-        using exterior_ring_type = typename ring_return_type<Polygon>::type;
-        using interior_ring_range_type = typename interior_return_type<Polygon>::type;
 
         if (ring_index == -1)
         {
-            exterior_ring_type ext_ring = exterior_ring(polygon);
+            auto&& ext_ring = exterior_ring(polygon);
             to_range_point::apply<ring_type, Point>(ext_ring, point);
         }
         else if (ring_index < signed_size_type(num_interior_rings(polygon)))
         {
-            interior_ring_range_type int_rings = interior_rings(polygon);
+            auto&& int_rings = interior_rings(polygon);
             to_range_point::apply<ring_type, Point>(range::at(int_rings, ring_index), point);
         }
     }

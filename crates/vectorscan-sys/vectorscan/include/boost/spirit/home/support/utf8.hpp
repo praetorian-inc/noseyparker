@@ -1,5 +1,6 @@
 /*=============================================================================
     Copyright (c) 2001-2011 Joel de Guzman
+    Copyright (c) 2023 Nikita Kniazev
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -11,10 +12,9 @@
 #pragma once
 #endif
 
+#include <boost/config.hpp>
 #include <boost/cstdint.hpp>
-#include <boost/regex/pending/unicode_iterator.hpp>
 #include <boost/type_traits/make_unsigned.hpp>
-#include <iterator>
 #include <string>
 
 namespace boost { namespace spirit
@@ -24,48 +24,63 @@ namespace boost { namespace spirit
     typedef std::basic_string<ucs4_char> ucs4_string;
     typedef std::basic_string<utf8_char> utf8_string;
 
+namespace detail {
+    inline void utf8_put_encode(utf8_string& out, ucs4_char x)
+    {
+        // https://www.unicode.org/versions/Unicode15.0.0/ch03.pdf D90
+        if (BOOST_UNLIKELY(x > 0x10FFFFul || (0xD7FFul < x && x < 0xE000ul)))
+            x = 0xFFFDul;
+
+        // Table 3-6. UTF-8 Bit Distribution
+        if (x < 0x80ul) {
+            out.push_back(static_cast<unsigned char>(x));
+        }
+        else if (x < 0x800ul) {
+            out.push_back(static_cast<unsigned char>(0xC0ul + (x >> 6)));
+            out.push_back(static_cast<unsigned char>(0x80ul + (x & 0x3Ful)));
+        }
+        else if (x < 0x10000ul) {
+            out.push_back(static_cast<unsigned char>(0xE0ul + (x >> 12)));
+            out.push_back(static_cast<unsigned char>(0x80ul + ((x >> 6) & 0x3Ful)));
+            out.push_back(static_cast<unsigned char>(0x80ul + (x & 0x3Ful)));
+        }
+        else {
+            out.push_back(static_cast<unsigned char>(0xF0ul + (x >> 18)));
+            out.push_back(static_cast<unsigned char>(0x80ul + ((x >> 12) & 0x3Ful)));
+            out.push_back(static_cast<unsigned char>(0x80ul + ((x >> 6) & 0x3Ful)));
+            out.push_back(static_cast<unsigned char>(0x80ul + (x & 0x3Ful)));
+        }
+    }
+}
+
     template <typename Char>
     inline utf8_string to_utf8(Char value)
     {
-        // always store as UTF8
         utf8_string result;
-        typedef std::back_insert_iterator<utf8_string> insert_iter;
-        insert_iter out_iter(result);
-        utf8_output_iterator<insert_iter> utf8_iter(out_iter);
         typedef typename make_unsigned<Char>::type UChar;
-        *utf8_iter = (UChar)value;
+        detail::utf8_put_encode(result, static_cast<UChar>(value));
         return result;
     }
 
     template <typename Char>
     inline utf8_string to_utf8(Char const* str)
     {
-        // always store as UTF8
         utf8_string result;
-        typedef std::back_insert_iterator<utf8_string> insert_iter;
-        insert_iter out_iter(result);
-        utf8_output_iterator<insert_iter> utf8_iter(out_iter);
         typedef typename make_unsigned<Char>::type UChar;
         while (*str)
-            *utf8_iter++ = (UChar)*str++;
+            detail::utf8_put_encode(result, static_cast<UChar>(*str++));
         return result;
     }
 
     template <typename Char, typename Traits, typename Allocator>
-    inline utf8_string 
+    inline utf8_string
     to_utf8(std::basic_string<Char, Traits, Allocator> const& str)
     {
-        // always store as UTF8
         utf8_string result;
-        typedef std::back_insert_iterator<utf8_string> insert_iter;
-        insert_iter out_iter(result);
-        utf8_output_iterator<insert_iter> utf8_iter(out_iter);
         typedef typename make_unsigned<Char>::type UChar;
         for (Char const* ptr = str.data(),
                        * end = ptr + str.size(); ptr < end; ++ptr)
-        {
-            *utf8_iter++ = (UChar)*ptr;
-        }
+            detail::utf8_put_encode(result, static_cast<UChar>(*ptr));
         return result;
     }
 
@@ -74,28 +89,37 @@ namespace boost { namespace spirit
     inline utf8_string to_utf8(wchar_t value)
     {
         utf8_string result;
-        typedef std::back_insert_iterator<utf8_string> insert_iter;
-        insert_iter out_iter(result);
-        utf8_output_iterator<insert_iter> utf8_iter(out_iter);
-
-        u16_to_u32_iterator<wchar_t const*, ucs4_char> ucs4_iter(&value);
-        *utf8_iter++ = *ucs4_iter;
-
+        detail::utf8_put_encode(result, static_cast<make_unsigned<wchar_t>::type>(value));
         return result;
     }
+
+namespace detail {
+    inline ucs4_char decode_utf16(wchar_t const*& s)
+    {
+        typedef make_unsigned<wchar_t>::type uwchar_t;
+
+        uwchar_t x(*s);
+        if (x < 0xD800ul || x > 0xDFFFul)
+            return x;
+
+        // expected high-surrogate
+        if (BOOST_UNLIKELY((x >> 10) != 0x36ul))
+            return 0xFFFDul;
+
+        uwchar_t y(*++s);
+        // expected low-surrogate
+        if (BOOST_UNLIKELY((y >> 10) != 0x37ul))
+            return 0xFFFDul;
+
+        return ((x & 0x3FFul) << 10) + (y & 0x3FFul) + 0x10000ul;
+    }
+}
 
     inline utf8_string to_utf8(wchar_t const* str)
     {
         utf8_string result;
-        typedef std::back_insert_iterator<utf8_string> insert_iter;
-        insert_iter out_iter(result);
-        utf8_output_iterator<insert_iter> utf8_iter(out_iter);
-
-        u16_to_u32_iterator<wchar_t const*, ucs4_char> ucs4_iter(str);
-        for (ucs4_char c; (c = *ucs4_iter) != ucs4_char(); ++ucs4_iter) {
-            *utf8_iter++ = c;
-        }
-
+        for (ucs4_char c; (c = detail::decode_utf16(str)) != ucs4_char(); ++str)
+            detail::utf8_put_encode(result, c);
         return result;
     }
 

@@ -15,6 +15,7 @@
 #include <boost/math/distributions/normal.hpp> // for normal CDF and quantile
 #include <boost/math/distributions/students_t.hpp>
 #include <boost/math/distributions/detail/generic_quantile.hpp> // quantile
+#include <boost/math/special_functions/trunc.hpp>
 
 namespace boost
 {
@@ -43,7 +44,7 @@ namespace boost
             // cancellation errors later (test case is v = 1621286869049072.3
             // delta = 0.16212868690490723, x = 0.86987415482475994).
             //
-            int k = itrunc(d2);
+            long long k = lltrunc(d2);
             T pois;
             if(k == 0) k = 1;
             // Starting Poisson weight:
@@ -69,12 +70,12 @@ namespace boost
             //
             std::uintmax_t count = 0;
             T last_term = 0;
-            for(int i = k; i >= 0; --i)
+            for(auto i = k; i >= 0; --i)
             {
                T term = beta * pois;
                sum += term;
                // Don't terminate on first term in case we "fixed" k above:
-               if((fabs(last_term) > fabs(term)) && fabs(term/sum) < errtol)
+               if(((fabs(last_term) > fabs(term)) && fabs(term/sum) < errtol) || (v == 2 && i == 0))
                   break;
                last_term = term;
                pois *= (i + 0.5f) / d2;
@@ -83,7 +84,7 @@ namespace boost
                ++count;
             }
             last_term = 0;
-            for(int i = k + 1; ; ++i)
+            for(auto i = k + 1; ; ++i)
             {
                poisf *= d2 / (i + 0.5f);
                xtermf *= (x * (v / 2 + i - 1)) / (i);
@@ -121,11 +122,11 @@ namespace boost
             // (test case is v = 561908036470413.25, delta = 0.056190803647041321,
             // x = 1.6155232703966216):
             //
-            int k = itrunc(d2);
+            long long k = lltrunc(d2);
             if(k == 0) k = 1;
             // Starting Poisson weight:
             T pois;
-            if((k < static_cast<int>(max_factorial<T>::value)) && (d2 < tools::log_max_value<T>()) && (log(d2) * k < tools::log_max_value<T>()))
+            if((k < static_cast<long long>(max_factorial<T>::value)) && (d2 < tools::log_max_value<T>()) && (log(d2) * k < tools::log_max_value<T>()))
             {
                //
                // For small k we can optimise this calculation by using
@@ -171,7 +172,7 @@ namespace boost
             //
             std::uintmax_t count = 0;
             T last_term = 0;
-            for(int i = k + 1, j = k; ; ++i, --j)
+            for(auto i = k + 1, j = k; ; ++i, --j)
             {
                poisf *= d2 / (i + 0.5f);
                xtermf *= (x * (v / 2 + i - 1)) / (i);
@@ -183,7 +184,8 @@ namespace boost
                   term += beta * pois;
                   pois *= (j + 0.5f) / d2;
                   beta -= xterm;
-                  xterm *= (j) / (x * (v / 2 + j - 1));
+                  if(!(v == 2 && j == 0))
+                     xterm *= (j) / (x * (v / 2 + j - 1));
                }
 
                sum += term;
@@ -305,9 +307,9 @@ namespace boost
                   function,
                   v, &r, Policy())
                   ||
-               !detail::check_finite(
+               !detail::check_non_centrality(
                   function,
-                  delta,
+                  static_cast<T>(delta * delta),
                   &r,
                   Policy())
                   ||
@@ -386,7 +388,7 @@ namespace boost
             // k is the starting point for iteration, and is the
             // maximum of the poisson weighting term:
             //
-            int k = itrunc(d2);
+            long long k = lltrunc(d2);
             T pois, xterm;
             if(k == 0)
                k = 1;
@@ -408,7 +410,7 @@ namespace boost
             // direction for recursion:
             //
             std::uintmax_t count = 0;
-            for(int i = k; i >= 0; --i)
+            for(auto i = k; i >= 0; --i)
             {
                T term = xterm * pois;
                sum += term;
@@ -424,7 +426,7 @@ namespace boost
                      "Series did not converge, closest value was %1%", sum, pol);
                }
             }
-            for(int i = k + 1; ; ++i)
+            for(auto i = k + 1; ; ++i)
             {
                poisf *= d2 / (i + 0.5f);
                xtermf *= (x * (n / 2 + i)) / (i);
@@ -728,9 +730,9 @@ namespace boost
             detail::check_df_gt0_to_inf(
                function,
                v, &r, Policy());
-            detail::check_finite(
+            detail::check_non_centrality(
                function,
-               lambda,
+               static_cast<value_type>(lambda * lambda),
                &r,
                Policy());
          } // non_central_t_distribution constructor.
@@ -872,12 +874,12 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
 
          BOOST_MATH_STD_USING
 
@@ -910,12 +912,12 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
          if(v <= 1)
             return policies::raise_domain_error<RealType>(
                function,
@@ -945,12 +947,12 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
          if(v <= 2)
             return policies::raise_domain_error<RealType>(
                function,
@@ -980,12 +982,12 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
          if(v <= 3)
             return policies::raise_domain_error<RealType>(
                function,
@@ -1012,12 +1014,12 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
          if(v <= 4)
             return policies::raise_domain_error<RealType>(
                function,
@@ -1051,9 +1053,9 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l), // we need l^2 to be countable.
             &r,
             Policy())
             ||
@@ -1062,7 +1064,7 @@ namespace boost
             t,
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
          return policies::checked_narrowing_cast<RealType, forwarding_policy>(
             detail::non_central_t_pdf(static_cast<value_type>(v),
                static_cast<value_type>(l),
@@ -1091,9 +1093,9 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy())
             ||
@@ -1102,8 +1104,8 @@ namespace boost
             x,
             &r,
             Policy()))
-               return (RealType)r;
-          if ((boost::math::isinf)(v))
+               return static_cast<RealType>(r);
+         if ((boost::math::isinf)(v))
           { // Infinite degrees of freedom, so use normal distribution located at delta.
              normal_distribution<RealType, Policy> n(l, 1);
              cdf(n, x);
@@ -1145,9 +1147,9 @@ namespace boost
             function,
             v, &r, Policy())
             ||
-         !detail::check_finite(
+         !detail::check_non_centrality(
             function,
-            l,
+            static_cast<RealType>(l * l),
             &r,
             Policy())
             ||
@@ -1156,7 +1158,7 @@ namespace boost
             x,
             &r,
             Policy()))
-               return (RealType)r;
+               return static_cast<RealType>(r);
 
          if ((boost::math::isinf)(v))
          { // Infinite degrees of freedom, so use normal distribution located at delta.

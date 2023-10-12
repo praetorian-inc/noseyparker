@@ -437,7 +437,7 @@ for both `id` and `value`.
 
 \subsubsection env_reset Reset variables
 
-Reseting signle variables can be done in the following way:
+Resetting single variables can be done in the following way:
 
 \code{.cpp}
 env[id] = boost::none;

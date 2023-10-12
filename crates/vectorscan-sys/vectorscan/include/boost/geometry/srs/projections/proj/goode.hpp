@@ -67,7 +67,7 @@ namespace projections
             {
                 sinu_spheroid<T, Par>    sinu;
                 moll_spheroid<T, Par>    moll;
-                
+
                 // NOTE: It is ok to share parameters between projections because
                 // the only member that is modified in the constructors of
                 // spherical sinu and moll projections is es = 0 which is set
@@ -176,7 +176,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(goode_entry, goode_spheroid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(goode_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(goode, goode_entry);

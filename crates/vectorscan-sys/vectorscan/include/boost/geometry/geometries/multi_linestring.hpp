@@ -24,9 +24,8 @@
 #include <boost/geometry/geometries/concepts/linestring_concept.hpp>
 
 #include <boost/config.hpp>
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
+
 #include <initializer_list>
-#endif
 
 namespace boost { namespace geometry
 {
@@ -57,8 +56,6 @@ class multi_linestring : public Container<LineString, Allocator<LineString> >
 {
     BOOST_CONCEPT_ASSERT( (concepts::Linestring<LineString>) );
 
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
-
     // default constructor and base_type definitions are required only
     // if the constructor taking std::initializer_list is defined
 
@@ -87,8 +84,6 @@ public:
 //        return *this;
 //    }
 //#endif
-
-#endif
 };
 
 

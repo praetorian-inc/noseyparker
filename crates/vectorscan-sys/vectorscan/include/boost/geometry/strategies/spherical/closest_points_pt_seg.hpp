@@ -79,12 +79,12 @@ public:
     {}
 
     template <typename Point, typename PointOfSegment>
-    inline auto apply(Point const& p, 
-                      PointOfSegment const& sp1, 
+    inline auto apply(Point const& p,
+                      PointOfSegment const& sp1,
                       PointOfSegment const& sp2) const
     {
         using CT = typename calculation_type<Point, PointOfSegment>::type;
-        
+
         // http://williams.best.vwh.net/avform.htm#XTE
         CT d3 = m_strategy.apply(sp1, sp2);
 
@@ -143,12 +143,12 @@ public:
 
             CT dist = CT(2) * asin(math::sqrt(distance)) * m_strategy.radius();
             CT dist_d1 = CT(2) * asin(math::sqrt(d1)) * m_strategy.radius();
-            
+
             // Note: this is similar to spherical computation in geographic
             // point_segment_distance formula
             CT earth_radius = m_strategy.radius();
             CT cos_frac = cos(dist_d1 / earth_radius) / cos(dist / earth_radius);
-            CT s14_sph = cos_frac >= 1 
+            CT s14_sph = cos_frac >= 1
                 ? CT(0) : cos_frac <= -1 ? math::pi<CT>() * earth_radius
                                          : acos(cos_frac) * earth_radius;
 
@@ -165,7 +165,7 @@ public:
                     dimension<PointOfSegment>::value,
                     typename coordinate_system<PointOfSegment>::type
                 > cp;
-            
+
             geometry::set_from_radian<0>(cp, res_direct.lon2);
             geometry::set_from_radian<1>(cp, res_direct.lat2);
 

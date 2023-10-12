@@ -225,7 +225,7 @@ maximum_gap(RangeOfIntervals const& range_of_intervals,
     std::priority_queue
         <
             event_type,
-            std::vector<event_type>, 
+            std::vector<event_type>,
             detail::max_interval_gap::event_greater<event_type>
         > queue;
 

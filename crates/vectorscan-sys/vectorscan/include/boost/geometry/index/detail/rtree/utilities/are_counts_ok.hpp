@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019.
-// Modifications copyright (c) 2019 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2023.
+// Modifications copyright (c) 2019-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,6 +17,7 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_UTILITIES_ARE_COUNTS_OK_HPP
 
 #include <boost/geometry/index/detail/rtree/node/node.hpp>
+#include <boost/geometry/index/detail/rtree/utilities/view.hpp>
 
 namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree { namespace utilities {
 
@@ -26,7 +28,7 @@ class are_counts_ok
     : public MembersHolder::visitor_const
 {
     typedef typename MembersHolder::parameters_type parameters_type;
-    
+
     typedef typename MembersHolder::internal_node internal_node;
     typedef typename MembersHolder::leaf leaf;
 
@@ -105,7 +107,7 @@ bool are_counts_ok(Rtree const& tree, bool check_min = true)
     visitors::are_counts_ok<
         typename RTV::members_holder
     > v(tree.parameters(), check_min);
-    
+
     rtv.apply_visitor(v);
 
     return v.result;

@@ -17,7 +17,8 @@
 #include <boost/json/string.hpp>
 #include <boost/json/value_stack.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 struct handler
@@ -61,6 +62,7 @@ struct handler
 };
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

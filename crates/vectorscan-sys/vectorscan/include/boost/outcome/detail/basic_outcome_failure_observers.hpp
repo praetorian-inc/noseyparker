@@ -1,5 +1,5 @@
 /* Failure observers for outcome type
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (7 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (7 commits)
 File Created: Oct 2017
 
 
@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #define BOOST_OUTCOME_BASIC_OUTCOME_FAILURE_OBSERVERS_HPP
 
 #include "basic_result_storage.hpp"
+
+#include <exception>
 
 BOOST_OUTCOME_V2_NAMESPACE_EXPORT_BEGIN
 

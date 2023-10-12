@@ -527,7 +527,7 @@ namespace boost
           {
             garbage_collecting_lock<connection_body_base> lock(**it);
             if((*it)->nolock_nograb_connected() == false) continue;
-            if((*it)->slot().slot_function() == slot)
+            if((*it)->slot().slot_function().contains(slot))
             {
               (*it)->nolock_disconnect(lock);
             }else
@@ -535,7 +535,7 @@ namespace boost
               // check for wrapped extended slot
               bound_extended_slot_function_type *fp;
               fp = (*it)->slot().slot_function().template target<bound_extended_slot_function_type>();
-              if(fp && *fp == slot)
+              if(fp && function_equal(*fp, slot))
               {
                 (*it)->nolock_disconnect(lock);
               }

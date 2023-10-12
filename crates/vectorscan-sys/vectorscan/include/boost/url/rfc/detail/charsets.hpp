@@ -73,7 +73,7 @@ param_value_chars = pchars
 constexpr
 auto
 fragment_chars =
-    pchars + '/' + '?';
+    pchars + '/' + '?' + '#';
 
 constexpr
 auto

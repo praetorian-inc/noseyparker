@@ -49,7 +49,7 @@ class static_url;
         @li @ref parse_uri
         @li @ref parse_uri_reference
 */
-class BOOST_SYMBOL_VISIBLE
+class BOOST_URL_DECL
     static_url_base
     : public url_base
 {
@@ -57,13 +57,13 @@ class BOOST_SYMBOL_VISIBLE
     friend class static_url;
 
     ~static_url_base() = default;
-    BOOST_URL_DECL static_url_base(
+    static_url_base(
         char* buf, std::size_t cap) noexcept;
-    BOOST_URL_DECL static_url_base(
-        char* buf, std::size_t cap, string_view s);
-    BOOST_URL_DECL void clear_impl() noexcept override;
-    BOOST_URL_DECL void reserve_impl(std::size_t, op_t&) override;
-    BOOST_URL_DECL void cleanup(op_t&) override;
+    static_url_base(
+        char* buf, std::size_t cap, core::string_view s);
+    void clear_impl() noexcept override;
+    void reserve_impl(std::size_t, op_t&) override;
+    void cleanup(op_t&) override;
 
     void
     copy(url_view_base const& u)
@@ -216,7 +216,7 @@ public:
     */
     explicit
     static_url(
-        string_view s)
+        core::string_view s)
         : static_url_base(
             buf_, sizeof(buf_), s)
     {
@@ -342,7 +342,7 @@ public:
     //
 
     /// @copydoc url_base::set_scheme
-    static_url& set_scheme(string_view s) { url_base::set_scheme(s); return *this; }
+    static_url& set_scheme(core::string_view s) { url_base::set_scheme(s); return *this; }
     /// @copydoc url_base::set_scheme_id
     static_url& set_scheme_id(urls::scheme id) { url_base::set_scheme_id(id); return *this; }
     /// @copydoc url_base::remove_scheme
@@ -354,28 +354,28 @@ public:
     static_url& remove_authority() { url_base::remove_authority(); return *this; }
 
     /// @copydoc url_base::set_userinfo
-    static_url& set_userinfo(string_view s) { url_base::set_userinfo(s); return *this; }
+    static_url& set_userinfo(core::string_view s) { url_base::set_userinfo(s); return *this; }
     /// @copydoc url_base::set_encoded_userinfo
     static_url& set_encoded_userinfo(pct_string_view s) { url_base::set_encoded_userinfo(s); return *this; }
     /// @copydoc url_base::remove_userinfo
     static_url& remove_userinfo() noexcept { url_base::remove_userinfo(); return *this; }
     /// @copydoc url_base::set_user
-    static_url& set_user(string_view s) { url_base::set_user(s); return *this; }
+    static_url& set_user(core::string_view s) { url_base::set_user(s); return *this; }
     /// @copydoc url_base::set_encoded_user
     static_url& set_encoded_user(pct_string_view s) { url_base::set_encoded_user(s); return *this; }
     /// @copydoc url_base::set_password
-    static_url& set_password(string_view s) { url_base::set_password(s); return *this; }
+    static_url& set_password(core::string_view s) { url_base::set_password(s); return *this; }
     /// @copydoc url_base::set_encoded_password
     static_url& set_encoded_password(pct_string_view s) { url_base::set_encoded_password(s); return *this; }
     /// @copydoc url_base::remove_password
     static_url& remove_password() noexcept { url_base::remove_password(); return *this; }
 
     /// @copydoc url_base::set_host
-    static_url& set_host(string_view s) { url_base::set_host(s); return *this; }
+    static_url& set_host(core::string_view s) { url_base::set_host(s); return *this; }
     /// @copydoc url_base::set_encoded_host
     static_url& set_encoded_host(pct_string_view s) { url_base::set_encoded_host(s); return *this; }
     /// @copydoc url_base::set_host_address
-    static_url& set_host_address(string_view s) { url_base::set_host_address(s); return *this; }
+    static_url& set_host_address(core::string_view s) { url_base::set_host_address(s); return *this; }
     /// @copydoc url_base::set_encoded_host_address
     static_url& set_encoded_host_address(pct_string_view s) { url_base::set_encoded_host_address(s); return *this; }
     /// @copydoc url_base::set_host_ipv4
@@ -383,27 +383,27 @@ public:
     /// @copydoc url_base::set_host_ipv6
     static_url& set_host_ipv6(ipv6_address const& addr) { url_base::set_host_ipv6(addr); return *this; }
     /// @copydoc url_base::set_host_ipvfuture
-    static_url& set_host_ipvfuture(string_view s) { url_base::set_host_ipvfuture(s); return *this; }
+    static_url& set_host_ipvfuture(core::string_view s) { url_base::set_host_ipvfuture(s); return *this; }
     /// @copydoc url_base::set_host_name
-    static_url& set_host_name(string_view s) { url_base::set_host_name(s); return *this; }
+    static_url& set_host_name(core::string_view s) { url_base::set_host_name(s); return *this; }
     /// @copydoc url_base::set_encoded_host_name
     static_url& set_encoded_host_name(pct_string_view s) { url_base::set_encoded_host_name(s); return *this; }
     /// @copydoc url_base::set_port_number
     static_url& set_port_number(std::uint16_t n) { url_base::set_port_number(n); return *this; }
     /// @copydoc url_base::set_port
-    static_url& set_port(string_view s) { url_base::set_port(s); return *this; }
+    static_url& set_port(core::string_view s) { url_base::set_port(s); return *this; }
     /// @copydoc url_base::remove_port
     static_url& remove_port() noexcept { url_base::remove_port(); return *this; }
 
     /// @copydoc url_base::set_path_absolute
     //bool set_path_absolute(bool absolute);
     /// @copydoc url_base::set_path
-    static_url& set_path(string_view s) { url_base::set_path(s); return *this; }
+    static_url& set_path(core::string_view s) { url_base::set_path(s); return *this; }
     /// @copydoc url_base::set_encoded_path
     static_url& set_encoded_path(pct_string_view s) { url_base::set_encoded_path(s); return *this; }
 
     /// @copydoc url_base::set_query
-    static_url& set_query(string_view s) { url_base::set_query(s); return *this; }
+    static_url& set_query(core::string_view s) { url_base::set_query(s); return *this; }
     /// @copydoc url_base::set_encoded_query
     static_url& set_encoded_query(pct_string_view s) { url_base::set_encoded_query(s); return *this; }
     /// @copydoc url_base::remove_query
@@ -412,7 +412,7 @@ public:
     /// @copydoc url_base::remove_fragment
     static_url& remove_fragment() noexcept { url_base::remove_fragment(); return *this; }
     /// @copydoc url_base::set_fragment
-    static_url& set_fragment(string_view s) { url_base::set_fragment(s); return *this; }
+    static_url& set_fragment(core::string_view s) { url_base::set_fragment(s); return *this; }
     /// @copydoc url_base::set_encoded_fragment
     static_url& set_encoded_fragment(pct_string_view s) { url_base::set_encoded_fragment(s); return *this; }
 

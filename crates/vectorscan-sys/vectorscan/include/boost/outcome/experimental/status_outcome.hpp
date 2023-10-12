@@ -1,5 +1,5 @@
 /* A less simple result type
-(C) 2018-2022 Niall Douglas <http://www.nedproductions.biz/> (17 commits)
+(C) 2018-2023 Niall Douglas <http://www.nedproductions.biz/> (17 commits)
 File Created: Apr 2018
 
 
@@ -76,7 +76,7 @@ namespace experimental
   /*! AWAITING HUGO JSON CONVERSION TOOL
 SIGNATURE NOT RECOGNISED
 */
-  template <class R, class S = errored_status_code<erased<typename system_code::value_type>>, class P = std::exception_ptr,
+  template <class R, class S = erased_errored_status_code<typename system_code::value_type>, class P = std::exception_ptr,
             class NoValuePolicy = policy::default_status_outcome_policy<R, S, P>>  //
   using status_outcome = basic_outcome<R, S, P, NoValuePolicy>;
 

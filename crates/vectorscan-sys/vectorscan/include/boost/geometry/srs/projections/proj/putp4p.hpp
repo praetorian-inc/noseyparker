@@ -102,7 +102,7 @@ namespace projections
             {
                 proj_parm.C_x = 0.874038744;
                 proj_parm.C_y = 3.883251825;
-                
+
                 par.es = 0.;
             }
 
@@ -112,7 +112,7 @@ namespace projections
             {
                 proj_parm.C_x = 1.;
                 proj_parm.C_y = 4.442882938;
-                
+
                 par.es = 0.;
             }
 

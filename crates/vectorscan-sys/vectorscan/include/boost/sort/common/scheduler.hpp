@@ -14,15 +14,16 @@
 #ifndef __BOOST_SORT_COMMON_SCHEDULER_HPP
 #define __BOOST_SORT_COMMON_SCHEDULER_HPP
 
-#include <boost/sort/common/spinlock.hpp>
-#include <boost/sort/common/search.hpp>
-#include <boost/sort/common/compare_traits.hpp>
+#include <ciso646>
 #include <scoped_allocator>
 #include <utility>
 #include <vector>
 #include <deque>
 #include <iostream>
 #include <unordered_map>
+#include <boost/sort/common/spinlock.hpp>
+#include <boost/sort/common/util/search.hpp>
+#include <boost/sort/common/util/traits.hpp>
 
 namespace boost
 {
@@ -55,14 +56,21 @@ struct scheduler
     //                     D E F I N I T I O N S
     //-----------------------------------------------------------------------
     typedef std::scoped_allocator_adaptor <Allocator>   scoped_alloc;
+    template <class T>
+    using alloc_t = typename std::allocator_traits<Allocator>::
+                    template rebind_alloc<T>;
+
+
     typedef std::deque <Func_t, scoped_alloc>           deque_t;
     typedef typename deque_t::iterator                  it_deque;
     typedef std::thread::id                             key_t;
     typedef std::hash <key_t>                           hash_t;
     typedef std::equal_to <key_t>                       equal_t;
     typedef std::unique_lock <spinlock_t>               lock_t;
-    typedef std::unordered_map <key_t, deque_t, hash_t, 
-                        equal_t, scoped_alloc>          map_t;
+    typedef std::pair<const key_t, deque_t>             pair_t;
+
+    typedef std::unordered_map <key_t, deque_t, hash_t,
+                                equal_t, alloc_t <pair_t> >  map_t;
     typedef typename map_t::iterator                    it_map;
 
     //-----------------------------------------------------------------------
@@ -184,7 +192,7 @@ struct scheduler
         //--------------------------------------------------------------------
         //                    Metaprogramming
         //--------------------------------------------------------------------
-        typedef value_iter<it_func> value2_t;
+        typedef util::value_iter<it_func> value2_t;
         static_assert (std::is_same< Func_t, value2_t >::value,
                         "Incompatible iterators\n");
 

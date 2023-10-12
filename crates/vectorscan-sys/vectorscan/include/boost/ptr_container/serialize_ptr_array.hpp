@@ -38,7 +38,7 @@ void load(Archive& ar, ptr_array<T, N, CloneAllocator>& c, unsigned int /*versio
 template<class Archive, class T, std::size_t N, class CloneAllocator>
 void serialize(Archive& ar, ptr_array<T, N, CloneAllocator>& c, const unsigned int version)
 {
-   split_free(ar, c, version);
+    core::split_free(ar, c, version);
 }
 
 } // namespace serialization

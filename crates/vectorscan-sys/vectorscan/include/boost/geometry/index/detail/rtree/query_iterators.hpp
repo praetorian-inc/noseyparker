@@ -2,7 +2,7 @@
 //
 // R-tree query iterators
 //
-// Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2023 Adam Wulkiewicz, Lodz, Poland.
 //
 // This file was modified by Oracle on 2019-2021.
 // Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
@@ -15,7 +15,7 @@
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_RTREE_QUERY_ITERATORS_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_QUERY_ITERATORS_HPP
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <boost/geometry/index/detail/rtree/node/node_elements.hpp>
 #include <boost/geometry/index/detail/rtree/visitors/distance_query.hpp>
@@ -125,7 +125,7 @@ public:
     {
         return r.m_impl.is_end();
     }
-    
+
 private:
     visitors::spatial_query_incremental<MembersHolder, Predicates> m_impl;
 };
@@ -217,7 +217,7 @@ public:
     virtual ~query_iterator_base() {}
 
     virtual query_iterator_base * clone() const = 0;
-    
+
     virtual bool is_end() const = 0;
     virtual reference dereference() const = 0;
     virtual void increment() = 0;
@@ -261,7 +261,7 @@ template <typename Value, typename Allocators>
 class query_iterator
 {
     typedef query_iterator_base<Value, Allocators> iterator_base;
-    typedef boost::scoped_ptr<iterator_base> iterator_ptr;
+    typedef std::unique_ptr<iterator_base> iterator_ptr;
 
 public:
     typedef std::forward_iterator_tag iterator_category;
@@ -285,6 +285,8 @@ public:
         : m_ptr(o.m_ptr.get() ? o.m_ptr->clone() : 0)
     {}
 
+    query_iterator(query_iterator&&) = default;
+
     query_iterator & operator=(query_iterator const& o)
     {
         if ( this != boost::addressof(o) )
@@ -294,21 +296,7 @@ public:
         return *this;
     }
 
-    query_iterator(query_iterator && o)
-        : m_ptr(0)
-    {
-        m_ptr.swap(o.m_ptr);
-    }
-
-    query_iterator & operator=(query_iterator && o)
-    {
-        if ( this != boost::addressof(o) )
-        {
-            m_ptr.swap(o.m_ptr);
-            o.m_ptr.reset();
-        }
-        return *this;
-    }
+    query_iterator& operator=(query_iterator &&) = default;
 
     reference operator*() const
     {

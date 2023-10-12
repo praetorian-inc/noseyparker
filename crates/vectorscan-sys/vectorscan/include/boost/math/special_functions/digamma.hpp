@@ -379,7 +379,7 @@ inline T digamma_imp_1_2(T x, const std::integral_constant<int, 24>*)
       -0.61041765350579073e-1f
    };
    static const T Q[] = {
-      0.1e1,
+      0.1e1f,
       0.15890202430554952e1f,
       0.65341249856146947e0f,
       0.63851690523355715e-1f
@@ -412,7 +412,7 @@ T digamma_imp(T x, const Tag* t, const Policy& pol)
       // Argument reduction for tan:
       T remainder = x - floor(x);
       // Shift to negative if > 0.5:
-      if(remainder > 0.5)
+      if(remainder > T(0.5))
       {
          remainder -= 1;
       }
@@ -478,7 +478,7 @@ T digamma_imp(T x, const std::integral_constant<int, 0>* t, const Policy& pol)
       // Argument reduction for tan:
       T remainder = x - floor(x);
       // Shift to negative if > 0.5:
-      if(remainder > 0.5)
+      if(remainder > T(0.5))
       {
          remainder -= 1;
       }

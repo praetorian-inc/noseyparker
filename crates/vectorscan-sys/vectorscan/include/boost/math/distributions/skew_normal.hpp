@@ -486,7 +486,7 @@ namespace boost{ namespace math{
 
     // 21 elements
     static const RealType shapes[] = {
-      0.0,
+      static_cast<RealType>(0.0),
       static_cast<RealType>(1.000000000000000e-004),
       static_cast<RealType>(2.069138081114790e-004),
       static_cast<RealType>(4.281332398719396e-004),
@@ -511,7 +511,7 @@ namespace boost{ namespace math{
 
     // 21 elements
     static const RealType guess[] = {
-      0.0,
+      static_cast<RealType>(0.0),
       static_cast<RealType>(5.000050000525391e-005),
       static_cast<RealType>(1.500015000148736e-004),
       static_cast<RealType>(3.500035000350010e-004),

@@ -239,7 +239,7 @@
            return r;
         }
         int s1, s2;
-        T r = boost::math::lgamma(T(z + n), &s1, pol) - boost::math::lgamma(z, &s2, pol);
+        auto r = static_cast<T>(boost::math::lgamma(T(z + n), &s1, pol) - boost::math::lgamma(z, &s2, pol));
         if(s)
            *s = s1 * s2;
         return r;

@@ -48,8 +48,10 @@ acquire() ->
 {
     U* p;
     {
+#if !defined(BOOST_URL_DISABLE_THREADS)
         std::lock_guard<
             std::mutex> lock(m_);
+#endif
         p = head_;
         if(p)
         {
@@ -75,10 +77,14 @@ release(U* u) noexcept
 {
     if(--u->refs != 0)
         return;
-    m_.lock();
-    u->next = head_;
-    head_ = u;
-    m_.unlock();
+    {
+#if !defined(BOOST_URL_DISABLE_THREADS)
+        std::lock_guard<
+            std::mutex> lock(m_);
+#endif
+        u->next = head_;
+        head_ = u;
+    }
     detail::recycled_add(
         sizeof(U));
 }

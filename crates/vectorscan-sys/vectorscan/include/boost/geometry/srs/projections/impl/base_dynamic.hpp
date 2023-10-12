@@ -146,7 +146,7 @@ public:
     dynamic_wrapper_fi(Params const& params, P const& par, P3 const& p3)
         : base_t(params, par, p3)
     {}
-    
+
     virtual void inv(P const& par, CT const& xy_x, CT const& xy_y, CT& lp_lon, CT& lp_lat) const
     {
         this->prj().inv(par, xy_x, xy_y, lp_lon, lp_lat);

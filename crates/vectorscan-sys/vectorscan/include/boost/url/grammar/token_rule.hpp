@@ -13,7 +13,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/grammar/charset.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 
 namespace boost {
 namespace urls {
@@ -26,13 +26,13 @@ namespace grammar {
 
     @par Value Type
     @code
-    using value_type = string_view;
+    using value_type = core::string_view;
     @endcode
 
     @par Example
     Rules are used with the function @ref parse.
     @code
-    result< string_view > rv = parse( "abcdef", token_rule( alpha_chars ) );
+    system::result< core::string_view > rv = parse( "abcdef", token_rule( alpha_chars ) );
     @endcode
 
     @par BNF
@@ -56,7 +56,7 @@ token_rule(
 template<class CharSet>
 struct token_rule_t
 {
-    using value_type = string_view;
+    using value_type = core::string_view;
 
     static_assert(
         is_charset<CharSet>::value,
@@ -67,7 +67,7 @@ struct token_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 
 private:
     template<class CharSet_>

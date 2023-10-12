@@ -30,6 +30,7 @@ public:
         using boost::math::constants::pi;
         using std::isfinite;
         using std::floor;
+        using std::ceil;
         Real y = 0;
         Real x = (t - m_t0)/m_h;
         Real z = x;
@@ -61,6 +62,7 @@ public:
         using boost::math::constants::pi;
         using std::isfinite;
         using std::floor;
+        using std::ceil;
 
         Real x = (t - m_t0)/m_h;
         if (ceil(x) == x) {

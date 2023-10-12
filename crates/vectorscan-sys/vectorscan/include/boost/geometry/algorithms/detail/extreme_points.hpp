@@ -26,7 +26,6 @@
 #include <boost/range/value_type.hpp>
 
 #include <boost/geometry/algorithms/detail/assign_box_corners.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 
 #include <boost/geometry/arithmetic/arithmetic.hpp>
 
@@ -124,7 +123,6 @@ struct extreme_points_on_ring
 {
 
     typedef typename geometry::coordinate_type<Ring>::type coordinate_type;
-    typedef typename boost::range_iterator<Ring const>::type range_iterator;
     typedef typename geometry::point_type<Ring>::type point_type;
 
     template <typename CirclingIterator, typename Points>
@@ -288,8 +286,7 @@ struct extreme_points_on_ring
     template <typename Iterator, typename SideStrategy>
     static inline bool right_turn(Ring const& ring, Iterator it, SideStrategy const& strategy)
     {
-        typename std::iterator_traits<Iterator>::difference_type const index
-            = std::distance(boost::begin(ring), it);
+        auto const index = std::distance(boost::begin(ring), it);
         geometry::ever_circling_range_iterator<Ring const> left(ring);
         geometry::ever_circling_range_iterator<Ring const> right(ring);
         left += index;
@@ -326,9 +323,9 @@ struct extreme_points_on_ring
 
         // Get all maxima, usually one. In case of self-tangencies, or self-crossings,
         // the max might be is not valid. A valid max should make a right turn
-        range_iterator max_it = boost::begin(ring);
+        auto max_it = boost::begin(ring);
         compare<Dimension> smaller;
-        for (range_iterator it = max_it + 1; it != boost::end(ring); ++it)
+        for (auto it = max_it + 1; it != boost::end(ring); ++it)
         {
             if (smaller(*max_it, *it) && right_turn(ring, it, strategy))
             {
@@ -341,8 +338,7 @@ struct extreme_points_on_ring
             return false;
         }
 
-        typename std::iterator_traits<range_iterator>::difference_type const
-            index = std::distance(boost::begin(ring), max_it);
+        auto const index = std::distance(boost::begin(ring), max_it);
 //std::cout << "Extreme point lies at " << index << " having " << geometry::wkt(*max_it) << std::endl;
 
         geometry::ever_circling_range_iterator<Ring const> left(ring);
@@ -429,10 +425,8 @@ struct extreme_points<Polygon, Dimension, polygon_tag>
         }
 
         // For a polygon, its interior rings can contain intruders
-        typename interior_return_type<Polygon const>::type
-            rings = interior_rings(polygon);
-        for (typename detail::interior_iterator<Polygon const>::type
-                it = boost::begin(rings); it != boost::end(rings); ++it)
+        auto const& rings = interior_rings(polygon);
+        for (auto it = boost::begin(rings); it != boost::end(rings); ++it)
         {
             ring_implementation::get_intruders(*it, extremes,  intruders, strategy);
         }

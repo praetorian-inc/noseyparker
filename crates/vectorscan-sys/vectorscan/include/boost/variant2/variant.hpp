@@ -920,6 +920,11 @@ template<class... T> struct variant_base_impl<true, true, T...>
 
         this->emplace_impl<J, U>( std::is_nothrow_constructible<U, A&&...>(), std::forward<A>(a)... );
     }
+
+    static constexpr bool uses_double_storage() noexcept
+    {
+        return false;
+    }
 };
 
 // trivially destructible, double buffered
@@ -977,6 +982,11 @@ template<class... T> struct variant_base_impl<true, false, T...>
         st_[ i2 ].emplace( mp11::mp_size_t<J>(), std::forward<A>(a)... );
 
         ix_ = J * 2 + i2;
+    }
+
+    static constexpr bool uses_double_storage() noexcept
+    {
+        return true;
     }
 };
 
@@ -1067,6 +1077,11 @@ template<class... T> struct variant_base_impl<false, true, T...>
 
         st_.emplace( mp11::mp_size_t<J>(), std::move(tmp) );
         ix_ = J;
+    }
+
+    static constexpr bool uses_double_storage() noexcept
+    {
+        return false;
     }
 };
 
@@ -1192,6 +1207,11 @@ template<class... T> struct variant_base_impl<false, false, T...>
         _destroy();
 
         ix_ = J * 2 + i2;
+    }
+
+    static constexpr bool uses_double_storage() noexcept
+    {
+        return true;
     }
 };
 
@@ -1702,6 +1722,8 @@ public:
     }
 
     using variant_base::index;
+
+    using variant_base::uses_double_storage;
 
     // swap
 

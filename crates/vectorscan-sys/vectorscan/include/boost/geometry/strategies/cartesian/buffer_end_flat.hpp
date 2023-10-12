@@ -54,7 +54,7 @@ public :
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     //! Fills output_range with a flat end
-    template <typename Point, typename RangeOut, typename DistanceStrategy>
+    template <typename Point, typename DistanceStrategy, typename RangeOut>
     inline void apply(Point const& penultimate_point,
                 Point const& perp_left_point,
                 Point const& ultimate_point,
@@ -63,20 +63,13 @@ public :
                 DistanceStrategy const& distance,
                 RangeOut& range_out) const
     {
-        typedef typename coordinate_type<Point>::type coordinate_type;
+        auto const dist_left = distance.apply(penultimate_point, ultimate_point, buffer_side_left);
+        auto const dist_right = distance.apply(penultimate_point, ultimate_point, buffer_side_right);
 
-        typedef typename geometry::select_most_precise
-        <
-            coordinate_type,
-            double
-        >::type promoted_type;
+        bool const reversed =
+                (side == buffer_side_left && dist_right < 0 && -dist_right > dist_left)
+            ||  (side == buffer_side_right && dist_left < 0 && -dist_left > dist_right);
 
-        promoted_type const dist_left = distance.apply(penultimate_point, ultimate_point, buffer_side_left);
-        promoted_type const dist_right = distance.apply(penultimate_point, ultimate_point, buffer_side_right);
-
-        bool reversed = (side == buffer_side_left && dist_right < 0 && -dist_right > dist_left)
-                    || (side == buffer_side_right && dist_left < 0 && -dist_left > dist_right)
-                    ;
         if (reversed)
         {
             range_out.push_back(perp_right_point);
@@ -89,7 +82,7 @@ public :
         }
         // Don't add the ultimate_point (endpoint of the linestring).
         // The buffer might be generated completely at one side.
-        // In other cases it does no harm but is further useless
+        // In other cases it does no harm but it is useless
     }
 
     template <typename NumericType>

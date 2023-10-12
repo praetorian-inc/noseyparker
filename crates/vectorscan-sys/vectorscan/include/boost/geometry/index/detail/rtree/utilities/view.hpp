@@ -31,7 +31,7 @@ public:
     typedef typename Rtree::value_type value_type;
     typedef typename Rtree::options_type options_type;
     typedef typename Rtree::box_type box_type;
-    typedef typename Rtree::allocators_type allocators_type;    
+    typedef typename Rtree::allocators_type allocators_type;
 
     view(Rtree const& rt) : m_rtree(rt) {}
 

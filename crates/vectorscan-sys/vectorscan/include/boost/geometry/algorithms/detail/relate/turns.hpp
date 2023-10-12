@@ -249,7 +249,7 @@ struct less_op_areal_areal
                     else if ( right_operation.operation == overlay::operation_intersection )
                         return false;
                 }
-                
+
                 return op_to_int_iuxc(left_operation) < op_to_int_iuxc(right_operation);
             }
         }

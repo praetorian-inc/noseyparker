@@ -3,7 +3,7 @@
 // varray details
 //
 // Copyright (c) 2011-2013 Andrew Hundt.
-// Copyright (c) 2012-2020 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2012-2023 Adam Wulkiewicz, Lodz, Poland.
 //
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020, Oracle and/or its affiliates.
@@ -25,14 +25,9 @@
 
 #include <boost/config.hpp>
 
-#include <boost/core/no_exceptions_support.hpp>
-#include <boost/move/move.hpp>
 #include <boost/core/addressof.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/iterator/iterator_traits.hpp>
-
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-#include <boost/move/detail/fwd_macros.hpp>
-#endif
 
 // TODO - move vectors iterators optimization to the other, optional file instead of checking defines?
 
@@ -48,13 +43,13 @@ namespace boost { namespace geometry { namespace index { namespace detail { name
 template <typename I>
 struct are_elements_contiguous : std::is_pointer<I>
 {};
-    
+
 // EXPERIMENTAL - not finished
 // Conditional setup - mark vector iterators defined in known implementations
 // as iterators pointing to contiguous ranges
 
 #if defined(BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_ENABLE_VECTOR_OPTIMIZATION) && !defined(BOOST_NO_EXCEPTIONS)
-    
+
 template <typename Pointer>
 struct are_elements_contiguous<
     boost::container::container_detail::vector_const_iterator<Pointer>
@@ -68,7 +63,7 @@ struct are_elements_contiguous<
 {};
 
 #if defined(BOOST_DINKUMWARE_STDLIB)
-    
+
 template <typename T>
 struct are_elements_contiguous<
     std::_Vector_const_iterator<T>
@@ -101,7 +96,7 @@ struct are_elements_contiguous<
 #else // OTHER_STDLIB
 
 // TODO - add other iterators implementations
-    
+
 #endif // STDLIB
 
 #endif // BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_ENABLE_VECTOR_OPTIMIZATION && !BOOST_NO_EXCEPTIONS
@@ -284,7 +279,7 @@ O uninitialized_move_dispatch(I first, I last, O dst,
     {
         typedef typename std::iterator_traits<O>::value_type value_type;
         for (; first != last; ++first, ++o )
-            new (boost::addressof(*o)) value_type(boost::move(*first));
+            new (boost::addressof(*o)) value_type(std::move(*first));
     }
     BOOST_CATCH(...)
     {
@@ -324,7 +319,7 @@ inline
 O move_dispatch(I first, I last, O dst,
                 std::false_type /*use_memmove*/)
 {
-    return boost::move(first, last, dst);                                         // may throw
+    return std::move(first, last, dst);                                           // may throw
 }
 
 template <typename I, typename O>
@@ -354,7 +349,7 @@ inline
 BDO move_backward_dispatch(BDI first, BDI last, BDO dst,
                            std::false_type /*use_memmove*/)
 {
-    return boost::move_backward(first, last, dst);                                // may throw
+    return std::move_backward(first, last, dst);                                  // may throw
 }
 
 template <typename BDI, typename BDO>
@@ -363,17 +358,6 @@ BDO move_backward(BDI first, BDI last, BDO dst)
 {
     return move_backward_dispatch(first, last, dst, is_memop_safe_for_range<BDI, BDO>()); // may throw
 }
-
-template <typename T>
-struct has_nothrow_move
-    : std::integral_constant
-        <
-            bool,
-            ::boost::has_nothrow_move<std::remove_const_t<T> >::value
-            ||
-            ::boost::has_nothrow_move<T>::value
-        >
-{};
 
 // uninitialized_move_if_noexcept(I, I, O)
 
@@ -397,7 +381,7 @@ template <typename I, typename O>
 inline
 O uninitialized_move_if_noexcept(I first, I last, O dst)
 {
-    typedef has_nothrow_move<
+    typedef std::is_nothrow_move_constructible<
         typename ::boost::iterator_value<O>::type
     > use_move;
 
@@ -426,7 +410,7 @@ template <typename I, typename O>
 inline
 O move_if_noexcept(I first, I last, O dst)
 {
-    typedef has_nothrow_move<
+    typedef std::is_nothrow_move_constructible<
         typename ::boost::iterator_value<O>::type
     > use_move;
 
@@ -495,7 +479,7 @@ inline
 void construct_dispatch(std::false_type /*dont_init*/, I pos)
 {
     typedef typename ::boost::iterator_value<I>::type value_type;
-    new (static_cast<void*>(::boost::addressof(*pos))) value_type();                      // may throw
+    new (static_cast<void*>(boost::addressof(*pos))) value_type();                      // may throw
 }
 
 template <typename DisableTrivialInit, typename I>
@@ -553,60 +537,31 @@ void construct_move_dispatch(I pos, V const& v,
 
 template <typename I, typename P>
 inline
-void construct_move_dispatch(I pos, BOOST_RV_REF(P) p,
+void construct_move_dispatch(I pos, P&& p,
                              std::false_type const& /*use_memcpy*/)
 {
     typedef typename boost::iterator_value<I>::type V;
-    new (static_cast<void*>(boost::addressof(*pos))) V(::boost::move(p));       // may throw
+    new (static_cast<void*>(boost::addressof(*pos))) V(std::move(p));       // may throw
 }
 
 template <typename DisableTrivialInit, typename I, typename P>
 inline
-void construct(DisableTrivialInit const&, I pos, BOOST_RV_REF(P) p)
+void construct(DisableTrivialInit const&, I pos, P&& p)
 {
-    construct_move_dispatch(pos, ::boost::move(p), is_memop_safe_for_value<I, P>()); // may throw
+    construct_move_dispatch(pos, std::move(p), is_memop_safe_for_value<I, P>()); // may throw
 }
 
 // Needed by emplace_back() and emplace()
-
-#if !defined(BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE)
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
 template <typename DisableTrivialInit, typename I, class ...Args>
 inline
 void construct(DisableTrivialInit const&,
                I pos,
-               BOOST_FWD_REF(Args) ...args)
+               Args&& ...args)
 {
     typedef typename boost::iterator_value<I>::type V;
-    new (static_cast<void*>(boost::addressof(*pos))) V(::boost::forward<Args>(args)...);    // may throw
+    new (static_cast<void*>(boost::addressof(*pos))) V(std::forward<Args>(args)...);    // may throw
 }
-
-#else // !BOOST_NO_CXX11_VARIADIC_TEMPLATES
-
-// BOOST_NO_CXX11_RVALUE_REFERENCES -> P0 const& p0
-// !BOOST_NO_CXX11_RVALUE_REFERENCES -> P0 && p0
-// which means that version with one parameter may take V const& v
-
-#define BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_DETAIL_CONSTRUCT(N)                                      \
-template <typename DisableTrivialInit, typename I, typename P BOOST_MOVE_I##N BOOST_MOVE_CLASS##N > \
-inline                                                                                              \
-void construct(DisableTrivialInit const&,                                                           \
-               I pos,                                                                               \
-               BOOST_FWD_REF(P) p                                                                   \
-               BOOST_MOVE_I##N BOOST_MOVE_UREF##N)                                                  \
-{                                                                                                   \
-    typedef typename boost::iterator_value<I>::type V;                                              \
-    new                                                                                             \
-    (static_cast<void*>(boost::addressof(*pos)))                                                    \
-    V(boost::forward<P>(p) BOOST_MOVE_I##N BOOST_MOVE_FWD##N);                    /*may throw*/    \
-}                                                                                                   \
-
-BOOST_MOVE_ITERATE_1TO9(BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_DETAIL_CONSTRUCT)
-#undef BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_DETAIL_CONSTRUCT
-
-#endif // !BOOST_NO_CXX11_VARIADIC_TEMPLATES
-#endif // !BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE
 
 // assign(I, V)
 
@@ -645,17 +600,17 @@ void assign_move_dispatch(I pos, V const& v,
 
 template <typename I, typename V>
 inline
-void assign_move_dispatch(I pos, BOOST_RV_REF(V) v,
+void assign_move_dispatch(I pos, V&& v,
                           std::false_type /*use_memcpy*/)
 {
-    *pos = boost::move(v);                                                        // may throw
+    *pos = std::move(v);                                                          // may throw
 }
 
 template <typename I, typename V>
 inline
-void assign(I pos, BOOST_RV_REF(V) v)
+void assign(I pos, V&& v)
 {
-    assign_move_dispatch(pos, ::boost::move(v), is_memop_safe_for_value<I, V>());
+    assign_move_dispatch(pos, std::move(v), is_memop_safe_for_value<I, V>());
 }
 
 // uninitialized_copy_s

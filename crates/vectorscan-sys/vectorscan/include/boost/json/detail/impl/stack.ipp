@@ -12,15 +12,28 @@
 
 #include <boost/json/detail/stack.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 stack::
 ~stack()
 {
-    if(buf_)
+    if(base_ != buf_)
         sp_->deallocate(
-            buf_, cap_);
+            base_, cap_);
+}
+
+stack::
+stack(
+    storage_ptr sp,
+    unsigned char* buf,
+    std::size_t buf_size) noexcept
+    : sp_(std::move(sp))
+    , cap_(buf_size)
+    , base_(buf)
+    , buf_(buf)
+{
 }
 
 void
@@ -29,19 +42,21 @@ reserve(std::size_t n)
 {
     if(cap_ >= n)
         return;
-    auto const buf = static_cast<
-        char*>(sp_->allocate(n));
-    if(buf_)
+    auto const base = static_cast<
+        unsigned char*>(sp_->allocate(n));
+    if(base_)
     {
         if(size_ > 0)
-            std::memcpy(buf, buf_, size_);
-        sp_->deallocate(buf_, cap_);
+            std::memcpy(base, base_, size_);
+        if(base_ != buf_)
+            sp_->deallocate(base_, cap_);
     }
-    buf_ = buf;
+    base_ = base;
     cap_ = n;
 }
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

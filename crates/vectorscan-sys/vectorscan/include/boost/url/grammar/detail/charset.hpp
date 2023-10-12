@@ -11,7 +11,6 @@
 #define BOOST_URL_GRAMMAR_DETAIL_CHARSET_HPP
 
 #include <boost/core/bit.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 
 #ifdef BOOST_URL_USE_SSE2
@@ -36,7 +35,7 @@ template<class T, class = void>
 struct has_find_if : std::false_type {};
 
 template<class T>
-struct has_find_if<T, boost::void_t<
+struct has_find_if<T, void_t<
     decltype(
     std::declval<char const*&>() =
         std::declval<T const&>().find_if(
@@ -50,7 +49,7 @@ template<class T, class = void>
 struct has_find_if_not : std::false_type {};
 
 template<class T>
-struct has_find_if_not<T, boost::void_t<
+struct has_find_if_not<T, void_t<
     decltype(
     std::declval<char const*&>() =
         std::declval<T const&>().find_if_not(

@@ -82,9 +82,7 @@ struct linear_linear_no_intersections
     static inline OutputIterator apply(MultiLineString const& multilinestring,
                                        OutputIterator oit)
     {
-        for (typename boost::range_iterator<MultiLineString const>::type
-                 it = boost::begin(multilinestring);
-             it != boost::end(multilinestring); ++it)
+        for (auto it = boost::begin(multilinestring); it != boost::end(multilinestring); ++it)
         {
             LineStringOut ls_out;
             geometry::convert(*it, ls_out);

@@ -45,8 +45,8 @@ namespace urls {
         @ref segments_encoded_view.
 */
 BOOST_URL_DECL
-result<segments_encoded_view>
-parse_path(string_view s) noexcept;
+system::result<segments_encoded_view>
+parse_path(core::string_view s) noexcept;
 
 } // urls
 } // boost

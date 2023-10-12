@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019-2021.
-// Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2023.
+// Modifications copyright (c) 2019-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -18,6 +19,13 @@
 #include <tuple>
 #include <type_traits>
 //#include <utility>
+
+#include <boost/geometry/algorithms/detail/covered_by/interface.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/interface.hpp>
+#include <boost/geometry/algorithms/detail/intersects/interface.hpp>
+#include <boost/geometry/algorithms/detail/overlaps/interface.hpp>
+#include <boost/geometry/algorithms/detail/touches/interface.hpp>
+#include <boost/geometry/algorithms/detail/within/interface.hpp>
 
 #include <boost/geometry/core/static_assert.hpp>
 #include <boost/geometry/core/tag.hpp>

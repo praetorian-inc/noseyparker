@@ -12,25 +12,37 @@
 
 #include <boost/json/error.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
+namespace detail {
 
-error_code
-make_error_code(error e)
+// msvc 14.0 has a bug that warns about inability to use constexpr
+// construction here, even though there's no constexpr construction
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+# pragma warning( push )
+# pragma warning( disable : 4592 )
+#endif
+BOOST_JSON_CONSTINIT
+error_code_category_t error_code_category;
+
+BOOST_JSON_CONSTINIT
+error_condition_category_t error_condition_category;
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+# pragma warning( pop )
+#endif
+
+char const*
+error_code_category_t::name() const noexcept
 {
-    struct codes : error_category
-    {
-        const char*
-        name() const noexcept override
-        {
-            return "boost.json";
-        }
+    return "boost.json";
+}
 
-        std::string
-        message(int ev) const override
-        {
-            switch(static_cast<error>(ev))
-            {
-            default:
+char const*
+error_code_category_t::message( int ev, char*, std::size_t ) const noexcept
+{
+    switch(static_cast<error>(ev))
+    {
+    default:
 case error::syntax: return "syntax error";
 case error::extra_data: return "extra data";
 case error::incomplete: return "incomplete JSON";
@@ -44,9 +56,11 @@ case error::object_too_large: return "object too large";
 case error::array_too_large: return "array too large";
 case error::key_too_large: return "key too large";
 case error::string_too_large: return "string too large";
+case error::number_too_large: return "number too large";
 case error::input_error: return "input error";
 
 case error::exception: return "got exception";
+case error::out_of_range: return "out of range";
 case error::test_failure: return "test failure";
 
 case error::missing_slash: return "missing slash character";
@@ -64,20 +78,28 @@ case error::not_bool: return "value is not boolean";
 case error::not_array: return "value is not an array";
 case error::not_object: return "value is not an object";
 case error::not_string: return "value is not a string";
-case error::size_mismatch: return "array size does not match target size";
+case error::not_int64: return "value is not a std::int64_t number";
+case error::not_uint64: return "value is not a std::uint64_t number";
+case error::not_double: return "value is not a double";
+case error::size_mismatch: return "source composite size does not match target size";
 case error::exhausted_variants: return "exhausted all variants";
 case error::unknown_name: return "unknown name";
-            }
-        }
+    }
+}
 
-        error_condition
-        default_error_condition(
-            int ev) const noexcept override
-        {
-            switch(static_cast<error>(ev))
-            {
-            default:
-                return {ev, *this};
+std::string
+error_code_category_t::message( int ev ) const
+{
+    return message( ev, nullptr, 0 );
+}
+
+error_condition
+error_code_category_t::default_error_condition( int ev) const noexcept
+{
+    switch(static_cast<error>(ev))
+    {
+    default:
+        return {ev, *this};
 
 case error::syntax:
 case error::extra_data:
@@ -92,6 +114,7 @@ case error::object_too_large:
 case error::array_too_large:
 case error::key_too_large:
 case error::string_too_large:
+case error::number_too_large:
 case error::input_error:
     return condition::parse_error;
 
@@ -113,61 +136,53 @@ case error::not_bool:
 case error::not_array:
 case error::not_object:
 case error::not_string:
+case error::not_int64:
+case error::not_uint64:
+case error::not_double:
 case error::size_mismatch:
 case error::exhausted_variants:
 case error::unknown_name:
     return condition::conversion_error;
 
 case error::exception:
+case error::out_of_range:
     return condition::generic_error;
-            }
-        }
-    };
-    // on some versions of msvc-14.2 the category is put in RO memory
-    // erroneusly, if the category object is const,
-    // and that may result in crash
-    static codes cat{};
-    return error_code{static_cast<
-        std::underlying_type<error>::type>(e), cat};
+    }
 }
 
-error_condition
-make_error_condition(condition c)
+char const*
+error_condition_category_t::name() const noexcept
 {
-    struct codes : error_category
-    {
-        const char*
-        name() const noexcept override
-        {
-            return "boost.json";
-        }
-
-        std::string
-        message(int cv) const override
-        {
-            switch(static_cast<condition>(cv))
-            {
-            default:
-            case condition::parse_error:
-                return "A JSON parse error occurred";
-            case condition::pointer_parse_error:
-                return "A JSON Pointer parse error occurred";
-            case condition::pointer_use_error:
-                return "An error occurred when JSON Pointer was used with"
-                    " a value";
-            case condition::conversion_error:
-                return "An error occurred during conversion";
-            }
-        }
-    };
-    // on some versions of msvc-14.2 the category is put in RO memory
-    // erroneusly, if the category object is const,
-    // and that may result in crash
-    static codes cat{};
-    return error_condition{static_cast<
-        std::underlying_type<condition>::type>(c), cat};
+    return "boost.json";
 }
 
-BOOST_JSON_NS_END
+char const*
+error_condition_category_t::message( int cv, char*, std::size_t ) const noexcept
+{
+    switch(static_cast<condition>(cv))
+    {
+    default:
+    case condition::parse_error:
+        return "A JSON parse error occurred";
+    case condition::pointer_parse_error:
+        return "A JSON Pointer parse error occurred";
+    case condition::pointer_use_error:
+        return "An error occurred when JSON Pointer was used with"
+            " a value";
+    case condition::conversion_error:
+        return "An error occurred during conversion";
+    }
+}
+
+std::string
+error_condition_category_t::message( int cv ) const
+{
+    return message( cv, nullptr, 0 );
+}
+
+} // namespace detail
+
+} // namespace json
+} // namespace boost
 
 #endif

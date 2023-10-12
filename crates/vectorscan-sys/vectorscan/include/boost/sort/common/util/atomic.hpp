@@ -12,6 +12,7 @@
 #ifndef __BOOST_SORT_PARALLEL_DETAIL_UTIL_ATOMIC_HPP
 #define __BOOST_SORT_PARALLEL_DETAIL_UTIL_ATOMIC_HPP
 
+#include <ciso646>
 #include <atomic>
 #include <cassert>
 #include <type_traits>

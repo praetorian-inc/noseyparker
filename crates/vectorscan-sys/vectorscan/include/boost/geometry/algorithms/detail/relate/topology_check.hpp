@@ -1,7 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014-2020, Oracle and/or its affiliates.
+// Copyright (c) 2014-2023, Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -170,22 +171,22 @@ struct topology_check<MultiLinestring, Strategy, multi_linestring_tag>
     }
 
 private:
-    typedef geometry::less<void, -1, typename Strategy::cs_tag> less_type;
+    typedef geometry::less<void, -1, Strategy> less_type;
 
     void init() const
     {
         if (m_is_initialized)
+        {
             return;
+        }
 
         m_endpoints.reserve(boost::size(m_mls) * 2);
 
         m_has_interior = false;
 
-        typedef typename boost::range_iterator<MultiLinestring const>::type ls_iterator;
-        for ( ls_iterator it = boost::begin(m_mls) ; it != boost::end(m_mls) ; ++it )
+        for (auto it = boost::begin(m_mls); it != boost::end(m_mls); ++it)
         {
-            typename boost::range_reference<MultiLinestring const>::type
-                ls = *it;
+            auto const& ls = *it;
 
             std::size_t count = boost::size(ls);
 
@@ -196,13 +197,8 @@ private:
 
             if (count > 1)
             {
-                typedef typename boost::range_reference
-                    <
-                        typename boost::range_value<MultiLinestring const>::type const
-                    >::type point_reference;
-                
-                point_reference front_pt = range::front(ls);
-                point_reference back_pt = range::back(ls);
+                auto const& front_pt = range::front(ls);
+                auto const& back_pt = range::back(ls);
 
                 // don't store boundaries of linear rings, this doesn't change anything
                 if (! equals::equals_point_point(front_pt, back_pt, m_strategy))
@@ -226,7 +222,7 @@ private:
 
         m_has_boundary = false;
 
-        if (! m_endpoints.empty() )
+        if (! m_endpoints.empty())
         {
             std::sort(m_endpoints.begin(), m_endpoints.end(), less_type());
             m_has_boundary = find_odd_count(m_endpoints.begin(), m_endpoints.end());
@@ -341,7 +337,7 @@ struct topology_check<MultiPolygon, Strategy, multi_polygon_tag>
     : topology_check_areal
 {
     topology_check(MultiPolygon const&, Strategy const&) {}
-    
+
     template <typename Point>
     static bool check_boundary_point(Point const& ) { return true; }
 };

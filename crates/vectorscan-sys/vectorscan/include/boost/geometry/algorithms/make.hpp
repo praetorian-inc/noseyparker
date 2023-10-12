@@ -4,7 +4,8 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
-// Copyright (c) 2020, Oracle and/or its affiliates.
+// Copyright (c) 2020-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -19,7 +20,7 @@
 
 #include <type_traits>
 
-#include <boost/geometry/algorithms/assign.hpp>
+#include "boost/geometry/algorithms/detail/assign_values.hpp"
 
 #include <boost/geometry/core/make.hpp>
 

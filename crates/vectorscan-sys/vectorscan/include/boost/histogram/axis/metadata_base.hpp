@@ -27,6 +27,15 @@ class metadata_base {
 protected:
   using metadata_type = Metadata;
 
+  static_assert(std::is_default_constructible<metadata_type>::value,
+                "metadata must be default constructible");
+
+  static_assert(std::is_copy_constructible<metadata_type>::value,
+                "metadata must be copy constructible");
+
+  static_assert(std::is_copy_assignable<metadata_type>::value,
+                "metadata must be copy assignable");
+
   // std::string explicitly guarantees nothrow only in C++17
   static_assert(std::is_same<metadata_type, std::string>::value ||
                     std::is_nothrow_move_constructible<metadata_type>::value,
@@ -45,15 +54,15 @@ protected:
     return *this;
   }
 
-private:
-  mutable metadata_type data_;
-
 public:
   /// Returns reference to metadata.
   metadata_type& metadata() noexcept { return data_; }
 
   /// Returns reference to mutable metadata from const axis.
   metadata_type& metadata() const noexcept { return data_; }
+
+private:
+  mutable metadata_type data_;
 };
 
 #ifndef BOOST_HISTOGRAM_DOXYGEN_INVOKED

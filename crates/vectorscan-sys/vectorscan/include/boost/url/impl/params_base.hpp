@@ -19,7 +19,7 @@ namespace urls {
 
 //------------------------------------------------
 
-class params_base::iterator
+class BOOST_URL_DECL params_base::iterator
 {
     detail::params_iter_impl it_;
     bool space_as_plus_ = true;
@@ -88,7 +88,6 @@ public:
         return tmp;
     }
 
-    BOOST_URL_DECL
     reference
     operator*() const;
 
@@ -110,84 +109,6 @@ public:
     }
 };
 
-//------------------------------------------------
-
-inline
-params_base::
-params_base() noexcept
-    // space_as_plus = true
-    : opt_(true, false, false)
-{
-}
-
-inline
-bool
-params_base::
-contains(
-    string_view key,
-    ignore_case_param ic) const noexcept
-{
-    return find(
-        begin(),key, ic) != end();
-}
-
-inline
-auto
-params_base::
-find(
-    string_view key,
-    ignore_case_param ic) const noexcept ->
-        iterator
-{
-    return iterator(
-        find_impl(
-            begin().it_, key, ic),
-        opt_);
-}
-
-inline
-auto
-params_base::
-find(
-    iterator it,
-    string_view key,
-    ignore_case_param ic) const noexcept ->
-        iterator
-{
-    return iterator(
-        find_impl(
-            it.it_, key, ic),
-        opt_);
-}
-
-inline
-auto
-params_base::
-find_last(
-    string_view key,
-    ignore_case_param ic) const noexcept ->
-        iterator
-{
-    return iterator(
-        find_last_impl(
-            end().it_, key, ic),
-        opt_);
-}
-
-inline
-auto
-params_base::
-find_last(
-    iterator it,
-    string_view key,
-    ignore_case_param ic) const noexcept ->
-        iterator
-{
-    return iterator(
-        find_last_impl(
-            it.it_, key, ic),
-        opt_);
-}
 
 } // urls
 } // boost

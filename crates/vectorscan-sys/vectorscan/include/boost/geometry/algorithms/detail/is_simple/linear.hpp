@@ -158,7 +158,7 @@ public:
     inline bool apply(Turn const& turn) const
     {
         typedef typename boost::range_value<MultiLinestring>::type linestring_type;
-        
+
         linestring_type const& ls1 =
             range::at(m_multilinestring, turn.operations[0].seg_id.multi_index);
 
@@ -291,7 +291,7 @@ public:
         // return true for empty multilinestring
 
         using not_simple = not_simple<Strategy>; // do not compute self-intersections
- 
+
         if (std::any_of(boost::begin(multilinestring),
                         boost::end(multilinestring),
                         not_simple(strategy)))

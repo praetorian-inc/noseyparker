@@ -669,8 +669,6 @@ inline BOOST_MP_CXX14_CONSTEXPR void eval_set_imag(debug_adaptor<To>& to, const 
 
 } // namespace backends
 
-using backends::debug_adaptor;
-
 namespace detail {
    template <class Backend>
    struct is_variable_precision<debug_adaptor<Backend> > : public is_variable_precision<Backend>
@@ -693,10 +691,6 @@ namespace detail {
 template <class Backend>
 struct number_category<backends::debug_adaptor<Backend> > : public number_category<Backend>
 {};
-
-template <class Number>
-using debug_adaptor_t = number<debug_adaptor<typename Number::backend_type>, Number::et>;
-
 
 template <class Backend, expression_template_option ExpressionTemplates>
 struct component_type<number<debug_adaptor<Backend>, ExpressionTemplates>>

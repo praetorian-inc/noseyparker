@@ -64,19 +64,9 @@ struct intersection_multi_linestring_multi_linestring_point
     {
         // Note, this loop is quadratic w.r.t. number of linestrings per input.
         // Future Enhancement: first do the sections of each, then intersect.
-        for (typename boost::range_iterator
-                <
-                    MultiLinestring1 const
-                >::type it1 = boost::begin(ml1);
-            it1 != boost::end(ml1);
-            ++it1)
+        for (auto it1 = boost::begin(ml1); it1 != boost::end(ml1); ++it1)
         {
-            for (typename boost::range_iterator
-                    <
-                        MultiLinestring2 const
-                    >::type it2 = boost::begin(ml2);
-                it2 != boost::end(ml2);
-                ++it2)
+            for (auto it2 = boost::begin(ml2); it2 != boost::end(ml2); ++it2)
             {
                 out = intersection_linestring_linestring_point<PointOut>
                       ::apply(*it1, *it2, robust_policy, out, strategy);
@@ -103,12 +93,7 @@ struct intersection_linestring_multi_linestring_point
             OutputIterator out,
             Strategy const& strategy)
     {
-        for (typename boost::range_iterator
-                <
-                    MultiLinestring const
-                >::type it = boost::begin(ml);
-            it != boost::end(ml);
-            ++it)
+        for (auto it = boost::begin(ml); it != boost::end(ml); ++it)
         {
             out = intersection_linestring_linestring_point<PointOut>
                   ::apply(linestring, *it, robust_policy, out, strategy);
@@ -141,12 +126,7 @@ struct intersection_of_multi_linestring_with_areal
             OutputIterator out,
             Strategy const& strategy)
     {
-        for (typename boost::range_iterator
-                <
-                    MultiLinestring const
-                >::type it = boost::begin(ml);
-            it != boost::end(ml);
-            ++it)
+        for (auto it = boost::begin(ml); it != boost::end(ml); ++it)
         {
             out = intersection_of_linestring_with_areal
                 <
@@ -205,9 +185,7 @@ struct clip_multi_linestring
     {
         typedef typename point_type<LinestringOut>::type point_type;
         strategy::intersection::liang_barsky<Box, point_type> lb_strategy;
-        for (typename boost::range_iterator<MultiLinestring const>::type it
-            = boost::begin(multi_linestring);
-            it != boost::end(multi_linestring); ++it)
+        for (auto it = boost::begin(multi_linestring); it != boost::end(multi_linestring); ++it)
         {
             out = detail::intersection::clip_range_with_box
                 <LinestringOut>(box, *it, robust_policy, out, lb_strategy);

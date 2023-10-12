@@ -19,23 +19,41 @@ jobs:
   docker:
     name: Docker
     runs-on: ubuntu-22.04
+
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: docker/setup-qemu-action@v2  # for multi-platform build
+    - uses: docker/setup-qemu-action@v3  # for multi-platform build
 
-    - uses: docker/setup-buildx-action@v2
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install zsh
 
     - name: Authenticate with GitHub Container Registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Docker metadata
+      id: docker_metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
+
+        # see https://github.com/docker/metadata-action#tags-input
+        tags: |
+          type=semver,pattern={{raw}}
+          type=ref,event=tag
+          type=ref,event=pr
+          type=ref,event=branch
+
     - name: Build linux/amd64 Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -45,6 +63,7 @@ jobs:
         push: false
         platforms: linux/amd64
         load: true
+        pull: true
 
     - name: Test the Docker image
       run: docker run --rm noseyparker:test --version
@@ -60,14 +79,64 @@ jobs:
         platforms: linux/amd64,linux/arm64
 
         push: true
-        tags:
-        - ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-        - ghcr.io/${{ github.repository }}:latest
 
-        labels: |
-          org.opencontainers.image.title=${{ github.event.repository.name }}
-          org.opencontainers.image.description=${{ github.event.repository.description }}
-          org.opencontainers.image.url=${{ github.event.repository.html_url }}
-          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+        tags: ${{ steps.docker_metadata.outputs.tags }}
+
+        labels: ${{ steps.docker_metadata.outputs.labels }}
+
+
+  native:
+    name: ${{ matrix.build }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        build:
+        - ubuntu-20.04.x86_64
+        - macos-13.x86_64
+        - macos-13.arm64
+
+        include:
+        - build: ubuntu-20.04.x86_64
+          os: ubuntu-20.04
+          rust: stable
+          install_dependencies: |
+            sudo apt-get install zsh
+
+        - build: macos-13.x86_64
+          os: macos-13
+          rust: stable
+          install_dependencies: |
+            brew install coreutils
+
+        - build: macos-13.arm64
+          os: macos-13-xlarge
+          rust: stable
+          install_dependencies: |
+            brew install coreutils
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: ${{ matrix.install_dependencies }}
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+
+    - name: Cache
+      uses: Swatinem/rust-cache@v2
+
+    - name: Build release
+      run: |
+        ./scripts/create-release.zsh
+
+    - name: Upload release files
+      uses: actions/upload-artifact@v3
+      with:
+        name: release.${{ matrix.build }}
+        path: release
+        if-no-files-found: error

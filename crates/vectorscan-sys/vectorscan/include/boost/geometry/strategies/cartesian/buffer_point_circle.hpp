@@ -57,10 +57,9 @@ class point_circle
 {
 public :
     //! \brief Constructs the strategy
-    //! \param count number of points for the created circle (if count
-    //! is smaller than 3, count is internally set to 3)
-    explicit point_circle(std::size_t count = 90)
-        : m_count((count < 3u) ? 3u : count)
+    //! \param count Number of points (minimum 3) for the created circle
+    explicit point_circle(std::size_t count = default_points_per_circle)
+        : m_count(get_point_count_for_circle(count))
     {}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

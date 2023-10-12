@@ -14,7 +14,8 @@
 #include <boost/json/storage_ptr.hpp>
 #include <cstring>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 class stack
@@ -22,11 +23,19 @@ class stack
     storage_ptr sp_;
     std::size_t cap_ = 0;
     std::size_t size_ = 0;
-    char* buf_ = nullptr;
+    unsigned char* base_ = nullptr;
+    unsigned char* buf_ = nullptr;
 
 public:
     BOOST_JSON_DECL
     ~stack();
+
+    stack() = default;
+
+    stack(
+        storage_ptr sp,
+        unsigned char* buf,
+        std::size_t buf_size) noexcept;
 
     bool
     empty() const noexcept
@@ -56,7 +65,7 @@ public:
         //BOOST_ASSERT(cap_ >= size_ + n);
         reserve(size_ + n);
         std::memcpy(
-            buf_ + size_, &t, n);
+            base_ + size_, &t, n);
         size_ += n;
     }
 
@@ -67,7 +76,7 @@ public:
         auto const n = sizeof(T);
         BOOST_ASSERT(size_ + n <= cap_);
         std::memcpy(
-            buf_ + size_, &t, n);
+            base_ + size_, &t, n);
         size_ += n;
     }
 
@@ -78,7 +87,7 @@ public:
         auto const n = sizeof(T);
         BOOST_ASSERT(size_ >= n);
         std::memcpy(&t,
-            buf_ + size_ - n, n);
+            base_ + size_ - n, n);
     }
 
     template<class T>
@@ -89,11 +98,12 @@ public:
         BOOST_ASSERT(size_ >= n);
         size_ -= n;
         std::memcpy(
-            &t, buf_ + size_, n);
+            &t, base_ + size_, n);
     }
 };
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

@@ -2,9 +2,9 @@
 
 // Copyright (c) 2012-2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2015.
-// Modifications copyright (c) 2015, Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2015-2023.
+// Modifications copyright (c) 2015-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,7 +16,9 @@
 
 #include <boost/core/ignore_unused.hpp>
 
+#include <boost/geometry/arithmetic/arithmetic.hpp>
 #include <boost/geometry/core/cs.hpp>
+#include <boost/geometry/core/access.hpp>
 #include <boost/geometry/strategies/tags.hpp>
 #include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/select_most_precise.hpp>
@@ -80,8 +82,8 @@ private :
         for (std::size_t i = 0; i < point_buffer_count; i++, alpha -= diff)
         {
             typename boost::range_value<RangeOut>::type p;
-            set<0>(p, get<0>(point) + buffer_distance * cos(alpha));
-            set<1>(p, get<1>(point) + buffer_distance * sin(alpha));
+            geometry::set<0>(p, geometry::get<0>(point) + buffer_distance * cos(alpha));
+            geometry::set<1>(p, geometry::get<1>(point) + buffer_distance * sin(alpha));
             range_out.push_back(p);
         }
     }
@@ -98,16 +100,15 @@ private :
 public :
 
     //! \brief Constructs the strategy
-    //! \param points_per_circle points which would be used for a full circle
-    //! (if points_per_circle is smaller than 4, it is internally set to 4)
-    explicit inline end_round(std::size_t points_per_circle = 90)
-        : m_points_per_circle((points_per_circle < 4u) ? 4u : points_per_circle)
+    //! \param points_per_circle Number of points (minimum 4) that would be used for a full circle
+    explicit inline end_round(std::size_t points_per_circle = default_points_per_circle)
+        : m_points_per_circle(get_point_count_for_end(points_per_circle))
     {}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-    //! Fills output_range with a flat end
-    template <typename Point, typename RangeOut, typename DistanceStrategy>
+    //! Fills output_range with a round end
+    template <typename Point, typename DistanceStrategy, typename RangeOut>
     inline void apply(Point const& penultimate_point,
                 Point const& perp_left_point,
                 Point const& ultimate_point,
@@ -145,8 +146,8 @@ public :
                     : (dist_left - dist_right)) / two;
 
             Point shifted_point;
-            set<0>(shifted_point, get<0>(ultimate_point) + dist_half * cos(alpha));
-            set<1>(shifted_point, get<1>(ultimate_point) + dist_half * sin(alpha));
+            geometry::set<0>(shifted_point, geometry::get<0>(ultimate_point) + dist_half * cos(alpha));
+            geometry::set<1>(shifted_point, geometry::get<1>(ultimate_point) + dist_half * sin(alpha));
             generate_points(shifted_point, alpha, dist_average, range_out);
         }
 

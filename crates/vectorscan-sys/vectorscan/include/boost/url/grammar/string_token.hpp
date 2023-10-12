@@ -11,9 +11,8 @@
 #define BOOST_URL_GRAMMAR_STRING_TOKEN_HPP
 
 #include <boost/url/detail/config.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/detail/except.hpp>
-#include <boost/type_traits.hpp>
 #include <memory>
 #include <string>
 
@@ -89,7 +88,7 @@ template<class T, class = void>
 struct is_token : std::false_type {};
 
 template<class T>
-struct is_token<T, boost::void_t<
+struct is_token<T, void_t<
     decltype(std::declval<T&>().prepare(
         std::declval<std::size_t>())),
     decltype(std::declval<T&>().result())
@@ -269,7 +268,7 @@ assign_to(
 
 //------------------------------------------------
 
-/** A token for producing a durable string_view from a temporary string
+/** A token for producing a durable core::string_view from a temporary string
 */
 #ifdef BOOST_URL_DOCS
 template<
@@ -286,7 +285,7 @@ template<class Alloc>
 struct preserve_size_t
     : arg
 {
-    using result_type = string_view;
+    using result_type = core::string_view;
 
     using string_type = std::basic_string<
         char, std::char_traits<char>,
@@ -313,7 +312,7 @@ struct preserve_size_t
     result_type
     result() noexcept
     {
-        return string_view(
+        return core::string_view(
             s_.data(), n_);
     }
 

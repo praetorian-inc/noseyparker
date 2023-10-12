@@ -5,8 +5,9 @@
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 // Copyright (c) 2014 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2017-2021.
-// Modifications copyright (c) 2017-2021, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2017-2023.
+// Modifications copyright (c) 2017-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -28,7 +29,6 @@
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
 #include <boost/range/value_type.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/variant_fwd.hpp>
 
@@ -37,12 +37,8 @@
 #include <boost/geometry/algorithms/detail/assign_indexed_point.hpp>
 #include <boost/geometry/algorithms/detail/convert_point_to_point.hpp>
 #include <boost/geometry/algorithms/detail/convert_indexed_to_indexed.hpp>
-#include <boost/geometry/algorithms/detail/interior_iterator.hpp>
 #include <boost/geometry/algorithms/not_implemented.hpp>
 
-#include <boost/geometry/arithmetic/arithmetic.hpp>
-
-#include <boost/geometry/core/cs.hpp>
 #include <boost/geometry/core/closure.hpp>
 #include <boost/geometry/core/point_order.hpp>
 #include <boost/geometry/core/tags.hpp>
@@ -128,7 +124,7 @@ struct segment_to_range
     {
         traits::resize<Range>::apply(range, 2);
 
-        typename boost::range_iterator<Range>::type it = boost::begin(range);
+        auto it = boost::begin(range);
 
         assign_point_from_index<0>(segment, *it);
         ++it;
@@ -152,7 +148,7 @@ struct range_to_range
             geometry::detail::conversion::convert_point_to_point(point1, point2);
         }
     };
-    
+
     static inline void apply(Range1 const& source, Range2& destination)
     {
         apply(source, destination, default_policy());
@@ -186,8 +182,7 @@ struct range_to_range
         // but ok, sice below it == end()
 
         size_type i = 0;
-        for (typename boost::range_iterator<view_type const>::type it
-            = boost::begin(view);
+        for (auto it = boost::begin(view);
             it != boost::end(view) && i < n;
             ++it, ++i)
         {
@@ -227,15 +222,11 @@ struct polygon_to_polygon
                 >::type
             >::apply(interior_rings(destination), num_interior_rings(source));
 
-        typename interior_return_type<Polygon1 const>::type
-            rings_source = interior_rings(source);
-        typename interior_return_type<Polygon2>::type
-            rings_dest = interior_rings(destination);
+        auto const& rings_source = interior_rings(source);
+        auto&& rings_dest = interior_rings(destination);
 
-        typename detail::interior_iterator<Polygon1 const>::type
-            it_source = boost::begin(rings_source);
-        typename detail::interior_iterator<Polygon2>::type
-            it_dest = boost::begin(rings_dest);
+        auto it_source = boost::begin(rings_source);
+        auto it_dest = boost::begin(rings_dest);
 
         for ( ; it_source != boost::end(rings_source); ++it_source, ++it_dest)
         {
@@ -263,10 +254,8 @@ struct multi_to_multi: private Policy
     {
         traits::resize<Multi2>::apply(multi2, boost::size(multi1));
 
-        typename boost::range_iterator<Multi1 const>::type it1
-                = boost::begin(multi1);
-        typename boost::range_iterator<Multi2>::type it2
-                = boost::begin(multi2);
+        auto it1 = boost::begin(multi1);
+        auto it2 = boost::begin(multi2);
 
         for (; it1 != boost::end(multi1); ++it1, ++it2)
         {

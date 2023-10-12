@@ -3,9 +3,9 @@
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
 // Copyright (c) 2009-2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2015-2021.
-// Modifications copyright (c) 2015-2021, Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2015-2023.
+// Modifications copyright (c) 2015-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -20,6 +20,8 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+
+#include <boost/geometry/algorithms/assign.hpp>
 
 #include <boost/geometry/arithmetic/arithmetic.hpp>
 

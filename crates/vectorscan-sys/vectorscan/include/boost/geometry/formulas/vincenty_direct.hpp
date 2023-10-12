@@ -141,7 +141,7 @@ public:
             result.lat2
                 = atan2( sin_U1 * cos_sigma + cos_U1 * sin_sigma * cos_azimuth12,
                          one_min_f * math::sqrt(sin_alpha_sqr + math::sqr(sin_U1 * sin_sigma - cos_U1 * cos_sigma * cos_azimuth12))); // (8)
-            
+
             CT const lambda = atan2( sin_sigma * sin_azimuth12,
                                      cos_U1 * cos_sigma - sin_U1 * sin_sigma * cos_azimuth12); // (9)
             CT const C = (flattening/CT(16)) * cos_alpha_sqr * ( CT(4) + flattening * ( CT(4) - CT(3) * cos_alpha_sqr ) ); // (10)

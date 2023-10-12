@@ -132,7 +132,7 @@ T lgamma_small_imp(T z, T zm1, T zm2, const std::integral_constant<int, 64>&, co
       // Two approximations, on for z in [1,1.5] and
       // one for z in [1.5,2]:
       //
-      if(z <= 1.5)
+      if(z <= T(1.5))
       {
          //
          // Use the following form:

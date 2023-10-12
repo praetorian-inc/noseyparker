@@ -12,7 +12,8 @@
 
 #include <boost/json/detail/default_resource.hpp>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 #ifndef BOOST_JSON_WEAK_CONSTINIT
@@ -61,6 +62,7 @@ do_is_equal(
 }
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

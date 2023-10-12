@@ -382,7 +382,7 @@ inline RealType quantile(const inverse_gaussian_distribution<RealType, Policy>& 
   RealType guess = detail::guess_ig(p, dist.mean(), dist.scale());
   using boost::math::tools::max_value;
 
-  RealType min = 0.; // Minimum possible value is bottom of range of distribution.
+  RealType min = static_cast<RealType>(0); // Minimum possible value is bottom of range of distribution.
   RealType max = max_value<RealType>();// Maximum possible value is top of range. 
   // int digits = std::numeric_limits<RealType>::digits; // Maximum possible binary digits accuracy for type T.
   // digits used to control how accurate to try to make the result.
@@ -454,7 +454,7 @@ inline RealType quantile(const complemented2_type<inverse_gaussian_distribution<
    // Complement.
    using boost::math::tools::max_value;
 
-  RealType min = 0.; // Minimum possible value is bottom of range of distribution.
+  RealType min = static_cast<RealType>(0); // Minimum possible value is bottom of range of distribution.
   RealType max = max_value<RealType>();// Maximum possible value is top of range. 
   // int digits = std::numeric_limits<RealType>::digits; // Maximum possible binary digits accuracy for type T.
   // digits used to control how accurate to try to make the result.

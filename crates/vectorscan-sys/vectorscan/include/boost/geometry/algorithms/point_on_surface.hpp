@@ -5,8 +5,9 @@
 // Copyright (c) 2009-2013 Mateusz Loskot, London, UK.
 // Copyright (c) 2013-2017 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2014-2020.
-// Modifications copyright (c) 2014-2020 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014-2023.
+// Modifications copyright (c) 2014-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,23 +17,16 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_POINT_ON_SURFACE_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_POINT_ON_SURFACE_HPP
 
-
-#include <cstddef>
-#include <numeric>
-
-#include <boost/concept_check.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 
 #include <boost/geometry/core/point_type.hpp>
-#include <boost/geometry/core/ring_type.hpp>
 
 #include <boost/geometry/geometries/concepts/check.hpp>
 
 #include <boost/geometry/algorithms/detail/extreme_points.hpp>
 #include <boost/geometry/algorithms/detail/signed_size_type.hpp>
 
-#include <boost/geometry/strategies/cartesian/centroid_bashein_detmer.hpp>
 #include <boost/geometry/strategies/side.hpp>
 
 
@@ -82,11 +76,11 @@ template <int Dimension, typename Collection, typename Value, typename Predicate
 inline bool max_value(Collection const& collection, Value& the_max, Predicate const& predicate)
 {
     bool first = true;
-    for (typename Collection::const_iterator it = collection.begin(); it != collection.end(); ++it)
+    for (auto const& item : collection)
     {
-        if (! it->empty())
+        if (! item.empty())
         {
-            Value the_value = geometry::get<Dimension>(*std::max_element(it->begin(), it->end(), predicate));
+            Value the_value = geometry::get<Dimension>(*std::max_element(item.begin(), item.end(), predicate));
             if (first || the_value > the_max)
             {
                 the_max = the_value;
@@ -153,16 +147,14 @@ template <typename Point, typename P>
 inline void calculate_average(Point& point, std::vector<P> const& points)
 {
     typedef typename geometry::coordinate_type<Point>::type coordinate_type;
-    typedef typename std::vector<P>::const_iterator iterator_type;
 
     coordinate_type x = 0;
     coordinate_type y = 0;
 
-    iterator_type end = points.end();
-    for ( iterator_type it = points.begin() ; it != end ; ++it)
+    for (auto const& p : points)
     {
-        x += geometry::get<0>(*it);
-        y += geometry::get<1>(*it);
+        x += geometry::get<0>(p);
+        y += geometry::get<1>(p);
     }
 
     signed_size_type const count = points.size();

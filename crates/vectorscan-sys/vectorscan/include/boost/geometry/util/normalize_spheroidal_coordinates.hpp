@@ -22,7 +22,7 @@
 namespace boost { namespace geometry
 {
 
-namespace math 
+namespace math
 {
 
 #ifndef DOXYGEN_NO_DETAIL
@@ -225,14 +225,14 @@ protected:
     {
         return
             math::mod(value + constants::half_period(), constants::period())
-            - constants::half_period();            
+            - constants::half_period();
     }
 
     static inline CoordinateType normalize_down(CoordinateType const& value)
     {
         return
             math::mod(value - constants::half_period(), constants::period())
-            + constants::half_period();            
+            + constants::half_period();
     }
 
 public:
@@ -495,7 +495,7 @@ inline CoordinateType longitude_interval_distance_signed(CoordinateType const& l
         dist_a12 = -dist_a12;
         dist_a1b = -dist_a1b;
     }
-    
+
     return dist_a1b < c0 ? dist_a1b
          : dist_a1b > dist_a12 ? dist_a1b - dist_a12
          : c0;

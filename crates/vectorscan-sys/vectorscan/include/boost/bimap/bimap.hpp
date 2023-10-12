@@ -54,7 +54,7 @@ the next step will be:
 #include <boost/mpl/aux_/na.hpp>
 
 #ifndef BOOST_BIMAP_DISABLE_SERIALIZATION
-    #include <boost/serialization/nvp.hpp>
+    #include <boost/core/serialization.hpp>
 #endif // BOOST_BIMAP_DISABLE_SERIALIZATION
 
 // Boost.Bimap

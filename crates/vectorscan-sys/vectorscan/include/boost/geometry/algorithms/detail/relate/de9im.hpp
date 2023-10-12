@@ -26,7 +26,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace de9im
 {
 
@@ -104,7 +104,7 @@ public:
     inline explicit mask(const char* code)
         : base_type(code)
     {}
-    
+
     /*!
     \brief The constructor.
     \param code The mask pattern.

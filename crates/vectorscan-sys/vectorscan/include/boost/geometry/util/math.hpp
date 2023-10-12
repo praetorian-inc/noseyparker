@@ -664,6 +664,20 @@ inline T r2d()
     return conversion_coefficient;
 }
 
+/*!
+\brief Wraps an angle in the range [-pi, +pi] (both inclusive)
+*/
+template <typename T>
+inline T wrap_azimuth_in_radian(T const& azimuth)
+{
+    static T const pi = geometry::math::pi<T>();
+    static T const two_pi = geometry::math::two_pi<T>();
+    T result = azimuth;
+    while (result > pi) { result -= two_pi; }
+    while (result < -pi) { result += two_pi; }
+    return result;
+};
+
 
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail {

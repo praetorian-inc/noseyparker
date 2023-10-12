@@ -30,6 +30,7 @@
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/detail/cast_tags.hpp>
 #include <boost/assert.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/interprocess/smart_ptr/detail/shared_count.hpp>
 #include <boost/interprocess/detail/mpl.hpp>
 #include <boost/interprocess/detail/nothrow.hpp>
@@ -37,7 +38,6 @@
 #include <boost/interprocess/detail/type_traits.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/smart_ptr/deleter.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 
 #include <iosfwd> // for std::basic_ostream

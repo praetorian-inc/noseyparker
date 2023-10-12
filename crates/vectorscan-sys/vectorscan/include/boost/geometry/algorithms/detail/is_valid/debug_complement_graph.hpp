@@ -1,7 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2014, 2018, 2019, Oracle and/or its affiliates.
+// Copyright (c) 2014-2023, Oracle and/or its affiliates.
 
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -25,12 +26,12 @@ namespace detail { namespace is_valid
 
 
 #ifdef BOOST_GEOMETRY_TEST_DEBUG
-template <typename OutputStream, typename TurnPoint, typename CSTag>
+template <typename OutputStream, typename TurnPoint, typename Strategy>
 inline void
 debug_print_complement_graph(OutputStream& os,
-                             complement_graph<TurnPoint, CSTag> const& graph)
+                             complement_graph<TurnPoint, Strategy> const& graph)
 {
-    typedef typename complement_graph<TurnPoint>::vertex_handle vertex_handle;
+    typedef typename complement_graph<TurnPoint, Strategy>::vertex_handle vertex_handle;
 
     os << "num rings: " << graph.m_num_rings << std::endl;
     os << "vertex ids: {";
@@ -39,7 +40,7 @@ debug_print_complement_graph(OutputStream& os,
     {
         os << " " << it->id();
     }
-    os << " }" << std::endl;        
+    os << " }" << std::endl;
 
     for (vertex_handle it = graph.m_vertices.begin();
          it != graph.m_vertices.end(); ++it)
@@ -47,20 +48,20 @@ debug_print_complement_graph(OutputStream& os,
         os << "neighbors of " << it->id() << ": {";
         for (typename complement_graph
                  <
-                     TurnPoint
+                     TurnPoint, Strategy
                  >::neighbor_container::const_iterator
                  nit = graph.m_neighbors[it->id()].begin();
              nit != graph.m_neighbors[it->id()].end(); ++nit)
         {
             os << " " << (*nit)->id();
         }
-        os << "}" << std::endl;        
+        os << "}" << std::endl;
     }
 }
 #else
-template <typename OutputStream, typename TurnPoint, typename CSTag>
+template <typename OutputStream, typename TurnPoint, typename Strategy>
 inline void debug_print_complement_graph(OutputStream&,
-                                         complement_graph<TurnPoint, CSTag> const&)
+                                         complement_graph<TurnPoint, Strategy> const&)
 {
 }
 #endif

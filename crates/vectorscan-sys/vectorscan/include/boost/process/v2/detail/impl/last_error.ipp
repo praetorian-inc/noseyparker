@@ -28,20 +28,6 @@ error_code get_last_error()
 
 }
 
-void throw_last_error()
-{
-    throw system_error(get_last_error());
-}
-void throw_last_error(const char * msg)
-{
-    throw system_error(get_last_error(), msg);
-}
-void throw_last_error(const std::string & msg)
-{
-    throw system_error(get_last_error(), msg);
-}
-
-
 }
 BOOST_PROCESS_V2_END_NAMESPACE
 

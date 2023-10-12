@@ -91,25 +91,18 @@ namespace ptr_container_detail
         
 #else // BOOST_NO_SFINAE
 
-#if BOOST_WORKAROUND(__MWERKS__, <= 0x3003)
         template< class Iter >
         static const U* get_const_pointer( void_ptr_iterator<Iter,U> i )
         {
             return static_cast<const U*>( *i.base() );
         }
-#else // BOOST_WORKAROUND
-        template< class Iter >
-        static const U* get_const_pointer( void_ptr_iterator<Iter,const U> i )
-        {
-            return static_cast<const U*>( *i.base() );
-        }
-#endif // BOOST_WORKAROUND
 
         template< class Iter >
         static const U* get_const_pointer( Iter i )
         {
             return &*i;
         }
+
 #endif // BOOST_NO_SFINAE
 
         BOOST_STATIC_CONSTANT(bool, allow_null = boost::is_nullable<T>::value );

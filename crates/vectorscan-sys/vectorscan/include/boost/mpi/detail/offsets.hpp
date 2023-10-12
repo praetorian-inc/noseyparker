@@ -33,7 +33,7 @@ void offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n);
 // displs are not already provided.
 // If memory was allocated, returns a pointer to it
 // otherwise null.
-int* make_offsets(communicator const& comm, int const* sizes, int const* displs, int root = -1);
+int* BOOST_MPI_DECL make_offsets(communicator const& comm, int const* sizes, int const* displs, int root = -1);
 
 // Reconstruct skip slots from sizes and offsets.
 // Only takes place if on the root process and if 

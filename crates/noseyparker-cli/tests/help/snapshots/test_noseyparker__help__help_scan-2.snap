@@ -47,7 +47,7 @@ Options:
           [default: datastore.np]
 
   -j, --jobs <N>
-          Use N parallel scanning jobs
+          Use N parallel scanning threads
           
           [default: DEFAULT]
 
@@ -103,7 +103,7 @@ Input Specifier Options:
           [default: https://api.github.com/]
           [aliases: api-url]
 
-      --git-clone-mode <MODE>
+      --git-clone <MODE>
           Use the specified method for cloning Git repositories
           
           [default: bare]
@@ -111,6 +111,20 @@ Input Specifier Options:
           Possible values:
           - bare:   Match the behavior of `git clone --bare`
           - mirror: Match the behavior of `git clone --mirror`
+
+      --git-history <MODE>
+          Use the specified mode for handling Git history
+          
+          Git history can be completely ignored when scanning by using `--git-history=none`. Note
+          that this will interfere with other input specifiers that cause Git repositories to be
+          automatically cloned. For example, specifying an input with `--git-url=<URL>` while
+          simultaneously using `--git-history=none` will not result in useful scanning.
+          
+          [default: full]
+
+          Possible values:
+          - full: Scan all history
+          - none: Scan no history
 
 Content Filtering Options:
       --max-file-size <MEGABYTES>
@@ -143,6 +157,9 @@ Metadata Collection Options:
 
       --git-blob-provenance <MODE>
           Specify which Git commit provenance metadata will be collected
+          
+          This should not need to be changed unless you are running into performance problems on a
+          problematic Git repository input.
           
           [default: first-seen]
 

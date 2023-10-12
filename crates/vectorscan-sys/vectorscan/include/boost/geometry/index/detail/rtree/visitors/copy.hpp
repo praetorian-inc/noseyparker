@@ -53,7 +53,7 @@ public:
         for (typename elements_type::iterator it = elements.begin();
             it != elements.end(); ++it)
         {
-            rtree::apply_visitor(*this, *it->second);                                                   // MAY THROW (V, E: alloc, copy, N: alloc) 
+            rtree::apply_visitor(*this, *it->second);                                                   // MAY THROW (V, E: alloc, copy, N: alloc)
 
             // for exception safety
             subtree_destroyer auto_result(result, m_allocators);

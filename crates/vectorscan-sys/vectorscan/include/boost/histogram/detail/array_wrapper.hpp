@@ -7,8 +7,8 @@
 #ifndef BOOST_HISTOGRAM_DETAIL_ARRAY_WRAPPER_HPP
 #define BOOST_HISTOGRAM_DETAIL_ARRAY_WRAPPER_HPP
 
+#include <boost/core/make_span.hpp>
 #include <boost/core/nvp.hpp>
-#include <boost/histogram/detail/span.hpp>
 #include <boost/histogram/detail/static_if.hpp>
 #include <boost/mp11/function.hpp>
 #include <boost/mp11/utility.hpp>
@@ -48,8 +48,7 @@ struct array_wrapper {
               ar);
         },
         [this](auto& ar) {
-          for (auto&& x : boost::histogram::detail::make_span(this->ptr, this->size))
-            ar& make_nvp("item", x);
+          for (auto&& x : make_span(this->ptr, this->size)) ar& make_nvp("item", x);
         },
         ar);
   }

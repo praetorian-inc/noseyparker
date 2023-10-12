@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2021, Oracle and/or its affiliates.
+// Copyright (c) 2021-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 
@@ -16,8 +16,10 @@
 #include <boost/core/addressof.hpp>
 
 #include <boost/geometry/algorithms/assign.hpp>
+#include <boost/geometry/algorithms/detail/closest_points/utilities.hpp>
 #include <boost/geometry/algorithms/detail/distance/is_comparable.hpp>
 #include <boost/geometry/algorithms/detail/distance/strategy_utils.hpp>
+#include <boost/geometry/algorithms/dispatch/closest_points.hpp>
 #include <boost/geometry/algorithms/dispatch/distance.hpp>
 #include <boost/geometry/algorithms/intersects.hpp>
 
@@ -44,7 +46,7 @@ namespace detail { namespace closest_points
 class segment_to_segment
 {
 public:
-    
+
     template <typename Segment1, typename Segment2, typename OutputSegment, typename Strategies>
     static inline void apply(Segment1 const& segment1, Segment2 const& segment2,
                              OutputSegment& shortest_seg,
@@ -66,12 +68,12 @@ public:
                                             intersection_policy());
         if (is.count > 0)
         {
-            set_segment_from_points::apply(is.intersections[0], 
-                                           is.intersections[0], 
+            set_segment_from_points::apply(is.intersections[0],
+                                           is.intersections[0],
                                            shortest_seg);
             return;
         }
-        
+
         typename point_type<Segment1>::type p[2];
         detail::assign_point_from_index<0>(segment1, p[0]);
         detail::assign_point_from_index<1>(segment1, p[1]);
@@ -86,17 +88,17 @@ public:
         auto cp3 = strategies.closest_points(p[1], segment2).apply(p[1], q[0], q[1]);
 
         closest_points::creturn_t<Segment1, Segment2, Strategies> d[4];
-        
+
         auto const cds = strategies::distance::detail::make_comparable(strategies)
             .distance(detail::dummy_point(), detail::dummy_point());
-        
+
         d[0] = cds.apply(cp0, q[0]);
         d[1] = cds.apply(cp1, q[1]);
         d[2] = cds.apply(p[0], cp2);
         d[3] = cds.apply(p[1], cp3);
 
-        std::size_t imin = std::distance(boost::addressof(d[0]), std::min_element(d, d + 4));    
-        
+        std::size_t imin = std::distance(boost::addressof(d[0]), std::min_element(d, d + 4));
+
         switch (imin)
         {
         case 0:

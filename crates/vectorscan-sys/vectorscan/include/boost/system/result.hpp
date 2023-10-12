@@ -85,6 +85,10 @@ template<class T> using remove_cvref = typename std::remove_cv< typename std::re
 
 template<class... T> using is_errc_t = std::is_same<mp11::mp_list<remove_cvref<T>...>, mp11::mp_list<errc::errc_t>>;
 
+template<class T, class... A> struct is_constructible: std::is_constructible<T, A...> {};
+template<class A> struct is_constructible<bool, A>: std::is_convertible<A, bool> {};
+template<class A> struct is_constructible<bool const, A>: std::is_convertible<A, bool> {};
+
 } // namespace detail
 
 // result
@@ -122,7 +126,7 @@ public:
     template<class A = T, typename std::enable_if<
         std::is_convertible<A, T>::value &&
         !(detail::is_errc_t<A>::value && std::is_arithmetic<T>::value) &&
-        !std::is_constructible<E, A>::value, int>::type = 0>
+        !std::is_convertible<A, E>::value, int>::type = 0>
     constexpr result( A&& a )
         noexcept( std::is_nothrow_constructible<T, A>::value )
         : v_( in_place_value, std::forward<A>(a) )
@@ -132,7 +136,7 @@ public:
     // implicit, error
     template<class A = E, class = void, typename std::enable_if<
         std::is_convertible<A, E>::value &&
-        !std::is_constructible<T, A>::value, int>::type = 0>
+        !std::is_convertible<A, T>::value, int>::type = 0>
     constexpr result( A&& a )
         noexcept( std::is_nothrow_constructible<E, A>::value )
         : v_( in_place_error, std::forward<A>(a) )
@@ -141,9 +145,9 @@ public:
 
     // explicit, value
     template<class... A, class En = typename std::enable_if<
-        std::is_constructible<T, A...>::value &&
+        detail::is_constructible<T, A...>::value &&
         !(detail::is_errc_t<A...>::value && std::is_arithmetic<T>::value) &&
-        !std::is_constructible<E, A...>::value &&
+        !detail::is_constructible<E, A...>::value &&
         sizeof...(A) >= 1
         >::type>
     explicit constexpr result( A&&... a )
@@ -154,8 +158,8 @@ public:
 
     // explicit, error
     template<class... A, class En2 = void, class En = typename std::enable_if<
-        !std::is_constructible<T, A...>::value &&
-        std::is_constructible<E, A...>::value &&
+        !detail::is_constructible<T, A...>::value &&
+        detail::is_constructible<E, A...>::value &&
         sizeof...(A) >= 1
         >::type>
     explicit constexpr result( A&&... a )
@@ -187,7 +191,8 @@ public:
     // converting
     template<class T2, class E2, class En = typename std::enable_if<
         std::is_convertible<T2, T>::value &&
-        std::is_convertible<E2, E>::value
+        std::is_convertible<E2, E>::value &&
+        !std::is_convertible<result<T2, E2> const&, T>::value
         >::type>
     BOOST_CXX14_CONSTEXPR result( result<T2, E2> const& r2 )
         noexcept(
@@ -205,7 +210,8 @@ public:
 
     template<class T2, class E2, class En = typename std::enable_if<
         std::is_convertible<T2, T>::value &&
-        std::is_convertible<E2, E>::value
+        std::is_convertible<E2, E>::value &&
+        !std::is_convertible<result<T2, E2>&&, T>::value
         >::type>
     BOOST_CXX14_CONSTEXPR result( result<T2, E2>&& r2 )
         noexcept(
@@ -395,10 +401,16 @@ public:
 
     // error access
 
-    constexpr E error() const
+    constexpr E error() const &
         noexcept( std::is_nothrow_default_constructible<E>::value && std::is_nothrow_copy_constructible<E>::value )
     {
         return has_error()? variant2::unsafe_get<1>( v_ ): E();
+    }
+
+    BOOST_CXX14_CONSTEXPR E error() &&
+        noexcept( std::is_nothrow_default_constructible<E>::value && std::is_nothrow_move_constructible<E>::value )
+    {
+        return has_error()? std::move( variant2::unsafe_get<1>( v_ ) ): E();
     }
 
     // emplace
@@ -575,10 +587,16 @@ public:
 
     // error access
 
-    constexpr E error() const
+    constexpr E error() const &
         noexcept( std::is_nothrow_default_constructible<E>::value && std::is_nothrow_copy_constructible<E>::value )
     {
         return has_error()? variant2::unsafe_get<1>( v_ ): E();
+    }
+
+    BOOST_CXX14_CONSTEXPR E error() &&
+        noexcept( std::is_nothrow_default_constructible<E>::value && std::is_nothrow_move_constructible<E>::value )
+    {
+        return has_error()? std::move( variant2::unsafe_get<1>( v_ ) ): E();
     }
 
     // emplace

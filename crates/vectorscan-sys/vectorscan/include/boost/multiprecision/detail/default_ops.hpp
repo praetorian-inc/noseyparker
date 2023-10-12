@@ -3733,6 +3733,17 @@ struct conj_funct
       using default_ops::eval_conj;
       eval_conj(result, arg);
    }
+   //
+   // To allow for mixed complex/scalar arithmetic where conj is called on the scalar type (as in Eigen)
+   // we provide an overload that will promote the arg to the distination type:
+   //
+   template <class Other>
+   BOOST_MP_CXX14_CONSTEXPR typename std::enable_if<std::is_constructible<Other, Backend>::value>::type operator()(Other& result, const Backend& arg) const
+   {
+      using default_ops::eval_conj;
+      Other t(arg);
+      eval_conj(result, t);
+   }
 };
 template <class Backend>
 struct proj_funct

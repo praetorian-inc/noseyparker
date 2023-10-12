@@ -39,10 +39,10 @@ inline std::string build_cmd_shell(const std::string & exe, std::vector<std::str
             //the first one is put directly onto the output,
             //because then I don't have to copy the whole string
             arg.insert(arg.begin(), '"' );
-            arg += '"'; //thats the post one.
+            arg += '"'; //that is the post one.
         }
 
-        if (!st.empty())//first one does not need a preceeding space
+        if (!st.empty())//first one does not need a preceding space
             st += ' ';
 
         st += arg;
@@ -112,7 +112,10 @@ struct exe_cmd_init<char> : boost::process::detail::api::handler_base_ext
     {
         if (exe.empty()) //cmd style
         {
-            exec.exe = args.front().c_str();
+            if (args.empty())
+                exec.exe = "";
+            else
+                exec.exe = args.front().c_str();    
             exec.cmd_style = true;
         }
         else
@@ -155,13 +158,15 @@ private:
 
 std::vector<char*> exe_cmd_init<char>::make_cmd()
 {
+    // any string must be writable.
+    static char empty_string[1] = "";
     std::vector<char*> vec;
     if (!exe.empty())
-        vec.push_back(&exe.front());
+        vec.push_back(exe.empty() ? empty_string : &exe.front());
 
     if (!args.empty()) {
         for (auto & v : args)
-            vec.push_back(&v.front());
+            vec.push_back(v.empty() ? empty_string : &v.front());
     }
 
     vec.push_back(nullptr);

@@ -28,17 +28,6 @@
 
 namespace boost {
 namespace multiprecision {
-namespace backends {
-
-template <unsigned digits10>
-struct mpc_complex_backend;
-
-template <class Backend>
-struct logged_adaptor;
-template <class Backend>
-struct debug_adaptor;
-
-} // namespace backends
 
 template <unsigned digits10>
 struct number_category<backends::mpc_complex_backend<digits10> > : public std::integral_constant<int, number_kind_complex>
@@ -1691,14 +1680,6 @@ struct is_variable_precision<backends::mpc_complex_backend<0> > : public std::in
 template <>
 struct number_category<detail::canonical<mpc_t, backends::mpc_complex_backend<0> >::type> : public std::integral_constant<int, number_kind_floating_point>
 {};
-
-using boost::multiprecision::backends::mpc_complex_backend;
-
-using mpc_complex_50 = number<mpc_complex_backend<50> >  ;
-using mpc_complex_100 = number<mpc_complex_backend<100> > ;
-using mpc_complex_500 = number<mpc_complex_backend<500> > ;
-using mpc_complex_1000 = number<mpc_complex_backend<1000> >;
-using mpc_complex = number<mpc_complex_backend<0> >   ;
 
 template <unsigned Digits10, expression_template_option ExpressionTemplates>
 struct component_type<number<mpc_complex_backend<Digits10>, ExpressionTemplates> >

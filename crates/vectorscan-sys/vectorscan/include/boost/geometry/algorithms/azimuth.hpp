@@ -2,8 +2,8 @@
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2014-2021.
-// Modifications copyright (c) 2014-2021, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014-2023.
+// Modifications copyright (c) 2014-2023, Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -17,11 +17,8 @@
 
 #include <boost/geometry/algorithms/not_implemented.hpp>
 
-#include <boost/geometry/core/cs.hpp>
-#include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/radian_access.hpp>
 #include <boost/geometry/core/tag.hpp>
-#include <boost/geometry/core/tags.hpp>
 
 #include <boost/geometry/geometries/concepts/check.hpp>
 
@@ -30,9 +27,6 @@
 #include <boost/geometry/strategies/azimuth/geographic.hpp>
 #include <boost/geometry/strategies/azimuth/spherical.hpp>
 
-#include <boost/geometry/util/math.hpp>
-
-
 namespace boost { namespace geometry
 {
 
@@ -40,7 +34,7 @@ namespace boost { namespace geometry
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail
 {
-       
+
 } // namespace detail
 #endif // DOXYGEN_NO_DETAIL
 
@@ -183,7 +177,7 @@ inline auto azimuth(Point1 const& point1, Point2 const& point2)
 {
     concepts::check<Point1 const>();
     concepts::check<Point2 const>();
-    
+
     return resolve_strategy::azimuth
             <
                 default_strategy

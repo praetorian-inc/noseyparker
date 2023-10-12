@@ -3,7 +3,7 @@
 // R-tree implementation
 //
 // Copyright (c) 2008 Federico J. Fernandez.
-// Copyright (c) 2011-2022 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2023 Adam Wulkiewicz, Lodz, Poland.
 // Copyright (c) 2020 Caian Benedicto, Campinas, Brazil.
 //
 // This file was modified by Oracle on 2019-2021.
@@ -23,7 +23,6 @@
 
 // Boost
 #include <boost/container/new_allocator.hpp>
-#include <boost/move/move.hpp>
 #include <boost/tuple/tuple.hpp>
 
 // Boost.Geometry
@@ -172,8 +171,6 @@ template
 >
 class rtree
 {
-    BOOST_COPYABLE_AND_MOVABLE(rtree)
-
 public:
     /*! \brief The type of Value stored in the container. */
     typedef Value value_type;
@@ -271,10 +268,10 @@ private:
         members_holder(IndGet const& ind_get,
                        ValEq const& val_eq,
                        Parameters const& parameters,
-                       BOOST_FWD_REF(Alloc) alloc)
+                       Alloc&& alloc)
             : translator_type(ind_get, val_eq)
             , Parameters(parameters)
-            , allocators_type(boost::forward<Alloc>(alloc))
+            , allocators_type(std::forward<Alloc>(alloc))
             , values_count(0)
             , leafs_level(0)
             , root(0)
@@ -308,7 +305,7 @@ private:
         node_pointer root;
     };
 
-    typedef typename members_holder::translator_type translator_type;    
+    typedef typename members_holder::translator_type translator_type;
     typedef typename members_holder::options_type options_type;
     typedef typename members_holder::allocators_type allocators_type;
     typedef typename members_holder::node node;
@@ -654,11 +651,11 @@ public:
     \par Throws
     Nothing.
     */
-    inline rtree(BOOST_RV_REF(rtree) src)
+    inline rtree(rtree&& src)
         : m_members(src.m_members.indexable_getter(),
                     src.m_members.equal_to(),
                     src.m_members.parameters(),
-                    boost::move(src.m_members.allocators()))
+                    std::move(src.m_members.allocators()))
     {
         boost::swap(m_members.values_count, src.m_members.values_count);
         boost::swap(m_members.leafs_level, src.m_members.leafs_level);
@@ -678,7 +675,7 @@ public:
     \li If Value copy constructor throws (only if allocators aren't equal).
     \li If allocation throws or returns invalid value (only if allocators aren't equal).
     */
-    inline rtree(BOOST_RV_REF(rtree) src, allocator_type const& allocator)
+    inline rtree(rtree&& src, allocator_type const& allocator)
         : m_members(src.m_members.indexable_getter(),
                     src.m_members.equal_to(),
                     src.m_members.parameters(),
@@ -708,7 +705,7 @@ public:
     \li If allocation throws.
     \li If allocation throws or returns invalid value.
     */
-    inline rtree & operator=(BOOST_COPY_ASSIGN_REF(rtree) src)
+    inline rtree & operator=(rtree const& src)
     {
         if ( &src != this )
         {
@@ -718,11 +715,11 @@ public:
             // NOTE: if propagate is true for std allocators on darwin 4.2.1, glibc++
             // (allocators stored as base classes of members_holder)
             // copying them changes values_count, in this case it doesn't cause errors since data must be copied
-            
+
             typedef std::integral_constant<bool,
                 allocator_traits_type::propagate_on_container_copy_assignment::value
             > propagate;
-            
+
             if ( propagate::value && !(this_allocs == src_allocs) )
                 this->raw_destroy(*this);
             detail::assign_cond(this_allocs, src_allocs, propagate());
@@ -746,13 +743,13 @@ public:
     \li If Value copy constructor throws.
     \li If allocation throws or returns invalid value.
     */
-    inline rtree & operator=(BOOST_RV_REF(rtree) src)
+    inline rtree & operator=(rtree&& src)
     {
         if ( &src != this )
         {
             allocators_type & this_allocs = m_members.allocators();
             allocators_type & src_allocs = src.m_members.allocators();
-            
+
             if ( this_allocs == src_allocs )
             {
                 this->raw_destroy(*this);
@@ -768,7 +765,7 @@ public:
                 // NOTE: if propagate is true for std allocators on darwin 4.2.1, glibc++
                 // (allocators stored as base classes of members_holder)
                 // moving them changes values_count
-                
+
                 typedef std::integral_constant<bool,
                     allocator_traits_type::propagate_on_container_move_assignment::value
                 > propagate;
@@ -801,11 +798,11 @@ public:
         boost::swap(m_members.indexable_getter(), other.m_members.indexable_getter());
         boost::swap(m_members.equal_to(), other.m_members.equal_to());
         boost::swap(m_members.parameters(), other.m_members.parameters());
-        
+
         // NOTE: if propagate is true for std allocators on darwin 4.2.1, glibc++
         // (allocators stored as base classes of members_holder)
         // swapping them changes values_count
-        
+
         typedef std::integral_constant<bool,
             allocator_traits_type::propagate_on_container_swap::value
         > propagate;
@@ -1002,7 +999,7 @@ public:
     Values will be returned only if all predicates are met.
 
     <b>Spatial predicates</b>
-    
+
     Spatial predicates may be generated by one of the functions listed below:
     \li \c boost::geometry::index::contains(),
     \li \c boost::geometry::index::covered_by(),
@@ -1022,7 +1019,7 @@ public:
     \li <tt>! boost::geometry::index::within()</tt>
 
     <b>Satisfies predicate</b>
-    
+
     This is a special kind of predicate which allows to pass a user-defined function or function object which checks
     if Value should be returned by the query. It's generated by:
     \li \c boost::geometry::index::satisfies().
@@ -1033,7 +1030,7 @@ public:
     in returning k values to the output iterator. Only one nearest predicate may be passed to the query.
     It may be generated by:
     \li \c boost::geometry::index::nearest().
-        
+
     <b>Connecting predicates</b>
 
     Predicates may be passed together connected with \c operator&&().
@@ -1098,7 +1095,7 @@ public:
     For the information about predicates which may be passed to this method see query().
 
     \par Example
-    \verbatim    
+    \verbatim
     for ( Rtree::const_query_iterator it = tree.qbegin(bgi::nearest(pt, 10000)) ;
           it != tree.qend() ; ++it )
     {
@@ -1130,7 +1127,7 @@ public:
     The modification of the rtree may invalidate the iterators.
 
     \param predicates   Predicates.
-    
+
     \return             The iterator pointing at the begin of the query range.
     */
     template <typename Predicates>
@@ -1145,7 +1142,7 @@ public:
     This method returns an iterator which may be used to check if the query has ended.
 
     \par Example
-    \verbatim    
+    \verbatim
     for ( Rtree::const_query_iterator it = tree.qbegin(bgi::nearest(pt, 10000)) ;
           it != tree.qend() ; ++it )
     {
@@ -1174,7 +1171,7 @@ public:
 
     \warning
     The modification of the rtree may invalidate the iterators.
-    
+
     \return             The iterator pointing at the end of the query range.
     */
     const_query_iterator qend() const
@@ -1201,7 +1198,7 @@ private:
 
     This method returns an iterator which may be used to perform iterative queries.
     For the information about predicates which may be passed to this method see query().
-    
+
     The type of the returned iterator depends on the type of passed Predicates but the iterator of this type
     may be assigned to the variable of const_query_iterator type. If you'd like to use the type of the iterator
     returned by this method you may get the type e.g. by using C++11 decltype or Boost.Typeof library.
@@ -1246,7 +1243,7 @@ private:
     The modification of the rtree may invalidate the iterators.
 
     \param predicates   Predicates.
-    
+
     \return             The iterator pointing at the begin of the query range.
     */
     template <typename Predicates>
@@ -1266,7 +1263,7 @@ private:
 
     This method returns the iterator which may be used to perform iterative queries. For the information
     about the predicates which may be passed to this method see query().
-    
+
     The type of the returned iterator depends on the type of passed Predicates but the iterator of this type
     may be assigned to the variable of const_query_iterator type. If you'd like to use the type of the iterator
     returned by this method you may get the type e.g. by using C++11 decltype or Boost.Typeof library.
@@ -1290,7 +1287,7 @@ private:
     The modification of the rtree may invalidate the iterators.
 
     \param predicates   Predicates.
-    
+
     \return             The iterator pointing at the end of the query range.
     */
     template <typename Predicates>
@@ -1308,7 +1305,7 @@ private:
 
     This method returns the iterator which may be compared with the iterator returned by qbegin() in order to
     check if the query has ended.
-    
+
     The type of the returned iterator is different than the type returned by qbegin() but the iterator of this type
     may be assigned to the variable of const_query_iterator type. If you'd like to use the type of the iterator returned by this
     method, which most certainly will be faster than the type-erased iterator, you may get the type
@@ -1349,7 +1346,7 @@ private:
 
     \warning
     The modification of the rtree may invalidate the iterators.
-    
+
     \return             The iterator pointing at the end of the query range.
     */
     detail::rtree::iterators::end_query_iterator<value_type, allocators_type>
@@ -1510,7 +1507,7 @@ public:
 
     /*!
     \brief Count Values or Indexables stored in the container.
-    
+
     For indexable_type it returns the number of values which indexables equals the parameter.
     For value_type it returns the number of values which equals the parameter.
 
@@ -1892,7 +1889,7 @@ private:
 
         return distance_v.apply(m_members, out_it);
     }
-    
+
     /*!
     \brief Count elements corresponding to value or indexable.
 
@@ -2081,7 +2078,7 @@ This query function performs spatial and k-nearest neighbor searches. It allows 
 Values will be returned only if all predicates are met.
 
 <b>Spatial predicates</b>
-    
+
 Spatial predicates may be generated by one of the functions listed below:
 \li \c boost::geometry::index::contains(),
 \li \c boost::geometry::index::covered_by(),
@@ -2112,7 +2109,7 @@ If the nearest predicate is passed a k-nearest neighbor search will be performed
 in returning k values to the output iterator. Only one nearest predicate may be passed to the query.
 It may be generated by:
 \li \c boost::geometry::index::nearest().
-        
+
 <b>Connecting predicates</b>
 
 Predicates may be passed together connected with \c operator&&().
@@ -2162,7 +2159,7 @@ query(rtree<Value, Parameters, IndexableGetter, EqualTo, Allocator> const& tree,
 
 This method returns the iterator which may be used to perform iterative queries. For the information
 about the predicates which may be passed to this method see query().
-    
+
 \par Example
 \verbatim
 std::for_each(bgi::qbegin(tree, bgi::nearest(pt, 3)), bgi::qend(tree), do_something());
@@ -2182,7 +2179,7 @@ The modification of the rtree may invalidate the iterators.
 
 \param tree         The rtree.
 \param predicates   Predicates.
-    
+
 \return             The iterator pointing at the begin of the query range.
 */
 template <typename Value, typename Parameters, typename IndexableGetter, typename EqualTo, typename Allocator,
@@ -2198,7 +2195,7 @@ qbegin(rtree<Value, Parameters, IndexableGetter, EqualTo, Allocator> const& tree
 \brief Returns the query iterator pointing at the end of the query range.
 
 This method returns the iterator which may be used to check if the query has ended.
-    
+
 \par Example
 \verbatim
 std::for_each(bgi::qbegin(tree, bgi::nearest(pt, 3)), bgi::qend(tree), do_something());
@@ -2214,7 +2211,7 @@ Nothing
 The modification of the rtree may invalidate the iterators.
 
 \ingroup rtree_functions
-    
+
 \return             The iterator pointing at the end of the query range.
 */
 template <typename Value, typename Parameters, typename IndexableGetter, typename EqualTo, typename Allocator> inline

@@ -29,7 +29,7 @@ struct fork_and_forget_launcher : default_launcher
         auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "fork_and_forget_launcher");
+            v2::detail::throw_error(ec, "fork_and_forget_launcher");
 
         return proc;
     }
@@ -60,7 +60,7 @@ struct fork_and_forget_launcher : default_launcher
         auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "fork_and_forget_launcher");
+            v2::detail::throw_error(ec, "fork_and_forget_launcher");
 
         return proc;
     }
@@ -94,7 +94,7 @@ struct fork_and_forget_launcher : default_launcher
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 return basic_process<Executor>{exec};
             }
             else if (pid == 0)
@@ -107,7 +107,7 @@ struct fork_and_forget_launcher : default_launcher
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
-                ec.assign(errno, system_category());
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);
                 return basic_process<Executor>{exec};

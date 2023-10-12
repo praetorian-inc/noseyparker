@@ -181,7 +181,7 @@ struct gl_draw
                 detail::utilities::gl_draw_indexable(it->first, level_rel * z_mul);
             }
         }
-        
+
         size_t level_backup = level;
         ++level;
 

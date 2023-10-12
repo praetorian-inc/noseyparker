@@ -4,8 +4,8 @@
 // Copyright (c) 2008-2015 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2015-2021.
-// Modifications copyright (c) 2015-2021, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2015-2023.
+// Modifications copyright (c) 2015-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
@@ -172,7 +172,7 @@ public :
             // arguments, we cyclically permute them so that the first
             // argument is always the lexicographically smallest point.
 
-            using less = compare::cartesian<compare::less>;
+            using less = compare::cartesian<compare::less, compare::equals_epsilon>;
 
             if (less::apply(p, p1))
             {

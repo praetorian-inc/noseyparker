@@ -33,7 +33,7 @@ namespace dispatch
 
 template
 <
-    typename Geometry1, typename Geometry2, 
+    typename Geometry1, typename Geometry2,
     typename Tag1 = typename tag_cast
         <
             typename tag<Geometry1>::type,

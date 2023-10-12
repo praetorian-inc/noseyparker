@@ -4,8 +4,9 @@
 //
 // Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2020.
-// Modifications copyright (c) 2020, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2020-2023.
+// Modifications copyright (c) 2020-2023, Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -15,6 +16,7 @@
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_ALGORITHMS_DIFF_ABS_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_ALGORITHMS_DIFF_ABS_HPP
 
+#include <cmath>
 #include <type_traits>
 
 namespace boost { namespace geometry { namespace index { namespace detail

@@ -465,9 +465,7 @@ struct nadgrids
     nadgrids(std::string const& g0, std::string const& g1, std::string const& g2) : base_t(g0, g1, g2) {}
     nadgrids(std::string const& g0, std::string const& g1, std::string const& g2, std::string const& g3) : base_t(g0, g1, g2, g3) {}
     nadgrids(std::string const& g0, std::string const& g1, std::string const& g2, std::string const& g3, std::string const& g4) : base_t(g0, g1, g2, g3, g4) {}
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
     nadgrids(std::initializer_list<std::string> l) : base_t(l) {}
-#endif
 };
 
 template <typename Proj>
@@ -488,9 +486,7 @@ struct towgs84
     towgs84(T const& v0, T const& v1, T const& v2, T const& v3, T const& v4, T const& v5, T const& v6)
         : base_t(v0, v1, v2, v3, v4, v5, v6)
     {}
-#ifndef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
     towgs84(std::initializer_list<T> l) : base_t(l) {}
-#endif
 };
 
 struct axis

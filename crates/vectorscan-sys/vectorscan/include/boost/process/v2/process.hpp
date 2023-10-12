@@ -15,6 +15,7 @@
 #include <boost/process/v2/default_launcher.hpp>
 #include <boost/process/v2/exit_code.hpp>
 #include <boost/process/v2/pid.hpp>
+#include <boost/process/v2/ext/exe.hpp>
 #include <boost/process/v2/process_handle.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
@@ -92,17 +93,7 @@ struct basic_process
       : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
   {
   }
-    /// Construct a child from a property list and launch it using the default launcher..
-  template<typename ... Inits>
-  explicit basic_process(
-      executor_type executor,
-      const filesystem::path& exe,
-      std::initializer_list<wstring_view> args,
-      Inits&&... inits)
-      : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
-  {
-  }
-
+  
   /// Construct a child from a property list and launch it using the default launcher..
   template<typename Args, typename ... Inits>
   explicit basic_process(
@@ -214,6 +205,37 @@ struct basic_process
     process_handle_.request_exit(ec);
   }
 
+  /// Send the process a signal requesting it to stop. This may rely on undocumented functions.
+  void suspend(error_code &ec)
+  {
+    process_handle_.suspend(ec);
+  }
+
+  /// Send the process a signal requesting it to stop. This may rely on undocumented functions.
+  void suspend()
+  {
+    error_code ec;
+    suspend(ec);
+    if (ec)
+        detail::throw_error(ec, "suspend");
+  }
+
+
+  /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
+  void resume(error_code &ec)
+  {
+    process_handle_.resume(ec);  
+  }
+
+  /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
+  void resume()
+  {
+      error_code ec;
+      suspend(ec);
+      if (ec)
+          detail::throw_error(ec, "resume");
+  }
+
   /// Throwing @overload void terminate(native_exit_code_type &exit_code, error_code & ec)
   void terminate()
   {
@@ -233,12 +255,12 @@ struct basic_process
   {
     error_code ec;
     if (running(ec))
-      wait(ec);
+      process_handle_.wait(exit_status_, ec);
     if (ec)
       detail::throw_error(ec, "wait failed");
     return exit_code();
   }
-  /// Waits for the process to exit, store the exit code internall and return it.
+  /// Waits for the process to exit, store the exit code internally and return it.
   int wait(error_code & ec)
   {
     if (running(ec))
@@ -255,8 +277,9 @@ struct basic_process
     return boost::exchange(process_handle_, get_executor());
 #endif
   }
-  // Get the native 
+  /// Get the native
   native_handle_type native_handle() {return process_handle_.native_handle(); }
+  /// Return the evaluated exit_code.
   int exit_code() const
   {
     return evaluate_exit_code(exit_status_);
@@ -302,7 +325,7 @@ struct basic_process
   /** Note that this might be a process that already exited.*/
   bool is_open() const { return process_handle_.is_open(); }
   
-  /// Asynchronously wait for the process to exit and deliver the portable exit-code in the completion handler.
+  /// Asynchronously wait for the process to exit and deliver the native exit-code in the completion handler.
   template <BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, int))
             WaitHandler BOOST_PROCESS_V2_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
   BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(WaitHandler, void (error_code, int))

@@ -14,7 +14,8 @@
 #include <boost/json/string_view.hpp>
 #include <cstdlib>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 class object;
 class value;
@@ -89,6 +90,7 @@ find_in_object<string_view>(
     string_view key) noexcept;
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

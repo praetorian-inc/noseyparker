@@ -45,8 +45,8 @@ inline constexpr Real ldexp(Real arg, int exp) noexcept
     if(BOOST_MATH_IS_CONSTANT_EVALUATED(arg))
     {
         return boost::math::ccmath::abs(arg) == Real(0) ? arg :
-               boost::math::ccmath::isinf(arg) ? arg :
-               boost::math::ccmath::isnan(arg) ? arg :
+               (boost::math::ccmath::isinf)(arg) ? arg :
+               (boost::math::ccmath::isnan)(arg) ? arg :
                boost::math::ccmath::detail::ldexp_impl(arg, exp);
     }
     else

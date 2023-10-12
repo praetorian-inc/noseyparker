@@ -37,7 +37,7 @@ char const* const hexdigs[] = {
 template<class CharSet>
 std::size_t
 re_encoded_size_unsafe(
-    string_view s,
+    core::string_view s,
     CharSet const& unreserved,
     encoding_opts opt) noexcept
 {
@@ -107,7 +107,7 @@ std::size_t
 re_encode_unsafe(
     char*& dest_,
     char const* const end,
-    string_view s,
+    core::string_view s,
     CharSet const& unreserved,
     encoding_opts opt) noexcept
 {

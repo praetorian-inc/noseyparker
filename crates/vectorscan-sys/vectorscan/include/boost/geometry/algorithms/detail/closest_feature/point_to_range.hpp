@@ -189,7 +189,7 @@ private:
             it_min1 = it_back;
             it_min2 = first;
         }
-    }    
+    }
 
 public:
     typedef typename std::pair<iterator_type, iterator_type> return_type;

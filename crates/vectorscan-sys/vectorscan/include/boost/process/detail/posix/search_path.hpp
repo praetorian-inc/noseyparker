@@ -27,7 +27,11 @@ inline boost::process::filesystem::path search_path(
     for (const boost::process::filesystem::path & pp : path)
     {
         auto p = pp / filename;
+#if defined(BOOST_PROCESS_USE_STD_FS)
+        std::error_code ec;
+#else
         boost::system::error_code ec;
+#endif
         bool file = boost::process::filesystem::is_regular_file(p, ec);
         if (!ec && file && ::access(p.c_str(), X_OK) == 0)
             return p;

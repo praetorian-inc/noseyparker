@@ -224,7 +224,7 @@ namespace boost
            // but zero is the best we can do:
            return 0;
         }
-        if(p == 1)
+        if(p == 1 || success_fraction == 1)
         {  // Probability of n or fewer successes is always one,
            // so n is the most sensible answer here:
            return trials;
@@ -233,10 +233,6 @@ namespace boost
         { // p <= pdf(dist, 0) == cdf(dist, 0)
           return 0; // So the only reasonable result is zero.
         } // And root finder would fail otherwise.
-        if(success_fraction == 1)
-        {  // our formulae break down in this case:
-           return p > 0.5f ? trials : 0;
-        }
 
         // Solve for quantile numerically:
         //

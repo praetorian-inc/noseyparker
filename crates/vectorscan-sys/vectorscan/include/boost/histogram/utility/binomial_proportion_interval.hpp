@@ -61,7 +61,7 @@ class confidence_level;
 class deviation {
 public:
   /// constructor from units of standard deviations
-  explicit deviation(double d) noexcept : d_{d} {
+  explicit deviation(double d) : d_{d} {
     if (d <= 0)
       BOOST_THROW_EXCEPTION(std::invalid_argument("scaling factor must be positive"));
   }
@@ -93,7 +93,7 @@ private:
 class confidence_level {
 public:
   /// constructor from confidence level (a probability)
-  explicit confidence_level(double cl) noexcept : cl_{cl} {
+  explicit confidence_level(double cl) : cl_{cl} {
     if (cl <= 0 || cl >= 1)
       BOOST_THROW_EXCEPTION(std::invalid_argument("0 < cl < 1 is required"));
   }

@@ -110,12 +110,7 @@ struct point_on_multi
     {
         // Take a point on the first multi-geometry
         // (i.e. the first that is not empty)
-        for (typename boost::range_iterator
-                <
-                    MultiGeometry const
-                >::type it = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        for (auto it = boost::begin(multi); it != boost::end(multi); ++it)
         {
             if (Policy::apply(point, *it))
             {

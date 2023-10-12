@@ -82,7 +82,7 @@ using limit_handles_ = ::boost::process::detail::api::limit_handles_;
 }
 
 /**
- * The limit_handles property sets all properties to be inherited only expcitly. It closes all unused file-descriptors on posix after the fork and
+ * The limit_handles property sets all properties to be inherited only explicitly. It closes all unused file-descriptors on posix after the fork and
  * removes the inherit flags on windows.
  *
  * \note This is executed after the fork on posix.

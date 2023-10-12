@@ -56,7 +56,7 @@ struct smallest_for_indexable_dimension<Point, BoxIndexable, box_tag, minmaxdist
             closer_comp = detail::diff_abs(pt_c, ind_c_min); // unsigned values protection
         else
             closer_comp = ind_c_max - pt_c;
-        
+
         result_type further_comp = 0;
         if ( ind_c_avg <= pt_c )
             further_comp = pt_c - ind_c_min;

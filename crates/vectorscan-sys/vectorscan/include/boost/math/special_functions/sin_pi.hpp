@@ -27,7 +27,7 @@ inline T sin_pi_imp(T x, const Policy& pol)
    if(x < 0)
       return -sin_pi_imp(T(-x), pol);
    // sin of pi*x:
-   if(x < 0.5)
+   if(x < T(0.5))
       return sin(constants::pi<T>() * x);
    bool invert;
    if(x < 1)

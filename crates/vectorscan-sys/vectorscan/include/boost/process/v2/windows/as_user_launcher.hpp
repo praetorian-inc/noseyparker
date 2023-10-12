@@ -37,7 +37,7 @@ struct as_user_launcher : default_launcher
       auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
-          asio::detail::throw_error(ec, "as_user_launcher");
+          v2::detail::throw_error(ec, "as_user_launcher");
 
       return proc;
   }
@@ -68,7 +68,7 @@ struct as_user_launcher : default_launcher
       auto proc = (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
-          asio::detail::throw_error(ec, "as_user_launcher");
+          detail::throw_error(ec, "as_user_launcher");
 
       return proc;
   }
@@ -107,7 +107,7 @@ struct as_user_launcher : default_launcher
 
     if (ok == 0)
     {
-      ec = detail::get_last_error();
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
       detail::on_error(*this, executable, command_line, ec, inits...);
 
       if (process_information.hProcess != INVALID_HANDLE_VALUE)

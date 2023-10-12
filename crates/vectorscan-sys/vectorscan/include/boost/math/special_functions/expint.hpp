@@ -457,7 +457,7 @@ T expint_imp(unsigned n, T z, const Policy& pol, const Tag& tag)
    bool f;
    if(n < 3)
    {
-      f = z < 0.5;
+      f = z < T(0.5);
    }
    else
    {
@@ -574,7 +574,7 @@ T expint_i_imp(T z, const Policy& pol, const std::integral_constant<int, 53>& ta
          / tools::evaluate_polynomial(Q, t);
       t = (z - r1) - r2;
       result *= t;
-      if(fabs(t) < 0.1)
+      if(fabs(t) < T(0.1))
       {
          result += boost::math::log1p(t / r, pol);
       }
@@ -791,7 +791,7 @@ T expint_i_imp(T z, const Policy& pol, const std::integral_constant<int, 64>& ta
          / tools::evaluate_polynomial(Q, t);
       t = (z - r1) - r2;
       result *= t;
-      if(fabs(t) < 0.1)
+      if(fabs(t) < T(0.1))
       {
          result += boost::math::log1p(t / r, pol);
       }

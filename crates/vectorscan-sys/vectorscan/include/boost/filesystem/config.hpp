@@ -1,7 +1,7 @@
 //  boost/filesystem/v3/config.hpp  ----------------------------------------------------//
 
 //  Copyright Beman Dawes 2003
-//  Copyright Andrey Semashev 2021
+//  Copyright Andrey Semashev 2021-2023
 
 //  Distributed under the Boost Software License, Version 1.0.
 //  See http://www.boost.org/LICENSE_1_0.txt
@@ -70,47 +70,8 @@
 // Deprecated symbols markup -----------------------------------------------------------//
 
 #if !defined(BOOST_FILESYSTEM_ALLOW_DEPRECATED)
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && defined(_MSC_VER)
-#if (_MSC_VER) >= 1400
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __declspec(deprecated(msg))
+#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) BOOST_DEPRECATED(msg)
 #else
-// MSVC 7.1 only supports the attribute without a message
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __declspec(deprecated)
-#endif
-#endif
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && defined(__has_extension)
-#if __has_extension(attribute_deprecated_with_message)
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __attribute__((deprecated(msg)))
-#endif
-#endif
-
-// gcc since 4.5 supports deprecated attribute with a message; older versions support the attribute without a message.
-// Oracle Studio 12.4 supports deprecated attribute with a message; this is the first release that supports the attribute.
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && (\
-    (defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 405) ||\
-    (defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x5130))
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __attribute__((deprecated(msg)))
-#endif
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && __cplusplus >= 201402
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) [[deprecated(msg)]]
-#endif
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && defined(__GNUC__)
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __attribute__((deprecated))
-#endif
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED) && defined(__has_attribute)
-#if __has_attribute(deprecated)
-#define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg) __attribute__((deprecated))
-#endif
-#endif
-
-#endif // !defined(BOOST_FILESYSTEM_ALLOW_DEPRECATED)
-
-#if !defined(BOOST_FILESYSTEM_DETAIL_DEPRECATED)
 #define BOOST_FILESYSTEM_DETAIL_DEPRECATED(msg)
 #endif
 
@@ -170,6 +131,13 @@
 #include <boost/config/auto_link.hpp>
 #endif // auto-linking disabled
 
+#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) ||\
+    (defined(BOOST_LIBSTDCXX_VERSION) && (BOOST_LIBSTDCXX_VERSION < 50000)) ||\
+    (defined(BOOST_MSSTL_VERSION) && (BOOST_MSSTL_VERSION < 100))
+// Indicates that the standard library fstream types do not support move constructor/assignment.
+#define BOOST_FILESYSTEM_DETAIL_NO_CXX11_MOVABLE_FSTREAMS
+#endif
+
 #if !defined(BOOST_NO_CXX17_HDR_STRING_VIEW) && \
     (\
         (defined(BOOST_DINKUMWARE_STDLIB) && defined(_HAS_CXX23) && (_HAS_CXX23 != 0) && defined(_MSVC_STL_UPDATE) && (_MSVC_STL_UPDATE < 202208L)) || \
@@ -178,7 +146,7 @@
 // Indicates that std::string_view has implicit constructor from ranges that was present in an early C++23 draft (N4892).
 // This was later rectified by marking the constructor explicit (https://wg21.link/p2499). Unfortunately, some compilers
 // were released with the constructor being implicit.
-#define BOOST_FILESYSTEM_CXX23_STRING_VIEW_HAS_IMPLICIT_RANGE_CTOR
+#define BOOST_FILESYSTEM_DETAIL_CXX23_STRING_VIEW_HAS_IMPLICIT_RANGE_CTOR
 #endif
 
 #endif // BOOST_FILESYSTEM_CONFIG_HPP

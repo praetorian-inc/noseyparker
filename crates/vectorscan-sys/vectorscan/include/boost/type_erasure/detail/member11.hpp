@@ -38,13 +38,13 @@ namespace boost {
 namespace type_erasure {
 namespace detail {
 
-template<class P, template<class ...> class interface, class Sig, class Concept, class Base, class ID>
+template<class P, template<class ...> class Interface, class Sig, class Concept, class Base, class ID>
 using choose_member_interface = typename ::boost::mpl::if_c< ::boost::is_reference<P>::value,
     typename ::boost::mpl::if_c< ::boost::type_erasure::detail::is_non_const_ref<P>::value,
-        interface<Sig, Concept, Base, const ID>,
+        Interface<Sig, Concept, Base, const ID>,
         Base
     >::type,
-    interface<Sig, Concept, Base, ID>
+    Interface<Sig, Concept, Base, ID>
 >::type;
 
 

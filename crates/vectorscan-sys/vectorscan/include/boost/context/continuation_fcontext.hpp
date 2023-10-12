@@ -44,7 +44,7 @@
 # include BOOST_ABI_PREFIX
 #endif
 
-#if defined __CET__
+#if defined(__CET__) && defined(__unix__)
 #  include <cet.h>
 #  include <sys/mman.h>
 #  define SHSTK_ENABLED (__CET__ & 0x2)

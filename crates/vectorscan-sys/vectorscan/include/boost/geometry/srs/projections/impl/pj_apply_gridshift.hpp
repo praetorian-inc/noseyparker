@@ -338,7 +338,7 @@ inline bool pj_apply_gridshift_3(StreamPolicy const& stream_policy,
                                  grids_tag)
 {
     typedef typename boost::range_size<Range>::type size_type;
-    
+
     // If the grids are empty the indexes are as well
     if (gridindexes.empty())
     {
@@ -356,7 +356,7 @@ inline bool pj_apply_gridshift_3(StreamPolicy const& stream_policy,
 
         CalcT in_lon = geometry::get_as_radian<0>(point);
         CalcT in_lat = geometry::get_as_radian<1>(point);
-        
+
         pj_gi * gip = find_grid(in_lon, in_lat, grids.gridinfo, gridindexes);
 
         if ( gip != NULL )
@@ -369,7 +369,7 @@ inline bool pj_apply_gridshift_3(StreamPolicy const& stream_policy,
                 CalcT out_lat = HUGE_VAL;
 
                 nad_cvt<Inverse>(in_lon, in_lat, out_lon, out_lat, *gip);
-            
+
                 // TODO: check differently
                 if ( out_lon != HUGE_VAL )
                 {
@@ -392,7 +392,7 @@ inline bool pj_apply_gridshift_3(StreamPolicy const& stream_policy,
                                  shared_grids_tag)
 {
     typedef typename boost::range_size<Range>::type size_type;
-    
+
     // If the grids are empty the indexes are as well
     if (gridindexes.empty())
     {

@@ -27,7 +27,7 @@ namespace urls {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< ipv4_address > rv = grammar::parse( "192.168.0.1", ipv4_address_rule );
+    system::result< ipv4_address > rv = grammar::parse( "192.168.0.1", ipv4_address_rule );
     @endcode
 
     @par BNF
@@ -66,7 +66,7 @@ struct ipv4_address_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<ipv4_address>;
+        system::result<ipv4_address>;
 };
 
 constexpr ipv4_address_rule_t ipv4_address_rule{};

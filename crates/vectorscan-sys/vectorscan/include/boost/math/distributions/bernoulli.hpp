@@ -151,7 +151,7 @@ namespace boost
       return dist.success_fraction();
     } // mean
 
-    // Rely on dereived_accessors quantile(half)
+    // Rely on derived_accessors quantile(half)
     //template <class RealType>
     //inline RealType median(const bernoulli_distribution<RealType, Policy>& dist)
     //{ // Median of bernoulli distribution is not defined.

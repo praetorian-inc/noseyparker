@@ -36,7 +36,7 @@ public:
                 CalculationType
             >
     {};
-    
+
     template <typename Box>
     static inline auto apply(Box const& box)
     {

@@ -20,12 +20,6 @@ namespace multiprecision {
 namespace backends {
 
 template <class Backend>
-struct debug_adaptor;
-
-template <class Backend>
-struct logged_adaptor;
-
-template <class Backend>
 struct complex_adaptor
 {
  protected:
@@ -945,8 +939,6 @@ inline std::size_t hash_value(const complex_adaptor<Backend>& val)
 }
 
 } // namespace backends
-
-using boost::multiprecision::backends::complex_adaptor;
 
 template <class Backend>
 struct number_category<complex_adaptor<Backend> > : public std::integral_constant<int, boost::multiprecision::number_kind_complex>

@@ -16,7 +16,8 @@
 #include <cstring>
 #include <cstdint>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 template<int N>
@@ -192,6 +193,7 @@ public:
 };
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

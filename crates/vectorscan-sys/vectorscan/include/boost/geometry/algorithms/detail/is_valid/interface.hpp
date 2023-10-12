@@ -30,7 +30,7 @@
 
 namespace boost { namespace geometry
 {
-    
+
 namespace resolve_strategy
 {
 

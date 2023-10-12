@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2020-2021, Oracle and/or its affiliates.
+// Copyright (c) 2020-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -11,12 +11,14 @@
 #ifndef BOOST_GEOMETRY_STRATEGIES_CONVEX_HULL_CARTESIAN_HPP
 #define BOOST_GEOMETRY_STRATEGIES_CONVEX_HULL_CARTESIAN_HPP
 
-#include <boost/geometry/strategies/side.hpp>
-#include <boost/geometry/strategy/cartesian/side_robust.hpp>
-
 #include <boost/geometry/strategies/cartesian/point_in_point.hpp>
 #include <boost/geometry/strategies/convex_hull/services.hpp>
+#include <boost/geometry/strategies/compare.hpp>
 #include <boost/geometry/strategies/detail.hpp>
+#include <boost/geometry/strategies/side.hpp>
+
+#include <boost/geometry/strategy/cartesian/side_robust.hpp>
+
 #include <boost/geometry/util/type_traits.hpp>
 
 
@@ -47,6 +49,14 @@ public:
             = strategy::side::side_robust<CalculationType>;
         return side_strategy_type();
     }
+
+    template <typename ComparePolicy, typename EqualsPolicy>
+    using compare_type = typename strategy::compare::cartesian
+        <
+            ComparePolicy,
+            EqualsPolicy,
+            -1
+        >;
 };
 
 namespace services

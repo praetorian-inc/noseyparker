@@ -3,8 +3,9 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2013-2017 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2013-2021.
-// Modifications copyright (c) 2013-2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2013-2023.
+// Modifications copyright (c) 2013-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -77,7 +78,7 @@ class spherical_winding_base
             {
                 return 0;
             }
-            
+
             if (m_raw_count != 0 && m_raw_count_anti != 0)
             {
                 if (m_raw_count > 0) // right, wrap around south pole
@@ -175,7 +176,7 @@ public:
                                 : 1); // going right all points will be on left side
                     }
                 }
-            
+
                 if (side == 0)
                 {
                     // Point is lying on segment
@@ -264,7 +265,7 @@ protected:
         //  it doesn't matter what lon it is if it's a pole
         //  so e.g. if one of the segment endpoints is a pole
         //  then only the other lon matters
-        
+
         bool eq1_strict = longitudes_equal<units_t>(s1_lon, p_lon);
         bool eq2_strict = longitudes_equal<units_t>(s2_lon, p_lon);
         bool eq1_anti = false;
@@ -273,11 +274,9 @@ protected:
         calc_t const anti_p_lon = p_lon + (p_lon <= c0 ? pi : -pi);
 
         eq1 = eq1_strict // lon strictly equal to s1
-            || (eq1_anti = longitudes_equal<units_t>(s1_lon, anti_p_lon)) // anti-lon strictly equal to s1
-            || math::equals(math::abs(s1_lat), half_pi); // s1 is pole
+            || (eq1_anti = longitudes_equal<units_t>(s1_lon, anti_p_lon)); // anti-lon strictly equal to s1
         eq2 = eq2_strict // lon strictly equal to s2
-            || (eq2_anti = longitudes_equal<units_t>(s2_lon, anti_p_lon)) // anti-lon strictly equal to s2
-            || math::equals(math::abs(s2_lat), half_pi); // s2 is pole
+            || (eq2_anti = longitudes_equal<units_t>(s2_lon, anti_p_lon)); // anti-lon strictly equal to s2
 
         // segment overlapping pole
         calc_t const s_lon_diff = math::longitude_distance_signed<units_t>(s1_lon, s2_lon);
@@ -292,7 +291,29 @@ protected:
                 eq1 = eq2 = true;
             }
         }
-        
+
+        // check whether point is on a segment with a pole endpoint
+        if (math::longitude_distance_signed<units_t>(s2_lon, p_lon) == c0)
+        {
+            bool const s1_north = math::equals(get<1>(seg1), half_pi);
+            bool const s1_south = math::equals(get<1>(seg1), -half_pi);
+            if (s1_north || s1_south)
+            {
+                state.m_touches = s1_south ? s2_lat > p_lat : s2_lat < p_lat;
+                return state.m_touches;
+            }
+        }
+        if (math::longitude_distance_signed<units_t>(s1_lon, p_lon) == c0)
+        {
+            bool const s2_north = math::equals(get<1>(seg2), half_pi);
+            bool const s2_south = math::equals(get<1>(seg2), -half_pi);
+            if (s2_north || s2_south)
+            {
+                state.m_touches = s2_south ? s1_lat > p_lat : s1_lat < p_lat;
+                return state.m_touches;
+            }
+        }
+
         // Both equal p -> segment vertical
         // The only thing which has to be done is check if point is ON segment
         if (eq1 && eq2)
@@ -361,14 +382,24 @@ protected:
         // If needed (eq1 && eq2 ? 0) could be returned
 
         calc_t const c0 = 0;
+        calc_t const c2 = 2;
         calc_t const pi = constants::half_period();
+        calc_t const half_pi = pi / c2;
+
+        bool const s1_is_pole = math::equals(std::abs(get<1>(seg1)), half_pi);
+        bool const s2_is_pole = math::equals(std::abs(get<1>(seg2)), half_pi);
+
+        if (s1_is_pole && s2_is_pole)
+        {
+            return count_info(0, false);
+        }
 
         calc_t const p = get<0>(point);
         calc_t const s1 = get<0>(seg1);
         calc_t const s2 = get<0>(seg2);
 
         calc_t const s1_p = math::longitude_distance_signed<units_t>(s1, p);
-        
+
         if (s_antipodal)
         {
             return count_info(s1_p < c0 ? -2 : 2, false); // choose W/E
@@ -388,7 +419,7 @@ protected:
         {
             return count_info(s1_s2 < c0 ? -2 : 2, false); // choose W/E
         }
-        
+
         calc_t const s1_p_anti = math::longitude_distance_signed<units_t>(s1, p + pi);
 
         // Anti-Point between s1 and s2

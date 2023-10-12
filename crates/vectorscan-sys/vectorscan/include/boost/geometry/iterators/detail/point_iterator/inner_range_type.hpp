@@ -31,7 +31,7 @@ namespace detail { namespace point_iterator
 
 template
 <
-    typename Geometry, 
+    typename Geometry,
     typename Tag = typename tag<Geometry>::type
 >
 struct inner_range_type

@@ -66,7 +66,7 @@ namespace windows
     {
       if (wc == L'"')
         *(itr++) = L'\\';
-        *(itr++) = wc;
+      *(itr++) = wc;
     }
 
     *(itr ++) = L'"';

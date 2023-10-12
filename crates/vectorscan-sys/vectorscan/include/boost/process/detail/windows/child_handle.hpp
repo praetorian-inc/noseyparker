@@ -81,7 +81,7 @@ struct child_handle
     {
         ::boost::winapi::BOOL_ value;
         if (!::boost::winapi::IsProcessInJob(proc_info.hProcess, nullptr, &value))
-            throw_last_error("IsProcessinJob Failed");
+            throw_last_error("IsProcessInJob Failed");
         return value!=0;
     }
     bool in_group(std::error_code &ec) const noexcept

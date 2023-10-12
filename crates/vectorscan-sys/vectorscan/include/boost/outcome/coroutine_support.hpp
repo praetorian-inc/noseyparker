@@ -1,5 +1,5 @@
 /* Tells C++ coroutines about Outcome's result
-(C) 2019-2022 Niall Douglas <http://www.nedproductions.biz/> (12 commits)
+(C) 2019-2023 Niall Douglas <http://www.nedproductions.biz/> (12 commits)
 File Created: Oct 2019
 
 

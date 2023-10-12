@@ -27,6 +27,7 @@
 # pragma warning(disable:4365)  // conversion ... signed/unsigned mismatch
 #endif
 
+#include <boost/endian/detail/requires_cxx11.hpp>
 #include <boost/endian/buffers.hpp>
 #include <boost/core/scoped_enum.hpp>
 #include <boost/static_assert.hpp>

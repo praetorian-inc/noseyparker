@@ -15,6 +15,7 @@
 #ifndef __BOOST_SORT_COMMON_INT_ARRAY_HPP
 #define __BOOST_SORT_COMMON_INT_ARRAY_HPP
 
+#include <ciso646>
 #include <cstdint>
 #include <iostream>
 

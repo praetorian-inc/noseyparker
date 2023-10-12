@@ -113,8 +113,8 @@ struct GeometryCollection
 
     BOOST_CONCEPT_USAGE(GeometryCollection)
     {
-        Geometry* gc = nullptr;        
-        traits::clear<Geometry>::apply(*gc);        
+        Geometry* gc = nullptr;
+        traits::clear<Geometry>::apply(*gc);
         traits::iter_visit<Geometry>::apply([](auto &&) {}, boost::begin(*gc));
     }
 #endif // DOXYGEN_NO_CONCEPT_MEMBERS

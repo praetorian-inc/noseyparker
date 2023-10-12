@@ -231,7 +231,7 @@ struct crosses
             >::apply(geometry1, geometry2, strategy);
     }
 };
-    
+
 
 template <typename DynamicGeometry1, typename Geometry2, typename Tag2>
 struct crosses<DynamicGeometry1, Geometry2, dynamic_geometry_tag, Tag2>
@@ -295,10 +295,10 @@ struct crosses<DynamicGeometry1, DynamicGeometry2, dynamic_geometry_tag, dynamic
     }
 };
 
-    
+
 } // namespace resolve_dynamic
-    
-    
+
+
 /*!
 \brief \brief_check2{crosses}
 \ingroup crosses

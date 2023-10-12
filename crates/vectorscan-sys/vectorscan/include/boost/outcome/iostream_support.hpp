@@ -1,5 +1,5 @@
 /* iostream specialisations for result and outcome
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (21 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (21 commits)
 File Created: July 2017
 
 
@@ -88,13 +88,13 @@ namespace detail
     v._status.spare_storage_value = y;
     if(v._status.have_value())
     {
-      new(&v._value) decltype(v._value)();  // NOLINT
-      s >> v._value;                        // NOLINT
+      new(BOOST_OUTCOME_ADDRESS_OF(v._value)) decltype(v._value)();  // NOLINT
+      s >> v._value;                                       // NOLINT
     }
     if(v._status.have_error())
     {
-      new(&v._error) decltype(v._error)();  // NOLINT
-      s >> v._error;                        // NOLINT
+      new(BOOST_OUTCOME_ADDRESS_OF(v._error)) decltype(v._error)();  // NOLINT
+      s >> v._error;                                       // NOLINT
     }
     return s;
   }
@@ -109,8 +109,8 @@ namespace detail
     v._status.spare_storage_value = y;
     if(v._status.have_error())
     {
-      new(&v._error) decltype(v._error)();  // NOLINT
-      s >> v._error;                        // NOLINT
+      new(BOOST_OUTCOME_ADDRESS_OF(v._error)) decltype(v._error)();  // NOLINT
+      s >> v._error;                                       // NOLINT
     }
     return s;
   }
@@ -125,8 +125,8 @@ namespace detail
     v._status.spare_storage_value = y;
     if(v._status.have_value())
     {
-      new(&v._value) decltype(v._value)();  // NOLINT
-      s >> v._value;                        // NOLINT
+      new(BOOST_OUTCOME_ADDRESS_OF(v._value)) decltype(v._value)();  // NOLINT
+      s >> v._value;                                       // NOLINT
     }
     return s;
   }

@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2018-2019 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2018-2022 Barend Gehrels, Amsterdam, the Netherlands.
 
 // This file was modified by Oracle on 2020-2021.
 // Modifications copyright (c) 2020-2021 Oracle and/or its affiliates.
@@ -17,11 +17,15 @@
 
 #include <boost/range/value_type.hpp>
 
+#include <boost/geometry/core/radian_access.hpp>
+
 #include <boost/geometry/srs/spheroid.hpp>
 #include <boost/geometry/strategies/buffer.hpp>
+#include <boost/geometry/strategies/geographic/buffer_helper.hpp>
 #include <boost/geometry/strategies/geographic/parameters.hpp>
 #include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/select_calculation_type.hpp>
+
 
 namespace boost { namespace geometry
 {
@@ -55,80 +59,74 @@ template
 class geographic_point_circle
 {
 public :
+
+    //! \brief Constructs the strategy with a spheroid
+    //! \param spheroid The spheroid to be used
+    //! \param count Number of points (minimum 3) for the created circle
+    explicit inline geographic_point_circle(Spheroid const& spheroid,
+                                            std::size_t count = default_points_per_circle)
+        : m_spheroid(spheroid)
+        , m_count(get_point_count_for_circle(count))
+    {}
+
     //! \brief Constructs the strategy
-    //! \param count number of points for the created circle (if count
-    //! is smaller than 3, count is internally set to 3)
-    explicit geographic_point_circle(std::size_t count = 90)
-        : m_count((count < 3u) ? 3u : count)
+    //! \param count Number of points (minimum 3) for the created circle
+    explicit inline geographic_point_circle(std::size_t count = default_points_per_circle)
+        : m_count(get_point_count_for_circle(count))
     {}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    //! Fills output_range with a circle around point using distance_strategy
+    //! Fills range_out with a circle around point using distance_strategy
     template
     <
         typename Point,
-        typename OutputRange,
-        typename DistanceStrategy
+        typename DistanceStrategy,
+        typename RangeOut
     >
     inline void apply(Point const& point,
-                DistanceStrategy const& distance_strategy,
-                OutputRange& output_range) const
+                      DistanceStrategy const& distance_strategy,
+                      RangeOut& range_out) const
     {
-        typedef typename boost::range_value<OutputRange>::type output_point_type;
-
-        typedef typename select_calculation_type
+        using calc_t = typename select_calculation_type
             <
-                Point, output_point_type,
+                Point,
+                typename boost::range_value<RangeOut>::type,
                 CalculationType
-                //double
-            >::type calculation_type;
+            >::type;
 
-        calculation_type const buffer_distance = distance_strategy.apply(point, point,
-                        strategy::buffer::buffer_side_left);
+        using helper = geographic_buffer_helper<FormulaPolicy, calc_t>;
 
-        typedef typename FormulaPolicy::template direct
-            <
-                calculation_type, true, false, false, false
-            > direct_t;
+        calc_t const lon_rad = get_as_radian<0>(point);
+        calc_t const lat_rad = get_as_radian<1>(point);
 
-        calculation_type const two_pi = geometry::math::two_pi<calculation_type>();
-        calculation_type const pi = geometry::math::pi<calculation_type>();
+        calc_t const buffer_distance = distance_strategy.apply(point,
+            point, strategy::buffer::buffer_side_left);
 
-        calculation_type const diff = two_pi / calculation_type(m_count);
-        // TODO: after calculation of some angles is corrected,
-        // we can start at 0.0
-        calculation_type angle = 0.001;
+        calc_t const two_pi = geometry::math::two_pi<calc_t>();
+        calc_t const pi = geometry::math::pi<calc_t>();
+
+        calc_t const diff = two_pi / calc_t(m_count);
+        calc_t angle = -pi;
 
         for (std::size_t i = 0; i < m_count; i++, angle += diff)
         {
-            if (angle > pi)
-            {
-                angle -= two_pi;
-            }
-
-            typename direct_t::result_type
-                dir_r = direct_t::apply(get_as_radian<0>(point), get_as_radian<1>(point),
-                                        buffer_distance, angle,
-                                        m_spheroid);
-            output_point_type p;
-            set_from_radian<0>(p, dir_r.lon2);
-            set_from_radian<1>(p, dir_r.lat2);
-            output_range.push_back(p);
+            // If angle is zero, shift angle a tiny bit to avoid spikes.
+            calc_t const eps = angle == 0 ? 1.0e-10 : 0.0;
+            helper::append_point(lon_rad, lat_rad, buffer_distance, angle + eps, m_spheroid, range_out);
         }
 
         {
             // Close the range
-            const output_point_type p = output_range.front();
-            output_range.push_back(p);
+            auto const p = range_out.front();
+            range_out.push_back(p);
         }
     }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 private :
-    std::size_t m_count;
     Spheroid m_spheroid;
+    std::size_t m_count;
 };
-
 
 }} // namespace strategy::buffer
 

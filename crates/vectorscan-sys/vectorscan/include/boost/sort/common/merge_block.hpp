@@ -14,6 +14,7 @@
 #ifndef __BOOST_SORT_COMMON_MERGE_BLOCK_HPP
 #define __BOOST_SORT_COMMON_MERGE_BLOCK_HPP
 
+#include <ciso646>
 #include <boost/sort/common/range.hpp>
 #include <boost/sort/common/rearrange.hpp>
 #include <boost/sort/common/util/merge.hpp>

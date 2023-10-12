@@ -72,7 +72,7 @@ struct less_ptr_no_null
 /// @param index : vector where store the iterators
 //-----------------------------------------------------------------------------
 template<class Iter_t>
-static void create_index(Iter_t first, Iter_t last, std::vector<Iter_t> &index)
+void create_index(Iter_t first, Iter_t last, std::vector<Iter_t> &index)
 {
     auto nelem = last - first;
     assert(nelem >= 0);
@@ -90,7 +90,7 @@ static void create_index(Iter_t first, Iter_t last, std::vector<Iter_t> &index)
 /// @param [in] index : vector of the iterators
 //-----------------------------------------------------------------------------
 template<class Iter_t>
-static void sort_index(Iter_t global_first, std::vector<Iter_t> &index)
+void sort_index(Iter_t global_first, std::vector<Iter_t> &index)
 {
     typedef util::value_iter<Iter_t> value_t;
 
@@ -129,8 +129,8 @@ static void sort_index(Iter_t global_first, std::vector<Iter_t> &index)
     };
 };
 
-template<class func, class Iter_t, class Compare = compare_iter<Iter_t> >
-static void indirect_sort(func method, Iter_t first, Iter_t last, Compare comp)
+template<class func, class Iter_t, class Compare = util::compare_iter<Iter_t> >
+void indirect_sort(func method, Iter_t first, Iter_t last, Compare comp)
 {
     auto nelem = (last - first);
     assert(nelem >= 0);

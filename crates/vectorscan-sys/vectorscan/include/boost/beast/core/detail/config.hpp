@@ -104,13 +104,17 @@ namespace net = boost::asio;
 
 
 #ifdef BOOST_BEAST_NO_SOURCE_LOCATION
-#define BOOST_BEAST_ASSIGN_EC(ec, error) ec.assign(error)
+#define BOOST_BEAST_ASSIGN_EC(ec, error) ec = error
 #else
 
 #define BOOST_BEAST_ASSIGN_EC(ec, error) \
     static constexpr auto BOOST_PP_CAT(loc_, __LINE__) ((BOOST_CURRENT_LOCATION)); \
     ec.assign(error, & BOOST_PP_CAT(loc_, __LINE__) )
 
+#endif
+
+#ifndef BOOST_BEAST_FILE_BUFFER_SIZE
+#define BOOST_BEAST_FILE_BUFFER_SIZE 4096
 #endif
 
 #endif

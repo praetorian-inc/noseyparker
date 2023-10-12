@@ -114,6 +114,8 @@ template<typename Char> constexpr Char space_sign();
 template<> constexpr char     space_sign<char>    () {return  ' '; }
 template<> constexpr wchar_t  space_sign<wchar_t> () {return L' '; }
 
+}
+}
+}
 
-}}}
 #endif

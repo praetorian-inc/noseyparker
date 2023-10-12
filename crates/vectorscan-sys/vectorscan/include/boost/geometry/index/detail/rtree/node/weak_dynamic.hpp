@@ -2,10 +2,11 @@
 //
 // R-tree nodes based on static conversion, storing dynamic-size containers
 //
-// Copyright (c) 2011-2018 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2023 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2021.
-// Modifications copyright (c) 2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2021-2023.
+// Modifications copyright (c) 2021-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -18,10 +19,12 @@
 #include <boost/container/allocator_traits.hpp>
 #include <boost/container/vector.hpp>
 #include <boost/core/pointer_traits.hpp>
+#include <boost/core/swap.hpp>
 
 #include <boost/geometry/index/detail/rtree/options.hpp>
 #include <boost/geometry/index/detail/rtree/node/concept.hpp>
 #include <boost/geometry/index/detail/rtree/node/pairs.hpp>
+#include <boost/geometry/index/detail/rtree/node/scoped_deallocator.hpp>
 #include <boost/geometry/index/detail/rtree/node/weak_visitor.hpp>
 
 namespace boost { namespace geometry { namespace index {
@@ -181,10 +184,10 @@ private:
             leaf_allocator_type // leaf_allocator_type for consistency with weak_leaf
         >::template rebind_alloc<Value> value_allocator_type;
     typedef boost::container::allocator_traits<value_allocator_type> value_allocator_traits;
-    
+
 public:
     typedef Allocator allocator_type;
-    
+
     typedef Value value_type;
     typedef typename value_allocator_traits::reference reference;
     typedef typename value_allocator_traits::const_reference const_reference;
@@ -204,26 +207,24 @@ public:
         , leaf_allocator_type(alloc)
     {}
 
-    inline allocators(BOOST_FWD_REF(allocators) a)
-        : internal_node_allocator_type(boost::move(a.internal_node_allocator()))
-        , leaf_allocator_type(boost::move(a.leaf_allocator()))
+    inline allocators(allocators&& a)
+        : internal_node_allocator_type(std::move(a.internal_node_allocator()))
+        , leaf_allocator_type(std::move(a.leaf_allocator()))
     {}
 
-    inline allocators & operator=(BOOST_FWD_REF(allocators) a)
+    inline allocators & operator=(allocators&& a)
     {
-        internal_node_allocator() = ::boost::move(a.internal_node_allocator());
-        leaf_allocator() = ::boost::move(a.leaf_allocator());
+        internal_node_allocator() = std::move(a.internal_node_allocator());
+        leaf_allocator() = std::move(a.leaf_allocator());
         return *this;
     }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     inline allocators & operator=(allocators const& a)
     {
         internal_node_allocator() = a.internal_node_allocator();
         leaf_allocator() = a.leaf_allocator();
         return *this;
     }
-#endif
 
     void swap(allocators & a)
     {

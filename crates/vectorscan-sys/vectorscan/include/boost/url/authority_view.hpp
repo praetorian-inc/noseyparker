@@ -31,7 +31,7 @@ namespace urls {
     strings constructed from a parsed, external
     character buffer whose storage is managed
     by the caller. That is, it acts like a
-    @ref string_view in terms of ownership.
+    `core::string_view` in terms of ownership.
     The caller is responsible for ensuring
     that the lifetime of the underlying
     character buffer extends until it is no
@@ -55,7 +55,7 @@ namespace urls {
     contain an error. The error can be converted to
     an exception by the caller if desired:
     @code
-    result< authority_view > rv = parse_authority( "user:pass@www.example.com:8080" );
+    system::result< authority_view > rv = parse_authority( "user:pass@www.example.com:8080" );
     @endcode
 
     @par BNF
@@ -79,7 +79,7 @@ namespace urls {
     @see
         @ref parse_authority.
 */
-class BOOST_SYMBOL_VISIBLE
+class BOOST_URL_DECL
     authority_view
     : private detail::parts_base
 {
@@ -103,7 +103,6 @@ public:
 
     /** Destructor
     */
-    BOOST_URL_DECL
     virtual
     ~authority_view();
 
@@ -119,7 +118,6 @@ public:
 
         @par Specification
     */
-    BOOST_URL_DECL
     authority_view() noexcept;
 
     /** Construct from a string.
@@ -157,19 +155,16 @@ public:
         @see
             @ref parse_authority.
     */
-    BOOST_URL_DECL
     explicit
-    authority_view(string_view s);
+    authority_view(core::string_view s);
 
     /** Constructor
     */
-    BOOST_URL_DECL
     authority_view(
         authority_view const&) noexcept;
 
     /** Assignment
     */
-    BOOST_URL_DECL
     authority_view&
     operator=(
         authority_view const&) noexcept;
@@ -240,7 +235,7 @@ public:
 
         @par Example
         @code
-        assert( parse_authority( "www.example.com" ).value().encoded_authority() == "www.example.com" );
+        assert( parse_authority( "www.example.com" ).value().buffer() == "www.example.com" );
         @endcode
 
         @par BNF
@@ -255,10 +250,10 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2"
             >3.2. Authority (rfc3986)</a>
     */
-    string_view
+    core::string_view
     buffer() const noexcept
     {
-        return string_view(data(), size());
+        return core::string_view(data(), size());
     }
 
     //--------------------------------------------
@@ -304,7 +299,6 @@ public:
             @ref userinfo.
 
     */
-    BOOST_URL_DECL
     bool
     has_userinfo() const noexcept;
 
@@ -399,7 +393,6 @@ public:
             @ref user,
             @ref userinfo.
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_userinfo() const noexcept;
 
@@ -498,7 +491,6 @@ public:
             @ref user,
             @ref userinfo.
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_user() const noexcept;
 
@@ -540,7 +532,6 @@ public:
             @ref user,
             @ref userinfo.
     */
-    BOOST_URL_DECL
     bool
     has_password() const noexcept;
 
@@ -633,7 +624,6 @@ public:
             @ref user,
             @ref userinfo.
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_password() const noexcept;
 
@@ -750,7 +740,6 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_host() const noexcept;
 
@@ -865,7 +854,6 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_host_address() const noexcept;
 
@@ -905,7 +893,6 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
     ipv4_address
     host_ipv4_address() const noexcept;
 
@@ -953,7 +940,6 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
     ipv6_address
     host_ipv6_address() const noexcept;
 
@@ -986,8 +972,7 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
-    string_view
+    core::string_view
     host_ipvfuture() const noexcept;
 
     /** Return the host name
@@ -1069,7 +1054,6 @@ public:
         @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2"
             >3.2.2. Host (rfc3986)</a>
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_host_name() const noexcept;
 
@@ -1111,7 +1095,6 @@ public:
             @ref port,
             @ref port_number.
     */
-    BOOST_URL_DECL
     bool
     has_port() const noexcept;
 
@@ -1147,8 +1130,7 @@ public:
             @ref has_port,
             @ref port_number.
     */
-    BOOST_URL_DECL
-    string_view
+    core::string_view
     port() const noexcept;
 
     /** Return the port
@@ -1183,7 +1165,6 @@ public:
             @ref has_port,
             @ref port.
     */
-    BOOST_URL_DECL
     std::uint16_t
     port_number() const noexcept;
 
@@ -1223,9 +1204,153 @@ public:
             @ref port,
             @ref port_number.
     */
-    BOOST_URL_DECL
     pct_string_view
     encoded_host_and_port() const noexcept;
+
+    //--------------------------------------------
+    //
+    // Comparison
+    //
+    //--------------------------------------------
+
+    /** Return the result of comparing this with another authority
+
+        This function compares two authorities
+        according to Syntax-Based comparison
+        algorithm.
+
+        @par Exception Safety
+        Throws nothing.
+
+        @return -1 if `*this < other`, 0 if
+        `this == other`, and 1 if `this > other`.
+
+        @par Specification
+        @li <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.2"
+            >6.2.2 Syntax-Based Normalization (rfc3986)</a>
+    */
+    int
+    compare(authority_view const& other) const noexcept;
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator==(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return a0.compare(a1) == 0;
+    }
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator!=(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return ! (a0 == a1);
+    }
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator<(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return a0.compare(a1) < 0;
+    }
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator<=(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return a0.compare(a1) <= 0;
+    }
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator>(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return a0.compare(a1) > 0;
+    }
+
+    /** Return the result of comparing two authorities
+        The authorities are compared component
+        by component as if they were first
+        normalized.
+
+        @par Complexity
+        Linear in `min( a0.size(), a1.size() )`
+
+        @par Exception Safety
+        Throws nothing
+    */
+    friend
+    bool
+    operator>=(
+        authority_view const& a0,
+        authority_view const& a1) noexcept
+    {
+        return a0.compare(a1) >= 0;
+    }
 
     //--------------------------------------------
 
@@ -1304,9 +1429,9 @@ operator<<(
         @ref authority_view.
 */
 BOOST_URL_DECL
-result<authority_view>
+system::result<authority_view>
 parse_authority(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 //------------------------------------------------
 

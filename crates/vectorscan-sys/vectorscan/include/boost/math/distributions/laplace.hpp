@@ -17,6 +17,7 @@
 #ifndef BOOST_STATS_LAPLACE_HPP
 #define BOOST_STATS_LAPLACE_HPP
 
+#include <boost/math/special_functions/log1p.hpp>
 #include <boost/math/distributions/detail/common_error_handling.hpp>
 #include <boost/math/distributions/complement.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -226,6 +227,50 @@ inline RealType cdf(const laplace_distribution<RealType, Policy>& dist, const Re
    return result;
 } // cdf
 
+template <class RealType, class Policy>
+inline RealType logcdf(const laplace_distribution<RealType, Policy>& dist, const RealType& x)
+{
+   BOOST_MATH_STD_USING  // For ADL of std functions.
+
+   RealType result = 0;
+   // Checking function argument.
+   const char* function = "boost::math::logcdf(const laplace_distribution<%1%>&, %1%)";
+   // Check scale and location.
+   if (false == dist.check_parameters(function, &result)) 
+   {
+      return result;
+   }
+
+   // Special cdf values:
+   if((boost::math::isinf)(x))
+   {
+      if(x < 0) 
+      {
+         return 0; // -infinity.
+      }
+      return 1; // + infinity.
+   }
+
+   if (false == detail::check_x(function, x, &result, Policy())) 
+   {
+      return result;
+   }
+
+   // General cdf  values
+   RealType scale( dist.scale() );
+   RealType location( dist.location() );
+
+   if (x < location)
+   {
+      result = ((x - location) / scale) - boost::math::constants::ln_two<RealType>();
+   }
+   else
+   {
+      result = log1p(-exp((location - x) / scale) / 2);
+   }
+
+   return result;
+} // logcdf
 
 template <class RealType, class Policy>
 inline RealType quantile(const laplace_distribution<RealType, Policy>& dist, const RealType& p)
@@ -302,6 +347,46 @@ inline RealType cdf(const complemented2_type<laplace_distribution<RealType, Poli
    return result;
 } // cdf complement
 
+template <class RealType, class Policy>
+inline RealType logcdf(const complemented2_type<laplace_distribution<RealType, Policy>, RealType>& c)
+{
+   // Calculate complement of logcdf.
+   BOOST_MATH_STD_USING // for ADL of std functions
+
+   RealType scale = c.dist.scale();
+   RealType location = c.dist.location();
+   RealType x = c.param;
+   RealType result = 0;
+
+   // Checking function argument.
+   const char* function = "boost::math::logcdf(const complemented2_type<laplace_distribution<%1%>, %1%>&)";
+
+   // Check scale and location.
+    if (false == c.dist.check_parameters(function, &result)) return result;
+
+   // Special cdf values.
+   if((boost::math::isinf)(x))
+   {
+     if(x < 0) 
+     { 
+       return 1; // cdf complement -infinity is unity.
+     }
+
+     return 0; // cdf complement +infinity is zero.
+   }
+   if(false == detail::check_x(function, x, &result, Policy()))return result;
+
+   // Cdf interval value.
+   if (-x < -location)
+   {
+      result = (-x+location)/scale - boost::math::constants::ln_two<RealType>();
+   }
+   else
+   {
+      result = log1p(-exp( (-location+x)/scale )/2, Policy());
+   }
+   return result;
+} // cdf complement
 
 template <class RealType, class Policy>
 inline RealType quantile(const complemented2_type<laplace_distribution<RealType, Policy>, RealType>& c)

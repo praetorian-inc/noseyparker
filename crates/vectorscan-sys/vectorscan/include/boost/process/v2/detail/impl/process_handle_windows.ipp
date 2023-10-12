@@ -9,8 +9,19 @@
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/process_handle_windows.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
 
 #include <windows.h>
+
+#if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
+extern "C" 
+{
+
+LONG WINAPI NtResumeProcess(HANDLE ProcessHandle);
+LONG WINAPI NtSuspendProcess(HANDLE ProcessHandle);
+
+}
+#endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
@@ -23,7 +34,7 @@ void get_exit_code_(
     error_code & ec)
 {
     if (!::GetExitCodeProcess(handle, &exit_code))
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 }
 
 
@@ -31,7 +42,12 @@ HANDLE open_process_(DWORD pid)
 {
     auto proc = OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE, FALSE, pid);
     if (proc == nullptr)
-        detail::throw_last_error("open_process()");
+    {
+        error_code ec;
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        throw system_error(ec, "open_process()");
+    }
+
     return proc;
 }
 
@@ -40,17 +56,17 @@ void terminate_if_running_(HANDLE handle)
 {
     DWORD exit_code = 0u;
     if (handle == INVALID_HANDLE_VALUE)
-      return ;
+        return ;
     if (::GetExitCodeProcess(handle, &exit_code))
-      if (exit_code == STILL_ACTIVE)
-        ::TerminateProcess(handle, 260);
+        if (exit_code == STILL_ACTIVE)
+            ::TerminateProcess(handle, 260);
 }
 
 bool check_handle_(HANDLE handle, error_code & ec)
 {
     if (handle == INVALID_HANDLE_VALUE)
     {
-        ec.assign(ERROR_INVALID_HANDLE_STATE, system_category());
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, ERROR_INVALID_HANDLE_STATE, system_category())
         return false;
     }
     return true;
@@ -60,8 +76,8 @@ bool check_pid_(pid_type pid_, error_code & ec)
 {
     if (pid_ == 0)
     {
-      ec.assign(ERROR_INVALID_HANDLE_STATE, system_category());
-      return false;
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, ERROR_INVALID_HANDLE_STATE, system_category())
+        return false;
     }
     return true;
 }
@@ -73,46 +89,73 @@ struct enum_windows_data_t
 };
 
 static BOOL CALLBACK enum_window(HWND hwnd, LPARAM param)
-  {
+{
     auto data = reinterpret_cast<enum_windows_data_t*>(param);
     DWORD pid{0u};
     GetWindowThreadProcessId(hwnd, &pid);
     if (pid != data->pid)
-      return TRUE;
+        return TRUE;
     
     LRESULT res = ::SendMessageW(hwnd, WM_CLOSE, 0, 0);
 
     if (res)
-      data->ec = detail::get_last_error();
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(data->ec)
     return res == 0;
-  }
+}
 
 void request_exit_(pid_type pid_, error_code & ec)
 {
     enum_windows_data_t data{ec, pid_};
 
     if (!::EnumWindows(enum_window, reinterpret_cast<LONG_PTR>(&data)))
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 }
 
 void interrupt_(pid_type pid_, error_code & ec)
 {
     if (!::GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid_))
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 }
 
 void terminate_(HANDLE handle, error_code & ec, DWORD & exit_status)
 {
     if (!::TerminateProcess(handle, 260))
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 }
 
 void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
 {
     if (!::GetExitCodeProcess(handle, &exit_status))
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 }
 
+#if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
+void suspend_(HANDLE handle, error_code & ec)
+{
+    auto nt_err = NtSuspendProcess(handle);
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
+    if (dos_err)
+       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+}
+
+void resume_(HANDLE handle, error_code & ec)
+{
+    auto nt_err = NtResumeProcess(handle);
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
+    if (dos_err)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+}
+#else
+void suspend_(HANDLE, error_code & ec)
+{
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ERROR_CALL_NOT_IMPLEMENTED, system_category())
+}
+
+void resume_(HANDLE handle, error_code & ec)
+{
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ERROR_CALL_NOT_IMPLEMENTED, system_category())
+}
+#endif
 
 #if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
 template struct basic_process_handle_win<>;

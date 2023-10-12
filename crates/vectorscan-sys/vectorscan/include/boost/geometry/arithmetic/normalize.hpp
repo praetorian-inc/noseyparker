@@ -45,7 +45,7 @@ inline bool vec_normalize(Point & pt, typename coordinate_type<Point>::type & le
 
     coord_t const c0 = 0;
     len = vec_length(pt);
-    
+
     if (math::equals(len, c0))
     {
         return false;

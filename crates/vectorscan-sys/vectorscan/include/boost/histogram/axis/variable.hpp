@@ -64,52 +64,63 @@ class variable : public iterator_mixin<variable<Value, MetaData, Options, Alloca
   using allocator_type = Allocator;
   using vector_type = std::vector<Value, allocator_type>;
 
-  static_assert(
-      std::is_floating_point<value_type>::value,
-      "current version of variable axis requires floating point type; "
-      "if you need a variable axis with an integral type, please submit an issue");
-
-  static_assert(
-      (!options_type::test(option::circular) && !options_type::test(option::growth)) ||
-          (options_type::test(option::circular) ^ options_type::test(option::growth)),
-      "circular and growth options are mutually exclusive");
-
 public:
   constexpr variable() = default;
   explicit variable(allocator_type alloc) : vec_(alloc) {}
 
-  /** Construct from iterator range of bin edges.
+  /** Construct from forward iterator range of bin edges.
 
-     @param begin   begin of edge sequence.
-     @param end     end of edge sequence.
-     @param meta    description of the axis (optional).
-     @param options see boost::histogram::axis::option (optional).
-     @param alloc   allocator instance to use (optional).
+    @param begin   begin of edge sequence.
+    @param end     end of edge sequence.
+    @param meta    description of the axis (optional).
+    @param options see boost::histogram::axis::option (optional).
+    @param alloc   allocator instance to use (optional).
+
+    The constructor throws `std::invalid_argument` if iterator range is invalid, if less
+    than two edges are provided or if bin edges are not in ascending order.
+
+    The arguments meta and alloc are passed by value. If you move either of them into the
+    axis and the constructor throws, their values are lost. Do not move if you cannot
+    guarantee that the bin description is not valid.
    */
   template <class It, class = detail::requires_iterator<It>>
   variable(It begin, It end, metadata_type meta = {}, options_type options = {},
            allocator_type alloc = {})
       : metadata_base(std::move(meta)), vec_(std::move(alloc)) {
-    (void)options;
+    // static_asserts were moved here from class scope to satisfy deduction in gcc>=11
+    static_assert(
+        std::is_floating_point<value_type>::value,
+        "current version of variable axis requires floating point type; "
+        "if you need a variable axis with an integral type, please submit an issue");
+    static_assert((!options.test(option::circular) && !options.test(option::growth)) ||
+                      (options.test(option::circular) ^ options.test(option::growth)),
+                  "circular and growth options are mutually exclusive");
 
-    if (std::distance(begin, end) < 2)
-      BOOST_THROW_EXCEPTION(std::invalid_argument("bins > 0 required"));
+    const auto n = std::distance(begin, end);
+    if (n < 0)
+      BOOST_THROW_EXCEPTION(
+          std::invalid_argument("end must be reachable by incrementing begin"));
 
-    vec_.reserve(std::distance(begin, end));
+    if (n < 2) BOOST_THROW_EXCEPTION(std::invalid_argument("bins > 1 required"));
+
+    vec_.reserve(n);
     vec_.emplace_back(*begin++);
     bool strictly_ascending = true;
     for (; begin != end; ++begin) {
       strictly_ascending &= vec_.back() < *begin;
       vec_.emplace_back(*begin);
     }
+
     if (!strictly_ascending)
       BOOST_THROW_EXCEPTION(
           std::invalid_argument("input sequence must be strictly ascending"));
   }
 
-  // kept for backward compatibility
-  template <class It, class = detail::requires_iterator<It>>
-  variable(It begin, It end, metadata_type meta, allocator_type alloc)
+  // kept for backward compatibility; requires_allocator is a workaround for deduction
+  // guides in gcc>=11
+  template <class It, class A, class = detail::requires_iterator<It>,
+            class = detail::requires_allocator<A>>
+  variable(It begin, It end, metadata_type meta, A alloc)
       : variable(begin, end, std::move(meta), {}, std::move(alloc)) {}
 
   /** Construct variable axis from iterable range of bin edges.
@@ -125,9 +136,11 @@ public:
       : variable(std::begin(iterable), std::end(iterable), std::move(meta), options,
                  std::move(alloc)) {}
 
-  // kept for backward compatibility
-  template <class U, class = detail::requires_iterable<U>>
-  variable(const U& iterable, metadata_type meta, allocator_type alloc)
+  // kept for backward compatibility; requires_allocator is a workaround for deduction
+  // guides in gcc>=11
+  template <class U, class A, class = detail::requires_iterable<U>,
+            class = detail::requires_allocator<A>>
+  variable(const U& iterable, metadata_type meta, A alloc)
       : variable(std::begin(iterable), std::end(iterable), std::move(meta), {},
                  std::move(alloc)) {}
 
@@ -143,9 +156,10 @@ public:
            options_type options = {}, allocator_type alloc = {})
       : variable(list.begin(), list.end(), std::move(meta), options, std::move(alloc)) {}
 
-  // kept for backward compatibility
-  template <class U>
-  variable(std::initializer_list<U> list, metadata_type meta, allocator_type alloc)
+  // kept for backward compatibility; requires_allocator is a workaround for deduction
+  // guides in gcc>=11
+  template <class U, class A, class = detail::requires_allocator<A>>
+  variable(std::initializer_list<U> list, metadata_type meta, A alloc)
       : variable(list.begin(), list.end(), std::move(meta), {}, std::move(alloc)) {}
 
   /// Constructor used by algorithm::reduce to shrink and rebin (not for users).

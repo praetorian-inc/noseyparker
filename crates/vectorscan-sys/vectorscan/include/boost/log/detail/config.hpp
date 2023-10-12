@@ -17,10 +17,8 @@
 #ifndef BOOST_LOG_DETAIL_CONFIG_HPP_INCLUDED_
 #define BOOST_LOG_DETAIL_CONFIG_HPP_INCLUDED_
 
-#include <boost/predef/os.h>
-
 // Try including WinAPI config as soon as possible so that any other headers don't include Windows SDK headers
-#if defined(BOOST_OS_WINDOWS_AVAILABLE)
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
 #include <boost/winapi/config.hpp>
 #endif
 
@@ -34,10 +32,6 @@
 
 #if defined(_MSC_VER) && _MSC_VER >= 1600
 #   define BOOST_LOG_HAS_PRAGMA_DETECT_MISMATCH
-#endif
-
-#if defined(BOOST_LOG_HAS_PRAGMA_DETECT_MISMATCH)
-#include <boost/preprocessor/stringize.hpp>
 #endif
 
 #if !defined(BOOST_WINDOWS)
@@ -414,7 +408,7 @@ namespace log {}
 #endif // !defined(BOOST_LOG_DOXYGEN_PASS)
 
 #if defined(BOOST_LOG_HAS_PRAGMA_DETECT_MISMATCH)
-#pragma detect_mismatch("boost_log_abi", BOOST_PP_STRINGIZE(BOOST_LOG_VERSION_NAMESPACE))
+#pragma detect_mismatch("boost_log_abi", BOOST_STRINGIZE(BOOST_LOG_VERSION_NAMESPACE))
 #endif
 
 } // namespace boost

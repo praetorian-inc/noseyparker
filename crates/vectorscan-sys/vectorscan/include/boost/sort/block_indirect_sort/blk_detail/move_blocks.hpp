@@ -15,10 +15,11 @@
 #define __BOOST_SORT_PARALLEL_DETAIL_MOVE_BLOCKS_HPP
 
 #include <atomic>
-#include <boost/sort/block_indirect_sort/blk_detail/backbone.hpp>
+#include <ciso646>
 #include <future>
 #include <iostream>
 #include <iterator>
+#include <boost/sort/block_indirect_sort/blk_detail/backbone.hpp>
 
 namespace boost
 {

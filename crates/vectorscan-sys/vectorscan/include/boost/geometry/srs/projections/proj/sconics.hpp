@@ -163,7 +163,7 @@ namespace projections
             };
 
             template <typename Params, typename Parameters, typename T>
-            inline void setup(Params const& params, Parameters& par, par_sconics<T>& proj_parm, proj_type type) 
+            inline void setup(Params const& params, Parameters& par, par_sconics<T>& proj_parm, proj_type type)
             {
                 static const T half_pi = detail::half_pi<T>();
 
@@ -256,7 +256,7 @@ namespace projections
             inline void setup_murd3(Params const& params, Parameters& par, par_sconics<T>& proj_parm)
             {
                 setup(params, par, proj_parm, proj_murd3);
-            }            
+            }
 
             // Perspective Conic
             template <typename Params, typename Parameters, typename T>
@@ -274,7 +274,7 @@ namespace projections
 
     }} // namespace detail::sconics
     #endif // doxygen
-    
+
     /*!
         \brief Tissot projection
         \ingroup projections
@@ -462,7 +462,7 @@ namespace projections
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_STATIC_PROJECTION_FI(srs::spar::proj_pconic, pconic_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_STATIC_PROJECTION_FI(srs::spar::proj_tissot, tissot_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_STATIC_PROJECTION_FI(srs::spar::proj_vitk1, vitk1_spheroid)
-        
+
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(euler_entry, euler_spheroid)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(murd1_entry, murd1_spheroid)

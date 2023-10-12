@@ -13,7 +13,8 @@
 #include <boost/json/detail/config.hpp>
 #include <new>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 #ifdef _MSC_VER
@@ -94,6 +95,7 @@ union default_resource::
 };
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

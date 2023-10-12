@@ -10,7 +10,8 @@
 #ifndef BOOST_JSON_DETAIL_IMPL_ARRAY_HPP
 #define BOOST_JSON_DETAIL_IMPL_ARRAY_HPP
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 namespace detail {
 
 unchecked_array::
@@ -36,6 +37,7 @@ relocate(value* dest) noexcept
 }
 
 } // detail
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

@@ -344,7 +344,7 @@ vec_traits<qvm_detail::sws_<OriginalScalar,SwizzleList> >
         BOOST_QVM_STATIC_ASSERT(I>=0);
         BOOST_QVM_STATIC_ASSERT(I<dim);
         int const idx=qvm_detail::swizzle<SwizzleList,I>::value;
-        BOOST_QVM_STATIC_ASSERT(idx==0);
+        BOOST_QVM_STATIC_ASSERT(idx<1);
         return reinterpret_cast<OriginalScalar &>(x);
         }
     };

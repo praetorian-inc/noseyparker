@@ -113,7 +113,7 @@ struct box_longitude_range
         // min <= max <=> diff >= 0
         calc_t const diff_ed = bed_max - bed_min;
         calc_t const diff_ing = bing_max - bing_min;
-        
+
         // if containing covers the whole globe it contains all
         if (diff_ing >= constants::period())
         {
@@ -150,7 +150,7 @@ struct relate_box_box_loop
     static inline bool apply(Box1 const& b_contained, Box2 const& b_containing)
     {
         assert_dimension_equal<Box1, Box2>();
-        
+
         if (! SubStrategy<Box1, Dimension, CSTag>::apply(
                     get<min_corner, Dimension>(b_contained),
                     get<max_corner, Dimension>(b_contained),

@@ -1,5 +1,5 @@
 /* Sets Outcome version
-(C) 2017-2022 Niall Douglas <http://www.nedproductions.biz/> (4 commits)
+(C) 2017-2023 Niall Douglas <http://www.nedproductions.biz/> (4 commits)
 
 
 Boost Software License - Version 1.0 - August 17th, 2003

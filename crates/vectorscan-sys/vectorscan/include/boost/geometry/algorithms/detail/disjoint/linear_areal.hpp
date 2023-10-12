@@ -89,12 +89,11 @@ struct disjoint_no_intersections_policy<Geometry1, Geometry2, Tag1, multi_tag>
     static inline bool apply(Geometry1 const& g1, Geometry2 const& g2, Strategy const& strategy)
     {
         // TODO: use partition or rtree on g2
-        typedef typename boost::range_iterator<Geometry1 const>::type iterator;
-        for ( iterator it = boost::begin(g1) ; it != boost::end(g1) ; ++it )
+        for (auto it = boost::begin(g1); it != boost::end(g1); ++it)
         {
             typedef typename boost::range_value<Geometry1 const>::type value_type;
-            if ( ! disjoint_no_intersections_policy<value_type const, Geometry2>
-                    ::apply(*it, g2, strategy) )
+            if (! disjoint_no_intersections_policy<value_type const, Geometry2>
+                    ::apply(*it, g2, strategy))
             {
                 return false;
             }
@@ -142,7 +141,7 @@ struct disjoint_segment_areal
 template <typename Segment, typename Polygon>
 class disjoint_segment_areal<Segment, Polygon, polygon_tag>
 {
-    
+
     template <typename InteriorRings, typename Strategy>
     static inline
     bool check_interior_rings(InteriorRings const& interior_rings,

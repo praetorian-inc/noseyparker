@@ -1011,7 +1011,6 @@ template <class T>
 template<int N>
 inline T constant_plastic<T>::compute(BOOST_MATH_EXPLICIT_TEMPLATE_TYPE_SPEC((std::integral_constant<int, N>)))
 {
-   using std::cbrt;
    using std::sqrt;
    return (cbrt(9-sqrt(T(69))) + cbrt(9+sqrt(T(69))))/cbrt(T(18));
 }

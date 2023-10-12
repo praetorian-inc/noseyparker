@@ -162,7 +162,7 @@ struct disjoint_segment_box_impl
             <
                 RelativeDistance,
                 SegmentPoint,
-                Box, 
+                Box,
                 I + 1,
                 Dimension
             >::apply(p0, p1, box, t_min, t_max);

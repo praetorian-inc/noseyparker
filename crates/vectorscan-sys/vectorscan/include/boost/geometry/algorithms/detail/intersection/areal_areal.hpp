@@ -155,7 +155,7 @@ struct intersection_areal_areal_<TupledOut, tupled_output_tag>
                             pointlike::get(geometry_out),
                             strategy);
         }
-        
+
         return;
     }
 

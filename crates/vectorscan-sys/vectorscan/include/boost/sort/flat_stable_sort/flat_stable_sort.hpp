@@ -13,6 +13,14 @@
 #ifndef __BOOST_SORT_FLAT_STABLE_SORT_HPP
 #define __BOOST_SORT_FLAT_STABLE_SORT_HPP
 
+#include <ciso646>
+#include <cstdlib>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <type_traits>
+#include <vector>
+
 #include <boost/sort/insert_sort/insert_sort.hpp>
 #include <boost/sort/common/util/insert.hpp>
 #include <boost/sort/common/merge_block.hpp>
@@ -21,12 +29,7 @@
 #include <boost/sort/common/util/traits.hpp>
 #include <boost/sort/common/indirect.hpp>
 
-#include <cstdlib>
-#include <functional>
-#include <iterator>
-#include <memory>
-#include <type_traits>
-#include <vector>
+
 
 namespace boost
 {
@@ -299,7 +302,7 @@ inline void indirect_flat_stable_sort (Iter_t first, Iter_t last,
                                            Compare comp = Compare())
 {
     typedef typename std::vector<Iter_t>::iterator itx_iter;
-    typedef common::less_ptr_no_null<Iter_t, Compare> itx_comp;
+    typedef common::less_ptr_no_null <Iter_t, Compare> itx_comp;
     common::indirect_sort ( flat_stable_sort<itx_iter, itx_comp>,
                             first, last, comp);
 };

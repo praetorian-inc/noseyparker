@@ -75,7 +75,7 @@ struct translating_transformer<Geometry, areal_tag, cartesian_tag>
 {
     typedef typename geometry::point_type<Geometry>::type point_type;
     typedef point_type result_type;
-    
+
     explicit translating_transformer(Geometry const& geom)
         : m_origin(NULL)
     {

@@ -10,7 +10,8 @@
 #ifndef BOOST_JSON_IMPL_VISIT_HPP
 #define BOOST_JSON_IMPL_VISIT_HPP
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 template<class Visitor>
 auto
@@ -54,6 +55,7 @@ visit(
     }
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #endif

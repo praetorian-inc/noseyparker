@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2020-2021, Oracle and/or its affiliates.
+// Copyright (c) 2020-2023, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -13,9 +13,11 @@
 
 
 #include <boost/geometry/strategies/convex_hull/services.hpp>
+#include <boost/geometry/strategies/compare.hpp>
 #include <boost/geometry/strategies/detail.hpp>
 #include <boost/geometry/strategies/spherical/point_in_point.hpp>
 #include <boost/geometry/strategies/spherical/ssf.hpp>
+
 #include <boost/geometry/util/type_traits.hpp>
 
 
@@ -44,6 +46,14 @@ public:
     {
         return strategy::side::spherical_side_formula<CalculationType>();
     }
+
+    template <typename ComparePolicy, typename EqualsPolicy>
+    using compare_type = typename strategy::compare::spherical
+        <
+            ComparePolicy,
+            EqualsPolicy,
+            -1
+        >;
 };
 
 namespace services

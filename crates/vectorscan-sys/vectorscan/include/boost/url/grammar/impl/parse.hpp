@@ -24,7 +24,7 @@ parse(
     char const*& it,
     char const* end,
     R const& r) ->
-        result<typename R::value_type>
+        system::result<typename R::value_type>
 {
     // If this goes off, it means the rule
     // passed in did not meet the requirements.
@@ -40,9 +40,9 @@ template<class R>
 BOOST_URL_NO_INLINE
 auto
 parse(
-    string_view s,
+    core::string_view s,
     R const& r) ->
-        result<typename R::value_type>
+        system::result<typename R::value_type>
 {
     // If this goes off, it means the rule
     // passed in did not meet the requirements.

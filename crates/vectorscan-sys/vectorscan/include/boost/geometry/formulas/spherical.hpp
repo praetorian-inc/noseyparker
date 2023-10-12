@@ -29,7 +29,7 @@
 #include <boost/geometry/formulas/result_direct.hpp>
 
 namespace boost { namespace geometry {
-    
+
 namespace formula {
 
 template <typename T>

@@ -27,7 +27,7 @@ namespace urls {
     @par Example
     Rules are used with the function @ref grammar::parse.
     @code
-    result< url_view > rv = grammar::parse( "images/dot.gif?v=hide#a", relative_ref_rule );
+    system::result< url_view > rv = grammar::parse( "images/dot.gif?v=hide#a", relative_ref_rule );
     @endcode
 
     @par BNF
@@ -57,7 +57,7 @@ struct relative_ref_rule_t
         char const*& it,
         char const* end
             ) const noexcept ->
-        result<value_type>;
+        system::result<value_type>;
 };
 
 constexpr relative_ref_rule_t relative_ref_rule{};

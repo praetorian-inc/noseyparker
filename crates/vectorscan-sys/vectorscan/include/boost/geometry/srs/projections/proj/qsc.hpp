@@ -189,7 +189,7 @@ namespace projections
 
                         T lat, lon;
                         T theta, phi;
-                        T t, mu; /* nu; */ 
+                        T t, mu; /* nu; */
                         area_type area;
 
                         /* Convert the geodetic latitude to a geocentric latitude.

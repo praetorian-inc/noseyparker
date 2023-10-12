@@ -10,16 +10,17 @@
 #ifndef BOOST_JSON_IMPL_ARRAY_IPP
 #define BOOST_JSON_IMPL_ARRAY_IPP
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/json/array.hpp>
 #include <boost/json/pilfer.hpp>
 #include <boost/json/detail/except.hpp>
-#include <boost/json/detail/hash_combine.hpp>
 #include <cstdlib>
 #include <limits>
 #include <new>
 #include <utility>
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 //----------------------------------------------------------
 
@@ -39,9 +40,10 @@ allocate(
 {
     BOOST_ASSERT(capacity > 0);
     if(capacity > array::max_size())
-        detail::throw_length_error(
-            "array too large",
-            BOOST_CURRENT_LOCATION);
+    {
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_CURRENT_LOCATION;
+        detail::throw_system_error( error::array_too_large, &loc );
+    }
     auto p = reinterpret_cast<
         table*>(sp->allocate(
             sizeof(table) +
@@ -99,9 +101,10 @@ revert_insert(
         return;
     }
     if(n_ > max_size() - arr_->size())
-        detail::throw_length_error(
-            "array too large",
-            BOOST_CURRENT_LOCATION);
+    {
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_CURRENT_LOCATION;
+        detail::throw_system_error( error::array_too_large, &loc );
+    }
     auto t = table::allocate(
         arr_->growth(arr_->size() + n_),
             arr_->sp_);
@@ -625,9 +628,10 @@ growth(
     std::size_t new_size) const
 {
     if(new_size > max_size())
-        detail::throw_length_error(
-            "array too large",
-            BOOST_CURRENT_LOCATION);
+    {
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_CURRENT_LOCATION;
+        detail::throw_system_error( error::array_too_large, &loc );
+    }
     std::size_t const old = capacity();
     if(old > max_size() - old / 2)
         return new_size;
@@ -751,7 +755,8 @@ equal(
     return true;
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 //----------------------------------------------------------
 //
@@ -763,13 +768,7 @@ std::size_t
 std::hash<::boost::json::array>::operator()(
     ::boost::json::array const& ja) const noexcept
 {
-  std::size_t seed = ja.size();
-  for (const auto& jv : ja) {
-    seed = ::boost::json::detail::hash_combine(
-        seed,
-        std::hash<::boost::json::value>{}(jv));
-  }
-  return seed;
+    return ::boost::hash< ::boost::json::array >()( ja );
 }
 
 //----------------------------------------------------------

@@ -1,9 +1,10 @@
 // Boost.Geometry Index
 //
-// Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2023 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2021.
-// Modifications copyright (c) 2021 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2021-2023.
+// Modifications copyright (c) 2021-2023 Oracle and/or its affiliates.
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,10 +17,10 @@
 #include <boost/type_traits/alignment_of.hpp>
 #include <boost/type_traits/aligned_storage.hpp>
 
-//#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/version.hpp>
-//#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/nvp.hpp>
 
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -48,7 +49,7 @@ class rtree;
 
 namespace detail {
 
-// TODO - use boost::move?
+// TODO - use std::move?
 template<typename T>
 class serialization_storage
 {
@@ -77,7 +78,7 @@ private:
 template <typename T, typename Archive> inline
 T serialization_load(const char * name, Archive & ar)
 {
-    namespace bs = boost::serialization;    
+    namespace bs = boost::serialization;
     serialization_storage<T> storage(ar, bs::version<T>::value);        // load_construct_data
     ar >> boost::serialization::make_nvp(name, *storage.address());   // serialize
     //ar >> *storage.address();                                           // serialize
@@ -92,7 +93,7 @@ void serialization_save(T const& t, const char * name, Archive & ar)
     ar << boost::serialization::make_nvp(name, t);                                // serialize
     //ar << t;                                                                      // serialize
 }
-    
+
 }}}}
 
 // TODO - move to index/serialization/rtree.hpp
@@ -421,7 +422,7 @@ private:
         if ( current_level < leafs_level )
         {
             node_pointer n = rtree::create_node<allocators_type, internal_node>::apply(allocators);         // MAY THROW (A)
-            subtree_destroyer auto_remover(n, allocators);    
+            subtree_destroyer auto_remover(n, allocators);
             internal_node & in = rtree::get<internal_node>(*n);
 
             elements_type & elements = rtree::elements(in);
@@ -482,7 +483,7 @@ public:
     typedef typename Rtree::value_type value_type;
     typedef typename Rtree::options_type options_type;
     typedef typename Rtree::box_type box_type;
-    typedef typename Rtree::allocators_type allocators_type;    
+    typedef typename Rtree::allocators_type allocators_type;
 
     const_private_view(Rtree const& rt) : m_rtree(rt) {}
 
@@ -507,7 +508,7 @@ public:
     typedef typename Rtree::value_type value_type;
     typedef typename Rtree::options_type options_type;
     typedef typename Rtree::box_type box_type;
-    typedef typename Rtree::allocators_type allocators_type;    
+    typedef typename Rtree::allocators_type allocators_type;
 
     private_view(Rtree & rt) : m_rtree(rt) {}
 

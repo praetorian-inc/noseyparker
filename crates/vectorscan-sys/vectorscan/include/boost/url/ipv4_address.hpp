@@ -14,7 +14,7 @@
 #include <boost/url/detail/config.hpp>
 #include <boost/url/error.hpp>
 #include <boost/url/error_types.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/string_token.hpp>
 #include <string>
 #include <array>
@@ -145,7 +145,7 @@ public:
     BOOST_URL_DECL
     explicit
     ipv4_address(
-        string_view s);
+        core::string_view s);
 
     /** Return the address as bytes, in network byte order.
     */
@@ -215,7 +215,7 @@ public:
         @param dest_size The size of the output buffer.
     */
     BOOST_URL_DECL
-    string_view
+    core::string_view
     to_buffer(
         char* dest,
         std::size_t dest_size) const;
@@ -334,9 +334,9 @@ operator<<(
 /** Return an IPv4 address from an IP address string in dotted decimal form
 */
 BOOST_URL_DECL
-result<ipv4_address>
+system::result<ipv4_address>
 parse_ipv4_address(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 } // urls
 } // boost

@@ -12,7 +12,7 @@
 #define BOOST_URL_GRAMMAR_CI_STRING_HPP
 
 #include <boost/url/detail/config.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/grammar/detail/ci_string.hpp>
 #include <cstdlib>
 
@@ -119,8 +119,8 @@ to_upper(char c) noexcept
 BOOST_URL_DECL
 int
 ci_compare(
-    string_view s0,
-    string_view s1) noexcept;
+    core::string_view s0,
+    core::string_view s1) noexcept;
 
 /** Return the case-insensitive digest of a string
 
@@ -139,7 +139,7 @@ ci_compare(
 BOOST_URL_DECL
 std::size_t
 ci_digest(
-    string_view s) noexcept;
+    core::string_view s) noexcept;
 
 //------------------------------------------------
 
@@ -176,13 +176,13 @@ ci_is_equal(
     String1 const& s1) ->
         typename std::enable_if<
             ! std::is_convertible<
-                String0, string_view>::value ||
+                String0, core::string_view>::value ||
             ! std::is_convertible<
-                String1, string_view>::value,
+                String1, core::string_view>::value,
         bool>::type
 {
     // this overload supports forward iterators and
-    // does not assume the existence string_view::size
+    // does not assume the existence core::string_view::size
     if( detail::type_id<String0>() >
         detail::type_id<String1>())
         return detail::ci_is_equal(s1, s0);
@@ -192,11 +192,11 @@ ci_is_equal(
 inline
 bool
 ci_is_equal(
-    string_view s0,
-    string_view s1) noexcept
+    core::string_view s0,
+    core::string_view s1) noexcept
 {
     // this overload is faster as it makes use of
-    // string_view::size
+    // core::string_view::size
     if(s0.size() != s1.size())
         return false;
     return detail::ci_is_equal(s0, s1);
@@ -224,8 +224,8 @@ ci_is_equal(
 inline
 bool
 ci_is_less(
-    string_view s0,
-    string_view s1) noexcept
+    core::string_view s0,
+    core::string_view s1) noexcept
 {
     if(s0.size() != s1.size())
         return s0.size() < s1.size();
@@ -264,7 +264,7 @@ struct ci_hash
 
     std::size_t
     operator()(
-        string_view s) const noexcept
+        core::string_view s) const noexcept
     {
         return ci_digest(s);
     }
@@ -341,8 +341,8 @@ struct ci_less
 
     std::size_t
     operator()(
-        string_view s0,
-        string_view s1) const noexcept
+        core::string_view s0,
+        core::string_view s1) const noexcept
     {
         return ci_is_less(s0, s1);
     }

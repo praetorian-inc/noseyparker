@@ -180,7 +180,7 @@ namespace projections
                 T s2p0, N0, R0, tan0;
 
                 proj_parm.en = pj_enfn<T>(par.es);
-                
+
                 if (par.phi0 == 0.) {
                     BOOST_THROW_EXCEPTION( projection_exception(error_lat_0_is_zero) );
                 }
@@ -232,7 +232,7 @@ namespace projections
 
         // Factory entry(s)
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_ENTRY_FI(lcca_entry, lcca_ellipsoid)
-        
+
         BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_BEGIN(lcca_init)
         {
             BOOST_GEOMETRY_PROJECTIONS_DETAIL_FACTORY_INIT_ENTRY(lcca, lcca_entry)

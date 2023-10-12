@@ -41,6 +41,17 @@
 namespace boost {
 namespace filesystem {
 
+class directory_iterator;
+
+namespace detail {
+
+struct directory_iterator_params;
+
+BOOST_FILESYSTEM_DECL void directory_iterator_construct(directory_iterator& it, path const& p, unsigned int opts, directory_iterator_params* params, system::error_code* ec);
+BOOST_FILESYSTEM_DECL void directory_iterator_increment(directory_iterator& it, system::error_code* ec);
+
+} // namespace detail
+
 //--------------------------------------------------------------------------------------//
 //                                                                                      //
 //                                 directory_entry                                      //
@@ -53,20 +64,30 @@ namespace filesystem {
 
 class directory_entry
 {
+    friend BOOST_FILESYSTEM_DECL void detail::directory_iterator_construct(directory_iterator& it, path const& p, unsigned int opts, detail::directory_iterator_params* params, system::error_code* ec);
+    friend BOOST_FILESYSTEM_DECL void detail::directory_iterator_increment(directory_iterator& it, system::error_code* ec);
+
 public:
     typedef boost::filesystem::path::value_type value_type; // enables class path ctor taking directory_entry
 
     directory_entry() BOOST_NOEXCEPT {}
 
-    explicit directory_entry(boost::filesystem::path const& p) :
-        m_path(p), m_status(file_status()), m_symlink_status(file_status())
-    {
-    }
+    explicit directory_entry(boost::filesystem::path const& p);
 
+#if BOOST_FILESYSTEM_VERSION >= 4
+    directory_entry(boost::filesystem::path const& p, system::error_code& ec) :
+        m_path(p)
+    {
+        refresh_impl(&ec);
+        if (ec)
+            m_path.clear();
+    }
+#else
     directory_entry(boost::filesystem::path const& p, file_status st, file_status symlink_st = file_status()) :
         m_path(p), m_status(st), m_symlink_status(symlink_st)
     {
     }
+#endif
 
     directory_entry(directory_entry const& rhs) :
         m_path(rhs.m_path), m_status(rhs.m_status), m_symlink_status(rhs.m_symlink_status)
@@ -101,7 +122,238 @@ public:
         return *this;
     }
 
-    void assign(boost::filesystem::path&& p, file_status st = file_status(), file_status symlink_st = file_status())
+    void assign(boost::filesystem::path&& p);
+
+#if BOOST_FILESYSTEM_VERSION >= 4
+    void assign(boost::filesystem::path&& p, system::error_code& ec)
+    {
+        m_path = static_cast< boost::filesystem::path&& >(p);
+        refresh_impl(&ec);
+    }
+#else
+    void assign(boost::filesystem::path&& p, file_status st, file_status symlink_st = file_status())
+    {
+        assign_with_status(static_cast< boost::filesystem::path&& >(p), st, symlink_st);
+    }
+#endif
+#endif // !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+
+    void assign(boost::filesystem::path const& p);
+
+#if BOOST_FILESYSTEM_VERSION >= 4
+    void assign(boost::filesystem::path const& p, system::error_code& ec)
+    {
+        m_path = p;
+        refresh_impl(&ec);
+    }
+#else
+    void assign(boost::filesystem::path const& p, file_status st, file_status symlink_st = file_status())
+    {
+        assign_with_status(p, st, symlink_st);
+    }
+#endif
+
+    void replace_filename(boost::filesystem::path const& p);
+
+#if BOOST_FILESYSTEM_VERSION >= 4
+    void replace_filename(boost::filesystem::path const& p, system::error_code& ec)
+    {
+        m_path.replace_filename(p);
+        refresh_impl(&ec);
+    }
+#else
+    void replace_filename(boost::filesystem::path const& p, file_status st, file_status symlink_st = file_status())
+    {
+        replace_filename_with_status(p, st, symlink_st);
+    }
+
+    BOOST_FILESYSTEM_DETAIL_DEPRECATED("Use directory_entry::replace_filename() instead")
+    void replace_leaf(boost::filesystem::path const& p, file_status st, file_status symlink_st)
+    {
+        replace_filename_with_status(p, st, symlink_st);
+    }
+#endif
+
+    boost::filesystem::path const& path() const BOOST_NOEXCEPT { return m_path; }
+    operator boost::filesystem::path const&() const BOOST_NOEXCEPT { return m_path; }
+
+    void refresh() { refresh_impl(); }
+    void refresh(system::error_code& ec) BOOST_NOEXCEPT { refresh_impl(&ec); }
+
+    file_status status() const
+    {
+        if (!filesystem::status_known(m_status))
+            refresh_impl();
+        return m_status;
+    }
+
+    file_status status(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        if (!filesystem::status_known(m_status))
+            refresh_impl(&ec);
+        return m_status;
+    }
+
+    file_status symlink_status() const
+    {
+        if (!filesystem::status_known(m_symlink_status))
+            refresh_impl();
+        return m_symlink_status;
+    }
+
+    file_status symlink_status(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        if (!filesystem::status_known(m_symlink_status))
+            refresh_impl(&ec);
+        return m_symlink_status;
+    }
+
+    filesystem::file_type file_type() const
+    {
+        if (!filesystem::type_present(m_status))
+            refresh_impl();
+        return m_status.type();
+    }
+
+    filesystem::file_type file_type(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        if (!filesystem::type_present(m_status))
+            refresh_impl(&ec);
+        return m_status.type();
+    }
+
+    filesystem::file_type symlink_file_type() const
+    {
+        if (!filesystem::type_present(m_symlink_status))
+            refresh_impl();
+        return m_symlink_status.type();
+    }
+
+    filesystem::file_type symlink_file_type(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        if (!filesystem::type_present(m_symlink_status))
+            refresh_impl(&ec);
+        return m_symlink_status.type();
+    }
+
+    bool exists() const
+    {
+        filesystem::file_type ft = this->file_type();
+        return ft != filesystem::status_error && ft != filesystem::file_not_found;
+    }
+
+    bool exists(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        filesystem::file_type ft = this->file_type(ec);
+        return ft != filesystem::status_error && ft != filesystem::file_not_found;
+    }
+
+    bool is_regular_file() const
+    {
+        return this->file_type() == filesystem::regular_file;
+    }
+
+    bool is_regular_file(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::regular_file;
+    }
+
+    bool is_directory() const
+    {
+        return this->file_type() == filesystem::directory_file;
+    }
+
+    bool is_directory(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::directory_file;
+    }
+
+    bool is_symlink() const
+    {
+        return this->symlink_file_type() == filesystem::symlink_file;
+    }
+
+    bool is_symlink(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->symlink_file_type(ec) == filesystem::symlink_file;
+    }
+
+    bool is_block_file() const
+    {
+        return this->file_type() == filesystem::block_file;
+    }
+
+    bool is_block_file(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::block_file;
+    }
+
+    bool is_character_file() const
+    {
+        return this->file_type() == filesystem::character_file;
+    }
+
+    bool is_character_file(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::character_file;
+    }
+
+    bool is_fifo() const
+    {
+        return this->file_type() == filesystem::fifo_file;
+    }
+
+    bool is_fifo(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::fifo_file;
+    }
+
+    bool is_socket() const
+    {
+        return this->file_type() == filesystem::socket_file;
+    }
+
+    bool is_socket(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->file_type(ec) == filesystem::socket_file;
+    }
+
+    bool is_reparse_file() const
+    {
+        return this->symlink_file_type() == filesystem::reparse_file;
+    }
+
+    bool is_reparse_file(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        return this->symlink_file_type(ec) == filesystem::reparse_file;
+    }
+
+    bool is_other() const
+    {
+        filesystem::file_type ft = this->file_type();
+        return ft != filesystem::status_error && ft != filesystem::file_not_found &&
+            ft != filesystem::regular_file && ft != filesystem::directory_file;
+    }
+
+    bool is_other(system::error_code& ec) const BOOST_NOEXCEPT
+    {
+        filesystem::file_type ft = this->file_type(ec);
+        return ft != filesystem::status_error && ft != filesystem::file_not_found &&
+            ft != filesystem::regular_file && ft != filesystem::directory_file;
+    }
+
+    bool operator==(directory_entry const& rhs) const { return m_path == rhs.m_path; }
+    bool operator!=(directory_entry const& rhs) const { return m_path != rhs.m_path; }
+    bool operator<(directory_entry const& rhs) const { return m_path < rhs.m_path; }
+    bool operator<=(directory_entry const& rhs) const { return m_path <= rhs.m_path; }
+    bool operator>(directory_entry const& rhs) const { return m_path > rhs.m_path; }
+    bool operator>=(directory_entry const& rhs) const { return m_path >= rhs.m_path; }
+
+private:
+    BOOST_FILESYSTEM_DECL void refresh_impl(system::error_code* ec = NULL) const;
+
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+    void assign_with_status(boost::filesystem::path&& p, file_status st, file_status symlink_st)
     {
         m_path = static_cast< boost::filesystem::path&& >(p);
         m_status = static_cast< file_status&& >(st);
@@ -109,7 +361,7 @@ public:
     }
 #endif
 
-    void assign(boost::filesystem::path const& p, file_status st = file_status(), file_status symlink_st = file_status())
+    void assign_with_status(boost::filesystem::path const& p, file_status st, file_status symlink_st)
     {
         m_path = p;
 #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
@@ -121,10 +373,9 @@ public:
 #endif
     }
 
-    void replace_filename(boost::filesystem::path const& p, file_status st = file_status(), file_status symlink_st = file_status())
+    void replace_filename_with_status(boost::filesystem::path const& p, file_status st, file_status symlink_st)
     {
-        m_path.remove_filename();
-        m_path /= p;
+        m_path.replace_filename(p);
 #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         m_status = static_cast< file_status&& >(st);
         m_symlink_status = static_cast< file_status&& >(symlink_st);
@@ -134,50 +385,68 @@ public:
 #endif
     }
 
-#ifndef BOOST_FILESYSTEM_NO_DEPRECATED
-    BOOST_FILESYSTEM_DETAIL_DEPRECATED("Use directory_entry::replace_filename() instead")
-    void replace_leaf(boost::filesystem::path const& p, file_status st, file_status symlink_st)
-    {
-        replace_filename(p, st, symlink_st);
-    }
-#endif
-
-    boost::filesystem::path const& path() const BOOST_NOEXCEPT
-    {
-        return m_path;
-    }
-    operator boost::filesystem::path const&() const BOOST_NOEXCEPT { return m_path; }
-    file_status status() const { return get_status(); }
-    file_status status(system::error_code& ec) const BOOST_NOEXCEPT { return get_status(&ec); }
-    file_status symlink_status() const { return get_symlink_status(); }
-    file_status symlink_status(system::error_code& ec) const BOOST_NOEXCEPT { return get_symlink_status(&ec); }
-
-    bool operator==(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path == rhs.m_path; }
-    bool operator!=(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path != rhs.m_path; }
-    bool operator<(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path < rhs.m_path; }
-    bool operator<=(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path <= rhs.m_path; }
-    bool operator>(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path > rhs.m_path; }
-    bool operator>=(directory_entry const& rhs) const BOOST_NOEXCEPT { return m_path >= rhs.m_path; }
-
-private:
-    BOOST_FILESYSTEM_DECL file_status get_status(system::error_code* ec = NULL) const;
-    BOOST_FILESYSTEM_DECL file_status get_symlink_status(system::error_code* ec = NULL) const;
-
 private:
     boost::filesystem::path m_path;
     mutable file_status m_status;         // stat()-like
     mutable file_status m_symlink_status; // lstat()-like
-};                                        // directory_entry
+};
+
+#if !defined(BOOST_FILESYSTEM_SOURCE)
+
+inline directory_entry::directory_entry(boost::filesystem::path const& p) :
+    m_path(p)
+{
+#if BOOST_FILESYSTEM_VERSION >= 4
+    refresh_impl();
+#endif
+}
+
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+inline void directory_entry::assign(boost::filesystem::path&& p)
+{
+    m_path = static_cast< boost::filesystem::path&& >(p);
+#if BOOST_FILESYSTEM_VERSION >= 4
+    refresh_impl();
+#else
+    m_status = file_status();
+    m_symlink_status = file_status();
+#endif
+}
+#endif // !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+
+inline void directory_entry::assign(boost::filesystem::path const& p)
+{
+    m_path = p;
+#if BOOST_FILESYSTEM_VERSION >= 4
+    refresh_impl();
+#else
+    m_status = file_status();
+    m_symlink_status = file_status();
+#endif
+}
+
+inline void directory_entry::replace_filename(boost::filesystem::path const& p)
+{
+    m_path.replace_filename(p);
+#if BOOST_FILESYSTEM_VERSION >= 4
+    refresh_impl();
+#else
+    m_status = file_status();
+    m_symlink_status = file_status();
+#endif
+}
+
+#endif // !defined(BOOST_FILESYSTEM_SOURCE)
 
 namespace detail {
 namespace path_traits {
 
 // Dispatch function for integration with path class
 template< typename Callback >
-BOOST_FORCEINLINE void dispatch(directory_entry const& de, Callback cb, const codecvt_type* cvt, directory_entry_tag)
+BOOST_FORCEINLINE typename Callback::result_type dispatch(directory_entry const& de, Callback cb, const codecvt_type* cvt, directory_entry_tag)
 {
     boost::filesystem::path::string_type const& source = de.path().native();
-    cb(source.data(), source.data() + source.size(), cvt);
+    return cb(source.data(), source.data() + source.size(), cvt);
 }
 
 } // namespace path_traits
@@ -199,66 +468,142 @@ inline file_status status(directory_entry const& e)
 {
     return e.status();
 }
+
 inline file_status status(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
     return e.status(ec);
 }
+
+inline file_status symlink_status(directory_entry const& e)
+{
+    return e.symlink_status();
+}
+
+inline file_status symlink_status(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.symlink_status(ec);
+}
+
 inline bool type_present(directory_entry const& e)
 {
-    return filesystem::type_present(e.status());
+    return e.file_type() != filesystem::status_error;
 }
+
 inline bool type_present(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::type_present(e.status(ec));
+    return e.file_type(ec) != filesystem::status_error;
 }
+
 inline bool status_known(directory_entry const& e)
 {
     return filesystem::status_known(e.status());
 }
+
 inline bool status_known(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
     return filesystem::status_known(e.status(ec));
 }
+
 inline bool exists(directory_entry const& e)
 {
-    return filesystem::exists(e.status());
+    return e.exists();
 }
+
 inline bool exists(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::exists(e.status(ec));
+    return e.exists(ec);
 }
+
 inline bool is_regular_file(directory_entry const& e)
 {
-    return filesystem::is_regular_file(e.status());
+    return e.is_regular_file();
 }
+
 inline bool is_regular_file(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::is_regular_file(e.status(ec));
+    return e.is_regular_file(ec);
 }
+
 inline bool is_directory(directory_entry const& e)
 {
-    return filesystem::is_directory(e.status());
+    return e.is_directory();
 }
+
 inline bool is_directory(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::is_directory(e.status(ec));
+    return e.is_directory(ec);
 }
+
 inline bool is_symlink(directory_entry const& e)
 {
-    return filesystem::is_symlink(e.symlink_status());
+    return e.is_symlink();
 }
+
 inline bool is_symlink(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::is_symlink(e.symlink_status(ec));
+    return e.is_symlink(ec);
 }
+
+inline bool is_block_file(directory_entry const& e)
+{
+    return e.is_block_file();
+}
+
+inline bool is_block_file(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.is_block_file(ec);
+}
+
+inline bool is_character_file(directory_entry const& e)
+{
+    return e.is_character_file();
+}
+
+inline bool is_character_file(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.is_character_file(ec);
+}
+
+inline bool is_fifo(directory_entry const& e)
+{
+    return e.is_fifo();
+}
+
+inline bool is_fifo(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.is_fifo(ec);
+}
+
+inline bool is_socket(directory_entry const& e)
+{
+    return e.is_socket();
+}
+
+inline bool is_socket(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.is_socket(ec);
+}
+
+inline bool is_reparse_file(directory_entry const& e)
+{
+    return e.is_reparse_file();
+}
+
+inline bool is_reparse_file(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
+{
+    return e.is_reparse_file(ec);
+}
+
 inline bool is_other(directory_entry const& e)
 {
-    return filesystem::is_other(e.status());
+    return e.is_other();
 }
+
 inline bool is_other(directory_entry const& e, system::error_code& ec) BOOST_NOEXCEPT
 {
-    return filesystem::is_other(e.status(ec));
+    return e.is_other(ec);
 }
+
 #ifndef BOOST_FILESYSTEM_NO_DEPRECATED
 BOOST_FILESYSTEM_DETAIL_DEPRECATED("Use is_regular_file() instead")
 inline bool is_regular(directory_entry const& e)
@@ -276,19 +621,17 @@ inline bool is_regular(directory_entry const& e)
 BOOST_SCOPED_ENUM_UT_DECLARE_BEGIN(directory_options, unsigned int)
 {
     none = 0u,
-    skip_permission_denied = 1u,        // if a directory cannot be opened because of insufficient permissions, pretend that the directory is empty
-    follow_directory_symlink = 1u << 1, // recursive_directory_iterator: follow directory symlinks
-    skip_dangling_symlinks = 1u << 2,   // non-standard extension for recursive_directory_iterator: don't follow dangling directory symlinks,
-    pop_on_error = 1u << 3,             // non-standard extension for recursive_directory_iterator: instead of producing an end iterator on errors,
-                                        // repeatedly invoke pop() until it succeeds or the iterator becomes equal to end iterator
-    _detail_no_follow = 1u << 4,        // internal use only
-    _detail_no_push = 1u << 5           // internal use only
+    skip_permission_denied = 1u,         // if a directory cannot be opened because of insufficient permissions, pretend that the directory is empty
+    follow_directory_symlink = 1u << 1u, // recursive_directory_iterator: follow directory symlinks
+    skip_dangling_symlinks = 1u << 2u,   // non-standard extension for recursive_directory_iterator: don't follow dangling directory symlinks,
+    pop_on_error = 1u << 3u,             // non-standard extension for recursive_directory_iterator: instead of producing an end iterator on errors,
+                                         // repeatedly invoke pop() until it succeeds or the iterator becomes equal to end iterator
+    _detail_no_follow = 1u << 4u,        // internal use only
+    _detail_no_push = 1u << 5u           // internal use only
 }
 BOOST_SCOPED_ENUM_DECLARE_END(directory_options)
 
 BOOST_BITMASK(BOOST_SCOPED_ENUM_NATIVE(directory_options))
-
-class directory_iterator;
 
 namespace detail {
 
@@ -318,11 +661,6 @@ struct dir_itr_imp :
     BOOST_FILESYSTEM_DECL static void operator delete(void* p, std::size_t extra_size) BOOST_NOEXCEPT;
     BOOST_FILESYSTEM_DECL static void operator delete(void* p) BOOST_NOEXCEPT;
 };
-
-struct directory_iterator_params;
-
-BOOST_FILESYSTEM_DECL void directory_iterator_construct(directory_iterator& it, path const& p, unsigned int opts, directory_iterator_params* params, system::error_code* ec);
-BOOST_FILESYSTEM_DECL void directory_iterator_increment(directory_iterator& it, system::error_code* ec);
 
 } // namespace detail
 

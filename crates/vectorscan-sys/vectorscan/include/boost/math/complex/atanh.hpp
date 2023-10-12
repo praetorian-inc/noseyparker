@@ -21,7 +21,7 @@ namespace std{ using ::sqrt; using ::fabs; using ::acos; using ::asin; using ::a
 namespace boost{ namespace math{
 
 template<class T> 
-std::complex<T> atanh(const std::complex<T>& z)
+[[deprecated("Replaced by C++11")]] std::complex<T> atanh(const std::complex<T>& z)
 {
    //
    // References:

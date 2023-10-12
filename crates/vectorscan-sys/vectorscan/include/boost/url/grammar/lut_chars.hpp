@@ -12,7 +12,6 @@
 
 #include <boost/url/detail/config.hpp>
 #include <boost/url/grammar/detail/charset.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <cstdint>
 #include <type_traits>
 
@@ -29,7 +28,7 @@ template<class T, class = void>
 struct is_pred : std::false_type {};
 
 template<class T>
-struct is_pred<T, boost::void_t<
+struct is_pred<T, void_t<
     decltype(
     std::declval<bool&>() =
         std::declval<T const&>().operator()(
@@ -53,7 +52,7 @@ struct is_pred<T, boost::void_t<
     @code
     constexpr lut_chars vowel_chars = "AEIOU" "aeiou";
 
-    result< string_view > rv = parse( "Aiea", token_rule( vowel_chars ) );
+    system::result< core::string_view > rv = parse( "Aiea", token_rule( vowel_chars ) );
     @endcode
 
     @see

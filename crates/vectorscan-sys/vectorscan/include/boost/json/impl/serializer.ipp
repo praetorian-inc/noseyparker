@@ -20,7 +20,8 @@
 #pragma warning(disable: 4127) // conditional expression is constant
 #endif
 
-BOOST_JSON_NS_BEGIN
+namespace boost {
+namespace json {
 
 enum class serializer::state : char
 {
@@ -38,6 +39,20 @@ enum class serializer::state : char
 
 serializer::
 ~serializer() noexcept = default;
+
+serializer::
+serializer(
+    storage_ptr sp,
+    unsigned char* buf,
+    std::size_t buf_size,
+    serialize_options const& opts) noexcept
+    : st_(
+        std::move(sp),
+        buf,
+        buf_size)
+    , opts_(opts)
+{
+}
 
 bool
 serializer::
@@ -424,12 +439,15 @@ write_number(stream& ss0)
                 ss.remain() >=
                     detail::max_number_chars))
             {
-                ss.advance(detail::format_double(
-                    ss.data(), jv_->get_double()));
+                ss.advance(
+                    detail::format_double(
+                        ss.data(),
+                        jv_->get_double(),
+                        opts_.allow_infinity_and_nan));
                 return true;
             }
             cs0_ = { buf_, detail::format_double(
-                buf_, jv_->get_double()) };
+                buf_, jv_->get_double(), opts_.allow_infinity_and_nan) };
             break;
         }
     }
@@ -737,7 +755,8 @@ read_some(
 //----------------------------------------------------------
 
 serializer::
-serializer() noexcept
+serializer( serialize_options const& opts ) noexcept
+    : opts_(opts)
 {
     // ensure room for \uXXXX escape plus one
     BOOST_STATIC_ASSERT(
@@ -813,7 +832,8 @@ read(char* dest, std::size_t size)
     return read_some(dest, size);
 }
 
-BOOST_JSON_NS_END
+} // namespace json
+} // namespace boost
 
 #ifdef _MSC_VER
 #pragma warning(pop)

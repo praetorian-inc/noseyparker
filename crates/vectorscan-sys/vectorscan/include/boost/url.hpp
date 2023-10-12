@@ -18,6 +18,7 @@
 #include <boost/url/encoding_opts.hpp>
 #include <boost/url/error.hpp>
 #include <boost/url/error_types.hpp>
+#include <boost/url/format.hpp>
 #include <boost/url/host_type.hpp>
 #include <boost/url/ignore_case.hpp>
 #include <boost/url/ipv4_address.hpp>
@@ -42,7 +43,7 @@
 #include <boost/url/segments_ref.hpp>
 #include <boost/url/segments_view.hpp>
 #include <boost/url/static_url.hpp>
-#include <boost/url/string_view.hpp>
+#include <boost/core/detail/string_view.hpp>
 #include <boost/url/url.hpp>
 #include <boost/url/url_base.hpp>
 #include <boost/url/url_view.hpp>

@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017, 2018.
 // Modifications copyright (c) 2017-2018, Oracle and/or its affiliates.
@@ -39,9 +40,10 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+#include <algorithm>
 #include <string>
+#include <ostream>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/static_assert.hpp>
 
 #include <boost/geometry/core/config.hpp>
@@ -123,16 +125,10 @@ struct dms_parser
         bool has_dms[3];
 
         dms_value()
-#ifdef BOOST_GEOMETRY_CXX11_ARRAY_UNIFIED_INITIALIZATION
-            : dms{0, 0, 0}
-            , has_dms{false, false, false}
-        {}
-#else
         {
             std::fill(dms, dms + 3, T(0));
             std::fill(has_dms, has_dms + 3, false);
         }
-#endif
     };
 
 

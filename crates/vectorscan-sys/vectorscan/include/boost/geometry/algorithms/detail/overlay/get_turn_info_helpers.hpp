@@ -345,7 +345,7 @@ public:
         <
             UniqueSubRange2, UniqueSubRange1, UmbrellaStrategy
         > swapped_side_calculator_type;
-    
+
     intersection_info_base(UniqueSubRange1 const& range_p,
                            UniqueSubRange2 const& range_q,
                            UmbrellaStrategy const& umbrella_strategy,
@@ -409,7 +409,7 @@ public:
 
     typedef typename base::side_calculator_type side_calculator_type;
     typedef typename base::result_type result_type;
-    
+
     typedef typename result_type::intersection_points_type i_info_type;
     typedef typename result_type::direction_type d_info_type;
 
@@ -462,7 +462,7 @@ public:
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -485,18 +485,18 @@ public:
             bool const has_pk = ! base::p_is_last_segment();
             int const pk_q1 = has_pk ? base::sides().pk_wrt_q1() : 0;
             int const pk_q2 = has_pk ? base::sides().pk_wrt_q2() : 0;
-                
+
             if (pk_q1 == -pk_q2)
             {
                 if (pk_q1 == 0)
                 {
                     return direction_code<cs_tag>(base::rqi(), base::rqj(), base::rqk()) == -1;
                 }
-                        
+
                 return true;
             }
         }
-        
+
         return false;
     }
 

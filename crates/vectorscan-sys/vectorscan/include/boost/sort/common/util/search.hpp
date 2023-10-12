@@ -9,8 +9,10 @@
 #ifndef __BOOST_SORT_COMMON_SEARCH_HPP
 #define __BOOST_SORT_COMMON_SEARCH_HPP
 
-#include <boost/sort/common/util/traits.hpp>
+#include <ciso646>
 #include <cassert>
+#include <boost/sort/common/util/traits.hpp>
+
 
 namespace boost
 {
