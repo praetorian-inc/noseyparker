@@ -32,13 +32,12 @@ fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
         .init()?;
 
     let env_filter = EnvFilter::builder()
-        .with_default_directive(level_filter.clone().into())
+        .with_default_directive(level_filter.into())
         .with_env_var("NP_LOG")
         .from_env()
         .context("Failed to parse filters from NP_LOG environment variable")?;
 
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
-        // .with_max_level(level_filter)
         .with_ansi(global_args.use_color())
         .with_env_filter(env_filter)
         .finish();
