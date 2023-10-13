@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 
 ### Additions
 - A default value (`datastore.np`) is now set for commands that take a datastore parameter ([#74](https://github.com/praetorian-inc/noseyparker/issues/74)).
