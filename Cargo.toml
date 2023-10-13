@@ -10,7 +10,7 @@ license = "Apache-2.0"
 authors = ["Brad Larsen <bradford.larsen@praetorian.com>"]
 homepage = "https://github.com/praetorian-inc/noseyparker"
 repository = "https://github.com/praetorian-inc/noseyparker"
-version = "0.15.0"
+version = "0.16.0-dev"
 
 publish = false
 
