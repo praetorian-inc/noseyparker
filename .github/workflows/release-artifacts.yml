@@ -17,11 +17,25 @@ on:
 
 jobs:
   docker:
+    strategy:
+      matrix:
+        build:
+        - debian
+        - alpine
+
+        include:
+        - build: debian
+          dockerfile: Dockerfile
+          image: ghcr.io/${{ github.repository }}
+
+        - build: alpine
+          dockerfile: Dockerfile.alpine
+          image: ghcr.io/${{ github.repository }}-alpine
+
     name: Docker
     runs-on: ubuntu-22.04
 
     steps:
-
     - uses: actions/checkout@v4
 
     - uses: docker/setup-qemu-action@v3  # for multi-platform build
@@ -43,7 +57,7 @@ jobs:
       id: docker_metadata
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository }}
+        images: ${{ matrix.image }}
 
         # see https://github.com/docker/metadata-action#tags-input
         tags: |
@@ -59,29 +73,33 @@ jobs:
         cache-to: type=gha,mode=max
 
         context: .
-        tags: noseyparker:test
-        push: false
+        file: ${{ matrix.dockerfile }}
         platforms: linux/amd64
+        push: false
         load: true
         pull: true
+
+        tags: noseyparker:test
+        labels: ${{ steps.docker_metadata.outputs.labels }}
 
     - name: Test the Docker image
       run: docker run --rm noseyparker:test --version
 
     # This shouldn't end up building linux/amd64 again; it should get it from the cache
     - name: Build multiplatform Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
         context: .
+        file: ${{ matrix.dockerfile }}
         platforms: linux/amd64,linux/arm64
-
         push: true
+        load: true
+        pull: true
 
         tags: ${{ steps.docker_metadata.outputs.tags }}
-
         labels: ${{ steps.docker_metadata.outputs.labels }}
 
 
