@@ -12,10 +12,10 @@ RUN apk add --no-cache --no-interactive \
         git \
         make \
         musl-dev \
-        ninja-build \
         openssl \
         openssl-dev \
         perl \
+        samurai \
         zsh \
         && \
     apk cache clean
