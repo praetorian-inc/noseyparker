@@ -8,11 +8,23 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        build:
+        - debian
+        - alpine
+
+        include:
+        - build: debian
+          dockerfile: Dockerfile
+          image: ghcr.io/${{ github.repository }}
+
+        - build: alpine
+          dockerfile: Dockerfile.alpine
+          image: ghcr.io/${{ github.repository }}-alpine
+
     name: Docker
     runs-on: ubuntu-22.04
-
-    env:
-      NP_TAG: ghcr.io/${{ github.repository }}:edge
 
     steps:
     - uses: actions/checkout@v4
@@ -33,7 +45,8 @@ jobs:
         cache-to: type=gha,mode=max
 
         context: .
-        tags: ${{ env.NP_TAG }}
+        file: ${{ matrix.dockerfile }}
+        tags: ${{ matrix.image }}:edge
         push: false
         # For multi-platform builds
         # platforms: linux/amd64,linux/arm64
@@ -49,7 +62,7 @@ jobs:
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
     - name: Test the Docker image
-      run: docker run --rm "$NP_TAG" --version
+      run: docker run --rm "${{ matrix.image }}:edge" --version
 
     - name: Authenticate with GitHub Container Registry
       if: github.event_name == 'push' && github.ref_name == 'main'
@@ -62,4 +75,4 @@ jobs:
     - name: Push the image to `edge`
       if: github.event_name == 'push' && github.ref_name == 'main'
       run: |
-        docker push "$NP_TAG"
+        docker push "${{ matrix.image }}:edge"
