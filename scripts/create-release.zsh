@@ -86,7 +86,7 @@ banner "Assembling release dir"
 # Copy binary into release dir
 NP="$PWD/$RELEASE_DIR/bin/noseyparker"
 cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP"
-
+strip --strip-all $NP
 ################################################################################
 # Shell completion generation
 ################################################################################
