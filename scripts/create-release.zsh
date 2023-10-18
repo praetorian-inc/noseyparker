@@ -107,7 +107,7 @@ find "$RELEASE_DIR" -type f -print0 | xargs -0 du -shc | sort -h -k1,1
 
 if [[ $PLATFORM == 'linux' ]]; then
     banner "ldd output for noseyparker"
-    ldd "$NP"
+    ldd "$NP" || true
 
     banner "readelf -d output for noseyparker"
     readelf -d "$NP"
