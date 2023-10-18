@@ -43,3 +43,11 @@ rules:
   - |
       # TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'
       # TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'
+
+  # XXX It would be nice if this actually matched
+  negative_examples:
+  - |
+      Twitter(auth=OAuth('MjuHWoGbzYmJv3ZuHaBvSENfyevu00NQuBc40VM',
+                         'anJLBCOALCXl7aXeybmNA5oae9E03Cm23cKNMLaScuXwk',
+                         'kl3E14NQx84qxO1dy247V0b2W',
+                         '5VFVXVMq9bDJzFAKPfWOiYmJZin2F7YLhSfoyLBXf6Bc9ngX3g'))

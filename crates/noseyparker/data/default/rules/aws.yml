@@ -26,7 +26,17 @@ rules:
 - name: AWS Secret Access Key
   id: np.aws.2
 
-  pattern: '(?i)\baws_?(?:secret)?_?(?:access)?_?(?:key)?["'']?\s{0,30}(?::|=>|=)\s{0,30}["'']?([a-z0-9/+=]{40})\b'
+  pattern: |
+    (?x)(?i)
+    \b
+    aws_? (?:secret)? _? (?:access)? _? (?:key)?
+    ["'']?
+    \s{0,30}
+    (?::|=>|=)
+    \s{0,30}
+    ["'']?
+    ([a-z0-9/+=]{40})
+    \b
 
   references:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
@@ -39,10 +49,11 @@ rules:
   - 'aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
   negative_examples:
+  - 'export AWS_SECRET_ACCESS_KEY=ded7db27a4558e2ea9bbf0bf36ae0e8521618f366c'
   - '"aws_secret_access_key" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend'
   - '"aws_secret_access_key" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaendbbbbbbb'
   - '"aws_sEcReT_key"  =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend'
-  # FIXME: modify the pattern to detect cases like this
+  # FIXME: modify the pattern to detect cases like the following
   - 'aws_secret_key: OOzkR1+hF+1ABCsIFDJMEUtqmtnZ1234567890'
   - '======================'
   - '//////////////////////'

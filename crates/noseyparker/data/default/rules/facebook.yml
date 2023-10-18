@@ -21,6 +21,10 @@ rules:
   - "    var fbApiKey = '0278fc1adf6dc1d82a156f306ce2c5cc';"
   - '     fbApiKey:            "171e84fd57f430fc59afa8fad3dbda2a",'
 
+  negative_examples:
+  # XXX would be nice if the following matched
+  - '\"fbconnectkey\";s:32:\"8f52d1586bd18a18e152289b00ed7d29\";'
+
 
 - name: Facebook Access Token
   id: np.facebook.2

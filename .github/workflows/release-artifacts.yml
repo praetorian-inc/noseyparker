@@ -96,7 +96,6 @@ jobs:
         file: ${{ matrix.dockerfile }}
         platforms: linux/amd64,linux/arm64
         push: true
-        load: true
         pull: true
 
         tags: ${{ steps.docker_metadata.outputs.tags }}

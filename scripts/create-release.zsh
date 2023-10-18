@@ -53,6 +53,8 @@ elif [[ $PLATFORM == 'macos' ]]; then
 else
     fatal "unknown platform $PLATFORM"
 fi
+ensure_has_program cmake
+ensure_has_program make
 ensure_has_program sha256sum
 
 banner "Build configuration"
