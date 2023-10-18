@@ -15,7 +15,6 @@ RUN apk add --no-cache --no-interactive \
         openssl \
         openssl-dev \
         perl \
-        samurai \
         zsh \
         && \
     apk cache clean

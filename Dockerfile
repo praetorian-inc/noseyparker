@@ -17,7 +17,6 @@ FROM rust:1.71-bullseye AS builder
 RUN apt-get update &&\
     apt-get install -y \
         cmake \
-        ninja-build \
         zsh \
         &&\
     apt-get clean
