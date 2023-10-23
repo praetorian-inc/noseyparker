@@ -48,16 +48,16 @@ pub struct Datastore {
 impl Datastore {
     /// Create a new datastore at `root_dir` if one does not exist,
     /// or open an existing one if present.
-    pub fn create_or_open(root_dir: &Path) -> Result<Self> {
-        Self::create(root_dir)
-            .or_else(|_e| Self::open(root_dir))
+    pub fn create_or_open(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        Self::create(root_dir, cache_size)
+            .or_else(|_e| Self::open(root_dir, cache_size))
             .with_context(|| format!("Failed to open datastore at {}", root_dir.display()))
     }
 
     /// Open the existing datastore at `root_dir`.
-    pub fn open(root_dir: &Path) -> Result<Self> {
+    pub fn open(root_dir: &Path, cache_size: i64) -> Result<Self> {
         let db_path = root_dir.join("datastore.db");
-        let conn = Self::new_connection(&db_path)
+        let conn = Self::new_connection(&db_path, cache_size)
             .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
         let root_dir = root_dir.canonicalize().with_context(|| {
             format!("Failed to canonicalize datastore path at {}", root_dir.display())
@@ -88,7 +88,7 @@ impl Datastore {
     }
 
     /// Create a new datastore at `root_dir` and open it.
-    pub fn create(root_dir: &Path) -> Result<Self> {
+    pub fn create(root_dir: &Path, cache_size: i64) -> Result<Self> {
         // Create datastore directory
         std::fs::create_dir(root_dir).with_context(|| {
             format!("Failed to create datastore root directory at {}", root_dir.display())
@@ -99,7 +99,7 @@ impl Datastore {
             format!("Failed to write .gitignore to datastore at {}", root_dir.display())
         })?;
 
-        Self::open(root_dir)
+        Self::open(root_dir, cache_size)
     }
 
     /// Get the path to this datastore's scratch directory.
@@ -741,16 +741,13 @@ pub struct MatchId(pub i64);
 
 // Private implementation
 impl Datastore {
-    fn new_connection(path: &Path) -> Result<Connection> {
+    fn new_connection(path: &Path, cache_size: i64) -> Result<Connection> {
         let conn = Connection::open(path)?;
 
         conn.pragma_update(None, "journal_mode", "wal")?; // https://www.sqlite.org/wal.html
         conn.pragma_update(None, "foreign_keys", "on")?; // https://sqlite.org/foreignkeys.html
         conn.pragma_update(None, "synchronous", "normal")?; // https://sqlite.org/pragma.html#pragma_synchronous
-
-        // FIXME: make this a command-line parameter
-        let limit: i64 = -8 * 1024 * 1024; // 8GiB limit
-        conn.pragma_update(None, "cache_size", limit)?; // https://sqlite.org/pragma.html#pragma_cache_size
+        conn.pragma_update(None, "cache_size", cache_size)?; // sqlite.org/pragma.html#pragma_cache_size
 
         Ok(conn)
     }

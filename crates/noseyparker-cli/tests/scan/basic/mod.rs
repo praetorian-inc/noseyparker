@@ -225,3 +225,25 @@ fn report_nonexistent_default_datastore() {
 
     ds.assert(predicates::path::missing());
 }
+
+#[test]
+/// Test that the `report` command's `--max-matches` can be given a negative value (which means "no
+/// limit" for the option) without requiring an equals sign for the value. That is, instead of
+/// _requiring_ that the option be written `--max-matches=-1`, it should work fine to write
+/// `--max-matches -1`.
+///
+/// N.B., Suppoorting that argument parsing requires passing the `allow_negative_numbers=true` in
+/// the correct spot in the `clap` code.
+fn report_unlimited_matches() {
+    let scan_env = ScanEnv::new();
+    let input = scan_env.input_file_with_secret("input.txt");
+
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
+        .stdout(match_scan_stats("81 B", 1, 1, 1));
+
+    with_settings!({
+        filters => get_report_stdout_filters(),
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath(), "--max-matches", "-1"));
+    });
+}

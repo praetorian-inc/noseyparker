@@ -217,6 +217,21 @@ pub struct AdvancedArgs {
     #[arg(hide_short_help=true, global=true, long, default_value_t=16384, value_name="LIMIT")]
     pub rlimit_nofile: u64,
 
+    /// Set the cache size for sqlite connections to SIZE
+    ///
+    /// This has the effect of setting SQLite's `pragma cache_size=SIZE`.
+    /// The default value is set to use a maximum of 8GiB for database cache.
+    /// See <https://sqlite.org/pragma.html#pragma_cache_size> for more details.
+    #[arg(
+        hide_short_help=true,
+        global=true,
+        long,
+        default_value_t=-8 * 1024 * 1024,
+        value_name="SIZE",
+        allow_negative_numbers=true,
+    )]
+    pub sqlite_cache_size: i64,
+
     /// Enable or disable backtraces on panic
     ///
     /// This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
@@ -577,7 +592,8 @@ pub struct ContentFilteringArgs {
     #[arg(
         long("max-file-size"),
         default_value_t = 100.0,
-        value_name = "MEGABYTES"
+        value_name = "MEGABYTES",
+        allow_negative_numbers=true,
     )]
     pub max_file_size_mb: f64,
 
@@ -647,7 +663,7 @@ pub struct ReportArgs {
     /// Limit the number of matches per finding to at most N
     ///
     /// A negative value means "no limit".
-    #[arg(long, default_value_t = 3, value_name = "N")]
+    #[arg(long, default_value_t = 3, value_name = "N", allow_negative_numbers=true)]
     pub max_matches: i64,
 }
 

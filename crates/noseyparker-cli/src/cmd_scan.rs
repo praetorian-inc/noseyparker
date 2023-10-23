@@ -55,7 +55,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Open datastore
     // ---------------------------------------------------------------------------------------------
     init_progress.set_message("Initializing datastore...");
-    let mut datastore = Datastore::create_or_open(&args.datastore)?;
+    let mut datastore = Datastore::create_or_open(
+        &args.datastore,
+        global_args.advanced.sqlite_cache_size,
+    )?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules

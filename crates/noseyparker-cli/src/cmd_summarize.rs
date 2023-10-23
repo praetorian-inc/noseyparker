@@ -45,8 +45,8 @@ impl MatchSummaryReporter {
     }
 }
 
-pub fn run(_global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
-    let datastore = Datastore::open(&args.datastore)
+pub fn run(global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
+    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
     let output = args
         .output_args
