@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - `--sqlite-cache-size SIZE` to control the `pragma cache_size` value used in sqlite database connections
 
+- The datastore now contains two additional tables for storing user annotations, both freeform comments and accept/reject status.
+  These additional tables are not currently populated or used elsewhere in the open-source version of Nosey Parker.
+
 ### Fixes
 - Command-line parameters that can meaningfully accept negative numbers can now be specified without having to use `--PARAMETER=NEGATIVE_VALUE` syntax; a space can now separate the paraemter and the value.
 

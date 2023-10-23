@@ -773,7 +773,7 @@ impl Datastore {
                   the new format; rescanning the inputs with a new datastore will be required."
             );
         }
-        if user_version > 4 {
+        if user_version > 5 {
             bail!("Unknown schema version {user_version}");
         }
 
@@ -948,15 +948,16 @@ impl Datastore {
 
         // -----------------------------------------------------------------------------------------
         // migration 4
+        //
+        // Add an explicit `id` primary key to the match table.
+        //
+        // Sqlite doesn't allow adding a primary key via `alter table`, so we do a roundabout
+        // migration by renaming, creating a new table, copying, an dropping the old one.
         // -----------------------------------------------------------------------------------------
         let user_version = get_user_version()?;
         if user_version == 3 {
             let new_user_version = 4;
             debug!("Migrating database schema from version {user_version} to {new_user_version}");
-            // Add an explicit `id` primary key to the match table.
-            //
-            // Sqlite doesn't allow adding a primary key via `alter table`, so we do a roundabout
-            // migration by renaming, creating a new table, copying, an dropping the old one.
             tx.execute_batch(indoc! {r#"
                 alter table match rename to old_match;
 
@@ -1022,7 +1023,95 @@ impl Datastore {
             set_user_version(new_user_version)?;
         }
 
-        assert_eq!(get_user_version()?, 4);
+        // -----------------------------------------------------------------------------------------
+        // migration 5
+        //
+        // Add a couple tables for annotating findings: commenting and accept/reject status.
+        // These tables are not currently populated by open-source Nosey Parker.
+        // -----------------------------------------------------------------------------------------
+        let user_version = get_user_version()?;
+        if user_version == 4 {
+            let new_user_version = 5;
+            debug!("Migrating database schema from version {user_version} to {new_user_version}");
+
+            // determine if a finding_status table already exists in the datastore
+            let finding_status_exists: bool = tx.query_row(indoc! {r#"
+                select exists (
+                    select *
+                    from sqlite_master
+                    where type = 'table'
+                    and name = 'finding_status'
+                )
+            "#}, (), |row| row.get(0))?;
+
+            // determine if a finding_comment table already exists in the datastore
+            let finding_comment_exists: bool = tx.query_row(indoc! {r#"
+                select exists (
+                    select *
+                    from sqlite_master
+                    where type = 'table'
+                    and name = 'finding_comment'
+                )
+            "#}, (), |row| row.get(0))?;
+
+            if finding_status_exists {
+                tx.execute("alter table finding_status rename to old_finding_status", ())?;
+            }
+
+            if finding_comment_exists {
+                tx.execute("alter table finding_comment rename to old_finding_status", ())?;
+            }
+
+            tx.execute_batch(indoc! {r#"
+                create table finding_status
+                -- This table records the accepted/rejected status of findings.
+                (
+                    id integer primary key,
+                    rule_name text not null,
+                    group_input blob not null,
+                    status text not null,
+                    constraint status_valid check (status in ('accept', 'reject')),
+                    unique (rule_name, group_input)
+                ) strict;
+
+                create table if not exists finding_comment
+                -- This table records ad-hoc comments assigned to findings.
+                (
+                    id integer primary key,
+                    rule_name text not null,
+                    group_input blob not null,
+                    comment text not null,
+                    unique (rule_name, group_input),
+                    constraint comment_valid check (comment != '')
+                ) strict;
+            "#})?;
+
+            // migrate old finding status data
+            if finding_status_exists {
+                tx.execute_batch(indoc! {r#"
+                    insert into finding_status (rule_name, group_input, status)
+                    select rule_name, group_input, status
+                    from old_finding_status;
+
+                    drop table old_finding_status;
+                "#})?;
+            }
+
+            // migrate old finding comment data
+            if finding_comment_exists {
+                tx.execute_batch(indoc! {r#"
+                    insert into finding_comment (rule_name, group_input, comment)
+                    select rule_name, group_input, comment
+                    from old_finding_comment;
+
+                    drop table old_finding_comment;
+                "#})?;
+            }
+
+            set_user_version(new_user_version)?;
+        }
+
+        assert_eq!(get_user_version()?, 5);
         tx.commit()?;
 
         Ok(())
