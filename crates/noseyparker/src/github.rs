@@ -15,7 +15,7 @@ pub use error::Error;
 pub use repo_enumerator::{RepoEnumerator, RepoSpecifiers};
 pub use result::Result;
 
-use crate::progress::Progress;
+use progress::Progress;
 
 /// List accessible repository URLs matching the given specifiers.
 ///

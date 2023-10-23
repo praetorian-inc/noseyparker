@@ -13,7 +13,7 @@ use std::time::Instant;
 use tracing::{debug, warn};
 
 use crate::bstring_table::BStringTable;
-use crate::progress::Progress;
+use progress::Progress;
 
 type Symbol = crate::bstring_table::Symbol<u32>;
 

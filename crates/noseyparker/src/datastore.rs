@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
+use bstring_serde::BStringSerde;
 use indoc::indoc;
+use input_enumerator::git_commit_metadata::CommitMetadata;
 use rusqlite::{Connection, types::FromSqlError};
 use serde::Serialize;
 use std::ffi::OsString;
@@ -10,7 +12,6 @@ use tracing::{debug, debug_span};
 
 use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
-use crate::git_commit_metadata::CommitMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
@@ -1192,7 +1193,7 @@ pub struct MatchGroupMetadata {
     pub rule_name: String,
 
     /// The matched content of all the matches in the group
-    #[serde(with = "crate::utils::BStringSerde")]
+    #[serde(with = "BStringSerde")]
     pub match_content: BString,
 
     /// The number of matches in the group

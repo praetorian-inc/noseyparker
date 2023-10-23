@@ -10,6 +10,11 @@ use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
 
 use crate::args;
 
+use content_guesser;
+use content_guesser::Guesser;
+use input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
+use progress::Progress;
+
 use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_map::BlobIdMap;
 use noseyparker::blob_metadata::BlobMetadata;
@@ -18,17 +23,15 @@ use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
 use noseyparker::github;
-use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
 use noseyparker::matcher_stats::MatcherStats;
-use noseyparker::progress::Progress;
 use noseyparker::provenance::{CommitKind, Provenance};
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules::Rules;
 use noseyparker::rules_database::RulesDatabase;
-use noseyparker::{content_guesser, content_guesser::Guesser};
+
 
 type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
 
@@ -294,7 +297,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let make_matcher = || -> Result<(Matcher, Guesser)> {
         *num_matchers_counter.lock().unwrap() += 1;
         let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
-        let guesser = content_guesser::Guesser::new()?;
+        let guesser = Guesser::new()?;
         Ok((matcher, guesser))
     };
 

@@ -1,10 +1,15 @@
+pub mod blob_appearance;
+pub mod bstring_table;
+pub mod git_commit_metadata;
+pub mod git_metadata_graph;
+
 use anyhow::Result;
 use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::{debug, error, warn};
 
-use crate::progress::Progress;
+use progress::Progress;
 
 mod git_repo_enumerator;
 pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoWithMetadataEnumerator, GitRepoResult};

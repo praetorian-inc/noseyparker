@@ -214,9 +214,9 @@ checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
 name = "base64"
-version = "0.21.4"
+version = "0.21.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ba43ea6f343b788c8764558649e08df62f86c6ef251fdaeb1ffd010a9ae50a2"
+checksum = "35636a1494ede3b646cc98f74f8e62c773a38a659ebc777a2cf26b9b74171df9"
 
 [[package]]
 name = "bindgen"
@@ -288,6 +288,14 @@ checksum = "c79ad7fb2dd38f3dabd76b09c6a5a20c038fc0213ef1e9afd30eb777f120f019"
 dependencies = [
  "memchr",
  "regex-automata 0.4.1",
+ "serde",
+]
+
+[[package]]
+name = "bstring-serde"
+version = "0.0.0"
+dependencies = [
+ "bstr",
  "serde",
 ]
 
@@ -461,7 +469,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "content_guesser"
+name = "content-guesser"
 version = "0.0.0"
 dependencies = [
  "magic",
@@ -1951,7 +1959,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.9",
+ "socket2 0.4.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -2087,7 +2095,6 @@ dependencies = [
  "instant",
  "number_prefix",
  "portable-atomic",
- "rayon",
  "unicode-segmentation",
  "unicode-width",
 ]
@@ -2097,6 +2104,27 @@ name = "indoc"
 version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e186cfbae8084e513daff4240b4797e342f988cecda4fb6c939150f96315fd8"
+
+[[package]]
+name = "input-enumerator"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bstr",
+ "bstring-serde",
+ "fixedbitset",
+ "gix",
+ "gix-object",
+ "ignore",
+ "petgraph",
+ "pretty_assertions",
+ "progress",
+ "proptest",
+ "roaring",
+ "serde",
+ "smallvec",
+ "tracing",
+]
 
 [[package]]
 name = "insta"
@@ -2136,9 +2164,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.8.0"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28b29a3cd74f0f4598934efe3aeba42bae0eb4680554128851ebbecb02af14e6"
+checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
 
 [[package]]
 name = "is-terminal"
@@ -2408,9 +2436,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.8"
+version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "927a765cd3fc26206e66b296465fa9d3e5ab003e651c1b3c060e7956d96b19d2"
+checksum = "3dce281c5e46beae905d4de1870d8b1509a9142b62eedf18b443b011ca8343d0"
 dependencies = [
  "libc",
  "wasi",
@@ -2453,14 +2481,14 @@ checksum = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
 
 [[package]]
 name = "noseyparker"
-version = "0.16.0-dev"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "atoi",
  "bstr",
+ "bstring-serde",
  "chrono",
  "console",
- "content_guesser",
  "fixedbitset",
  "gix",
  "gix-object",
@@ -2468,21 +2496,18 @@ dependencies = [
  "hyperx",
  "ignore",
  "include_dir",
- "indicatif",
  "indoc",
+ "input-enumerator",
  "lazy_static",
- "mime",
- "petgraph",
  "pretty_assertions",
+ "progress",
  "proptest",
  "regex",
  "reqwest",
- "roaring",
  "rusqlite",
  "secrecy",
  "serde",
  "serde_yaml",
- "smallvec",
  "thiserror",
  "tokio",
  "tracing",
@@ -2501,11 +2526,12 @@ dependencies = [
  "clap",
  "clap_complete",
  "console",
+ "content-guesser",
  "crossbeam-channel",
- "ignore",
  "indenter",
  "indicatif",
  "indoc",
+ "input-enumerator",
  "insta",
  "lazy_static",
  "log",
@@ -2515,6 +2541,7 @@ dependencies = [
  "predicates",
  "pretty_assertions",
  "prettytable-rs",
+ "progress",
  "rayon",
  "regex",
  "rlimit",
@@ -2855,6 +2882,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "progress"
+version = "0.0.0"
+dependencies = [
+ "indicatif",
+]
+
+[[package]]
 name = "proptest"
 version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3033,7 +3067,7 @@ version = "0.11.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "046cd98826c46c2ac8ddecae268eb5c2e58628688a5fc7a2643704a73faba95b"
 dependencies = [
- "base64 0.21.4",
+ "base64 0.21.5",
  "bytes",
  "encoding_rs",
  "futures-core",
@@ -3426,9 +3460,9 @@ dependencies = [
 
 [[package]]
 name = "socket2"
-version = "0.4.9"
+version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64a4a911eed85daf18834cfaa86a79b7d266ff93ff5ba14005426219480ed662"
+checksum = "9f7916fc008ca5542385b89a3d3ce689953c143e9304a9bf8beec1de48994c0d"
 dependencies = [
  "libc",
  "winapi",
@@ -3436,9 +3470,9 @@ dependencies = [
 
 [[package]]
 name = "socket2"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4031e820eb552adee9295814c0ced9e5cf38ddf1e8b7d566d6de8e2538ea989e"
+checksum = "7b5fac59a5cb5dd637972e5fca70daf0523c9067fcdc4842f053dae04a18f8e9"
 dependencies = [
  "libc",
  "windows-sys 0.48.0",
@@ -3674,7 +3708,7 @@ dependencies = [
  "libc",
  "mio",
  "pin-project-lite",
- "socket2 0.5.4",
+ "socket2 0.5.5",
  "windows-sys 0.48.0",
 ]
 

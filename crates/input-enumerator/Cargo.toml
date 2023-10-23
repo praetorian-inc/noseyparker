@@ -1,0 +1,41 @@
+[package]
+name = "input-enumerator"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+version = "0.0.0"
+publish.workspace = true
+
+[features]
+gix_debug = ["gix-object/verbose-object-parsing-errors"]
+
+[dependencies]
+progress = { path = "../progress" }
+
+anyhow = { version = "1.0" }
+bstr = { version = "1.0", features = ["serde"] }
+bstring-serde = { path = "../bstring-serde" }
+fixedbitset = "0.4"
+
+# The following two dependencies get enabled by the `gix_debug` feature
+#
+# note that the `verbose-object-parsing-errors` feature is:
+# - broken in gix 0.53 + gix-object 0.36,
+# - broken in gix 0.52 + gix-object 0.35
+# - not broken in gix 0.51 + gix-object 0.33
+gix = { version = "0.55", features = ["max-performance", "serde"] }
+gix-object = { version = "0.38", features = ["verbose-object-parsing-errors"], optional = true }
+
+ignore = "0.4"
+petgraph = "0.6"
+roaring = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+smallvec = { version = "1.11", features = ["const_generics", "const_new", "union"] }
+tracing = "0.1"
+
+[dev-dependencies]
+pretty_assertions = "1.3"
+proptest = "1.0"
