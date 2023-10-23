@@ -6,7 +6,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error, info, trace_span, warn};
+use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
 
 use crate::args;
 
@@ -676,7 +676,12 @@ fn run_matcher(
 
     let (matcher, guesser) = matcher_guesser;
 
-    match matcher.scan_blob(&blob, &provenance) {
+    let t1 = Instant::now();
+    let res = matcher.scan_blob(&blob, &provenance);
+    let scan_time = t1.elapsed();
+    let scan_us = scan_time.as_micros();
+
+    match res {
         Err(e) => {
             progress.suspend(|| {
                 error!("Failed to scan blob {} from {}: {e}", blob.id, provenance.first())
@@ -685,10 +690,14 @@ fn run_matcher(
         }
 
         // blob already seen, but with no matches; nothing to do!
-        Ok(ScanResult::SeenSansMatches) => Ok(()),
+        Ok(ScanResult::SeenSansMatches) => {
+            trace!("({scan_us}us) blob already scanned with no matches");
+            Ok(())
+        }
 
         // blob already seen; all we need to do is record its provenance
         Ok(ScanResult::SeenWithMatches) => {
+            trace!("({scan_us}us) blob already scanned with matches");
             let metadata = BlobMetadata {
                 id: blob.id,
                 num_bytes: blob.len(),
@@ -703,6 +712,8 @@ fn run_matcher(
 
         // blob has not been seen; need to record blob metadata, provenance, and matches
         Ok(ScanResult::New(matches)) => {
+            trace!("({scan_us}us) blob newly scanned; {} matches", matches.len());
+
             if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {
                 return Ok(());
             }
