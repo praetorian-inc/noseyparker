@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   When specified as `matching`, a copy of each encountered blob that has matches will be saved to the datastore's `blobs` directory.
   When specified as `all`, a copy of _each_ encountered blob will be saved.
   The default value is `none`.
-  Saved copies of blobs are used for no additional purpose at present within Nosey Parker.
+  This mechanism exists to aid in ad-hoc downstream investigation.
+  Copied blobs are not used elsewhere in Nosey Parker at this point.
 
 - A new advanced global command-line parameter has been exposed:
 

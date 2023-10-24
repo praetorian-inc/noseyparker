@@ -448,6 +448,9 @@ pub struct ScanArgs {
     /// If this option is enabled, corresponding blobs will be written to the `blobs` directory within the datastore.
     /// The format of that directory is similar to Git's "loose" object format:
     /// the first 2 characters of the hex-encoded blob ID name a subdirectory, and the remaining characters are used as the filename.
+    ///
+    /// This mechanism exists to aid in ad-hoc downstream investigation.
+    /// Copied blobs are not used elsewhere in Nosey Parker at this point.
     #[arg(
         long,
         default_value_t=CopyBlobsMode::None,
@@ -517,13 +520,13 @@ pub enum BlobMetadataMode {
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[strum(serialize_all="kebab-case")]
 pub enum CopyBlobsMode {
-    /// Save all encountered blobs
+    /// Copy all encountered blobs
     All,
 
-    /// Save only blobs with matches
+    /// Copy only blobs with matches
     Matching,
 
-    /// Save no blobs
+    /// Copy no blobs
     None,
 }
 

@@ -177,12 +177,15 @@ Data Collection Options:
           format: the first 2 characters of the hex-encoded blob ID name a subdirectory, and the
           remaining characters are used as the filename.
           
+          This mechanism exists to aid in ad-hoc downstream investigation. Copied blobs are not used
+          elsewhere in Nosey Parker at this point.
+          
           [default: none]
 
           Possible values:
-          - all:      Save all encountered blobs
-          - matching: Save only blobs with matches
-          - none:     Save no blobs
+          - all:      Copy all encountered blobs
+          - matching: Copy only blobs with matches
+          - none:     Copy no blobs
 
 Global Options:
   -v, --verbose...
