@@ -1,0 +1,19 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stdout
+---
+Finding 1/1: AWS API Key
+Match: AKIADEADBEEFDEADBEEF
+
+    Occurrence 1/1
+    File:  <FILENAME>
+    Blob:  <BLOB>
+    Lines: 3:9-3:28
+
+        # This is fake configuration data
+        USERNAME=the_dude
+        AWS_KEY=AKIADEADBEEFDEADBEEF
+
+
+
+

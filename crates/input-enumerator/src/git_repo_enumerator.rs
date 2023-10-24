@@ -8,7 +8,8 @@ use tracing::{error_span, warn};
 use crate::blob_appearance::{BlobAppearance, BlobAppearanceSet};
 use crate::git_commit_metadata::CommitMetadata;
 use crate::git_metadata_graph::GitMetadataGraph;
-use crate::progress::Progress;
+
+use progress::Progress;
 
 // -------------------------------------------------------------------------------------------------
 // implementation helpers

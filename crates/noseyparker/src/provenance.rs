@@ -1,9 +1,9 @@
 use bstr::BString;
+use bstring_serde::BStringSerde;
+use input_enumerator::git_commit_metadata::CommitMetadata;
 use serde::Serialize;
 use std::path::PathBuf;
 
-use crate::git_commit_metadata::CommitMetadata;
-use crate::utils::BStringSerde;
 
 // -------------------------------------------------------------------------------------------------
 // Provenance

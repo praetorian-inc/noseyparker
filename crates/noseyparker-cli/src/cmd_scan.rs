@@ -6,9 +6,14 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error, info, trace_span, warn};
+use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
 
 use crate::args;
+
+use content_guesser;
+use content_guesser::Guesser;
+use input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
+use progress::Progress;
 
 use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_map::BlobIdMap;
@@ -18,17 +23,15 @@ use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
 use noseyparker::github;
-use noseyparker::input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
 use noseyparker::matcher_stats::MatcherStats;
-use noseyparker::progress::Progress;
 use noseyparker::provenance::{CommitKind, Provenance};
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules::Rules;
 use noseyparker::rules_database::RulesDatabase;
-use noseyparker::{content_guesser, content_guesser::Guesser};
+
 
 type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
 
@@ -55,7 +58,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Open datastore
     // ---------------------------------------------------------------------------------------------
     init_progress.set_message("Initializing datastore...");
-    let mut datastore = Datastore::create_or_open(&args.datastore)?;
+    let mut datastore = Datastore::create_or_open(
+        &args.datastore,
+        global_args.advanced.sqlite_cache_size,
+    )?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -291,7 +297,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let make_matcher = || -> Result<(Matcher, Guesser)> {
         *num_matchers_counter.lock().unwrap() += 1;
         let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
-        let guesser = content_guesser::Guesser::new()?;
+        let guesser = Guesser::new()?;
         Ok((matcher, guesser))
     };
 
@@ -673,7 +679,12 @@ fn run_matcher(
 
     let (matcher, guesser) = matcher_guesser;
 
-    match matcher.scan_blob(&blob, &provenance) {
+    let t1 = Instant::now();
+    let res = matcher.scan_blob(&blob, &provenance);
+    let scan_time = t1.elapsed();
+    let scan_us = scan_time.as_micros();
+
+    match res {
         Err(e) => {
             progress.suspend(|| {
                 error!("Failed to scan blob {} from {}: {e}", blob.id, provenance.first())
@@ -682,10 +693,14 @@ fn run_matcher(
         }
 
         // blob already seen, but with no matches; nothing to do!
-        Ok(ScanResult::SeenSansMatches) => Ok(()),
+        Ok(ScanResult::SeenSansMatches) => {
+            trace!("({scan_us}us) blob already scanned with no matches");
+            Ok(())
+        }
 
         // blob already seen; all we need to do is record its provenance
         Ok(ScanResult::SeenWithMatches) => {
+            trace!("({scan_us}us) blob already scanned with matches");
             let metadata = BlobMetadata {
                 id: blob.id,
                 num_bytes: blob.len(),
@@ -700,6 +715,8 @@ fn run_matcher(
 
         // blob has not been seen; need to record blob metadata, provenance, and matches
         Ok(ScanResult::New(matches)) => {
+            trace!("({scan_us}us) blob newly scanned; {} matches", matches.len());
+
             if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {
                 return Ok(());
             }

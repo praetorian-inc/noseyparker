@@ -26,7 +26,7 @@ rule_profiling = ["noseyparker/rule_profiling"]
 
 # Enable the file content classifier based on `libmagic`
 # Requires a aystem-wide `libmagic` to be available
-libmagic = ["noseyparker/libmagic"]
+libmagic = ["content-guesser/libmagic"]
 
 # Compile out `trace`-level log and tracing messages in release builds
 disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug"]
@@ -35,7 +35,7 @@ disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug
 release = ["disable_trace"]
 
 # Enable additional debugging in the `gix` set of dependencies
-gix_debug = ["noseyparker/gix_debug"]
+gix_debug = ["input-enumerator/gix_debug"]
 
 
 [build-dependencies]
@@ -50,17 +50,19 @@ bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 clap_complete = "4.4"
 console = "0.15"
+content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 indenter = "0.3"
-indicatif = { version = "0.17", features = ["improved_unicode", "rayon"] }
+indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
-ignore = "0.4"
+input-enumerator = { path = "../input-enumerator" }
 lazy_static = "1.4"
 log = { version = "0.4", optional = true }
 mimalloc = "0.1"
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 prettytable-rs = "0.10"
+progress = { path = "../progress" }
 rayon = "1.5"
 regex = "1.7"
 rlimit = "0.10.0"

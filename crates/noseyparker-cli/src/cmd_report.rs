@@ -21,7 +21,7 @@ use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat, Reportable};
 pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     debug!("Args:\n{global_args:#?}\n{args:#?}");
 
-    let datastore = Datastore::open(&args.datastore)
+    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
     let output = args
         .output_args

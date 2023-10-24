@@ -2,7 +2,7 @@ use bstr::BString;
 use gix::ObjectId;
 use gix::date::Time;
 
-use crate::utils::BStringSerde;
+use bstring_serde::BStringSerde;
 
 
 // FIXME: figure out how to do this without allocating

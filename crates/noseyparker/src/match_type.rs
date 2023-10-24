@@ -1,11 +1,11 @@
 use bstr::BString;
+use bstring_serde::BStringSerde;
 use tracing::debug;
 
 use crate::blob_id::BlobId;
 use crate::location::{LocationMapping, Location};
 use crate::matcher::BlobMatch;
 use crate::snippet::Snippet;
-use crate::utils::BStringSerde;
 
 // -------------------------------------------------------------------------------------------------
 // Match

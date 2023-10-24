@@ -1,10 +1,10 @@
 use bstr::BString;
+use bstring_serde::BStringSerde;
 use serde::{Deserialize, Serialize};
 // use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 
 use crate::bstring_escape::Escaped;
-use crate::utils::BStringSerde;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Snippet {

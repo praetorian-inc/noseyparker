@@ -1,0 +1,16 @@
+[package]
+name = "progress"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+version = "0.0.0"
+publish.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# XXX Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
+indicatif = { version = "0.17", features = ["improved_unicode"] }
