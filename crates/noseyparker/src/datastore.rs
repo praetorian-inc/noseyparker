@@ -85,6 +85,15 @@ impl Datastore {
             )
         })?;
 
+        let blobs_dir = ds.blobs_dir();
+        std::fs::create_dir_all(&blobs_dir).with_context(|| {
+            format!(
+                "Failed to create blobs directory {} for datastore at {}",
+                blobs_dir.display(),
+                ds.root_dir().display()
+            )
+        })?;
+
         Ok(ds)
     }
 
@@ -111,6 +120,11 @@ impl Datastore {
     /// Get the path to this datastore's clones directory.
     pub fn clones_dir(&self) -> PathBuf {
         self.root_dir.join("clones")
+    }
+
+    /// Get the path to this datastore's blobs directory.
+    pub fn blobs_dir(&self) -> PathBuf {
+        self.root_dir.join("blobs")
     }
 
     /// Get the root directory that contains this `Datastore`.

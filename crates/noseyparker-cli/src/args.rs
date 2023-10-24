@@ -418,13 +418,6 @@ pub struct ScanArgs {
     #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
     pub num_jobs: usize,
 
-    /// Include up to the specified number of bytes before and after each match
-    ///
-    /// The default value typically gives between 4 and 7 lines of context before and after each
-    /// match.
-    #[arg(long, value_name="BYTES", default_value_t=256)]
-    pub snippet_length: usize,
-
     /// Use custom rules from the specified file or directory
     ///
     /// The paths can be either files or directories.
@@ -442,6 +435,27 @@ pub struct ScanArgs {
 
     #[command(flatten)]
     pub metadata_args: MetadataArgs,
+
+    /// Include up to the specified number of bytes before and after each match
+    ///
+    /// The default value typically gives between 4 and 7 lines of context before and after each
+    /// match.
+    #[arg(long, value_name="BYTES", default_value_t=256, help_heading="Data Collection Options")]
+    pub snippet_length: usize,
+
+    /// Specify which blobs will be copied in entirety to the datastore
+    ///
+    /// If this option is enabled, corresponding blobs will be written to the `blobs` directory within the datastore.
+    /// The format of that directory is similar to Git's "loose" object format:
+    /// the first 2 characters of the hex-encoded blob ID name a subdirectory, and the remaining characters are used as the filename.
+    #[arg(
+        long,
+        default_value_t=CopyBlobsMode::None,
+        value_name="MODE",
+        help_heading="Data Collection Options",
+    )]
+    pub copy_blobs: CopyBlobsMode,
+
 }
 
 /// The mode to use for cloning a Git repository
@@ -497,6 +511,19 @@ pub enum BlobMetadataMode {
     Matching,
 
     /// Record metadata for no blobs
+    None,
+}
+
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
+pub enum CopyBlobsMode {
+    /// Save all encountered blobs
+    All,
+
+    /// Save only blobs with matches
+    Matching,
+
+    /// Save no blobs
     None,
 }
 

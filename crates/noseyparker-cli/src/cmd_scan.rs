@@ -311,7 +311,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Create a channel pair for matcher threads to get their results to the datastore recorder.
     let channel_size = std::cmp::max(args.num_jobs * BATCH_SIZE, 64 * BATCH_SIZE);
     let (send_ds, recv_ds) = crossbeam_channel::bounded::<DatastoreMessage>(channel_size);
-    // let (send_ds, recv_ds) = crossbeam_channel::unbounded::<DatastoreMessage>();
+
+    let blobs_dir = datastore.blobs_dir();
 
     // We create a separate thread for writing matches to the datastore.
     // The datastore uses SQLite, which does best with a single writer.
@@ -430,6 +431,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     &send_ds,
                     args.snippet_length,
                     args.metadata_args.blob_metadata,
+                    args.copy_blobs,
+                    &blobs_dir,
                     progress,
                 )?;
 
@@ -544,6 +547,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                             &send_ds,
                             args.snippet_length,
                             args.metadata_args.blob_metadata,
+                            args.copy_blobs,
+                            &blobs_dir,
                             progress,
                         )?;
 
@@ -673,9 +678,12 @@ fn run_matcher(
     send_ds: &crossbeam_channel::Sender<DatastoreMessage>,
     snippet_length: usize,
     blob_metadata_recording_mode: args::BlobMetadataMode,
+    copy_blobs: args::CopyBlobsMode,
+    blobs_dir: &Path,
     progress: &Progress,
 ) -> Result<()> {
-    let _span = trace_span!("matcher", blob_id = blob.id.hex()).entered();
+    let blob_id = blob.id.hex();
+    let _span = trace_span!("matcher", blob_id = blob_id).entered();
 
     let (matcher, guesser) = matcher_guesser;
 
@@ -709,13 +717,34 @@ fn run_matcher(
             };
             send_ds
                 .send((provenance, metadata, Vec::new()))
-                .context("Failed to save results")?;
+                .context("Failed to save blob scan results")?;
             Ok(())
         }
 
         // blob has not been seen; need to record blob metadata, provenance, and matches
         Ok(ScanResult::New(matches)) => {
             trace!("({scan_us}us) blob newly scanned; {} matches", matches.len());
+
+            let do_copy_blob = match copy_blobs {
+                args::CopyBlobsMode::All => true,
+                args::CopyBlobsMode::Matching => !matches.is_empty(),
+                args::CopyBlobsMode::None => false,
+            };
+            if do_copy_blob {
+                let output_dir = blobs_dir.join(&blob_id[..2]);
+                let output_path = output_dir.join(&blob_id[2..]);
+                trace!("saving blob to {}", output_path.display());
+                match std::fs::create_dir(&output_dir) {
+                    Ok(()) => {},
+                    Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {},
+                    Err(e) => {
+                        bail!("Failed to create blob directory at {}: {}", output_dir.display(), e);
+                    }
+                }
+                std::fs::write(&output_path, &blob.bytes).with_context(||
+                    format!("Failed to write blob contents to {}", output_path.display())
+                )?;
+            }
 
             if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {
                 return Ok(());

@@ -143,6 +143,12 @@ impl<'a> Matcher<'a> {
     /// Otherwise, the matches found within the blob are returned.
     ///
     /// NOTE: `provenance` is used only for diagnostic purposes if something goes wrong.
+    ///
+    /// NOTE: There is a race condition in determining if a blob was already scanned.
+    /// There is a chance that when using multiple scanning threads that a blob will be scanned
+    /// multiple times.
+    ///
+    /// However, only a single `ScanResult::New` result will be returned in such a case.
     pub fn scan_blob<'b>(
         &mut self,
         blob: &'b Blob,
@@ -173,8 +179,13 @@ impl<'a> Matcher<'a> {
         let raw_matches_scratch = &mut self.user_data.raw_matches_scratch;
         if raw_matches_scratch.is_empty() {
             // No matches! We can exit early and save work.
-            self.seen_blobs.insert(blob.id, false);
-            return Ok(ScanResult::New(Vec::new()));
+            return Ok(match self.seen_blobs.insert(blob.id, false) {
+                None => ScanResult::New(Vec::new()),
+
+                // We raced with another thread, which beat us, but we ended up scanning anyway.
+                Some(true) => ScanResult::SeenWithMatches,
+                Some(false) => ScanResult::SeenSansMatches,
+            });
         }
 
         // -----------------------------------------------------------------------------------------
@@ -261,8 +272,13 @@ impl<'a> Matcher<'a> {
                 previous = Some((rule_id, matching_input_offset_span));
                 Some(m)
             }).collect();
-        self.seen_blobs.insert(blob.id, !matches.is_empty());
-        Ok(ScanResult::New(matches))
+        Ok(match self.seen_blobs.insert(blob.id, !matches.is_empty()) {
+            None => ScanResult::New(matches),
+
+            // We raced with another thread, which beat us, but we ended up scanning anyway.
+            Some(true) => ScanResult::SeenWithMatches,
+            Some(false) => ScanResult::SeenSansMatches,
+        })
     }
 }
 

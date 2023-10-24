@@ -51,14 +51,6 @@ Options:
           
           [default: DEFAULT]
 
-      --snippet-length <BYTES>
-          Include up to the specified number of bytes before and after each match
-          
-          The default value typically gives between 4 and 7 lines of context before and after each
-          match.
-          
-          [default: 256]
-
   -r, --rules <PATH>
           Use custom rules from the specified file or directory
           
@@ -167,6 +159,30 @@ Metadata Collection Options:
           - first-seen: The Git repository and set of commits and accompanying pathnames in which a
             blob is first seen
           - minimal:    Only the Git repository in which a blob is seen
+
+Data Collection Options:
+      --snippet-length <BYTES>
+          Include up to the specified number of bytes before and after each match
+          
+          The default value typically gives between 4 and 7 lines of context before and after each
+          match.
+          
+          [default: 256]
+
+      --copy-blobs <MODE>
+          Specify which blobs will be copied in entirety to the datastore
+          
+          If this option is enabled, corresponding blobs will be written to the `blobs` directory
+          within the datastore. The format of that directory is similar to Git's "loose" object
+          format: the first 2 characters of the hex-encoded blob ID name a subdirectory, and the
+          remaining characters are used as the filename.
+          
+          [default: none]
+
+          Possible values:
+          - all:      Save all encountered blobs
+          - matching: Save only blobs with matches
+          - none:     Save no blobs
 
 Global Options:
   -v, --verbose...
