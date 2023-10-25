@@ -4,7 +4,7 @@ rules:
   id: np.cratesio.1
 
   # It's a 32-character alphanumeric identifier prefixed by `cio`
-  pattern: '\bcio[a-zA-Z0-9]{32}\b'
+  pattern: '\b(cio[a-zA-Z0-9]{32})\b'
 
   references:
   - https://crates.io/data-access

@@ -2,7 +2,7 @@ rules:
 
 - name: Age Recipient (X25519 public key)
   id: np.age.1
-  pattern: '\bage1[0-9a-z]{58}\b'
+  pattern: '\b(age1[0-9a-z]{58})\b'
 
   examples:
   - 'age1zvkyg2lqzraa2lnjvqej32nkuu0ues2s82hzrye869xeexvn73equnujwj'
@@ -15,7 +15,7 @@ rules:
 
 - name: Age Identity (X22519 secret key)
   id: np.age.2
-  pattern: '\bAGE-SECRET-KEY-1[0-9A-Z]{58}\b'
+  pattern: '\b(AGE-SECRET-KEY-1[0-9A-Z]{58})\b'
 
   examples:
   - |

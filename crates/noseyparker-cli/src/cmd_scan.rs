@@ -787,7 +787,10 @@ fn run_matcher(
                     );
                     new_matches
                 }
-                None => Vec::new(),
+                None => {
+                    debug_assert!(matches.is_empty());
+                    Vec::new()
+                }
             };
 
             send_ds

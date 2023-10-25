@@ -61,6 +61,8 @@ impl Match {
         };
         let source_span = loc_mapping.get_source_span(&offset_span);
 
+        debug_assert!(blob_match.captures.len() > 1, "blob {}: no capture groups for rule {}", blob_match.blob.id, blob_match.rule.id);
+
         blob_match
             .captures
             .iter()

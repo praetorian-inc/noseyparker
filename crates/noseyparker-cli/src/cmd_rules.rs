@@ -124,6 +124,12 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             num_errors += 1;
         }
         Ok(pat) => {
+            // Check that the rule has at least one capture group
+            if pat.captures_len() <= 1 {
+                error!("Rule has no capture groups");
+                num_errors += 1;
+            }
+
             let mut num_succeeded = 0;
             let mut num_failed = 0;
 
