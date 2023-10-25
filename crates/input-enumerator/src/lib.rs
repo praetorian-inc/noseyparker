@@ -43,7 +43,7 @@ struct VisitorBuilder<'t> {
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
 
-    progress: Progress,
+    progress: &'t Progress,
 }
 
 impl<'s, 't> ignore::ParallelVisitorBuilder<'s> for VisitorBuilder<'t>
@@ -291,7 +291,7 @@ impl FilesystemEnumerator {
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,
-            progress: progress.clone(),
+            progress,
         };
 
         self.walk_builder
