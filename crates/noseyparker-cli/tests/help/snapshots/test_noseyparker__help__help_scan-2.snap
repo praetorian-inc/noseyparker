@@ -52,7 +52,7 @@ Options:
           [default: DEFAULT]
 
   -r, --rules <PATH>
-          Use custom rules from the specified file or directory
+          Load additional custom rules from the specified file or directory
           
           The paths can be either files or directories. Directories are recursively walked and all
           discovered rule files will be loaded.

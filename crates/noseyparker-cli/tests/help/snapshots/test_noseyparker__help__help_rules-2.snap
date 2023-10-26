@@ -8,6 +8,7 @@ Usage: noseyparker rules [OPTIONS] <COMMAND>
 
 Commands:
   check  Check rules for problems
+  list   List available rules
   help   Print this message or the help of the given subcommand(s)
 
 Options:

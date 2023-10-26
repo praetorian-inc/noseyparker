@@ -6,3 +6,4 @@ use common::*;
 mod scan;
 mod help;
 mod github;
+mod rules;

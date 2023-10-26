@@ -22,7 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The datastore now contains two additional tables for storing user annotations, both freeform comments and accept/reject status.
   These additional tables are not currently populated or used elsewhere in the open-source version of Nosey Parker.
 
-- Added a check to the `rules check` command to ensure that each regex rule has at least one capture group.
+- An additional check has been added to the `rules check` command to ensure that each regex rule has at least one capture group.
+
+- A new `rules list` command is available, which lists the IDs and names of available rules.
+  This command can emit its output in a variety of formats.
+  It lists the default rules, and can also list rules found from additional custom rule files.
 
 ### Fixes
 - Command-line parameters that can meaningfully accept negative numbers can now be specified without having to use `--PARAMETER=NEGATIVE_VALUE` syntax; a space can now separate the paraemter and the value.

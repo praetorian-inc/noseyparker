@@ -7,11 +7,14 @@ use vectorscan::{BlockDatabase, Flag, Pattern, Scan};
 use noseyparker_rules::{Rule, Rules};
 use noseyparker::rules_database::RulesDatabase;
 
+mod cmd_rules_list;
 use crate::args;
+
 
 pub fn run(global_args: &args::GlobalArgs, args: &args::RulesArgs) -> Result<()> {
     match &args.command {
         args::RulesCommand::Check(args) => cmd_rules_check(global_args, args),
+        args::RulesCommand::List(args) => cmd_rules_list::run(global_args, args),
     }
 }
 

@@ -346,6 +346,9 @@ pub enum RulesCommand {
     ///
     /// If errors are detected or if warnings are detected and `--warnings-as-errors` is specified, the program will exit with a nonzero exit code.
     Check(RulesCheckArgs),
+
+    /// List available rules
+    List(RulesListArgs),
 }
 
 #[derive(Args, Debug)]
@@ -354,9 +357,42 @@ pub struct RulesCheckArgs {
     /// Treat warnings as errors
     pub warnings_as_errors: bool,
 
-    #[arg(num_args(1..), required(true), value_hint = ValueHint::AnyPath)]
+    #[arg(num_args(1..), required(true), value_name = "PATH", value_hint = ValueHint::AnyPath)]
     /// Files or directories to check
     pub inputs: Vec<PathBuf>,
+}
+
+#[derive(Args, Debug)]
+pub struct RulesListArgs {
+    /// Load additional custom rules from the specified file or directory
+    ///
+    /// The paths can be either files or directories.
+    /// Directories are recursively walked and all discovered rule files will be loaded.
+    ///
+    /// This option can be repeated.
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
+    pub rules: Vec<PathBuf>,
+
+    #[command(flatten)]
+    pub output_args: OutputArgs<RulesListOutputFormat>,
+}
+
+// -----------------------------------------------------------------------------
+// rules list output format
+// -----------------------------------------------------------------------------
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all="kebab-case")]
+pub enum RulesListOutputFormat {
+    /// A text-based format designed for humans
+    Human,
+
+    /// Pretty-printed JSON format
+    Json,
+
+    /// JSON Lines format
+    ///
+    /// This is a sequence of JSON objects, one per line.
+    Jsonl,
 }
 
 // -----------------------------------------------------------------------------
@@ -418,13 +454,15 @@ pub struct ScanArgs {
     #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
     pub num_jobs: usize,
 
-    /// Use custom rules from the specified file or directory
+
+    /// Load additional custom rules from the specified file or directory
     ///
     /// The paths can be either files or directories.
     /// Directories are recursively walked and all discovered rule files will be loaded.
     ///
     /// This option can be repeated.
     #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
+    // FIXME: factor out this option; it's duplicated with RulesListArgs
     pub rules: Vec<PathBuf>,
 
     #[command(flatten)]

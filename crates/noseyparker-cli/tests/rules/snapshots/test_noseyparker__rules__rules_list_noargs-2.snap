@@ -1,0 +1,114 @@
+---
+source: crates/noseyparker-cli/tests/rules/mod.rs
+expression: stdout
+---
+
+                ID   Name 
+─────────────────────────────────────────────────────────────────────────────
+        np.adobe.1   Adobe OAuth Client Secret 
+          np.age.1   Age Recipient (X25519 public key) 
+          np.age.2   Age Identity (X22519 secret key) 
+          np.arn.1   Amazon Resource Name 
+  np.artifactory.1   Artifactory API Key 
+          np.aws.1   AWS API Key 
+          np.aws.2   AWS Secret Access Key 
+          np.aws.3   AWS Account ID 
+          np.aws.4   AWS Session Token 
+          np.aws.5   Amazon MWS Auth Token 
+        np.azure.1   Azure Connection String 
+        np.azure.2   Azure App Configuration Connection String 
+       np.bcrypt.1   bcrypt Hash 
+  np.codeclimate.1   CodeClimate 
+     np.cratesio.1   crates.io API Key 
+ np.digitalocean.1   DigitalOcean Application Access Token 
+ np.digitalocean.2   DigitalOcean Personal Access Token 
+ np.digitalocean.3   DigitalOcean Refresh Token 
+    np.dynatrace.1   Dynatrace Token 
+     np.facebook.1   Facebook Secret Key 
+     np.facebook.2   Facebook Access Token 
+        np.figma.1   Figma Personal Access Token 
+          np.gcs.1   Google Cloud Storage Bucket (subdomain style) 
+          np.gcs.2   Google Cloud Storage Bucket (path style) 
+      np.generic.1   Generic Secret 
+      np.generic.2   Generic API Key 
+      np.generic.3   Generic Username and Password (quoted) 
+      np.generic.4   Generic Username and Password (unquoted) 
+      np.generic.5   Generic Password (double quoted) 
+      np.generic.6   Generic Password (single quoted) 
+       np.github.1   GitHub Personal Access Token 
+       np.github.2   GitHub OAuth Access Token 
+       np.github.3   GitHub App Token 
+       np.github.4   GitHub Refresh Token 
+       np.github.5   GitHub Client ID 
+       np.github.6   GitHub Secret Key 
+       np.github.7   GitHub Personal Access Token (fine-grained permissions) 
+       np.gitlab.1   GitLab Runner Registration Token 
+       np.gitlab.2   GitLab Personal Access Token 
+       np.gitlab.3   GitLab Pipeline Trigger Token 
+       np.google.1   Google Client ID 
+       np.google.2   Google OAuth Client Secret (prefixed) 
+       np.google.3   Google OAuth Client Secret 
+       np.google.4   Google OAuth Access Token 
+       np.google.5   Google API Key 
+       np.gradle.1   Hardcoded Gradle Credentials 
+      np.grafana.1   Grafana API Token 
+      np.grafana.2   Grafana Cloud API Token 
+      np.grafana.3   Grafana Service Account Token 
+       np.heroku.1   Heroku API Key 
+  np.huggingface.1   HuggingFace User Access Token 
+      np.jenkins.1   Jenkins Token or Crumb 
+          np.jwt.1   JSON Web Token (base64url-encoded) 
+     np.linkedin.1   LinkedIn Client ID 
+     np.linkedin.2   LinkedIn Secret Key 
+    np.mailchimp.1   MailChimp API Key 
+      np.mailgun.1   Mailgun API Key 
+       np.mapbox.1   Mapbox Public Access Token 
+       np.mapbox.2   Mapbox Secret Access Token 
+       np.mapbox.3   Mapbox Temporary Access Token 
+          np.md5.1   md5crypt Hash 
+      np.msteams.1   Microsoft Teams Webhook 
+        np.netrc.1   netrc Credentials 
+     np.newrelic.1   New Relic License Key 
+     np.newrelic.2   New Relic License Key (non-suffixed) 
+     np.newrelic.3   New Relic API Service Key 
+     np.newrelic.4   New Relic Admin API Key 
+     np.newrelic.5   New Relic Insights Insert Key 
+     np.newrelic.6   New Relic Insights Query Key 
+     np.newrelic.7   New Relic REST API Key 
+     np.newrelic.8   New Relic Pixie API Key 
+     np.newrelic.9   New Relic Pixie Deploy Key 
+          np.npm.1   NPM Access Token (fine-grained) 
+        np.nuget.1   NuGet API Key 
+         np.odbc.1   Credentials in ODBC Connection String 
+         np.okta.1   Okta API Token 
+       np.openai.1   OpenAI API Key 
+          np.pem.1   PEM-Encoded Private Key 
+      np.postman.1   Postman API Key 
+       np.psexec.1   Credentials in PsExec 
+         np.pypi.1   PyPI Upload Token 
+     np.rubygems.1   RubyGems API Key 
+           np.s3.1   AWS S3 Bucket (subdomain style) 
+           np.s3.2   AWS S3 Bucket (path style) 
+   np.salesforce.1   Salesforce Access Token 
+        np.sauce.1   Sauce Token 
+      np.segment.1   Segment Public API Token 
+     np.sendgrid.1   SendGrid API Key 
+      np.shopify.1   Shopify Domain 
+      np.shopify.2   Shopify App Secret 
+      np.shopify.3   Shopify Access Token (Public App) 
+      np.shopify.4   Shopify Access Token (Custom App) 
+      np.shopify.5   Shopify Access Token (Legacy Private App) 
+        np.slack.1   Slack 
+        np.slack.2   Slack Token 
+        np.slack.3   Slack Webhook 
+    np.sonarqube.1   SonarQube Token 
+       np.square.1   Square Access Token 
+       np.square.2   Square OAuth Secret 
+    np.stackhawk.1   StackHawk API Key 
+       np.stripe.1   Stripe API Key 
+       np.stripe.2   Stripe API Test Key 
+     np.telegram.1   Telegram Bot Token 
+       np.twilio.1   Twilio API Key 
+      np.twitter.1   Twitter Client ID 
+      np.twitter.2   Twitter Secret Key 
+

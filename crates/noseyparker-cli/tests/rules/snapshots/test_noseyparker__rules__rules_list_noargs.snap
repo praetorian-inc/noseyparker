@@ -1,0 +1,5 @@
+---
+source: crates/noseyparker-cli/tests/rules/mod.rs
+expression: status
+---
+exit status: 0

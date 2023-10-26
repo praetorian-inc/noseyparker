@@ -109,6 +109,11 @@ impl Rules {
     pub fn is_empty(&self) -> bool {
         self.rules.is_empty()
     }
+
+    #[inline]
+    pub fn iter(&self) -> std::slice::Iter<'_, Rule> {
+        self.rules.iter()
+    }
 }
 
 /// Creates an empty collection of rules.
