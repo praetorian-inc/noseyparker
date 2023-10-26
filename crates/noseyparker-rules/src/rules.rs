@@ -2,12 +2,10 @@ use anyhow::{bail, Context, Result};
 use ignore::types::TypesBuilder;
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::BufReader;
 use std::path::Path;
 use tracing::{debug, debug_span};
 
-use crate::Rule;
+use crate::{util, Rule};
 
 // -------------------------------------------------------------------------------------------------
 // Rules
@@ -22,7 +20,7 @@ impl Rules {
         let mut rules = Rules { rules: Vec::new() };
         for (path, contents) in iterable.into_iter() {
             let rs: Self = serde_yaml::from_reader(contents)
-                .with_context(|| format!("Failed to load YAML from {}", path.display()))?;
+                .with_context(|| format!("Failed to load rules YAML from {}", path.display()))?;
             rules.extend(rs);
         }
 
@@ -57,11 +55,8 @@ impl Rules {
     pub fn from_yaml_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let _span = debug_span!("Rules::from_yaml_file", "{}", path.display()).entered();
-        let infile =
-            File::open(path).with_context(|| format!("Failed to read rules from {}", path.display()))?;
-        let reader = BufReader::new(infile);
-        let rules: Self = serde_yaml::from_reader(reader)
-            .with_context(|| format!("Failed to load YAML from {}", path.display()))?;
+        let rules: Self = util::load_yaml_file(path)
+            .with_context(|| format!("Failed to load rules YAML from {}", path.display()))?;
         debug!("Loaded {} rules from {}", rules.len(), path.display());
         Ok(rules)
     }

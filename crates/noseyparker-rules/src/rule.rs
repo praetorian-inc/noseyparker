@@ -4,8 +4,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// A pattern-based rule as represented syntactically.
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Rule {
     /// The human-readable name of the rule
     pub name: String,
