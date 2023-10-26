@@ -29,13 +29,17 @@ impl Rules {
         Ok(rules)
     }
 
+    /// Create an empty collection of rules.
     pub fn new() -> Self {
         Rules { rules: Vec::new() }
     }
 
-    pub fn from_paths<P: AsRef<Path>>(paths: &[P]) -> Result<Self> {
+    /// Load rules from the given paths, which may refer either to YAML files or to directories.
+    pub fn from_paths<P: AsRef<Path>, I: IntoIterator<Item=P>>(paths: I) -> Result<Self> {
+        let mut num_paths = 0;
         let mut rules = Rules::new();
         for input in paths {
+            num_paths += 1;
             let input = input.as_ref();
             if input.is_file() {
                 rules.extend(Rules::from_yaml_file(input)?);
@@ -45,10 +49,11 @@ impl Rules {
                 bail!("Unhandled input type: {} is neither a file nor directory", input.display());
             }
         }
-        debug!("Loaded {} rules from {} paths", rules.len(), paths.len());
+        debug!("Loaded {} rules from {num_paths} paths", rules.len());
         Ok(rules)
     }
 
+    /// Load rules from the given YAML file.
     pub fn from_yaml_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let _span = debug_span!("Rules::from_yaml_file", "{}", path.display()).entered();
@@ -61,16 +66,19 @@ impl Rules {
         Ok(rules)
     }
 
-    pub fn from_yaml_files<P: AsRef<Path>>(paths: &[P]) -> Result<Self> {
+    /// Load rules from the given YAML files.
+    pub fn from_yaml_files<P: AsRef<Path>, I: IntoIterator<Item=P>>(paths: I) -> Result<Self> {
+        let mut num_paths = 0;
         let mut rules = Vec::new();
         for path in paths {
-            let file_rules = Rules::from_yaml_file(path.as_ref())?;
-            rules.extend(file_rules);
+            num_paths += 1;
+            rules.extend(Rules::from_yaml_file(path.as_ref())?);
         }
-        debug!("Loaded {} rules from {} files", rules.len(), paths.len());
+        debug!("Loaded {} rules from {num_paths} files", rules.len());
         Ok(Rules { rules })
     }
 
+    /// Load rules from YAML files found recursively within the given directory.
     pub fn from_directory<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let _span = debug_span!("Rules::from_directory", "{}", path.display()).entered();
@@ -95,17 +103,20 @@ impl Rules {
         Self::from_yaml_files(&yaml_files)
     }
 
+    /// How many rules are in this collection?
     #[inline]
     pub fn len(&self) -> usize {
         self.rules.len()
     }
 
+    /// Is this collection of rules empty?
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.rules.is_empty()
     }
 }
 
+/// Creates an empty collection of rules.
 impl Default for Rules {
     fn default() -> Self {
         Self::new()
