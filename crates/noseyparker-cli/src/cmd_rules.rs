@@ -1,13 +1,13 @@
 use anyhow::{bail, Context, Result};
 use regex::Regex;
 use std::collections::HashSet;
+use tracing::{debug_span, error, error_span, info, warn};
 use vectorscan::{BlockDatabase, Flag, Pattern, Scan};
 
-use tracing::{debug_span, error, error_span, info, warn};
+use noseyparker_rules::{Rule, Rules};
+use noseyparker::rules_database::RulesDatabase;
 
 use crate::args;
-use noseyparker::rules::{Rule, Rules};
-use noseyparker::rules_database::RulesDatabase;
 
 pub fn run(global_args: &args::GlobalArgs, args: &args::RulesArgs) -> Result<()> {
     match &args.command {

@@ -2,12 +2,13 @@ use anyhow::Result;
 use std::sync::Mutex;
 use tracing::error;
 
+use noseyparker_rules::Rule;
+
 use crate::blob::Blob;
 use crate::blob_id_map::BlobIdMap;
 use crate::location::OffsetSpan;
 use crate::matcher_stats::MatcherStats;
 use crate::provenance_set::ProvenanceSet;
-use crate::rules::Rule;
 use crate::rules_database::RulesDatabase;
 
 // -------------------------------------------------------------------------------------------------
@@ -289,7 +290,7 @@ impl<'a> Matcher<'a> {
 mod test {
     use super::*;
 
-    use crate::rules::Rules;
+    use noseyparker_rules::Rules;
 
     use pretty_assertions::assert_eq;
 

@@ -2499,15 +2499,14 @@ dependencies = [
  "indoc",
  "input-enumerator",
  "lazy_static",
+ "noseyparker-rules",
  "pretty_assertions",
  "progress",
- "proptest",
  "regex",
  "reqwest",
  "rusqlite",
  "secrecy",
  "serde",
- "serde_yaml",
  "thiserror",
  "tokio",
  "tracing",
@@ -2538,6 +2537,7 @@ dependencies = [
  "mimalloc",
  "mime",
  "noseyparker",
+ "noseyparker-rules",
  "predicates",
  "pretty_assertions",
  "prettytable-rs",
@@ -2556,6 +2556,21 @@ dependencies = [
  "url",
  "vectorscan",
  "vergen",
+]
+
+[[package]]
+name = "noseyparker-rules"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ignore",
+ "lazy_static",
+ "pretty_assertions",
+ "proptest",
+ "regex",
+ "serde",
+ "serde_yaml",
+ "tracing",
 ]
 
 [[package]]

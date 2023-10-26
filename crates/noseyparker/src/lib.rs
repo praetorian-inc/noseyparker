@@ -18,6 +18,5 @@ pub mod provenance;
 pub mod provenance_set;
 #[cfg(feature = "rule_profiling")]
 pub mod rule_profiling;
-pub mod rules;
 pub mod rules_database;
 pub mod snippet;

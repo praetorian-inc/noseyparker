@@ -5,7 +5,9 @@ use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, debug_span};
 
-use crate::rules::{Rule, Rules};
+use noseyparker_rules::{Rule, Rules};
+
+use crate::defaults::get_default_rules;
 
 pub struct RulesDatabase {
     // NOTE: pub(crate) here so that `Matcher` can access these
@@ -17,7 +19,7 @@ pub struct RulesDatabase {
 impl RulesDatabase {
     /// Create a new `RulesDatabase` with the built-in default set of rules.
     pub fn from_default_rules() -> Result<Self> {
-        Self::from_rules(Rules::from_default_rules()?)
+        Self::from_rules(get_default_rules()?)
     }
 
     /// Create a new `RulesDatabase` from rules files found within the given directory.

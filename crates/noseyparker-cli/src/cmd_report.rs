@@ -2,7 +2,6 @@ use anyhow::{bail, Context, Result};
 use bstr::{BStr, ByteSlice};
 use indenter::indented;
 use lazy_static::lazy_static;
-use noseyparker::rules::Rules;
 use serde::Serialize;
 use serde_sarif::sarif;
 use std::fmt::{Display, Formatter, Write};
@@ -11,6 +10,7 @@ use tracing::debug;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId};
+use noseyparker::defaults::get_default_rules;
 use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
@@ -285,7 +285,7 @@ impl DetailsReporter {
 
 /// Load the rules used during the scan for the runs.tool.driver.rules array property
 fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
-    Rules::from_default_rules()
+    get_default_rules()
         .context("Failed to load default rules")?
         .into_iter()
         .map(|rule| {
