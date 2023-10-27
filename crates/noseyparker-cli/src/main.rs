@@ -13,6 +13,7 @@ mod cmd_rules;
 mod cmd_scan;
 mod cmd_shell_completions;
 mod cmd_summarize;
+mod rule_loader;
 
 use args::GlobalArgs;
 

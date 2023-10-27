@@ -40,6 +40,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Due to nuanced details of how scanning is performed, rules without capture groups will never produce reported matches.
   An additional check was added to the `rules check` command and a couple assertions were added that should help prevent this type of error in the future.
 
+### Changes
+- The `rules check` command invocation now behaves differently.
+  It now no longer requires input paths to be specified.
+  It will check the built-in rules for problems, and if additional paths are specified, will check those rules as well.
+  This change was made so that the `scan`, `rules check`, and `rules list` invocations have consistent interfaces.
+
 
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 

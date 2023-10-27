@@ -357,21 +357,14 @@ pub struct RulesCheckArgs {
     /// Treat warnings as errors
     pub warnings_as_errors: bool,
 
-    #[arg(num_args(1..), required(true), value_name = "PATH", value_hint = ValueHint::AnyPath)]
-    /// Files or directories to check
-    pub inputs: Vec<PathBuf>,
+    #[command(flatten)]
+    pub rules: RuleSpecifierArgs,
 }
 
 #[derive(Args, Debug)]
 pub struct RulesListArgs {
-    /// Load additional custom rules from the specified file or directory
-    ///
-    /// The paths can be either files or directories.
-    /// Directories are recursively walked and all discovered rule files will be loaded.
-    ///
-    /// This option can be repeated.
-    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
-    pub rules: Vec<PathBuf>,
+    #[command(flatten)]
+    pub rules: RuleSpecifierArgs,
 
     #[command(flatten)]
     pub output_args: OutputArgs<RulesListOutputFormat>,
@@ -455,15 +448,8 @@ pub struct ScanArgs {
     pub num_jobs: usize,
 
 
-    /// Load additional custom rules from the specified file or directory
-    ///
-    /// The paths can be either files or directories.
-    /// Directories are recursively walked and all discovered rule files will be loaded.
-    ///
-    /// This option can be repeated.
-    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
-    // FIXME: factor out this option; it's duplicated with RulesListArgs
-    pub rules: Vec<PathBuf>,
+    #[command(flatten)]
+    pub rules: RuleSpecifierArgs,
 
     #[command(flatten)]
     pub input_specifier_args: InputSpecifierArgs,
@@ -497,6 +483,19 @@ pub struct ScanArgs {
     )]
     pub copy_blobs: CopyBlobsMode,
 
+}
+
+#[derive(Args, Debug)]
+#[command(next_help_heading = "Rule Selection Options")]
+pub struct RuleSpecifierArgs {
+    /// Load additional custom rules from the specified file or directory
+    ///
+    /// The paths can be either files or directories.
+    /// Directories are recursively walked and all discovered rule files will be loaded.
+    ///
+    /// This option can be repeated.
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
+    pub rules: Vec<PathBuf>,
 }
 
 /// The mode to use for cloning a Git repository

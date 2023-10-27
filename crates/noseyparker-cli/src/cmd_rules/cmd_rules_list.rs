@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
-use noseyparker::defaults::get_default_rules;
 use noseyparker_rules::{Rule, Rules};
 use serde::Serialize;
 use tracing::debug_span;
 
 use crate::args::{GlobalArgs, Reportable, RulesListArgs, RulesListOutputFormat};
+use crate::rule_loader::RuleLoader;
 
 pub fn run(_global_args: &GlobalArgs, args: &RulesListArgs) -> Result<()> {
     let _span = debug_span!("cmd_rules_list").entered();
@@ -14,17 +14,9 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesListArgs) -> Result<()> {
         .get_writer()
         .context("Failed to get output writer")?;
 
-    // XXX should factor out rule loading code into one place; this duplicates cmd_scan
-    let rules = {
-        let mut rules = get_default_rules().context("Failed to load default rules")?;
-        if !args.rules.is_empty() {
-            let custom_rules =
-                Rules::from_paths(&args.rules).context("Failed to load specified rules files")?;
-            rules.extend(custom_rules);
-        }
-        rules.rules.sort_by_key(|r| r.id.clone());
-        rules
-    };
+    let rules = RuleLoader::from_rule_specifiers(&args.rules)
+        .load()
+        .context("Failed to load rules")?;
 
     let reporter = RulesReporter { rules };
     reporter.report(args.output_args.format, output)

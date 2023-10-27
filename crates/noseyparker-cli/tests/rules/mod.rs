@@ -19,3 +19,9 @@ fn rules_list_json() {
 fn rules_list_jsonl() {
     assert_cmd_snapshot!(noseyparker_success!("rules", "list", "-f", "jsonl"));
 }
+
+/// Check the default rules using the built-in linter.
+#[test]
+fn rules_check_builtins() {
+    assert_cmd_snapshot!(noseyparker_success!("rules", "check", "--warnings-as-errors"));
+}

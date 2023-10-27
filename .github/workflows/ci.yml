@@ -137,10 +137,6 @@ jobs:
       if: ${{ matrix.check_rules }}
       run: cargo build --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
-    - name: Check rules
-      if: ${{ matrix.check_rules }}
-      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings -- rules check crates/noseyparker/data/default/rules --warnings-as-errors
-
     - name: Check documentation
       if: ${{ matrix.check_docs }}
       env:

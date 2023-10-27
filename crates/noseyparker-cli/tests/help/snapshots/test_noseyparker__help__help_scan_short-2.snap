@@ -9,8 +9,10 @@ Usage: noseyparker scan [OPTIONS] [INPUT]...
 Options:
   -d, --datastore <PATH>  Use the specified datastore [env: NP_DATASTORE=] [default: datastore.np]
   -j, --jobs <N>          Use N parallel scanning threads [default: DEFAULT]
-  -r, --rules <PATH>      Load additional custom rules from the specified file or directory
   -h, --help              Print help (see more with '--help')
+
+Rule Selection Options:
+  -r, --rules <PATH>  Load additional custom rules from the specified file or directory
 
 Input Specifier Options:
   [INPUT]...                    Scan the specified file, directory, or local Git repository

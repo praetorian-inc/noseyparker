@@ -8,7 +8,7 @@ use std::sync::Mutex;
 use std::time::Instant;
 use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
 
-use crate::args;
+use crate::{args, rule_loader::RuleLoader};
 
 use content_guesser;
 use content_guesser::Guesser;
@@ -19,7 +19,7 @@ use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_map::BlobIdMap;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
-use noseyparker::defaults::{get_default_rules, DEFAULT_IGNORE_RULES};
+use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
 use noseyparker::github;
@@ -30,7 +30,6 @@ use noseyparker::matcher_stats::MatcherStats;
 use noseyparker::provenance::{CommitKind, Provenance};
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
-use noseyparker_rules::Rules;
 
 
 type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
@@ -68,12 +67,9 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     init_progress.set_message("Compiling rules...");
     let rules_db = {
-        let mut rules = get_default_rules().context("Failed to load default rules")?;
-        if !args.rules.is_empty() {
-            let custom_rules =
-                Rules::from_paths(&args.rules).context("Failed to load specified rules files")?;
-            rules.extend(custom_rules);
-        }
+        let rules = RuleLoader::from_rule_specifiers(&args.rules)
+            .load()
+            .context("Failed to load rules")?;
         RulesDatabase::from_rules(rules).context("Failed to compile rules")?
     };
 

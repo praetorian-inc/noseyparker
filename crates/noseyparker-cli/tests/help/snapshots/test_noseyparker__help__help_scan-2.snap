@@ -51,6 +51,10 @@ Options:
           
           [default: DEFAULT]
 
+  -h, --help
+          Print help (see a summary with '-h')
+
+Rule Selection Options:
   -r, --rules <PATH>
           Load additional custom rules from the specified file or directory
           
@@ -58,9 +62,6 @@ Options:
           discovered rule files will be loaded.
           
           This option can be repeated.
-
-  -h, --help
-          Print help (see a summary with '-h')
 
 Input Specifier Options:
   [INPUT]...
