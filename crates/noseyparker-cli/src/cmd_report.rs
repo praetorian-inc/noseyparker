@@ -16,7 +16,8 @@ use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 
-use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat, Reportable};
+use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat};
+use crate::reportable::Reportable;
 
 pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     debug!("Args:\n{global_args:#?}\n{args:#?}");

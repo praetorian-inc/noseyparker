@@ -1,7 +1,8 @@
 use anyhow::{bail, Context, Result};
 use url::Url;
 
-use crate::args::{GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs, Reportable};
+use crate::args::{GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs};
+use crate::reportable::Reportable;
 use noseyparker::github;
 
 pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {

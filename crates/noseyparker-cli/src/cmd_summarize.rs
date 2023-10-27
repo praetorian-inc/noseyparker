@@ -3,7 +3,8 @@ use indicatif::HumanCount;
 
 use noseyparker::datastore::{Datastore, MatchSummary};
 
-use crate::args::{GlobalArgs, Reportable, SummarizeArgs, SummarizeOutputFormat};
+use crate::args::{GlobalArgs, SummarizeArgs, SummarizeOutputFormat};
+use crate::reportable::Reportable;
 
 struct MatchSummaryReporter(MatchSummary);
 

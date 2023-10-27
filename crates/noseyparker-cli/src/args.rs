@@ -1,4 +1,7 @@
-use anyhow::Result;
+//! Nosey Parker's command-line interface is specified here in one monolithic file.
+//!
+//! The command-line interface is defined using `clap`.
+
 use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint};
 use std::io::IsTerminal;
 use std::path::PathBuf;
@@ -864,13 +867,4 @@ pub enum GitHubOutputFormat {
     ///
     /// This is a sequence of JSON objects, one per line.
     Jsonl,
-}
-
-// -----------------------------------------------------------------------------
-// report writer
-// -----------------------------------------------------------------------------
-pub trait Reportable {
-    type Format;
-
-    fn report<W: std::io::Write>(&self, format: Self::Format, writer: W) -> Result<()>;
 }

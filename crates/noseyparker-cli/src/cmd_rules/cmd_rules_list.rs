@@ -3,7 +3,8 @@ use noseyparker_rules::{Rule, Rules};
 use serde::Serialize;
 use tracing::debug_span;
 
-use crate::args::{GlobalArgs, Reportable, RulesListArgs, RulesListOutputFormat};
+use crate::args::{GlobalArgs, RulesListArgs, RulesListOutputFormat};
+use crate::reportable::Reportable;
 use crate::rule_loader::RuleLoader;
 
 pub fn run(_global_args: &GlobalArgs, args: &RulesListArgs) -> Result<()> {
