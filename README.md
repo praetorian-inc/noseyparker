@@ -26,9 +26,11 @@ A prebuilt multiplatform Docker image is available for the latest release for x8
 docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
+Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
 
-**Note:** The Docker image runs noticeably slower than a native binary, particularly on macOS.
+Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker-alpine:edge`).
+
+**Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
 
 <details>
 <summary><h3>Building from source</h3></summary>
