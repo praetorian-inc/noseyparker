@@ -60,7 +60,7 @@ fn literal_match_02() {
     scan_env.input_file_with_secret("input/input.dat");
 
     noseyparker_success!("scan", input.path(), "--ignore", ignore_file.path(), "-d", scan_env.dspath())
-        .stdout(match_scan_stats("81 B", 1, 1, 1));
+        .stdout(match_scan_stats("104 B", 1, 1, 1));
 }
 
 #[test]
@@ -92,7 +92,7 @@ fn glob_01() {
     scan_env.input_file_with_secret("input/subdir/input.dat");
 
     noseyparker_success!("scan", "--ignore", ignore_file.path(), "-d", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("81 B", 1, 1, 1));
+        .stdout(match_scan_stats("104 B", 1, 1, 1));
 }
 
 #[test]
@@ -125,5 +125,5 @@ fn negation_01() {
     scan_env.input_file_with_secret("input/subdir2/input.dat");
 
     noseyparker_success!("scan", "-vvv", "--ignore", ignore_file.path(), "-d", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("81 B", 1, 1, 1));
+        .stdout(match_scan_stats("104 B", 1, 1, 1));
 }

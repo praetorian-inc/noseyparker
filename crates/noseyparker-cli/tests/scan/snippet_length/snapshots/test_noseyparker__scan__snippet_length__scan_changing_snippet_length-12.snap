@@ -2,17 +2,17 @@
 source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
 expression: stdout
 ---
-Finding 1/1: AWS API Key
-Match: AKIADEADBEEFDEADBEEF
+Finding 1/1: GitHub Personal Access Token
+Match: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
     Occurrence 1/1
     File:  <FILENAME>
     Blob:  <BLOB>
-    Lines: 30:9-30:28
+    Lines: 30:12-30:51
 
-         data
+        ta
         USERNAME=the_dude
-        AWS_KEY=AKIADEADBEEFDEADBEEF
+        GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
         function lorem(ipsum, dolor = 
 

@@ -15,9 +15,10 @@ fn rules_list_json() {
     assert_cmd_snapshot!(noseyparker_success!("rules", "list", "--format=json"));
 }
 
+/// No JSONL format support for the `rules list` command
 #[test]
 fn rules_list_jsonl() {
-    assert_cmd_snapshot!(noseyparker_success!("rules", "list", "-f", "jsonl"));
+    assert_cmd_snapshot!(noseyparker_failure!("rules", "list", "-f", "jsonl"));
 }
 
 /// Check the default rules using the built-in linter.

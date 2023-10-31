@@ -1,11 +1,11 @@
 use anyhow::{Context, Result};
-use noseyparker_rules::{Rule, Rules};
+use noseyparker_rules::{Rule, Ruleset};
 use serde::Serialize;
 use tracing::debug_span;
 
 use crate::args::{GlobalArgs, RulesListArgs, RulesListOutputFormat};
 use crate::reportable::Reportable;
-use crate::rule_loader::RuleLoader;
+use crate::rule_loader::{LoadedRules, RuleLoader};
 
 pub fn run(_global_args: &GlobalArgs, args: &RulesListArgs) -> Result<()> {
     let _span = debug_span!("cmd_rules_list").entered();
@@ -15,16 +15,16 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesListArgs) -> Result<()> {
         .get_writer()
         .context("Failed to get output writer")?;
 
-    let rules = RuleLoader::from_rule_specifiers(&args.rules)
+    let loaded = RuleLoader::from_rule_specifiers(&args.rules)
         .load()
         .context("Failed to load rules")?;
 
-    let reporter = RulesReporter { rules };
+    let reporter = RulesReporter { loaded };
     reporter.report(args.output_args.format, output)
 }
 
 struct RulesReporter {
-    rules: Rules,
+    loaded: LoadedRules,
 }
 
 impl Reportable for RulesReporter {
@@ -34,13 +34,90 @@ impl Reportable for RulesReporter {
         match format {
             RulesListOutputFormat::Human => self.human_format(writer),
             RulesListOutputFormat::Json => self.json_format(writer),
-            RulesListOutputFormat::Jsonl => self.jsonl_format(writer),
         }
     }
 }
 
 impl RulesReporter {
-    fn table(&self) -> prettytable::Table {
+    fn get_entries(&self) -> Entries<'_> {
+        let mut rules: Vec<_> = self
+            .loaded
+            .iter_rules()
+            .map(|r| RuleEntry::new(r))
+            .collect();
+        rules.sort_by(|r1, r2| r1.id.cmp(&r2.id));
+
+        let mut rulesets: Vec<_> = self
+            .loaded
+            .iter_rulesets()
+            .map(|r| RulesetEntry::new(r))
+            .collect();
+        rulesets.sort_by(|r1, r2| r1.id.cmp(&r2.id));
+
+        Entries { rules, rulesets }
+    }
+
+    fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
+        let entries = self.get_entries();
+
+        let rules_table = entries.rules_table();
+        writeln!(writer)?;
+        rules_table.print(&mut writer)?;
+
+        let rulesets_table = entries.rulesets_table();
+        writeln!(writer)?;
+        rulesets_table.print(&mut writer)?;
+
+        Ok(())
+    }
+
+    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
+        let entries = self.get_entries();
+        serde_json::to_writer_pretty(writer, &entries)?;
+        Ok(())
+    }
+}
+
+#[derive(Serialize)]
+struct Entries<'r> {
+    rules: Vec<RuleEntry<'r>>,
+    rulesets: Vec<RulesetEntry<'r>>,
+}
+
+#[derive(Serialize)]
+struct RuleEntry<'r> {
+    id: &'r str,
+    name: &'r str,
+}
+
+impl<'r> RuleEntry<'r> {
+    pub fn new(rule: &'r Rule) -> Self {
+        Self {
+            id: &rule.id,
+            name: &rule.name,
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct RulesetEntry<'r> {
+    id: &'r str,
+    name: &'r str,
+    num_rules: usize,
+}
+
+impl<'r> RulesetEntry<'r> {
+    pub fn new(ruleset: &'r Ruleset) -> Self {
+        Self {
+            id: &ruleset.id,
+            name: &ruleset.name,
+            num_rules: ruleset.num_rules(),
+        }
+    }
+}
+
+impl<'r> Entries<'r> {
+    fn rules_table(&self) -> prettytable::Table {
         use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
         use prettytable::row;
 
@@ -55,52 +132,32 @@ impl RulesReporter {
         let mut table: prettytable::Table = self
             .rules
             .iter()
-            .map(|r| {
-                row![
-                     r -> &r.id,
-                     l -> &r.name,
-                ]
-            })
+            .map(|r| row![l -> &r.id, l -> &r.name])
             .collect();
         table.set_format(f);
-        table.set_titles(row![rb -> "ID", lb -> "Name"]);
+        table.set_titles(row![lb -> "Rule ID", lb -> "Rule Name"]);
         table
     }
 
-    fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        writeln!(writer)?;
-        let table = self.table();
-        table.print(&mut writer)?;
-        Ok(())
-    }
+    fn rulesets_table(&self) -> prettytable::Table {
+        use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
+        use prettytable::row;
 
-    fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
-        let entries: Vec<_> = self.rules.iter().map(|r| RulesListEntry::new(r)).collect();
-        serde_json::to_writer_pretty(writer, &entries)?;
-        Ok(())
-    }
+        let f = FormatBuilder::new()
+            // .column_separator('│')
+            // .separators(&[LinePosition::Title], LineSeparator::new('─', '┼', '├', '┤'))
+            .column_separator(' ')
+            .separators(&[LinePosition::Title], LineSeparator::new('─', '─', '─', '─'))
+            .padding(1, 1)
+            .build();
 
-    fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        for rule in self.rules.iter() {
-            let entry = RulesListEntry::new(&rule);
-            serde_json::to_writer(&mut writer, &entry)?;
-            writeln!(&mut writer)?;
-        }
-        Ok(())
-    }
-}
-
-#[derive(Serialize)]
-struct RulesListEntry<'r> {
-    id: &'r str,
-    name: &'r str,
-}
-
-impl <'r> RulesListEntry<'r> {
-    pub fn new(rule: &'r Rule) -> Self {
-        Self {
-            id: &rule.id,
-            name: &rule.name,
-        }
+        let mut table: prettytable::Table = self
+            .rulesets
+            .iter()
+            .map(|r| row![l -> &r.id, l -> &r.name, r -> r.num_rules])
+            .collect();
+        table.set_format(f);
+        table.set_titles(row![lb -> "Ruleset ID", lb -> "Ruleset Name", rb -> "Rules"]);
+        table
     }
 }

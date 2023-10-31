@@ -174,7 +174,7 @@ pub enum Command {
     /// Manage rules
     Rules(RulesArgs),
 
-    #[command(display_order = 30)]
+    #[command(display_order = 40)]
     /// Generate shell completions
     ShellCompletions(ShellCompletionsArgs),
 }
@@ -384,11 +384,6 @@ pub enum RulesListOutputFormat {
 
     /// Pretty-printed JSON format
     Json,
-
-    /// JSON Lines format
-    ///
-    /// This is a sequence of JSON objects, one per line.
-    Jsonl,
 }
 
 // -----------------------------------------------------------------------------
@@ -491,14 +486,29 @@ pub struct ScanArgs {
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Rule Selection Options")]
 pub struct RuleSpecifierArgs {
-    /// Load additional custom rules from the specified file or directory
+    /// Load additional rules and rulesets from the specified file or directory
     ///
     /// The paths can be either files or directories.
-    /// Directories are recursively walked and all discovered rule files will be loaded.
+    /// Directories are recursively walked and all discovered YAML files of rules and rulesets will be loaded.
     ///
     /// This option can be repeated.
-    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::AnyPath)]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath)]
     pub rules: Vec<PathBuf>,
+
+    /// Enable an additional ruleset with the specified ID
+    ///
+    /// The ID must resolve to a built-in ruleset or to an additional ruleset loaded with the
+    /// `--rule-load-path=PATH` option.
+    ///
+    /// The special `all` ID causes all loaded rules to be used.
+    ///
+    /// This option can be repeated.
+    #[arg(long, value_name = "ID")]
+    pub ruleset: Vec<String>,
+
+    /// Enable or disable the default ruleset
+    #[arg(long, default_value_t=true, action=ArgAction::Set, value_name="BOOL")]
+    pub enable_default_ruleset: bool,
 }
 
 /// The mode to use for cloning a Git repository

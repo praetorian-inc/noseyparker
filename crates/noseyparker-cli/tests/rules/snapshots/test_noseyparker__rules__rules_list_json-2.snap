@@ -2,429 +2,443 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
-[
-  {
-    "id": "np.adobe.1",
-    "name": "Adobe OAuth Client Secret"
-  },
-  {
-    "id": "np.age.1",
-    "name": "Age Recipient (X25519 public key)"
-  },
-  {
-    "id": "np.age.2",
-    "name": "Age Identity (X22519 secret key)"
-  },
-  {
-    "id": "np.arn.1",
-    "name": "Amazon Resource Name"
-  },
-  {
-    "id": "np.artifactory.1",
-    "name": "Artifactory API Key"
-  },
-  {
-    "id": "np.aws.1",
-    "name": "AWS API Key"
-  },
-  {
-    "id": "np.aws.2",
-    "name": "AWS Secret Access Key"
-  },
-  {
-    "id": "np.aws.3",
-    "name": "AWS Account ID"
-  },
-  {
-    "id": "np.aws.4",
-    "name": "AWS Session Token"
-  },
-  {
-    "id": "np.aws.5",
-    "name": "Amazon MWS Auth Token"
-  },
-  {
-    "id": "np.azure.1",
-    "name": "Azure Connection String"
-  },
-  {
-    "id": "np.azure.2",
-    "name": "Azure App Configuration Connection String"
-  },
-  {
-    "id": "np.bcrypt.1",
-    "name": "bcrypt Hash"
-  },
-  {
-    "id": "np.codeclimate.1",
-    "name": "CodeClimate"
-  },
-  {
-    "id": "np.cratesio.1",
-    "name": "crates.io API Key"
-  },
-  {
-    "id": "np.digitalocean.1",
-    "name": "DigitalOcean Application Access Token"
-  },
-  {
-    "id": "np.digitalocean.2",
-    "name": "DigitalOcean Personal Access Token"
-  },
-  {
-    "id": "np.digitalocean.3",
-    "name": "DigitalOcean Refresh Token"
-  },
-  {
-    "id": "np.dynatrace.1",
-    "name": "Dynatrace Token"
-  },
-  {
-    "id": "np.facebook.1",
-    "name": "Facebook Secret Key"
-  },
-  {
-    "id": "np.facebook.2",
-    "name": "Facebook Access Token"
-  },
-  {
-    "id": "np.figma.1",
-    "name": "Figma Personal Access Token"
-  },
-  {
-    "id": "np.gcs.1",
-    "name": "Google Cloud Storage Bucket (subdomain style)"
-  },
-  {
-    "id": "np.gcs.2",
-    "name": "Google Cloud Storage Bucket (path style)"
-  },
-  {
-    "id": "np.generic.1",
-    "name": "Generic Secret"
-  },
-  {
-    "id": "np.generic.2",
-    "name": "Generic API Key"
-  },
-  {
-    "id": "np.generic.3",
-    "name": "Generic Username and Password (quoted)"
-  },
-  {
-    "id": "np.generic.4",
-    "name": "Generic Username and Password (unquoted)"
-  },
-  {
-    "id": "np.generic.5",
-    "name": "Generic Password (double quoted)"
-  },
-  {
-    "id": "np.generic.6",
-    "name": "Generic Password (single quoted)"
-  },
-  {
-    "id": "np.github.1",
-    "name": "GitHub Personal Access Token"
-  },
-  {
-    "id": "np.github.2",
-    "name": "GitHub OAuth Access Token"
-  },
-  {
-    "id": "np.github.3",
-    "name": "GitHub App Token"
-  },
-  {
-    "id": "np.github.4",
-    "name": "GitHub Refresh Token"
-  },
-  {
-    "id": "np.github.5",
-    "name": "GitHub Client ID"
-  },
-  {
-    "id": "np.github.6",
-    "name": "GitHub Secret Key"
-  },
-  {
-    "id": "np.github.7",
-    "name": "GitHub Personal Access Token (fine-grained permissions)"
-  },
-  {
-    "id": "np.gitlab.1",
-    "name": "GitLab Runner Registration Token"
-  },
-  {
-    "id": "np.gitlab.2",
-    "name": "GitLab Personal Access Token"
-  },
-  {
-    "id": "np.gitlab.3",
-    "name": "GitLab Pipeline Trigger Token"
-  },
-  {
-    "id": "np.google.1",
-    "name": "Google Client ID"
-  },
-  {
-    "id": "np.google.2",
-    "name": "Google OAuth Client Secret (prefixed)"
-  },
-  {
-    "id": "np.google.3",
-    "name": "Google OAuth Client Secret"
-  },
-  {
-    "id": "np.google.4",
-    "name": "Google OAuth Access Token"
-  },
-  {
-    "id": "np.google.5",
-    "name": "Google API Key"
-  },
-  {
-    "id": "np.gradle.1",
-    "name": "Hardcoded Gradle Credentials"
-  },
-  {
-    "id": "np.grafana.1",
-    "name": "Grafana API Token"
-  },
-  {
-    "id": "np.grafana.2",
-    "name": "Grafana Cloud API Token"
-  },
-  {
-    "id": "np.grafana.3",
-    "name": "Grafana Service Account Token"
-  },
-  {
-    "id": "np.heroku.1",
-    "name": "Heroku API Key"
-  },
-  {
-    "id": "np.huggingface.1",
-    "name": "HuggingFace User Access Token"
-  },
-  {
-    "id": "np.jenkins.1",
-    "name": "Jenkins Token or Crumb"
-  },
-  {
-    "id": "np.jwt.1",
-    "name": "JSON Web Token (base64url-encoded)"
-  },
-  {
-    "id": "np.linkedin.1",
-    "name": "LinkedIn Client ID"
-  },
-  {
-    "id": "np.linkedin.2",
-    "name": "LinkedIn Secret Key"
-  },
-  {
-    "id": "np.mailchimp.1",
-    "name": "MailChimp API Key"
-  },
-  {
-    "id": "np.mailgun.1",
-    "name": "Mailgun API Key"
-  },
-  {
-    "id": "np.mapbox.1",
-    "name": "Mapbox Public Access Token"
-  },
-  {
-    "id": "np.mapbox.2",
-    "name": "Mapbox Secret Access Token"
-  },
-  {
-    "id": "np.mapbox.3",
-    "name": "Mapbox Temporary Access Token"
-  },
-  {
-    "id": "np.md5.1",
-    "name": "md5crypt Hash"
-  },
-  {
-    "id": "np.msteams.1",
-    "name": "Microsoft Teams Webhook"
-  },
-  {
-    "id": "np.netrc.1",
-    "name": "netrc Credentials"
-  },
-  {
-    "id": "np.newrelic.1",
-    "name": "New Relic License Key"
-  },
-  {
-    "id": "np.newrelic.2",
-    "name": "New Relic License Key (non-suffixed)"
-  },
-  {
-    "id": "np.newrelic.3",
-    "name": "New Relic API Service Key"
-  },
-  {
-    "id": "np.newrelic.4",
-    "name": "New Relic Admin API Key"
-  },
-  {
-    "id": "np.newrelic.5",
-    "name": "New Relic Insights Insert Key"
-  },
-  {
-    "id": "np.newrelic.6",
-    "name": "New Relic Insights Query Key"
-  },
-  {
-    "id": "np.newrelic.7",
-    "name": "New Relic REST API Key"
-  },
-  {
-    "id": "np.newrelic.8",
-    "name": "New Relic Pixie API Key"
-  },
-  {
-    "id": "np.newrelic.9",
-    "name": "New Relic Pixie Deploy Key"
-  },
-  {
-    "id": "np.npm.1",
-    "name": "NPM Access Token (fine-grained)"
-  },
-  {
-    "id": "np.nuget.1",
-    "name": "NuGet API Key"
-  },
-  {
-    "id": "np.odbc.1",
-    "name": "Credentials in ODBC Connection String"
-  },
-  {
-    "id": "np.okta.1",
-    "name": "Okta API Token"
-  },
-  {
-    "id": "np.openai.1",
-    "name": "OpenAI API Key"
-  },
-  {
-    "id": "np.pem.1",
-    "name": "PEM-Encoded Private Key"
-  },
-  {
-    "id": "np.postman.1",
-    "name": "Postman API Key"
-  },
-  {
-    "id": "np.psexec.1",
-    "name": "Credentials in PsExec"
-  },
-  {
-    "id": "np.pypi.1",
-    "name": "PyPI Upload Token"
-  },
-  {
-    "id": "np.rubygems.1",
-    "name": "RubyGems API Key"
-  },
-  {
-    "id": "np.s3.1",
-    "name": "AWS S3 Bucket (subdomain style)"
-  },
-  {
-    "id": "np.s3.2",
-    "name": "AWS S3 Bucket (path style)"
-  },
-  {
-    "id": "np.salesforce.1",
-    "name": "Salesforce Access Token"
-  },
-  {
-    "id": "np.sauce.1",
-    "name": "Sauce Token"
-  },
-  {
-    "id": "np.segment.1",
-    "name": "Segment Public API Token"
-  },
-  {
-    "id": "np.sendgrid.1",
-    "name": "SendGrid API Key"
-  },
-  {
-    "id": "np.shopify.1",
-    "name": "Shopify Domain"
-  },
-  {
-    "id": "np.shopify.2",
-    "name": "Shopify App Secret"
-  },
-  {
-    "id": "np.shopify.3",
-    "name": "Shopify Access Token (Public App)"
-  },
-  {
-    "id": "np.shopify.4",
-    "name": "Shopify Access Token (Custom App)"
-  },
-  {
-    "id": "np.shopify.5",
-    "name": "Shopify Access Token (Legacy Private App)"
-  },
-  {
-    "id": "np.slack.1",
-    "name": "Slack"
-  },
-  {
-    "id": "np.slack.2",
-    "name": "Slack Token"
-  },
-  {
-    "id": "np.slack.3",
-    "name": "Slack Webhook"
-  },
-  {
-    "id": "np.sonarqube.1",
-    "name": "SonarQube Token"
-  },
-  {
-    "id": "np.square.1",
-    "name": "Square Access Token"
-  },
-  {
-    "id": "np.square.2",
-    "name": "Square OAuth Secret"
-  },
-  {
-    "id": "np.stackhawk.1",
-    "name": "StackHawk API Key"
-  },
-  {
-    "id": "np.stripe.1",
-    "name": "Stripe API Key"
-  },
-  {
-    "id": "np.stripe.2",
-    "name": "Stripe API Test Key"
-  },
-  {
-    "id": "np.telegram.1",
-    "name": "Telegram Bot Token"
-  },
-  {
-    "id": "np.twilio.1",
-    "name": "Twilio API Key"
-  },
-  {
-    "id": "np.twitter.1",
-    "name": "Twitter Client ID"
-  },
-  {
-    "id": "np.twitter.2",
-    "name": "Twitter Secret Key"
-  }
-]
+{
+  "rules": [
+    {
+      "id": "np.adobe.1",
+      "name": "Adobe OAuth Client Secret"
+    },
+    {
+      "id": "np.age.1",
+      "name": "Age Recipient (X25519 public key)"
+    },
+    {
+      "id": "np.age.2",
+      "name": "Age Identity (X22519 secret key)"
+    },
+    {
+      "id": "np.arn.1",
+      "name": "Amazon Resource Name"
+    },
+    {
+      "id": "np.artifactory.1",
+      "name": "Artifactory API Key"
+    },
+    {
+      "id": "np.aws.1",
+      "name": "AWS API Key"
+    },
+    {
+      "id": "np.aws.2",
+      "name": "AWS Secret Access Key"
+    },
+    {
+      "id": "np.aws.3",
+      "name": "AWS Account ID"
+    },
+    {
+      "id": "np.aws.4",
+      "name": "AWS Session Token"
+    },
+    {
+      "id": "np.aws.5",
+      "name": "Amazon MWS Auth Token"
+    },
+    {
+      "id": "np.azure.1",
+      "name": "Azure Connection String"
+    },
+    {
+      "id": "np.azure.2",
+      "name": "Azure App Configuration Connection String"
+    },
+    {
+      "id": "np.bcrypt.1",
+      "name": "bcrypt Hash"
+    },
+    {
+      "id": "np.codeclimate.1",
+      "name": "CodeClimate"
+    },
+    {
+      "id": "np.cratesio.1",
+      "name": "crates.io API Key"
+    },
+    {
+      "id": "np.digitalocean.1",
+      "name": "DigitalOcean Application Access Token"
+    },
+    {
+      "id": "np.digitalocean.2",
+      "name": "DigitalOcean Personal Access Token"
+    },
+    {
+      "id": "np.digitalocean.3",
+      "name": "DigitalOcean Refresh Token"
+    },
+    {
+      "id": "np.dynatrace.1",
+      "name": "Dynatrace Token"
+    },
+    {
+      "id": "np.facebook.1",
+      "name": "Facebook Secret Key"
+    },
+    {
+      "id": "np.facebook.2",
+      "name": "Facebook Access Token"
+    },
+    {
+      "id": "np.figma.1",
+      "name": "Figma Personal Access Token"
+    },
+    {
+      "id": "np.gcs.1",
+      "name": "Google Cloud Storage Bucket (subdomain style)"
+    },
+    {
+      "id": "np.gcs.2",
+      "name": "Google Cloud Storage Bucket (path style)"
+    },
+    {
+      "id": "np.generic.1",
+      "name": "Generic Secret"
+    },
+    {
+      "id": "np.generic.2",
+      "name": "Generic API Key"
+    },
+    {
+      "id": "np.generic.3",
+      "name": "Generic Username and Password (quoted)"
+    },
+    {
+      "id": "np.generic.4",
+      "name": "Generic Username and Password (unquoted)"
+    },
+    {
+      "id": "np.generic.5",
+      "name": "Generic Password (double quoted)"
+    },
+    {
+      "id": "np.generic.6",
+      "name": "Generic Password (single quoted)"
+    },
+    {
+      "id": "np.github.1",
+      "name": "GitHub Personal Access Token"
+    },
+    {
+      "id": "np.github.2",
+      "name": "GitHub OAuth Access Token"
+    },
+    {
+      "id": "np.github.3",
+      "name": "GitHub App Token"
+    },
+    {
+      "id": "np.github.4",
+      "name": "GitHub Refresh Token"
+    },
+    {
+      "id": "np.github.5",
+      "name": "GitHub Client ID"
+    },
+    {
+      "id": "np.github.6",
+      "name": "GitHub Secret Key"
+    },
+    {
+      "id": "np.github.7",
+      "name": "GitHub Personal Access Token (fine-grained permissions)"
+    },
+    {
+      "id": "np.gitlab.1",
+      "name": "GitLab Runner Registration Token"
+    },
+    {
+      "id": "np.gitlab.2",
+      "name": "GitLab Personal Access Token"
+    },
+    {
+      "id": "np.gitlab.3",
+      "name": "GitLab Pipeline Trigger Token"
+    },
+    {
+      "id": "np.google.1",
+      "name": "Google Client ID"
+    },
+    {
+      "id": "np.google.2",
+      "name": "Google OAuth Client Secret (prefixed)"
+    },
+    {
+      "id": "np.google.3",
+      "name": "Google OAuth Client Secret"
+    },
+    {
+      "id": "np.google.4",
+      "name": "Google OAuth Access Token"
+    },
+    {
+      "id": "np.google.5",
+      "name": "Google API Key"
+    },
+    {
+      "id": "np.gradle.1",
+      "name": "Hardcoded Gradle Credentials"
+    },
+    {
+      "id": "np.grafana.1",
+      "name": "Grafana API Token"
+    },
+    {
+      "id": "np.grafana.2",
+      "name": "Grafana Cloud API Token"
+    },
+    {
+      "id": "np.grafana.3",
+      "name": "Grafana Service Account Token"
+    },
+    {
+      "id": "np.heroku.1",
+      "name": "Heroku API Key"
+    },
+    {
+      "id": "np.huggingface.1",
+      "name": "HuggingFace User Access Token"
+    },
+    {
+      "id": "np.jenkins.1",
+      "name": "Jenkins Token or Crumb"
+    },
+    {
+      "id": "np.jwt.1",
+      "name": "JSON Web Token (base64url-encoded)"
+    },
+    {
+      "id": "np.linkedin.1",
+      "name": "LinkedIn Client ID"
+    },
+    {
+      "id": "np.linkedin.2",
+      "name": "LinkedIn Secret Key"
+    },
+    {
+      "id": "np.mailchimp.1",
+      "name": "MailChimp API Key"
+    },
+    {
+      "id": "np.mailgun.1",
+      "name": "Mailgun API Key"
+    },
+    {
+      "id": "np.mapbox.1",
+      "name": "Mapbox Public Access Token"
+    },
+    {
+      "id": "np.mapbox.2",
+      "name": "Mapbox Secret Access Token"
+    },
+    {
+      "id": "np.mapbox.3",
+      "name": "Mapbox Temporary Access Token"
+    },
+    {
+      "id": "np.md5.1",
+      "name": "md5crypt Hash"
+    },
+    {
+      "id": "np.msteams.1",
+      "name": "Microsoft Teams Webhook"
+    },
+    {
+      "id": "np.netrc.1",
+      "name": "netrc Credentials"
+    },
+    {
+      "id": "np.newrelic.1",
+      "name": "New Relic License Key"
+    },
+    {
+      "id": "np.newrelic.2",
+      "name": "New Relic License Key (non-suffixed)"
+    },
+    {
+      "id": "np.newrelic.3",
+      "name": "New Relic API Service Key"
+    },
+    {
+      "id": "np.newrelic.4",
+      "name": "New Relic Admin API Key"
+    },
+    {
+      "id": "np.newrelic.5",
+      "name": "New Relic Insights Insert Key"
+    },
+    {
+      "id": "np.newrelic.6",
+      "name": "New Relic Insights Query Key"
+    },
+    {
+      "id": "np.newrelic.7",
+      "name": "New Relic REST API Key"
+    },
+    {
+      "id": "np.newrelic.8",
+      "name": "New Relic Pixie API Key"
+    },
+    {
+      "id": "np.newrelic.9",
+      "name": "New Relic Pixie Deploy Key"
+    },
+    {
+      "id": "np.npm.1",
+      "name": "NPM Access Token (fine-grained)"
+    },
+    {
+      "id": "np.nuget.1",
+      "name": "NuGet API Key"
+    },
+    {
+      "id": "np.odbc.1",
+      "name": "Credentials in ODBC Connection String"
+    },
+    {
+      "id": "np.okta.1",
+      "name": "Okta API Token"
+    },
+    {
+      "id": "np.openai.1",
+      "name": "OpenAI API Key"
+    },
+    {
+      "id": "np.pem.1",
+      "name": "PEM-Encoded Private Key"
+    },
+    {
+      "id": "np.postman.1",
+      "name": "Postman API Key"
+    },
+    {
+      "id": "np.psexec.1",
+      "name": "Credentials in PsExec"
+    },
+    {
+      "id": "np.pypi.1",
+      "name": "PyPI Upload Token"
+    },
+    {
+      "id": "np.rubygems.1",
+      "name": "RubyGems API Key"
+    },
+    {
+      "id": "np.s3.1",
+      "name": "AWS S3 Bucket (subdomain style)"
+    },
+    {
+      "id": "np.s3.2",
+      "name": "AWS S3 Bucket (path style)"
+    },
+    {
+      "id": "np.salesforce.1",
+      "name": "Salesforce Access Token"
+    },
+    {
+      "id": "np.sauce.1",
+      "name": "Sauce Token"
+    },
+    {
+      "id": "np.segment.1",
+      "name": "Segment Public API Token"
+    },
+    {
+      "id": "np.sendgrid.1",
+      "name": "SendGrid API Key"
+    },
+    {
+      "id": "np.shopify.1",
+      "name": "Shopify Domain"
+    },
+    {
+      "id": "np.shopify.2",
+      "name": "Shopify App Secret"
+    },
+    {
+      "id": "np.shopify.3",
+      "name": "Shopify Access Token (Public App)"
+    },
+    {
+      "id": "np.shopify.4",
+      "name": "Shopify Access Token (Custom App)"
+    },
+    {
+      "id": "np.shopify.5",
+      "name": "Shopify Access Token (Legacy Private App)"
+    },
+    {
+      "id": "np.slack.1",
+      "name": "Slack"
+    },
+    {
+      "id": "np.slack.2",
+      "name": "Slack Token"
+    },
+    {
+      "id": "np.slack.3",
+      "name": "Slack Webhook"
+    },
+    {
+      "id": "np.sonarqube.1",
+      "name": "SonarQube Token"
+    },
+    {
+      "id": "np.square.1",
+      "name": "Square Access Token"
+    },
+    {
+      "id": "np.square.2",
+      "name": "Square OAuth Secret"
+    },
+    {
+      "id": "np.stackhawk.1",
+      "name": "StackHawk API Key"
+    },
+    {
+      "id": "np.stripe.1",
+      "name": "Stripe API Key"
+    },
+    {
+      "id": "np.stripe.2",
+      "name": "Stripe API Test Key"
+    },
+    {
+      "id": "np.telegram.1",
+      "name": "Telegram Bot Token"
+    },
+    {
+      "id": "np.twilio.1",
+      "name": "Twilio API Key"
+    },
+    {
+      "id": "np.twitter.1",
+      "name": "Twitter Client ID"
+    },
+    {
+      "id": "np.twitter.2",
+      "name": "Twitter Secret Key"
+    }
+  ],
+  "rulesets": [
+    {
+      "id": "np.assets",
+      "name": "Nosey Parker asset detection rules",
+      "num_rules": 15
+    },
+    {
+      "id": "np.default",
+      "name": "Nosey Parker default rules",
+      "num_rules": 90
+    }
+  ]
+}

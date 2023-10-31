@@ -207,7 +207,7 @@ impl<'a> Matcher<'a> {
             (m.rule_id, m.end_idx, m.end_idx - m.start_idx)
         });
 
-        let rules = &self.rules_db.rules.rules;
+        let rules = &self.rules_db.rules;
         let anchored_regexes = &self.rules_db.anchored_regexes;
         // (rule id, regex captures) from most recently emitted match
         let mut previous: Option<(usize, OffsetSpan)> = None;
@@ -290,8 +290,6 @@ impl<'a> Matcher<'a> {
 mod test {
     use super::*;
 
-    use noseyparker_rules::Rules;
-
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -304,7 +302,6 @@ mod test {
             negative_examples: vec![],
             references: vec![],
         }];
-        let rules = Rules { rules };
         let rules_db = RulesDatabase::from_rules(rules)?;
         let input = "some test data for vectorscan";
         let seen_blobs = BlobIdMap::new();

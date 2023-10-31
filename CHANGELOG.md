@@ -17,16 +17,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - A new advanced global command-line parameter has been exposed:
 
-  - `--sqlite-cache-size SIZE` to control the `pragma cache_size` value used in sqlite database connections
+  - `--sqlite-cache-size=SIZE` to control the `pragma cache_size` value used in sqlite database connections
 
 - The datastore now contains two additional tables for storing user annotations, both freeform comments and accept/reject status.
   These additional tables are not currently populated or used elsewhere in the open-source version of Nosey Parker.
 
-- An additional check has been added to the `rules check` command to ensure that each regex rule has at least one capture group.
+- A new "ruleset" mechanism has been added.
+  A ruleset is a named collection of rules that can be selected as a group.
+  The new `--ruleset=NAME` parameter to `scan` can be used to enable additional rulesets.
+  Two built-in rulesets are provided (`np.default` and `np.assets`); the special ruleset name `all` enables all known rules.
+  The default ruleset can be disabled using the new `--enable-default-ruleset=false` parameter to `scan`.
+  See the built-in rulesets at `crates/noseyparker/data/default/builtin/rulesets` for an example for writing your own.
 
-- A new `rules list` command is available, which lists the IDs and names of available rules.
-  This command can emit its output in a variety of formats.
-  It lists the default rules, and can also list rules found from additional custom rule files.
+- The default collection of rules has been pruned down to further emphasize signal-to-noise.
+  Only rules that detect secret things are included in the default collection.
+  Rules that detect other things, such as cloud assets, application IDs, or public keys, are not included in this set.
+  Instead, those are in the `np.assets` ruleset, which is not enabled by default.
+  No rules have been removed from Nosey Parker; rather, the defaults have been adjusted to support the most common use case (secrets detection).
+
+- Additional checks have been added to the `rules check` command:
+
+  - Each regex rule must have at least one capture group
+  - Each ruleset must have a globally-unique ID
+  - A ruleset's included rules must resolve to actual rules
+  - A ruleset should not include duplicate rules
+
+- A new `rules list` command is available, which lists available rules and rulesets.
+  This command can emit its output in human-oriented format or in JSON format.
 
 ### Fixes
 - Command-line parameters that can meaningfully accept negative numbers can now be specified without having to use `--PARAMETER=NEGATIVE_VALUE` syntax; a space can now separate the paraemter and the value.

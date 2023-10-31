@@ -2,4 +2,4 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: status
 ---
-exit status: 0
+exit status: 2

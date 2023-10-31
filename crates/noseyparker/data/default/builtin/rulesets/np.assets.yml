@@ -1,0 +1,29 @@
+rulesets:
+
+- id: np.assets
+
+  name: Nosey Parker asset detection rules
+
+  description: |
+    The rules included in this set are those that values that detect usually
+    non-secret assets, such as public identifiers, public keys, and cloud
+    bucket names.
+
+
+  include_rule_ids:
+  - np.age.1          # Age Recipient (X25519 public key)
+  - np.arn.1          # Amazon Resource Name
+  - np.aws.1          # AWS API Key
+  - np.aws.3          # AWS Account ID
+  - np.gcs.1          # Google Cloud Storage Bucket (subdomain style)
+  - np.gcs.2          # Google Cloud Storage Bucket (path style)
+  - np.github.5       # GitHub Client ID
+  - np.google.1       # Google Client ID
+  # - np.jwt.1          # JSON Web Token (base64url-encoded)
+  - np.linkedin.1     # LinkedIn Client ID
+  - np.mapbox.1       # Mapbox Public Access Token
+  - np.s3.1           # AWS S3 Bucket (subdomain style)
+  - np.s3.2           # AWS S3 Bucket (path style)
+  - np.segment.1      # Segment Public API Token
+  - np.shopify.1      # Shopify Domain
+  - np.twitter.1      # Twitter Client ID

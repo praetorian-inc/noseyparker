@@ -4,50 +4,50 @@ expression: json_output
 ---
 [
   {
-    "match_content": "AKIADEADBEEFDEADBEEF",
+    "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
     "matches": [
       {
-        "blob_id": "c3c55e6f7e1304573e25e85202e9f019bfc05087",
+        "blob_id": "96add51d102b68a8eb16cd104f6a79edc27bb61d",
         "blob_metadata": {
           "charset": null,
-          "id": "c3c55e6f7e1304573e25e85202e9f019bfc05087",
+          "id": "96add51d102b68a8eb16cd104f6a79edc27bb61d",
           "mime_essence": "text/plain",
-          "num_bytes": 1425
+          "num_bytes": 1448
         },
         "capture_group_index": 1,
         "location": {
           "offset_span": {
-            "end": 752,
-            "start": 732
+            "end": 775,
+            "start": 735
           },
           "source_span": {
             "end": {
-              "column": 28,
+              "column": 51,
               "line": 30
             },
             "start": {
-              "column": 9,
+              "column": 12,
               "line": 30
             }
           }
         },
-        "match_content": "AKIADEADBEEFDEADBEEF",
+        "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
         "provenance": [
           {
             "kind": "file",
             "path": "<ROOT>/input.txt"
           }
         ],
-        "rule_name": "AWS API Key",
+        "rule_name": "GitHub Personal Access Token",
         "snippet": {
           "after": "\n\nfunction lorem(ipsum, dolor = ",
-          "before": " data\nUSERNAME=the_dude\nAWS_KEY=",
-          "matching": "AKIADEADBEEFDEADBEEF"
+          "before": "ta\nUSERNAME=the_dude\nGITHUB_KEY=",
+          "matching": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg"
         }
       }
     ],
     "num_matches": 1,
-    "rule_name": "AWS API Key",
+    "rule_name": "GitHub Personal Access Token",
     "type": "finding"
   }
 ]

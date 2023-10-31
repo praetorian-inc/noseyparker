@@ -5,31 +5,40 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tracing::{debug, debug_span};
 
-use crate::{util, Rule};
+use crate::{util, Rule, Ruleset};
 
-// -------------------------------------------------------------------------------------------------
-// Rules
-// -------------------------------------------------------------------------------------------------
-#[derive(Serialize, Deserialize)]
+/// A collection of rules and rulesets
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Rules {
+    #[serde(default)]
     pub rules: Vec<Rule>,
+
+    #[serde(default)]
+    pub rulesets: Vec<Ruleset>,
 }
 
 impl Rules {
+    /// Create an empty collection of rules and rulesets.
+    pub fn new() -> Self {
+        Self { rules: Vec::new(), rulesets: Vec::new() }
+    }
+
+    /// Update this collection of rules by adding those from another collection.
+    pub fn update(&mut self, other: Rules) {
+        self.rules.extend(other.rules);
+        self.rulesets.extend(other.rulesets);
+    }
+
+    // Load from an iterable of `(path, contents)`.
     pub fn from_paths_and_contents<'a, I: IntoIterator<Item=(&'a Path, &'a [u8])>>(iterable: I) -> Result<Self> {
-        let mut rules = Rules { rules: Vec::new() };
+        let mut rules = Self::new();
         for (path, contents) in iterable.into_iter() {
             let rs: Self = serde_yaml::from_reader(contents)
                 .with_context(|| format!("Failed to load rules YAML from {}", path.display()))?;
-            rules.extend(rs);
+            rules.update(rs);
         }
 
         Ok(rules)
-    }
-
-    /// Create an empty collection of rules.
-    pub fn new() -> Self {
-        Rules { rules: Vec::new() }
     }
 
     /// Load rules from the given paths, which may refer either to YAML files or to directories.
@@ -40,14 +49,14 @@ impl Rules {
             num_paths += 1;
             let input = input.as_ref();
             if input.is_file() {
-                rules.extend(Rules::from_yaml_file(input)?);
+                rules.update(Rules::from_yaml_file(input)?);
             } else if input.is_dir() {
-                rules.extend(Rules::from_directory(input)?);
+                rules.update(Rules::from_directory(input)?);
             } else {
                 bail!("Unhandled input type: {} is neither a file nor directory", input.display());
             }
         }
-        debug!("Loaded {} rules from {num_paths} paths", rules.len());
+        debug!("Loaded {} rules and {} rulesets from {num_paths} paths", rules.num_rules(), rules.num_rulesets());
         Ok(rules)
     }
 
@@ -57,20 +66,20 @@ impl Rules {
         let _span = debug_span!("Rules::from_yaml_file", "{}", path.display()).entered();
         let rules: Self = util::load_yaml_file(path)
             .with_context(|| format!("Failed to load rules YAML from {}", path.display()))?;
-        debug!("Loaded {} rules from {}", rules.len(), path.display());
+        debug!("Loaded {} rules and {} rulesets from {}", rules.num_rules(), rules.num_rulesets(), path.display());
         Ok(rules)
     }
 
     /// Load rules from the given YAML files.
     pub fn from_yaml_files<P: AsRef<Path>, I: IntoIterator<Item=P>>(paths: I) -> Result<Self> {
         let mut num_paths = 0;
-        let mut rules = Vec::new();
+        let mut rules = Rules::new();
         for path in paths {
             num_paths += 1;
-            rules.extend(Rules::from_yaml_file(path.as_ref())?);
+            rules.update(Rules::from_yaml_file(path.as_ref())?);
         }
-        debug!("Loaded {} rules from {num_paths} files", rules.len());
-        Ok(Rules { rules })
+        debug!("Loaded {} rules and {} rulesets from {num_paths} paths", rules.num_rules(), rules.num_rulesets());
+        Ok(rules)
     }
 
     /// Load rules from YAML files found recursively within the given directory.
@@ -100,19 +109,30 @@ impl Rules {
 
     /// How many rules are in this collection?
     #[inline]
-    pub fn len(&self) -> usize {
+    pub fn num_rules(&self) -> usize {
         self.rules.len()
     }
 
-    /// Is this collection of rules empty?
+    /// How many rulesets are in this collection?
+    #[inline]
+    pub fn num_rulesets(&self) -> usize {
+        self.rulesets.len()
+    }
+
+    /// Is this collection of rules and rulesets empty?
     #[inline]
     pub fn is_empty(&self) -> bool {
-        self.rules.is_empty()
+        self.rules.is_empty() && self.rulesets.is_empty()
     }
 
     #[inline]
-    pub fn iter(&self) -> std::slice::Iter<'_, Rule> {
+    pub fn iter_rules(&self) -> std::slice::Iter<'_, Rule> {
         self.rules.iter()
+    }
+
+    #[inline]
+    pub fn iter_rulesets(&self) -> std::slice::Iter<'_, Ruleset> {
+        self.rulesets.iter()
     }
 }
 
@@ -120,19 +140,5 @@ impl Rules {
 impl Default for Rules {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl Extend<Rule> for Rules {
-    fn extend<T: IntoIterator<Item = Rule>>(&mut self, iter: T) {
-        self.rules.extend(iter);
-    }
-}
-
-impl IntoIterator for Rules {
-    type Item = Rule;
-    type IntoIter = <Vec<Rule> as IntoIterator>::IntoIter;
-    fn into_iter(self) -> Self::IntoIter {
-        self.rules.into_iter()
     }
 }

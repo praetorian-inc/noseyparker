@@ -15,6 +15,7 @@ mod cmd_shell_completions;
 mod cmd_summarize;
 mod rule_loader;
 mod reportable;
+mod util;
 
 use args::GlobalArgs;
 

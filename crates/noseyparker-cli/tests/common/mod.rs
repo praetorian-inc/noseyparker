@@ -157,12 +157,12 @@ impl ScanEnv {
     }
 
     /// Create a small input file within this mock scanning environment with the given name.
-    /// The created input file will have content containing a fake AWS key that should be detected.
+    /// The created input file will have content containing a fake GitHub PAT that should be detected.
     pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
         self.input_file_with_contents(name, indoc! {r#"
             # This is fake configuration data
             USERNAME=the_dude
-            AWS_KEY=AKIADEADBEEFDEADBEEF
+            GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
         "#})
     }
 
@@ -199,7 +199,7 @@ impl ScanEnv {
 
             # This is fake configuration data
             USERNAME=the_dude
-            AWS_KEY=AKIADEADBEEFDEADBEEF
+            GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
             function lorem(ipsum, dolor = 1) {
               const sit = ipsum == null ? 0 : ipsum.sit;

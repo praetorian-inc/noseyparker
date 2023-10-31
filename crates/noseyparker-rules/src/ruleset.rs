@@ -6,13 +6,19 @@ use tracing::{debug, debug_span};
 use crate::util;
 
 /// A syntactic representation describing a set of Nosey Parker rules.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct Ruleset {
-    /// A description of this ruleset
+    /// A unique identifier for this ruleset
+    pub id: String,
+
+    /// A human-readable name for the ruleset
+    pub name: String,
+
+    /// A description of the ruleset
     pub description: String,
 
-    /// A list of rule IDs to include in this set
-    pub include_ids: Vec<String>,
+    /// A list of rule IDs included in the ruleset
+    pub include_rule_ids: Vec<String>,
 }
 
 impl Ruleset {
@@ -28,6 +34,6 @@ impl Ruleset {
 
     /// How many rules are listed in this ruleset?
     pub fn num_rules(&self) -> usize {
-        self.include_ids.len()
+        self.include_rule_ids.len()
     }
 }

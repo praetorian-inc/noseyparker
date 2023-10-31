@@ -132,7 +132,7 @@ fn scan_secrets1() {
     let input = scan_env.input_file_with_secret("input.txt");
 
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("81 B", 1, 1, 1));
+        .stdout(match_scan_stats("104 B", 1, 1, 1));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", scan_env.dspath()));
 
@@ -239,7 +239,7 @@ fn report_unlimited_matches() {
     let input = scan_env.input_file_with_secret("input.txt");
 
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
-        .stdout(match_scan_stats("81 B", 1, 1, 1));
+        .stdout(match_scan_stats("104 B", 1, 1, 1));
 
     with_settings!({
         filters => get_report_stdout_filters(),

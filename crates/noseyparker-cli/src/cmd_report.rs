@@ -10,7 +10,7 @@ use tracing::debug;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId};
-use noseyparker::defaults::get_default_rules;
+use noseyparker::defaults::get_builtin_rules;
 use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
@@ -286,9 +286,10 @@ impl DetailsReporter {
 
 /// Load the rules used during the scan for the runs.tool.driver.rules array property
 fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
-    get_default_rules()
-        .context("Failed to load default rules")?
-        .into_iter()
+    // FIXME: this ignores any non-builtin rules
+    get_builtin_rules()
+        .context("Failed to load builtin rules")?
+        .iter_rules()
         .map(|rule| {
             let help = sarif::MultiformatMessageStringBuilder::default()
                 .text(&rule.references.join("\n"))
@@ -296,7 +297,7 @@ fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
 
             // FIXME: add better descriptions to Nosey Parker rules
             let description = sarif::MultiformatMessageStringBuilder::default()
-                .text(rule.pattern)
+                .text(&rule.pattern)
                 .build()?;
 
             let rule = sarif::ReportingDescriptorBuilder::default()

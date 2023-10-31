@@ -2,4 +2,10 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stderr
 ---
+error: invalid value 'jsonl' for '--format <FORMAT>'
+  [possible values: human, json]
+
+  tip: a similar value exists: 'json'
+
+For more information, try '--help'.
 

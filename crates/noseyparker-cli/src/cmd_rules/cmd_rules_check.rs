@@ -4,81 +4,155 @@ use std::collections::HashSet;
 use tracing::{debug_span, error, error_span, info, warn};
 use vectorscan::{BlockDatabase, Flag, Pattern, Scan};
 
-use noseyparker_rules::Rule;
 use noseyparker::rules_database::RulesDatabase;
+use noseyparker_rules::{Rule, Ruleset};
 
 use crate::args::{GlobalArgs, RulesCheckArgs};
 use crate::rule_loader::RuleLoader;
-
+use crate::util::Counted;
 
 pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     let _span = debug_span!("cmd_rules_check").entered();
 
-    let rules = RuleLoader::from_rule_specifiers(&args.rules).load().context("Failed to load rules")?;
+    let loaded = RuleLoader::from_rule_specifiers(&args.rules)
+        .load()
+        .context("Failed to load rules")?;
+
+    let mut rules: Vec<&Rule> = loaded.iter_rules().collect();
+    rules.sort_by(|r1, r2| r1.id.cmp(&r2.id));
+
+    let mut rulesets: Vec<&Ruleset> = loaded.iter_rulesets().collect();
+    rulesets.sort_by(|r1, r2| r1.id.cmp(&r2.id));
 
     let mut num_errors = 0;
     let mut num_warnings = 0;
-    let num_rules = rules.rules.len();
 
-    // ensure IDs are globally unique
+    let id_validator_pat = Regex::new(r"^[a-zA-Z0-9]+(?:[.-][a-zA-Z0-9]+)*$")
+        .expect("ID validator pattern should compile");
+    const ID_LIMIT: usize = 20;
+
+    // ensure ruleset IDs are globally unique
     {
         let mut seen_ids = HashSet::<&str>::new();
-        for rule in rules.rules.iter() {
-            let rule_id = &rule.id;
-            if !seen_ids.insert(rule_id) {
-                error!("Rule ID {rule_id} is not unique");
+        for ruleset in rulesets.iter() {
+            let id = &ruleset.id;
+            if !seen_ids.insert(id) {
+                error!("Ruleset ID {id} is not unique");
                 num_errors += 1;
             }
         }
     }
 
-    // ensure IDs are well-formed
+    // ensure ruleset IDs are well-formed
     {
-        let id_pat = Regex::new(r"^[a-zA-Z0-9]+(?:[.-][a-zA-Z0-9]+)*$")
-            .expect("ID validator pattern should compile");
-
-        for rule in rules.rules.iter() {
-            let rule_id = &rule.id;
-            const ID_LIMIT: usize = 20;
-            let rule_id_len = rule_id.len();
-            if rule_id_len > ID_LIMIT {
-                error!("Rule ID {rule_id} is too long ({rule_id_len} characters: \
-                       should be {ID_LIMIT} characters max)");
+        for ruleset in rulesets.iter() {
+            let id = &ruleset.id;
+            let id_len = id.len();
+            if id_len > ID_LIMIT {
+                error!(
+                    "Ruleset ID {id} is too long ({id_len} characters: \
+                       should be {ID_LIMIT} characters max)"
+                );
                 num_errors += 1;
             }
 
-            if !id_pat.is_match(rule_id) {
-                error!("Rule ID {rule_id} is not well-formed: \
+            if !id_validator_pat.is_match(id) {
+                error!(
+                    "Ruleset ID {id} is not well-formed: \
                        it should consist only of alphanumeric sections \
-                       delimited by hyphens or periods");
+                       delimited by hyphens or periods"
+                );
                 num_errors += 1;
             }
         }
     }
 
-    // compile the rules individually
-    for (rule_num, rule) in rules.rules.iter().enumerate() {
+    // ensure rule IDs are globally unique
+    {
+        let mut seen_ids = HashSet::<&str>::new();
+        for rule in rules.iter() {
+            let id = &rule.id;
+            if !seen_ids.insert(id) {
+                error!("Rule ID {id} is not unique");
+                num_errors += 1;
+            }
+        }
+    }
+
+    // ensure rule IDs are well-formed
+    {
+        for rule in rules.iter() {
+            let id = &rule.id;
+            let id_len = id.len();
+            if id_len > ID_LIMIT {
+                error!(
+                    "Rule ID {id} is too long ({id_len} characters: \
+                       should be {ID_LIMIT} characters max)"
+                );
+                num_errors += 1;
+            }
+
+            if !id_validator_pat.is_match(id) {
+                error!(
+                    "Rule ID {id} is not well-formed: \
+                       it should consist only of alphanumeric sections \
+                       delimited by hyphens or periods"
+                );
+                num_errors += 1;
+            }
+        }
+    }
+
+    // ensure that in each ruleset:
+    // - all referenced rules resolve
+    // - all referenced rules are unique
+    {
+        for (ruleset_num, ruleset) in rulesets.iter().enumerate() {
+            let _span = error_span!("ruleset", "{}:{}", ruleset_num + 1, ruleset.name).entered();
+            loaded.resolve_ruleset_rules(ruleset)?;
+
+            let mut seen_ids = HashSet::<&str>::new();
+            for id in ruleset.include_rule_ids.iter() {
+                if !seen_ids.insert(id) {
+                    warn!("Rule ID {id} is not unique");
+                    num_warnings += 1;
+                }
+            }
+        }
+    }
+
+    // check the rules individually
+    for (rule_num, rule) in rules.iter().enumerate() {
         let stats = check_rule(rule_num, rule)?;
         num_errors += stats.num_errors;
         num_warnings += stats.num_warnings;
     }
 
     // compile the rules all together
+    let rules: Vec<Rule> = rules.into_iter().cloned().collect();
     let _rules_db =
         RulesDatabase::from_rules(rules).context("Failed to compile combined rules database")?;
 
     if num_warnings == 0 && num_errors == 0 {
-        println!("{num_rules} rules: no issues detected");
+        println!(
+            "{} and {}: no issues detected",
+            Counted::regular(loaded.num_rules(), "rule"),
+            Counted::regular(loaded.num_rulesets(), "ruleset"),
+        );
     } else {
-        println!("{num_rules} rules: {num_errors} errors and {num_warnings} warnings");
+        println!(
+            "{} and {}: {num_errors} errors and {num_warnings} warnings",
+            Counted::regular(loaded.num_rules(), "rule"),
+            Counted::regular(loaded.num_rulesets(), "ruleset"),
+        );
     }
 
     if num_errors != 0 {
-        bail!("{num_errors} errors in rules");
+        bail!("{}", Counted::regular(num_errors, "error"));
     }
 
     if num_warnings != 0 && args.warnings_as_errors {
-        bail!("{num_warnings} warnings; warnings being treated as errors");
+        bail!("{}; warnings being treated as errors", Counted::regular(num_warnings, "warning"));
     }
 
     Ok(())

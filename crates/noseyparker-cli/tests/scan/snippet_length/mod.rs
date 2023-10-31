@@ -15,7 +15,7 @@ fn scan_changing_snippet_length() {
 
     // first scan with non-default short snippet length
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path(), "--snippet-length=16")
-        .stdout(match_scan_stats("1.39 KiB", 1, 1, 1));
+        .stdout(match_scan_stats("1.41 KiB", 1, 1, 1));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", scan_env.dspath()));
 
@@ -37,7 +37,7 @@ fn scan_changing_snippet_length() {
 
     // now rescan with longer snippet length
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path(), "--snippet-length=32")
-        .stdout(match_scan_stats("1.39 KiB", 1, 0, 1));
+        .stdout(match_scan_stats("1.41 KiB", 1, 0, 1));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", scan_env.dspath()));
 

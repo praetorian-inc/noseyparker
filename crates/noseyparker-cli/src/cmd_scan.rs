@@ -67,10 +67,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     init_progress.set_message("Compiling rules...");
     let rules_db = {
-        let rules = RuleLoader::from_rule_specifiers(&args.rules)
+        let loaded = RuleLoader::from_rule_specifiers(&args.rules)
             .load()
             .context("Failed to load rules")?;
-        RulesDatabase::from_rules(rules).context("Failed to compile rules")?
+        let resolved = loaded.resolve_enabled_rules()
+            .context("Failed to resolve rules")?;
+        let rules_db = RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
+            .context("Failed to compile rules")?;
+        rules_db
     };
 
     drop(init_progress);
