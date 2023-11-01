@@ -43,16 +43,16 @@ impl RulesReporter {
         let mut rules: Vec<_> = self
             .loaded
             .iter_rules()
-            .map(|r| RuleEntry::new(r))
+            .map(RuleEntry::new)
             .collect();
-        rules.sort_by(|r1, r2| r1.id.cmp(&r2.id));
+        rules.sort_by(|r1, r2| r1.id.cmp(r2.id));
 
         let mut rulesets: Vec<_> = self
             .loaded
             .iter_rulesets()
-            .map(|r| RulesetEntry::new(r))
+            .map(RulesetEntry::new)
             .collect();
-        rulesets.sort_by(|r1, r2| r1.id.cmp(&r2.id));
+        rulesets.sort_by(|r1, r2| r1.id.cmp(r2.id));
 
         Entries { rules, rulesets }
     }

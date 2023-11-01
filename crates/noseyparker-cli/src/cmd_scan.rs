@@ -10,7 +10,6 @@ use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
 
 use crate::{args, rule_loader::RuleLoader};
 
-use content_guesser;
 use content_guesser::Guesser;
 use input_enumerator::{open_git_repo, FileResult, FilesystemEnumerator};
 use progress::Progress;
@@ -72,9 +71,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             .context("Failed to load rules")?;
         let resolved = loaded.resolve_enabled_rules()
             .context("Failed to resolve rules")?;
-        let rules_db = RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
-            .context("Failed to compile rules")?;
-        rules_db
+        RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
+            .context("Failed to compile rules")?
     };
 
     drop(init_progress);
@@ -671,6 +669,7 @@ impl MetadataResult {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn run_matcher(
     matcher_guesser: &mut (Matcher, Guesser),
     provenance: ProvenanceSet,
