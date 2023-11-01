@@ -117,15 +117,19 @@ rules:
       export AWS_SESSION_TOKEN="eyJhbGciOiJIUzUxMi53InR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJJMDhCQ1gySkpWNDVFRDFET0M5SiIsImFjciI6Ij53LCJhdWQiOiJhY2NvdW50IiwiYXV0aF90aW1lIjowLCJhenAiOiJtaW5pbyIsImVtYWlsIjoiYWlkYW4uY29wZUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImV4cCI6MTU4MDUwMDIzOCwiZmFtaWx5X25hbWUiOiJDb3BlIiwiZ2l2ZW5fbmFtZSI6IkFpZGFuIENvcGUiLCJpYXQiOjE1ODA0OTk5MzgsImlzcyI6Imh0dHBzOi8vYXV0aHN0Zy5wb3BkYXRhLmJjLmNhL2F1dGgvcmVhbG1zL3NhbXBsZSIsImp0aSI6IjU5ZTM5ODAxLWQxMmUtNDVhYS04NmQzLWVhMmNmZDU0NmE2MiIsIm1pbmlvX3BvbGljeSI6ImRhdGFzZXRfMV9ybyIsIm5hbWUiOiJBaWRhbiBDb3BlIENvcGUiLCJuYmYiOjAsInByZWZlcnJlZF91c2VybmFtZSI6ImFjb3BlLTk5LXQwNSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2Vzc2lvbl9zdGF0ZSI6IjcxYjczZWJjLThlMzMtNGMyMi04NmE2LWI0MzhhNDM4ZmI2MiIsInN1YiI6IjVkOTBlOTgzLTA1NDItNDYyYS1hZWIwLWYxZWVmNjcwYzdlNSIsInR5cCI6IkJlYXJlciJ9.J-a9PORJToz7MUrnPQlOywcqtVMNkXy53Gedp_V4PW-Gbf1_BAMjwuw_X7fKRd6hkNfEn43CKKju7muzi_d1Ig"
 
 
+# Note that this service is being deprecated on March 31, 2024
 - name: Amazon MWS Auth Token
   id: np.aws.5
-  pattern: '(?i)amzn\.mws\.([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+  pattern: '(?i)(amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
 
   examples:
   - |
       AWS Access Key:AKIAIDQJ6PTGDFFWYX7A
       secret key:IwJz1SHMccAKUKuskdVoHFfkre73BTyF80nRmcWc
       MWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58
+
+  references:
+  - https://docs.developer.amazonservices.com/en_US/dev_guide/index.html
 
 
 - name: AWS S3 Bucket (subdomain style)

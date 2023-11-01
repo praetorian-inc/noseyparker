@@ -57,6 +57,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Due to nuanced details of how scanning is performed, rules without capture groups will never produce reported matches.
   An additional check was added to the `rules check` command and a couple assertions were added that should help prevent this type of error in the future.
 
+- Fixed a rule whose capture group was smaller than it should have been:
+
+  - Amazon MWS Auth Token
+
 ### Changes
 - The `rules check` command invocation now behaves differently.
   It now no longer requires input paths to be specified.
