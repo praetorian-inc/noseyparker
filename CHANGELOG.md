@@ -67,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   It will check the built-in rules for problems, and if additional paths are specified, will check those rules as well.
   This change was made so that the `scan`, `rules check`, and `rules list` invocations have consistent interfaces.
 
+- The default path-based ignore rules in Nosey Parker now ignore `packed-refs` files from Git repositories.
 
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 
