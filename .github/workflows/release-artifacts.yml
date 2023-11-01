@@ -80,7 +80,14 @@ jobs:
         pull: true
 
         tags: noseyparker:test
-        labels: ${{ steps.docker_metadata.outputs.labels }}
+        labels: |
+          ${{ steps.docker_metadata.outputs.labels }}
+          org.opencontainers.image.title=${{ github.event.repository.name }}
+          org.opencontainers.image.description=${{ github.event.repository.description }}
+          org.opencontainers.image.url=${{ github.event.repository.html_url }}
+          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
     - name: Test the Docker image
       run: docker run --rm noseyparker:test --version
@@ -99,7 +106,14 @@ jobs:
         pull: true
 
         tags: ${{ steps.docker_metadata.outputs.tags }}
-        labels: ${{ steps.docker_metadata.outputs.labels }}
+        labels: |
+          ${{ steps.docker_metadata.outputs.labels }}
+          org.opencontainers.image.title=${{ github.event.repository.name }}
+          org.opencontainers.image.description=${{ github.event.repository.description }}
+          org.opencontainers.image.url=${{ github.event.repository.html_url }}
+          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
 
   native:
