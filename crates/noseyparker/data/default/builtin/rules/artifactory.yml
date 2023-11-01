@@ -2,6 +2,7 @@ rules:
 
 - name: Artifactory API Key
   id: np.artifactory.1
+  # FIXME: all the real onces start with `AKC`?
   pattern: '(?i)artifactory.{0,50}\b([a-z0-9]{73})\b'
 
   examples:
@@ -9,3 +10,6 @@ rules:
       export HOMEBREW_ARTIFACTORY_API_TOKEN=AKCp8igrDNFerC357m4422e4tmu7xB983QLPxJhKFcSMfoux2RFvp8rc4jC8t9ncdmYCMFD8W
       export HOMEBREW_ARTIFACTORY_API_USER=kashorn
   - 'jfrog rt dl --url=http://localhost:8071/artifactory --apikey=AKCp2WXX7SDvcsmny528sSDnaB3zACkNQoRcD8D1WmxhMV9gk6Wp8mVWC8bh38kJQbXagUT8Z generic-local/hello.txt'
+
+  references:
+  - https://jfrog.com/help/r/jfrog-rest-apis/introduction-to-the-artifactory-rest-apis
