@@ -10,6 +10,7 @@
 !/Cargo.lock
 !/Cargo.toml
 !/LICENSE
+!/README.md
 !/crates
 !/scripts
 !/share
