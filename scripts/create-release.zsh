@@ -22,6 +22,24 @@ ensure_has_program() {
 # The directory containing this script
 HERE=${0:a:h}
 
+# To strip or not strip the final binary?
+DO_STRIP=0
+
+################################################################################
+# Parse arguments
+################################################################################
+while (( $# > 0 )); do
+    case $1 in
+        --strip)
+            DO_STRIP=1
+            shift
+        ;;
+
+        *)
+            fatal "unknown argument '$1'"
+        ;;
+    esac
+done
 
 ################################################################################
 # Determine build configuration
@@ -31,11 +49,13 @@ case $(uname) in
     Darwin*)
         PLATFORM="macos"
         CARGO_FEATURES="release"
+        STRIP_COMMAND=(strip)
     ;;
 
     Linux*)
         PLATFORM="linux"
         CARGO_FEATURES="release"
+        STRIP_COMMAND=(strip --strip-all)
     ;;
 
     *)
@@ -88,6 +108,11 @@ banner "Assembling release dir"
 # Copy binary into release dir
 NP="$PWD/$RELEASE_DIR/bin/noseyparker"
 cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP"
+
+if (( $DO_STRIP )); then
+    banner "Stripping release binary"
+    $STRIP_COMMAND "$NP"
+fi
 
 ################################################################################
 # Shell completion generation
