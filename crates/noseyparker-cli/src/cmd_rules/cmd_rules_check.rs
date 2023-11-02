@@ -109,7 +109,10 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     {
         for (ruleset_num, ruleset) in rulesets.iter().enumerate() {
             let _span = error_span!("ruleset", "{}:{}", ruleset_num + 1, ruleset.name).entered();
-            loaded.resolve_ruleset_rules(ruleset)?;
+            if let Err(e) = loaded.resolve_ruleset_rules(ruleset) {
+                error!("Failed to resolve rules: {e}");
+                num_errors += 1;
+            }
 
             let mut seen_ids = HashSet::<&str>::new();
             for id in ruleset.include_rule_ids.iter() {
