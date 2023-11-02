@@ -67,7 +67,7 @@ rulesets:
   - np.heroku.1       # Heroku API Key
   - np.huggingface.1  # HuggingFace User Access Token
   - np.jenkins.1      # Jenkins Token or Crumb
-  # - np.jwt.1          # JSON Web Token (base64url-encoded)
+  - np.jwt.1          # JSON Web Token (base64url-encoded)
   # - np.linkedin.1     # LinkedIn Client ID
   - np.linkedin.2     # LinkedIn Secret Key
   - np.mailchimp.1    # MailChimp API Key

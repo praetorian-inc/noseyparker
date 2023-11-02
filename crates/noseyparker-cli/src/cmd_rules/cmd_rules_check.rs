@@ -131,10 +131,27 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
         num_warnings += stats.num_warnings;
     }
 
-    // compile the rules all together
+    // check that every rule is included in at least one ruleset
+    {
+        let mut seen_rule_ids = HashSet::new();
+        for ruleset in rulesets.iter() {
+            seen_rule_ids.extend(ruleset.include_rule_ids.iter());
+        }
+
+        for rule in rules.iter() {
+            let id = &rule.id;
+            if !seen_rule_ids.contains(id) {
+                warn!("Rule ID {id} is not contained in any known ruleset");
+                num_warnings += 1;
+            }
+        }
+    }
+
+    // check that the rules can all compile together
     let rules: Vec<Rule> = rules.into_iter().cloned().collect();
     let _rules_db =
         RulesDatabase::from_rules(rules).context("Failed to compile combined rules database")?;
+
 
     if num_warnings == 0 && num_errors == 0 {
         println!(
