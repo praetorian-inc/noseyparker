@@ -377,16 +377,24 @@ expression: stdout
       "name": "Shopify Access Token (Legacy Private App)"
     },
     {
-      "id": "np.slack.1",
-      "name": "Slack"
-    },
-    {
       "id": "np.slack.2",
-      "name": "Slack Token"
+      "name": "Slack Bot Token"
     },
     {
       "id": "np.slack.3",
       "name": "Slack Webhook"
+    },
+    {
+      "id": "np.slack.4",
+      "name": "Slack User Token"
+    },
+    {
+      "id": "np.slack.5",
+      "name": "Slack App Token"
+    },
+    {
+      "id": "np.slack.6",
+      "name": "Slack Legacy Bot Token"
     },
     {
       "id": "np.sonarqube.1",
@@ -438,7 +446,7 @@ expression: stdout
     {
       "id": "np.default",
       "name": "Nosey Parker default rules",
-      "num_rules": 90
+      "num_rules": 93
     }
   ]
 }

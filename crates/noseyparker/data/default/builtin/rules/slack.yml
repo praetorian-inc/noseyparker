@@ -1,11 +1,48 @@
 rules:
 
-# FIXME: figure out what this is actually detecting. Can it be merged with `Slack Token`?
-- name: Slack
-  id: np.slack.1
-  pattern: '\b(xox[baprs]-[a-zA-Z0-9]{10,48})\b'
+# XXX what are these?
+# pattern: '\b(xoxa-[0-9]{12}-[0-9]{12}-[a-f0-9]{32})\b'
+# pattern: '\b(xoxa-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-f0-9]{32})\b'
+# pattern: '\b(xoxr-[0-9]{12}-[0-9]{12}-[a-z0-9]{24})\b'
+
+- name: Slack Bot Token
+  id: np.slack.2
+  pattern: '\b(xoxb-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24})\b'
+
+  references:
+  - https://api.slack.com/authentication
+  - https://api.slack.com/authentication/best-practices
+  - https://api.slack.com/authentication/token-types
 
   examples:
+  - 'SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D'
+
+  negative_examples:
+  - 'python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 "This is a test run. Ignore"'
+  - |
+      this is the api token to connect to the bot user
+
+      xoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K
+  - |
+      def send_slack_notification(message):
+          token = "xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1"
+
+
+- name: Slack User Token
+  id: np.slack.4
+  pattern: '\b(xoxp-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-f0-9]{32})\b'
+
+  references:
+  - https://api.slack.com/authentication
+  - https://api.slack.com/authentication/best-practices
+  - https://api.slack.com/authentication/token-types
+
+  examples:
+  - 'python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 "This is a test run. Ignore"'
+  - 'curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer xoxp-283316862324-298911817009-298923149681-44f585044dace54f5701618e97cd1c0b" --data @data.json https://wirecard-issuing.slack.com/api/chat.postMessage'
+  - '	url := "https://slack.com/api/channels.history?token=xoxp-113726990690-113803571044-155105854433-53ffb9d16ace50aa79aa1c425a68b131&channel=C4D8D3XMX&count=1&pretty=1"'
+
+  negative_examples:
   - |
       this is the api token to connect to the bot user
 
@@ -16,21 +53,42 @@ rules:
           token = "xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1"
 
 
-- name: Slack Token
-  id: np.slack.2
-  pattern: '\b(xox[pboa]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32})\b'
+- name: Slack App Token
+  id: np.slack.5
+  pattern: '\b(xapp-[0-9]{12}-[a-zA-Z0-9/+]{24})\b'
 
   references:
+  - https://api.slack.com/authentication
+  - https://api.slack.com/authentication/best-practices
+  - https://api.slack.com/authentication/token-types
+
+  examples:
+  - 'ENV SLACK_TOKEN="xapp-083452001657-ShAYwge/87H4lC3j7lZ48pAL" \'
+
+- name: Slack Legacy Bot Token
+  id: np.slack.6
+  pattern: '\b(xoxb-[0-9]{10,13}-[a-zA-Z0-9]{24})\b'
+
+  references:
+  - https://api.slack.com/authentication
   - https://api.slack.com/authentication/best-practices
   - https://api.slack.com/authentication/token-types
   - https://api.slack.com/legacy/custom-integrations/legacy-tokens
-  - https://api.slack.com/tutorials/tracks/getting-a-token
 
   examples:
+  - |
+      this is the api token to connect to the bot user
+
+      xoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K
+  - |
+      def send_slack_notification(message):
+          token = "xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1"
+
+  negative_examples:
+  - 'SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D'
   - 'python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 "This is a test run. Ignore"'
   - 'curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer xoxp-283316862324-298911817009-298923149681-44f585044dace54f5701618e97cd1c0b" --data @data.json https://wirecard-issuing.slack.com/api/chat.postMessage'
   - '	url := "https://slack.com/api/channels.history?token=xoxp-113726990690-113803571044-155105854433-53ffb9d16ace50aa79aa1c425a68b131&channel=C4D8D3XMX&count=1&pretty=1"'
-
 
 
 - name: Slack Webhook

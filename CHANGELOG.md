@@ -74,6 +74,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The default path-based ignore rules in Nosey Parker now ignore `packed-refs` files from Git repositories.
 
+- The rules for detecting Slack tokens have been refined:
+
+  - The `Slack` rule (id `np.slack.1`) has been removed, as it was redundant with `Slack Token`.
+  - `Slack Token` has been split into `Slack Bot Token`, `Slack Legacy Bot Token`, `Slack User Token`, and `Slack App Token`.
+
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 
 ### Additions

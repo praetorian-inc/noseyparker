@@ -98,9 +98,11 @@ expression: stdout
  np.shopify.3        Shopify Access Token (Public App) 
  np.shopify.4        Shopify Access Token (Custom App) 
  np.shopify.5        Shopify Access Token (Legacy Private App) 
- np.slack.1          Slack 
- np.slack.2          Slack Token 
+ np.slack.2          Slack Bot Token 
  np.slack.3          Slack Webhook 
+ np.slack.4          Slack User Token 
+ np.slack.5          Slack App Token 
+ np.slack.6          Slack Legacy Bot Token 
  np.sonarqube.1      SonarQube Token 
  np.square.1         Square Access Token 
  np.square.2         Square OAuth Secret 
@@ -115,5 +117,5 @@ expression: stdout
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
  np.assets    Nosey Parker asset detection rules      15 
- np.default   Nosey Parker default rules              90 
+ np.default   Nosey Parker default rules              93 
 
