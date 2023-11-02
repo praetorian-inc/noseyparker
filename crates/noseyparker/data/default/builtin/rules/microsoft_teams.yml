@@ -5,16 +5,17 @@ rules:
 
   pattern: |
     (?x)(?i)
-    outlook\.office\.com/webhook/
     (
+      https://
+      outlook\.office\.com/webhook/
       [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
       @
       [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
+      /IncomingWebhook/
+      [a-f0-9]{32}
+      /
+      [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
     )
-    /IncomingWebhook/
-    ([a-f0-9]{32})
-    /
-    ([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
 
   examples:
   - "//test //url = 'https://outlook.office.com/webhook/9da5da9c-4218-4c22-aed6-b5c8baebfff5@2f2b54b7-0141-4ba7-8fcd-ab7d17a60547/IncomingWebhook/1bf66ccbb8e745e791fa6e6de0cf465b/4361420b-8fde-48eb-b62a-0e34fec63f5c';"

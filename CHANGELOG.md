@@ -1,6 +1,7 @@
-# Changelog
+# Nosey Parker Changelog
 
-All notable changes to this project will be documented in this file.
+This is the changelog for [Nosey Parker](https://github.com/praetorian-inc/noseyparker).
+All notable changes to the project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -57,9 +58,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Due to nuanced details of how scanning is performed, rules without capture groups will never produce reported matches.
   An additional check was added to the `rules check` command and a couple assertions were added that should help prevent this type of error in the future.
 
-- Fixed a rule whose capture group was smaller than it should have been:
+- Fixed several rules:
 
-  - Amazon MWS Auth Token
+  - Amazon MWS Auth Token: the capture group was smaller than it should have been
+  - Microsoft Teams Webhook: changed 3 capture groups to 1; full URL is now included
+  - Slack Webhook: full URL is now included
+
+- The LICENSE, README.md, and CHANGELOG.md files are now included in prebuilt binary releases.
 
 ### Changes
 - The `rules check` command invocation now behaves differently.

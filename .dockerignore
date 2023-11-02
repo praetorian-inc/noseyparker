@@ -9,6 +9,7 @@
 !/.git
 !/Cargo.lock
 !/Cargo.toml
+!/CHANGELOG.md
 !/LICENSE
 !/README.md
 !/crates

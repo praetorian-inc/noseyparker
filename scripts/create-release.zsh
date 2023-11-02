@@ -109,9 +109,8 @@ banner "Assembling release dir"
 NP="$PWD/$RELEASE_DIR/bin/noseyparker"
 cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP"
 
-# Copy LICENSE and README.md
-cp -p LICENSE "$RELEASE_DIR/"
-cp -p README.md "$RELEASE_DIR/"
+# Copy CHANGELOG.md, LICENSE, and README.md
+cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/"
 
 ################################################################################
 # Strip release binary if requested
