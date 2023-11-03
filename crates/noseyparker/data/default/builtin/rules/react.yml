@@ -1,0 +1,72 @@
+# These rules are designed to detect certain username and password patterns
+# that sometimes appear within .env files used within React apps via the
+# `create-react-app` program.
+#
+# Note that secrets are _not_ supposed to appear in such .env files, even if
+# they are .gitignored, as the contents will be embedded within the generated
+# React code (which is visible to clients).
+#
+# The variable names within one of these .env files are arbitrary, other than
+# that they have to start with `REACT_APP_`.
+
+
+rules:
+
+
+- name: React App Username
+  id: np.reactapp.1
+
+  pattern: |
+    (?x)(?i)
+    \b
+    REACT_APP (?: _[A-Z0-9]+)* _USER (?: NAME)?          (?# variable name )
+    \s* = \s*
+    ['"]?
+    ( [^\s'"$]{3,} )                                     (?# value )
+    (?: [\s'"$] | $ )
+
+
+  references:
+  - https://create-react-app.dev/docs/adding-custom-environment-variables/
+  - https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app
+
+  examples:
+  - '# REACT_APP_GUEST_USERNAME=guest'
+  - '# REACT_APP_USER=postgres'
+  - 'REACT_APP_AUTH_USER=postgres'
+  - 'REACT_APP_AUTH_USERNAME=bowie'
+  - '    REACT_APP_AUTH_USERNAME=bowie    # some comment'
+  - 'REACT_APP_MAILER_USERNAME=smtp_username # Enter your SMTP email username'
+
+  negative_examples:
+  - 'REACT_APP_FRONTEND_LOGIN_FORGOT_USERNAME=$REACT_APP_MATRIX_BASE_URL/classroom/#/forgot_username'
+
+
+- name: React App Password
+  id: np.reactapp.2
+
+  pattern: |
+    (?x)(?i)
+    \b
+    REACT_APP (?: _[A-Z0-9]+)* _PASS (?: WORD)?          (?# variable name )
+    \s* = \s*
+    ['"]?
+    ( [^\s'"$]{6,} )                                     (?# value )
+    (?: [\s'"$] | $ )
+
+
+  references:
+  - https://create-react-app.dev/docs/adding-custom-environment-variables/
+  - https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app
+
+  examples:
+  - '# REACT_APP_GUEST_PASSWORD=mycoin!1'
+  - '# REACT_APP_PASS=whiteduke'
+  - 'REACT_APP_AUTH_PASS=whiteduke'
+  - 'REACT_APP_AUTH_PASSWORD=whiteduke'
+  - '    REACT_APP_AUTH_PASSWORD=whiteduke    # some comment'
+  - 'REACT_APP_MAILER_PASSWORD=smtp_password # Enter your SMTP email password'
+
+  negative_examples:
+  - '  const password = process.env.REACT_APP_FIREBASE_DEV_PASSWORD || "not-set"'
+  - 'REACT_APP_FRONTEND_LOGIN_FORGOT_PASSWORD=$REACT_APP_MATRIX_BASE_URL/classroom/#/forgot_password'

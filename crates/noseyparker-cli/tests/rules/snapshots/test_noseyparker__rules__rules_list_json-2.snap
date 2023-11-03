@@ -329,6 +329,14 @@ expression: stdout
       "name": "PyPI Upload Token"
     },
     {
+      "id": "np.reactapp.1",
+      "name": "React App Username"
+    },
+    {
+      "id": "np.reactapp.2",
+      "name": "React App Password"
+    },
+    {
       "id": "np.rubygems.1",
       "name": "RubyGems API Key"
     },
@@ -446,7 +454,7 @@ expression: stdout
     {
       "id": "np.default",
       "name": "Nosey Parker default rules",
-      "num_rules": 93
+      "num_rules": 95
     }
   ]
 }

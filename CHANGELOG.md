@@ -46,6 +46,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `rules list` command is available, which lists available rules and rulesets.
   This command can emit its output in human-oriented format or in JSON format.
 
+- New rules have been added:
+
+  - React App Username
+  - React App Password
+
 ### Fixes
 - Command-line parameters that can meaningfully accept negative numbers can now be specified without having to use `--PARAMETER=NEGATIVE_VALUE` syntax; a space can now separate the paraemter and the value.
 

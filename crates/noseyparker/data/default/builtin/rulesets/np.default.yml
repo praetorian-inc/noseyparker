@@ -96,6 +96,8 @@ rulesets:
   - np.postman.1      # Postman API Key
   - np.psexec.1       # Credentials in PsExec
   - np.pypi.1         # PyPI Upload Token
+  - np.reactapp.1     # React App Username
+  - np.reactapp.2     # React App Password
   - np.rubygems.1     # RubyGems API Key
   # - np.s3.1           # AWS S3 Bucket (subdomain style)
   # - np.s3.2           # AWS S3 Bucket (path style)
