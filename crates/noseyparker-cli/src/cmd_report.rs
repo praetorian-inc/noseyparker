@@ -9,7 +9,7 @@ use tracing::debug;
 
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
-use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId};
+use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId, Status};
 use noseyparker::defaults::get_builtin_rules;
 use noseyparker::digest::sha1_hexdigest;
 use noseyparker::match_type::Match;
@@ -401,6 +401,20 @@ impl Display for MatchGroup {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", STYLE_RULE.apply_to(self.rule_name()),)?;
 
+        // write out status if set
+        if let Some(status) = self.metadata.status {
+            let status = match status {
+                Status::Accept => "Accept",
+                Status::Reject => "Reject",
+            };
+            writeln!(f, "{} {}", STYLE_HEADING.apply_to("Status:"), status)?;
+        };
+
+        // write out comment if set
+        if let Some(comment) = &self.metadata.comment {
+            writeln!(f, "{} {}", STYLE_HEADING.apply_to("Comment:"), comment)?;
+        };
+
         // write out the group on one line if it's single-line, and multiple lines otherwise
         let g = self.group_input();
         let match_heading = STYLE_HEADING.apply_to("Match:");
@@ -427,7 +441,7 @@ impl Display for MatchGroup {
         }
         writeln!(f)?;
 
-        // print matches
+        // write out matches
         let mut f = indented(f).with_str("    ");
         for (i, ReportMatch { ps, md, m, .. }) in self.matches.iter().enumerate() {
             let i = i + 1;

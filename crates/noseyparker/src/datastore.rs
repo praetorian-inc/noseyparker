@@ -509,8 +509,10 @@ impl Datastore {
                 .entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select group_input, rule_name, count(*)
-            from match
+            select m.group_input, m.rule_name, count(*), fc.comment, fs.status
+            from match m
+            left outer join finding_comment fc on (m.group_input = fc.group_input and m.rule_name = fc.rule_name)
+            left outer join finding_status fs on (m.group_input = fs.group_input and m.rule_name = fs.rule_name)
             group by 1, 2
             order by 2
         "#})?;
@@ -519,6 +521,8 @@ impl Datastore {
                 match_content: BString::new(row.get(0)?),
                 rule_name: row.get(1)?,
                 num_matches: row.get(2)?,
+                comment: row.get(3)?,
+                status: row.get(4)?,
             })
         })?;
         let mut es = Vec::new();
@@ -1200,7 +1204,7 @@ impl std::fmt::Display for MatchSummary {
 // MatchGroupMetadata
 // -------------------------------------------------------------------------------------------------
 
-/// Metadata for a group of matches that have identical match content.
+/// Metadata for a group of matches that have identical rule name and match content.
 #[derive(Debug, Serialize)]
 pub struct MatchGroupMetadata {
     /// The name of the rule of all the matches in the group
@@ -1212,4 +1216,41 @@ pub struct MatchGroupMetadata {
 
     /// The number of matches in the group
     pub num_matches: usize,
+
+    /// An optional status assigned to this match group
+    pub status: Option<Status>,
+
+    /// A comment assigned to this match group
+    pub comment: Option<String>,
+}
+
+// -------------------------------------------------------------------------------------------------
+// Status
+// -------------------------------------------------------------------------------------------------
+
+/// A status assigned to a match group
+#[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum Status {
+    Accept,
+    Reject,
+}
+
+impl rusqlite::types::ToSql for Status {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        match self {
+            Status::Accept => Ok("accept".into()),
+            Status::Reject => Ok("reject".into()),
+        }
+    }
+}
+
+impl rusqlite::types::FromSql for Status {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        match value.as_str()? {
+            "accept" => Ok(Status::Accept),
+            "reject" => Ok(Status::Reject),
+            _ => Err(rusqlite::types::FromSqlError::InvalidType),
+        }
+    }
 }

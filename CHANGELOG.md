@@ -20,8 +20,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - `--sqlite-cache-size=SIZE` to control the `pragma cache_size` value used in sqlite database connections
 
-- The datastore now contains two additional tables for storing user annotations, both freeform comments and accept/reject status.
-  These additional tables are not currently populated or used elsewhere in the open-source version of Nosey Parker.
+- The datastore now contains two additional tables for to represent freeform comments and accept/reject status associated with findings.
+  These additional tables are not currently populated in the open-source version of Nosey Parker.
+  The `report` command now emits finding status and comment if populated.
 
 - A new "ruleset" mechanism has been added.
   A ruleset is a named collection of rules that can be selected as a group.
