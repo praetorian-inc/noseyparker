@@ -22,6 +22,7 @@ rules:
   references:
   - https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/
   - https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string
+  - https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#best-practices-when-using-sas
 
   examples:
   - |
