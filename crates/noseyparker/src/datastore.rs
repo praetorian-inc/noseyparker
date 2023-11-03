@@ -1078,7 +1078,7 @@ impl Datastore {
             }
 
             if finding_comment_exists {
-                tx.execute("alter table finding_comment rename to old_finding_status", ())?;
+                tx.execute("alter table finding_comment rename to old_finding_comment", ())?;
             }
 
             tx.execute_batch(indoc! {r#"
