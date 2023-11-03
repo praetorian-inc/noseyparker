@@ -61,8 +61,6 @@ pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {
     use prettytable::row;
 
     let f = FormatBuilder::new()
-        // .column_separator('│')
-        // .separators(&[LinePosition::Title], LineSeparator::new('─', '┼', '├', '┤'))
         .column_separator(' ')
         .separators(&[LinePosition::Title], LineSeparator::new('─', '─', '─', '─'))
         .padding(1, 1)
