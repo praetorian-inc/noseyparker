@@ -1,12 +1,39 @@
 rules:
 
-- name: CodeClimate
+# This rule detects the appearance of a or CodeClimate Reporter ID (aka Repo Token).
+# Such a token only has write access for coverage info from the corresponding
+# repository, and has no other access than that.
+#
+# However, a leaked token could still be used to upload fraudulent code
+# coverage data or cause abuse of services.
+- name: CodeClimate Reporter ID
   id: np.codeclimate.1
 
-  pattern: '(?i)codeclima.{0,50}\b([a-f0-9]{64})\b'
+  pattern: |
+    (?x)
+    (?: CODECLIMATE_REPO_TOKEN | CC_TEST_REPORTER_ID)
+    \s* [:=] \s*
+    ([a-f0-9]{64})\b
 
   references:
+  # Old reporters use `CODECLIMATE_REPO_TOKEN`
+  - https://github.com/codeclimate/javascript-test-reporter
+  - https://github.com/codeclimate/php-test-reporter
+  - https://github.com/codeclimate/python-test-reporter
+  - https://github.com/codeclimate/ruby-test-reporter
   - https://github.com/codeclimate/ruby-test-reporter/issues/34
+
+  # New reporter uses `CC_TEST_REPORTER_ID`
+  - https://docs.codeclimate.com/docs/finding-your-test-coverage-token#should-i-keep-my-test-reporter-id-secret
 
   examples:
   - ' - RAILS_ENV=test CODECLIMATE_REPO_TOKEN=d37a8b9e09642cb73cfcf4e1284815fc3d6a55a7714110187ac59856ae4ab5ad'
+
+  - |
+      - uses: paambaati/codeclimate-action@v2.2.4
+      env:
+        CC_TEST_REPORTER_ID: 945dfb58a832d233a3caeb84e3e6d3be212e8c7abcb48117fce63b9adcb43647
+
+
+
+# XXX: should add rules for CodeClimate API keys too: https://developer.codeclimate.com/#authentication

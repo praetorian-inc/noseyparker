@@ -58,7 +58,7 @@ expression: stdout
     },
     {
       "id": "np.codeclimate.1",
-      "name": "CodeClimate"
+      "name": "CodeClimate Reporter ID"
     },
     {
       "id": "np.cratesio.1",

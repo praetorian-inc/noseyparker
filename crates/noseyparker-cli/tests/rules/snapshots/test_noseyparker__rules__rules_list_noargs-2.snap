@@ -18,7 +18,7 @@ expression: stdout
  np.azure.1          Azure Connection String 
  np.azure.2          Azure App Configuration Connection String 
  np.bcrypt.1         bcrypt Hash 
- np.codeclimate.1    CodeClimate 
+ np.codeclimate.1    CodeClimate Reporter ID 
  np.cratesio.1       crates.io API Key 
  np.digitalocean.1   DigitalOcean Application Access Token 
  np.digitalocean.2   DigitalOcean Personal Access Token 
