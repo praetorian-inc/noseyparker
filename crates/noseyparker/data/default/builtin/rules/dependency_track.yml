@@ -1,0 +1,20 @@
+rules:
+
+- name: Dependency-Track API Key
+  id: np.dtrack.1
+  pattern: (^odt_[A-Za-z0-9]{32,255}$)
+
+  examples:
+  - 'odt_KTJlDq2AGGGlqG4riKdT7p980AW8RlU5'
+  - 'odt_ABCDDq2AGxGlrF4ribBT7p98AOM9TlU8'
+  - 'odt_FHxhQGh77JAHHIYpZ818UQ0aYjXIdMIxxgeR'
+
+  negative_examples:
+    - 'KTJlDq2AGGGlqG8riKdT7p980AW8RlU5'
+    - 'ABCDDq2AGxGlqG 4ribBT7p98AOM9TlU8'
+    - 'FHxhQGh77_JAHHIYpZ818UQ0aYjXIdMIxxgeR'
+
+  references:
+  - https://docs.dependencytrack.org/integrations/rest-api/
+  - https://docs.dependencytrack.org/getting-started/configuration/
+
