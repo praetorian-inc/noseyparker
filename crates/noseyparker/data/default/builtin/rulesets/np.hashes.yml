@@ -1,0 +1,18 @@
+rulesets:
+
+- id: np.hashes
+
+  name: Nosey Parker password hash rules
+
+  description: |
+    This ruleset includes rules that detect various types of password hashes.
+
+    The rules included in this set typically have high precision, or in other
+    words, few false positives.
+
+  include_rule_ids:
+  - np.pwhash.1       # Password Hash (bcrypt)
+  - np.pwhash.2       # Password Hash (md5crypt)
+  - np.pwhash.3       # Password Hash (sha256crypt)
+  - np.pwhash.4       # Password Hash (sha256crypt)
+  - np.pwhash.5       # Password Hash (Cisco IOS PBKDF2 with SHA256)

@@ -17,7 +17,6 @@ expression: stdout
  np.aws.5            Amazon MWS Auth Token 
  np.azure.1          Azure Connection String 
  np.azure.2          Azure App Configuration Connection String 
- np.bcrypt.1         bcrypt Hash 
  np.codeclimate.1    CodeClimate Reporter ID 
  np.cratesio.1       crates.io API Key 
  np.digitalocean.1   DigitalOcean Application Access Token 
@@ -66,7 +65,6 @@ expression: stdout
  np.mapbox.1         Mapbox Public Access Token 
  np.mapbox.2         Mapbox Secret Access Token 
  np.mapbox.3         Mapbox Temporary Access Token 
- np.md5.1            md5crypt Hash 
  np.msteams.1        Microsoft Teams Webhook 
  np.netrc.1          netrc Credentials 
  np.newrelic.1       New Relic License Key 
@@ -86,6 +84,11 @@ expression: stdout
  np.pem.1            PEM-Encoded Private Key 
  np.postman.1        Postman API Key 
  np.psexec.1         Credentials in PsExec 
+ np.pwhash.1         Password Hash (md5crypt) 
+ np.pwhash.2         Password Hash (bcrypt) 
+ np.pwhash.3         Password Hash (sha256crypt) 
+ np.pwhash.4         Password Hash (sha512crypt) 
+ np.pwhash.5         Password Hash (Cisco IOS PBKDF2 with SHA256) 
  np.pypi.1           PyPI Upload Token 
  np.reactapp.1       React App Username 
  np.reactapp.2       React App Password 
@@ -120,5 +123,6 @@ expression: stdout
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
  np.assets    Nosey Parker asset detection rules      15 
- np.default   Nosey Parker default rules              96 
+ np.default   Nosey Parker default rules              94 
+ np.hashes    Nosey Parker password hash rules         5 
 

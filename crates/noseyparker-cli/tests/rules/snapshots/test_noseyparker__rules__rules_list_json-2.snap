@@ -53,10 +53,6 @@ expression: stdout
       "name": "Azure App Configuration Connection String"
     },
     {
-      "id": "np.bcrypt.1",
-      "name": "bcrypt Hash"
-    },
-    {
       "id": "np.codeclimate.1",
       "name": "CodeClimate Reporter ID"
     },
@@ -249,10 +245,6 @@ expression: stdout
       "name": "Mapbox Temporary Access Token"
     },
     {
-      "id": "np.md5.1",
-      "name": "md5crypt Hash"
-    },
-    {
       "id": "np.msteams.1",
       "name": "Microsoft Teams Webhook"
     },
@@ -327,6 +319,26 @@ expression: stdout
     {
       "id": "np.psexec.1",
       "name": "Credentials in PsExec"
+    },
+    {
+      "id": "np.pwhash.1",
+      "name": "Password Hash (md5crypt)"
+    },
+    {
+      "id": "np.pwhash.2",
+      "name": "Password Hash (bcrypt)"
+    },
+    {
+      "id": "np.pwhash.3",
+      "name": "Password Hash (sha256crypt)"
+    },
+    {
+      "id": "np.pwhash.4",
+      "name": "Password Hash (sha512crypt)"
+    },
+    {
+      "id": "np.pwhash.5",
+      "name": "Password Hash (Cisco IOS PBKDF2 with SHA256)"
     },
     {
       "id": "np.pypi.1",
@@ -458,7 +470,12 @@ expression: stdout
     {
       "id": "np.default",
       "name": "Nosey Parker default rules",
-      "num_rules": 96
+      "num_rules": 94
+    },
+    {
+      "id": "np.hashes",
+      "name": "Nosey Parker password hash rules",
+      "num_rules": 5
     }
   ]
 }

@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new "ruleset" mechanism has been added.
   A ruleset is a named collection of rules that can be selected as a group.
   The new `--ruleset=NAME` parameter to `scan` can be used to enable additional rulesets.
-  Two built-in rulesets are provided (`np.default` and `np.assets`); the special ruleset name `all` enables all known rules.
+  Three built-in rulesets are provided (`np.default`, `np.assets` and `np.hashes`); the special ruleset name `all` enables all known rules.
   The default ruleset can be disabled using the new `--enable-default-ruleset=false` parameter to `scan`.
   See the built-in rulesets at `crates/noseyparker/data/default/builtin/rulesets` for an example for writing your own.
 
@@ -50,6 +50,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New rules have been added:
 
   - Dependency-Track API Key (Thank you @tpat13!)
+  - Password Hash (sha256crypt)
+  - Password Hash (sha512crypt)
+  - Password Hash (Cisco IOS PBKDF2 with SHA256)
   - React App Username
   - React App Password
 
@@ -86,6 +89,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - The `Slack` rule (id `np.slack.1`) has been removed, as it was redundant with `Slack Token`.
   - `Slack Token` has been split into `Slack Bot Token`, `Slack Legacy Bot Token`, `Slack User Token`, and `Slack App Token`.
   - `CodeClimate` was enhanced to detect additional cases and was renamed to `CodeClimate Reporter ID`.
+  - `md5crypt Hash` (id `np.md5.1`) has been renamed to `Password Hash (md5crypt)` and re-identified as `np.pwhash.1`.
+  - `bcrypt Hash` (id `np.bcrypt.1`) has been renamed to `Password Hash (bcrypt)` and re-identified as `np.pwhash.2`.
 
 
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)

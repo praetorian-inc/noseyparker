@@ -16,18 +16,13 @@ rulesets:
 
   include_rule_ids:
   - np.adobe.1        # Adobe OAuth Client Secret
-  # - np.age.1          # Age Recipient (X25519 public key)
   - np.age.2          # Age Identity (X22519 secret key)
-  # - np.arn.1          # Amazon Resource Name
   - np.artifactory.1  # Artifactory API Key
-  # - np.aws.1          # AWS API Key
   - np.aws.2          # AWS Secret Access Key
-  # - np.aws.3          # AWS Account ID
   - np.aws.4          # AWS Session Token
   - np.aws.5          # Amazon MWS Auth Token
   - np.azure.1        # Azure Connection String
   - np.azure.2        # Azure App Configuration Connection String
-  - np.bcrypt.1       # bcrypt Hash
   - np.codeclimate.1  # CodeClimate
   - np.cratesio.1     # crates.io API Key
   - np.dtrack.1       # Dependency-Track API Key
@@ -38,8 +33,6 @@ rulesets:
   - np.facebook.1     # Facebook Secret Key
   - np.facebook.2     # Facebook Access Token
   - np.figma.1        # Figma Personal Access Token
-  # - np.gcs.1          # Google Cloud Storage Bucket (subdomain style)
-  # - np.gcs.2          # Google Cloud Storage Bucket (path style)
   - np.generic.1      # Generic Secret
   - np.generic.2      # Generic API Key
   - np.generic.3      # Generic Username and Password (quoted)
@@ -50,13 +43,11 @@ rulesets:
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token
   - np.github.4       # GitHub Refresh Token
-  # - np.github.5       # GitHub Client ID
   - np.github.6       # GitHub Secret Key
   - np.github.7       # GitHub Personal Access Token (fine-grained permissions)
   - np.gitlab.1       # GitLab Runner Registration Token
   - np.gitlab.2       # GitLab Personal Access Token
   - np.gitlab.3       # GitLab Pipeline Trigger Token
-  # - np.google.1       # Google Client ID
   - np.google.2       # Google OAuth Client Secret (prefixed)
   - np.google.3       # Google OAuth Client Secret
   - np.google.4       # Google OAuth Access Token
@@ -69,14 +60,11 @@ rulesets:
   - np.huggingface.1  # HuggingFace User Access Token
   - np.jenkins.1      # Jenkins Token or Crumb
   - np.jwt.1          # JSON Web Token (base64url-encoded)
-  # - np.linkedin.1     # LinkedIn Client ID
   - np.linkedin.2     # LinkedIn Secret Key
   - np.mailchimp.1    # MailChimp API Key
   - np.mailgun.1      # Mailgun API Key
-  # - np.mapbox.1       # Mapbox Public Access Token
   - np.mapbox.2       # Mapbox Secret Access Token
   - np.mapbox.3       # Mapbox Temporary Access Token
-  - np.md5.1          # md5crypt Hash
   - np.msteams.1      # Microsoft Teams Webhook
   - np.netrc.1        # netrc Credentials
   - np.newrelic.1     # New Relic License Key
@@ -100,13 +88,9 @@ rulesets:
   - np.reactapp.1     # React App Username
   - np.reactapp.2     # React App Password
   - np.rubygems.1     # RubyGems API Key
-  # - np.s3.1           # AWS S3 Bucket (subdomain style)
-  # - np.s3.2           # AWS S3 Bucket (path style)
   - np.salesforce.1   # Salesforce Access Token
   - np.sauce.1        # Sauce Token
-  # - np.segment.1      # Segment Public API Token
   - np.sendgrid.1     # SendGrid API Key
-  # - np.shopify.1      # Shopify Domain
   - np.shopify.2      # Shopify App Secret
   - np.shopify.3      # Shopify Access Token (Public App)
   - np.shopify.4      # Shopify Access Token (Custom App)
@@ -124,5 +108,4 @@ rulesets:
   - np.stripe.2       # Stripe API Test Key
   - np.telegram.1     # Telegram Bot Token
   - np.twilio.1       # Twilio API Key
-  # - np.twitter.1      # Twitter Client ID
   - np.twitter.2      # Twitter Secret Key

@@ -1,12 +1,14 @@
 rules:
 
-- name: md5crypt Hash
-  id: np.md5.1
+- name: Password Hash (md5crypt)
+  id: np.pwhash.1
   pattern: '(\$1\$[./A-Za-z0-9]{8}\$[./A-Za-z0-9]{22})'
 
   references:
+  - https://en.wikipedia.org/wiki/Crypt_(C)#MD5-based_scheme
   - https://unix.stackexchange.com/a/511017
   - https://hashcat.net/wiki/doku.php?id=example_hashes
+  - https://passwordvillage.org/salted.html#md5crypt
 
   examples:
   # generated with `openssl passwd -1 -salt 'OKgLCmVl' 'a'`
@@ -14,8 +16,8 @@ rules:
   - '$1$28772684$iEwNOgGugqO9.bIz5sk8k/'
 
 
-- name: bcrypt Hash
-  id: np.bcrypt.1
+- name: Password Hash (bcrypt)
+  id: np.pwhash.2
   # Format from Wikipedia:
   #   $2<a/b/x/y>$[cost]$[22 character salt][31 character hash]
   pattern: '(\$2[abxy]\$\d+\$[./A-Za-z0-9]{53})'
@@ -30,3 +32,65 @@ rules:
   - '$2a$05$Uo385Fa0g86uUXHwZxB90.qMMdRFExaXePGka4WGFv.86I45AEjmO'
   - '$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6'
   - '$2y$12$atWJ1Nx6ep65tNx0YIJ4I.jzgI86znQbNRI3lF0qIt/XCYnEPxSc2'
+
+
+- name: Password Hash (sha256crypt)
+  id: np.pwhash.3
+  pattern: |
+    (?x)
+    (
+    \$ 5                    (?# magic )
+    (?: \$ rounds=\d+ )?    (?# optional rounds )
+    \$ [./A-Za-z0-9]{8,16}  (?# salt )
+    \$ [./A-Za-z0-9]{43}    (?# hash )
+    )
+
+  references:
+  - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
+  - https://hashcat.net/wiki/doku.php?id=example_hashes
+  - https://passwordvillage.org/salted.html#sha256crypt
+
+  examples:
+  - '$5$rounds=5000$GX7BopJZJxPc/KEK$le16UF8I2Anb.rOrn22AUPWvzUETDGefUmAV8AZkGcD'
+  - '$5$9ks3nNEqv31FX.F$gdEoLFsCRsn/WRN3wxUnzfeZLoooVlzeF4WjLomTRFD'
+  - '$5$KAlz5SULZNybHwil$3UgmS1pmo2r5HG.tjbjzoVxISBh8IH81d.bJh4MCC19'
+
+
+- name: Password Hash (sha512crypt)
+  id: np.pwhash.4
+  pattern: |
+    (?x)
+    (
+    \$ 6                    (?# magic )
+    (?: \$ rounds=\d+ )?    (?# optional rounds )
+    \$ [./A-Za-z0-9]{8,16}  (?# salt )
+    \$ [./A-Za-z0-9]{86}    (?# hash )
+    )
+
+  references:
+  - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
+  - https://hashcat.net/wiki/doku.php?id=example_hashes
+  - https://passwordvillage.org/salted.html#sha512crypt
+
+  examples:
+  - '$6$52450745$k5ka2p8bFuSmoVT1tzOyyuaREkkKBcCNqoDKzYiJL9RaE8yMnPgh2XzzF0NDrUhgrcLwg78xs1w5pJiypEdFX/'
+  - '$6$qoE2letU$wWPRl.PVczjzeMVgjiA8LLy2nOyZbf7Amj3qLIL978o18gbMySdKZ7uepq9tmMQXxyTIrS12Pln.2Q/6Xscao0'
+
+
+- name: Password Hash (Cisco IOS PBKDF2 with SHA256)
+  id: np.pwhash.5
+  pattern: |
+    (?x)
+    (
+    \$ 8                    (?# magic )
+    \$ [./A-Za-z0-9]{8,16}  (?# salt )
+    \$ [./A-Za-z0-9]{43}    (?# hash )
+    )
+
+  references:
+  - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
+  - https://hashcat.net/wiki/doku.php?id=example_hashes
+
+  examples:
+  - '$8$TnGX/fE4KGHOVU$pEhnEvxrvaynpi8j4f.EMHr6M.FzU8xnZnBr/tJdFWk'
+  - '$8$mTj4RZG8N9ZDOk$elY/asfm8kD3iDmkBe3hD2r4xcA/0oWS5V3os.O91u.'

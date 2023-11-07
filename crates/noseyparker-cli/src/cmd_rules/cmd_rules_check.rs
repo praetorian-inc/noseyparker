@@ -141,7 +141,7 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
         for rule in rules.iter() {
             let id = &rule.id;
             if !seen_rule_ids.contains(id) {
-                warn!("Rule ID {id} is not contained in any known ruleset");
+                warn!("Rule ID {id} ({}) is not referenced from any known ruleset", rule.name);
                 num_warnings += 1;
             }
         }
