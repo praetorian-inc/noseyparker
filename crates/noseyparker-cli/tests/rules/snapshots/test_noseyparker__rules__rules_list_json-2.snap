@@ -77,6 +77,10 @@ expression: stdout
       "name": "DigitalOcean Refresh Token"
     },
     {
+      "id": "np.dtrack.1",
+      "name": "Dependency-Track API Key"
+    },
+    {
       "id": "np.dynatrace.1",
       "name": "Dynatrace Token"
     },
@@ -454,7 +458,7 @@ expression: stdout
     {
       "id": "np.default",
       "name": "Nosey Parker default rules",
-      "num_rules": 95
+      "num_rules": 96
     }
   ]
 }
