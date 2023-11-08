@@ -1,0 +1,28 @@
+rules:
+
+# This detects occurrences of a Dependency-Track API key that uses the default
+# `odt_` key prefix. This prefix was set as the default in the Dependency-Track
+# v4.9.0 release on October 16, 2023.
+- name: Dependency-Track API Key
+  id: np.dtrack.1
+  pattern: '\b(odt_[A-Za-z0-9]{32,255})\b'
+
+  examples:
+  - 'odt_KTJlDq2AGGGlqG4riKdT7p980AW8RlU5'
+  - 'odt_ABCDDq2AGxGlrF4ribBT7p98AOM9TlU8'
+  - 'odt_FHxhQGh77JAHHIYpZ818UQ0aYjXIdMIxxgeR'
+
+  negative_examples:
+    - 'KTJlDq2AGGGlqG8riKdT7p980AW8RlU5'
+    - 'ABCDDq2AGxGlqG 4ribBT7p98AOM9TlU8'
+    - 'FHxhQGh77_JAHHIYpZ818UQ0aYjXIdMIxxgeR'
+
+  references:
+  - https://docs.dependencytrack.org/integrations/rest-api/
+  - https://docs.dependencytrack.org/getting-started/configuration/
+
+  # Code that implements stuff related to the API key
+  - https://github.com/stevespringett/Alpine/blob/92fdb7de7e5623b8c986de08997480036af5f472/alpine-model/src/main/java/alpine/model/ApiKey.java
+
+  # Issue about adding support for the `odt_` default key prefix
+  - https://github.com/DependencyTrack/dependency-track/pull/3047

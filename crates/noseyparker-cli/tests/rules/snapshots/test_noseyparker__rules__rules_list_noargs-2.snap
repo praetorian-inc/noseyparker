@@ -23,6 +23,7 @@ expression: stdout
  np.digitalocean.1   DigitalOcean Application Access Token 
  np.digitalocean.2   DigitalOcean Personal Access Token 
  np.digitalocean.3   DigitalOcean Refresh Token 
+ np.dtrack.1         Dependency-Track API Key 
  np.dynatrace.1      Dynatrace Token 
  np.facebook.1       Facebook Secret Key 
  np.facebook.2       Facebook Access Token 
@@ -119,5 +120,5 @@ expression: stdout
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
  np.assets    Nosey Parker asset detection rules      15 
- np.default   Nosey Parker default rules              95 
+ np.default   Nosey Parker default rules              96 
 
