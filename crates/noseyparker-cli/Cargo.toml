@@ -34,9 +34,6 @@ disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug
 # Enable features that are desirable in a release build
 release = ["disable_trace"]
 
-# Enable additional debugging in the `gix` set of dependencies
-gix_debug = ["input-enumerator/gix_debug"]
-
 
 [build-dependencies]
 # Used for embedding compile-time version information into the `noseyparker` CLI

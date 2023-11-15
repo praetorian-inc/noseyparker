@@ -203,10 +203,13 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
                 Kind::Tree => {
                     let tree_idx = metadata_graph.get_tree_idx(oid);
-                    let tree_ref = unwrap_or_continue!(odb.find_tree(&oid, &mut scratch), |e| {
+                    let tree_ref_iter = unwrap_or_continue!(odb.find_tree_iter(&oid, &mut scratch), |e| {
                         warn!("Failed to find tree {oid}: {e}");
                     });
-                    for child in tree_ref.entries {
+                    for child in tree_ref_iter {
+                        let child = unwrap_or_continue!(child, |e| {
+                            warn!("Failed to decode entry in tree {oid}: {e}");
+                        });
                         use gix::objs::tree::EntryMode;
                         let child_idx = match child.mode {
                             EntryMode::Tree => metadata_graph.get_tree_idx(child.oid.into()),
