@@ -70,10 +70,10 @@ Advanced Global Options:
           Set the cache size for sqlite connections to SIZE
           
           This has the effect of setting SQLite's `pragma cache_size=SIZE`. The default value is set
-          to use a maximum of 8GiB for database cache. See
+          to use a maximum of 1GiB for database cache. See
           <https://sqlite.org/pragma.html#pragma_cache_size> for more details.
           
-          [default: -8388608]
+          [default: -1048576]
 
       --enable-backtraces <BOOL>
           Enable or disable backtraces on panic

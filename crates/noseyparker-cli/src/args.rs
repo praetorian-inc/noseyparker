@@ -223,13 +223,13 @@ pub struct AdvancedArgs {
     /// Set the cache size for sqlite connections to SIZE
     ///
     /// This has the effect of setting SQLite's `pragma cache_size=SIZE`.
-    /// The default value is set to use a maximum of 8GiB for database cache.
+    /// The default value is set to use a maximum of 1GiB for database cache.
     /// See <https://sqlite.org/pragma.html#pragma_cache_size> for more details.
     #[arg(
         hide_short_help=true,
         global=true,
         long,
-        default_value_t=-8 * 1024 * 1024,
+        default_value_t=-1 * 1024 * 1024,
         value_name="SIZE",
         allow_negative_numbers=true,
     )]
