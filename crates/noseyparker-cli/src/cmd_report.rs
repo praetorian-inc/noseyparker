@@ -1,5 +1,6 @@
 use anyhow::{bail, Context, Result};
 use bstr::{BStr, ByteSlice};
+use console::Style;
 use indenter::indented;
 use lazy_static::lazy_static;
 use serde::Serialize;
@@ -368,12 +369,11 @@ struct ReportMatch {
 }
 
 lazy_static! {
-    static ref STYLE_FINDING_HEADING: console::Style =
-        console::Style::new().bold().bright().white();
-    static ref STYLE_RULE: console::Style = console::Style::new().bright().bold().blue();
-    static ref STYLE_HEADING: console::Style = console::Style::new().bold();
-    static ref STYLE_MATCH: console::Style = console::Style::new().yellow();
-    static ref STYLE_METADATA: console::Style = console::Style::new().bright().blue();
+    static ref STYLE_FINDING_HEADING: Style = Style::new().bold().bright().white();
+    static ref STYLE_RULE: Style = Style::new().bright().bold().blue();
+    static ref STYLE_HEADING: Style = Style::new().bold();
+    static ref STYLE_MATCH: Style = Style::new().yellow();
+    static ref STYLE_METADATA: Style = Style::new().bright().blue();
 }
 
 impl MatchGroup {

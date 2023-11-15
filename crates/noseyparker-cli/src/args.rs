@@ -800,23 +800,6 @@ impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
             }
         }
     }
-
-    /*
-    pub fn report(&self, format: Format::Format) -> Result<()> {
-        let writer = self
-            .get_writer()
-            .context("Failed to open output destination for writing")?;
-
-        match self.format.report(format, writer) {
-            Ok(()) => Ok(()),
-            Err(e) => match e.downcast_ref::<std::io::Error>() {
-                // Ignore SIGPIPE errors, like those that can come from piping to `head`
-                Some(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
-                _ => Err(e)?,
-            },
-        }
-    }
-    */
 }
 
 // -----------------------------------------------------------------------------

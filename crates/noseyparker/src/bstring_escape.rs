@@ -30,7 +30,6 @@ pub struct Escaped<'a>(pub &'a [u8]);
 
 impl Display for Escaped<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // FIXME: this doesn't quite do what we want: for invalid UTF-8 sequences, it uses the unicode replacement character, not a backslash escape
         let b = String::from_utf8_lossy(self.0);
         let b = escape_nonprinting(&b);
         let b = strip_ansi_codes(&b);
