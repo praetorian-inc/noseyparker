@@ -78,6 +78,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The LICENSE, README.md, and CHANGELOG.md files are now included in prebuilt binary releases.
 
+- ANSI formatting sequences are now no longer included by default by the `report` command when the output is redirected to a file using the `-o`/`--outfile` parameter ([#55](https://github.com/praetorian-inc/noseyparker/issues/55)).
+
 ### Changes
 - The `rules check` command invocation now behaves differently.
   It now no longer requires input paths to be specified.

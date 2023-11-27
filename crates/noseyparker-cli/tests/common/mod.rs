@@ -10,7 +10,6 @@ pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
 pub use insta::{assert_display_snapshot, assert_json_snapshot, assert_snapshot, with_settings, internals::Redaction};
 pub use predicates::str::{RegexPredicate, is_empty};
-pub use pretty_assertions::{assert_eq, assert_ne};
 pub use std::path::Path;
 pub use std::process::Command;
 
