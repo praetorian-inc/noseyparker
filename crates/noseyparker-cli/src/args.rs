@@ -113,6 +113,11 @@ impl CommandLineArgs {
             args.global_args.color = Mode::Never
         }
 
+        // If `--quiet` is specified, disable progress bars
+        if args.global_args.quiet {
+            args.global_args.progress = Mode::Never;
+        }
+
         args
     }
 }
@@ -191,9 +196,16 @@ pub struct GlobalArgs {
     #[arg(global=true, long, short, action=ArgAction::Count)]
     pub verbose: u8,
 
+    /// Suppress non-error feedback messages
+    ///
+    /// This silences WARNING, INFO, DEBUG, and TRACE messages and disables progress bars.
+    /// This overrides any provided verbosity and progress reporting options.
+    #[arg(global=true, long, short)]
+    pub quiet: bool,
+
     /// Enable or disable colored output
     ///
-    /// When this is "auto", colors are enabled when stdout is a tty.
+    /// When this is "auto", colors are enabled for stdout and stderr when they are terminals.
     ///
     /// If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `--color=never`.
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
@@ -201,7 +213,7 @@ pub struct GlobalArgs {
 
     /// Enable or disable progress bars
     ///
-    /// When this is "auto", progress bars are enabled when stderr is a tty.
+    /// When this is "auto", progress bars are enabled when stderr is a terminal.
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
     pub progress: Mode,
 
@@ -243,11 +255,11 @@ pub struct AdvancedArgs {
 }
 
 impl GlobalArgs {
-    pub fn use_color(&self) -> bool {
+    pub fn use_color<T: IsTerminal>(&self, out: T) -> bool {
         match self.color {
             Mode::Never => false,
             Mode::Always => true,
-            Mode::Auto => std::io::stdout().is_terminal(),
+            Mode::Auto => out.is_terminal(),
         }
     }
 

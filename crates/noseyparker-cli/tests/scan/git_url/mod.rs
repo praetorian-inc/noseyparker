@@ -6,8 +6,8 @@ fn https_nonexistent() {
 
     let path = "https://example.com/nothere.git";
     noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path)
-        .stdout(is_match(r"(?m)^Cloning into bare repository .*$"))
-        .stdout(is_match(r"(?m)^fatal: repository .* not found$"))
+        .stderr(is_match(r"(?m)^Cloning into bare repository .*$"))
+        .stderr(is_match(r"(?m)^fatal: repository .* not found$"))
         .stderr(is_match(r"(?m)^Error: No inputs to scan$"));
 }
 
@@ -21,7 +21,7 @@ fn git_binary_missing() {
         .env("PATH", "/dev/null")
         .assert()
         .failure()
-        .stdout(is_match(r"Failed to clone .*: git execution failed:"))
+        .stderr(is_match(r"Failed to clone .*: git execution failed:"))
         .stderr(is_match(r"(?m)^Error: No inputs to scan$"));
 }
 

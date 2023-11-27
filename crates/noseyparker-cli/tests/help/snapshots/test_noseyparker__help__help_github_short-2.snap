@@ -17,6 +17,7 @@ Options:
 
 Global Options:
   -v, --verbose...       Enable verbose output
+  -q, --quiet            Suppress non-error feedback messages
       --color <MODE>     Enable or disable colored output [default: auto] [possible values: auto,
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,

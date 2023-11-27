@@ -110,7 +110,7 @@ fn scan_unreadable_file() {
     assert!(std::fs::read_to_string(input.path()).is_err());
 
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
-        .stdout(is_match("ERROR.*: Failed to load blob from .*: Permission denied"))
+        .stderr(is_match("ERROR.*: Failed to load blob from .*: Permission denied"))
         .stdout(match_nothing_scanned());
 }
 
@@ -226,7 +226,6 @@ fn report_nonexistent_default_datastore() {
     ds.assert(predicates::path::missing());
 }
 
-#[test]
 /// Test that the `report` command's `--max-matches` can be given a negative value (which means "no
 /// limit" for the option) without requiring an equals sign for the value. That is, instead of
 /// _requiring_ that the option be written `--max-matches=-1`, it should work fine to write
@@ -234,6 +233,7 @@ fn report_nonexistent_default_datastore() {
 ///
 /// N.B., Suppoorting that argument parsing requires passing the `allow_negative_numbers=true` in
 /// the correct spot in the `clap` code.
+#[test]
 fn report_unlimited_matches() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file_with_secret("input.txt");

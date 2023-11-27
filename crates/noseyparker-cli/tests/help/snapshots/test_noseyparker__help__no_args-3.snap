@@ -1,5 +1,5 @@
 ---
-source: tests/test_noseyparker_help.rs
+source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stderr
 ---
 Nosey Parker is a command-line program that finds secrets and sensitive information in textual data
@@ -23,6 +23,7 @@ Options:
 
 Global Options:
   -v, --verbose...       Enable verbose output
+  -q, --quiet            Suppress non-error feedback messages
       --color <MODE>     Enable or disable colored output [default: auto] [possible values: auto,
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,

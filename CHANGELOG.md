@@ -56,6 +56,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - React App Username
   - React App Password
 
+- A new global `--quiet` / `-q` option has been added, which suppresses non-error feedback messages and disables progress bars.
+
 ### Fixes
 - Command-line parameters that can meaningfully accept negative numbers can now be specified without having to use `--PARAMETER=NEGATIVE_VALUE` syntax; a space can now separate the paraemter and the value.
 
@@ -92,6 +94,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `md5crypt Hash` (id `np.md5.1`) has been renamed to `Password Hash (md5crypt)` and re-identified as `np.pwhash.1`.
   - `bcrypt Hash` (id `np.bcrypt.1`) has been renamed to `Password Hash (bcrypt)` and re-identified as `np.pwhash.2`.
 
+- Log messages are written to stderr instead of stdout.
 
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 

@@ -19,36 +19,47 @@ mod util;
 
 use args::GlobalArgs;
 
+/// Set up the logging / tracing system for the application.
 fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
     use tracing_log::{AsLog, LogTracer};
     use tracing_subscriber::{filter::LevelFilter, EnvFilter};
 
-    let level_filter = match global_args.verbose {
-        0 => LevelFilter::WARN,
-        1 => LevelFilter::INFO,
-        2 => LevelFilter::DEBUG,
-        _ => LevelFilter::TRACE,
+    // Set the tracing level according to the `-q`/`--quiet` and `-v`/`--verbose` options
+    let level_filter = if global_args.quiet {
+        LevelFilter::ERROR
+    } else {
+        match global_args.verbose {
+            0 => LevelFilter::WARN,
+            1 => LevelFilter::INFO,
+            2 => LevelFilter::DEBUG,
+            _ => LevelFilter::TRACE,
+        }
     };
 
+    // Configure the bridge from the `log` crate to the `tracing` crate
     LogTracer::builder()
         .with_max_level(level_filter.as_log())
         .init()?;
 
+    // Configure logging filters according to the `NP_LOG` environment variable
     let env_filter = EnvFilter::builder()
         .with_default_directive(level_filter.into())
         .with_env_var("NP_LOG")
         .from_env()
         .context("Failed to parse filters from NP_LOG environment variable")?;
 
+    // Install the global tracing subscriber
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
-        .with_ansi(global_args.use_color())
+        .with_ansi(global_args.use_color(std::io::stderr()))
         .with_env_filter(env_filter)
+        .with_writer(std::io::stderr)
         .finish();
     tracing::subscriber::set_global_default(subscriber)?;
 
     Ok(())
 }
 
+/// Set the process rlimits according to the global arguments.
 fn configure_rlimits(global_args: &GlobalArgs) -> Result<()> {
     use rlimit::Resource;
     use std::cmp::max;
@@ -62,12 +73,13 @@ fn configure_rlimits(global_args: &GlobalArgs) -> Result<()> {
     Ok(())
 }
 
+/// Enable or disable colored output according to the global arguments.
 fn configure_color(global_args: &GlobalArgs) {
-    let use_color = global_args.use_color();
-    console::set_colors_enabled(use_color);
-    console::set_colors_enabled_stderr(use_color);
+    console::set_colors_enabled(global_args.use_color(std::io::stdout()));
+    console::set_colors_enabled_stderr(global_args.use_color(std::io::stderr()));
 }
 
+/// Enable or disable backtraces for the process according to the global arguments.
 fn configure_backtraces(global_args: &GlobalArgs) {
     if global_args.advanced.enable_backtraces {
         // Print a stack trace in case of panic.
