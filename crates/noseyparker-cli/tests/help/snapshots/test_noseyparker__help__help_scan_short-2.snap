@@ -12,11 +12,8 @@ Options:
   -h, --help              Print help (see more with '--help')
 
 Rule Selection Options:
-      --rules <PATH>                   Load additional rules and rulesets from the specified file or
-                                       directory
-      --ruleset <ID>                   Enable an additional ruleset with the specified ID
-      --enable-default-ruleset <BOOL>  Enable or disable the default ruleset [default: true]
-                                       [possible values: true, false]
+      --rules <PATH>  Load additional rules and rulesets from the specified file or directory
+      --ruleset <ID>  Enable the ruleset with the specified ID [default: default]
 
 Input Specifier Options:
   [INPUT]...                    Scan the specified file, directory, or local Git repository

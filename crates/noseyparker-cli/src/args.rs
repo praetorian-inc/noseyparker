@@ -507,20 +507,19 @@ pub struct RuleSpecifierArgs {
     #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath)]
     pub rules: Vec<PathBuf>,
 
-    /// Enable an additional ruleset with the specified ID
+    /// Enable the ruleset with the specified ID
     ///
     /// The ID must resolve to a built-in ruleset or to an additional ruleset loaded with the
-    /// `--rule-load-path=PATH` option.
+    /// `--rules=PATH` option.
     ///
     /// The special `all` ID causes all loaded rules to be used.
     ///
     /// This option can be repeated.
-    #[arg(long, value_name = "ID")]
+    ///
+    /// Specifying this option disables the default ruleset.
+    /// If you want to use a custom ruleset in addition to the default ruleset, specify this option twice, e.g., `--ruleset default --ruleset CUSTOM_ID`.
+    #[arg(long, value_name = "ID", default_values_t=["default".to_string()])]
     pub ruleset: Vec<String>,
-
-    /// Enable or disable the default ruleset
-    #[arg(long, default_value_t=true, action=ArgAction::Set, value_name="BOOL")]
-    pub enable_default_ruleset: bool,
 }
 
 /// The mode to use for cloning a Git repository

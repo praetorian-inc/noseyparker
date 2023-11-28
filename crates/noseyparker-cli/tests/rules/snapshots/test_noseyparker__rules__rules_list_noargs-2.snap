@@ -122,7 +122,7 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
+ default      Nosey Parker default rules              94 
  np.assets    Nosey Parker asset detection rules      15 
- np.default   Nosey Parker default rules              94 
  np.hashes    Nosey Parker password hash rules         5 
 

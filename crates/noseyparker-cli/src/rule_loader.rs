@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use tracing::{debug, info};
 
-use noseyparker::defaults::{get_builtin_rules, DEFAULT_RULESET_ID};
+use noseyparker::defaults::get_builtin_rules;
 use noseyparker_rules::{Rule, Rules, Ruleset};
 
 use crate::args::RuleSpecifierArgs;
@@ -11,7 +11,6 @@ use crate::util::Counted;
 
 pub struct RuleLoader {
     load_builtins: bool,
-    enable_default_ruleset: bool,
     additional_load_paths: Vec<PathBuf>,
     enabled_ruleset_ids: Vec<String>,
 }
@@ -22,16 +21,9 @@ impl RuleLoader {
     pub fn new() -> Self {
         Self {
             load_builtins: true,
-            enable_default_ruleset: true,
             additional_load_paths: Vec::new(),
             enabled_ruleset_ids: Vec::new(),
         }
-    }
-
-    /// Enable or disable the default ruleset.
-    pub fn enable_default_ruleset(mut self, enable_default_ruleset: bool) -> Self {
-        self.enable_default_ruleset = enable_default_ruleset;
-        self
     }
 
     /// Add additional file or directory paths to load rules and rulesets from.
@@ -68,10 +60,6 @@ impl RuleLoader {
 
         let mut enabled_ruleset_ids = self.enabled_ruleset_ids.clone();
 
-        if self.enable_default_ruleset {
-            enabled_ruleset_ids.push(DEFAULT_RULESET_ID.to_string());
-        }
-
         enabled_ruleset_ids.sort();
         enabled_ruleset_ids.dedup();
 
@@ -97,7 +85,6 @@ impl RuleLoader {
         Self::new()
             .additional_rule_load_paths(specs.rules.as_slice())
             .enable_ruleset_ids(specs.ruleset.iter())
-            .enable_default_ruleset(specs.enable_default_ruleset)
     }
 }
 

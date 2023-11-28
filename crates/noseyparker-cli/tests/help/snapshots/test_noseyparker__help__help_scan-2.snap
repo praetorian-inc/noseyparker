@@ -64,20 +64,20 @@ Rule Selection Options:
           This option can be repeated.
 
       --ruleset <ID>
-          Enable an additional ruleset with the specified ID
+          Enable the ruleset with the specified ID
           
           The ID must resolve to a built-in ruleset or to an additional ruleset loaded with the
-          `--rule-load-path=PATH` option.
+          `--rules=PATH` option.
           
           The special `all` ID causes all loaded rules to be used.
           
           This option can be repeated.
-
-      --enable-default-ruleset <BOOL>
-          Enable or disable the default ruleset
           
-          [default: true]
-          [possible values: true, false]
+          Specifying this option disables the default ruleset. If you want to use a custom ruleset
+          in addition to the default ruleset, specify this option twice, e.g., `--ruleset default
+          --ruleset CUSTOM_ID`.
+          
+          [default: default]
 
 Input Specifier Options:
   [INPUT]...

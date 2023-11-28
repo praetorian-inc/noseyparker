@@ -26,9 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - A new "ruleset" mechanism has been added.
   A ruleset is a named collection of rules that can be selected as a group.
-  The new `--ruleset=NAME` parameter to `scan` can be used to enable additional rulesets.
-  Three built-in rulesets are provided (`np.default`, `np.assets` and `np.hashes`); the special ruleset name `all` enables all known rules.
-  The default ruleset can be disabled using the new `--enable-default-ruleset=false` parameter to `scan`.
+  The new `--ruleset=NAME` parameter to `scan` can be used to enable alternative rulesets.
+  Three built-in rulesets are provided (`default`, `np.assets` and `np.hashes`); the special ruleset name `all` enables all known rules.
   See the built-in rulesets at `crates/noseyparker/data/default/builtin/rulesets` for an example for writing your own.
 
 - The default collection of rules has been pruned down to further emphasize signal-to-noise.

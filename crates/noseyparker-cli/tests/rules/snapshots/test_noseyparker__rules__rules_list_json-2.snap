@@ -463,14 +463,14 @@ expression: stdout
   ],
   "rulesets": [
     {
+      "id": "default",
+      "name": "Nosey Parker default rules",
+      "num_rules": 94
+    },
+    {
       "id": "np.assets",
       "name": "Nosey Parker asset detection rules",
       "num_rules": 15
-    },
-    {
-      "id": "np.default",
-      "name": "Nosey Parker default rules",
-      "num_rules": 94
     },
     {
       "id": "np.hashes",

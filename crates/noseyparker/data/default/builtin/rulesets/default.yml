@@ -1,6 +1,6 @@
 rulesets:
 
-- id: np.default
+- id: default
 
   name: Nosey Parker default rules
 
