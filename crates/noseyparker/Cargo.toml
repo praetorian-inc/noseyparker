@@ -41,7 +41,7 @@ noseyparker-rules = { path = "../noseyparker-rules" }
 progress = { path = "../progress" }
 regex = "1.7"
 reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
-rusqlite = { version = "0.29", features = ["bundled", "backup"] }
+rusqlite = { version = "0.30", features = ["bundled", "backup"] }
 secrecy = "0.8.0"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1"

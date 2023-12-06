@@ -15,7 +15,7 @@ build = "build.rs"
 gen = ["bindgen"]
 
 [build-dependencies]
-bindgen = { version = "0.68", optional = true }
+bindgen = { version = "0.69", optional = true }
 cmake = "0.1"
 
 [lib]

@@ -70,7 +70,7 @@ serde-sarif = "0.4"
 strum = { version = "0.25", features = ["derive"] }
 time = "0.3"
 tracing = "0.1"
-tracing-log = "0.1"
+tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default_features = false }
 url = "2.3"
 vectorscan = { path = "../vectorscan" }
