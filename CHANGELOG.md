@@ -79,6 +79,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - ANSI formatting sequences are now no longer included by default by the `report` command when the output is redirected to a file using the `-o`/`--outfile` parameter ([#55](https://github.com/praetorian-inc/noseyparker/issues/55)).
 
+- The `scan` command should no longer emit warnings like `Failed to decode entry in tree`.
+  These warnings were due to a bug in the Git object parsing code in the `gix` dependency, which was fixed upstream.
+
 ### Changes
 - The `rules check` command invocation now behaves differently.
   It now no longer requires input paths to be specified.

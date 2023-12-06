@@ -210,10 +210,10 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                         let child = unwrap_or_continue!(child, |e| {
                             warn!("Failed to decode entry in tree {oid}: {e}");
                         });
-                        use gix::objs::tree::EntryMode;
-                        let child_idx = match child.mode {
-                            EntryMode::Tree => metadata_graph.get_tree_idx(child.oid.into()),
-                            EntryMode::Blob | EntryMode::BlobExecutable => {
+                        use gix::objs::tree::EntryKind;
+                        let child_idx = match child.mode.kind() {
+                            EntryKind::Tree => metadata_graph.get_tree_idx(child.oid.into()),
+                            EntryKind::Blob | EntryKind::BlobExecutable => {
                                 metadata_graph.get_blob_idx(child.oid.into())
                             }
                             _ => continue,
