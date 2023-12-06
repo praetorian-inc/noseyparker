@@ -6,7 +6,7 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
 
 ### Additions
 - The `scan` command now supports a new `--copy-blobs={all,matching,none}` parameter.
@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The datastore now contains two additional tables for to represent freeform comments and accept/reject status associated with findings.
   These additional tables are not currently populated in the open-source version of Nosey Parker.
   The `report` command now emits finding status and comment if populated.
+  **Note: the datastore format is not settled and is subject to change.**
 
 - A new "ruleset" mechanism has been added.
   A ruleset is a named collection of rules that can be selected as a group.
@@ -99,6 +100,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `bcrypt Hash` (id `np.bcrypt.1`) has been renamed to `Password Hash (bcrypt)` and re-identified as `np.pwhash.2`.
 
 - Log messages are written to stderr instead of stdout.
+
 
 ## [v0.15.0](https://github.com/praetorian-inc/noseyparker/releases/v0.15.0) (2023-10-12)
 
