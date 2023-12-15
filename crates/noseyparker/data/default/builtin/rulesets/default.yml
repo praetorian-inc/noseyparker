@@ -109,4 +109,5 @@ rulesets:
   - np.telegram.1     # Telegram Bot Token
   - np.twilio.1       # Twilio API Key
   - np.twitter.2      # Twitter Secret Key
-  - np.wireguard.1    # WireGuard PrivateKey/PresharedKey
+  - np.wireguard.1    # WireGuard Private Key
+  - np.wireguard.2    # WireGuard Preshared Key

@@ -462,14 +462,18 @@ expression: stdout
     },
     {
       "id": "np.wireguard.1",
-      "name": "WireGuard PrivateKey/PresharedKey"
+      "name": "WireGuard Private Key"
+    },
+    {
+      "id": "np.wireguard.2",
+      "name": "WireGuard Preshared Key"
     }
   ],
   "rulesets": [
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 95
+      "num_rules": 96
     },
     {
       "id": "np.assets",
