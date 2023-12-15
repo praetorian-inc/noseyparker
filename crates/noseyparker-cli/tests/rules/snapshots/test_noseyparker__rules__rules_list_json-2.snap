@@ -459,13 +459,17 @@ expression: stdout
     {
       "id": "np.twitter.2",
       "name": "Twitter Secret Key"
+    },
+    {
+      "id": "np.wireguard.1",
+      "name": "WireGuard PrivateKey/PresharedKey"
     }
   ],
   "rulesets": [
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 94
+      "num_rules": 95
     },
     {
       "id": "np.assets",
