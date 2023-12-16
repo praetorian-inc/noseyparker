@@ -1,0 +1,39 @@
+# These rules are specifically designed to identify WireGuard .conf files,
+# with a focus on detecting private and preshared keys contained within them.
+
+rules:
+
+- name: WireGuard Private Key
+  id: np.wireguard.1
+
+  pattern: PrivateKey\s*=\s*([A-Za-z0-9+/]{43})
+
+  examples:
+  - |
+      [Interface]
+      Address = 10.200.200.3/32
+      PrivateKey = AsaFot43bfs1fEWjvtty+rGcjh3rP1H6sug1l3u19ix=
+      DNS = 8.8.8.8
+
+  references:
+  - https://www.wireguard.com/quickstart/
+  - https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html
+  - https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6
+
+- name: WireGuard Preshared Key
+  id: np.wireguard.2
+
+  pattern: PresharedKey\s*=\s*([A-Za-z0-9+/]{43}=)
+
+  examples:
+  - |
+      [Peer]
+      PublicKey = [Server's public key]
+      PresharedKey = uRsfsZ2Ts1rach4Zv3hhwcx6wa5fuIo2u3w7sa+7j81=
+      AllowedIPs = 0.0.0.0/0, ::/0
+      Endpoint = [Server Addr:Server Port]
+
+  references:
+  - https://www.wireguard.com/quickstart/
+  - https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html
+  - https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6
