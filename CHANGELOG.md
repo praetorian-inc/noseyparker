@@ -10,9 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
-- New rule has been added:
+- New rules have been added:
 
-  - WireGuard PrivateKey/PresharedKey
+  - WireGuard Private Key
+  - WireGuard Preshared Key
 
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
