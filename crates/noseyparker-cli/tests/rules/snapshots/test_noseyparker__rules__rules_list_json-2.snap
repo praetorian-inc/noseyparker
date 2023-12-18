@@ -73,6 +73,10 @@ expression: stdout
       "name": "DigitalOcean Refresh Token"
     },
     {
+      "id": "np.dockerhub.1",
+      "name": "Docker Hub Personal Access Token"
+    },
+    {
       "id": "np.dtrack.1",
       "name": "Dependency-Track API Key"
     },
@@ -473,7 +477,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 96
+      "num_rules": 97
     },
     {
       "id": "np.assets",

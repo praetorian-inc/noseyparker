@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - Docker Hub Personal Access Token
   - WireGuard Private Key
   - WireGuard Preshared Key
 
