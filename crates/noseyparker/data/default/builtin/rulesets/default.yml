@@ -29,6 +29,7 @@ rulesets:
   - np.digitalocean.1 # DigitalOcean Application Access Token
   - np.digitalocean.2 # DigitalOcean Personal Access Token
   - np.digitalocean.3 # DigitalOcean Refresh Token
+  - np.dockerhub.1    # Docker Hub Personal Access Token
   - np.dynatrace.1    # Dynatrace Token
   - np.facebook.1     # Facebook Secret Key
   - np.facebook.2     # Facebook Access Token
