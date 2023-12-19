@@ -12,10 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
-  - Docker Hub Personal Access Token
-  - Dropbox Access Token
-  - WireGuard Private Key
-  - WireGuard Preshared Key
+  - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108) - thank you @gemesa!)
+  - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106) - thank you @gemesa!)
+  - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
+  - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
 
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
