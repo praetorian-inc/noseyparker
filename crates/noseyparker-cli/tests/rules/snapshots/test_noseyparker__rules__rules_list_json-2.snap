@@ -77,6 +77,10 @@ expression: stdout
       "name": "Docker Hub Personal Access Token"
     },
     {
+      "id": "np.dropbox.1",
+      "name": "Dropbox Access Token"
+    },
+    {
       "id": "np.dtrack.1",
       "name": "Dependency-Track API Key"
     },
@@ -477,7 +481,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 97
+      "num_rules": 98
     },
     {
       "id": "np.assets",
