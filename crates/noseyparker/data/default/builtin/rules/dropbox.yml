@@ -6,12 +6,14 @@ rules:
   pattern: |
     (?x)
     \b
-    (sl\.[a-zA-Z0-9_-]{140})
-    \b
+    (sl\.[a-zA-Z0-9_-]{130,152})
+    (?: $ | [^a-zA-Z0-9_-] )
 
   examples:
   - 'curl -X POST https://api.dropboxapi.com/2/users/get_current_account --header "Authorization: Bearer sl.hAi61Jx1hs3XlhrnsCxnctrEmxK2Q-UK29hbdxxHyAykldSeHmipBAauxTzuBEIqt2jdyyUZw8kgY3t_ars-PNIPS27ySa1ab22132U3sUuqYTXHzf2XlvMxSesUhkzx2G11_9W1f-eo"'
-
+  # this one comes from dropbox example documentation; ends with a `-`
+  - '  "access_token": "sl.AbX9y6Fe3AuH5o66-gmJpR032jwAwQPIVVzWXZNkdzcYT02akC2de219dZi6gxYPVnYPrpvISRSf9lxKWJzYLjtMPH-d9fo_0gXex7X37VIvpty4-G8f4-WX45AcEPfRnJJDwzv-",'
+  
   references:
   - https://developers.dropbox.com/oauth-guide
   - https://www.dropbox.com/developers/
