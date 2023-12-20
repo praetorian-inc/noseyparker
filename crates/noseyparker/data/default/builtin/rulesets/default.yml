@@ -15,6 +15,7 @@ rulesets:
 
 
   include_rule_ids:
+  - np.adafruit.1     # Adafruit IO Key
   - np.adobe.1        # Adobe OAuth Client Secret
   - np.age.2          # Age Identity (X22519 secret key)
   - np.artifactory.1  # Artifactory API Key

@@ -5,6 +5,10 @@ expression: stdout
 {
   "rules": [
     {
+      "id": "np.adafruit.1",
+      "name": "Adafruit IO Key"
+    },
+    {
       "id": "np.adobe.1",
       "name": "Adobe OAuth Client Secret"
     },
@@ -533,7 +537,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 111
+      "num_rules": 112
     },
     {
       "id": "np.assets",

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added (thank you @gemesa!):
 
+  - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
   - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108))
   - Doppler CLI Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
   - Doppler Personal Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
