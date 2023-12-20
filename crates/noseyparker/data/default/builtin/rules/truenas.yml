@@ -1,0 +1,53 @@
+rules:
+
+- name: TrueNAS API Key (WebSocket)
+  id: np.truenas.1
+
+  pattern: |
+    (?x)
+    "params"\s*:\s*\[\s*"
+    (\d+-[a-zA-Z0-9]{64})
+    "\s*\]
+
+  examples:
+  - '{"id":"3286a508-a6ca-278a-c078-85b2b515d8d2", "msg":"method", "method":"auth.login_with_api_key", "params":["8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu"]}'
+  - '{"id":"677d9914-f598-f497-e77e-2a3aadbb822e", "msg":"method", "method":"auth.login_with_api_key", "params" : ["9-hTSZDBPyg0PjRZvWb8omoxJ7X2gAjRGmiPKql9ENGIUP9OPtEAzz5f6g9YIMVbZT"]}'
+  - '{"id":"2755dad4-cc12-94bb-a894-ba0f85c3fdbf", "msg":"method", "method":"auth.login_with_api_key", "params" : [ "10-6LZBVhNq8zze0rzXJptfSWDBoskWuThnQb3fUVw4sVNgJ7GKT3ITVIovhwPf34oL" ]}'
+  - |
+    {
+      "id": "2755dad4-cc12-94bb-a894-ba0f85c3fdbf",
+      "msg": "method",
+      "method": "auth.login_with_api_key",
+      "params": [
+        "10-6LZBVhNq8zze0rzXJptfSWDBoskWuThnQb3fUVw4sVNgJ7GKT3ITVIovhwPf34oL"
+      ]
+    }
+
+  references:
+  - https://www.truenas.com/docs/api/core_websocket_api.html
+  - https://www.truenas.com/docs/api/scale_rest_api.html
+  - https://www.truenas.com/docs/scale/scaletutorials/toptoolbar/managingapikeys/
+  - https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/
+  - https://www.truenas.com/docs/scale/api/
+  - https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/
+
+- name: TrueNAS API Key (REST API)
+  id: np.truenas.2
+
+  pattern: |
+    (?x)
+    Bearer\s*
+    (\d+-[a-zA-Z0-9]{64})
+    \b
+
+  examples:
+  # only "Bearer" is accepted by TrueNAS API (no "bearer" etc.)
+  - 'curl -X POST "http://192.168.0.30/api/v2.0/device/get_info" -H "Content-Type: application/json" -H "Authorization: Bearer 8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu" -d "\"SERIAL\""'
+
+  references:
+  - https://www.truenas.com/docs/api/core_websocket_api.html
+  - https://www.truenas.com/docs/api/scale_rest_api.html
+  - https://www.truenas.com/docs/scale/scaletutorials/toptoolbar/managingapikeys/
+  - https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/
+  - https://www.truenas.com/docs/scale/api/
+  - https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/

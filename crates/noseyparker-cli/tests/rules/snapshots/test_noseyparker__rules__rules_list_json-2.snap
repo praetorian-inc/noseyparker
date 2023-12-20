@@ -457,6 +457,14 @@ expression: stdout
       "name": "Telegram Bot Token"
     },
     {
+      "id": "np.truenas.1",
+      "name": "TrueNAS API Key (WebSocket)"
+    },
+    {
+      "id": "np.truenas.2",
+      "name": "TrueNAS API Key (REST API)"
+    },
+    {
       "id": "np.twilio.1",
       "name": "Twilio API Key"
     },
@@ -481,7 +489,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 98
+      "num_rules": 100
     },
     {
       "id": "np.assets",

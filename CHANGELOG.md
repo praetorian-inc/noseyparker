@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108) - thank you @gemesa!)
   - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106) - thank you @gemesa!)
+  - TrueNAS API Key (WebSocket)
+  - TrueNAS API Key (REST API)
   - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
   - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
 
