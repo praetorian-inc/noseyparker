@@ -118,7 +118,8 @@ expression: stdout
  np.stripe.1         Stripe API Key 
  np.stripe.2         Stripe API Test Key 
  np.telegram.1       Telegram Bot Token 
- np.truenas.1        TrueNAS API Key 
+ np.truenas.1        TrueNAS API Key (WebSocket) 
+ np.truenas.2        TrueNAS API Key (REST API) 
  np.twilio.1         Twilio API Key 
  np.twitter.1        Twitter Client ID 
  np.twitter.2        Twitter Secret Key 
@@ -127,7 +128,7 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules              99 
+ default      Nosey Parker default rules             100 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         5 
 

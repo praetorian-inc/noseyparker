@@ -458,7 +458,11 @@ expression: stdout
     },
     {
       "id": "np.truenas.1",
-      "name": "TrueNAS API Key"
+      "name": "TrueNAS API Key (WebSocket)"
+    },
+    {
+      "id": "np.truenas.2",
+      "name": "TrueNAS API Key (REST API)"
     },
     {
       "id": "np.twilio.1",
@@ -485,7 +489,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 99
+      "num_rules": 100
     },
     {
       "id": "np.assets",

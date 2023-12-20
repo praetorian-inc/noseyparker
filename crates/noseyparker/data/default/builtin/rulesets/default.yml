@@ -109,7 +109,8 @@ rulesets:
   - np.stripe.1       # Stripe API Key
   - np.stripe.2       # Stripe API Test Key
   - np.telegram.1     # Telegram Bot Token
-  - np.truenas.1      # TrueNAS API Key
+  - np.truenas.1      # TrueNAS API Key (WebSocket)
+  - np.truenas.2      # TrueNAS API Key (REST API)
   - np.twilio.1       # Twilio API Key
   - np.twitter.2      # Twitter Secret Key
   - np.wireguard.1    # WireGuard Private Key
