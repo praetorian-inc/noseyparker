@@ -13,6 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New rules have been added:
 
   - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108) - thank you @gemesa!)
+  - Doppler CLI Token
+  - Doppler Personal Token
+  - Doppler Service Token
+  - Doppler Service Account Token
+  - Doppler SCIM Token
+  - Doppler Audit Token
   - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106) - thank you @gemesa!)
   - TrueNAS API Key (WebSocket)
   - TrueNAS API Key (REST API)

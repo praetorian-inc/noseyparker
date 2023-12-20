@@ -77,6 +77,30 @@ expression: stdout
       "name": "Docker Hub Personal Access Token"
     },
     {
+      "id": "np.doppler.1",
+      "name": "Doppler CLI Token"
+    },
+    {
+      "id": "np.doppler.2",
+      "name": "Doppler Personal Token"
+    },
+    {
+      "id": "np.doppler.3",
+      "name": "Doppler Service Token"
+    },
+    {
+      "id": "np.doppler.4",
+      "name": "Doppler Service Account Token"
+    },
+    {
+      "id": "np.doppler.5",
+      "name": "Doppler SCIM Token"
+    },
+    {
+      "id": "np.doppler.6",
+      "name": "Doppler Audit Token"
+    },
+    {
       "id": "np.dropbox.1",
       "name": "Dropbox Access Token"
     },
@@ -489,7 +513,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 100
+      "num_rules": 106
     },
     {
       "id": "np.assets",

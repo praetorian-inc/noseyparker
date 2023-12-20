@@ -23,6 +23,12 @@ expression: stdout
  np.digitalocean.2   DigitalOcean Personal Access Token 
  np.digitalocean.3   DigitalOcean Refresh Token 
  np.dockerhub.1      Docker Hub Personal Access Token 
+ np.doppler.1        Doppler CLI Token 
+ np.doppler.2        Doppler Personal Token 
+ np.doppler.3        Doppler Service Token 
+ np.doppler.4        Doppler Service Account Token 
+ np.doppler.5        Doppler SCIM Token 
+ np.doppler.6        Doppler Audit Token 
  np.dropbox.1        Dropbox Access Token 
  np.dtrack.1         Dependency-Track API Key 
  np.dynatrace.1      Dynatrace Token 
@@ -128,7 +134,7 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             100 
+ default      Nosey Parker default rules             106 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         5 
 
