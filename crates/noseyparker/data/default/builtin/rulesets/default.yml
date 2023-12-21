@@ -30,6 +30,12 @@ rulesets:
   - np.digitalocean.2 # DigitalOcean Personal Access Token
   - np.digitalocean.3 # DigitalOcean Refresh Token
   - np.dockerhub.1    # Docker Hub Personal Access Token
+  - np.doppler.1      # Doppler CLI Token
+  - np.doppler.2      # Doppler Personal Token
+  - np.doppler.3      # Doppler Service Token
+  - np.doppler.4      # Doppler Service Account Token
+  - np.doppler.5      # Doppler SCIM Token
+  - np.doppler.6      # Doppler Audit Token
   - np.dropbox.1      # Dropbox Access Token
   - np.dynatrace.1    # Dynatrace Token
   - np.facebook.1     # Facebook Secret Key

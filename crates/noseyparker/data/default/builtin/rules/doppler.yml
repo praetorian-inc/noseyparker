@@ -1,0 +1,97 @@
+rules:
+
+- name: Doppler CLI Token
+  id: np.doppler.1
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.ct\.[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.ct.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
+
+- name: Doppler Personal Token
+  id: np.doppler.2
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.pt\.[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.pt.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
+
+- name: Doppler Service Token
+  id: np.doppler.3
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.st\.(?:[a-z0-9\-_]{2,35}\.)?[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.st.dev.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
+
+- name: Doppler Service Account Token
+  id: np.doppler.4
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.sa\.[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.sa.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
+
+- name: Doppler SCIM Token
+  id: np.doppler.5
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.scim\.[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.scim.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
+
+- name: Doppler Audit Token
+  id: np.doppler.6
+
+  pattern: |
+    (?x)
+    \b
+    (dp\.audit\.[a-zA-Z0-9]{40,44})
+    \b
+
+  examples:
+  - dp.audit.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
+
+  references:
+  - https://docs.doppler.com/reference/api
+  - https://docs.doppler.com/reference/auth-token-formats
