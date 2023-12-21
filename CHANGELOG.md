@@ -10,20 +10,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
-- New rules have been added:
+- New rules have been added (thank you @gemesa!):
 
-  - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108) - thank you @gemesa!)
-  - Doppler CLI Token
-  - Doppler Personal Token
-  - Doppler Service Token
-  - Doppler Service Account Token
-  - Doppler SCIM Token
-  - Doppler Audit Token
-  - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106) - thank you @gemesa!)
-  - TrueNAS API Key (WebSocket)
-  - TrueNAS API Key (REST API)
-  - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
-  - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104) - thank you @gemesa!)
+  - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108))
+  - Doppler CLI Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Doppler Personal Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Doppler Service Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Doppler Service Account Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Doppler SCIM Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Doppler Audit Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+  - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106))
+  - TrueNAS API Key (WebSocket) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
+  - TrueNAS API Key (REST API) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
+  - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
+  - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
 
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
