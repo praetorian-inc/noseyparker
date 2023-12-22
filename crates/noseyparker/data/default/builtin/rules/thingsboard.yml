@@ -1,0 +1,64 @@
+rules:
+
+# FIXME: add MQTT rule(s)
+# - https://thingsboard.io/docs/paas/reference/mqtt-api/
+# - https://thingsboard.io/docs/reference/mqtt-api/
+
+# FIXME: 
+# The default access token follows the format [a-z0-9]{20}. However users may replace it with arbitrary tokens, provided they are between 1 and 32 characters in length.
+# TODO: Update the regex pattern accordingly (currently it matches only the default format).
+# After some research it appears that most (if not all) users utilize the default format so this is a low priority issue.
+
+# FIXME:
+# The default provision key/secret follows the format [a-z0-9]{20}. Users can replace it with arbitrary keys/secrets and there seems to be no length restriction.
+# TODO: Update the regex patterns accordingly (currently they match only the default format).
+# After some research it appears that most (if not all) users utilize the default format so this is a low priority issue.
+
+- name: ThingsBoard Access Token
+  id: np.thingsboard.1
+
+  pattern: |
+    (?x)
+    thingsboard\.cloud/api/v1/
+    ([a-z0-9]{20})
+
+  examples:
+  - http://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
+  - https://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
+  - coap://coap.thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
+
+  references:
+  - https://thingsboard.io/docs/paas/reference/http-api/
+  - https://thingsboard.io/docs/paas/reference/coap-api/
+
+- name: ThingsBoard Provision Device Key
+  id: np.thingsboard.2
+
+  pattern: |
+    (?x)
+    "provisionDeviceKey"\s*:\s*"
+    ([a-z0-9]{20})
+    "
+
+  examples:
+  - '"{"deviceName": "DEVICE_NAME", "provisionDeviceKey": "s2s1gfcuatgbi61n8h5s", "provisionDeviceSecret": "xbzsovaw9ix4qfhi14an"}"'
+
+  references:
+  - https://thingsboard.io/docs/paas/reference/http-api/
+  - https://thingsboard.io/docs/paas/user-guide/device-provisioning/
+
+- name: ThingsBoard Provision Device Secret
+  id: np.thingsboard.3
+
+  pattern: |
+    (?x)
+    "provisionDeviceSecret"\s*:\s*"
+    ([a-z0-9]{20})
+    "
+
+  examples:
+  - '"{"deviceName": "DEVICE_NAME", "provisionDeviceKey": "s2s1gfcuatgbi61n8h5s", "provisionDeviceSecret": "xbzsovaw9ix4qfhi14an"}"'
+
+  references:
+  - https://thingsboard.io/docs/paas/reference/http-api/
+  - https://thingsboard.io/docs/paas/user-guide/device-provisioning/

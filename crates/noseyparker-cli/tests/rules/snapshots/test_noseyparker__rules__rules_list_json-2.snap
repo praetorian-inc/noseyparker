@@ -481,6 +481,18 @@ expression: stdout
       "name": "Telegram Bot Token"
     },
     {
+      "id": "np.thingsboard.1",
+      "name": "ThingsBoard Access Token"
+    },
+    {
+      "id": "np.thingsboard.2",
+      "name": "ThingsBoard Provision Device Key"
+    },
+    {
+      "id": "np.thingsboard.3",
+      "name": "ThingsBoard Provision Device Secret"
+    },
+    {
       "id": "np.truenas.1",
       "name": "TrueNAS API Key (WebSocket)"
     },
@@ -513,7 +525,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 106
+      "num_rules": 109
     },
     {
       "id": "np.assets",
