@@ -89,6 +89,8 @@ expression: stdout
  np.odbc.1           Credentials in ODBC Connection String 
  np.okta.1           Okta API Token 
  np.openai.1         OpenAI API Key 
+ np.particleio.1     particle.io Access Token (URL first) 
+ np.particleio.2     particle.io Access Token (URL last) 
  np.pem.1            PEM-Encoded Private Key 
  np.postman.1        Postman API Key 
  np.psexec.1         Credentials in PsExec 
@@ -137,7 +139,7 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             109 
+ default      Nosey Parker default rules             111 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         5 
 

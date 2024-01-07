@@ -1,0 +1,51 @@
+rules:
+
+- name: particle.io Access Token (URL first)
+  id: np.particleio.1
+
+  pattern: |
+    (?x)
+    https://api\.particle\.io/v1/[a-zA-Z0-9_\-\s/"\\?]*
+    (?:access_token=|Authorization:\s*Bearer\s*)
+    \b
+    ([a-zA-Z0-9]{40})
+    \b
+
+  examples:
+  - |
+      curl https://api.particle.io/v1/devices \
+      -H "Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55"
+  - |
+      curl https://api.particle.io/v1/devices \
+      -d access_token=38bb7b318cc6898c80317decb34525844bc9db55
+  - 'curl https://api.particle.io/v1/devices -H "Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55"'
+  - 'curl https://api.particle.io/v1/devices -d access_token=38bb7b318cc6898c80317decb34525844bc9db55'
+  - 'curl "https://api.particle.io/v1/devices/events?access_token=38bb7b318cc6898c80317decb34525844bc9db55"'
+  - 'curl "https://api.particle.io/v1/access_tokens/current?access_token=38bb7b318cc6898c80317decb34525844bc9db55"'
+
+  references:
+  - https://docs.particle.io/reference/cloud-apis/api/
+
+- name: particle.io Access Token (URL last)
+  id: np.particleio.2
+
+  pattern: |
+    (?x)
+    (?:access_token=|Authorization:\s*Bearer\s*)
+    \b
+    ([a-zA-Z0-9]{40})
+    \b
+    [\s"\\]*https://api\.particle\.io/v1
+
+  examples:
+  - |
+      curl -H "Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55" \
+      https://api.particle.io/v1/devices
+  - |
+      curl -d access_token=38bb7b318cc6898c80317decb34525844bc9db55 \
+      https://api.particle.io/v1/devices
+  - 'curl -H "Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55" https://api.particle.io/v1/devices'
+  - 'curl -d access_token=38bb7b318cc6898c80317decb34525844bc9db55 https://api.particle.io/v1/devices'
+
+  references:
+  - https://docs.particle.io/reference/cloud-apis/api/
