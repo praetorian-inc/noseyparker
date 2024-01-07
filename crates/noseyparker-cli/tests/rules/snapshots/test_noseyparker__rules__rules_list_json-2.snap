@@ -341,6 +341,14 @@ expression: stdout
       "name": "OpenAI API Key"
     },
     {
+      "id": "np.particleio.1",
+      "name": "particle.io Access Token (URL first)"
+    },
+    {
+      "id": "np.particleio.2",
+      "name": "particle.io Access Token (URL last)"
+    },
+    {
       "id": "np.pem.1",
       "name": "PEM-Encoded Private Key"
     },
@@ -525,7 +533,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 109
+      "num_rules": 111
     },
     {
       "id": "np.assets",
