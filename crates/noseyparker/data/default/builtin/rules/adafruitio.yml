@@ -1,0 +1,18 @@
+rules:
+
+- name: Adafruit IO Key
+  id: np.adafruit.1
+
+  pattern: |
+    (?x)
+    \b
+    (aio\_[a-zA-Z0-9]{28})
+    \b
+
+  examples:
+  - '#define IO_KEY       "aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH"'
+  - 'export IO_KEY="aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH"'
+  - 'ADAFRUIT_IO_KEY = "aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH"'
+
+  references:
+  - https://io.adafruit.com/api/docs
