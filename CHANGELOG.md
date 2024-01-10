@@ -13,6 +13,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New rules have been added (thank you @gemesa!):
 
   - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
+  - Blynk Device Access Token ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Access Token (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Access Token (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Client ID (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Client ID (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Client Secret (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+  - Blynk Organization Client Secret (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
   - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108))
   - Doppler CLI Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
   - Doppler Personal Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))

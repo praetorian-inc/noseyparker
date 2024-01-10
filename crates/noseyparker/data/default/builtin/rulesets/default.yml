@@ -24,6 +24,13 @@ rulesets:
   - np.aws.5          # Amazon MWS Auth Token
   - np.azure.1        # Azure Connection String
   - np.azure.2        # Azure App Configuration Connection String
+  - np.blynk.1        # Blynk Device Access Token
+  - np.blynk.2        # Blynk Organization Access Token (URL first)
+  - np.blynk.3        # Blynk Organization Access Token (URL last)
+  - np.blynk.4        # Blynk Organization Client ID (URL first)
+  - np.blynk.5        # Blynk Organization Client ID (URL last)
+  - np.blynk.6        # Blynk Organization Client Secret (URL first)
+  - np.blynk.7        # Blynk Organization Client Secret (URL last)
   - np.codeclimate.1  # CodeClimate
   - np.cratesio.1     # crates.io API Key
   - np.dtrack.1       # Dependency-Track API Key

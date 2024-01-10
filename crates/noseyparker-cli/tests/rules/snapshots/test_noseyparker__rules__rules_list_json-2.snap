@@ -57,6 +57,34 @@ expression: stdout
       "name": "Azure App Configuration Connection String"
     },
     {
+      "id": "np.blynk.1",
+      "name": "Blynk Device Access Token"
+    },
+    {
+      "id": "np.blynk.2",
+      "name": "Blynk Organization Access Token (URL first)"
+    },
+    {
+      "id": "np.blynk.3",
+      "name": "Blynk Organization Access Token (URL last)"
+    },
+    {
+      "id": "np.blynk.4",
+      "name": "Blynk Organization Client ID (URL first)"
+    },
+    {
+      "id": "np.blynk.5",
+      "name": "Blynk Organization Client ID (URL last)"
+    },
+    {
+      "id": "np.blynk.6",
+      "name": "Blynk Organization Client Secret (URL first)"
+    },
+    {
+      "id": "np.blynk.7",
+      "name": "Blynk Organization Client Secret (URL last)"
+    },
+    {
       "id": "np.codeclimate.1",
       "name": "CodeClimate Reporter ID"
     },
@@ -537,7 +565,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 112
+      "num_rules": 119
     },
     {
       "id": "np.assets",
