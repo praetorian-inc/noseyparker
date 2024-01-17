@@ -19,10 +19,6 @@ jobs:
   docker:
     strategy:
       matrix:
-        build:
-        - debian
-        - alpine
-
         include:
         - build: debian
           dockerfile: Dockerfile
@@ -122,11 +118,6 @@ jobs:
 
     strategy:
       matrix:
-        build:
-        - ubuntu-20.04.x86_64
-        - macos-13.x86_64
-        - macos-13.arm64
-
         include:
         - build: ubuntu-20.04.x86_64
           os: ubuntu-20.04
@@ -165,9 +156,16 @@ jobs:
       run: |
         ./scripts/create-release.zsh
 
+    - name: Create release archive
+      id: release-archive
+      run: |
+        FILENAME="$(./release/bin/noseyparker -V | tr ' ' '-').tar.gz"
+        tar -C release -c -z -f "$FILENAME" .
+        echo "filename=$FILENAME" >> "$GITHUB_OUTPUT"
+
     - name: Upload release files
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: release.${{ matrix.build }}
-        path: release
+        name: ${{ steps.release-archive.outputs.filename }}
+        path: ${{ steps.release-archive.outputs.filename }}
         if-no-files-found: error
