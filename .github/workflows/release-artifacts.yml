@@ -166,6 +166,7 @@ jobs:
     - name: Upload release files
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.release-archive.outputs.filename }}
+        name: ${{ steps.release-archive.outputs.filename }}.zip
         path: ${{ steps.release-archive.outputs.filename }}
+        compression-level: 0
         if-no-files-found: error
