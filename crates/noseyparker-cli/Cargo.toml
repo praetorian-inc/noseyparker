@@ -37,7 +37,7 @@ release = ["disable_trace"]
 
 [build-dependencies]
 # Used for embedding compile-time version information into the `noseyparker` CLI
-vergen = { version = "8.1", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
+vergen = { version = "8.3", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
 
 [dependencies]
 

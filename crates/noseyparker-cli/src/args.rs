@@ -45,6 +45,14 @@ fn get_long_version() -> &'static str {
     )
 }
 
+/// Get a filename-friendly short version string, suitable for naming a release archive
+fn get_short_version() -> &'static str {
+    concat!(
+        "v", clap::crate_version!(),
+        "-", env!("VERGEN_CARGO_TARGET_TRIPLE"),
+    )
+}
+
 const DEFAULT_DATASTORE: &str = "datastore.np";
 
 // -----------------------------------------------------------------------------
@@ -56,9 +64,9 @@ const DEFAULT_DATASTORE: &str = "datastore.np";
     bin_name("noseyparker"),
 
     author,   // retrieved from Cargo.toml `authors`
-    version,  // retrieved from Cargo.toml `version`
     about,    // retrieved from Cargo.toml `description`
 
+    version = get_short_version(),
     long_version = get_long_version(),
 
     // FIXME: add longer comment description (will be shown with `--help`)
@@ -760,7 +768,7 @@ pub struct ReportArgs {
 
 
 // -----------------------------------------------------------------------------
-// `shell_completions` command
+// `shell-completions` command
 // -----------------------------------------------------------------------------
 #[derive(ValueEnum, Debug, Display, Clone)]
 #[clap(rename_all = "lower")]
