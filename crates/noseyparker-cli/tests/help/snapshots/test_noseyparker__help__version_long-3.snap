@@ -1,5 +1,0 @@
----
-source: crates/noseyparker-cli/tests/test_noseyparker_help.rs
-expression: stderr
----
-
