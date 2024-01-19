@@ -31,7 +31,6 @@ fixedbitset = "0.4"
 gix = { version = "0.56", features = ["max-performance", "serde"] }
 
 hex = "0.4"
-hyperx = "1.4"
 include_dir = { version = "0.7", features = ["glob"] }
 input-enumerator = { path = "../input-enumerator" }
 indoc = "2.0"

@@ -1,4 +1,6 @@
 use crate::github::Result;
+use lazy_static::lazy_static;
+use regex::{Regex, RegexBuilder};
 use url::Url;
 
 // -------------------------------------------------------------------------------------------------
@@ -20,43 +22,52 @@ impl<T: serde::de::DeserializeOwned> Page<T> {
 #[derive(Debug)]
 pub struct HeaderLinks {
     pub next: Option<Url>,
-    pub prev: Option<Url>,
-    pub first: Option<Url>,
-    pub last: Option<Url>,
+    // NOTE: these could be parsed out of the headers, but are not currently used, so we ignore them
+    // pub prev: Option<Url>,
+    // pub first: Option<Url>,
+    // pub last: Option<Url>,
+}
+
+lazy_static! {
+    static ref HEADER_LINKS_PATTERN: Regex =
+        RegexBuilder::new(r#"<([^>]+)>; \s* rel \s* = \s* "next""#)
+            .ignore_whitespace(true)
+            .build()
+            .expect("header links regex should compile");
 }
 
 fn get_header_links(response: &reqwest::Response) -> Result<HeaderLinks> {
-    use hyperx::header::{RelationType, TypedHeaders};
-
-    let mut first = None;
-    let mut prev = None;
     let mut next = None;
-    let mut last = None;
 
-    // println!("{:#?}", response.headers());
-    if let Ok(link_header) = response.headers().decode::<hyperx::header::Link>() {
-        for value in link_header.values() {
-            if let Some(relations) = value.rel() {
-                for reltype in relations {
-                    let dst = match reltype {
-                        RelationType::First => Some(&mut first),
-                        RelationType::Last => Some(&mut last),
-                        RelationType::Next => Some(&mut next),
-                        RelationType::Prev => Some(&mut prev),
-                        _ => None,
-                    };
-                    if let Some(dst) = dst {
-                        *dst = Some(Url::parse(value.link())?);
-                    }
-                }
-            }
-        }
+    let headers = response.headers();
+
+    // println!("*** {headers:#?}");
+    for value in headers.get_all(reqwest::header::LINK) {
+        // println!("*** {value:#?}");
+
+        let value = match value.to_str() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+
+        let captures = match HEADER_LINKS_PATTERN.captures(value) {
+            Some(v) => v,
+            None => continue,
+        };
+
+        let capture = match captures.get(1) {
+            Some(v) => v,
+            None => continue,
+        };
+
+        let url = match Url::parse(capture.as_str()) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+
+        next = Some(url);
+        break;
     }
 
-    Ok(HeaderLinks {
-        first,
-        prev,
-        next,
-        last,
-    })
+    Ok(HeaderLinks { next })
 }
