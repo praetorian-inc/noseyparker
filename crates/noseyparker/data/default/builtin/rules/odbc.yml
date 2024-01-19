@@ -6,10 +6,12 @@ rules:
   pattern: |
     (?x)(?i)
     (?: User | User\ Id | UserId | Uid) \s*=\s* ([^\s;]{3,100}) \s* ;
-    [ \t]* .{0,10} [ \t]*  (?# possible extra stuff, e.g., string concatenation)
-    (?: Password | Pwd) \s*=\s* ([^\s;]{3,100}) \s* (?: [;"'] | $)
+    [\ \t]* .{0,10} [\ \t]*  (?# possible extra stuff, e.g., string concatenation)
+    (?: Password | Pwd) \s*=\s* ([^\t\ ;]{3,100}) \s* (?: [;] | $)
 
   examples:
+  - '//Database Info\r\n\t\t\t\t\t$host = \"localhost\";\r\n\t\t\t\t\t$database = \"NHOHVA\";\r\n\t\t\t\t\t$user = \"mg1021\";              $password = \"goodspec\";'
+  - '//Database Info\r\n\t\t\t\t\t$host = \"localhost\";\r\n\t\t\t\t\t$database = \"NHOHVA\";\r\n\t\t\t\t\t$user = \"mg1021\";              $password = goodspec;'
   - 'Server=host;Port=5432;User Id=username;Password=secret;Database=databasename;'
   - 'Server=host;Port=5432;SomeOtherKey=SomeOtherValue;User Id=username;Password=secret;Database=databasename;'
   - 'Data Source=190.190.200.100,1433;Network Library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;'

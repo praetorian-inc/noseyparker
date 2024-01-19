@@ -38,6 +38,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
   - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
 
+### Fixes
+- Fixed several rules that in certain circumstances would fail to match and produce a runtime error message:
+
+  - Google API Key
+  - ODBC Connection String
+  - Sauce Token
+
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
 

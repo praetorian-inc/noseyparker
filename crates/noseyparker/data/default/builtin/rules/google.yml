@@ -68,13 +68,19 @@ rules:
 - name: Google API Key
   id: np.google.5
 
-  pattern: '\b(AIza[0-9A-Za-z_-]{35})\b'
+  pattern: |
+    (?x)
+    \b
+    (AIza[0-9A-Za-z_-]{35})
+    (?: [^0-9A-Za-z_-] | $ )
+
   references:
   - https://cloud.google.com/docs/authentication/api-keys#securing
   - https://support.google.com/googleapi/answer/6310037
 
   examples:
   - "  var DEVELOPER_KEY = 'AIzaSyB4sU8lU15bR_87qNb7eUVQN72_vv8mpbU';"
+  - 'value="AIzaSyBnAoO3VNVUco4MXf4enYCVBg6ZnpY49N-'
 
 
 - name: Google Cloud Storage Bucket (subdomain style)
