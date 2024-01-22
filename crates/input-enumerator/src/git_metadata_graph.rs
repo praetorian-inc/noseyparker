@@ -10,7 +10,7 @@ use roaring::RoaringBitmap;
 use smallvec::SmallVec;
 use std::collections::BinaryHeap;
 use std::time::Instant;
-use tracing::{debug, warn};
+use tracing::{debug, error, warn};
 
 use crate::bstring_table::BStringTable;
 use progress::Progress;
@@ -379,7 +379,6 @@ impl GitMetadataGraph {
             seen_sets[root_idx.index()] = Some(SeenTreeBlobSet::new());
         }
 
-        // FIXME: use a better representation here that is flatter and smaller and allocates less
         let mut tree_worklist: Vec<(TreeBlobNodeIdx, SmallVec<[Symbol; 2]>)> =
             Vec::with_capacity(32 * 1024);
 
@@ -420,17 +419,17 @@ impl GitMetadataGraph {
                         "commit metadata missing for {}; blob metadata may be incomplete or wrong",
                         commit_md.oid
                     );
-                    // NOTE: if we reach this point, we still need to enumerate child nodes; we simply
-                    // can't traverse the commit tree. Otherwise, we spuriously fail later on,
-                    // reporting a cycle detected
+                    // NOTE: if we reach this point, we still need to enumerate child nodes, even
+                    // though we can't traverse the commit's tree.
+                    // Otherwise, we spuriously fail later, incorrectly reporting a cycle detected.
                 }
                 Some(tree_idx) => {
                     assert!(tree_worklist.is_empty());
-                    // tree_worklist.clear();
                     if !seen.contains(tree_idx)? {
                         tree_worklist.push((tree_idx, SmallVec::new()));
                     }
 
+                    //while let Some((name_path, idx)) = tree_worklist.pop() {
                     while let Some((idx, name_path)) = tree_worklist.pop() {
                         let metadata = self.get_tree_blob_metadata(idx);
                         match metadata.kind {
@@ -460,25 +459,40 @@ impl GitMetadataGraph {
                 }
             }
 
-            // FIXME: bequeath `seen` to the last child to avoid a copy, especially in the common case of 1 commit parent
-            for edge in cg.edges_directed(commit_idx, Outgoing) {
+            // Propagate this commit's seen set into each of its immediate child commit's seen set.
+            let mut edges = cg.edges_directed(commit_idx, Outgoing).peekable();
+            while let Some(edge) = edges.next() {
                 let edge_index = edge.id().index();
                 if visited_edges.put(edge_index) {
+                    error!("Edge {edge_index} already visited -- this was supposed to be impossible!");
                     continue;
                 }
-
                 let child_idx = edge.target();
 
                 let child_seen = &mut seen_sets[child_idx.index()];
                 match child_seen.as_mut() {
-                    Some(child_seen) => child_seen.union_update(&seen),
+                    Some(child_seen) => {
+                        // Already have a seen set allocated for this child commit. Update it.
+                        child_seen.union_update(&seen);
+                    }
                     None => {
+                        // No seen set allocated yet for this child commit; make a new one,
+                        // recycling the current parent commit's seen set if possible. We can do
+                        // this on the last loop iteration (i.e., when we are working on the last
+                        // child commit), because at that point, the parent's seen set will no
+                        // longer be needed. This optimization reduces memory traffic, especially
+                        // in the common case of a single commit parent.
+
                         num_live_seen_sets += 1;
-                        *child_seen = Some(seen.clone());
+                        if edges.peek().is_none() {
+                            *child_seen = Some(std::mem::take(&mut seen));
+                        } else {
+                            *child_seen = Some(seen.clone());
+                        }
                     }
                 }
 
-                // If the child node has no unvisited parents, add it to the worklist
+                // If the child commit node has no unvisited parent commits, add it to the worklist
                 if !cg
                     .edges_directed(child_idx, Incoming)
                     .any(|edge| !visited_edges.contains(edge.id().index()))
