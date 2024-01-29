@@ -19,6 +19,8 @@ use crate::provenance::{CommitKind, CommitProvenance, Provenance, ProvenanceKind
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
+const _SCHEMA: &str = include_str!("datastore/schema.sql");
+
 // -------------------------------------------------------------------------------------------------
 // Datastore
 // -------------------------------------------------------------------------------------------------
