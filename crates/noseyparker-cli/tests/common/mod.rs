@@ -90,8 +90,24 @@ pub fn noseyparker_cmd() -> Command {
 }
 */
 
+/// Get the command for the Nosey Parker binary under test.
+///
+/// By default, this is the binary defined in this crate.
+/// However, if the `NP_TEST_PROGRAM` environment variable is set, its value is used instead.
+/// Its value should be an absolute path to the desired `noseyparker` program to test.
+///
+/// This environment variable makes it possible to run the test suite on different versions of
+/// Nosey Parker, such as a final release build or a Docker image.
+/// For example:
+///
+///     NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
+///
 pub fn noseyparker_cmd() -> Command {
-    Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
+    if let Ok(np) = std::env::var("NP_TEST_PROGRAM") {
+        Command::new(np)
+    } else {
+        Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
+    }
 }
 
 /// Create a `RegexPredicate` from the given pattern.
