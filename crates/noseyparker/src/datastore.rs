@@ -52,47 +52,46 @@ impl Datastore {
     /// Create a new datastore at `root_dir` if one does not exist,
     /// or open an existing one if present.
     pub fn create_or_open(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        debug!("Attempting to create or open an existing datastore at {}", root_dir.display());
+
         Self::create(root_dir, cache_size)
-            .or_else(|_e| Self::open(root_dir, cache_size))
-            .with_context(|| format!("Failed to open datastore at {}", root_dir.display()))
+            .or_else(|e| {
+                debug!("Failed to create datastore: {e}; will try to open existing datastore instead");
+                Self::open(root_dir, cache_size)
+            })
     }
 
     /// Open the existing datastore at `root_dir`.
     pub fn open(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        debug!("Attempting to open existing datastore at {}", root_dir.display());
+
         let db_path = root_dir.join("datastore.db");
-        let conn = Self::new_connection(&db_path, cache_size)
-            .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
-        let root_dir = root_dir.canonicalize().with_context(|| {
-            format!("Failed to canonicalize datastore path at {}", root_dir.display())
-        })?;
+        let conn = Self::new_connection(&db_path, cache_size)?;
+        let root_dir = root_dir.canonicalize()?;
         let mut ds = Self { root_dir, conn };
-        ds.migrate()
-            .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
+        ds.migrate().context("Failed to migrate database")?;
 
         let scratch_dir = ds.scratch_dir();
         std::fs::create_dir_all(&scratch_dir).with_context(|| {
             format!(
-                "Failed to create scratch directory {} for datastore at {}",
+                "Failed to create scratch directory {}",
                 scratch_dir.display(),
-                ds.root_dir().display()
             )
         })?;
 
         let clones_dir = ds.clones_dir();
         std::fs::create_dir_all(&clones_dir).with_context(|| {
             format!(
-                "Failed to create clones directory {} for datastore at {}",
+                "Failed to create clones directory {}",
                 clones_dir.display(),
-                ds.root_dir().display()
             )
         })?;
 
         let blobs_dir = ds.blobs_dir();
         std::fs::create_dir_all(&blobs_dir).with_context(|| {
             format!(
-                "Failed to create blobs directory {} for datastore at {}",
+                "Failed to create blobs directory {}",
                 blobs_dir.display(),
-                ds.root_dir().display()
             )
         })?;
 
@@ -101,6 +100,8 @@ impl Datastore {
 
     /// Create a new datastore at `root_dir` and open it.
     pub fn create(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        debug!("Attempting to create new datastore at {}", root_dir.display());
+
         // Create datastore directory
         std::fs::create_dir(root_dir).with_context(|| {
             format!("Failed to create datastore root directory at {}", root_dir.display())
