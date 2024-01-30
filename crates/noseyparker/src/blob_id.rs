@@ -108,14 +108,14 @@ impl From<gix::ObjectId> for BlobId {
 impl<'a> From<&'a BlobId> for gix::ObjectId {
     #[inline]
     fn from(blob_id: &'a BlobId) -> Self {
-        gix::hash::ObjectId::from(blob_id.as_bytes())
+        gix::hash::ObjectId::try_from(blob_id.as_bytes()).unwrap()
     }
 }
 
 impl From<BlobId> for gix::ObjectId {
     #[inline]
     fn from(blob_id: BlobId) -> Self {
-        gix::hash::ObjectId::from(blob_id.as_bytes())
+        gix::hash::ObjectId::try_from(blob_id.as_bytes()).unwrap()
     }
 }
 
