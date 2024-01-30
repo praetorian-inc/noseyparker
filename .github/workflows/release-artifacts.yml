@@ -156,6 +156,10 @@ jobs:
       run: |
         ./scripts/create-release.zsh
 
+    - name: Run integration tests on release
+      run: |
+        NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
+
     - name: Create release archive
       id: release-archive
       run: |
