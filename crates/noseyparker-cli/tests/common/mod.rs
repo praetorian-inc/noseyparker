@@ -288,12 +288,14 @@ pub fn get_report_stdout_filters() -> Vec<(&'static str, &'static str)> {
     vec![
         (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>"),
         (r"(?m)^(\s*Blob: ).*$", r"$1 <BLOB>"),
+        (r"(?m)^(\s*Git repo: ).*$", r"$1 <REPO>"),
     ]
 }
 
 pub fn get_report_json_redactions() -> Vec<(&'static str, Redaction)> {
     vec![
         ("[].matches[].provenance[].path", Redaction::from("<ROOT>/input.txt")),
+        ("[].matches[].provenance[].repo_path", Redaction::from("<REPO>")),
         ("[].score", insta::rounded_redaction(3)),
         ("[].matches[].score", insta::rounded_redaction(3)),
     ]

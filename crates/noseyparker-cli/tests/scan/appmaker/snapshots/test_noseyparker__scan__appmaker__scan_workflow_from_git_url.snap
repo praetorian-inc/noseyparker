@@ -1,0 +1,5 @@
+---
+source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
+expression: status
+---
+exit status: 0
