@@ -146,7 +146,10 @@ pub struct ScanEnv {
 impl ScanEnv {
     /// Create a new mock scanning environment.
     pub fn new() -> Self {
+        // FIXME: need to be able to override the root directory to test Docker containers via `NP_TEST_PROGRAM`
         let root = TempDir::new().expect("should be able to create tempdir");
+        assert!(root.exists());
+        assert!(root.is_dir());
         let datastore = root.child("datastore");
         assert!(!datastore.exists());
 
