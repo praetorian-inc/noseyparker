@@ -56,7 +56,7 @@ impl Datastore {
 
         Self::create(root_dir, cache_size)
             .or_else(|e| {
-                debug!("Failed to create datastore: {e}; will try to open existing datastore instead");
+                debug!("Failed to create datastore: {e:#}: will try to open existing datastore instead");
                 Self::open(root_dir, cache_size)
             })
     }
