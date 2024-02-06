@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Sauce Token
 
 - The `JSON Web Token (base64url-encoded)` rule has been improved to reduce false positives.
+  Thank you @saullocarvalho for the bug report!
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
 
