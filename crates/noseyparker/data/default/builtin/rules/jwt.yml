@@ -10,13 +10,13 @@ rules:
     (?x)
     \b
     (
-      ey[a-zA-Z0-9_-]+      (?# header )
+      ey[a-zA-Z0-9_-]{12,}  (?# header )
       \.
-      ey[a-zA-Z0-9_-]+      (?# payload )
+      ey[a-zA-Z0-9_-]{12,}  (?# payload )
       \.
-      [a-zA-Z0-9_-]+        (?# signature )
+      [a-zA-Z0-9_-]{12,}    (?# signature )
     )
-    (?:[^a-zA-Z0-9_-]|$)    (?# this instead of a \b anchor because that doesn't play nicely with `-` )
+    (?:[^a-zA-Z0-9_-]|$)   (?# this instead of a \b anchor because that doesn't play nicely with `-` )
 
   references:
   - https://en.wikipedia.org/wiki/JSON_Web_Token
@@ -28,3 +28,9 @@ rules:
   examples:
   - 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dnZWRJbkFzIjoiYWRtaW4iLCJpYXQiOjE0MjI3Nzk2Mzh9.gzSraSYS8EXBxLN_oWnFSRgCzcmEmMjLiuyu5CSpyHI'
   - 'NUCLEAR_SERVICES_ANON_KEY=eyJhbGciOiJIUzI1NiIsEnR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqcnVqc2lzY2Nzdnl2am5xdG5xIiwicm9sZSI6ImEub24iLCJpYXQiOjE2NTY1OTY0NjEsImV4cCI6MTk3MjE3MjQ2MX0.WQWcwBAQFNE259f2o8ruFln_UMLTFEnEaUD7KHrs9Aw'
+
+  negative_examples:
+  - |
+      it "sets the relation to nil" do
+        eye.eyeable.should be_nill
+      end
