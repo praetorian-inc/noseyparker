@@ -170,12 +170,13 @@ impl<'a> Transaction<'a> {
 
     fn mk_record_rule(&'a self) -> Result<impl FnMut(&'a Rule) -> rusqlite::Result<RuleIdInt>> {
         let mut get_id = self.inner.prepare_cached(indoc! {r#"
-            select id from rule where structural_id = ?
+            select id from rule
+            where structural_id = ? and name = ? and text_id = ?
         "#})?;
 
         let mut set_id = self.inner.prepare_cached(indoc! {r#"
-            insert into rule(structural_id)
-            values (?)
+            insert into rule(structural_id, name, text_id)
+            values (?, ?, ?)
             returning id
         "#})?;
 
@@ -188,7 +189,7 @@ impl<'a> Transaction<'a> {
 
         let f = move |r: &Rule| -> rusqlite::Result<RuleIdInt> {
             let rule_id =
-                add_if_missing(&mut get_id, &mut set_id, val_from_row, (r.structural_id(),))?;
+                add_if_missing(&mut get_id, &mut set_id, val_from_row, (r.structural_id(), r.name(), r.id()))?;
             let json_syntax = r.syntax().to_json();
             record_json_syntax.execute((rule_id, json_syntax))?;
             Ok(RuleIdInt(rule_id))

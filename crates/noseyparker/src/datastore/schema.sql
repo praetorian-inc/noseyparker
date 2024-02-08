@@ -72,9 +72,9 @@ CREATE TABLE blob_provenance
     blob_id integer not null references blob(id),
 
     -- The minified JSON-formatted provenance information
-    -- TODO: deduplicate these values via another table?
-    -- TODO: allow recursive representation of provenance values? I.e., structural decomposition and sharing, like `git repo` -> `commit` -> `blob path`?
-    -- TODO: define special JSON object fields that will be handled specially by NP? E.g., `path`, `repo_path`, ...?
+    -- XXX: deduplicate these values via another table?
+    -- XXX: allow recursive representation of provenance values? I.e., structural decomposition and sharing, like `git repo` -> `commit` -> `blob path`?
+    -- XXX: define special JSON object fields that will be handled specially by NP? E.g., `path`, `repo_path`, ...?
     provenance text not null,
 
     unique(blob_id, provenance),
@@ -91,7 +91,13 @@ CREATE TABLE rule
     -- An arbitrary integer identifier for the rule
     id integer primary key,
 
-    -- TODO: A content-based identifier, defined as `text id:sha1 hash of the pattern`.
+    -- The human-readable name of the rule
+    name text not null,
+
+    -- The textual identifier defined in the rule
+    text_id text not null,
+
+    -- A content-based identifier, defined as `text id:sha1 hash of the pattern`.
     structural_id text unique not null,
 
     foreign key (id) references rule_syntax(rule_id) deferrable initially deferred
@@ -157,7 +163,7 @@ CREATE TABLE match
 
     constraint valid_offsets check(0 <= start_byte and start_byte <= end_byte),
 
-    -- foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte),
+    foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte) deferrable initially deferred,
 
     -- Ensure that snippets, groups, finding IDs, and structural IDs are provided for each match
     foreign key (id) references match_snippet(match_id) deferrable initially deferred,
@@ -195,7 +201,7 @@ CREATE TABLE match_finding_id
 (
     match_id integer primary key references match(id),
     -- The content-based identifier of the finding this match belongs to, defined as
-    -- TODO: sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
+    -- sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
     finding_id text not null
 ) STRICT;
 
@@ -381,7 +387,7 @@ CREATE VIEW finding_denorm
 )
 as
 select
-    rs.syntax->>'name',
+    r.name,
     r.structural_id,
     rs.syntax,
     mg.groups,
