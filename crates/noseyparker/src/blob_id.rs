@@ -18,30 +18,13 @@ impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
-        use crate::digest::Sha1;
+        use noseyparker_digest::Sha1;
         use std::io::Write;
 
-        // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
-        // formatting the input length. Not sure how well this actually avoids allocation.
-        struct Sha1Writer(Sha1);
-
-        impl Write for Sha1Writer {
-            #[inline]
-            fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-                self.0.update(buf);
-                Ok(buf.len())
-            }
-
-            #[inline]
-            fn flush(&mut self) -> std::io::Result<()> {
-                Ok(())
-            }
-        }
-
-        let mut writer = Sha1Writer(Sha1::default());
-        write!(&mut writer, "blob {}\0", input.len()).unwrap();
-        writer.0.update(input);
-        BlobId(writer.0.digest())
+        let mut h = Sha1::default();
+        write!(&mut h, "blob {}\0", input.len()).unwrap();
+        h.update(input);
+        BlobId(h.digest())
     }
 
     #[inline]

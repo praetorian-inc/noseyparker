@@ -200,7 +200,7 @@ impl<'a> Matcher<'a> {
         // -----------------------------------------------------------------------------------------
         // Perform second-stage regex matching to get groups and precise start locations
         //
-        // Also deduplicate overlapping matches with the same rule
+        // Also deduplicate overlapping matches with the same rule, keeping only the longest match
         // -----------------------------------------------------------------------------------------
         raw_matches_scratch.sort_by_key(|m| {
             debug_assert!(m.start_idx <= m.end_idx);
@@ -243,7 +243,7 @@ impl<'a> Matcher<'a> {
                                 Snippet: {cxt:?}",
                                 &blob.id,
                                 provenance.first(),
-                                rule.name,
+                                rule.name(),
                             );
                         // });
 

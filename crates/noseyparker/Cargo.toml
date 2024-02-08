@@ -36,13 +36,16 @@ input-enumerator = { path = "../input-enumerator" }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
+noseyparker-digest = { path = "../noseyparker-digest" }
 noseyparker-rules = { path = "../noseyparker-rules" }
 progress = { path = "../progress" }
 regex = "1.7"
 reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
 rusqlite = { version = "0.30", features = ["bundled", "backup"] }
 secrecy = "0.8.0"
+smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
 thiserror = "1"
 tokio = "1.23"
 tracing = "0.1"

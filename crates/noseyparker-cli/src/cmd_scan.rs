@@ -59,7 +59,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut datastore = Datastore::create_or_open(
         &args.datastore,
         global_args.advanced.sqlite_cache_size,
-    )?;
+    ).with_context(|| format!("Failed to open datastore at {}", &args.datastore.display()))?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -74,6 +74,18 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
             .context("Failed to compile rules")?
     };
+
+    // ---------------------------------------------------------------------------------------------
+    // Record rules to the datastore
+    // ---------------------------------------------------------------------------------------------
+    init_progress.set_message("Recording rules...");
+    let mut record_rules = || -> Result<()> {
+        let tx = datastore.begin()?;
+        tx.record_rules(rules_db.rules())?;
+        tx.commit()?;
+        Ok(())
+    };
+    record_rules().context("Failed to record rules to the datastore")?;
 
     drop(init_progress);
 
@@ -341,7 +353,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 if batch.len() >= BATCH_SIZE || matches_in_batch >= BATCH_SIZE {
                     let t1 = std::time::Instant::now();
                     let batch_len = batch.len();
-                    let num_added = tx.record(batch.as_slice())?;
+                    let num_added = tx.record(batch.as_slice())
+                        .context("Failed to record batch")?;
                     num_matches_added += num_added;
                     batch.clear();
                     matches_in_batch = 0;
@@ -358,7 +371,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let t1 = std::time::Instant::now();
 
                 let batch_len = batch.len();
-                let num_added = tx.record(batch.as_slice())?;
+                let num_added = tx.record(batch.as_slice())
+                    .context("Failed to record batch")?;
                 num_matches_added += num_added;
                 // batch.clear();
                 // matches_in_batch = 0;
@@ -782,7 +796,7 @@ fn run_matcher(
                     new_matches.extend(
                         matches
                             .iter()
-                            .flat_map(|m| Match::convert(&loc_mapping, m, snippet_length)),
+                            .map(|m| Match::convert(&loc_mapping, m, snippet_length)),
                     );
                     new_matches
                 }

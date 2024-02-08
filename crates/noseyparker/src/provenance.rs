@@ -1,5 +1,5 @@
 use bstr::BString;
-use bstring_serde::BStringSerde;
+use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -166,6 +166,6 @@ pub struct CommitProvenance {
 
     pub commit_metadata: CommitMetadata,
 
-    #[serde(with = "BStringSerde")]
+    #[serde(with = "BStringLossyUtf8")]
     pub blob_path: BString,
 }

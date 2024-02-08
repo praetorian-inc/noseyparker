@@ -1,0 +1,17 @@
+[package]
+name = "noseyparker-digest"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+version = "0.0.0"
+publish.workspace = true
+
+[dependencies]
+gix = { version = "0.58", features = ["max-performance", "serde"] }
+hex = "0.4"
+
+[dev-dependencies]
+pretty_assertions = "1.3"

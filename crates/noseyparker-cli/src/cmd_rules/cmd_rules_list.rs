@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use noseyparker_rules::{Rule, Ruleset};
+use noseyparker_rules::{Rule, RulesetSyntax};
 use serde::Serialize;
 use tracing::debug_span;
 
@@ -93,8 +93,8 @@ struct RuleEntry<'r> {
 impl<'r> RuleEntry<'r> {
     pub fn new(rule: &'r Rule) -> Self {
         Self {
-            id: &rule.id,
-            name: &rule.name,
+            id: &rule.id(),
+            name: &rule.name(),
         }
     }
 }
@@ -107,7 +107,7 @@ struct RulesetEntry<'r> {
 }
 
 impl<'r> RulesetEntry<'r> {
-    pub fn new(ruleset: &'r Ruleset) -> Self {
+    pub fn new(ruleset: &'r RulesetSyntax) -> Self {
         Self {
             id: &ruleset.id,
             name: &ruleset.name,

@@ -27,7 +27,7 @@ impl RulesDatabase {
             .enumerate()
             .map(|(id, r)| {
                 let id = id.try_into().unwrap();
-                Pattern::new(r.pattern.clone().into_bytes(), Flag::default(), Some(id))
+                Pattern::new(r.syntax().pattern.clone().into_bytes(), Flag::default(), Some(id))
             })
             .collect::<Vec<Pattern>>();
 
@@ -38,7 +38,7 @@ impl RulesDatabase {
         let t2 = Instant::now();
         let anchored_regexes = rules
             .iter()
-            .map(Rule::as_anchored_regex)
+            .map(|r| r.syntax().as_anchored_regex())
             .collect::<Result<Vec<Regex>>>()?;
         let d2 = t2.elapsed().as_secs_f64();
 
@@ -65,6 +65,10 @@ impl RulesDatabase {
     #[inline]
     pub fn get_rule(&self, index: usize) -> Option<&Rule> {
         self.rules.get(index)
+    }
+
+    pub fn rules(&self) -> &[Rule] {
+        self.rules.as_slice()
     }
 }
 

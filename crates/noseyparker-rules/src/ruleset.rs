@@ -7,7 +7,7 @@ use crate::util;
 
 /// A syntactic representation describing a set of Nosey Parker rules.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct Ruleset {
+pub struct RulesetSyntax {
     /// A unique identifier for this ruleset
     pub id: String,
 
@@ -21,7 +21,7 @@ pub struct Ruleset {
     pub include_rule_ids: Vec<String>,
 }
 
-impl Ruleset {
+impl RulesetSyntax {
     /// Load a ruleset from the given YAML file.
     pub fn from_yaml_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();

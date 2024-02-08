@@ -18,7 +18,7 @@ CREATE TABLE blob
     ),
 
     constraint valid_size check(0 <= size)
-) strict;
+) STRICT;
 
 CREATE TABLE blob_mime_essence
 -- This table records mime type metadata about blobs.
@@ -28,7 +28,7 @@ CREATE TABLE blob_mime_essence
 
     -- Guessed mime type of the blob
     mime_essence text not null
-) strict;
+) STRICT;
 
 CREATE TABLE blob_charset
 -- This table records charset metadata about blobs.
@@ -38,7 +38,7 @@ CREATE TABLE blob_charset
 
     -- Guessed charset encoding of the blob
     charset text not null
-) strict;
+) STRICT;
 
 CREATE TABLE blob_source_span
 -- This table represents source span-based location information for ranges within blobs.
@@ -62,7 +62,7 @@ CREATE TABLE blob_source_span
         and 0 <= start_column
         and 0 <= end_column
     )
-) strict;
+) STRICT;
 
 CREATE TABLE blob_provenance
 -- This table records the various ways in which blobs were encountered.
@@ -71,7 +71,7 @@ CREATE TABLE blob_provenance
     -- The integer identifier of the blob
     blob_id integer not null references blob(id),
 
-    -- The JSON-formatted provenance information
+    -- The minified JSON-formatted provenance information
     -- TODO: deduplicate these values via another table?
     -- TODO: allow recursive representation of provenance values? I.e., structural decomposition and sharing, like `git repo` -> `commit` -> `blob path`?
     -- TODO: define special JSON object fields that will be handled specially by NP? E.g., `path`, `repo_path`, ...?
@@ -80,8 +80,7 @@ CREATE TABLE blob_provenance
     unique(blob_id, provenance),
 
     constraint payload_valid check(json_type(provenance) = 'object')
-) strict;
-
+) STRICT;
 
 --------------------------------------------------------------------------------
 -- rules
@@ -92,55 +91,39 @@ CREATE TABLE rule
     -- An arbitrary integer identifier for the rule
     id integer primary key,
 
-    -- The name specified in the rule, e.g., `AWS API Key`
-    name text not null,
+    -- TODO: A content-based identifier, defined as `text id:sha1 hash of the pattern`.
+    structural_id text unique not null,
 
-    -- The text-based identifier specified in the rule, e.g., `np.aws.1`
-    text_id text not null,
+    foreign key (id) references rule_syntax(rule_id) deferrable initially deferred
+) STRICT;
 
-    -- The regular expression pattern specified in the rule
-    pattern text not null,
-
-    -- TODO: add JSON representation of the rule?
-    -- TODO: add structural identifier? perhaps sha1_hex(pattern)?  Or by convention, keep text_id values stable, never changing the pattern
-
-    unique(name, text_id, pattern)
-) strict;
-
--- FIXME: need an additional table to make this useful, like a relation of (invocation id, match id) to keep track of which matches were seen in which invocation
-/*
-CREATE TABLE invocation
--- This table records the scanner invocations.
+CREATE TABLE rule_syntax
+-- This table records the abstract syntax of each rule.
 (
-    -- An arbitrary integer identifier
-    id integer primary key,
+    rule_id integer primary key references rule(id),
 
-    -- The datetime of invocation
-    timestamp text not null,
+    -- The minified JSON serialization of the rule
+    syntax text not null,
 
-    -- The JSON array of command-line arguments
-    cli_args text not null,
-
-    constraint timestamp_valid check(datetime(timestamp) is not null),
-
-    constraint cli_args_valid check(json_type(cli_args) = 'array')
-) strict;
-*/
+    constraint json_syntax_valid check(json_type(syntax) = 'object')
+) STRICT;
 
 --------------------------------------------------------------------------------
 -- snippets
 --------------------------------------------------------------------------------
 CREATE TABLE snippet
--- This table deduplicates contextual snippets.
+-- This table represents contextual snippets in a deduplicated way.
+--
 -- Deduplication of snippets reduces the size of large datastores 20-100x or more.
+-- Keeping them in a separate table also makes it possible to update _just_ the
+-- snippets of matches when scanning using a larger context window.
 (
     -- An arbitrary integer identifier for the snippet
     id integer primary key,
 
     -- The snippet content
     snippet blob unique not null
-) strict;
-
+) STRICT;
 
 --------------------------------------------------------------------------------
 -- matches
@@ -152,10 +135,6 @@ CREATE TABLE match
 (
     -- An arbitrary integer identifier for the match
     id integer primary key,
-
-    -- TODO: move this to a separate table?
-    -- TODO: The content-based identifier of the match, defined as sha1_hex(rule structural identifier + '\0' + matching input)
-    structural_id text not null,
 
     -- The blob in which this match occurs
     blob_id integer not null references blob(id),
@@ -178,15 +157,49 @@ CREATE TABLE match
 
     constraint valid_offsets check(0 <= start_byte and start_byte <= end_byte),
 
-    foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte),
+    -- foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte),
 
-    -- Ensure that snippets and groups are provided for this match
-    foreign key (id) references match_snippet(match_id) deferrable initially deferred
+    -- Ensure that snippets, groups, finding IDs, and structural IDs are provided for each match
+    foreign key (id) references match_snippet(match_id) deferrable initially deferred,
+    foreign key (id) references match_groups(match_id) deferrable initially deferred,
+    foreign key (id) references match_structural_id(match_id) deferrable initially deferred,
+    foreign key (id) references match_finding_id(match_id) deferrable initially deferred
+) STRICT;
 
-    -- XXX This foreign key does not work with sqlite, as `match_id` does not
-    -- have a unique index. See the `child_7` case: https://www.sqlite.org/foreignkeys.html#fk_indexes
-    -- ,foreign key (id) references match_group(match_id) deferrable initially deferred
-) strict;
+CREATE TABLE match_groups
+-- This table represents the capture groups belonging to each match.
+(
+    match_id integer primary key references match(id),
+
+    -- The capture groups from the match, encoded as a minified JSON array of base64-encoded bytestrings
+    groups text not null,
+
+    constraint valid_groups check(json_type(groups) = 'array')
+) STRICT;
+
+CREATE INDEX match_groups_index on match_groups(groups);
+
+CREATE TABLE match_structural_id
+-- This table represents content-based identifiers assigned to each match.
+(
+    match_id integer primary key references match(id),
+
+    -- The content-based unique identifier of the match
+    -- sha1_hex(rule structural identifier + '\0' + hex blob id + '\0' + decimal start byte + '\0' + decimal end byte)
+    structural_id text unique not null
+) STRICT;
+
+CREATE TABLE match_finding_id
+-- This table represents the finding identifier assigned to each match.
+-- Matches with the same finding identifier are different occurrences of the same match.
+(
+    match_id integer primary key references match(id),
+    -- The content-based identifier of the finding this match belongs to, defined as
+    -- TODO: sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
+    finding_id text not null
+) STRICT;
+
+CREATE INDEX match_finding_id_index on match_finding_id(finding_id);
 
 CREATE TABLE match_snippet
 -- This table represents the contextual snippets for each match.
@@ -202,35 +215,9 @@ CREATE TABLE match_snippet
 
     -- The contextual snippet trailing the matching input
     after_snippet_id integer not null references snippet(id)
-) strict;
+) STRICT;
 
--- TODO: collect location information for each individual match group
-CREATE TABLE match_group
--- This table represents the match group content of each match.
--- Most rules produce matches with a single match group; however, some rules
--- produce multiple match groups, such as to isolate both username and password
--- from a connection string.
-(
-    -- An arbitrary integer identifier
-    id integer primary key,
-
-    -- The match that this group belongs to
-    match_id integer not null references match(id),
-
-    -- The rule's group index for this match
-    group_index integer not null,
-
-    -- The identifier of the content of this group
-    group_input_id integer not null references snippet(id),
-
-    unique(match_id, group_index),
-
-    constraint valid_group_index check(0 <= group_index)
-) strict;
-
--- CREATE INDEX match_grouping_index on match (group_input_id, rule_id);
 CREATE INDEX match_rule_index on match(rule_id);
-CREATE INDEX match_group_input_index on match_group(group_input_id);
 
 CREATE TABLE match_status
 -- This table records the accepted/rejected status of matches.
@@ -242,7 +229,7 @@ CREATE TABLE match_status
     status text not null,
 
     constraint status_valid check (status in ('accept', 'reject'))
-) strict;
+) STRICT;
 
 CREATE TABLE match_comment
 -- This table records ad-hoc comments assigned to matches.
@@ -254,7 +241,7 @@ CREATE TABLE match_comment
     comment text not null,
 
     constraint comment_valid check (comment != '')
-) strict;
+) STRICT;
 
 CREATE TABLE match_score
 -- This table records a numeric score for matches.
@@ -273,24 +260,21 @@ CREATE TABLE match_score
     constraint score_valid check (0.0 <= score and score <= 1.0),
 
     constraint method_valid check (method != '')
-) strict;
+) STRICT;
 
 
 --------------------------------------------------------------------------------
 -- Convenience Views
 --------------------------------------------------------------------------------
 CREATE VIEW match_denorm
--- A convenience view to view matches in their fully denormalized form rather
--- than the low-level datastore form that involves numerous indirection.
+-- A convenience view for matches in their fully denormalized form rather
+-- than the low-level datastore form that involves numerous indirections.
 (
     id,
     structural_id,
+    finding_id,
 
     blob_id,
-    size,
-    mime_essence,
-    charset,
-    provenance,
 
     start_byte,
     end_byte,
@@ -304,8 +288,7 @@ CREATE VIEW match_denorm
     rule_text_id,
     rule_pattern,
 
-    group_index,
-    group_input,
+    groups,
 
     before_snippet,
     matching_snippet,
@@ -319,12 +302,9 @@ CREATE VIEW match_denorm
 select
     m.id,
     m.structural_id,
+    m.finding_id,
 
     b.blob_id,
-    b.size,
-    bm.mime_essence,
-    bc.charset,
-    bp.provenance,
 
     bss.start_line,
     bss.start_column,
@@ -338,8 +318,7 @@ select
     r.text_id,
     r.pattern,
 
-    mg.group_index,
-    group_input.snippet,
+    mg.groups,
 
     before_snippet.snippet,
     matching_snippet.snippet,
@@ -349,27 +328,23 @@ select
     match_comment.comment,
     match_score.method,
     match_score.score
-FROM
+from
     match m
     left outer join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
-    left outer join match_group mg on (m.id = mg.match_id)
     left outer join match_snippet ms on (m.id = ms.match_id)
     left outer join blob b on (m.blob_id = b.id)
-    left outer join blob_mime_essence bm on (m.blob_id = bm.blob_id)
-    left outer join blob_charset bc on (m.blob_id = bc.blob_id)
     left outer join rule r on (m.rule_id = r.id)
-    left outer join snippet group_input on (mg.group_input_id = group_input.id)
+    left outer join match_groups mg on (m.rule_id = mg.rule_id)
     left outer join snippet before_snippet on (ms.before_snippet_id = before_snippet.id)
     left outer join snippet matching_snippet on (ms.matching_snippet_id = matching_snippet.id)
     left outer join snippet after_snippet on (ms.after_snippet_id = after_snippet.id)
-    left outer join match_status on (mg.id = match_status.match_id)
-    left outer join match_comment on (mg.id = match_comment.match_id)
-    left outer join match_score on (mg.id = match_score.match_id)
-    left outer join blob_provenance bp on (b.id = bp.blob_id)
+    left outer join match_status on (m.id = match_status.match_id)
+    left outer join match_comment on (m.id = match_comment.match_id)
+    left outer join match_score on (m.id = match_score.match_id)
 ;
 
 CREATE VIEW blob_denorm
--- A convenience view to view blobs in their fully denormalized form rather
+-- A convenience view for blobs in their fully denormalized form rather
 -- than the low-level datastore form that involves numerous indirection.
 (
     id,
@@ -392,4 +367,48 @@ from
     left outer join blob_mime_essence bm on (b.id = bm.blob_id)
     left outer join blob_charset bc on (b.id = bc.blob_id)
     left outer join blob_provenance bp on (b.id = bp.blob_id)
+;
+
+CREATE VIEW finding_denorm
+-- A convenience view for findings in their fully denormalized form rather
+-- than the low-level datastore form that involves numerous indirection.
+(
+    rule_name,
+    rule_structural_id,
+    rule_syntax,
+    groups,
+    finding_id
+)
+as
+select
+    rs.syntax->>'name',
+    r.structural_id,
+    rs.syntax,
+    mg.groups,
+    mf.finding_id
+from
+    match m
+    inner join match_finding_id mf on (m.id = mf.match_id)
+    inner join match_groups mg on (m.id = mg.match_id)
+    inner join rule r on (m.rule_id = r.id)
+    inner join rule_syntax rs on (rs.rule_id = r.id)
+;
+
+CREATE VIEW finding_summary
+-- A convenience view for a summary of findings in denormalized form.
+(
+    rule_name,
+    rule_structural_id,
+    total_findings,
+    total_matches
+)
+as
+select
+    rule_name,
+    rule_structural_id,
+    count(distinct finding_id),
+    count(*)
+from
+    finding_denorm
+group by 1, 2
 ;

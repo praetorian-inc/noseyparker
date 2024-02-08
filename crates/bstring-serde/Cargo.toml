@@ -12,5 +12,6 @@ publish.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+base64 = { version = "0.21" }
 bstr = { version = "1.0", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }

@@ -23,7 +23,7 @@ ignore = "0.4"
 petgraph = "0.6"
 roaring = "0.10"
 serde = { version = "1.0", features = ["derive"] }
-smallvec = { version = "1.11", features = ["const_generics", "const_new", "union"] }
+smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 tracing = "0.1"
 
 [dev-dependencies]

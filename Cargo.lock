@@ -265,6 +265,7 @@ dependencies = [
 name = "bstring-serde"
 version = "0.0.0"
 dependencies = [
+ "base64",
  "bstr",
  "serde",
 ]
@@ -2479,6 +2480,7 @@ dependencies = [
  "indoc",
  "input-enumerator",
  "lazy_static",
+ "noseyparker-digest",
  "noseyparker-rules",
  "pretty_assertions",
  "progress",
@@ -2487,6 +2489,8 @@ dependencies = [
  "rusqlite",
  "secrecy",
  "serde",
+ "serde_json",
+ "smallvec",
  "thiserror",
  "tokio",
  "tracing",
@@ -2517,6 +2521,7 @@ dependencies = [
  "mimalloc",
  "mime",
  "noseyparker",
+ "noseyparker-digest",
  "noseyparker-rules",
  "predicates",
  "pretty_assertions",
@@ -2539,16 +2544,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "noseyparker-digest"
+version = "0.0.0"
+dependencies = [
+ "gix",
+ "hex",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "noseyparker-rules"
 version = "0.0.0"
 dependencies = [
  "anyhow",
  "ignore",
  "lazy_static",
+ "noseyparker-digest",
  "pretty_assertions",
  "proptest",
  "regex",
  "serde",
+ "serde_json",
  "serde_yaml",
  "tracing",
 ]
