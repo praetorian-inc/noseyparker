@@ -7,7 +7,7 @@ use noseyparker_rules::Rule;
 use rusqlite::{types::FromSqlError, Connection};
 use serde::Serialize;
 use std::ffi::OsString;
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
+use std::os::unix::ffi::OsStringExt;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
@@ -16,7 +16,7 @@ use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::Match;
-use crate::provenance::{CommitKind, CommitProvenance, Provenance, ProvenanceKind};
+use crate::provenance::{CommitKind, Provenance, ProvenanceKind};
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
@@ -250,174 +250,19 @@ impl<'a> Transaction<'a> {
     fn mk_record_provenance(
         &'a self,
     ) -> Result<impl FnMut(BlobIdInt, &'a Provenance) -> rusqlite::Result<()>> {
-        panic!("unimplemented!");
-
-        /*
-        let mut add_git_commit = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from git_commit where commit_id = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into git_commit(
-                    commit_id,
-                    commit_date,
-                    committer_name,
-                    committer_email,
-                    author_date,
-                    author_name,
-                    author_email,
-                    message
-                ) values (?, ?, ?, ?, ?, ?, ?, ?)
-                returning id
-            "#})?;
-
-            move |c: &CommitProvenance| -> rusqlite::Result<i64> {
-                let commit_id = c.commit_metadata.commit_id.to_string();
-                let params = (
-                    &commit_id,
-                    c.commit_metadata.committer_timestamp.seconds,
-                    c.commit_metadata.committer_name.as_slice(),
-                    c.commit_metadata.committer_email.as_slice(),
-                    c.commit_metadata.author_timestamp.seconds,
-                    c.commit_metadata.author_name.as_slice(),
-                    c.commit_metadata.author_email.as_slice(),
-                    c.commit_metadata.message.as_slice(),
-                );
-                get.query((&commit_id,))?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, val_from_row), val_from_row)
-            }
-        };
-
-        let mut add_provenance_payload_file = {
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_file(path)
-                values (?)
-                returning id
-            "#})?;
-
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_file
-                where path = ?
-            "#})?;
-
-            move |path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (path,);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, val_from_row), val_from_row)
-            }
-        };
-
-        let mut add_provenance_payload_git_repo = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_git_repo
-                where repo_path = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_git_repo(repo_path)
-                values (?)
-                returning id
-            "#})?;
-
-            move |repo_path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (repo_path,);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, val_from_row), val_from_row)
-            }
-        };
-
-        let mut add_provenance_payload_git_commit = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_git_commit
-                where repo_path = ? and commit_id = ? and blob_path = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_git_commit(repo_path, commit_id, blob_path)
-                values (?, ?, ?)
-                returning id
-            "#})?;
-
-            move |repo_path: &[u8], commit_id: i64, blob_path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (repo_path, commit_id, blob_path);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, val_from_row), val_from_row)
-            }
-        };
-
-        let mut add_provenance = {
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance(payload_kind, payload_id)
-                values (?, ?)
-                returning id
-            "#})?;
-
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance
-                where payload_kind = ? and payload_id = ?
-            "#})?;
-
-            move |kind: ProvenanceKind, payload_id: i64| -> rusqlite::Result<i64> {
-                let params = (kind, payload_id);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, val_from_row), val_from_row)
-            }
-        };
-
-        let mut add_provenance_id = self.inner.prepare_cached(indoc! {r#"
-            insert into blob_provenance(blob_id, provenance_id, kind)
-            values (?, ?, ?)
+        let mut add_provenance = self.inner.prepare_cached(indoc! {r#"
+            insert into blob_provenance(blob_id, provenance)
+            values (?, ?)
             on conflict do nothing
         "#})?;
 
-        let f = move |BlobIdInt(blob_id), provenance_set: &ProvenanceSet| -> rusqlite::Result<()> {
-            for p in provenance_set.iter() {
-                let (provenance_id, kind) = match p {
-                    Provenance::File(e) => {
-                        let path = e.path.as_os_str().as_bytes();
-                        let payload_id = add_provenance_payload_file(path)?;
-                        let provenance_id = add_provenance(ProvenanceKind::File, payload_id)?;
-                        (provenance_id, None)
-                    }
-                    Provenance::GitRepo(e) => {
-                        let repo_path = e.repo_path.as_os_str().as_bytes();
-                        match &e.commit_provenance {
-                            // no commit information; record just the repo
-                            None => {
-                                let payload_id = add_provenance_payload_git_repo(repo_path)?;
-                                let provenance_id =
-                                    add_provenance(ProvenanceKind::GitRepo, payload_id)?;
-                                (provenance_id, None)
-                            }
-                            // detailed commit information
-                            Some(c) => {
-                                let commit_id = add_git_commit(c)?;
-                                let blob_path = c.blob_path.as_slice();
-                                let payload_id = add_provenance_payload_git_commit(
-                                    repo_path, commit_id, blob_path,
-                                )?;
-                                let provenance_id =
-                                    add_provenance(ProvenanceKind::GitCommit, payload_id)?;
-                                (provenance_id, Some(c.commit_kind))
-                            }
-                        }
-                    }
-                };
-
-                add_provenance_id.execute((blob_id, provenance_id, kind))?;
-            }
-
+        let f = move |BlobIdInt(blob_id), provenance| -> rusqlite::Result<()> {
+            let provenance_json = serde_json::to_string(provenance).expect("should be able to serialize provenance as JSON");
+            add_provenance.execute((blob_id, provenance_json))?;
             Ok(())
         };
 
         Ok(f)
-        */
     }
 
     fn mk_record_snippet(&'a self) -> Result<impl FnMut(&'a [u8]) -> rusqlite::Result<i64>> {
@@ -568,22 +413,24 @@ impl<'a> Transaction<'a> {
     /// Returns the number of matches that were newly added.
     pub fn record(&self, batch: &[BatchEntry]) -> Result<u64> {
         let mut record_blob_metadata = self.mk_record_blob_metadata()?;
-        // let mut record_provenance_set = self.mk_record_provenance_set()?;
+        let mut record_provenance = self.mk_record_provenance()?;
         let mut record_match = self.mk_record_match()?;
 
         let mut num_matches_added = 0;
 
-        for (_ps, md, ms) in batch {
+        for (ps, md, ms) in batch {
             // record blob metadata
             let blob_id = record_blob_metadata(md).context("Failed to add blob metadata")?;
 
             // // record provenance metadata
-            // record_provenance_set(blob_id, ps)
-            //     .context("Failed to record provenance metadata")?;
+            for p in ps.iter() {
+                record_provenance(blob_id, p)
+                    .context("Failed to record blob provenance")?;
+            }
 
             // record matches
             for m in ms {
-                if record_match(blob_id, m)? {
+                if record_match(blob_id, m).context("Failed to record match")? {
                     num_matches_added += 1;
                 }
             }
