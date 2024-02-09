@@ -379,25 +379,30 @@ CREATE VIEW finding_denorm
 -- A convenience view for findings in their fully denormalized form rather
 -- than the low-level datastore form that involves numerous indirection.
 (
+    finding_id,
     rule_name,
+    rule_text_id,
     rule_structural_id,
     rule_syntax,
     groups,
-    finding_id
+    num_matches
 )
 as
 select
+    mf.finding_id,
     r.name,
+    r.text_id,
     r.structural_id,
     rs.syntax,
     mg.groups,
-    mf.finding_id
+    count(*)
 from
     match m
     inner join match_finding_id mf on (m.id = mf.match_id)
     inner join match_groups mg on (m.id = mg.match_id)
     inner join rule r on (m.rule_id = r.id)
     inner join rule_syntax rs on (rs.rule_id = r.id)
+group by mf.finding_id
 ;
 
 CREATE VIEW finding_summary
@@ -413,7 +418,7 @@ select
     rule_name,
     rule_structural_id,
     count(distinct finding_id),
-    count(*)
+    sum(num_matches)
 from
     finding_denorm
 group by 1, 2

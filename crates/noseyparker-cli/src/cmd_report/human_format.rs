@@ -4,8 +4,8 @@ impl DetailsReporter {
     pub fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
-            .context("Failed to get match group metadata from datastore")?;
+            .get_finding_metadata()
+            .context("Failed to get finding metadata from datastore")?;
 
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {

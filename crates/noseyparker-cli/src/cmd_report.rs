@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
-use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId, Status};
+use noseyparker::datastore::{Datastore, FindingMetadata, MatchId, Status};
 use noseyparker::defaults::get_builtin_rules;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
@@ -62,7 +62,7 @@ struct DetailsReporter {
 }
 
 impl DetailsReporter {
-    fn get_matches(&self, metadata: &MatchGroupMetadata) -> Result<Vec<ReportMatch>> {
+    fn get_matches(&self, metadata: &FindingMetadata) -> Result<Vec<ReportMatch>> {
         Ok(self
             .datastore
             .get_match_group_data(metadata, self.max_matches)
@@ -124,7 +124,7 @@ impl DetailsReporter {
     ) -> Result<()> {
         let datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
+            .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         if let Some(begin) = begin {
@@ -174,7 +174,7 @@ enum Finding {
 #[derive(Serialize)]
 struct MatchGroup {
     #[serde(flatten)]
-    metadata: MatchGroupMetadata,
+    metadata: FindingMetadata,
     matches: Vec<ReportMatch>,
 }
 
@@ -195,7 +195,7 @@ struct ReportMatch {
 }
 
 impl MatchGroup {
-    fn new(metadata: MatchGroupMetadata, matches: Vec<ReportMatch>) -> Self {
+    fn new(metadata: FindingMetadata, matches: Vec<ReportMatch>) -> Self {
         Self { metadata, matches }
     }
 
@@ -204,7 +204,9 @@ impl MatchGroup {
     }
 
     fn group_input(&self) -> &[u8] {
-        &self.metadata.match_content
+        // FIXME: reimplement this
+        // &self.metadata.match_input
+        &[]
     }
 
     fn total_matches(&self) -> usize {

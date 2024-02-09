@@ -1,6 +1,5 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
-use bstring_serde::BStringLossyUtf8;
 use indoc::indoc;
 use input_enumerator::git_commit_metadata::CommitMetadata;
 use noseyparker_rules::Rule;
@@ -15,7 +14,7 @@ use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
-use crate::match_type::Match;
+use crate::match_type::{Groups, Match};
 use crate::provenance::{CommitKind, Provenance, ProvenanceKind};
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
@@ -189,7 +188,7 @@ impl<'a> Transaction<'a> {
 
         let f = move |r: &Rule| -> rusqlite::Result<RuleIdInt> {
             let rule_id =
-                add_if_missing(&mut get_id, &mut set_id, val_from_row, (r.structural_id(), r.name(), r.id()))?;
+                add_if_missing_simple(&mut get_id, &mut set_id, val_from_row, (r.structural_id(), r.name(), r.id()))?;
             let json_syntax = r.syntax().to_json();
             record_json_syntax.execute((rule_id, json_syntax))?;
             Ok(RuleIdInt(rule_id))
@@ -231,7 +230,7 @@ impl<'a> Transaction<'a> {
         "#})?;
 
         let f = move |b: &BlobMetadata| -> rusqlite::Result<BlobIdInt> {
-            let blob_id = add_if_missing(&mut get_id, &mut set_id, val_from_row, (&b.id.hex(), b.num_bytes))?;
+            let blob_id = add_if_missing_simple(&mut get_id, &mut set_id, val_from_row, (&b.id.hex(), b.num_bytes))?;
 
             if let Some(mime_essence) = b.mime_essence() {
                 set_mime_essence.execute((blob_id, mime_essence))?;
@@ -277,7 +276,7 @@ impl<'a> Transaction<'a> {
             returning id
         "#})?;
 
-        Ok(move |blob| add_if_missing(&mut get, &mut set, val_from_row, (blob,)))
+        Ok(move |blob| add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,)))
     }
 
     fn mk_record_match_snippet(
@@ -380,7 +379,7 @@ impl<'a> Transaction<'a> {
             let start_byte = m.location.offset_span.start;
             let end_byte = m.location.offset_span.end;
 
-            let (match_id, new) = add_if_missing(
+            let (match_id, new) = add_if_missing_simple(
                 &mut get_match_id,
                 &mut set_match_id,
                 from_row,
@@ -485,22 +484,19 @@ impl Datastore {
     }
 
     /// Get metadata for all groups of identical matches recorded within this `Datastore`.
-    pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
+    pub fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
         let _span =
-            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display())
+            debug_span!("Datastore::get_finding_metadata", "{}", self.root_dir.display())
                 .entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select m.group_input, m.rule_name, count(*), fc.comment, fs.status
-            from match m
-            left outer join finding_comment fc on (m.group_input = fc.group_input and m.rule_name = fc.rule_name)
-            left outer join finding_status fs on (m.group_input = fs.group_input and m.rule_name = fs.rule_name)
-            group by 1, 2
-            order by 2
+            select groups, rule_name, num_matches, null, null -- TODO: add comment and status
+            from finding_denorm
+            order by rule_name
         "#})?;
         let entries = stmt.query_map((), |row| {
-            Ok(MatchGroupMetadata {
-                match_content: BString::new(row.get(0)?),
+            Ok(FindingMetadata {
+                groups: serde_json::from_str(row.get_ref(0)?.as_str()?).map_err(|e| FromSqlError::Other(e.into()))?,
                 rule_name: row.get(1)?,
                 num_matches: row.get(2)?,
                 comment: row.get(3)?,
@@ -517,7 +513,7 @@ impl Datastore {
     /// Get up to `limit` matches that belong to the group with the given group metadata.
     pub fn get_match_group_data(
         &self,
-        metadata: &MatchGroupMetadata,
+        metadata: &FindingMetadata,
         limit: Option<usize>,
     ) -> Result<Vec<(ProvenanceSet, BlobMetadata, MatchId, Match)>> {
         let _span =
@@ -556,7 +552,8 @@ impl Datastore {
         "#})?;
 
         let entries = get_blob_metadata_and_match.query_map(
-            (metadata.match_content.as_slice(), &metadata.rule_name, match_limit),
+            // (metadata.groups.as_slice(), &metadata.rule_name, match_limit),
+            ("", &metadata.rule_name, match_limit),
             |row| {
                 let v0: String = row.get(0)?;
                 let blob_id = BlobId::from_hex(&v0).map_err(|e| FromSqlError::Other(e.into()))?;
@@ -770,7 +767,7 @@ where
 /// The setter should insert a new entry for the given parameters and return 1 row.
 ///
 /// Any rows returned by either the getter or the setter should be convertible by the `f` function.
-fn add_if_missing<'a, P, F, T>(
+fn add_if_missing_simple<'a, P, F, T>(
     get: &mut rusqlite::CachedStatement<'_>,
     set: &mut rusqlite::CachedStatement<'_>,
     f: F,
@@ -780,10 +777,32 @@ where
     P: rusqlite::Params + Copy,
     F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
 {
-    match get.query(params)?.next()? {
+    add_if_missing(get, set, f, params, params)
+}
+
+/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
+///
+/// This takes two SQL statement arguments: a getter and a setter.
+/// The getter should look up 0 or 1 rows for the given parameters.
+/// The setter should insert a new entry for the given parameters and return 1 row.
+///
+/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
+fn add_if_missing<'a, P1, P2, F, T>(
+    get: &mut rusqlite::CachedStatement<'_>,
+    set: &mut rusqlite::CachedStatement<'_>,
+    f: F,
+    get_params: P1,
+    set_params: P2,
+) -> rusqlite::Result<T>
+where
+    P1: rusqlite::Params,
+    P2: rusqlite::Params,
+    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
+{
+    match get.query(get_params)?.next()? {
         Some(row) => f(row),
         None => f(set
-            .query(params)?
+            .query(set_params)?
             .next()?
             .expect("either get or set statement must return a row")),
     }
@@ -927,18 +946,17 @@ impl std::fmt::Display for MatchSummary {
 }
 
 // -------------------------------------------------------------------------------------------------
-// MatchGroupMetadata
+// FindingMetadata
 // -------------------------------------------------------------------------------------------------
 
 /// Metadata for a group of matches that have identical rule name and match content.
 #[derive(Debug, Serialize)]
-pub struct MatchGroupMetadata {
+pub struct FindingMetadata {
     /// The name of the rule of all the matches in the group
     pub rule_name: String,
 
     /// The matched content of all the matches in the group
-    #[serde(with = "BStringLossyUtf8")]
-    pub match_content: BString,
+    pub groups: Groups,
 
     /// The number of matches in the group
     pub num_matches: usize,

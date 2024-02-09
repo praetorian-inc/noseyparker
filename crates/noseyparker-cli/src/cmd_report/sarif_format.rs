@@ -95,7 +95,8 @@ impl DetailsReporter {
             })
             .collect::<Result<_>>()?;
 
-        let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
+        // let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
+        let sha1_fingerprint = "".to_string(); // FIXME: reimplement this
 
         // Build the result for the match
         let result = sarif::ResultBuilder::default()
@@ -113,7 +114,7 @@ impl DetailsReporter {
     pub fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore: &Datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
+            .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         let mut findings = Vec::with_capacity(group_metadata.len());

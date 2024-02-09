@@ -13,7 +13,7 @@ use crate::snippet::Snippet;
 // -------------------------------------------------------------------------------------------------
 // Group
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Group(#[serde(with = "BStringBase64")] BString);
 
 impl Group {
@@ -25,7 +25,7 @@ impl Group {
 // -------------------------------------------------------------------------------------------------
 // Groups
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Default, Clone, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Groups(SmallVec<[Group; 1]>);
 
 // -------------------------------------------------------------------------------------------------
