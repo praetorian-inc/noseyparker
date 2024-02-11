@@ -84,6 +84,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let repo_specifiers = github::RepoSpecifiers {
             user: args.input_specifier_args.github_user.clone(),
             organization: args.input_specifier_args.github_organization.clone(),
+            scan_instance: args.input_specifier_args.scan_github_enterprise_instance,
         };
         let mut repo_urls = args.input_specifier_args.git_url.clone();
         if !repo_specifiers.is_empty() {

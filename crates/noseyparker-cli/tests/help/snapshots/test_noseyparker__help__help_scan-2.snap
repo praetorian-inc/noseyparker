@@ -103,6 +103,14 @@ Input Specifier Options:
           
           This option can be repeated.
 
+      --scan-github-enterprise-instance
+          Clone and scan accessible repositories in the GitHub instance specified with the custom
+          API url
+          
+          Requires setting up the `github_api_url` option.
+          
+          [aliases: scan-instance]
+
       --github-api-url <URL>
           Use the specified URL for GitHub API access
           

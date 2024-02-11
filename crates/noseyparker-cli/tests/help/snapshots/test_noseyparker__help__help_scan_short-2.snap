@@ -16,18 +16,27 @@ Rule Selection Options:
       --ruleset <ID>  Enable the ruleset with the specified ID [default: default]
 
 Input Specifier Options:
-  [INPUT]...                    Scan the specified file, directory, or local Git repository
-      --git-url <URL>               Clone and scan the Git repository at the specified URL
-      --github-organization <NAME>  Clone and scan accessible repositories belonging to the
-                                    specified GitHub organization [aliases: github-org]
-      --github-user <NAME>          Clone and scan accessible repositories belonging to the
-                                    specified GitHub user
-      --github-api-url <URL>        Use the specified URL for GitHub API access [default:
-                                    https://api.github.com/] [aliases: api-url]
-      --git-clone <MODE>            Use the specified method for cloning Git repositories [default:
-                                    bare] [possible values: bare, mirror]
-      --git-history <MODE>          Use the specified mode for handling Git history [default: full]
-                                    [possible values: full, none]
+  [INPUT]...
+          Scan the specified file, directory, or local Git repository
+      --git-url <URL>
+          Clone and scan the Git repository at the specified URL
+      --github-organization <NAME>
+          Clone and scan accessible repositories belonging to the specified GitHub organization
+          [aliases: github-org]
+      --github-user <NAME>
+          Clone and scan accessible repositories belonging to the specified GitHub user
+      --scan-github-enterprise-instance
+          Clone and scan accessible repositories in the GitHub instance specified with the custom
+          API url [aliases: scan-instance]
+      --github-api-url <URL>
+          Use the specified URL for GitHub API access [default: https://api.github.com/] [aliases:
+          api-url]
+      --git-clone <MODE>
+          Use the specified method for cloning Git repositories [default: bare] [possible values:
+          bare, mirror]
+      --git-history <MODE>
+          Use the specified mode for handling Git history [default: full] [possible values: full,
+          none]
 
 Content Filtering Options:
       --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]

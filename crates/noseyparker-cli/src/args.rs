@@ -2,7 +2,9 @@
 //!
 //! The command-line interface is defined using `clap`.
 
-use clap::{crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint};
+use clap::{
+    crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
+};
 use std::io::IsTerminal;
 use std::path::PathBuf;
 use strum::Display;
@@ -350,6 +352,12 @@ pub struct GitHubRepoSpecifiers {
     /// This option can be repeated.
     #[arg(long, visible_alias = "org")]
     pub organization: Vec<String>,
+
+    /// Clone and scan accessible repositories in the GitHub instance specified with the custom API url
+    ///
+    /// Requires setting up the `github_api_url` option.
+    #[arg(long, visible_alias = "scan-instance")]
+    pub scan_github_enterprise_instance: bool,
 }
 
 impl GitHubRepoSpecifiers {
@@ -625,7 +633,7 @@ pub struct InputSpecifierArgs {
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
-        required_unless_present_any(["github_user", "github_organization", "git_url"]),
+        required_unless_present_any(["github_user", "github_organization", "git_url", "scan_github_enterprise_instance"]),
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -659,6 +667,17 @@ pub struct InputSpecifierArgs {
         display_order = 20
     )]
     pub github_organization: Vec<String>,
+
+    /// Clone and scan accessible repositories in the GitHub instance specified with the custom API url
+    ///
+    /// Requires setting up the `github_api_url` option.
+    #[arg(
+        long,
+        visible_alias = "scan-instance",
+        requires = "github_api_url",
+        display_order = 21
+    )]
+    pub scan_github_enterprise_instance: bool,
 
     /// Use the specified URL for GitHub API access
     ///
