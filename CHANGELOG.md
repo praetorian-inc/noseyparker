@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
+- Allow ignoring validation of TLS certificates with new `--ignore-certs` flag ([#125](https://github.com/praetorian-inc/noseyparker/pull/125))
 - New rules have been added (thank you @gemesa!):
 
   - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
