@@ -134,6 +134,14 @@ CREATE TABLE match
     -- An arbitrary integer identifier for the match
     id integer primary key,
 
+    -- The content-based unique identifier of the match
+    -- sha1_hex(rule structural identifier + '\0' + hex blob id + '\0' + decimal start byte + '\0' + decimal end byte)
+    structural_id text unique not null,
+
+    -- The content-based identifier of the finding this match belongs to, defined as
+    -- sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
+    finding_id text not null,
+
     -- The blob in which this match occurs
     blob_id integer not null references blob(id),
 
@@ -146,6 +154,18 @@ CREATE TABLE match
     -- The rule that produced this match
     rule_id integer not null references rule(id),
 
+    -- The capture groups from the match, encoded as a minified JSON array of base64-encoded bytestrings
+    groups text not null,
+
+    -- the contextual snippet preceding the matching input
+    before_snippet_id integer not null references snippet(id),
+
+    -- the entire matching input
+    matching_snippet_id integer not null references snippet(id),
+
+    -- the contextual snippet trailing the matching input
+    after_snippet_id integer not null references snippet(id),
+
     unique (
         blob_id,
         start_byte,
@@ -154,67 +174,12 @@ CREATE TABLE match
     ),
 
     constraint valid_offsets check(0 <= start_byte and start_byte <= end_byte),
+    constraint valid_groups check(json_type(groups) = 'array'),
 
-    foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte) deferrable initially deferred,
-
-    -- Ensure that snippets, groups, finding IDs, and structural IDs are provided for each match
-    foreign key (id) references match_snippet(match_id) deferrable initially deferred,
-    foreign key (id) references match_groups(match_id) deferrable initially deferred,
-    foreign key (id) references match_structural_id(match_id) deferrable initially deferred,
-    foreign key (id) references match_finding_id(match_id) deferrable initially deferred
+    foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte)
 ) STRICT;
 
-CREATE TABLE match_groups
--- This table represents the capture groups belonging to each match.
-(
-    match_id integer primary key references match(id),
-
-    -- The capture groups from the match, encoded as a minified JSON array of base64-encoded bytestrings
-    groups text not null,
-
-    constraint valid_groups check(json_type(groups) = 'array')
-) STRICT;
-
-CREATE INDEX match_groups_index on match_groups(groups);
-
-CREATE TABLE match_structural_id
--- This table represents content-based identifiers assigned to each match.
-(
-    match_id integer primary key references match(id),
-
-    -- The content-based unique identifier of the match
-    -- sha1_hex(rule structural identifier + '\0' + hex blob id + '\0' + decimal start byte + '\0' + decimal end byte)
-    structural_id text unique not null
-) STRICT;
-
-CREATE TABLE match_finding_id
--- This table represents the finding identifier assigned to each match.
--- Matches with the same finding identifier are different occurrences of the same match.
-(
-    match_id integer primary key references match(id),
-    -- The content-based identifier of the finding this match belongs to, defined as
-    -- sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
-    finding_id text not null
-) STRICT;
-
-CREATE INDEX match_finding_id_index on match_finding_id(finding_id);
-
-CREATE TABLE match_snippet
--- This table represents the contextual snippets for each match.
-(
-    -- The integer identifier of the match
-    match_id integer primary key references match(id),
-
-    -- The contextual snippet preceding the matching input
-    before_snippet_id integer not null references snippet(id),
-
-    -- The entire matching input
-    matching_snippet_id integer not null references snippet(id),
-
-    -- The contextual snippet trailing the matching input
-    after_snippet_id integer not null references snippet(id)
-) STRICT;
-
+CREATE INDEX match_grouping_index on match(groups, rule_id);
 CREATE INDEX match_rule_index on match(rule_id);
 
 CREATE TABLE match_status
@@ -265,8 +230,8 @@ CREATE TABLE match_score
 -- Convenience Views
 --------------------------------------------------------------------------------
 CREATE VIEW match_denorm
--- A convenience view for matches in their fully denormalized form rather
--- than the low-level datastore form that involves numerous indirections.
+-- A convenience view for matches in denormalized form rather than the
+-- low-level datastore form that involves numerous indirections.
 (
     id,
     structural_id,
@@ -299,8 +264,8 @@ CREATE VIEW match_denorm
 ) as
 select
     m.id,
-    msid.structural_id,
-    mfid.finding_id,
+    m.structural_id,
+    m.finding_id,
 
     b.blob_id,
 
@@ -316,7 +281,7 @@ select
     r.text_id,
     r.structural_id,
 
-    mg.groups,
+    m.groups,
 
     before_snippet.snippet,
     matching_snippet.snippet,
@@ -328,31 +293,26 @@ select
     match_score.score
 from
     match m
-    left outer join match_structural_id msid on (msid.match_id = m.id)
-    left outer join match_finding_id mfid on (mfid.match_id = m.id)
-    left outer join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
-    left outer join match_snippet ms on (m.id = ms.match_id)
-    left outer join blob b on (m.blob_id = b.id)
-    left outer join rule r on (m.rule_id = r.id)
-    left outer join match_groups mg on (m.id = mg.match_id)
-    left outer join snippet before_snippet on (ms.before_snippet_id = before_snippet.id)
-    left outer join snippet matching_snippet on (ms.matching_snippet_id = matching_snippet.id)
-    left outer join snippet after_snippet on (ms.after_snippet_id = after_snippet.id)
+    inner join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
+    inner join blob b on (m.blob_id = b.id)
+    inner join rule r on (m.rule_id = r.id)
+    inner join snippet before_snippet on (m.before_snippet_id = before_snippet.id)
+    inner join snippet matching_snippet on (m.matching_snippet_id = matching_snippet.id)
+    inner join snippet after_snippet on (m.after_snippet_id = after_snippet.id)
     left outer join match_status on (m.id = match_status.match_id)
     left outer join match_comment on (m.id = match_comment.match_id)
     left outer join match_score on (m.id = match_score.match_id)
 ;
 
 CREATE VIEW blob_denorm
--- A convenience view for blobs in their fully denormalized form rather
--- than the low-level datastore form that involves numerous indirection.
+-- A convenience view for blobs in denormalized form rather than the low-level
+-- datastore form that involves numerous indirection.
 (
     id,
     blob_id,
     size,
     mime_essence,
-    charset,
-    provenance
+    charset
 )
 as
 select
@@ -360,13 +320,27 @@ select
     b.blob_id,
     b.size,
     bm.mime_essence,
-    bc.charset,
-    bp.provenance
+    bc.charset
 from
     blob b
     left outer join blob_mime_essence bm on (b.id = bm.blob_id)
     left outer join blob_charset bc on (b.id = bc.blob_id)
-    left outer join blob_provenance bp on (b.id = bp.blob_id)
+;
+
+CREATE VIEW blob_provenance_denorm
+-- A convenience view for blob provenance in denormalized form rather than the
+-- low-level datastore form that involves numerous indirection.
+(
+    blob_id,
+    provenance
+)
+as
+select
+    b.blob_id,
+    bp.provenance
+from
+    blob b
+    inner join blob_provenance bp on (b.id = bp.blob_id)
 ;
 
 CREATE VIEW finding_denorm
@@ -383,19 +357,17 @@ CREATE VIEW finding_denorm
 )
 as
 select
-    mf.finding_id,
+    m.finding_id,
     r.name,
     r.text_id,
     r.structural_id,
     r.syntax,
-    mg.groups,
+    m.groups,
     count(*)
 from
     match m
-    inner join match_finding_id mf on (m.id = mf.match_id)
-    inner join match_groups mg on (m.id = mg.match_id)
     inner join rule r on (m.rule_id = r.id)
-group by mf.finding_id
+group by m.finding_id
 ;
 
 CREATE VIEW finding_summary

@@ -8,7 +8,7 @@ use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, FindingMetadata, MatchId, Status};
 use noseyparker::defaults::get_builtin_rules;
-use noseyparker::match_type::Match;
+use noseyparker::match_type::{Groups, Group, Match};
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 
@@ -65,8 +65,8 @@ impl DetailsReporter {
         Ok(self
             .datastore
             .get_match_group_data(metadata, self.max_matches)
-            .with_context(|| format!("Failed to get match data for group {metadata:?}"))
-            .expect("should be able to find get match data for group")
+            .with_context(|| format!("Failed to get matches for finding {metadata:?}"))
+            .expect("should be able to find get matches for finding")
             .into_iter()
             .map(|(p, md, id, m)| ReportMatch { ps: p, md, id, m })
             .collect())
@@ -192,22 +192,22 @@ impl Finding {
         Self { metadata, matches }
     }
 
+    /// The name of the rule that produced this finding
     fn rule_name(&self) -> &str {
         &self.metadata.rule_name
     }
 
-    fn group_input(&self) -> &[u8] {
-        // self.metadata.groups.try_into
-        // FIXME: reimplement this
-        // &self.metadata.match_input
-        &[]
+    fn groups(&self) -> &Groups {
+        &self.metadata.groups
     }
 
+    /// The total number of matches in this finding
     fn total_matches(&self) -> usize {
         self.metadata.num_matches
     }
 
-    fn num_matches(&self) -> usize {
+    /// The number of matches present in this finding
+    fn num_matches_available(&self) -> usize {
         self.matches.len()
     }
 }

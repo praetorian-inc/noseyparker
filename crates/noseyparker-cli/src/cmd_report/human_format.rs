@@ -12,12 +12,8 @@ impl DetailsReporter {
             let finding_num = finding_num + 1;
             let matches = self.get_matches(&metadata)?;
             let finding = Finding { metadata, matches };
-            writeln!(
-                &mut writer,
-                "{} {}",
-                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}:")),
-                PrettyFinding(self, &finding),
-            )?;
+            writeln!(&mut writer, "{}", self.style_finding_heading(format!("Finding {finding_num}/{num_findings}")))?;
+            writeln!(&mut writer, "{}", PrettyFinding(self, &finding))?;
         }
         Ok(())
     }
@@ -29,11 +25,11 @@ pub struct PrettyFinding<'a>(&'a DetailsReporter, &'a Finding);
 
 impl <'a> Display for PrettyFinding<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let PrettyFinding(reporter, group) = self;
-        writeln!(f, "{}", reporter.style_rule(group.rule_name()))?;
+        let PrettyFinding(reporter, finding) = self;
+        writeln!(f, "{} {}", reporter.style_heading("Rule:"), reporter.style_rule(finding.rule_name()))?;
 
         // write out status if set
-        if let Some(status) = group.metadata.status {
+        if let Some(status) = finding.metadata.status {
             let status = match status {
                 Status::Accept => "Accept",
                 Status::Reject => "Reject",
@@ -42,31 +38,45 @@ impl <'a> Display for PrettyFinding<'a> {
         };
 
         // write out comment if set
-        if let Some(comment) = &group.metadata.comment {
+        if let Some(comment) = &finding.metadata.comment {
             writeln!(f, "{} {}", reporter.style_heading("Comment:"), comment)?;
         };
 
-        // write out the group on one line if it's single-line, and multiple lines otherwise
-        let g = group.group_input();
-        let match_heading = reporter.style_heading("Match:");
-        if g.contains(&b'\n') {
-            writeln!(f, "{match_heading}")?;
-            writeln!(f)?;
-            writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
-            writeln!(f)?;
+        let mut write_group = |group_heading: StyledObject<String>, g: &Group| {
+            let g = &g.0;
+            // write out the group on one line if it's single-line, and multiple lines otherwise
+            if g.contains(&b'\n') {
+                writeln!(f, "{group_heading}")?;
+                writeln!(f)?;
+                writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
+                writeln!(f)?;
+            } else {
+                writeln!(f, "{} {}", group_heading, reporter.style_match(Escaped(g)))?;
+            }
+            Ok(())
+        };
+
+        let gs = &finding.groups().0;
+        if gs.len() > 1 {
+            for (i, g) in gs.iter().enumerate() {
+                let i = i + 1;
+                let group_heading = reporter.style_heading(format!("Group {i}:"));
+                write_group(group_heading, g)?;
+            }
         } else {
-            writeln!(f, "{} {}", match_heading, reporter.style_match(Escaped(g)))?;
+            let group_heading = reporter.style_heading("Group:".into());
+            write_group(group_heading, &gs[0])?;
         }
 
         // write out count if not all matches are displayed
-        if group.num_matches() != group.total_matches() {
+        if finding.num_matches_available() != finding.total_matches() {
             writeln!(
                 f,
                 "{}",
                 reporter.style_heading(format!(
                     "Showing {}/{} occurrences:",
-                    group.num_matches(),
-                    group.total_matches()
+                    finding.num_matches_available(),
+                    finding.total_matches()
                 ))
             )?;
         }
@@ -74,12 +84,12 @@ impl <'a> Display for PrettyFinding<'a> {
 
         // write out matches
         let mut f = indented(f).with_str("    ");
-        for (i, ReportMatch { ps, md, m, .. }) in group.matches.iter().enumerate() {
+        for (i, ReportMatch { ps, md, m, .. }) in finding.matches.iter().enumerate() {
             let i = i + 1;
             writeln!(
                 f,
                 "{}",
-                reporter.style_heading(format!("Occurrence {i}/{}", group.total_matches())),
+                reporter.style_heading(format!("Occurrence {i}/{}", finding.total_matches())),
             )?;
 
             let blob_metadata = {

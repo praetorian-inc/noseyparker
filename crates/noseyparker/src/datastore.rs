@@ -260,9 +260,7 @@ impl<'a> Transaction<'a> {
         "#})?;
 
         let f = move |BlobIdInt(blob_id), provenance| -> rusqlite::Result<()> {
-            let provenance_json = serde_json::to_string(provenance)
-                .expect("should be able to serialize provenance as JSON");
-            add_provenance.execute((blob_id, provenance_json))?;
+            add_provenance.execute((blob_id, provenance))?;
             Ok(())
         };
 
@@ -283,81 +281,64 @@ impl<'a> Transaction<'a> {
         Ok(move |blob| add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,)))
     }
 
-    fn mk_record_match_snippet(
-        &'a self,
-    ) -> Result<impl FnMut(MatchId, &'a Snippet) -> rusqlite::Result<()>> {
-        let mut record_snippet = self.mk_record_snippet()?;
-
-        let mut record_match_snippet = self.inner.prepare_cached(indoc! {r#"
-            insert into match_snippet(
-                match_id,
-                before_snippet_id,
-                matching_snippet_id,
-                after_snippet_id
-            )
-            values (?, ?, ?, ?)
-            on conflict do update set
-                before_snippet_id = excluded.before_snippet_id,
-                matching_snippet_id = excluded.matching_snippet_id,
-                after_snippet_id = excluded.after_snippet_id
-            where
-                before_snippet_id != excluded.before_snippet_id
-                or matching_snippet_id != excluded.matching_snippet_id
-                or after_snippet_id != excluded.after_snippet_id
-        "#})?;
-
-        let f = move |MatchId(match_id), snippet: &'a Snippet| -> rusqlite::Result<()> {
-            let before_id = record_snippet(snippet.before.as_slice())?;
-            let matching_id = record_snippet(snippet.matching.as_slice())?;
-            let after_id = record_snippet(snippet.after.as_slice())?;
-            record_match_snippet.execute((match_id, before_id, matching_id, after_id))?;
-            Ok(())
-        };
-
-        Ok(f)
-    }
-
     /// Record matches
     fn mk_record_match(
         &'a self,
     ) -> Result<impl FnMut(BlobIdInt, &'a Match) -> rusqlite::Result<bool>> {
-        let mut record_match_snippet = self.mk_record_match_snippet()?;
+        let mut record_snippet = self.mk_record_snippet()?;
 
         let mut get_match_id = self.inner.prepare_cached(indoc! {r#"
-            select m.id, false
-            from match m
-            inner join rule r on (m.rule_id = r.id)
+            select m.id
+            from
+                match m
+                inner join rule r on (m.rule_id = r.id)
             where
                 m.blob_id = ?
                 and m.start_byte = ?
                 and m.end_byte = ?
                 and r.structural_id = ?
-
         "#})?;
 
-        let mut set_match_id = self.inner.prepare_cached(indoc! {r#"
-            insert into match (blob_id, start_byte, end_byte, rule_id)
-            select ?, ?, ?, r.id
+        let mut update_match = self.inner.prepare_cached(indoc! {r#"
+            update match
+            set
+                structural_id = ?2,
+                finding_id = ?3,
+                groups = ?4,
+                before_snippet_id = ?5,
+                matching_snippet_id = ?6,
+                after_snippet_id = ?7
+            where
+                id = ?1 and
+                (
+                    structural_id != ?2 or
+                    finding_id != ?3 or
+                    groups != ?4 or
+                    before_snippet_id != ?5 or
+                    matching_snippet_id != ?6 or
+                    after_snippet_id != ?7
+                )
+        "#})?;
+
+        let mut add_match = self.inner.prepare_cached(indoc! {r#"
+            insert into match (
+                structural_id,
+                finding_id,
+                blob_id,
+                start_byte,
+                end_byte,
+                groups,
+                before_snippet_id,
+                matching_snippet_id,
+                after_snippet_id,
+                rule_id
+            )
+            select ?, ?, ?, ?, ?, ?, ?, ?, ?, r.id
             from rule r
             where r.structural_id = ?
-            returning id, true
         "#})?;
 
-        let mut set_structural_id = self.inner.prepare_cached(indoc! {r#"
-            insert into match_structural_id (match_id, structural_id)
-            values (?, ?)
-            on conflict do update set structural_id = excluded.structural_id
-            where structural_id != excluded.structural_id
-        "#})?;
-
-        let mut set_finding_id = self.inner.prepare_cached(indoc! {r#"
-            insert into match_finding_id (match_id, finding_id)
-            values (?, ?)
-            on conflict do update set finding_id = excluded.finding_id
-            where finding_id != excluded.finding_id
-        "#})?;
-
-        let mut set_blob_source_span = self.inner.prepare_cached(indoc! {r#"
+        let mut add_blob_source_span = self.inner.prepare_cached(indoc! {r#"
             insert into blob_source_span (blob_id, start_byte, end_byte, start_line, start_column, end_line, end_column)
             values (?, ?, ?, ?, ?, ?, ?)
             on conflict do update set
@@ -372,47 +353,62 @@ impl<'a> Transaction<'a> {
                 or end_column != excluded.end_column
         "#})?;
 
-        let mut set_groups = self.inner.prepare_cached(indoc! {r#"
-            insert into match_groups (match_id, groups)
-            values (?, ?)
-            on conflict do update set groups = excluded.groups
-            where groups != excluded.groups
-        "#})?;
-
         let f = move |BlobIdInt(blob_id), m: &'a Match| {
             let start_byte = m.location.offset_span.start;
             let end_byte = m.location.offset_span.end;
-
-            let (match_id, new) = add_if_missing_simple(
-                &mut get_match_id,
-                &mut set_match_id,
-                from_row,
-                (blob_id, start_byte, end_byte, &m.rule_structural_id),
-            )?;
-
-            record_match_snippet(MatchId(match_id), &m.snippet)?;
-
+            let rule_structural_id = &m.rule_structural_id;
             let structural_id = &m.structural_id();
-            set_structural_id.execute((match_id, structural_id))?;
-
             let finding_id = &m.finding_id();
-            set_finding_id.execute((match_id, finding_id))?;
+            let groups = &m.groups;
+            let source_span = &m.location.source_span;
 
-            set_blob_source_span.execute((
+            add_blob_source_span.execute((
                 blob_id,
                 start_byte,
                 end_byte,
-                m.location.source_span.start.line,
-                m.location.source_span.start.column,
-                m.location.source_span.end.line,
-                m.location.source_span.end.column,
+                source_span.start.line,
+                source_span.start.column,
+                source_span.end.line,
+                source_span.end.column,
             ))?;
 
-            let groups_json = serde_json::to_string(&m.groups)
-                .expect("should be able to serialize groups as JSON");
-            set_groups.execute((match_id, groups_json))?;
+            let snippet = &m.snippet;
+            let before_snippet_id = record_snippet(snippet.before.as_slice())?;
+            let matching_snippet_id = record_snippet(snippet.matching.as_slice())?;
+            let after_snippet_id = record_snippet(snippet.after.as_slice())?;
 
-            Ok(new)
+            if let Some(match_id) = get_match_id
+                .query_map((blob_id, start_byte, end_byte, rule_structural_id), val_from_row)?
+                .next()
+            {
+                let match_id: i64 = match_id?;
+                // existing match; update if needed
+                update_match.execute((
+                    match_id,
+                    structural_id,
+                    finding_id,
+                    groups,
+                    before_snippet_id,
+                    matching_snippet_id,
+                    after_snippet_id,
+                ))?;
+                Ok(false)
+            } else {
+                // totally new match
+                add_match.execute((
+                    structural_id,
+                    finding_id,
+                    blob_id,
+                    start_byte,
+                    end_byte,
+                    groups,
+                    before_snippet_id,
+                    matching_snippet_id,
+                    after_snippet_id,
+                    rule_structural_id,
+                ))?;
+                Ok(true)
+            }
         };
 
         Ok(f)
@@ -622,12 +618,10 @@ impl Datastore {
 
     fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
         let mut get = self.conn.prepare_cached(indoc! {r#"
-            select provenance from blob_denorm where blob_id = ?
+            select provenance from blob_provenance_denorm where blob_id = ?
         "#})?;
 
-        let ps = get.query_map((metadata.id, ), |row| {
-            val_from_row(row)
-        })?;
+        let ps = get.query_map((metadata.id,), |row| val_from_row(row))?;
 
         let mut results = Vec::new();
         for p in ps {
@@ -638,15 +632,6 @@ impl Datastore {
             None => bail!("should have at least 1 provenance entry"),
         }
     }
-}
-
-/// A function that exists to make SQL row conversion to a value via TryFrom<&rusqlite::Row> more
-/// ergonomic.
-fn from_row<T>(row: &rusqlite::Row<'_>) -> rusqlite::Result<T>
-where
-    T: for<'a> TryFrom<&'a rusqlite::Row<'a>, Error = rusqlite::Error>,
-{
-    T::try_from(row)
 }
 
 /// Convert a row into a single value.

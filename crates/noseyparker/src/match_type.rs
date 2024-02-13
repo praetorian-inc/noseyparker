@@ -14,7 +14,7 @@ use crate::snippet::Snippet;
 // Group
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct Group(#[serde(with = "BStringBase64")] BString);
+pub struct Group(#[serde(with = "BStringBase64")] pub BString);
 
 impl Group {
     pub fn new(m: regex::bytes::Match<'_>) -> Self {
@@ -26,7 +26,7 @@ impl Group {
 // Groups
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
-pub struct Groups(SmallVec<[Group; 1]>);
+pub struct Groups(pub SmallVec<[Group; 1]>);
 
 // -------------------------------------------------------------------------------------------------
 // sql
