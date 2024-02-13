@@ -290,18 +290,20 @@ impl<'a> Matcher<'a> {
 mod test {
     use super::*;
 
+    use noseyparker_rules::RuleSyntax;
+
     use pretty_assertions::assert_eq;
 
     #[test]
     pub fn test_simple() -> Result<()> {
-        let rules = vec![Rule {
+        let rules = vec![Rule::new(RuleSyntax {
             id: "test.1".to_string(),
             name: "test".to_string(),
             pattern: "test".to_string(),
             examples: vec![],
             negative_examples: vec![],
             references: vec![],
-        }];
+        })];
         let rules_db = RulesDatabase::from_rules(rules)?;
         let input = "some test data for vectorscan";
         let seen_blobs = BlobIdMap::new();
