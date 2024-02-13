@@ -304,13 +304,13 @@ select
 
     b.blob_id,
 
+    m.start_byte,
+    m.end_byte,
+
     bss.start_line,
     bss.start_column,
     bss.end_line,
     bss.end_column,
-
-    m.start_byte,
-    m.end_byte,
 
     r.name,
     r.text_id,

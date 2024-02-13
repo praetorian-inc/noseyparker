@@ -142,7 +142,7 @@ impl DetailsReporter {
             first = false;
 
             let matches = self.get_matches(&metadata)?;
-            let f = Finding::MatchGroup(MatchGroup::new(metadata, matches));
+            let f = Finding::new(metadata, matches);
             serde_json::to_writer(&mut writer, &f)?;
         }
 
@@ -163,16 +163,9 @@ impl DetailsReporter {
 
 }
 
+/// A group of matches that all have the same rule and capture group content
 #[derive(Serialize)]
-#[serde(tag = "type")]
-enum Finding {
-    /// A group of matches that all have the same rule and capture group content
-    #[serde(rename = "finding")]
-    MatchGroup(MatchGroup),
-}
-
-#[derive(Serialize)]
-struct MatchGroup {
+struct Finding {
     #[serde(flatten)]
     metadata: FindingMetadata,
     matches: Vec<ReportMatch>,
@@ -194,7 +187,7 @@ struct ReportMatch {
     id: MatchId,
 }
 
-impl MatchGroup {
+impl Finding {
     fn new(metadata: FindingMetadata, matches: Vec<ReportMatch>) -> Self {
         Self { metadata, matches }
     }
@@ -204,6 +197,7 @@ impl MatchGroup {
     }
 
     fn group_input(&self) -> &[u8] {
+        // self.metadata.groups.try_into
         // FIXME: reimplement this
         // &self.metadata.match_input
         &[]

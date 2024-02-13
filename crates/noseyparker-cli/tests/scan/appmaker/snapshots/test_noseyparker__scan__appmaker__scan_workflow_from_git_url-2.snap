@@ -5,9 +5,9 @@ expression: stdout
 
  Rule                         Total Findings   Total Matches 
 ─────────────────────────────────────────────────────────────
- Generic Secret                            3               3 
- Amazon Resource Name                      3               3 
- AWS S3 Bucket (path style)                3              13 
  AWS API Key                               3               3 
+ AWS S3 Bucket (path style)                3              13 
+ Amazon Resource Name                      3               3 
+ Generic Secret                            3               3 
  AWS Secret Access Key                     1               1 
 

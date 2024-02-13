@@ -51,6 +51,6 @@ mod tests {
 
     #[test]
     fn empty() {
-        assert_eq!(sha1_hexdigest(&[]), "");
+        assert_eq!(sha1_hexdigest(&[]), "da39a3ee5e6b4b0d3255bfef95601890afd80709");
     }
 }

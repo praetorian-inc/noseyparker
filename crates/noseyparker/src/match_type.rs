@@ -149,10 +149,7 @@ impl Match {
         }
     }
 
-    /// Returns the content-based unique identifier of the match.
-    /// Such an identifier is defined as
-    ///
-    ///     sha1_hex(rule structural identifier + '\0' + hex blob id + '\0' + decimal start byte + '\0' + decimal end byte)
+    /// Returns a content-based unique identifier of the match.
     pub fn structural_id(&self) -> String {
         let mut h = Sha1::new();
         write!(

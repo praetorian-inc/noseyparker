@@ -68,8 +68,8 @@ impl RuleSyntax {
     ///
     /// ```
     /// # use pretty_assertions::assert_eq;
-    /// # use noseyparker_rules::Syntax;
-    /// let r = Syntax {
+    /// # use noseyparker_rules::RuleSyntax;
+    /// let r = RuleSyntax {
     ///     name: "Test rule".to_string(),
     ///     id: "test.1".to_string(),
     ///     pattern: r"hello\s*world".to_string(),

@@ -398,18 +398,14 @@ impl<'a> Transaction<'a> {
             let finding_id = &m.finding_id();
             set_finding_id.execute((match_id, finding_id))?;
 
-            let start_line = m.location.source_span.start.line;
-            let start_column = m.location.source_span.start.column;
-            let end_line = m.location.source_span.end.line;
-            let end_column = m.location.source_span.end.column;
             set_blob_source_span.execute((
                 blob_id,
                 start_byte,
                 end_byte,
-                start_line,
-                start_column,
-                end_line,
-                end_column,
+                m.location.source_span.start.line,
+                m.location.source_span.start.column,
+                m.location.source_span.end.line,
+                m.location.source_span.end.column,
             ))?;
 
             let groups_json = serde_json::to_string(&m.groups)
@@ -479,7 +475,7 @@ impl Datastore {
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select rule_name, total_findings, total_matches
             from finding_summary
-            order by total_findings desc
+            order by total_findings desc, rule_name, total_matches desc
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(MatchSummaryEntry {

@@ -5,7 +5,9 @@ expression: json_output
 [
   {
     "comment": null,
-    "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
+    "groups": [
+      "Z2hwX1hJeEI3S01OZEFyM3pxV3RRcWhFOTRxZ2xIcU96bjFEMXN0Zw=="
+    ],
     "matches": [
       {
         "blob_id": "96add51d102b68a8eb16cd104f6a79edc27bb61d",
@@ -15,7 +17,9 @@ expression: json_output
           "mime_essence": "text/plain",
           "num_bytes": 1448
         },
-        "capture_group_index": 1,
+        "groups": [
+          "Z2hwX1hJeEI3S01OZEFyM3pxV3RRcWhFOTRxZ2xIcU96bjFEMXN0Zw=="
+        ],
         "location": {
           "offset_span": {
             "end": 775,
@@ -32,14 +36,13 @@ expression: json_output
             }
           }
         },
-        "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
         "provenance": [
           {
             "kind": "file",
             "path": "<ROOT>/input.txt"
           }
         ],
-        "rule_name": "GitHub Personal Access Token",
+        "rule_structural_id": "np.github.1:f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
         "snippet": {
           "after": "\n\nfunction lorem",
           "before": "dude\nGITHUB_KEY=",
@@ -49,7 +52,8 @@ expression: json_output
     ],
     "num_matches": 1,
     "rule_name": "GitHub Personal Access Token",
-    "status": null,
-    "type": "finding"
+    "rule_structural_id": "np.github.1:f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
+    "rule_text_id": "np.github.1",
+    "status": null
   }
 ]

@@ -11,12 +11,12 @@ impl DetailsReporter {
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
             let finding_num = finding_num + 1;
             let matches = self.get_matches(&metadata)?;
-            let match_group = MatchGroup { metadata, matches };
+            let finding = Finding { metadata, matches };
             writeln!(
                 &mut writer,
                 "{} {}",
                 self.style_finding_heading(format!("Finding {finding_num}/{num_findings}:")),
-                PrettyMatchGroup(self, &match_group),
+                PrettyFinding(self, &finding),
             )?;
         }
         Ok(())
@@ -24,12 +24,12 @@ impl DetailsReporter {
 }
 
 
-/// A wrapper type to allow human-oriented pretty-printing of a `MatchGroup`.
-pub struct PrettyMatchGroup<'a>(&'a DetailsReporter, &'a MatchGroup);
+/// A wrapper type to allow human-oriented pretty-printing of a `Finding`.
+pub struct PrettyFinding<'a>(&'a DetailsReporter, &'a Finding);
 
-impl <'a> Display for PrettyMatchGroup<'a> {
+impl <'a> Display for PrettyFinding<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let PrettyMatchGroup(reporter, group) = self;
+        let PrettyFinding(reporter, group) = self;
         writeln!(f, "{}", reporter.style_rule(group.rule_name()))?;
 
         // write out status if set

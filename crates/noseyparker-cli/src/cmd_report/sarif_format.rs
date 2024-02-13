@@ -4,7 +4,7 @@ use super::*;
 
 impl DetailsReporter {
 
-    fn make_sarif_result(&self, finding: &MatchGroup) -> Result<sarif::Result> {
+    fn make_sarif_result(&self, finding: &Finding) -> Result<sarif::Result> {
         let matches = &finding.matches;
         let metadata = &finding.metadata;
 
@@ -102,7 +102,7 @@ impl DetailsReporter {
             .collect::<Result<_>>()?;
 
         // let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
-        let sha1_fingerprint = "".to_string(); // FIXME: reimplement this
+        let sha1_fingerprint = "".to_string(); // TODO: reimplement this
 
         // Build the result for the match
         let result = sarif::ResultBuilder::default()
@@ -126,8 +126,8 @@ impl DetailsReporter {
         let mut findings = Vec::with_capacity(group_metadata.len());
         for metadata in group_metadata {
             let matches = self.get_matches(&metadata)?;
-            let match_group = MatchGroup::new(metadata, matches);
-            findings.push(self.make_sarif_result(&match_group)?);
+            let finding = Finding::new(metadata, matches);
+            findings.push(self.make_sarif_result(&finding)?);
         }
 
         let run = sarif::RunBuilder::default()
