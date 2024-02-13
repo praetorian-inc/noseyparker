@@ -49,7 +49,7 @@ impl DetailsReporter {
                             }
                             Some(e.repo_path.to_string_lossy().into_owned())
                         }
-                        // TODO: implement this case properly
+                        // TODO(overhaul): implement this case properly
                         Provenance::Extended(_e) => None,
                     };
 
@@ -102,7 +102,7 @@ impl DetailsReporter {
             .collect::<Result<_>>()?;
 
         // let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
-        let sha1_fingerprint = "".to_string(); // TODO: reimplement this
+        let sha1_fingerprint = "".to_string(); // TODO(overhaul): reimplement this
 
         // Build the result for the match
         let result = sarif::ResultBuilder::default()

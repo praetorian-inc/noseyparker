@@ -2,8 +2,9 @@
 source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
 expression: "std::fs::read_to_string(report_txt.path()).unwrap()"
 ---
-Finding 1/13: AWS API Key
-Match: AKIAJEEUOSJXYB2BKLMA
+Finding 1/13
+Rule: AWS API Key
+Group: AKIAJEEUOSJXYB2BKLMA
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -20,8 +21,9 @@ Match: AKIAJEEUOSJXYB2BKLMA
         {"TERM_PROGRAM":"Apple_Terminal","TERM":"xterm-256color","SHELL":"/usr/local/bin/fish","CLICOLOR":"1","TMPDIR":"/var/folders/xj/5v3cc4y9039fx_fhk67bvg8w0000gn/T/","AWS_ID":"AKIAJEEUOSJXYB2BKLMA","Apple_PubSub_Socket_Render":"/tmp/launch-rHzB0S/Render","TERM_PROGRAM_VERSION":"326","TERM_SESSION_ID":"C99AE63D-8AC8-40EC-9A43-7C14ACEBE413","ANT_HOME":"/usr/local/etc/ant","CMD_DURATION":"1m 22.1s","USER":"davida","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/L
 
 
-Finding 2/13: AWS API Key
-Match: AKIAJQNF3BIPEDR6MXEA
+Finding 2/13
+Rule: AWS API Key
+Group: AKIAJQNF3BIPEDR6MXEA
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -38,8 +40,9 @@ Match: AKIAJQNF3BIPEDR6MXEA
         S3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ","S3_OBJECT_PREFIX":"flathead","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/Listeners","__CF_USER_TEXT_ENCODING":"0x1F5:0:0","PATH":"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin","__CHECKFIX1436934":"1","ASSET_HOST":"","S3_KEY":"AKIAJQNF3BIPEDR6MXEA","PWD":"/Users/davida/src/appmaker","LANG":"en_CA.UTF-8","PUBLISH_URL_PREFIX":"XXX","HOME":"/Users/davida","SHLVL":"2","LOGNAME":"davida","S3_BUCKET":"com.mozillalabs.appmaker","COOKIE_SECRET":"I hate working as a janitor for arrogant rich people; so I cl
 
 
-Finding 3/13: AWS API Key
-Match: AKIAJUZPLTNMY2JSXLYA
+Finding 3/13
+Rule: AWS API Key
+Group: AKIAJUZPLTNMY2JSXLYA
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -66,8 +69,9 @@ Match: AKIAJUZPLTNMY2JSXLYA
 
 
 
-Finding 4/13: AWS S3 Bucket (path style)
-Match: s3-us-west-2.amazonaws.com/makerstrap
+Finding 4/13
+Rule: AWS S3 Bucket (path style)
+Group: s3-us-west-2.amazonaws.com/makerstrap
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -101,8 +105,9 @@ Match: s3-us-west-2.amazonaws.com/makerstrap
           aria-labelledby=
 
 
-Finding 5/13: AWS S3 Bucket (path style)
-Match: s3.amazonaws.com/com.mozillalabs.appmaker
+Finding 5/13
+Rule: AWS S3 Bucket (path style)
+Group: s3.amazonaws.com/com.mozillalabs.appmaker
 Showing 3/11 occurrences:
 
     Occurrence 1/11
@@ -166,8 +171,9 @@ Showing 3/11 occurrences:
                   <div class="links"><a href="http://enchant
 
 
-Finding 6/13: AWS S3 Bucket (path style)
-Match: s3.amazonaws.com/listjs
+Finding 6/13
+Rule: AWS S3 Bucket (path style)
+Group: s3.amazonaws.com/listjs
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -200,8 +206,9 @@ Match: s3.amazonaws.com/listjs
         - Work
 
 
-Finding 7/13: AWS Secret Access Key
-Match: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
+Finding 7/13
+Rule: AWS Secret Access Key
+Group: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -218,8 +225,9 @@ Match: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
         Frameworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
 
 
-Finding 8/13: Amazon Resource Name
-Match: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+Finding 8/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -259,8 +267,9 @@ Match: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
         12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Proper
 
 
-Finding 9/13: Amazon Resource Name
-Match: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
+Finding 9/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -298,8 +307,9 @@ Match: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
         12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Properties pane, in the "Lifecycle" section, add a rule to expire/delete files ba
 
 
-Finding 10/13: Amazon Resource Name
-Match: arn:aws:s3:::the-bucket-name-goes-here`
+Finding 10/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::the-bucket-name-goes-here`
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -332,8 +342,9 @@ Match: arn:aws:s3:::the-bucket-name-goes-here`
         11. Input and submit an IAM Policy that grants the user at least read+write rights to the bucket. AWS has a policy generator and some examples to help
 
 
-Finding 11/13: Generic Secret
-Match: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
+Finding 11/13
+Rule: Generic Secret
+Group: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -360,8 +371,9 @@ Match: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
 
 
 
-Finding 12/13: Generic Secret
-Match: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
+Finding 12/13
+Rule: Generic Secret
+Group: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
 
     Occurrence 1/1
     Git repo:  <REPO>
@@ -378,8 +390,9 @@ Match: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
         eworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
 
 
-Finding 13/13: Generic Secret
-Match: qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ
+Finding 13/13
+Rule: Generic Secret
+Group: qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ
 
     Occurrence 1/1
     Git repo:  <REPO>

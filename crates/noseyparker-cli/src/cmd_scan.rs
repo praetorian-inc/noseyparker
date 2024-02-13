@@ -663,7 +663,7 @@ impl MetadataResult {
                 Some(md) => md.blob_path.to_path().ok(),
                 None => None,
             },
-            // TODO: implement this case
+            // TODO(overhaul): implement this case
             Provenance::Extended(_e) => None,
         });
 

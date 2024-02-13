@@ -499,9 +499,10 @@ impl Datastore {
                 rule_text_id,
                 rule_name,
                 num_matches,
-                null, null -- TODO: add comment and status
+                null, null -- TODO(overhaul): add comment and status
             from finding_denorm
-            order by rule_structural_id
+            -- TODO(overhaul): order by mean score as well
+            order by rule_name, rule_structural_id, groups
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingMetadata {

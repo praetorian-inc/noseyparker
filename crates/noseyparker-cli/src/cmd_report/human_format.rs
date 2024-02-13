@@ -150,7 +150,7 @@ impl <'a> Display for PrettyFinding<'a> {
                             writeln!(f)?;
                         }
                     }
-                    // TODO: implement this case properly
+                    // TODO(overhaul): implement this case properly
                     Provenance::Extended(e) => {
                         writeln!(f, "extended {}", e)?;
                     }
