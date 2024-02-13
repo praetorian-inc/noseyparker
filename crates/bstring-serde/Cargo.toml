@@ -15,3 +15,7 @@ publish.workspace = true
 base64 = { version = "0.21" }
 bstr = { version = "1.0", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1.0"
+serde_json = "1.0"

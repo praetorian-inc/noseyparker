@@ -94,3 +94,54 @@ fn deserialize_bytes_string_base64<'de, D: serde::Deserializer<'de>>(
     }
     d.deserialize_str(Vis)
 }
+
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        fn test_roundtrip_base64_json_1(input: Vec<u8>) {
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Test(#[serde(with="BStringBase64")] BString);
+
+            let v0: Test = Test(input.into());
+            let v1: String = serde_json::to_string(&v0).expect("should be able to serialize");
+            let v2: Test = serde_json::from_str(&v1).expect("should be able to deserialize");
+            prop_assert_eq!(v0, v2);
+        }
+
+        #[test]
+        fn test_roundtrip_lossyutf8_json_1(input: String) {
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Test(#[serde(with="BStringLossyUtf8")] BString);
+
+            let v0: Test = Test(input.into());
+            let v1: String = serde_json::to_string(&v0).expect("should be able to serialize");
+            let v2: Test = serde_json::from_str(&v1).expect("should be able to deserialize");
+            prop_assert_eq!(v0, v2);
+        }
+
+        #[test]
+        fn test_roundtrip_lossyutf8_json_2(input: Vec<u8>) {
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Test(#[serde(with="BStringLossyUtf8")] BString);
+
+            // Here we need to do the serialize -> deserialize cycle twice, since the original
+            // input may contain bytes that are lossily encoded. A simple round-trip test isn't
+            // actually correct with this codec.
+            let v0: Test = Test(input.into());
+            let v1: String = serde_json::to_string(&v0).expect("should be able to serialize");
+            let v2: Test = serde_json::from_str(&v1).expect("should be able to deserialize");
+
+            let v3: String = serde_json::to_string(&v2).expect("should be able to deserialize");
+            let v4: Test = serde_json::from_str(&v3).expect("should be able to deserialize");
+            prop_assert_eq!(v1, v3);
+            prop_assert_eq!(v2, v4);
+        }
+    }
+}

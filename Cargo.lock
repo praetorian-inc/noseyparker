@@ -267,7 +267,9 @@ version = "0.0.0"
 dependencies = [
  "base64",
  "bstr",
+ "proptest",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2121,7 +2123,6 @@ dependencies = [
  "petgraph",
  "pretty_assertions",
  "progress",
- "proptest",
  "roaring",
  "serde",
  "smallvec",
