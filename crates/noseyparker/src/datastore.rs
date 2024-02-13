@@ -10,12 +10,11 @@ use std::os::unix::ffi::OsStringExt;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
-use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
 use crate::match_type::{Groups, Match};
-use crate::provenance::{CommitKind, Provenance, ProvenanceKind};
+use crate::provenance::Provenance;
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
@@ -143,17 +142,21 @@ impl Datastore {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+/// A datastore-specific ID of a blob; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct BlobIdInt(i64);
 
-#[derive(Copy, Clone, Debug)]
+/// A datastore-specific ID of a rule; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct RuleIdInt(i64);
 
-#[derive(Copy, Clone, Debug)]
+/// A datastore-specific ID of a snippet; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct SnippetIdInt(i64);
 
-#[derive(Copy, Clone, Debug)]
-struct MatchIdInt(i64);
+/// A datastore-specific ID of a match; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct MatchId(i64);
 
 type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<Match>);
 
@@ -170,27 +173,25 @@ impl<'a> Transaction<'a> {
     fn mk_record_rule(&'a self) -> Result<impl FnMut(&'a Rule) -> rusqlite::Result<RuleIdInt>> {
         let mut get_id = self.inner.prepare_cached(indoc! {r#"
             select id from rule
-            where structural_id = ? and name = ? and text_id = ?
+            where structural_id = ? and name = ? and text_id = ? and syntax = ?
         "#})?;
 
         let mut set_id = self.inner.prepare_cached(indoc! {r#"
-            insert into rule(structural_id, name, text_id)
-            values (?, ?, ?)
+            insert into rule(structural_id, name, text_id, syntax)
+            values (?, ?, ?, ?)
+            on conflict do update set syntax = excluded.syntax
+            where syntax != excluded.syntax
             returning id
         "#})?;
 
-        let mut record_json_syntax = self.inner.prepare_cached(indoc! {r#"
-            insert into rule_syntax(rule_id, syntax)
-            values (?, ?)
-            on conflict do update set syntax = excluded.syntax
-            where syntax != excluded.syntax
-        "#})?;
-
         let f = move |r: &Rule| -> rusqlite::Result<RuleIdInt> {
-            let rule_id =
-                add_if_missing_simple(&mut get_id, &mut set_id, val_from_row, (r.structural_id(), r.name(), r.id()))?;
             let json_syntax = r.syntax().to_json();
-            record_json_syntax.execute((rule_id, json_syntax))?;
+            let rule_id = add_if_missing_simple(
+                &mut get_id,
+                &mut set_id,
+                val_from_row,
+                (r.structural_id(), r.name(), r.id(), &json_syntax),
+            )?;
             Ok(RuleIdInt(rule_id))
         };
 
@@ -230,7 +231,12 @@ impl<'a> Transaction<'a> {
         "#})?;
 
         let f = move |b: &BlobMetadata| -> rusqlite::Result<BlobIdInt> {
-            let blob_id = add_if_missing_simple(&mut get_id, &mut set_id, val_from_row, (&b.id.hex(), b.num_bytes))?;
+            let blob_id = add_if_missing_simple(
+                &mut get_id,
+                &mut set_id,
+                val_from_row,
+                (&b.id, b.num_bytes),
+            )?;
 
             if let Some(mime_essence) = b.mime_essence() {
                 set_mime_essence.execute((blob_id, mime_essence))?;
@@ -257,7 +263,8 @@ impl<'a> Transaction<'a> {
         "#})?;
 
         let f = move |BlobIdInt(blob_id), provenance| -> rusqlite::Result<()> {
-            let provenance_json = serde_json::to_string(provenance).expect("should be able to serialize provenance as JSON");
+            let provenance_json = serde_json::to_string(provenance)
+                .expect("should be able to serialize provenance as JSON");
             add_provenance.execute((blob_id, provenance_json))?;
             Ok(())
         };
@@ -281,7 +288,7 @@ impl<'a> Transaction<'a> {
 
     fn mk_record_match_snippet(
         &'a self,
-    ) -> Result<impl FnMut(MatchIdInt, &'a Snippet) -> rusqlite::Result<()>> {
+    ) -> Result<impl FnMut(MatchId, &'a Snippet) -> rusqlite::Result<()>> {
         let mut record_snippet = self.mk_record_snippet()?;
 
         let mut record_match_snippet = self.inner.prepare_cached(indoc! {r#"
@@ -302,7 +309,7 @@ impl<'a> Transaction<'a> {
                 or after_snippet_id != excluded.after_snippet_id
         "#})?;
 
-        let f = move |MatchIdInt(match_id), snippet: &'a Snippet| -> rusqlite::Result<()> {
+        let f = move |MatchId(match_id), snippet: &'a Snippet| -> rusqlite::Result<()> {
             let before_id = record_snippet(snippet.before.as_slice())?;
             let matching_id = record_snippet(snippet.matching.as_slice())?;
             let after_id = record_snippet(snippet.after.as_slice())?;
@@ -386,7 +393,7 @@ impl<'a> Transaction<'a> {
                 (blob_id, start_byte, end_byte, &m.rule_structural_id),
             )?;
 
-            record_match_snippet(MatchIdInt(match_id), &m.snippet)?;
+            record_match_snippet(MatchId(match_id), &m.snippet)?;
 
             let structural_id = &m.structural_id();
             set_structural_id.execute((match_id, structural_id))?;
@@ -398,9 +405,18 @@ impl<'a> Transaction<'a> {
             let start_column = m.location.source_span.start.column;
             let end_line = m.location.source_span.end.line;
             let end_column = m.location.source_span.end.column;
-            set_blob_source_span.execute((blob_id, start_byte, end_byte, start_line, start_column, end_line, end_column))?;
+            set_blob_source_span.execute((
+                blob_id,
+                start_byte,
+                end_byte,
+                start_line,
+                start_column,
+                end_line,
+                end_column,
+            ))?;
 
-            let groups_json = serde_json::to_string(&m.groups).expect("should be able to serialize groups as JSON");
+            let groups_json = serde_json::to_string(&m.groups)
+                .expect("should be able to serialize groups as JSON");
             set_groups.execute((match_id, groups_json))?;
 
             Ok(new)
@@ -424,8 +440,7 @@ impl<'a> Transaction<'a> {
 
             // // record provenance metadata
             for p in ps.iter() {
-                record_provenance(blob_id, p)
-                    .context("Failed to record blob provenance")?;
+                record_provenance(blob_id, p).context("Failed to record blob provenance")?;
             }
 
             // record matches
@@ -461,7 +476,7 @@ impl Datastore {
     }
 
     /// Summarize all recorded findings.
-    pub fn summarize(&self) -> Result<MatchSummary> {
+    pub fn summarize(&self) -> Result<FindingSummary> {
         let _span = debug_span!("Datastore::summarize", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
@@ -480,27 +495,34 @@ impl Datastore {
         for e in entries {
             es.push(e?);
         }
-        Ok(MatchSummary(es))
+        Ok(FindingSummary(es))
     }
 
     /// Get metadata for all groups of identical matches recorded within this `Datastore`.
     pub fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
         let _span =
-            debug_span!("Datastore::get_finding_metadata", "{}", self.root_dir.display())
-                .entered();
+            debug_span!("Datastore::get_finding_metadata", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select groups, rule_name, num_matches, null, null -- TODO: add comment and status
+            select
+                groups,
+                rule_structural_id,
+                rule_text_id,
+                rule_name,
+                num_matches,
+                null, null -- TODO: add comment and status
             from finding_denorm
-            order by rule_name
+            order by rule_structural_id
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingMetadata {
-                groups: serde_json::from_str(row.get_ref(0)?.as_str()?).map_err(|e| FromSqlError::Other(e.into()))?,
-                rule_name: row.get(1)?,
-                num_matches: row.get(2)?,
-                comment: row.get(3)?,
-                status: row.get(4)?,
+                groups: row.get(0)?,
+                rule_structural_id: row.get(1)?,
+                rule_text_id: row.get(2)?,
+                rule_name: row.get(3)?,
+                num_matches: row.get(4)?,
+                comment: row.get(5)?,
+                status: row.get(6)?,
             })
         })?;
         let mut es = Vec::new();
@@ -526,17 +548,19 @@ impl Datastore {
 
         let mut get_blob_metadata_and_match = self.conn.prepare_cached(indoc! {r#"
             select
-                b.blob_id,
+                m.blob_id,
                 m.start_byte,
                 m.end_byte,
                 m.start_line,
                 m.start_column,
                 m.end_line,
                 m.end_column,
+
                 m.before_snippet,
-                m.matching_input,
+                m.matching_snippet,
                 m.after_snippet,
-                m.group_index,
+
+                m.groups,
 
                 b.size,
                 b.mime_essence,
@@ -544,19 +568,17 @@ impl Datastore {
 
                 m.id
 
-            from match m
-            inner join blob b on (m.blob_id = b.id)
-            where m.group_input = ?1 and m.rule_name = ?2
+            from match_denorm m
+            inner join blob_denorm b on (m.blob_id = b.blob_id)
+            where m.groups = ?1 and m.rule_structural_id = ?2
             order by m.blob_id, m.start_byte, m.end_byte
             limit ?3
         "#})?;
 
         let entries = get_blob_metadata_and_match.query_map(
-            // (metadata.groups.as_slice(), &metadata.rule_name, match_limit),
-            ("", &metadata.rule_name, match_limit),
+            (&metadata.groups, &metadata.rule_structural_id, match_limit),
             |row| {
-                let v0: String = row.get(0)?;
-                let blob_id = BlobId::from_hex(&v0).map_err(|e| FromSqlError::Other(e.into()))?;
+                let blob_id = row.get(0)?;
                 let m = Match {
                     blob_id,
                     location: Location {
@@ -580,11 +602,8 @@ impl Datastore {
                         matching: BString::new(row.get(8)?),
                         after: BString::new(row.get(9)?),
                     },
-                    groups: Default::default(),
-                    // capture_group_index: row.get(10)?,
-                    // match_content: metadata.match_content.clone(),
-                    // rule_name: metadata.rule_name.clone(),
-                    rule_structural_id: metadata.rule_name.clone(),
+                    groups: row.get(10)?,
+                    rule_structural_id: metadata.rule_structural_id.clone(),
                 };
                 let num_bytes: usize = row.get(11)?;
                 let mime_essence: Option<String> = row.get(12)?;
@@ -609,122 +628,15 @@ impl Datastore {
     }
 
     fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
-        let mut get_provenance = self.conn.prepare_cached(indoc! {r#"
-            select distinct p.payload_kind, p.payload_id, bp.kind provenance_kind
-            from
-                blob_provenance bp
-                inner join blob b on (bp.blob_id = b.id)
-                inner join provenance p on (bp.provenance_id = p.id)
-            where b.blob_id = ?
+        let mut get = self.conn.prepare_cached(indoc! {r#"
+            select provenance from blob_denorm where blob_id = ?
         "#})?;
 
-        let mut get_provenance_payload_file = self.conn.prepare_cached(indoc! {r#"
-            select path from provenance_payload_file
-            where id = ?
-        "#})?;
-
-        let mut get_provenance_payload_git_repo = self.conn.prepare_cached(indoc! {r#"
-            select repo_path from provenance_payload_git_repo
-            where id = ?
-        "#})?;
-
-        let mut get_provenance_payload_git_commit = self.conn.prepare_cached(indoc! {r#"
-            select repo_path, commit_id, blob_path
-            from provenance_payload_git_commit
-            where id = ?
-        "#})?;
-
-        let mut get_commit_metadata = self.conn.prepare_cached(indoc! {r#"
-            select
-                commit_id,
-                committer_name,
-                committer_email,
-                commit_date,
-                author_name,
-                author_email,
-                author_date,
-                message
-            from git_commit
-            where id = ?
-        "#})?;
-
-        let ps = get_provenance.query_map((metadata.id.hex(),), |row| {
-            let payload_kind = row.get(0)?;
-            let payload_id: i64 = row.get(1)?;
-            let provenance_kind: Option<CommitKind> = row.get(2)?;
-            match payload_kind {
-                ProvenanceKind::File => {
-                    let path: Vec<u8> =
-                        get_provenance_payload_file.query_row((payload_id,), |r| r.get(0))?;
-                    let path = PathBuf::from(OsString::from_vec(path));
-                    Ok(Provenance::from_file(path))
-                }
-
-                ProvenanceKind::GitRepo => {
-                    let path: Vec<u8> =
-                        get_provenance_payload_git_repo.query_row((payload_id,), |r| r.get(0))?;
-                    let path = PathBuf::from(OsString::from_vec(path));
-                    Ok(Provenance::from_git_repo(path))
-                }
-
-                ProvenanceKind::GitCommit => {
-                    let (repo_path, commit_id, blob_path) = get_provenance_payload_git_commit
-                        .query_row((payload_id,), |row| {
-                            let repo_path: Vec<u8> = row.get(0)?;
-                            let repo_path = PathBuf::from(OsString::from_vec(repo_path));
-
-                            let commit_id: i64 = row.get(1)?;
-
-                            let blob_path: Vec<u8> = row.get(2)?;
-                            let blob_path = BString::from(blob_path);
-
-                            Ok((repo_path, commit_id, blob_path))
-                        })?;
-
-                    let commit_metadata: CommitMetadata =
-                        get_commit_metadata.query_row((commit_id,), |row| {
-                            let get_bstring = |idx: usize| -> rusqlite::Result<BString> {
-                                Ok(row.get_ref(idx)?.as_bytes()?.into())
-                            };
-
-                            let get_time = |idx: usize| -> rusqlite::Result<gix::date::Time> {
-                                let epoch_seconds = row.get_ref(idx)?.as_i64()?;
-                                Ok(gix::date::Time::new(epoch_seconds, 0))
-                            };
-
-                            let commit_id = gix::ObjectId::from_hex(row.get_ref(0)?.as_bytes()?)
-                                .map_err(|e| FromSqlError::Other(e.into()))?;
-
-                            let committer_name = get_bstring(1)?;
-                            let committer_email = get_bstring(2)?;
-                            let committer_timestamp = get_time(3)?;
-                            let author_name = get_bstring(4)?;
-                            let author_email = get_bstring(5)?;
-                            let author_timestamp = get_time(6)?;
-                            let message = get_bstring(7)?;
-
-                            Ok(CommitMetadata {
-                                commit_id,
-                                committer_name,
-                                committer_email,
-                                committer_timestamp,
-                                author_name,
-                                author_email,
-                                author_timestamp,
-                                message,
-                            })
-                        })?;
-
-                    let provenance_kind = provenance_kind.ok_or(FromSqlError::InvalidType)?;
-                    Ok(Provenance::from_git_repo_and_commit_metadata(
-                        repo_path,
-                        provenance_kind,
-                        commit_metadata,
-                        blob_path,
-                    ))
-                }
-            }
+        let ps = get.query_map((metadata.id, ), |row| {
+            // TODO: deserialize specialized types properly
+            Ok(Provenance::from_extended(val_from_row(row)?))
         })?;
+
         let mut results = Vec::new();
         for p in ps {
             results.push(p?);
@@ -735,9 +647,6 @@ impl Datastore {
         }
     }
 }
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MatchId(pub i64);
 
 /// A function that exists to make SQL row conversion to a value via TryFrom<&rusqlite::Row> more
 /// ergonomic.
@@ -922,12 +831,12 @@ mod test {
 }
 
 // -------------------------------------------------------------------------------------------------
-// MatchSummary
+// FindingSummary
 // -------------------------------------------------------------------------------------------------
 
 /// A summary of matches in a `Datastore`.
 #[derive(Serialize)]
-pub struct MatchSummary(pub Vec<MatchSummaryEntry>);
+pub struct FindingSummary(pub Vec<MatchSummaryEntry>);
 
 #[derive(Serialize)]
 pub struct MatchSummaryEntry {
@@ -936,7 +845,7 @@ pub struct MatchSummaryEntry {
     pub total_count: usize,
 }
 
-impl std::fmt::Display for MatchSummary {
+impl std::fmt::Display for FindingSummary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for entry in self.0.iter() {
             writeln!(f, "{}: {} ({})", entry.rule_name, entry.distinct_count, entry.total_count)?;
@@ -952,8 +861,14 @@ impl std::fmt::Display for MatchSummary {
 /// Metadata for a group of matches that have identical rule name and match content.
 #[derive(Debug, Serialize)]
 pub struct FindingMetadata {
-    /// The name of the rule of all the matches in the group
+    /// The name of the rule that detected each match
     pub rule_name: String,
+
+    /// The textual identifier of the rule that detected each match
+    pub rule_text_id: String,
+
+    /// The structural identifier of the rule that detected each match
+    pub rule_structural_id: String,
 
     /// The matched content of all the matches in the group
     pub groups: Groups,
@@ -980,21 +895,30 @@ pub enum Status {
     Reject,
 }
 
-impl rusqlite::types::ToSql for Status {
-    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        match self {
-            Status::Accept => Ok("accept".into()),
-            Status::Reject => Ok("reject".into()),
+// -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+
+    impl ToSql for Status {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            match self {
+                Status::Accept => Ok("accept".into()),
+                Status::Reject => Ok("reject".into()),
+            }
         }
     }
-}
 
-impl rusqlite::types::FromSql for Status {
-    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
-        match value.as_str()? {
-            "accept" => Ok(Status::Accept),
-            "reject" => Ok(Status::Reject),
-            _ => Err(rusqlite::types::FromSqlError::InvalidType),
+    impl FromSql for Status {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            match value.as_str()? {
+                "accept" => Ok(Status::Accept),
+                "reject" => Ok(Status::Reject),
+                _ => Err(FromSqlError::InvalidType),
+            }
         }
     }
 }

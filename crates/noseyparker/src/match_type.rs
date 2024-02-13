@@ -29,6 +29,32 @@ impl Group {
 pub struct Groups(SmallVec<[Group; 1]>);
 
 // -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{ToSql, FromSql, FromSqlError, ToSqlOutput, ValueRef, FromSqlResult};
+
+    impl ToSql for Groups {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            let json = serde_json::to_string(self).map_err(|e| FromSqlError::Other(e.into()))?;
+            Ok(json.into())
+        }
+    }
+
+    impl FromSql for Groups {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            match value {
+                ValueRef::Text(s) => serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into())),
+                ValueRef::Blob(b) => serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into())),
+                _ => Err(FromSqlError::InvalidType),
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 // Match
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone, serde::Serialize)]

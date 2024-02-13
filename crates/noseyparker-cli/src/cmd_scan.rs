@@ -26,7 +26,7 @@ use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
 use noseyparker::matcher_stats::MatcherStats;
-use noseyparker::provenance::{CommitKind, Provenance};
+use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
 
@@ -521,9 +521,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                     .commit_metadata
                                     .get(&e.commit_oid)
                                     .expect("should have commit metadata");
-                                let p = Provenance::from_git_repo_and_commit_metadata(
+                                let p = Provenance::from_git_repo_with_first_commit(
                                     repo_path.clone(),
-                                    CommitKind::FirstSeen,
                                     commit_metadata.clone(),
                                     e.path.clone(),
                                 );
@@ -534,9 +533,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                             .commit_metadata
                                             .get(&e.commit_oid)
                                             .expect("should have commit metadata");
-                                        Provenance::from_git_repo_and_commit_metadata(
+                                        Provenance::from_git_repo_with_first_commit(
                                             repo_path.clone(),
-                                            CommitKind::FirstSeen,
                                             commit_metadata.clone(),
                                             e.path.clone(),
                                         )
@@ -661,10 +659,12 @@ impl MetadataResult {
     ) -> MetadataResult {
         let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| match p {
             Provenance::File(e) => Some(e.path.as_path()),
-            Provenance::GitRepo(e) => match &e.commit_provenance {
+            Provenance::GitRepo(e) => match &e.first_commit {
                 Some(md) => md.blob_path.to_path().ok(),
                 None => None,
             },
+            // TODO: implement this case
+            Provenance::Extended(_e) => None,
         });
 
         let input = match blob_path {

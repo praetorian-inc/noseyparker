@@ -31,7 +31,7 @@ impl ProvenanceSet {
 
         for p in std::iter::once(&provenance).chain(&more_provenance) {
             if let Provenance::GitRepo(e) = p {
-                if e.commit_provenance.is_some() {
+                if e.first_commit.is_some() {
                     git_repos_with_detailed.insert(e.repo_path.clone());
                 }
             }
@@ -41,9 +41,10 @@ impl ProvenanceSet {
             .chain(more_provenance)
             .filter(|p| match p {
                 Provenance::GitRepo(e) => {
-                    e.commit_provenance.is_some() || !git_repos_with_detailed.contains(&e.repo_path)
+                    e.first_commit.is_some() || !git_repos_with_detailed.contains(&e.repo_path)
                 }
                 Provenance::File(_) => true,
+                Provenance::Extended(_) => true,
             });
 
         Self {

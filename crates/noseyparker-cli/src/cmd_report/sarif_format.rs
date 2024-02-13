@@ -39,17 +39,25 @@ impl DetailsReporter {
                         vec![(String::from("blob_metadata"), serde_json::json!(md))];
 
                     let uri = match p {
-                        Provenance::File(e) => e.path.to_string_lossy().into_owned(),
+                        Provenance::File(e) => Some(e.path.to_string_lossy().into_owned()),
                         Provenance::GitRepo(e) => {
-                            if let Some(p) = &e.commit_provenance {
+                            if let Some(p) = &e.first_commit {
                                 additional_properties.push((
-                                    String::from("commit_provenance"),
+                                    String::from("first_commit"),
                                     serde_json::json!(p),
                                 ));
                             }
-                            e.repo_path.to_string_lossy().into_owned()
+                            Some(e.repo_path.to_string_lossy().into_owned())
                         }
+                        // TODO: implement this case properly
+                        Provenance::Extended(_e) => None,
                     };
+
+                    let mut artifact_location = sarif::ArtifactLocationBuilder::default();
+                    if let Some(uri) = uri {
+                        artifact_location.uri(uri);
+                    }
+                    let artifact_location = artifact_location.build()?;
 
                     let additional_properties =
                         std::collections::BTreeMap::from_iter(additional_properties);
@@ -60,9 +68,7 @@ impl DetailsReporter {
                     let location = sarif::LocationBuilder::default()
                         .physical_location(
                             sarif::PhysicalLocationBuilder::default()
-                                .artifact_location(
-                                    sarif::ArtifactLocationBuilder::default().uri(uri).build()?,
-                                )
+                                .artifact_location(artifact_location)
                                 // .context_region() FIXME: fill this in with location info of surrounding context
                                 .region(
                                     sarif::RegionBuilder::default()

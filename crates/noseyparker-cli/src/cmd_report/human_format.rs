@@ -5,7 +5,7 @@ impl DetailsReporter {
         let datastore = &self.datastore;
         let group_metadata = datastore
             .get_finding_metadata()
-            .context("Failed to get finding metadata from datastore")?;
+            .context("Failed to get match group metadata from datastore")?;
 
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
@@ -108,7 +108,7 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                             reporter.style_heading("Git repo:"),
                             reporter.style_metadata(e.repo_path.display()),
                         )?;
-                        if let Some(cs) = &e.commit_provenance {
+                        if let Some(cs) = &e.first_commit {
                             let cmd = &cs.commit_metadata;
                             let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
                             let atime = cmd
@@ -116,9 +116,8 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                                 .format(time::macros::format_description!("[year]-[month]-[day]"));
                             writeln!(
                                 f,
-                                "{} {} in {}",
+                                "{} first seen in {}",
                                 reporter.style_heading("Commit:"),
-                                cs.commit_kind,
                                 reporter.style_metadata(cmd.commit_id),
                             )?;
                             writeln!(f)?;
@@ -140,6 +139,10 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                             )?;
                             writeln!(f)?;
                         }
+                    }
+                    // TODO: implement this case properly
+                    Provenance::Extended(e) => {
+                        writeln!(f, "extended {}", e)?;
                     }
                 }
             }

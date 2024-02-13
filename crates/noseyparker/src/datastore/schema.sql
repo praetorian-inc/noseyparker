@@ -100,14 +100,6 @@ CREATE TABLE rule
     -- A content-based identifier, defined as `text id:sha1 hash of the pattern`.
     structural_id text unique not null,
 
-    foreign key (id) references rule_syntax(rule_id) deferrable initially deferred
-) STRICT;
-
-CREATE TABLE rule_syntax
--- This table records the abstract syntax of each rule.
-(
-    rule_id integer primary key references rule(id),
-
     -- The minified JSON serialization of the rule
     syntax text not null,
 
@@ -292,7 +284,7 @@ CREATE VIEW match_denorm
 
     rule_name,
     rule_text_id,
-    rule_pattern,
+    rule_structural_id,
 
     groups,
 
@@ -307,8 +299,8 @@ CREATE VIEW match_denorm
 ) as
 select
     m.id,
-    m.structural_id,
-    m.finding_id,
+    msid.structural_id,
+    mfid.finding_id,
 
     b.blob_id,
 
@@ -322,7 +314,7 @@ select
 
     r.name,
     r.text_id,
-    r.pattern,
+    r.structural_id,
 
     mg.groups,
 
@@ -336,11 +328,13 @@ select
     match_score.score
 from
     match m
+    left outer join match_structural_id msid on (msid.match_id = m.id)
+    left outer join match_finding_id mfid on (mfid.match_id = m.id)
     left outer join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
     left outer join match_snippet ms on (m.id = ms.match_id)
     left outer join blob b on (m.blob_id = b.id)
     left outer join rule r on (m.rule_id = r.id)
-    left outer join match_groups mg on (m.rule_id = mg.rule_id)
+    left outer join match_groups mg on (m.id = mg.match_id)
     left outer join snippet before_snippet on (ms.before_snippet_id = before_snippet.id)
     left outer join snippet matching_snippet on (ms.matching_snippet_id = matching_snippet.id)
     left outer join snippet after_snippet on (ms.after_snippet_id = after_snippet.id)
@@ -393,7 +387,7 @@ select
     r.name,
     r.text_id,
     r.structural_id,
-    rs.syntax,
+    r.syntax,
     mg.groups,
     count(*)
 from
@@ -401,7 +395,6 @@ from
     inner join match_finding_id mf on (m.id = mf.match_id)
     inner join match_groups mg on (m.id = mg.match_id)
     inner join rule r on (m.rule_id = r.id)
-    inner join rule_syntax rs on (rs.rule_id = r.id)
 group by mf.finding_id
 ;
 

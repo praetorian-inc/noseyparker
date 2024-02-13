@@ -103,6 +103,27 @@ impl From<BlobId> for gix::ObjectId {
 }
 
 // -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{ToSql, ToSqlOutput, FromSql, FromSqlResult, FromSqlError, ValueRef};
+
+    impl ToSql for BlobId {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            Ok(self.hex().into())
+        }
+    }
+
+    impl FromSql for BlobId {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            Self::from_hex(value.as_str()?).map_err(|e| FromSqlError::Other(e.into()))
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 // test
 // -------------------------------------------------------------------------------------------------
 #[cfg(test)]
