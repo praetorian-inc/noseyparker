@@ -231,19 +231,19 @@ Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 
     Occurrence 1/1
     Git repo:  <REPO>
-    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
-
-        Author:     Mike Larsson <mikelarssonftw@gmail.com>
-        Date:       2014-06-19
-        Summary:    Add makerstrap to project
-        Path:       public/vendor/bootstrap/test-infra/README.md
-
-    Git repo:  <REPO>
     Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
 
         Author:     Jon Buckley <jon@jbuckley.ca>
         Date:       2014-11-07
         Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
         Path:       public/vendor/bootstrap/test-infra/README.md
 
     Blob:  <BLOB>
@@ -273,19 +273,19 @@ Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
 
     Occurrence 1/1
     Git repo:  <REPO>
-    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
-
-        Author:     Mike Larsson <mikelarssonftw@gmail.com>
-        Date:       2014-06-19
-        Summary:    Add makerstrap to project
-        Path:       public/vendor/bootstrap/test-infra/README.md
-
-    Git repo:  <REPO>
     Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
 
         Author:     Jon Buckley <jon@jbuckley.ca>
         Date:       2014-11-07
         Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
         Path:       public/vendor/bootstrap/test-infra/README.md
 
     Blob:  <BLOB>
@@ -313,19 +313,19 @@ Group: arn:aws:s3:::the-bucket-name-goes-here`
 
     Occurrence 1/1
     Git repo:  <REPO>
-    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
-
-        Author:     Mike Larsson <mikelarssonftw@gmail.com>
-        Date:       2014-06-19
-        Summary:    Add makerstrap to project
-        Path:       public/vendor/bootstrap/test-infra/README.md
-
-    Git repo:  <REPO>
     Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
 
         Author:     Jon Buckley <jon@jbuckley.ca>
         Date:       2014-11-07
         Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
         Path:       public/vendor/bootstrap/test-infra/README.md
 
     Blob:  <BLOB>

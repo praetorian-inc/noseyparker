@@ -619,7 +619,10 @@ impl Datastore {
 
     fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
         let mut get = self.conn.prepare_cached(indoc! {r#"
-            select provenance from blob_provenance_denorm where blob_id = ?
+            select provenance
+            from blob_provenance_denorm
+            where blob_id = ?
+            order by provenance
         "#})?;
 
         let ps = get.query_map((metadata.id,), |row| val_from_row(row))?;
