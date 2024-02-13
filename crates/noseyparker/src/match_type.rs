@@ -35,11 +35,14 @@ mod sql {
     use super::*;
 
     use rusqlite::types::{ToSql, FromSql, FromSqlError, ToSqlOutput, ValueRef, FromSqlResult};
+    use rusqlite::Error::ToSqlConversionFailure;
 
     impl ToSql for Groups {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
-            let json = serde_json::to_string(self).map_err(|e| FromSqlError::Other(e.into()))?;
-            Ok(json.into())
+            match serde_json::to_string(self) {
+                Err(e) => Err(ToSqlConversionFailure(e.into())),
+                Ok(s) => Ok(s.into()),
+            }
         }
     }
 
