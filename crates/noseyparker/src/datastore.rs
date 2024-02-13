@@ -15,7 +15,7 @@ use crate::provenance::Provenance;
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
-const SCHEMA: &str = include_str!("datastore/schema.sql");
+const SCHEMA_60: &str = include_str!("datastore/schema_60.sql");
 
 // -------------------------------------------------------------------------------------------------
 // Datastore
@@ -757,7 +757,7 @@ impl Datastore {
         if user_version == 0 {
             let new_user_version = Self::CURRENT_SCHEMA_VERSION;
             debug!("Migrating database schema from version {user_version} to {new_user_version}");
-            tx.execute_batch(SCHEMA)?;
+            tx.execute_batch(SCHEMA_60)?;
             set_user_version(new_user_version)?;
         }
 
