@@ -66,7 +66,8 @@ impl DetailsReporter {
         Ok(self
             .datastore
             .get_match_group_data(metadata, self.max_matches)
-            .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
+            .with_context(|| format!("Failed to get match data for group {metadata:?}"))
+            .expect("should be able to find get match data for group")
             .into_iter()
             .map(|(p, md, id, m)| ReportMatch { ps: p, md, id, m })
             .collect())
