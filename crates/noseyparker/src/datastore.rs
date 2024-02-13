@@ -1,12 +1,9 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
 use indoc::indoc;
-use input_enumerator::git_commit_metadata::CommitMetadata;
 use noseyparker_rules::Rule;
-use rusqlite::{types::FromSqlError, Connection};
+use rusqlite::Connection;
 use serde::Serialize;
-use std::ffi::OsString;
-use std::os::unix::ffi::OsStringExt;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
@@ -633,8 +630,7 @@ impl Datastore {
         "#})?;
 
         let ps = get.query_map((metadata.id, ), |row| {
-            // TODO: deserialize specialized types properly
-            Ok(Provenance::from_extended(val_from_row(row)?))
+            val_from_row(row)
         })?;
 
         let mut results = Vec::new();

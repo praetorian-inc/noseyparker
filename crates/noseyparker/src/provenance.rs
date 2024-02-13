@@ -1,7 +1,7 @@
 use bstr::BString;
 use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 
@@ -9,7 +9,7 @@ use std::path::PathBuf;
 // Provenance
 // -------------------------------------------------------------------------------------------------
 /// `Provenance` indicates where a particular blob or match was found when scanning.
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case", tag = "kind")]
 #[allow(clippy::large_enum_variant)]
 pub enum Provenance {
@@ -87,7 +87,7 @@ impl std::fmt::Display for Provenance {
 // FileProvenance
 // -------------------------------------------------------------------------------------------------
 /// Indicates that a blob was seen at a particular file path
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FileProvenance {
     pub path: PathBuf,
 }
@@ -96,7 +96,7 @@ pub struct FileProvenance {
 // GitRepoProvenance
 // -------------------------------------------------------------------------------------------------
 /// Indicates that a blob was seen in a Git repo, optionally with particular commit provenance info
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GitRepoProvenance {
     pub repo_path: PathBuf,
     pub first_commit: Option<CommitProvenance>,
@@ -106,7 +106,7 @@ pub struct GitRepoProvenance {
 // CommitProvenance
 // -------------------------------------------------------------------------------------------------
 /// How was a particular Git commit encountered?
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CommitProvenance {
     pub commit_metadata: CommitMetadata,
 
@@ -117,11 +117,37 @@ pub struct CommitProvenance {
 // -------------------------------------------------------------------------------------------------
 // ExtendedProvenance
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ExtendedProvenance(pub serde_json::Value);
 
 impl std::fmt::Display for ExtendedProvenance {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.0, f)
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+    use rusqlite::Error::ToSqlConversionFailure;
+
+    impl ToSql for Provenance {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            match serde_json::to_string(self) {
+                Err(e) => Err(ToSqlConversionFailure(e.into())),
+                Ok(s) => Ok(s.into()),
+            }
+        }
+    }
+
+    impl FromSql for Provenance {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            let s = value.as_str()?;
+            serde_json::from_str(s).map_err(|e| FromSqlError::Other(e.into()))
+        }
     }
 }

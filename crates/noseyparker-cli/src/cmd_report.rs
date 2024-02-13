@@ -11,7 +11,6 @@ use noseyparker::defaults::get_builtin_rules;
 use noseyparker::match_type::Match;
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
-use noseyparker_digest::sha1_hexdigest;
 
 use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat};
 use crate::reportable::Reportable;
