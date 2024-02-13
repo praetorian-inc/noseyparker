@@ -34,8 +34,19 @@ fn serialize_bytes_string_lossy<S: serde::Serializer>(
 fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(
     d: D,
 ) -> Result<Vec<u8>, D::Error> {
-    let s: &str = serde::Deserialize::deserialize(d)?;
-    Ok(s.as_bytes().to_vec())
+    struct Vis;
+    impl serde::de::Visitor<'_> for Vis {
+        type Value = Vec<u8>;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("a string")
+        }
+
+        fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+            Ok(v.into())
+        }
+    }
+    d.deserialize_str(Vis)
 }
 
 
