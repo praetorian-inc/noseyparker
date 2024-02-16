@@ -331,6 +331,10 @@ pub struct GitHubReposListArgs {
 
     #[command(flatten)]
     pub output_args: OutputArgs<GitHubOutputFormat>,
+
+    /// Ignore validation of TLS certificates
+    #[arg(long)]
+    pub ignore_certs: bool,
 }
 
 #[derive(Args, Debug, Clone)]
@@ -500,6 +504,10 @@ pub struct ScanArgs {
         help_heading="Data Collection Options",
     )]
     pub copy_blobs: CopyBlobsMode,
+
+    /// Ignore validation of TLS certificates
+    #[arg(long)]
+    pub ignore_certs: bool,
 
 }
 

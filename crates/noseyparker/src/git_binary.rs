@@ -22,10 +22,11 @@ pub enum GitError {
 
 pub struct Git {
     credentials: Vec<String>,
+    ignore_certs: bool,
 }
 
 impl Git {
-    pub fn new() -> Self {
+    pub fn new(ignore_certs: bool) -> Self {
         let credentials: Vec<String> = // if std::env::var("NP_GITHUB_TOKEN").is_ok() {
             [
                 "-c",
@@ -38,7 +39,7 @@ impl Git {
         // };
         ;
 
-        Self { credentials }
+        Self { credentials, ignore_certs }
     }
 
     fn git(&self) -> Command {
@@ -46,6 +47,9 @@ impl Git {
         cmd.env("GIT_CONFIG_GLOBAL", "/dev/null");
         cmd.env("GIT_CONFIG_NOSYSTEM", "1");
         cmd.env("GIT_CONFIG_SYSTEM", "/dev/null");
+        if self.ignore_certs {
+            cmd.env("GIT_SSL_NO_VERIFY", "1");
+        }
         cmd.args(&self.credentials);
         cmd.stdin(Stdio::null());
         cmd
@@ -105,7 +109,7 @@ impl Git {
 impl Default for Git {
     /// Equivalent to `Git::new()`
     fn default() -> Self {
-        Self::new()
+        Self::new(false)
     }
 }
 
