@@ -30,19 +30,21 @@ impl <'a> Display for PrettyFinding<'a> {
 
         // write out status if set
         let statuses = &finding.metadata.statuses.0;
-        if statuses.len() > 1 {
-            writeln!(f, "{} {}", reporter.style_heading("Status:"), "Mixed")?;
-        } else if statuses.len() == 1 {
+        let num_statuses = statuses.len();
+        #[allow(clippy::comparison_chain)]
+        if num_statuses > 1 {
+            writeln!(f, "{} Mixed", reporter.style_heading("Status:"))?;
+        } else if num_statuses == 1 {
             let status = match statuses[0] {
                 Status::Accept => "Accept",
                 Status::Reject => "Reject",
             };
-            writeln!(f, "{} {}", reporter.style_heading("Status:"), status)?;
+            writeln!(f, "{} {status}", reporter.style_heading("Status:"))?;
         };
 
         // write out comment if set
         if let Some(comment) = &finding.metadata.comment {
-            writeln!(f, "{} {}", reporter.style_heading("Comment:"), comment)?;
+            writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
         };
 
         let mut write_group = |group_heading: StyledObject<String>, g: &Group| {

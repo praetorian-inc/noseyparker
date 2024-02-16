@@ -93,8 +93,8 @@ struct RuleEntry<'r> {
 impl<'r> RuleEntry<'r> {
     pub fn new(rule: &'r Rule) -> Self {
         Self {
-            id: &rule.id(),
-            name: &rule.name(),
+            id: rule.id(),
+            name: rule.name(),
         }
     }
 }

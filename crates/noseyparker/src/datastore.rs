@@ -663,7 +663,7 @@ impl Datastore {
             order by provenance
         "#})?;
 
-        let ps = get.query_map((metadata.id,), |row| val_from_row(row))?;
+        let ps = get.query_map((metadata.id,), val_from_row)?;
 
         let mut results = Vec::new();
         for p in ps {
@@ -773,7 +773,7 @@ where
 /// The setter should insert a new entry for the given parameters and return 1 row.
 ///
 /// Any rows returned by either the getter or the setter should be convertible by the `f` function.
-fn add_if_missing_simple<'a, P, F, T>(
+fn add_if_missing_simple<P, F, T>(
     get: &mut rusqlite::CachedStatement<'_>,
     set: &mut rusqlite::CachedStatement<'_>,
     f: F,
@@ -793,7 +793,7 @@ where
 /// The setter should insert a new entry for the given parameters and return 1 row.
 ///
 /// Any rows returned by either the getter or the setter should be convertible by the `f` function.
-fn add_if_missing<'a, P1, P2, F, T>(
+fn add_if_missing<P1, P2, F, T>(
     get: &mut rusqlite::CachedStatement<'_>,
     set: &mut rusqlite::CachedStatement<'_>,
     f: F,

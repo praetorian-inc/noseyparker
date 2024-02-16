@@ -209,6 +209,6 @@ impl LoadedRules {
 
 /// Deduplicate and sort a collection of rules
 fn sort_and_deduplicate_rules(rules: &mut Vec<&Rule>) {
-    rules.sort_by(|r1, r2| r1.id().cmp(&r2.id()));
+    rules.sort_by(|r1, r2| r1.id().cmp(r2.id()));
     rules.dedup_by(|r1, r2| r1.id() == r2.id());
 }

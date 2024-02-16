@@ -19,7 +19,7 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
         .context("Failed to load rules")?;
 
     let mut rules: Vec<&Rule> = loaded.iter_rules().collect();
-    rules.sort_by(|r1, r2| r1.id().cmp(&r2.id()));
+    rules.sort_by(|r1, r2| r1.id().cmp(r2.id()));
 
     let mut rulesets: Vec<&RulesetSyntax> = loaded.iter_rulesets().collect();
     rulesets.sort_by(|r1, r2| r1.id.cmp(&r2.id));
