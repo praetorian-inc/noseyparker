@@ -57,7 +57,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS API Key",
         "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
         "score": null,
         "snippet": {
           "after": "\",\"Apple_PubSub_Socket_Render\":\"/tmp/launch-rHzB0S/Render\",\"TERM_PROGRAM_VERSION\":\"326\",\"TERM_SESSION_ID\":\"C99AE63D-8AC8-40EC-9A43-7C14ACEBE413\",\"ANT_HOME\":\"/usr/local/etc/ant\",\"CMD_DURATION\":\"1m 22.1s\",\"USER\":\"davida\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/L",
@@ -128,7 +130,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS API Key",
         "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
         "score": null,
         "snippet": {
           "after": "\",\"PWD\":\"/Users/davida/src/appmaker\",\"LANG\":\"en_CA.UTF-8\",\"PUBLISH_URL_PREFIX\":\"XXX\",\"HOME\":\"/Users/davida\",\"SHLVL\":\"2\",\"LOGNAME\":\"davida\",\"S3_BUCKET\":\"com.mozillalabs.appmaker\",\"COOKIE_SECRET\":\"I hate working as a janitor for arrogant rich people; so I cl",
@@ -199,7 +203,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS API Key",
         "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
         "score": null,
         "snippet": {
           "after": "\nS3_OBJECT_PREFIX=flathead\nS3_SECRET=DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
@@ -270,7 +276,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS S3 Bucket (path style)",
         "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
         "score": null,
         "snippet": {
           "after": "makerstrap.complete.min.css\" rel=\"stylesheet\">\n  <link href=\"../create-user/create-user-form.css\" rel=\"stylesheet\">\n</head>\n<body>\n\n  <!-- Modal -->\n<div\n  class=\"modal fade\"\n  id=\"webmaker-login-new-user\"\n  tabindex=\"-1\"\n  role=\"dialog\"\n  aria-labelledby=",
@@ -341,7 +349,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS S3 Bucket (path style)",
         "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
         "score": null,
         "snippet": {
           "after": "flathead/succinct-tub-861/app\"></iframe></div>\n          <p>Use a handful of instruments and a sequencer to create some musical noise!</p>\n        </li>\n        <li>\n          <h2>Draw with Friends</h2>\n          <div class=\"links\"><a href=\"http://screechi",
@@ -397,7 +407,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS S3 Bucket (path style)",
         "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
         "score": null,
         "snippet": {
           "after": "flathead/screeching-north-733/app\"></iframe></div>\n          <p>Draw and share your creativity with a group of friends!</p>\n        </li>\n        <li>\n          <h2>Track Progress</h2>\n          <div class=\"links\"><a href=\"http://wicked-animal-644.appalot.",
@@ -453,7 +465,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS S3 Bucket (path style)",
         "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
         "score": null,
         "snippet": {
           "after": "flathead/wicked-animal-644/app\"></iframe></div>\n          <p>Count progress toward a personal goal, event attendees, or any other target.</p>\n        </li>\n        <li>\n          <h2>Play Hot Potato</h2>\n          <div class=\"links\"><a href=\"http://enchant",
@@ -524,7 +538,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS S3 Bucket (path style)",
         "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
         "score": null,
         "snippet": {
           "after": "donate-coffee.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7ZGHV75VSD2E)\n\n### Core idea\n- Simple and invisible\n- Easy to apply to existing HTML\n- No dependencies\n- Fast\n- Small\n- Handle thousands of items\n\n### Features\n- Work",
@@ -595,7 +611,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "AWS Secret Access Key",
         "rule_structural_id": "np.aws.2:d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+        "rule_text_id": "np.aws.2",
         "score": null,
         "snippet": {
           "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
@@ -683,7 +701,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Amazon Resource Name",
         "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
         "score": null,
         "snippet": {
           "after": ",\n                    \"arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*\"\n                ]\n            }\n        ]\n    }\n    ```\n\n12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Proper",
@@ -771,7 +791,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Amazon Resource Name",
         "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
         "score": null,
         "snippet": {
           "after": "\n                ]\n            }\n        ]\n    }\n    ```\n\n12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Properties pane, in the \"Lifecycle\" section, add a rule to expire/delete files ba",
@@ -859,7 +881,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Amazon Resource Name",
         "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
         "score": null,
         "snippet": {
           "after": "10. In the bucket's Properties pane, in the \"Permissions\" section, click the \"Edit bucket policy\" button.\n11. Input and submit an IAM Policy that grants the user at least read+write rights to the bucket. AWS has a policy generator and some examples to help",
@@ -930,7 +954,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Generic Secret",
         "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
         "score": null,
         "snippet": {
           "after": "\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
@@ -1001,7 +1027,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Generic Secret",
         "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
         "score": null,
         "snippet": {
           "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
@@ -1072,7 +1100,9 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "rule_name": "Generic Secret",
         "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
         "score": null,
         "snippet": {
           "after": "\",\"S3_OBJECT_PREFIX\":\"flathead\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/Listeners\",\"__CF_USER_TEXT_ENCODING\":\"0x1F5:0:0\",\"PATH\":\"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin\",\"__CHECKFIX1436934\":\"1\",\"ASSET_HOST\":\"\",\"S3_KEY\":\"AKIAJQNF3BIPEDR6MXEA\",\"PWD\":\"/Users/",

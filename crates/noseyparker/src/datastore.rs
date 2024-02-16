@@ -184,7 +184,7 @@ impl<'a> Transaction<'a> {
         "#})?;
 
         let f = move |r: &Rule| -> rusqlite::Result<RuleIdInt> {
-            let json_syntax = r.syntax().to_json();
+            let json_syntax = r.json_syntax();
             let rule_id = add_if_missing_simple(
                 &mut get_id,
                 &mut set_id,
@@ -619,6 +619,8 @@ impl Datastore {
                     },
                     groups: row.get(10)?,
                     rule_structural_id: metadata.rule_structural_id.clone(),
+                    rule_name: metadata.rule_name.clone(),
+                    rule_text_id: metadata.rule_text_id.clone(),
                 };
                 let num_bytes: usize = row.get(11)?;
                 let mime_essence: Option<String> = row.get(12)?;

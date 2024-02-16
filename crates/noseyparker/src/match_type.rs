@@ -77,7 +77,11 @@ pub struct Match {
     /// The rule that produced this match
     pub rule_structural_id: String,
 
-    // FIXME(overhaul): add rule_name
+    /// The text identifier of the rule that produced this match
+    pub rule_text_id: String,
+
+    /// The name of the rule that produced this match
+    pub rule_name: String,
 }
 
 impl Match {
@@ -138,6 +142,8 @@ impl Match {
         Match {
             blob_id: blob_match.blob.id,
             rule_structural_id: blob_match.rule.structural_id().to_owned(),
+            rule_name: blob_match.rule.name().to_owned(),
+            rule_text_id: blob_match.rule.id().to_owned(),
             snippet: Snippet {
                 matching: BString::from(blob_match.matching_input),
                 before: BString::from(before_snippet),
