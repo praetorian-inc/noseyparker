@@ -58,9 +58,6 @@ macro_rules! noseyparker_failure {
     ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().failure() }
 }
 
-// make macros easily visible to other modules
-pub use {noseyparker, noseyparker_success, noseyparker_failure, assert_cmd_snapshot};
-
 
 /*
 lazy_static! {

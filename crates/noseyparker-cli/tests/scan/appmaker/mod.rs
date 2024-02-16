@@ -6,7 +6,6 @@
 /// been archived for years. This is a potential source of test nondeterminacy, as that data could
 /// conceivably be changed.
 use super::*;
-pub use pretty_assertions::assert_ne;
 
 fn read_json(fname: &Path) -> anyhow::Result<serde_json::Value> {
     let file = std::fs::File::open(fname)?;
