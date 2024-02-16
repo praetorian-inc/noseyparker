@@ -76,6 +76,8 @@ pub struct Match {
 
     /// The rule that produced this match
     pub rule_structural_id: String,
+
+    // FIXME(overhaul): add rule_name
 }
 
 impl Match {
