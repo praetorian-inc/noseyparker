@@ -137,7 +137,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
         };
-        let git = Git::new();
+        let git = Git::new(args.ignore_certs);
 
         let mut progress =
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
