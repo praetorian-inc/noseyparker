@@ -66,7 +66,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "{\"TERM_PROGRAM\":\"Apple_Terminal\",\"TERM\":\"xterm-256color\",\"SHELL\":\"/usr/local/bin/fish\",\"CLICOLOR\":\"1\",\"TMPDIR\":\"/var/folders/xj/5v3cc4y9039fx_fhk67bvg8w0000gn/T/\",\"AWS_ID\":\"",
           "matching": "AKIAJEEUOSJXYB2BKLMA"
         },
-        "status": null
+        "status": null,
+        "structural_id": "337bc475c7d91faaeaa8928bcdb69a0894cf129a"
       }
     ],
     "mean_score": null,
@@ -139,7 +140,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "S3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ\",\"S3_OBJECT_PREFIX\":\"flathead\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/Listeners\",\"__CF_USER_TEXT_ENCODING\":\"0x1F5:0:0\",\"PATH\":\"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin\",\"__CHECKFIX1436934\":\"1\",\"ASSET_HOST\":\"\",\"S3_KEY\":\"",
           "matching": "AKIAJQNF3BIPEDR6MXEA"
         },
-        "status": null
+        "status": null,
+        "structural_id": "89884c95014e1d4ecc6a5b888c7e40575e5e19e3"
       }
     ],
     "mean_score": null,
@@ -212,7 +214,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": " a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=",
           "matching": "AKIAJUZPLTNMY2JSXLYA"
         },
-        "status": null
+        "status": null,
+        "structural_id": "d8a55347f7254bef607e42f641feea9b7419b0fd"
       }
     ],
     "mean_score": null,
@@ -285,7 +288,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n  <meta charset=\"utf-8\">\n  <title>Persona example</title>\n  <link href=\"https:/",
           "matching": "/s3-us-west-2.amazonaws.com/makerstrap/"
         },
-        "status": null
+        "status": null,
+        "structural_id": "45cb43335b67dd491372630d822a691919023aa2"
       }
     ],
     "mean_score": null,
@@ -358,7 +362,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "   <div class=\"links\"><a href=\"http://succinct-tub-861.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fsuccinct-tub-861.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
           "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
         },
-        "status": null
+        "status": null,
+        "structural_id": "644422e3dcd86256bd6aebca86ed5fe360b2e399"
       },
       {
         "blob_id": "1050811ad6d53febece71e56c284f91deecf38ce",
@@ -416,7 +421,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "class=\"links\"><a href=\"http://screeching-north-733.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fscreeching-north-733.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
           "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
         },
-        "status": null
+        "status": null,
+        "structural_id": "ce52241ddcd44de5653b7f06ced351acc3d38353"
       },
       {
         "blob_id": "1050811ad6d53febece71e56c284f91deecf38ce",
@@ -474,7 +480,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": " <div class=\"links\"><a href=\"http://wicked-animal-644.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fwicked-animal-644.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
           "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
         },
-        "status": null
+        "status": null,
+        "structural_id": "02fa7a100353c02b905582c872a80028d1ff5c5d"
       }
     ],
     "mean_score": null,
@@ -547,7 +554,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "# List.js\nPerfect library for adding **search**, **sort**, **filters** and **flexibility** to\n**tables**, **lists** and various HTML elements. Built to be invisible and work on existing HTML.\nReally simple and easy to use!\n\n[![Donate](https:/",
           "matching": "/s3.amazonaws.com/listjs/"
         },
-        "status": null
+        "status": null,
+        "structural_id": "48b037a97d406f02ab2299d1b6b6dba44dd50296"
       }
     ],
     "mean_score": null,
@@ -620,7 +628,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "Frameworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"",
           "matching": "AWS_SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
         },
-        "status": null
+        "status": null,
+        "structural_id": "a7758d71b489b1ff3f045bd12f1bf670bb55e986"
       }
     ],
     "mean_score": null,
@@ -710,7 +719,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "             \"s3:ListBucket\",\n                    \"s3:DeleteObject\",\n                    \"s3:DeleteObjectVersion\",\n                    \"s3:GetObject\",\n                    \"s3:PutObject\"\n                ],\n                \"Resource\": [\n                    \"",
           "matching": "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\""
         },
-        "status": null
+        "status": null,
+        "structural_id": "ac9a696bb431d7903d9706cf3e14c64312bd19d7"
       }
     ],
     "mean_score": null,
@@ -800,7 +810,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "                \"s3:DeleteObjectVersion\",\n                    \"s3:GetObject\",\n                    \"s3:PutObject\"\n                ],\n                \"Resource\": [\n                    \"arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\",\n                    \"",
           "matching": "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*\""
         },
-        "status": null
+        "status": null,
+        "structural_id": "13067abed46192456dd424d8fc386e3a9270c4cf"
       }
     ],
     "mean_score": null,
@@ -890,7 +901,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": " *nix machines, you can easily generate a random UUID to use as the bucket name using Python:\n\n    ```bash\n    python -c \"import uuid; print(uuid.uuid4())\"\n    ```\n\n9. Determine and note what your bucket's ARN is. The ARN for an S3 bucket is of the form: `",
           "matching": "arn:aws:s3:::the-bucket-name-goes-here`\n"
         },
-        "status": null
+        "status": null,
+        "structural_id": "f86db477a75df92d4602da375bce77baf4d4ac93"
       }
     ],
     "mean_score": null,
@@ -963,7 +975,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "eir computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=AKIAJUZPLTNMY2JSXLYA\nS3_OBJECT_PREFIX=flathead\nS3_",
           "matching": "SECRET=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"
         },
-        "status": null
+        "status": null,
+        "structural_id": "77559665aae5d52badf11a28112d683ec2714a1f"
       }
     ],
     "mean_score": null,
@@ -1036,7 +1049,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "eworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"AWS_",
           "matching": "SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
         },
-        "status": null
+        "status": null,
+        "structural_id": "d099b238d17b29fa502de0f38dab4868a9b563e4"
       }
     ],
     "mean_score": null,
@@ -1109,7 +1123,8 @@ expression: read_json(report_json.path()).unwrap()
           "before": "8w0000gn/T/\",\"Apple_PubSub_Socket_Render\":\"/tmp/launch-rHzB0S/Render\",\"TERM_PROGRAM_VERSION\":\"326\",\"OLDPWD\":\"/Users/davida/src/appmaker\",\"TERM_SESSION_ID\":\"5600EB0F-9A8F-4DF7-BB34-CD3E7CB7408D\",\"COMPONENTS_BASE_URL\":\"//localhost:5000/\",\"USER\":\"davida\",\"S3_",
           "matching": "SECRET\":\"gQUSS3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ"
         },
-        "status": null
+        "status": null,
+        "structural_id": "99dfd4cb104847ed3ccf42f881d770a574c89009"
       }
     ],
     "mean_score": null,

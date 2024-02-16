@@ -53,7 +53,8 @@ expression: json_output
           "before": "dude\nGITHUB_KEY=",
           "matching": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg"
         },
-        "status": null
+        "status": null,
+        "structural_id": "886930787cc8451ad082bc735d3dad568bb26c98"
       }
     ],
     "mean_score": null,
