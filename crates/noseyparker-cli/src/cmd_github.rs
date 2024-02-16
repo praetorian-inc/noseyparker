@@ -22,6 +22,7 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Ur
             organization: args.repo_specifiers.organization.clone(),
         },
         api_url,
+        args.ignore_certs,
         None,
     )
     .context("Failed to enumerate GitHub repositories")?;

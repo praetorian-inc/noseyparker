@@ -177,6 +177,9 @@ Metadata Collection Options:
             blob is first seen
           - minimal:    Only the Git repository in which a blob is seen
 
+      --ignore-certs
+          Ignore validation of TLS certificates
+
 Data Collection Options:
       --snippet-length <BYTES>
           Include up to the specified number of bytes before and after each match
