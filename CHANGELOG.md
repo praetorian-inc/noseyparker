@@ -73,6 +73,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     The new representation explicitly records file and git-based provenance, but also adds explicit support for _extensible_ provenance.
     This change will make it possible in the future to have Nosey Parker scan and usefully report blobs produced by custom input data enumerators (e.g., a Python script that lists files from the Common Crawl WARC files).
 
+  - Scores are now associated with matches instead of findings.
+
+  - Comments can now be associated with both matches and findings, instead of just findings.
+
 - The JSON and JSONL report formats have changed.
   These will stabilize in a future release ([#101](https://github.com/praetorian-inc/noseyparker/issues/101).
 
