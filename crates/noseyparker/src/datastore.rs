@@ -367,7 +367,7 @@ impl<'a> Transaction<'a> {
             let start_byte = m.location.offset_span.start;
             let end_byte = m.location.offset_span.end;
             let rule_structural_id = &m.rule_structural_id;
-            let structural_id = &m.structural_id();
+            let structural_id = &m.structural_id;
             let finding_id = &m.finding_id();
             let groups = &m.groups;
             let source_span = &m.location.source_span;
@@ -581,7 +581,8 @@ impl Datastore {
                 m.id,
                 m.score,
                 m.comment,
-                m.status
+                m.status,
+                m.structural_id
 
             from match_denorm m
             inner join blob_denorm b on (m.blob_id = b.blob_id)
@@ -621,6 +622,7 @@ impl Datastore {
                     rule_structural_id: metadata.rule_structural_id.clone(),
                     rule_name: metadata.rule_name.clone(),
                     rule_text_id: metadata.rule_text_id.clone(),
+                    structural_id: row.get(18)?,
                 };
                 let num_bytes: usize = row.get(11)?;
                 let mime_essence: Option<String> = row.get(12)?;
