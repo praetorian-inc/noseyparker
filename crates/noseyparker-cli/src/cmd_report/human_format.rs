@@ -47,7 +47,7 @@ impl <'a> Display for PrettyFinding<'a> {
             writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
         };
 
-        let mut write_group = |group_heading: StyledObject<String>, g: &Group| {
+        let mut write_group = |group_heading: StyledObject<String>, g: &Group| -> std::fmt::Result {
             let g = &g.0;
             // write out the group on one line if it's single-line, and multiple lines otherwise
             if g.contains(&b'\n') {
