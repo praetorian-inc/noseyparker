@@ -3,7 +3,8 @@ use bstr::BString;
 use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
@@ -162,6 +163,7 @@ pub struct Transaction<'a> {
 }
 
 impl<'a> Transaction<'a> {
+    /// Commit this `Transaction`, consuming it.
     pub fn commit(self) -> Result<()> {
         self.inner.commit()?;
         Ok(())
@@ -267,6 +269,7 @@ impl<'a> Transaction<'a> {
         Ok(f)
     }
 
+    /// Record a contextual snippet, returning an integer ID for it
     fn mk_record_snippet(&'a self) -> Result<impl FnMut(&'a [u8]) -> rusqlite::Result<i64>> {
         let mut get = self.inner.prepare_cached(indoc! {r#"
             select id from snippet where snippet = ?
@@ -281,22 +284,35 @@ impl<'a> Transaction<'a> {
         Ok(move |blob| add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,)))
     }
 
-    /// Record matches
+    /// Record a match, returning whether it was new or not
     fn mk_record_match(
         &'a self,
     ) -> Result<impl FnMut(BlobIdInt, &'a Match) -> rusqlite::Result<bool>> {
         let mut record_snippet = self.mk_record_snippet()?;
 
+        let mut get_finding_id = self.inner.prepare_cached(indoc! {r#"
+            select f.id
+            from finding f
+            where f.finding_id = ?
+        "#})?;
+
+        let mut set_finding_id = self.inner.prepare_cached(indoc! {r#"
+            insert into finding (finding_id, rule_id, groups)
+            select ?1, r.id, ?3
+            from rule r
+            where r.structural_id = ?2
+            returning id
+        "#})?;
+
         let mut get_match_id = self.inner.prepare_cached(indoc! {r#"
             select m.id
             from
                 match m
-                inner join rule r on (m.rule_id = r.id)
             where
                 m.blob_id = ?
                 and m.start_byte = ?
                 and m.end_byte = ?
-                and r.structural_id = ?
+                and m.finding_id = ?
         "#})?;
 
         let mut update_match = self.inner.prepare_cached(indoc! {r#"
@@ -304,19 +320,17 @@ impl<'a> Transaction<'a> {
             set
                 structural_id = ?2,
                 finding_id = ?3,
-                groups = ?4,
-                before_snippet_id = ?5,
-                matching_snippet_id = ?6,
-                after_snippet_id = ?7
+                before_snippet_id = ?4,
+                matching_snippet_id = ?5,
+                after_snippet_id = ?6
             where
                 id = ?1 and
                 (
                     structural_id != ?2 or
                     finding_id != ?3 or
-                    groups != ?4 or
-                    before_snippet_id != ?5 or
-                    matching_snippet_id != ?6 or
-                    after_snippet_id != ?7
+                    before_snippet_id != ?4 or
+                    matching_snippet_id != ?5 or
+                    after_snippet_id != ?6
                 )
         "#})?;
 
@@ -327,15 +341,11 @@ impl<'a> Transaction<'a> {
                 blob_id,
                 start_byte,
                 end_byte,
-                groups,
                 before_snippet_id,
                 matching_snippet_id,
-                after_snippet_id,
-                rule_id
+                after_snippet_id
             )
-            select ?, ?, ?, ?, ?, ?, ?, ?, ?, r.id
-            from rule r
-            where r.structural_id = ?
+            select ?, ?, ?, ?, ?, ?, ?, ?
         "#})?;
 
         let mut add_blob_source_span = self.inner.prepare_cached(indoc! {r#"
@@ -372,13 +382,24 @@ impl<'a> Transaction<'a> {
                 source_span.end.column,
             ))?;
 
+            let finding_id: i64 = {
+                match get_finding_id
+                    .query_map((finding_id,), val_from_row)?
+                    .next()
+                {
+                    Some(finding_id) => finding_id?,
+                    None => set_finding_id
+                        .query_row((finding_id, rule_structural_id, groups), val_from_row)?,
+                }
+            };
+
             let snippet = &m.snippet;
             let before_snippet_id = record_snippet(snippet.before.as_slice())?;
             let matching_snippet_id = record_snippet(snippet.matching.as_slice())?;
             let after_snippet_id = record_snippet(snippet.after.as_slice())?;
 
             if let Some(match_id) = get_match_id
-                .query_map((blob_id, start_byte, end_byte, rule_structural_id), val_from_row)?
+                .query_map((blob_id, start_byte, end_byte, finding_id), val_from_row)?
                 .next()
             {
                 let match_id: i64 = match_id?;
@@ -387,7 +408,6 @@ impl<'a> Transaction<'a> {
                     match_id,
                     structural_id,
                     finding_id,
-                    groups,
                     before_snippet_id,
                     matching_snippet_id,
                     after_snippet_id,
@@ -401,11 +421,9 @@ impl<'a> Transaction<'a> {
                     blob_id,
                     start_byte,
                     end_byte,
-                    groups,
                     before_snippet_id,
                     matching_snippet_id,
                     after_snippet_id,
-                    rule_structural_id,
                 ))?;
                 Ok(true)
             }
@@ -494,25 +512,29 @@ impl Datastore {
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select
+                finding_id,
                 groups,
                 rule_structural_id,
                 rule_text_id,
                 rule_name,
                 num_matches,
-                null, null -- TODO(overhaul): add comment and status
+                comment,
+                match_statuses,
+                mean_score
             from finding_denorm
-            -- TODO(overhaul): order by mean score as well
-            order by rule_name, rule_structural_id, groups
+            order by rule_name, rule_structural_id, mean_score desc, groups
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingMetadata {
-                groups: row.get(0)?,
-                rule_structural_id: row.get(1)?,
-                rule_text_id: row.get(2)?,
-                rule_name: row.get(3)?,
-                num_matches: row.get(4)?,
-                comment: row.get(5)?,
-                status: row.get(6)?,
+                finding_id: row.get(0)?,
+                groups: row.get(1)?,
+                rule_structural_id: row.get(2)?,
+                rule_text_id: row.get(3)?,
+                rule_name: row.get(4)?,
+                num_matches: row.get(5)?,
+                comment: row.get(6)?,
+                statuses: row.get(7)?,
+                mean_score: row.get(8)?,
             })
         })?;
         let mut es = Vec::new();
@@ -522,14 +544,14 @@ impl Datastore {
         Ok(es)
     }
 
-    /// Get up to `limit` matches that belong to the group with the given group metadata.
-    pub fn get_match_group_data(
+    /// Get up to `limit` matches that belong to the finding with the given finding metadata.
+    pub fn get_finding_data(
         &self,
         metadata: &FindingMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(ProvenanceSet, BlobMetadata, MatchId, Match)>> {
+    ) -> Result<Vec<FindingDataEntry>> {
         let _span =
-            debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
+            debug_span!("Datastore::get_finding_data", "{}", self.root_dir.display()).entered();
 
         let match_limit: i64 = match limit {
             Some(limit) => limit.try_into().expect("limit should be convertible"),
@@ -556,7 +578,10 @@ impl Datastore {
                 b.mime_essence,
                 b.charset,
 
-                m.id
+                m.id,
+                m.score,
+                m.comment,
+                m.status
 
             from match_denorm m
             inner join blob_denorm b on (m.blob_id = b.blob_id)
@@ -605,14 +630,25 @@ impl Datastore {
                     charset,
                 };
                 let id = MatchId(row.get(14)?);
-                Ok((b, id, m))
+                let m_score = row.get(15)?;
+                let m_comment = row.get(16)?;
+                let m_status = row.get(17)?;
+                Ok((b, id, m, m_score, m_comment, m_status))
             },
         )?;
         let mut es = Vec::new();
         for e in entries {
-            let (md, id, m) = e?;
+            let (md, id, m, match_score, match_comment, match_status) = e?;
             let ps = self.get_provenance_set(&md)?;
-            es.push((ps, md, id, m));
+            es.push(FindingDataEntry{
+                provenance: ps,
+                blob_metadata: md,
+                match_id: id,
+                match_val: m,
+                match_comment,
+                match_score,
+                match_status,
+            });
         }
         Ok(es)
     }
@@ -635,66 +671,6 @@ impl Datastore {
             Some(ps) => Ok(ps),
             None => bail!("should have at least 1 provenance entry"),
         }
-    }
-}
-
-/// Convert a row into a single value.
-///
-/// This function exists to work around an ergonomic deficiency in Rust's type system, which
-/// doesn't allow defining TryFrom<&rusqlite::Row<'_>> for any T that implements rusqlite::types::FromSql.
-/// Without this function, you would have to use 1-tuples all over the place instead.
-fn val_from_row<T>(row: &rusqlite::Row<'_>) -> rusqlite::Result<T>
-where
-    T: rusqlite::types::FromSql,
-{
-    row.get(0)
-}
-
-/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
-///
-/// This takes two SQL statement arguments: a getter and a setter.
-/// The getter should look up 0 or 1 rows for the given parameters.
-/// The setter should insert a new entry for the given parameters and return 1 row.
-///
-/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
-fn add_if_missing_simple<'a, P, F, T>(
-    get: &mut rusqlite::CachedStatement<'_>,
-    set: &mut rusqlite::CachedStatement<'_>,
-    f: F,
-    params: P,
-) -> rusqlite::Result<T>
-where
-    P: rusqlite::Params + Copy,
-    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
-{
-    add_if_missing(get, set, f, params, params)
-}
-
-/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
-///
-/// This takes two SQL statement arguments: a getter and a setter.
-/// The getter should look up 0 or 1 rows for the given parameters.
-/// The setter should insert a new entry for the given parameters and return 1 row.
-///
-/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
-fn add_if_missing<'a, P1, P2, F, T>(
-    get: &mut rusqlite::CachedStatement<'_>,
-    set: &mut rusqlite::CachedStatement<'_>,
-    f: F,
-    get_params: P1,
-    set_params: P2,
-) -> rusqlite::Result<T>
-where
-    P1: rusqlite::Params,
-    P2: rusqlite::Params,
-    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
-{
-    match get.query(get_params)?.next()? {
-        Some(row) => f(row),
-        None => f(set
-            .query(set_params)?
-            .next()?
-            .expect("either get or set statement must return a row")),
     }
 }
 
@@ -775,6 +751,67 @@ impl Datastore {
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
+
+/// Convert a row into a single value.
+///
+/// This function exists to work around an ergonomic deficiency in Rust's type system, which
+/// doesn't allow defining TryFrom<&rusqlite::Row<'_>> for any T that implements rusqlite::types::FromSql.
+/// Without this function, you would have to use 1-tuples all over the place instead.
+fn val_from_row<T>(row: &rusqlite::Row<'_>) -> rusqlite::Result<T>
+where
+    T: rusqlite::types::FromSql,
+{
+    row.get(0)
+}
+
+/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
+///
+/// This takes two SQL statement arguments: a getter and a setter.
+/// The getter should look up 0 or 1 rows for the given parameters.
+/// The setter should insert a new entry for the given parameters and return 1 row.
+///
+/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
+fn add_if_missing_simple<'a, P, F, T>(
+    get: &mut rusqlite::CachedStatement<'_>,
+    set: &mut rusqlite::CachedStatement<'_>,
+    f: F,
+    params: P,
+) -> rusqlite::Result<T>
+where
+    P: rusqlite::Params + Copy,
+    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
+{
+    add_if_missing(get, set, f, params, params)
+}
+
+/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
+///
+/// This takes two SQL statement arguments: a getter and a setter.
+/// The getter should look up 0 or 1 rows for the given parameters.
+/// The setter should insert a new entry for the given parameters and return 1 row.
+///
+/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
+fn add_if_missing<'a, P1, P2, F, T>(
+    get: &mut rusqlite::CachedStatement<'_>,
+    set: &mut rusqlite::CachedStatement<'_>,
+    f: F,
+    get_params: P1,
+    set_params: P2,
+) -> rusqlite::Result<T>
+where
+    P1: rusqlite::Params,
+    P2: rusqlite::Params,
+    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
+{
+    match get.query(get_params)?.next()? {
+        Some(row) => f(row),
+        None => f(set
+            .query(set_params)?
+            .next()?
+            .expect("either get or set statement must return a row")),
+    }
+}
+
 /// Get a path for a local clone of the given git URL underneath `root`.
 fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
     Ok(root.join(repo.to_path_buf()))
@@ -840,8 +877,11 @@ impl std::fmt::Display for FindingSummary {
 // -------------------------------------------------------------------------------------------------
 
 /// Metadata for a group of matches that have identical rule name and match content.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct FindingMetadata {
+    /// The content-based finding identifier for this group of matches
+    pub finding_id: String,
+
     /// The name of the rule that detected each match
     pub rule_name: String,
 
@@ -857,11 +897,28 @@ pub struct FindingMetadata {
     /// The number of matches in the group
     pub num_matches: usize,
 
-    /// An optional status assigned to this match group
-    pub status: Option<Status>,
+    /// The unique statuses assigned to matches in the group
+    pub statuses: Statuses,
 
-    /// A comment assigned to this match group
+    /// A comment assigned to this finding
     pub comment: Option<String>,
+
+    /// The mean score in this group of matches
+    pub mean_score: Option<f64>,
+}
+
+// -------------------------------------------------------------------------------------------------
+// FindingDataEntry
+// -------------------------------------------------------------------------------------------------
+#[derive(Debug)]
+pub struct FindingDataEntry {
+    pub provenance: ProvenanceSet,
+    pub blob_metadata: BlobMetadata,
+    pub match_id: MatchId,
+    pub match_val: Match,
+    pub match_comment: Option<String>,
+    pub match_score: Option<f64>,
+    pub match_status: Option<Status>,
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -869,12 +926,22 @@ pub struct FindingMetadata {
 // -------------------------------------------------------------------------------------------------
 
 /// A status assigned to a match group
-#[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
+// FIXME(overhaul): use an integer representation for serialization and db
 pub enum Status {
     Accept,
     Reject,
 }
+
+// -------------------------------------------------------------------------------------------------
+// Statuses
+// -------------------------------------------------------------------------------------------------
+/// A collection of statuses
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+// FIXME(overhaul): use a bitflag representation here?
+pub struct Statuses(pub SmallVec<[Status; 16]>);
 
 // -------------------------------------------------------------------------------------------------
 // sql
@@ -883,6 +950,7 @@ mod sql {
     use super::*;
 
     use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+    use rusqlite::Error::ToSqlConversionFailure;
 
     impl ToSql for Status {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
@@ -898,6 +966,25 @@ mod sql {
             match value.as_str()? {
                 "accept" => Ok(Status::Accept),
                 "reject" => Ok(Status::Reject),
+                _ => Err(FromSqlError::InvalidType),
+            }
+        }
+    }
+
+    impl ToSql for Statuses {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            match serde_json::to_string(self) {
+                Err(e) => Err(ToSqlConversionFailure(e.into())),
+                Ok(s) => Ok(s.into()),
+            }
+        }
+    }
+
+    impl FromSql for Statuses {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            match value {
+                ValueRef::Text(s) => serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into())),
+                ValueRef::Blob(b) => serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into())),
                 _ => Err(FromSqlError::InvalidType),
             }
         }

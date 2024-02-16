@@ -2,7 +2,7 @@ use bstr::BString;
 use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 
 // -------------------------------------------------------------------------------------------------
@@ -56,9 +56,19 @@ impl Provenance {
         })
     }
 
-    /// Create a `Provenance` entry from a JSON object.
+    /// Create a `Provenance` entry from an arbitrary JSON value.
     pub fn from_extended(value: serde_json::Value) -> Self {
         Provenance::Extended(ExtendedProvenance(value))
+    }
+
+    /// Get the path for the blob from this `Provenance` entry, if one is specified.
+    pub fn blob_path(&self) -> Option<&Path> {
+        use bstr::ByteSlice;
+        match self {
+            Self::File(e) => Some(&e.path),
+            Self::GitRepo(e) => e.first_commit.as_ref().and_then(|c| c.blob_path.to_path().ok()),
+            Self::Extended(e) => e.path(),
+        }
     }
 }
 
@@ -117,12 +127,35 @@ pub struct CommitProvenance {
 // -------------------------------------------------------------------------------------------------
 // ExtendedProvenance
 // -------------------------------------------------------------------------------------------------
+/// An extended provenance entry.
+///
+/// This is an arbitrary JSON value.
+/// If the value is an object containing certain fields, they will be interpreted specially by
+/// Nosey Parker:
+///
+/// - A `path` field containing a string
+///
+/// - XXX A `url` string field that is a syntactically-valid URL
+/// - XXX A `time` string field
+/// - XXX A `display` string field
+///
+/// - XXX A `parent_blob` string field with a hex-encoded blob ID that the associated blob was derived from
+/// - XXX A `parent_transform` string field identifying the transform method used to derive the associated blob
+/// - XXX A `parent_start_byte` integer field
+/// - XXX A `parent_end_byte` integer field
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ExtendedProvenance(pub serde_json::Value);
 
 impl std::fmt::Display for ExtendedProvenance {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl ExtendedProvenance {
+    pub fn path(&self) -> Option<&Path> {
+        let p = self.0.get("path")?.as_str()?;
+        Some(Path::new(p))
     }
 }
 

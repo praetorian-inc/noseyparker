@@ -35,27 +35,12 @@ impl DetailsReporter {
                     let source_span = &m.location.source_span;
                     // let offset_span = &m.location.offset_span;
 
-                    let mut additional_properties =
+                    let additional_properties =
                         vec![(String::from("blob_metadata"), serde_json::json!(md))];
 
-                    let uri = match p {
-                        Provenance::File(e) => Some(e.path.to_string_lossy().into_owned()),
-                        Provenance::GitRepo(e) => {
-                            if let Some(p) = &e.first_commit {
-                                additional_properties.push((
-                                    String::from("first_commit"),
-                                    serde_json::json!(p),
-                                ));
-                            }
-                            Some(e.repo_path.to_string_lossy().into_owned())
-                        }
-                        // TODO(overhaul): implement this case properly
-                        Provenance::Extended(_e) => None,
-                    };
-
                     let mut artifact_location = sarif::ArtifactLocationBuilder::default();
-                    if let Some(uri) = uri {
-                        artifact_location.uri(uri);
+                    if let Some(path) = p.blob_path() {
+                        artifact_location.uri(path.to_string_lossy());
                     }
                     let artifact_location = artifact_location.build()?;
 
@@ -101,8 +86,8 @@ impl DetailsReporter {
             })
             .collect::<Result<_>>()?;
 
-        // let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
-        let sha1_fingerprint = "".to_string(); // TODO(overhaul): reimplement this
+        let fingerprint_name = "match_group_content/sha256/v1".to_string();
+        let fingerprint = metadata.finding_id.clone();
 
         // Build the result for the match
         let result = sarif::ResultBuilder::default()
@@ -112,7 +97,7 @@ impl DetailsReporter {
             .kind(sarif::ResultKind::Review.to_string())
             .locations(locations)
             .level(sarif::ResultLevel::Warning.to_string())
-            .partial_fingerprints([("match_group_content/sha256/v1".to_string(), sha1_fingerprint)])
+            .partial_fingerprints([(fingerprint_name, fingerprint)])
             .build()?;
         Ok(result)
     }

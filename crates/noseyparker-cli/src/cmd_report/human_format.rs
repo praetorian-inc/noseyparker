@@ -29,8 +29,11 @@ impl <'a> Display for PrettyFinding<'a> {
         writeln!(f, "{} {}", reporter.style_heading("Rule:"), reporter.style_rule(finding.rule_name()))?;
 
         // write out status if set
-        if let Some(status) = finding.metadata.status {
-            let status = match status {
+        let statuses = &finding.metadata.statuses.0;
+        if statuses.len() > 1 {
+            writeln!(f, "{} {}", reporter.style_heading("Status:"), "Mixed")?;
+        } else if statuses.len() == 1 {
+            let status = match statuses[0] {
                 Status::Accept => "Accept",
                 Status::Reject => "Reject",
             };
@@ -152,7 +155,12 @@ impl <'a> Display for PrettyFinding<'a> {
                     }
                     // TODO(overhaul): implement this case properly
                     Provenance::Extended(e) => {
-                        writeln!(f, "extended {}", e)?;
+                        writeln!(
+                            f,
+                            "{} {}",
+                            reporter.style_heading("Extended Provenance:"),
+                            reporter.style_metadata(e),
+                        )?;
                     }
                 }
             }

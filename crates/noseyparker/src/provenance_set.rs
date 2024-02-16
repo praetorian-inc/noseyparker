@@ -7,6 +7,7 @@ use crate::provenance::Provenance;
 // XXX this could be reworked to use https://docs.rs/nonempty instead of handrolling that
 
 /// A non-empty set of `Provenance` entries.
+#[derive(Debug)]
 pub struct ProvenanceSet {
     provenance: Provenance,
     more_provenance: Vec<Provenance>,

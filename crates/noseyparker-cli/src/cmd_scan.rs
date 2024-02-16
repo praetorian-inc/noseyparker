@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Result};
-use bstr::ByteSlice;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::path::Path;
@@ -657,16 +656,7 @@ impl MetadataResult {
         blob: &Blob,
         provenance: &ProvenanceSet,
     ) -> MetadataResult {
-        let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| match p {
-            Provenance::File(e) => Some(e.path.as_path()),
-            Provenance::GitRepo(e) => match &e.first_commit {
-                Some(md) => md.blob_path.to_path().ok(),
-                None => None,
-            },
-            // TODO(overhaul): implement this case
-            Provenance::Extended(_e) => None,
-        });
-
+        let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| p.blob_path());
         let input = match blob_path {
             None => content_guesser::Input::from_bytes(&blob.bytes),
             Some(blob_path) => content_guesser::Input::from_path_and_bytes(blob_path, &blob.bytes),

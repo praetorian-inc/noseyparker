@@ -124,6 +124,38 @@ CREATE TABLE snippet
 ) STRICT;
 
 --------------------------------------------------------------------------------
+-- findings
+--------------------------------------------------------------------------------
+CREATE TABLE finding
+-- This table represents findings.
+--
+-- A finding is defined as a group of matches that have the same rule and groups.
+-- Each finding is assigned a content-based identifier that is computed from
+-- its rule and groups:
+--
+-- sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
+(
+    -- An arbitrary integer identifier for the match
+    id integer primary key,
+
+    finding_id text unique not null,
+
+    -- The rule that produced this finding
+    rule_id integer not null references rule(id),
+
+    -- The capture groups, encoded as a minified JSON array of base64-encoded bytestrings
+    groups text not null,
+
+    constraint valid_id check(
+        length(finding_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', finding_id)
+    ),
+
+    constraint valid_groups check(json_type(groups) = 'array'),
+
+    unique(rule_id, groups)
+) STRICT;
+
+--------------------------------------------------------------------------------
 -- matches
 --------------------------------------------------------------------------------
 CREATE TABLE match
@@ -138,9 +170,8 @@ CREATE TABLE match
     -- sha1_hex(rule structural identifier + '\0' + hex blob id + '\0' + decimal start byte + '\0' + decimal end byte)
     structural_id text unique not null,
 
-    -- The content-based identifier of the finding this match belongs to, defined as
-    -- sha1_hex(rule structural identifier + '\0' + minified JSON array of base64-encoded groups)
-    finding_id text not null,
+    -- The identifier of the finding this match belongs to
+    finding_id integer not null references finding(id),
 
     -- The blob in which this match occurs
     blob_id integer not null references blob(id),
@@ -150,12 +181,6 @@ CREATE TABLE match
 
     -- The byte offset within the blob for the end of the match
     end_byte integer not null,
-
-    -- The rule that produced this match
-    rule_id integer not null references rule(id),
-
-    -- The capture groups from the match, encoded as a minified JSON array of base64-encoded bytestrings
-    groups text not null,
 
     -- the contextual snippet preceding the matching input
     before_snippet_id integer not null references snippet(id),
@@ -170,18 +195,17 @@ CREATE TABLE match
         blob_id,
         start_byte,
         end_byte,
-        rule_id
+        finding_id
     ),
-
-    constraint valid_offsets check(0 <= start_byte and start_byte <= end_byte),
-    constraint valid_groups check(json_type(groups) = 'array'),
 
     foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte)
 ) STRICT;
 
-CREATE INDEX match_grouping_index on match(groups, rule_id);
-CREATE INDEX match_rule_index on match(rule_id);
+CREATE INDEX match_finding_id_index on match(finding_id);
 
+--------------------------------------------------------------------------------
+-- Statuses
+--------------------------------------------------------------------------------
 CREATE TABLE match_status
 -- This table records the accepted/rejected status of matches.
 (
@@ -192,6 +216,21 @@ CREATE TABLE match_status
     status text not null,
 
     constraint status_valid check (status in ('accept', 'reject'))
+) STRICT;
+
+--------------------------------------------------------------------------------
+-- Comments
+--------------------------------------------------------------------------------
+CREATE TABLE finding_comment
+-- This table records ad-hoc comments assigned to findings.
+(
+    -- The integer identifier of the finding
+    finding_id integer primary key references finding(id),
+
+    -- The assigned comment, a non-empty string
+    comment text not null,
+
+    constraint comment_valid check (comment != '')
 ) STRICT;
 
 CREATE TABLE match_comment
@@ -206,25 +245,20 @@ CREATE TABLE match_comment
     constraint comment_valid check (comment != '')
 ) STRICT;
 
+--------------------------------------------------------------------------------
+-- Scores
+--------------------------------------------------------------------------------
 CREATE TABLE match_score
 -- This table records a numeric score for matches.
 (
     -- The integer identifier of the match
     match_id integer primary key references match(id),
 
-    -- The scoring method used
-    method text not null,
-
     -- The numeric score in [0, 1]
     score real not null,
 
-    unique(match_id, method),
-
-    constraint score_valid check (0.0 <= score and score <= 1.0),
-
-    constraint method_valid check (method != '')
+    constraint score_valid check (0.0 <= score and score <= 1.0)
 ) STRICT;
-
 
 --------------------------------------------------------------------------------
 -- Convenience Views
@@ -259,13 +293,12 @@ CREATE VIEW match_denorm
 
     status,
     comment,
-    score_method,
     score
 ) as
 select
     m.id,
     m.structural_id,
-    m.finding_id,
+    f.finding_id,
 
     b.blob_id,
 
@@ -281,7 +314,7 @@ select
     r.text_id,
     r.structural_id,
 
-    m.groups,
+    f.groups,
 
     before_snippet.snippet,
     matching_snippet.snippet,
@@ -289,13 +322,13 @@ select
 
     match_status.status,
     match_comment.comment,
-    match_score.method,
     match_score.score
 from
     match m
+    inner join finding f on (m.finding_id = f.id)
     inner join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
     inner join blob b on (m.blob_id = b.id)
-    inner join rule r on (m.rule_id = r.id)
+    inner join rule r on (f.rule_id = r.id)
     inner join snippet before_snippet on (m.before_snippet_id = before_snippet.id)
     inner join snippet matching_snippet on (m.matching_snippet_id = matching_snippet.id)
     inner join snippet after_snippet on (m.after_snippet_id = after_snippet.id)
@@ -353,21 +386,32 @@ CREATE VIEW finding_denorm
     rule_structural_id,
     rule_syntax,
     groups,
-    num_matches
+    num_matches,
+    mean_score,
+    comment,
+    match_statuses
 )
 as
 select
-    m.finding_id,
+    f.finding_id,
     r.name,
     r.text_id,
     r.structural_id,
     r.syntax,
-    m.groups,
-    count(*)
+    f.groups,
+    count(*),
+    avg(ms.score),
+    fc.comment,
+    json_group_array(distinct match_status.status order by match_status.status)
+        filter (where match_status.status is not null) match_statuses
 from
-    match m
-    inner join rule r on (m.rule_id = r.id)
-group by m.finding_id
+    finding f
+    inner join match m on (m.finding_id = f.id)
+    inner join rule r on (f.rule_id = r.id)
+    left outer join match_score ms on (m.id = ms.match_id)
+    left outer join match_status on (m.id = match_status.match_id)
+    left outer join finding_comment fc on (f.id = fc.finding_id)
+group by f.id
 ;
 
 CREATE VIEW finding_summary
@@ -380,11 +424,13 @@ CREATE VIEW finding_summary
 )
 as
 select
-    rule_name,
-    rule_structural_id,
-    count(distinct finding_id),
-    sum(num_matches)
+    r.name rule_name,
+    r.structural_id rule_structural_id,
+    count(distinct f.finding_id) total_findings,
+    count(*) total_matches
 from
-    finding_denorm
-group by 1, 2
+    finding f
+    inner join match m on (m.finding_id = f.id)
+    inner join rule r on (f.rule_id = r.id)
+group by rule_name, rule_structural_id
 ;
