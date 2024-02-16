@@ -103,7 +103,7 @@ Input Specifier Options:
           
           This option can be repeated.
 
-      --scan-github-enterprise-instance
+      --all-organizations
           Clone and scan accessible repositories in the GitHub instance specified with the custom
           API url
           

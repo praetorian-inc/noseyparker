@@ -356,8 +356,8 @@ pub struct GitHubRepoSpecifiers {
     /// Clone and scan accessible repositories in the GitHub instance specified with the custom API url
     ///
     /// Requires setting up the `github_api_url` option.
-    #[arg(long, visible_alias = "scan-instance")]
-    pub scan_github_enterprise_instance: bool,
+    #[arg(long)]
+    pub all_organizations: bool,
 }
 
 impl GitHubRepoSpecifiers {
@@ -633,7 +633,7 @@ pub struct InputSpecifierArgs {
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
-        required_unless_present_any(["github_user", "github_organization", "git_url", "scan_github_enterprise_instance"]),
+        required_unless_present_any(["github_user", "github_organization", "git_url", "all_organizations"]),
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -677,7 +677,7 @@ pub struct InputSpecifierArgs {
         requires = "github_api_url",
         display_order = 21
     )]
-    pub scan_github_enterprise_instance: bool,
+    pub all_organizations: bool,
 
     /// Use the specified URL for GitHub API access
     ///

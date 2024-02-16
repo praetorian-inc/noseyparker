@@ -28,7 +28,7 @@ impl<'c> RepoEnumerator<'c> {
 
     /// Enumerate the accessible repositories that belong to the given organization.
     pub async fn enumerate_instance_orgs(&self) -> Result<Vec<OrganizationShort>> {
-        let org_page = self.client.get_instance_orgs().await?;
+        let org_page = self.client.get_orgs().await?;
         self.client.get_all(org_page).await
     }
 
@@ -51,7 +51,7 @@ impl<'c> RepoEnumerator<'c> {
             repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 
-        let instance_orgs: Vec<_> = if repo_specifiers.scan_instance {
+        let instance_orgs: Vec<_> = if repo_specifiers.all_organizations {
             self.enumerate_instance_orgs()
                 .await?
                 .into_iter()
@@ -86,11 +86,11 @@ impl<'c> RepoEnumerator<'c> {
 pub struct RepoSpecifiers {
     pub user: Vec<String>,
     pub organization: Vec<String>,
-    pub scan_instance: bool,
+    pub all_organizations: bool,
 }
 
 impl RepoSpecifiers {
     pub fn is_empty(&self) -> bool {
-        self.user.is_empty() && self.organization.is_empty() && !self.scan_instance
+        self.user.is_empty() && self.organization.is_empty() && !self.all_organizations
     }
 }

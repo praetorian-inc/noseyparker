@@ -62,7 +62,7 @@ impl Client {
             .await
     }
 
-    pub async fn get_instance_orgs(&self) -> Result<Page<OrganizationShort>> {
+    pub async fn get_orgs(&self) -> Result<Page<OrganizationShort>> {
         self.get_paginated_with_params(&["organizations"], &[MAX_PER_PAGE])
             .await
     }

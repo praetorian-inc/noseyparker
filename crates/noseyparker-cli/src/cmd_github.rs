@@ -17,11 +17,11 @@ pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
 }
 
 fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Url) -> Result<()> {
-    if args.repo_specifiers.is_empty() && !args.repo_specifiers.scan_github_enterprise_instance {
+    if args.repo_specifiers.is_empty() && !args.repo_specifiers.all_organizations {
         bail!("No repositories specified");
     }
     if let Some(host) = api_url.host_str() {
-        if host == "api.github.com" && args.repo_specifiers.scan_github_enterprise_instance {
+        if host == "api.github.com" && args.repo_specifiers.all_organizations {
             let mut cmd = CommandLineArgs::command();
             let err = cmd.error(
                 ErrorKind::MissingRequiredArgument,
@@ -34,7 +34,7 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Ur
         &github::RepoSpecifiers {
             user: args.repo_specifiers.user.clone(),
             organization: args.repo_specifiers.organization.clone(),
-            scan_instance: args.repo_specifiers.scan_github_enterprise_instance,
+            all_organizations: args.repo_specifiers.all_organizations,
         },
         api_url,
         args.ignore_certs,

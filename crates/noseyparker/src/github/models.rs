@@ -219,7 +219,7 @@ pub struct Repository {
 
 // -------------------------------------------------------------------------------------------------
 // OrganizationShort
-// Defined as in: https://docs.github.com/en/enterprise-server@3.11/rest/orgs/orgs?apiVersion=2022-11-28#list-organizations
+// Defined as in: https://docs.github.com/en/rest/orgs/orgs?apiVersion=2022-11-28#list-organizations
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Deserialize)]
 pub struct OrganizationShort {
