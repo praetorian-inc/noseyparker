@@ -78,7 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Comments can now be associated with both matches and findings, instead of just findings.
 
 - The JSON and JSONL report formats have changed.
-  These will stabilize in a future release ([#101](https://github.com/praetorian-inc/noseyparker/issues/101).
+  These will stabilize in a future release ([#101](https://github.com/praetorian-inc/noseyparker/issues/101)).
 
   - The `matching_input` field for matches has been removed and replaced with a new `groups` field, which contains an array of base64-encoded bytestrings.
 
