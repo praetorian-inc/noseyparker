@@ -1,14 +1,14 @@
 use anyhow::{Context, Result};
 use indicatif::HumanCount;
 
-use noseyparker::datastore::{Datastore, MatchSummary};
+use noseyparker::datastore::{Datastore, FindingSummary};
 
 use crate::args::{GlobalArgs, SummarizeArgs, SummarizeOutputFormat};
 use crate::reportable::Reportable;
 
-struct MatchSummaryReporter(MatchSummary);
+struct FindingSummaryReporter(FindingSummary);
 
-impl Reportable for MatchSummaryReporter {
+impl Reportable for FindingSummaryReporter {
     type Format = SummarizeOutputFormat;
 
     fn report<W: std::io::Write>(&self, format: Self::Format, writer: W) -> Result<()> {
@@ -20,7 +20,7 @@ impl Reportable for MatchSummaryReporter {
     }
 }
 
-impl MatchSummaryReporter {
+impl FindingSummaryReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let summary = &self.0;
         writeln!(writer)?;
@@ -53,10 +53,10 @@ pub fn run(global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
         .output_args
         .get_writer()
         .context("Failed to get output writer")?;
-    MatchSummaryReporter(datastore.summarize()?).report(args.output_args.format, output)
+    FindingSummaryReporter(datastore.summarize()?).report(args.output_args.format, output)
 }
 
-pub fn summary_table(summary: &MatchSummary) -> prettytable::Table {
+pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
     use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
     use prettytable::row;
 

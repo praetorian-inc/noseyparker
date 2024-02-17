@@ -5,7 +5,10 @@ expression: json_output
 [
   {
     "comment": null,
-    "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
+    "finding_id": "515a0c9ea0dfda172d5f9d3b2738949249907087",
+    "groups": [
+      "Z2hwX1hJeEI3S01OZEFyM3pxV3RRcWhFOTRxZ2xIcU96bjFEMXN0Zw=="
+    ],
     "matches": [
       {
         "blob_id": "96add51d102b68a8eb16cd104f6a79edc27bb61d",
@@ -15,7 +18,10 @@ expression: json_output
           "mime_essence": "text/plain",
           "num_bytes": 1448
         },
-        "capture_group_index": 1,
+        "comment": null,
+        "groups": [
+          "Z2hwX1hJeEI3S01OZEFyM3pxV3RRcWhFOTRxZ2xIcU96bjFEMXN0Zw=="
+        ],
         "location": {
           "offset_span": {
             "end": 775,
@@ -32,7 +38,6 @@ expression: json_output
             }
           }
         },
-        "match_content": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
         "provenance": [
           {
             "kind": "file",
@@ -40,16 +45,23 @@ expression: json_output
           }
         ],
         "rule_name": "GitHub Personal Access Token",
+        "rule_structural_id": "np.github.1:f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
+        "rule_text_id": "np.github.1",
+        "score": null,
         "snippet": {
           "after": "\n\nfunction lorem(ipsum, dolor = ",
           "before": "ta\nUSERNAME=the_dude\nGITHUB_KEY=",
           "matching": "ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg"
-        }
+        },
+        "status": null,
+        "structural_id": "886930787cc8451ad082bc735d3dad568bb26c98"
       }
     ],
+    "mean_score": null,
     "num_matches": 1,
     "rule_name": "GitHub Personal Access Token",
-    "status": null,
-    "type": "finding"
+    "rule_structural_id": "np.github.1:f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
+    "rule_text_id": "np.github.1",
+    "statuses": []
   }
 ]

@@ -6,7 +6,6 @@ pub mod blob_metadata;
 pub mod bstring_escape;
 pub mod datastore;
 pub mod defaults;
-pub mod digest;
 pub mod git_binary;
 pub mod git_url;
 pub mod github;

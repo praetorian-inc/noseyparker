@@ -17,7 +17,7 @@ mod rule_loader;
 mod reportable;
 mod util;
 
-use args::GlobalArgs;
+use args::{CommandLineArgs, GlobalArgs};
 
 /// Set up the logging / tracing system for the application.
 fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
@@ -88,8 +88,7 @@ fn configure_backtraces(global_args: &GlobalArgs) {
     }
 }
 
-fn try_main() -> Result<()> {
-    let args = &args::CommandLineArgs::parse_args();
+fn try_main(args: &CommandLineArgs) -> Result<()> {
     let global_args = &args.global_args;
 
     configure_backtraces(global_args);
@@ -109,19 +108,15 @@ fn try_main() -> Result<()> {
 }
 
 fn main() {
-    if let Err(e) = try_main() {
-        eprintln!("Error: {e:?}");
+    let args = &CommandLineArgs::parse_args();
+    if let Err(e) = try_main(args) {
+        // Use the more verbose format that includes a backtrace when running with -vv or higher,
+        // otherwise use a more compact one-line error format.
+        if args.global_args.verbose > 1 {
+            eprintln!("Error: {e:?}");
+        } else {
+            eprintln!("Error: {e:#}");
+        }
         std::process::exit(2);
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use pretty_assertions::assert_eq;
-
-    #[test]
-    #[should_panic]
-    fn failure() {
-        assert_eq!(5, 42);
     }
 }

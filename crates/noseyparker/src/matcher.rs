@@ -200,7 +200,7 @@ impl<'a> Matcher<'a> {
         // -----------------------------------------------------------------------------------------
         // Perform second-stage regex matching to get groups and precise start locations
         //
-        // Also deduplicate overlapping matches with the same rule
+        // Also deduplicate overlapping matches with the same rule, keeping only the longest match
         // -----------------------------------------------------------------------------------------
         raw_matches_scratch.sort_by_key(|m| {
             debug_assert!(m.start_idx <= m.end_idx);
@@ -243,7 +243,7 @@ impl<'a> Matcher<'a> {
                                 Snippet: {cxt:?}",
                                 &blob.id,
                                 provenance.first(),
-                                rule.name,
+                                rule.name(),
                             );
                         // });
 
@@ -290,18 +290,20 @@ impl<'a> Matcher<'a> {
 mod test {
     use super::*;
 
+    use noseyparker_rules::RuleSyntax;
+
     use pretty_assertions::assert_eq;
 
     #[test]
     pub fn test_simple() -> Result<()> {
-        let rules = vec![Rule {
+        let rules = vec![Rule::new(RuleSyntax {
             id: "test.1".to_string(),
             name: "test".to_string(),
             pattern: "test".to_string(),
             examples: vec![],
             negative_examples: vec![],
             references: vec![],
-        }];
+        })];
         let rules_db = RulesDatabase::from_rules(rules)?;
         let input = "some test data for vectorscan";
         let seen_blobs = BlobIdMap::new();

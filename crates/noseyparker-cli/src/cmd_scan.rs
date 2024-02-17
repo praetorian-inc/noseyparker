@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Result};
-use bstr::ByteSlice;
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::path::Path;
@@ -26,7 +25,7 @@ use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
 use noseyparker::matcher_stats::MatcherStats;
-use noseyparker::provenance::{CommitKind, Provenance};
+use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
 
@@ -59,7 +58,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let mut datastore = Datastore::create_or_open(
         &args.datastore,
         global_args.advanced.sqlite_cache_size,
-    )?;
+    ).with_context(|| format!("Failed to open datastore at {}", &args.datastore.display()))?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -74,6 +73,18 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
             .context("Failed to compile rules")?
     };
+
+    // ---------------------------------------------------------------------------------------------
+    // Record rules to the datastore
+    // ---------------------------------------------------------------------------------------------
+    init_progress.set_message("Recording rules...");
+    let mut record_rules = || -> Result<()> {
+        let tx = datastore.begin()?;
+        tx.record_rules(rules_db.rules())?;
+        tx.commit()?;
+        Ok(())
+    };
+    record_rules().context("Failed to record rules to the datastore")?;
 
     drop(init_progress);
 
@@ -341,7 +352,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 if batch.len() >= BATCH_SIZE || matches_in_batch >= BATCH_SIZE {
                     let t1 = std::time::Instant::now();
                     let batch_len = batch.len();
-                    let num_added = tx.record(batch.as_slice())?;
+                    let num_added = tx.record(batch.as_slice())
+                        .context("Failed to record batch")?;
                     num_matches_added += num_added;
                     batch.clear();
                     matches_in_batch = 0;
@@ -358,7 +370,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let t1 = std::time::Instant::now();
 
                 let batch_len = batch.len();
-                let num_added = tx.record(batch.as_slice())?;
+                let num_added = tx.record(batch.as_slice())
+                    .context("Failed to record batch")?;
                 num_matches_added += num_added;
                 // batch.clear();
                 // matches_in_batch = 0;
@@ -507,9 +520,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                     .commit_metadata
                                     .get(&e.commit_oid)
                                     .expect("should have commit metadata");
-                                let p = Provenance::from_git_repo_and_commit_metadata(
+                                let p = Provenance::from_git_repo_with_first_commit(
                                     repo_path.clone(),
-                                    CommitKind::FirstSeen,
                                     commit_metadata.clone(),
                                     e.path.clone(),
                                 );
@@ -520,9 +532,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                             .commit_metadata
                                             .get(&e.commit_oid)
                                             .expect("should have commit metadata");
-                                        Provenance::from_git_repo_and_commit_metadata(
+                                        Provenance::from_git_repo_with_first_commit(
                                             repo_path.clone(),
-                                            CommitKind::FirstSeen,
                                             commit_metadata.clone(),
                                             e.path.clone(),
                                         )
@@ -645,14 +656,7 @@ impl MetadataResult {
         blob: &Blob,
         provenance: &ProvenanceSet,
     ) -> MetadataResult {
-        let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| match p {
-            Provenance::File(e) => Some(e.path.as_path()),
-            Provenance::GitRepo(e) => match &e.commit_provenance {
-                Some(md) => md.blob_path.to_path().ok(),
-                None => None,
-            },
-        });
-
+        let blob_path: Option<&'_ Path> = provenance.iter().find_map(|p| p.blob_path());
         let input = match blob_path {
             None => content_guesser::Input::from_bytes(&blob.bytes),
             Some(blob_path) => content_guesser::Input::from_path_and_bytes(blob_path, &blob.bytes),
@@ -782,7 +786,7 @@ fn run_matcher(
                     new_matches.extend(
                         matches
                             .iter()
-                            .flat_map(|m| Match::convert(&loc_mapping, m, snippet_length)),
+                            .map(|m| Match::convert(&loc_mapping, m, snippet_length)),
                     );
                     new_matches
                 }

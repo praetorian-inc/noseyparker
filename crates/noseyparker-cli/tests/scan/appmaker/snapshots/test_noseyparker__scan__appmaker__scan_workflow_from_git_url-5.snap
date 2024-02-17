@@ -1,0 +1,412 @@
+---
+source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
+expression: "std::fs::read_to_string(report_txt.path()).unwrap()"
+---
+Finding 1/13
+Rule: AWS API Key
+Group: AKIAJEEUOSJXYB2BKLMA
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in efda07fbb9e3a2c172f07e441c29b6988f90fe2f
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-11-11
+        Summary:    cleanup
+        Path:       tmp.env
+
+    Blob:  <BLOB>
+    Lines: 1:174-1:193
+
+        {"TERM_PROGRAM":"Apple_Terminal","TERM":"xterm-256color","SHELL":"/usr/local/bin/fish","CLICOLOR":"1","TMPDIR":"/var/folders/xj/5v3cc4y9039fx_fhk67bvg8w0000gn/T/","AWS_ID":"AKIAJEEUOSJXYB2BKLMA","Apple_PubSub_Socket_Render":"/tmp/launch-rHzB0S/Render","TERM_PROGRAM_VERSION":"326","TERM_SESSION_ID":"C99AE63D-8AC8-40EC-9A43-7C14ACEBE413","ANT_HOME":"/usr/local/etc/ant","CMD_DURATION":"1m 22.1s","USER":"davida","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/L
+
+
+Finding 2/13
+Rule: AWS API Key
+Group: AKIAJQNF3BIPEDR6MXEA
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 6ea21730dd131fd3bc315d19953761e2cd7bac07
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-11-11
+        Summary:    debugging statsd
+        Path:       tmp.env
+
+    Blob:  <BLOB>
+    Lines: 1:661-1:680
+
+        S3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ","S3_OBJECT_PREFIX":"flathead","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/Listeners","__CF_USER_TEXT_ENCODING":"0x1F5:0:0","PATH":"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin","__CHECKFIX1436934":"1","ASSET_HOST":"","S3_KEY":"AKIAJQNF3BIPEDR6MXEA","PWD":"/Users/davida/src/appmaker","LANG":"en_CA.UTF-8","PUBLISH_URL_PREFIX":"XXX","HOME":"/Users/davida","SHLVL":"2","LOGNAME":"davida","S3_BUCKET":"com.mozillalabs.appmaker","COOKIE_SECRET":"I hate working as a janitor for arrogant rich people; so I cl
+
+
+Finding 3/13
+Rule: AWS API Key
+Group: AKIAJUZPLTNMY2JSXLYA
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-09-02
+        Summary:    fix both 254 and 257
+        Path:       my.env
+
+    Blob:  <BLOB>
+    Lines: 9:8-9:27
+
+         a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush
+        PATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin
+        PORT=5002
+        PUBLISH_HOST=appalot.me
+        PUBLISH_HOST_PREFIX=http://
+        S3_BUCKET=com.mozillalabs.appmaker
+        S3_KEY=AKIAJUZPLTNMY2JSXLYA
+        S3_OBJECT_PREFIX=flathead
+        S3_SECRET=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
+        SHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/
+
+
+
+Finding 4/13
+Rule: AWS S3 Bucket (path style)
+Group: s3-us-west-2.amazonaws.com/makerstrap
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 93a0d0b65978bb3b364f7494e28c187c363c4a73
+
+        Author:     Christopher De Cairos <cade@mozillafoundation.org>
+        Date:       2014-05-23
+        Summary:    (Issue #1177) This is why we don't commit symbolic links
+        Path:       public/vendor/webmaker-auth-client/example/index.html
+
+    Blob:  <BLOB>
+    Lines: 7:22-7:60
+
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+          <meta charset="utf-8">
+          <title>Persona example</title>
+          <link href="https://s3-us-west-2.amazonaws.com/makerstrap/makerstrap.complete.min.css" rel="stylesheet">
+          <link href="../create-user/create-user-form.css" rel="stylesheet">
+        </head>
+        <body>
+
+          <!-- Modal -->
+        <div
+          class="modal fade"
+          id="webmaker-login-new-user"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby=
+
+
+Finding 5/13
+Rule: AWS S3 Bucket (path style)
+Group: s3.amazonaws.com/com.mozillalabs.appmaker
+Showing 3/11 occurrences:
+
+    Occurrence 1/11
+    Git repo:  <REPO>
+    Commit: first seen in ad1a555a827707a18a81f248cb30966a657fb89f
+
+        Author:     secretrobotron <secretrobotron@gmail.com>
+        Date:       2014-06-17
+        Summary:    removed appalot.me from iframe urls on start page
+        Path:       public/start.html
+
+    Blob:  <BLOB>
+    Lines: 23:48-23:90
+
+           <div class="links"><a href="http://succinct-tub-861.appalot.me/install">Install</a> <a href="https://apps.webmaker.org/designer?remix=http%253A%252F%252Fsuccinct-tub-861.appalot.me%252Fapp">Remix</a></div>
+                  <div class="app"><iframe src="https://s3.amazonaws.com/com.mozillalabs.appmaker/flathead/succinct-tub-861/app"></iframe></div>
+                  <p>Use a handful of instruments and a sequencer to create some musical noise!</p>
+                </li>
+                <li>
+                  <h2>Draw with Friends</h2>
+                  <div class="links"><a href="http://screechi
+
+    Occurrence 2/11
+    Git repo:  <REPO>
+    Commit: first seen in ad1a555a827707a18a81f248cb30966a657fb89f
+
+        Author:     secretrobotron <secretrobotron@gmail.com>
+        Date:       2014-06-17
+        Summary:    removed appalot.me from iframe urls on start page
+        Path:       public/start.html
+
+    Blob:  <BLOB>
+    Lines: 29:48-29:90
+
+        class="links"><a href="http://screeching-north-733.appalot.me/install">Install</a> <a href="https://apps.webmaker.org/designer?remix=http%253A%252F%252Fscreeching-north-733.appalot.me%252Fapp">Remix</a></div>
+                  <div class="app"><iframe src="https://s3.amazonaws.com/com.mozillalabs.appmaker/flathead/screeching-north-733/app"></iframe></div>
+                  <p>Draw and share your creativity with a group of friends!</p>
+                </li>
+                <li>
+                  <h2>Track Progress</h2>
+                  <div class="links"><a href="http://wicked-animal-644.appalot.
+
+    Occurrence 3/11
+    Git repo:  <REPO>
+    Commit: first seen in ad1a555a827707a18a81f248cb30966a657fb89f
+
+        Author:     secretrobotron <secretrobotron@gmail.com>
+        Date:       2014-06-17
+        Summary:    removed appalot.me from iframe urls on start page
+        Path:       public/start.html
+
+    Blob:  <BLOB>
+    Lines: 35:48-35:90
+
+         <div class="links"><a href="http://wicked-animal-644.appalot.me/install">Install</a> <a href="https://apps.webmaker.org/designer?remix=http%253A%252F%252Fwicked-animal-644.appalot.me%252Fapp">Remix</a></div>
+                  <div class="app"><iframe src="https://s3.amazonaws.com/com.mozillalabs.appmaker/flathead/wicked-animal-644/app"></iframe></div>
+                  <p>Count progress toward a personal goal, event attendees, or any other target.</p>
+                </li>
+                <li>
+                  <h2>Play Hot Potato</h2>
+                  <div class="links"><a href="http://enchant
+
+
+Finding 6/13
+Rule: AWS S3 Bucket (path style)
+Group: s3.amazonaws.com/listjs
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in fd18bf20a0bdf437cf5af3ce7bf3b8d998fb30c5
+
+        Author:     Christopher De Cairos <cade@mozillafoundation.org>
+        Date:       2014-05-16
+        Summary:    (Issue #1177) WebmakerAuth related vendor changes
+        Path:       public/vendor/listjs/README.md
+
+    Blob:  <BLOB>
+    Lines: 6:19-6:43
+
+        # List.js
+        Perfect library for adding **search**, **sort**, **filters** and **flexibility** to
+        **tables**, **lists** and various HTML elements. Built to be invisible and work on existing HTML.
+        Really simple and easy to use!
+
+        [![Donate](https://s3.amazonaws.com/listjs/donate-coffee.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7ZGHV75VSD2E)
+
+        ### Core idea
+        - Simple and invisible
+        - Easy to apply to existing HTML
+        - No dependencies
+        - Fast
+        - Small
+        - Handle thousands of items
+
+        ### Features
+        - Work
+
+
+Finding 7/13
+Rule: AWS Secret Access Key
+Group: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in efda07fbb9e3a2c172f07e441c29b6988f90fe2f
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-11-11
+        Summary:    cleanup
+        Path:       tmp.env
+
+    Blob:  <BLOB>
+    Lines: 1:1135-1:1187
+
+        Frameworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
+
+
+Finding 8/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
+
+        Author:     Jon Buckley <jon@jbuckley.ca>
+        Date:       2014-11-07
+        Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Blob:  <BLOB>
+    Lines: 78:22-78:71
+
+                     "s3:ListBucket",
+                            "s3:DeleteObject",
+                            "s3:DeleteObjectVersion",
+                            "s3:GetObject",
+                            "s3:PutObject"
+                        ],
+                        "Resource": [
+                            "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                            "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*"
+                        ]
+                    }
+                ]
+            }
+            ```
+
+        12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Proper
+
+
+Finding 9/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
+
+        Author:     Jon Buckley <jon@jbuckley.ca>
+        Date:       2014-11-07
+        Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Blob:  <BLOB>
+    Lines: 79:22-79:73
+
+                        "s3:DeleteObjectVersion",
+                            "s3:GetObject",
+                            "s3:PutObject"
+                        ],
+                        "Resource": [
+                            "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                            "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*"
+                        ]
+                    }
+                ]
+            }
+            ```
+
+        12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Properties pane, in the "Lifecycle" section, add a rule to expire/delete files ba
+
+
+Finding 10/13
+Rule: Amazon Resource Name
+Group: arn:aws:s3:::the-bucket-name-goes-here`
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2
+
+        Author:     Jon Buckley <jon@jbuckley.ca>
+        Date:       2014-11-07
+        Summary:    Bug 1091261 - Dependencies for login 3.0
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Git repo:  <REPO>
+    Commit: first seen in ac87d310f949a883efa99499a5446242afac0c6a
+
+        Author:     Mike Larsson <mikelarssonftw@gmail.com>
+        Date:       2014-06-19
+        Summary:    Add makerstrap to project
+        Path:       public/vendor/bootstrap/test-infra/README.md
+
+    Blob:  <BLOB>
+    Lines: 53:92-54:0
+
+         *nix machines, you can easily generate a random UUID to use as the bucket name using Python:
+
+            ```bash
+            python -c "import uuid; print(uuid.uuid4())"
+            ```
+
+        9. Determine and note what your bucket's ARN is. The ARN for an S3 bucket is of the form: `arn:aws:s3:::the-bucket-name-goes-here`
+        10. In the bucket's Properties pane, in the "Permissions" section, click the "Edit bucket policy" button.
+        11. Input and submit an IAM Policy that grants the user at least read+write rights to the bucket. AWS has a policy generator and some examples to help
+
+
+Finding 11/13
+Rule: Generic Secret
+Group: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-09-02
+        Summary:    fix both 254 and 257
+        Path:       my.env
+
+    Blob:  <BLOB>
+    Lines: 11:4-11:50
+
+        eir computer keyboareds with the toilet brush
+        PATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin
+        PORT=5002
+        PUBLISH_HOST=appalot.me
+        PUBLISH_HOST_PREFIX=http://
+        S3_BUCKET=com.mozillalabs.appmaker
+        S3_KEY=AKIAJUZPLTNMY2JSXLYA
+        S3_OBJECT_PREFIX=flathead
+        S3_SECRET=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
+        SHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/
+
+
+
+Finding 12/13
+Rule: Generic Secret
+Group: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in efda07fbb9e3a2c172f07e441c29b6988f90fe2f
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-11-11
+        Summary:    cleanup
+        Path:       tmp.env
+
+    Blob:  <BLOB>
+    Lines: 1:1139-1:1187
+
+        eworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
+
+
+Finding 13/13
+Rule: Generic Secret
+Group: qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 6ea21730dd131fd3bc315d19953761e2cd7bac07
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-11-11
+        Summary:    debugging statsd
+        Path:       tmp.env
+
+    Blob:  <BLOB>
+    Lines: 1:392-1:440
+
+        8w0000gn/T/","Apple_PubSub_Socket_Render":"/tmp/launch-rHzB0S/Render","TERM_PROGRAM_VERSION":"326","OLDPWD":"/Users/davida/src/appmaker","TERM_SESSION_ID":"5600EB0F-9A8F-4DF7-BB34-CD3E7CB7408D","COMPONENTS_BASE_URL":"//localhost:5000/","USER":"davida","S3_SECRET":"gQUSS3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ","S3_OBJECT_PREFIX":"flathead","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/Listeners","__CF_USER_TEXT_ENCODING":"0x1F5:0:0","PATH":"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin","__CHECKFIX1436934":"1","ASSET_HOST":"","S3_KEY":"AKIAJQNF3BIPEDR6MXEA","PWD":"/Users/
+
+
+

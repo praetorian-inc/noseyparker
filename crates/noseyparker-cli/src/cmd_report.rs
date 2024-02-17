@@ -6,10 +6,9 @@ use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
-use noseyparker::datastore::{Datastore, MatchGroupMetadata, MatchId, Status};
+use noseyparker::datastore::{Datastore, FindingDataEntry, FindingMetadata, MatchId, Status};
 use noseyparker::defaults::get_builtin_rules;
-use noseyparker::digest::sha1_hexdigest;
-use noseyparker::match_type::Match;
+use noseyparker::match_type::{Group, Groups, Match};
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 
@@ -20,7 +19,7 @@ mod human_format;
 mod sarif_format;
 mod styles;
 
-use styles::{Styles, StyledObject};
+use styles::{StyledObject, Styles};
 
 pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
@@ -62,13 +61,14 @@ struct DetailsReporter {
 }
 
 impl DetailsReporter {
-    fn get_matches(&self, metadata: &MatchGroupMetadata) -> Result<Vec<ReportMatch>> {
+    fn get_matches(&self, metadata: &FindingMetadata) -> Result<Vec<ReportMatch>> {
         Ok(self
             .datastore
-            .get_match_group_data(metadata, self.max_matches)
-            .with_context(|| format!("Failed to get match data for group {metadata:?}"))?
+            .get_finding_data(metadata, self.max_matches)
+            .with_context(|| format!("Failed to get matches for finding {metadata:?}"))
+            .expect("should be able to find get matches for finding")
             .into_iter()
-            .map(|(p, md, id, m)| ReportMatch { ps: p, md, id, m })
+            .map(|e| e.into())
             .collect())
     }
 
@@ -124,7 +124,7 @@ impl DetailsReporter {
     ) -> Result<()> {
         let datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
+            .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         if let Some(begin) = begin {
@@ -142,7 +142,7 @@ impl DetailsReporter {
             first = false;
 
             let matches = self.get_matches(&metadata)?;
-            let f = Finding::MatchGroup(MatchGroup::new(metadata, matches));
+            let f = Finding::new(metadata, matches);
             serde_json::to_writer(&mut writer, &f)?;
         }
 
@@ -160,21 +160,13 @@ impl DetailsReporter {
     fn jsonl_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
         self.write_json_findings(writer, None, Some("\n"), Some("\n"))
     }
-
 }
 
+/// A group of matches that all have the same rule and capture group content
 #[derive(Serialize)]
-#[serde(tag = "type")]
-enum Finding {
-    /// A group of matches that all have the same rule and capture group content
-    #[serde(rename = "finding")]
-    MatchGroup(MatchGroup),
-}
-
-#[derive(Serialize)]
-struct MatchGroup {
+struct Finding {
     #[serde(flatten)]
-    metadata: MatchGroupMetadata,
+    metadata: FindingMetadata,
     matches: Vec<ReportMatch>,
 }
 
@@ -192,26 +184,47 @@ struct ReportMatch {
     #[serde(skip)]
     #[allow(dead_code)]
     id: MatchId,
+
+    score: Option<f64>,
+    comment: Option<String>,
+    status: Option<Status>,
 }
 
-impl MatchGroup {
-    fn new(metadata: MatchGroupMetadata, matches: Vec<ReportMatch>) -> Self {
+impl From<FindingDataEntry> for ReportMatch {
+    fn from(e: FindingDataEntry) -> Self {
+        ReportMatch {
+            ps: e.provenance,
+            md: e.blob_metadata,
+            id: e.match_id,
+            m: e.match_val,
+            score: e.match_score,
+            comment: e.match_comment,
+            status: e.match_status,
+        }
+    }
+}
+
+impl Finding {
+    fn new(metadata: FindingMetadata, matches: Vec<ReportMatch>) -> Self {
         Self { metadata, matches }
     }
 
+    /// The name of the rule that produced this finding
     fn rule_name(&self) -> &str {
         &self.metadata.rule_name
     }
 
-    fn group_input(&self) -> &[u8] {
-        &self.metadata.match_content
+    fn groups(&self) -> &Groups {
+        &self.metadata.groups
     }
 
+    /// The total number of matches in this finding
     fn total_matches(&self) -> usize {
         self.metadata.num_matches
     }
 
-    fn num_matches(&self) -> usize {
+    /// The number of matches present in this finding
+    fn num_matches_available(&self) -> usize {
         self.matches.len()
     }
 }

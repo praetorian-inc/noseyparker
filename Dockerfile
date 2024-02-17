@@ -9,7 +9,7 @@
 #
 # See https://github.com/praetorian-inc/noseyparker/issues/58.
 ################################################################################
-FROM rust:1.71-bullseye AS builder
+FROM rust:1.76-bullseye AS builder
 
 # Install dependencies
 #

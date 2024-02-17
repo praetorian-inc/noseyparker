@@ -3,7 +3,7 @@
 #
 # We use the alpine current, since it's smaller than most debian releases.
 ################################################################################
-FROM rust:1.72-alpine3.18 AS builder
+FROM rust:1.76-alpine3.18 AS builder
 
 # Install dependencies
 RUN apk add --no-cache --no-interactive \

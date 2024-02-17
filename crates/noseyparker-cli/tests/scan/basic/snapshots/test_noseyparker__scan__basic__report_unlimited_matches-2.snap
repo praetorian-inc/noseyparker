@@ -2,8 +2,9 @@
 source: crates/noseyparker-cli/tests/scan/basic/mod.rs
 expression: stdout
 ---
-Finding 1/1: GitHub Personal Access Token
-Match: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
+Finding 1/1
+Rule: GitHub Personal Access Token
+Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
     Occurrence 1/1
     File:  <FILENAME>

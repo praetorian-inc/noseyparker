@@ -156,6 +156,15 @@ jobs:
       run: |
         ./scripts/create-release.zsh
 
+    - name: Run integration tests on release
+      run: |
+        NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
+      env:
+        # We use the GitHub Actions automatic token when running tests, to avoid
+        # spurious failures from rate limiting when testing Nosey Parker's github
+        # enumeration capabilities.
+        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create release archive
       id: release-archive
       run: |

@@ -28,7 +28,7 @@ chrono = { version = "0.4", default_features = false, features = ["std"] }
 console = "0.15"
 fixedbitset = "0.4"
 
-gix = { version = "0.56", features = ["max-performance", "serde"] }
+gix = { version = "0.58", features = ["max-performance", "serde"] }
 
 hex = "0.4"
 include_dir = { version = "0.7", features = ["glob"] }
@@ -36,13 +36,16 @@ input-enumerator = { path = "../input-enumerator" }
 indoc = "2.0"
 ignore = "0.4"
 lazy_static = "1.4"
+noseyparker-digest = { path = "../noseyparker-digest" }
 noseyparker-rules = { path = "../noseyparker-rules" }
 progress = { path = "../progress" }
 regex = "1.7"
 reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
-rusqlite = { version = "0.30", features = ["bundled", "backup"] }
+rusqlite = { version = "0.30", features = ["bundled", "backup", "serde_json"] }
 secrecy = "0.8.0"
+smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
 thiserror = "1"
 tokio = "1.23"
 tracing = "0.1"
