@@ -3,6 +3,7 @@ use bstr::BString;
 use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
@@ -881,7 +882,7 @@ impl std::fmt::Display for FindingSummary {
 // -------------------------------------------------------------------------------------------------
 
 /// Metadata for a group of matches that have identical rule name and match content.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema)]
 pub struct FindingMetadata {
     /// The content-based finding identifier for this group of matches
     pub finding_id: String,
@@ -930,7 +931,7 @@ pub struct FindingDataEntry {
 // -------------------------------------------------------------------------------------------------
 
 /// A status assigned to a match group
-#[derive(Debug, Copy, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 // FIXME(overhaul): use an integer representation for serialization and db
 pub enum Status {
@@ -942,7 +943,7 @@ pub enum Status {
 // Statuses
 // -------------------------------------------------------------------------------------------------
 /// A collection of statuses
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 // FIXME(overhaul): use a bitflag representation here?
 pub struct Statuses(pub SmallVec<[Status; 16]>);

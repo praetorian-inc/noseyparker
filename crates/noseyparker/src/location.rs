@@ -1,10 +1,11 @@
 use core::ops::Range;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 // -------------------------------------------------------------------------------------------------
 // OffsetPoint
 // -------------------------------------------------------------------------------------------------
-/// A single-point location within a bytestring
+/// A point defined by a byte offset.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Copy, Clone)]
 pub struct OffsetPoint(pub usize);
 
@@ -19,8 +20,10 @@ impl OffsetPoint {
 // -------------------------------------------------------------------------------------------------
 // OffsetSpan
 // -------------------------------------------------------------------------------------------------
-/// A non-empty span within a bytestring
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// A non-empty span, defined by two byte offsets.
+/// This is a half-open interval.
+/// A valid span will have an end value greater than the start value.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct OffsetSpan {
     pub start: usize,
     pub end: usize,
@@ -68,7 +71,9 @@ impl OffsetSpan {
 // -------------------------------------------------------------------------------------------------
 // SourcePoint
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, PartialEq, Eq, Hash, Serialize, Deserialize, Copy, Clone)]
+/// A point defined by line and column offsets.
+/// Lines are indexed from 1; columns are indexed from 0.
+#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SourcePoint {
     pub line: usize,
     pub column: usize,
@@ -83,8 +88,9 @@ impl std::fmt::Display for SourcePoint {
 // -------------------------------------------------------------------------------------------------
 // SourceSpan
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, PartialEq, Eq, Hash, Serialize, Deserialize, Clone)]
-// FIXME: is this a half-open or closed interval?  Clarify this.
+/// A span defined by two source points.
+/// This is a clsoed interval.
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SourceSpan {
     pub start: SourcePoint,
     pub end: SourcePoint,
@@ -152,7 +158,8 @@ impl LocationMapping {
 // -------------------------------------------------------------------------------------------------
 // Location
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, Deserialize, Serialize)]
+/// A span, including both the byte- and source-based representation.
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 pub struct Location {
     pub offset_span: OffsetSpan,
     pub source_span: SourceSpan,

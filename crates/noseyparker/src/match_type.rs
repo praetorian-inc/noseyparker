@@ -1,6 +1,8 @@
 use bstr::BString;
 use bstring_serde::BStringBase64;
 use noseyparker_digest::Sha1;
+use schemars::JsonSchema;
+use serde::{Serialize, Deserialize};
 use smallvec::SmallVec;
 use std::io::Write;
 use tracing::debug;
@@ -13,7 +15,7 @@ use crate::snippet::Snippet;
 // -------------------------------------------------------------------------------------------------
 // Group
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Group(#[serde(with = "BStringBase64")] pub BString);
 
 impl Group {
@@ -25,7 +27,7 @@ impl Group {
 // -------------------------------------------------------------------------------------------------
 // Groups
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Groups(pub SmallVec<[Group; 1]>);
 
 // -------------------------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ mod sql {
 // -------------------------------------------------------------------------------------------------
 // Match
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Match {
     /// The blob this match comes from
     pub blob_id: BlobId,

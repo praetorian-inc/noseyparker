@@ -14,6 +14,21 @@ impl std::fmt::Debug for BlobId {
     }
 }
 
+impl schemars::JsonSchema for BlobId {
+    fn schema_name() -> String {
+        "BlobId".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let s = String::json_schema(gen);
+        let mut o = s.into_object();
+        o.string().pattern = Some("[0-9a-f]{40}".into());
+        let md = o.metadata();
+        md.description = Some("A hex-encoded blob ID as computed by Git".into());
+        schemars::schema::Schema::Object(o)
+    }
+}
+
 impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
