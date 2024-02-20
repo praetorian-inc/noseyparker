@@ -23,10 +23,6 @@ mod styles;
 use styles::{StyledObject, Styles};
 
 pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
-    // let schema = schemars::schema_for!(Vec<Finding>);
-    // println!("{}", serde_json::to_string_pretty(&schema).unwrap());
-    // return Ok(());
-
     let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
     let output = args
@@ -169,7 +165,7 @@ impl DetailsReporter {
 
 /// A group of matches that all have the same rule and capture group content
 #[derive(Serialize, JsonSchema)]
-struct Finding {
+pub(crate) struct Finding {
     #[serde(flatten)]
     metadata: FindingMetadata,
     matches: Vec<ReportMatch>,

@@ -98,7 +98,7 @@ RELEASE_DIR="release"
 CARGO_BUILD_DIR="target/release"
 
 mkdir "$RELEASE_DIR" || fatal "could not create release directory"
-mkdir "$RELEASE_DIR"/{bin,share,share/completions} || fatal "could not create release directory tree"
+mkdir "$RELEASE_DIR"/{bin,share,share/completions,share/noseyparker} || fatal "could not create release directory tree"
 
 # Build release version of noseyparker into the release dir
 banner "Building release with Cargo"
@@ -126,6 +126,11 @@ fi
 for SHELL in bash zsh fish powershell elvish; do
     "$NP" shell-completions --shell zsh >"$RELEASE_DIR/share/completions/noseyparker.$SHELL"
 done
+
+################################################################################
+# JSON Schema generation
+################################################################################
+"$NP" json-schema >"$RELEASE_DIR/share/noseyparker/report-schema.v0.17.json"
 
 ################################################################################
 # Sanity checking
