@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::ser::SerializeSeq;
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -21,6 +22,21 @@ impl serde::Serialize for ProvenanceSet {
             seq.serialize_element(p)?;
         }
         seq.end()
+    }
+}
+
+impl JsonSchema for ProvenanceSet {
+    fn schema_name() -> String {
+        "ProvenanceSet".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let s = <Vec<Provenance>>::json_schema(gen);
+        let mut o = s.into_object();
+        o.array().min_items = Some(1);
+        let md = o.metadata();
+        md.description = Some("A non-empty set of `Provenance` entries".into());
+        schemars::schema::Schema::Object(o)
     }
 }
 

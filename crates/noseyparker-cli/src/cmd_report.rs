@@ -1,12 +1,13 @@
 use anyhow::{bail, Context, Result};
 use bstr::{BStr, ByteSlice};
 use indenter::indented;
+use schemars::JsonSchema;
 use serde::Serialize;
 use std::fmt::{Display, Formatter, Write};
 
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
-use noseyparker::datastore::{Datastore, FindingDataEntry, FindingMetadata, MatchId, Status};
+use noseyparker::datastore::{Datastore, FindingDataEntry, FindingMetadata, Status};
 use noseyparker::defaults::get_builtin_rules;
 use noseyparker::match_type::{Group, Groups, Match};
 use noseyparker::provenance::Provenance;
@@ -163,14 +164,16 @@ impl DetailsReporter {
 }
 
 /// A group of matches that all have the same rule and capture group content
-#[derive(Serialize)]
-struct Finding {
+#[derive(Serialize, JsonSchema)]
+pub(crate) struct Finding {
     #[serde(flatten)]
     metadata: FindingMetadata,
     matches: Vec<ReportMatch>,
 }
 
-#[derive(Serialize)]
+/// A match produced by one of Nosey Parker's rules.
+/// This corresponds to a single location.
+#[derive(Serialize, JsonSchema)]
 struct ReportMatch {
     #[serde(rename = "provenance")]
     ps: ProvenanceSet,
@@ -181,12 +184,14 @@ struct ReportMatch {
     #[serde(flatten)]
     m: Match,
 
-    #[serde(skip)]
-    #[allow(dead_code)]
-    id: MatchId,
-
+    /// An optional score assigned to the match
+    #[validate(range(min = 0.0, max = 1.0))]
     score: Option<f64>,
+
+    /// An optional comment assigned to the match
     comment: Option<String>,
+
+    /// An optional status assigned to the match
     status: Option<Status>,
 }
 
@@ -195,7 +200,6 @@ impl From<FindingDataEntry> for ReportMatch {
         ReportMatch {
             ps: e.provenance,
             md: e.blob_metadata,
-            id: e.match_id,
             m: e.match_val,
             score: e.match_score,
             comment: e.match_comment,

@@ -1,7 +1,7 @@
 use crate::blob_id::BlobId;
 
 /// Metadata about a blob
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, schemars::JsonSchema)]
 pub struct BlobMetadata {
     /// The blob ID this metadata applies to
     pub id: BlobId,

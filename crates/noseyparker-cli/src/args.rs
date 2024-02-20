@@ -179,17 +179,21 @@ pub enum Command {
     #[command(display_order = 4, name = "github")]
     GitHub(GitHubArgs),
 
-    #[command(display_order = 30)]
     /// Manage datastores
+    #[command(display_order = 30)]
     Datastore(DatastoreArgs),
 
-    #[command(display_order = 30)]
     /// Manage rules
+    #[command(display_order = 30)]
     Rules(RulesArgs),
 
-    #[command(display_order = 40)]
     /// Generate shell completions
+    #[command(display_order = 40, hide=true)]
     ShellCompletions(ShellCompletionsArgs),
+
+    /// Generate the JSON schema for the output of the `report` command
+    #[command(display_order = 50, hide=true)]
+    JsonSchema(JsonSchemaArgs),
 }
 
 // -----------------------------------------------------------------------------
@@ -793,6 +797,13 @@ pub enum ShellFormat {
 pub struct ShellCompletionsArgs {
     #[arg(long, short, value_name = "SHELL")]
     pub shell: ShellFormat,
+}
+
+// -----------------------------------------------------------------------------
+// `json-schema` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct JsonSchemaArgs {
 }
 
 // -----------------------------------------------------------------------------

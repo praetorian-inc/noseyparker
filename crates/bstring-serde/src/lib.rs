@@ -1,4 +1,5 @@
 use bstr::BString;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A custom `serde` codec for `bstr::BString` that uses lossy UTF-8 encoding.
@@ -49,6 +50,25 @@ fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(
     d.deserialize_str(Vis)
 }
 
+/// Use plain `string` as the JSON schema for `BStringLossyUtf8`.
+impl JsonSchema for BStringLossyUtf8 {
+    fn is_referenceable() -> bool {
+        false
+    }
+
+    fn schema_id() -> std::borrow::Cow<'static, str> {
+        <String as JsonSchema>::schema_id()
+    }
+
+    fn schema_name() -> String {
+        <String as JsonSchema>::schema_name()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(gen)
+    }
+}
+
 
 /// A custom `serde` codec for `bstr::BString` that uses standard base64.
 #[derive(Deserialize, Serialize)]
@@ -95,6 +115,20 @@ fn deserialize_bytes_string_base64<'de, D: serde::Deserializer<'de>>(
     d.deserialize_str(Vis)
 }
 
+impl JsonSchema for BStringBase64 {
+    fn schema_name() -> String {
+        "BStringBase64".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let s = String::json_schema(gen);
+        let mut o = s.into_object();
+        o.string().pattern = Some("[a-zA-Z0-9/+]*={0,2}".into());
+        let md = o.metadata();
+        md.description = Some("A standard base64-encoded bytestring".into());
+        schemars::schema::Schema::Object(o)
+    }
+}
 
 
 #[cfg(test)]

@@ -8,6 +8,7 @@ use tracing::debug;
 mod args;
 mod cmd_datastore;
 mod cmd_github;
+mod cmd_json_schema;
 mod cmd_report;
 mod cmd_rules;
 mod cmd_scan;
@@ -104,6 +105,7 @@ fn try_main(args: &CommandLineArgs) -> Result<()> {
         args::Command::Summarize(args) => cmd_summarize::run(global_args, args),
         args::Command::Report(args) => cmd_report::run(global_args, args),
         args::Command::ShellCompletions(args) => cmd_shell_completions::run(global_args, args),
+        args::Command::JsonSchema(args) => cmd_json_schema::run(global_args, args),
     }
 }
 

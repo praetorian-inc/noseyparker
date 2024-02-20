@@ -1,6 +1,7 @@
 use bstr::BString;
 use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::{PathBuf, Path};
 
@@ -9,7 +10,7 @@ use std::path::{PathBuf, Path};
 // Provenance
 // -------------------------------------------------------------------------------------------------
 /// `Provenance` indicates where a particular blob or match was found when scanning.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case", tag = "kind")]
 #[allow(clippy::large_enum_variant)]
 pub enum Provenance {
@@ -97,7 +98,7 @@ impl std::fmt::Display for Provenance {
 // FileProvenance
 // -------------------------------------------------------------------------------------------------
 /// Indicates that a blob was seen at a particular file path
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct FileProvenance {
     pub path: PathBuf,
 }
@@ -106,7 +107,7 @@ pub struct FileProvenance {
 // GitRepoProvenance
 // -------------------------------------------------------------------------------------------------
 /// Indicates that a blob was seen in a Git repo, optionally with particular commit provenance info
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct GitRepoProvenance {
     pub repo_path: PathBuf,
     pub first_commit: Option<CommitProvenance>,
@@ -116,7 +117,7 @@ pub struct GitRepoProvenance {
 // CommitProvenance
 // -------------------------------------------------------------------------------------------------
 /// How was a particular Git commit encountered?
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CommitProvenance {
     pub commit_metadata: CommitMetadata,
 
@@ -134,16 +135,16 @@ pub struct CommitProvenance {
 /// Nosey Parker:
 ///
 /// - A `path` field containing a string
-///
-/// - XXX A `url` string field that is a syntactically-valid URL
-/// - XXX A `time` string field
-/// - XXX A `display` string field
-///
-/// - XXX A `parent_blob` string field with a hex-encoded blob ID that the associated blob was derived from
-/// - XXX A `parent_transform` string field identifying the transform method used to derive the associated blob
-/// - XXX A `parent_start_byte` integer field
-/// - XXX A `parent_end_byte` integer field
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+//
+// - XXX A `url` string field that is a syntactically-valid URL
+// - XXX A `time` string field
+// - XXX A `display` string field
+//
+// - XXX A `parent_blob` string field with a hex-encoded blob ID that the associated blob was derived from
+// - XXX A `parent_transform` string field identifying the transform method used to derive the associated blob
+// - XXX A `parent_start_byte` integer field
+// - XXX A `parent_end_byte` integer field
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ExtendedProvenance(pub serde_json::Value);
 
 impl std::fmt::Display for ExtendedProvenance {
