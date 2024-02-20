@@ -128,9 +128,9 @@ for SHELL in bash zsh fish powershell elvish; do
 done
 
 ################################################################################
-# JSON Schema generation
+# Copy assets
 ################################################################################
-"$NP" json-schema >"$RELEASE_DIR/share/noseyparker/report-schema.v0.17.json"
+cp -p share/noseyparker/* "$RELEASE_DIR/share/noseyparker/"
 
 ################################################################################
 # Sanity checking
