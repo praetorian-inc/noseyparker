@@ -98,5 +98,3 @@ fn github_repos_list_user_json_format() {
         "JSON output does not contain https://github.com/octocat/Spoon-Knife.git: {json_parsed:?}"
     );
 }
-
-// TODO: add test using a non-default `--github-api-url URL`
