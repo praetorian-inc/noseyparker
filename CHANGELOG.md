@@ -47,11 +47,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Manpages via `generate manpages` ((#88)[https://github.com/praetorian-inc/noseyparker/issues/88])
 
 ### Fixes
-- Fixed several rules that in certain circumstances would fail to match and produce a runtime error message:
+- Several rules have been fixed that in certain circumstances would fail to match and produce a runtime error message:
 
   - Google API Key
   - ODBC Connection String
   - Sauce Token
+
+- The `netrc Credentials` rule has been modified to avoid a runtime message about an empty capture group.
 
 - The `JSON Web Token (base64url-encoded)` rule has been improved to reduce false positives.
   Thank you @saullocarvalho for the bug report!

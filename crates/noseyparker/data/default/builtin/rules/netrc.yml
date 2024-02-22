@@ -5,7 +5,7 @@ rules:
 
   pattern: |
     (?x)
-    (?: (machine \s+ [^\s]+) | default)
+    ( machine \s+ [^\s]+ | default )
     \s+
     login \s+ ([^\s]+)
     \s+
