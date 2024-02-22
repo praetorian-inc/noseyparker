@@ -12,5 +12,5 @@ pub fn run(_global_args: &GlobalArgs, args: &JsonSchemaArgs) -> Result<()> {
     if let Some(output) = &args.output {
         info!("Wrote JSON schema to {}", output.display());
     }
-    return Ok(());
+    Ok(())
 }
