@@ -40,6 +40,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
   - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
 
+- A new `generate` command has been added, which generates various assets that are included in prebuilt releases:
+
+  - Shell completion scripts via `generate shell-completions`
+  - A JSON Schema for the `report -f json` output via `generate json-schema` ((#128)[https://github.com/praetorian-inc/noseyparker/issues/128])
+  - Manpages via `generate manpages` ((#88)[https://github.com/praetorian-inc/noseyparker/issues/88])
+
 ### Fixes
 - Fixed several rules that in certain circumstances would fail to match and produce a runtime error message:
 
@@ -89,6 +95,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Schema migration of older Nosey Parker datastores is no longer performed.
   Previously, this would automatically and silently be done when opening a datastore from an older version.
   Explicit support for datastore migration may be added back in a future release.
+
+- The `shell-completions` command has been moved from the top level to a subcommand of `generate`.
 
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)
