@@ -621,7 +621,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let rule_name = &rules_db
                     .get_rule(entry.rule_id)
                     .expect("rule index should be valid")
-                    .name;
+                    .name();
                 println!(
                     "{:>50} {:>10} {:>10.4}s",
                     rule_name,
