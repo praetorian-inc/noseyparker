@@ -30,13 +30,13 @@ impl DetailsReporter {
         let locations: Vec<sarif::Location> = matches
             .iter()
             .flat_map(|m| {
-                let ReportMatch { ps, md, m, .. } = m;
-                ps.iter().map(move |p| {
+                let ReportMatch { provenance, blob_metadata, m, .. } = m;
+                provenance.iter().map(move |p| {
                     let source_span = &m.location.source_span;
                     // let offset_span = &m.location.offset_span;
 
                     let additional_properties =
-                        vec![(String::from("blob_metadata"), serde_json::json!(md))];
+                        vec![(String::from("blob_metadata"), serde_json::json!(blob_metadata))];
 
                     let mut artifact_location = sarif::ArtifactLocationBuilder::default();
                     if let Some(path) = p.blob_path() {

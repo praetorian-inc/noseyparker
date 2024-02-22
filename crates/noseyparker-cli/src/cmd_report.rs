@@ -175,11 +175,10 @@ pub(crate) struct Finding {
 /// This corresponds to a single location.
 #[derive(Serialize, JsonSchema)]
 struct ReportMatch {
-    #[serde(rename = "provenance")]
-    ps: ProvenanceSet,
+    provenance: ProvenanceSet,
 
     #[serde(rename = "blob_metadata")]
-    md: BlobMetadata,
+    blob_metadata: BlobMetadata,
 
     #[serde(flatten)]
     m: Match,
@@ -198,8 +197,8 @@ struct ReportMatch {
 impl From<FindingDataEntry> for ReportMatch {
     fn from(e: FindingDataEntry) -> Self {
         ReportMatch {
-            ps: e.provenance,
-            md: e.blob_metadata,
+            provenance: e.provenance,
+            blob_metadata: e.blob_metadata,
             m: e.match_val,
             score: e.match_score,
             comment: e.match_comment,

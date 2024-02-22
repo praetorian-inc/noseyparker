@@ -12,23 +12,32 @@ impl DetailsReporter {
             let finding_num = finding_num + 1;
             let matches = self.get_matches(&metadata)?;
             let finding = Finding { metadata, matches };
-            writeln!(&mut writer, "{}", self.style_finding_heading(format!("Finding {finding_num}/{num_findings}")))?;
+            writeln!(
+                &mut writer,
+                "{}",
+                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}"))
+            )?;
             writeln!(&mut writer, "{}", PrettyFinding(self, &finding))?;
         }
         Ok(())
     }
 }
 
-
 /// A wrapper type to allow human-oriented pretty-printing of a `Finding`.
 pub struct PrettyFinding<'a>(&'a DetailsReporter, &'a Finding);
 
-impl <'a> Display for PrettyFinding<'a> {
+impl<'a> Display for PrettyFinding<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let PrettyFinding(reporter, finding) = self;
-        writeln!(f, "{} {}", reporter.style_heading("Rule:"), reporter.style_rule(finding.rule_name()))?;
+        writeln!(
+            f,
+            "{} {}",
+            reporter.style_heading("Rule:"),
+            reporter.style_rule(finding.rule_name())
+        )?;
 
-        // write out status if set
+        // write out status if set: either `Accept`, `Reject`, or `Mixed` (when there are
+        // conflicting match statuses within the finding)
         let statuses = &finding.metadata.statuses.0;
         let num_statuses = statuses.len();
         #[allow(clippy::comparison_chain)]
@@ -42,24 +51,30 @@ impl <'a> Display for PrettyFinding<'a> {
             writeln!(f, "{} {status}", reporter.style_heading("Status:"))?;
         };
 
+        // write out score if set
+        if let Some(mean_score) = finding.metadata.mean_score {
+            writeln!(f, "{} {mean_score:.3}", reporter.style_heading("Score:"))?;
+        };
+
         // write out comment if set
         if let Some(comment) = &finding.metadata.comment {
             writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
         };
 
-        let mut write_group = |group_heading: StyledObject<String>, g: &Group| -> std::fmt::Result {
-            let g = &g.0;
-            // write out the group on one line if it's single-line, and multiple lines otherwise
-            if g.contains(&b'\n') {
-                writeln!(f, "{group_heading}")?;
-                writeln!(f)?;
-                writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
-                writeln!(f)?;
-            } else {
-                writeln!(f, "{} {}", group_heading, reporter.style_match(Escaped(g)))?;
-            }
-            Ok(())
-        };
+        let mut write_group =
+            |group_heading: StyledObject<String>, g: &Group| -> std::fmt::Result {
+                let g = &g.0;
+                // write out the group on one line if it's single-line, and multiple lines otherwise
+                if g.contains(&b'\n') {
+                    writeln!(f, "{group_heading}")?;
+                    writeln!(f)?;
+                    writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
+                    writeln!(f)?;
+                } else {
+                    writeln!(f, "{} {}", group_heading, reporter.style_match(Escaped(g)))?;
+                }
+                Ok(())
+            };
 
         let gs = &finding.groups().0;
         if gs.len() > 1 {
@@ -89,24 +104,53 @@ impl <'a> Display for PrettyFinding<'a> {
 
         // write out matches
         let mut f = indented(f).with_str("    ");
-        for (i, ReportMatch { ps, md, m, .. }) in finding.matches.iter().enumerate() {
+        for (i, rm) in finding.matches.iter().enumerate() {
             let i = i + 1;
+            let ReportMatch {
+                provenance,
+                blob_metadata,
+                m,
+                score,
+                comment,
+                status,
+            } = rm;
+
             writeln!(
                 f,
                 "{}",
                 reporter.style_heading(format!("Occurrence {i}/{}", finding.total_matches())),
             )?;
 
+            // write out match status if set
+            if let Some(status) = status {
+                let status = match status {
+                    Status::Accept => "Accept",
+                    Status::Reject => "Reject",
+                };
+                writeln!(f, "{} {status}", reporter.style_heading("Status:"))?;
+            }
+
+            // write out match score if set
+            if let Some(score) = score {
+                writeln!(f, "{} {score:.3}", reporter.style_heading("Score:"))?;
+            };
+
+            // write out match comment if set
+            if let Some(comment) = comment {
+                writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
+            };
+
             let blob_metadata = {
                 format!(
                     "{} bytes, {}, {}",
-                    md.num_bytes(),
-                    md.mime_essence().unwrap_or("unknown type"),
-                    md.charset().unwrap_or("unknown charset"),
+                    blob_metadata.num_bytes(),
+                    blob_metadata.mime_essence().unwrap_or("unknown type"),
+                    blob_metadata.charset().unwrap_or("unknown charset"),
                 )
             };
 
-            for p in ps.iter() {
+            // FIXME: limit the total number of provenance entries displayed
+            for p in provenance.iter() {
                 match p {
                     Provenance::File(e) => {
                         writeln!(
@@ -155,7 +199,7 @@ impl <'a> Display for PrettyFinding<'a> {
                             writeln!(f)?;
                         }
                     }
-                    // TODO(overhaul): implement this case properly
+                    // FIXME(overhaul): implement this case properly
                     Provenance::Extended(e) => {
                         writeln!(
                             f,
