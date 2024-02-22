@@ -703,12 +703,13 @@ impl Datastore {
     }
 
     fn check_schema_version(&self) -> Result<()> {
-        // let (user_version, ): (u64, ) = self.conn.pragma_query_value(None, "user_version", |r| <(u64, )>::try_from(r))?;
         let user_version: u64 = self
             .conn
             .pragma_query_value(None, "user_version", val_from_row)?;
         if user_version != Self::CURRENT_SCHEMA_VERSION {
-            bail!("Unsupported schema version {user_version}");
+            bail!("Unsupported schema version {user_version} (expected {}): \
+                  datastores from other versions of Nosey Parker are not supported",
+                  Self::CURRENT_SCHEMA_VERSION);
         }
         Ok(())
     }
