@@ -157,7 +157,7 @@ struct SnippetIdInt(i64);
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MatchId(i64);
 
-type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<Match>);
+type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>);
 
 pub struct Transaction<'a> {
     inner: rusqlite::Transaction<'a>,
@@ -288,7 +288,7 @@ impl<'a> Transaction<'a> {
     /// Record a match, returning whether it was new or not
     fn mk_record_match(
         &'a self,
-    ) -> Result<impl FnMut(BlobIdInt, &'a Match) -> rusqlite::Result<bool>> {
+    ) -> Result<impl FnMut(BlobIdInt, &'a Match, &'a Option<f64>) -> rusqlite::Result<bool>> {
         let mut record_snippet = self.mk_record_snippet()?;
 
         let mut get_finding_id = self.inner.prepare_cached(indoc! {r#"
@@ -347,6 +347,7 @@ impl<'a> Transaction<'a> {
                 after_snippet_id
             )
             select ?, ?, ?, ?, ?, ?, ?, ?
+            returning id
         "#})?;
 
         let mut add_blob_source_span = self.inner.prepare_cached(indoc! {r#"
@@ -364,7 +365,13 @@ impl<'a> Transaction<'a> {
                 or end_column != excluded.end_column
         "#})?;
 
-        let f = move |BlobIdInt(blob_id), m: &'a Match| {
+        let mut set_score = self.inner.prepare_cached(indoc! {r#"
+            insert into match_score (match_id, score)
+            values (?, ?)
+            on conflict do update set score = excluded.score
+        "#})?;
+
+        let f = move |BlobIdInt(blob_id), m: &'a Match, score: &'a Option<f64>| {
             let start_byte = m.location.offset_span.start;
             let end_byte = m.location.offset_span.end;
             let rule_structural_id = &m.rule_structural_id;
@@ -399,7 +406,7 @@ impl<'a> Transaction<'a> {
             let matching_snippet_id = record_snippet(snippet.matching.as_slice())?;
             let after_snippet_id = record_snippet(snippet.after.as_slice())?;
 
-            if let Some(match_id) = get_match_id
+            let (match_id, new) = if let Some(match_id) = get_match_id
                 .query_map((blob_id, start_byte, end_byte, finding_id), val_from_row)?
                 .next()
             {
@@ -413,10 +420,10 @@ impl<'a> Transaction<'a> {
                     matching_snippet_id,
                     after_snippet_id,
                 ))?;
-                Ok(false)
+                (match_id, false)
             } else {
                 // totally new match
-                add_match.execute((
+                let match_id = add_match.query_row((
                     structural_id,
                     finding_id,
                     blob_id,
@@ -425,9 +432,15 @@ impl<'a> Transaction<'a> {
                     before_snippet_id,
                     matching_snippet_id,
                     after_snippet_id,
-                ))?;
-                Ok(true)
+                ), val_from_row)?;
+                (match_id, true)
+            };
+
+            if let Some(score) = score {
+                set_score.execute((match_id, score))?;
             }
+
+            Ok(new)
         };
 
         Ok(f)
@@ -452,8 +465,8 @@ impl<'a> Transaction<'a> {
             }
 
             // record matches
-            for m in ms {
-                if record_match(blob_id, m).context("Failed to record match")? {
+            for (s, m) in ms {
+                if record_match(blob_id, m, s).context("Failed to record match")? {
                     num_matches_added += 1;
                 }
             }

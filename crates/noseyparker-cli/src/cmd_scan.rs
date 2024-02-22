@@ -30,7 +30,7 @@ use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
 
 
-type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
+type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>);
 
 /// This command scans multiple filesystem inputs for secrets.
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
@@ -786,7 +786,7 @@ fn run_matcher(
                     new_matches.extend(
                         matches
                             .iter()
-                            .map(|m| Match::convert(&loc_mapping, m, snippet_length)),
+                            .map(|m| (None, Match::convert(&loc_mapping, m, snippet_length))),
                     );
                     new_matches
                 }
