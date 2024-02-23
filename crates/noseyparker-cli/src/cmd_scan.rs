@@ -37,6 +37,11 @@ type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<Match>);
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
 /// and records found matches to a SQLite database from a single dedicated thread.
 pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> {
+    args::validate_github_api_url(
+        &args.input_specifier_args.github_api_url,
+        args.input_specifier_args.all_github_organizations
+    );
+
     debug!("Args:\n{global_args:#?}\n{args:#?}");
 
     let progress_enabled = global_args.use_progress();
@@ -84,7 +89,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let repo_specifiers = github::RepoSpecifiers {
             user: args.input_specifier_args.github_user.clone(),
             organization: args.input_specifier_args.github_organization.clone(),
-            all_organizations: args.input_specifier_args.all_organizations,
+            all_organizations: args.input_specifier_args.all_github_organizations,
         };
         let mut repo_urls = args.input_specifier_args.git_url.clone();
         if !repo_specifiers.is_empty() {
@@ -94,6 +99,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             );
             let mut num_found: u64 = 0;
             let api_url = args.input_specifier_args.github_api_url.clone();
+
             for repo_string in
                 github::enumerate_repo_urls(&repo_specifiers, api_url, args.ignore_certs, Some(&mut progress))
                     .context("Failed to enumerate GitHub repositories")?

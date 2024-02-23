@@ -22,8 +22,8 @@ Input Specifier Options:
                                     specified GitHub organization [aliases: github-org]
       --github-user <NAME>          Clone and scan accessible repositories belonging to the
                                     specified GitHub user
-      --all-organizations           Clone and scan accessible repositories in the GitHub instance
-                                    specified with the custom API url [aliases: scan-instance]
+      --all-github-organizations    Clone and scan accessible repositories from all accessible
+                                    GitHub organizations [aliases: all-github-orgs]
       --github-api-url <URL>        Use the specified URL for GitHub API access [default:
                                     https://api.github.com/] [aliases: api-url]
       --git-clone <MODE>            Use the specified method for cloning Git repositories [default:

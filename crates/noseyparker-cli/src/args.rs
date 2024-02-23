@@ -57,6 +57,25 @@ fn get_short_version() -> &'static str {
 
 const DEFAULT_DATASTORE: &str = "datastore.np";
 
+
+pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: bool) {
+    use clap::error::ErrorKind;
+    use clap::CommandFactory;
+
+    // Check that a non-default value of `--github-api-url` has been specified.
+    // This constraint is impossible to express natively using `clap` version 4.
+    if let Some(host) = github_api_url.host_str() {
+        if host == "api.github.com" && all_github_organizations {
+            let mut cmd = CommandLineArgs::command();
+            let err = cmd.error(
+                ErrorKind::MissingRequiredArgument,
+                "a non-default value for `--github-api-url` is required when using `--all-github-organizations`",
+            );
+            err.exit();
+        }
+    }
+}
+
 // -----------------------------------------------------------------------------
 // command-line args
 // -----------------------------------------------------------------------------
@@ -308,7 +327,8 @@ pub struct GitHubArgs {
         value_name = "URL",
         value_hint = ValueHint::Url,
         default_value = "https://api.github.com/",
-        visible_alias="api-url"
+        visible_alias="api-url",
+        global = true,
     )]
     pub github_api_url: Url,
 }
@@ -344,25 +364,36 @@ pub struct GitHubRepoSpecifiers {
     /// Select repositories belonging to the specified user
     ///
     /// This option can be repeated.
-    #[arg(long)]
+    #[arg(long, visible_alias = "github-user")]
     pub user: Vec<String>,
 
     /// Select repositories belonging to the specified organization
     ///
     /// This option can be repeated.
-    #[arg(long, visible_alias = "org")]
+    #[arg(
+        long,
+        visible_alias = "org",
+        visible_alias = "github-organization",
+        visible_alias = "github-org",
+    )]
     pub organization: Vec<String>,
 
-    /// Clone and scan accessible repositories in the GitHub instance specified with the custom API url
+    /// Select repositories belonging to all organizations
     ///
-    /// Requires setting up the `github_api_url` option.
-    #[arg(long)]
+    /// This only works with a GitHub Enterprise Server instance.
+    /// The `--github-api-url` option must be specified.
+    #[arg(
+        long,
+        visible_alias = "all-orgs",
+        visible_alias = "all-github-organizations",
+        visible_alias = "all-github-orgs",
+    )]
     pub all_organizations: bool,
 }
 
 impl GitHubRepoSpecifiers {
     pub fn is_empty(&self) -> bool {
-        self.user.is_empty() && self.organization.is_empty()
+        self.user.is_empty() && self.organization.is_empty() && !self.all_organizations
     }
 }
 
@@ -633,7 +664,7 @@ pub struct InputSpecifierArgs {
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
-        required_unless_present_any(["github_user", "github_organization", "git_url", "all_organizations"]),
+        required_unless_present_any(["github_user", "github_organization", "git_url", "all_github_organizations"]),
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -668,16 +699,17 @@ pub struct InputSpecifierArgs {
     )]
     pub github_organization: Vec<String>,
 
-    /// Clone and scan accessible repositories in the GitHub instance specified with the custom API url
+    /// Clone and scan accessible repositories from all accessible GitHub organizations
     ///
-    /// Requires setting up the `github_api_url` option.
+    /// This only works with a GitHub Enterprise Server instance.
+    /// A non-default option for the `--github-api-url` option must be specified.
     #[arg(
         long,
-        visible_alias = "scan-instance",
+        visible_alias = "all-github-orgs",
         requires = "github_api_url",
         display_order = 21
     )]
-    pub all_organizations: bool,
+    pub all_github_organizations: bool,
 
     /// Use the specified URL for GitHub API access
     ///

@@ -70,13 +70,15 @@ fn github_repos_list_multiple_user_dedupe_jsonl_format() {
         "github", "repos", "list", "--user", "octocat", "--user", "octocat", "--format", "jsonl"
     );
     handle_github_token(&mut cmd);
-    let cmd = cmd.assert()
+    let cmd = cmd
+        .assert()
         .success()
         .stdout(predicates::str::contains("\"https://github.com/octocat/Spoon-Knife.git\"\n"))
         .stderr(predicates::str::is_empty());
 
     // Ensure that output is sorted and there are no dupes
-    let stdout = String::from_utf8(cmd.get_output().stdout.clone()).expect("noseyparker output should be utf-8");
+    let stdout = String::from_utf8(cmd.get_output().stdout.clone())
+        .expect("noseyparker output should be utf-8");
     let stdout_lines: Vec<String> = stdout.lines().map(|s| s.to_string()).collect();
     let mut sorted_stdout_lines = stdout_lines.clone();
     sorted_stdout_lines.sort();
@@ -100,3 +102,44 @@ fn github_repos_list_user_json_format() {
 }
 
 // TODO: add test using a non-default `--github-api-url URL`
+
+#[test]
+fn github_repos_list_all_organizations_no_api_url1() {
+    assert_cmd_snapshot!(noseyparker_failure!(
+        "github",
+        "repos",
+        "list",
+        "--all-github-organizations"
+    ));
+}
+
+#[test]
+fn github_repos_list_all_organizations_no_api_url2() {
+    assert_cmd_snapshot!(noseyparker_failure!("github", "repos", "list", "--all-organizations"));
+}
+
+#[test]
+fn github_repos_list_all_organizations_no_api_url3() {
+    assert_cmd_snapshot!(noseyparker_failure!(
+        "github",
+        "repos",
+        "list",
+        "--all-organizations",
+        "--api-url",
+        "https://api.github.com/"
+    ));
+}
+
+#[test]
+fn github_repos_list_all_organizations_no_api_url4() {
+    assert_cmd_snapshot!(noseyparker_failure!(
+        "github",
+        "repos",
+        "list",
+        "--all-organizations",
+        "--api-url",
+        "https://api.github.com"
+    ));
+}
+
+// TODO(test): add tests for `github repos list --all-organizations` with a valid non-default `--github-api-url`
