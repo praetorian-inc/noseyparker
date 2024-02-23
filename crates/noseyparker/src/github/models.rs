@@ -216,3 +216,23 @@ pub struct Repository {
     pub web_commit_signoff_required: Option<bool>,
     // pub security_and_analysis: Option<Option<Box<crate::models::MinimalRepositorySecurityAndAnalysis>>>,
 }
+
+// -------------------------------------------------------------------------------------------------
+// OrganizationShort
+// Defined as in: https://docs.github.com/en/rest/orgs/orgs?apiVersion=2022-11-28#list-organizations
+// -------------------------------------------------------------------------------------------------
+#[derive(Debug, Deserialize)]
+pub struct OrganizationShort {
+    pub login: String,
+    pub id: i64,
+    pub node_id: String,
+    pub url: String,
+    pub repos_url: String,
+    pub events_url: String,
+    pub hooks_url: String,
+    pub issues_url: String,
+    pub members_url: String,
+    pub public_members_url: String,
+    pub avatar_url: String,
+    pub description: Option<String>,
+}

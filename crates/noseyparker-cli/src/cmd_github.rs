@@ -1,7 +1,9 @@
 use anyhow::{bail, Context, Result};
 use url::Url;
 
-use crate::args::{GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs};
+use crate::args::{
+    validate_github_api_url, GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs,
+};
 use crate::reportable::Reportable;
 use noseyparker::github;
 
@@ -16,10 +18,12 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Ur
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
+    validate_github_api_url(&api_url, args.repo_specifiers.all_organizations);
     let repo_urls = github::enumerate_repo_urls(
         &github::RepoSpecifiers {
             user: args.repo_specifiers.user.clone(),
             organization: args.repo_specifiers.organization.clone(),
+            all_organizations: args.repo_specifiers.all_organizations,
         },
         api_url,
         args.ignore_certs,

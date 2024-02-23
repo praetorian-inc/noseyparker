@@ -1,4 +1,4 @@
-use super::models::Repository;
+use super::models::{OrganizationShort, Repository};
 use super::{Client, Result};
 
 use progress::Progress;
@@ -26,6 +26,12 @@ impl<'c> RepoEnumerator<'c> {
         self.client.get_all(repo_page).await
     }
 
+    /// Enumerate the accessible repositories that belong to the given organization.
+    pub async fn enumerate_instance_orgs(&self) -> Result<Vec<OrganizationShort>> {
+        let org_page = self.client.get_orgs().await?;
+        self.client.get_all(org_page).await
+    }
+
     /// Enumerate the repository clone URLs found from the according to the given `RepoSpecifiers`,
     /// collecting the union of specified repository URLs.
     ///
@@ -45,7 +51,22 @@ impl<'c> RepoEnumerator<'c> {
             repo_urls.extend(to_add.into_iter().map(|r| r.clone_url));
         }
 
-        for orgname in &repo_specifiers.organization {
+        let instance_orgs: Vec<_> = if repo_specifiers.all_organizations {
+            self.enumerate_instance_orgs()
+                .await?
+                .into_iter()
+                .map(|o| o.login)
+                .collect()
+        } else {
+            Default::default()
+        };
+        let orgs: Vec<&String> = repo_specifiers
+            .organization
+            .iter()
+            .chain(instance_orgs.iter())
+            .collect();
+
+        for orgname in orgs {
             let to_add = self.enumerate_org_repos(orgname).await?;
             if let Some(progress) = progress.as_mut() {
                 progress.inc(to_add.len() as u64);
@@ -65,10 +86,11 @@ impl<'c> RepoEnumerator<'c> {
 pub struct RepoSpecifiers {
     pub user: Vec<String>,
     pub organization: Vec<String>,
+    pub all_organizations: bool,
 }
 
 impl RepoSpecifiers {
     pub fn is_empty(&self) -> bool {
-        self.user.is_empty() && self.organization.is_empty()
+        self.user.is_empty() && self.organization.is_empty() && !self.all_organizations
     }
 }

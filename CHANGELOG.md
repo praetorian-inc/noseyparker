@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `--ignore-certs` command-line option has been added to the `scan` and `github` commands.
   This option causes TLS certificate validation to be skipped ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre!).
 
+- Allow ignoring validation of TLS certificates with new `--ignore-certs` flag ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre!)
+
+- The `scan` and `github` commands now support the `--all_organizations` flag.
+  When supplied along with a custom GitHub API URL, Nosey Parker will scan the provided GitHub instance for all organizations to be further enumerated for additional repositories.
+  ([#126](https://github.com/praetorian-inc/noseyparker/pull/126); thank you @seqre!)
+
 - New rules have been added (thank you @gemesa!):
 
   - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))

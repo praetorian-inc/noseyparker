@@ -103,6 +103,14 @@ Input Specifier Options:
           
           This option can be repeated.
 
+      --all-github-organizations
+          Clone and scan accessible repositories from all accessible GitHub organizations
+          
+          This only works with a GitHub Enterprise Server instance. A non-default option for the
+          `--github-api-url` option must be specified.
+          
+          [aliases: all-github-orgs]
+
       --github-api-url <URL>
           Use the specified URL for GitHub API access
           

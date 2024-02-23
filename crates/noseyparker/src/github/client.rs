@@ -3,7 +3,7 @@ use reqwest;
 use reqwest::{header, header::HeaderValue, StatusCode, Url};
 use secrecy::ExposeSecret;
 
-use super::models::{Page, RateLimitOverview, Repository, User};
+use super::models::{OrganizationShort, Page, RateLimitOverview, Repository, User};
 use super::{Auth, ClientBuilder, Error, Result};
 
 // TODO: debug logging
@@ -59,6 +59,11 @@ impl Client {
 
     pub async fn get_org_repos(&self, orgname: &str) -> Result<Page<Repository>> {
         self.get_paginated_with_params(&["orgs", orgname, "repos"], &[MAX_PER_PAGE])
+            .await
+    }
+
+    pub async fn get_orgs(&self) -> Result<Page<OrganizationShort>> {
+        self.get_paginated_with_params(&["organizations"], &[MAX_PER_PAGE])
             .await
     }
 

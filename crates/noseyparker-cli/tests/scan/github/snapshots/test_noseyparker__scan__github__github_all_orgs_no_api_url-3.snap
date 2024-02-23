@@ -1,0 +1,11 @@
+---
+source: crates/noseyparker-cli/tests/scan/github/mod.rs
+expression: stderr
+---
+error: the following required arguments were not provided:
+  --github-api-url <URL>
+
+Usage: noseyparker scan --github-api-url <URL> --datastore <PATH> --all-github-organizations [INPUT]...
+
+For more information, try '--help'.
+
