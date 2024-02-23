@@ -9,11 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Additions
+- A new `--ignore-certs` command-line option has been added to the `scan` and `github` commands.
+  This option causes TLS certificate validation to be skipped ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre!).
 
 - Allow ignoring validation of TLS certificates with new `--ignore-certs` flag ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre!)
+
 - The `scan` and `github` commands now support the `--all_organizations` flag.
   When supplied along with a custom GitHub API URL, Nosey Parker will scan the provided GitHub instance for all organizations to be further enumerated for additional repositories.
   ([#126](https://github.com/praetorian-inc/noseyparker/pull/126); thank you @seqre!)
+
 - New rules have been added (thank you @gemesa!):
 
   - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
@@ -42,12 +46,65 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
   - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
 
+- A new `generate` command has been added, which generates various assets that are included in prebuilt releases:
+
+  - Shell completion scripts via `generate shell-completions`
+  - A JSON Schema for the `report -f json` output via `generate json-schema` ((#128)[https://github.com/praetorian-inc/noseyparker/issues/128])
+  - Manpages via `generate manpages` ((#88)[https://github.com/praetorian-inc/noseyparker/issues/88])
+
 ### Fixes
-- Fixed several rules that in certain circumstances would fail to match and produce a runtime error message:
+- Several rules have been fixed that in certain circumstances would fail to match and produce a runtime error message:
 
   - Google API Key
   - ODBC Connection String
   - Sauce Token
+
+- The `netrc Credentials` rule has been modified to avoid a runtime message about an empty capture group.
+
+- The `JSON Web Token (base64url-encoded)` rule has been improved to reduce false positives.
+  Thank you @saullocarvalho for the bug report!
+
+### Changes
+- The minimum supported Rust version has been changed from 1.70 to 1.76.
+
+- The data model and datastore have been significantly overhauled:
+
+  - The rules used during scanning are now explicitly recorded in the datastore.
+    Each rule is additionally accompanied by a content-based identifier that uniquely identifies the rule based on its pattern.
+
+  - Each match is now associated with the rule that produced it, rather than just the rule's name (which can change as rules are modified).
+
+  - Each match is now assigned a unique content-based identifier.
+
+  - Findings (i.e., groups of matches with the same capture groups, produced by the same rule) are now represented explicitly in the datastore.
+    Each finding is assigned a unique content-based identifier.
+
+  - Now, each time a rule matches, a single match object is produced.
+    Each match in the datastore is now associated with an array of capture groups.
+    Previously, a rule whose pattern had multiple capture groups would produce one match object for each group, with each one being associated with a single capture group.
+
+  - Provenance metadata for blobs is recorded in a much simpler way than before.
+    The new representation explicitly records file and git-based provenance, but also adds explicit support for _extensible_ provenance.
+    This change will make it possible in the future to have Nosey Parker scan and usefully report blobs produced by custom input data enumerators (e.g., a Python script that lists files from the Common Crawl WARC files).
+
+  - Scores are now associated with matches instead of findings.
+
+  - Comments can now be associated with both matches and findings, instead of just findings.
+
+- The JSON and JSONL report formats have changed.
+  These will stabilize in a future release ([#101](https://github.com/praetorian-inc/noseyparker/issues/101)).
+
+  - The `matching_input` field for matches has been removed and replaced with a new `groups` field, which contains an array of base64-encoded bytestrings.
+
+  - Each match now includes additional `rule_text_id`, `rule_structural_id`, and `structural_id` fields.
+
+  - The `provenance` field of each match is now slightly different.
+
+- Schema migration of older Nosey Parker datastores is no longer performed.
+  Previously, this would automatically and silently be done when opening a datastore from an older version.
+  Explicit support for datastore migration may be added back in a future release.
+
+- The `shell-completions` command has been moved from the top level to a subcommand of `generate`.
 
 
 ## [v0.16.0](https://github.com/praetorian-inc/noseyparker/releases/v0.16.0) (2023-12-06)

@@ -58,9 +58,6 @@ macro_rules! noseyparker_failure {
     ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().failure() }
 }
 
-// make macros easily visible to other modules
-pub use {noseyparker, noseyparker_success, noseyparker_failure, assert_cmd_snapshot};
-
 
 /*
 lazy_static! {
@@ -90,8 +87,24 @@ pub fn noseyparker_cmd() -> Command {
 }
 */
 
+/// Get the command for the Nosey Parker binary under test.
+///
+/// By default, this is the binary defined in this crate.
+/// However, if the `NP_TEST_PROGRAM` environment variable is set, its value is used instead.
+/// Its value should be an absolute path to the desired `noseyparker` program to test.
+///
+/// This environment variable makes it possible to run the test suite on different versions of
+/// Nosey Parker, such as a final release build or a Docker image.
+/// For example:
+///
+///     NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
+///
 pub fn noseyparker_cmd() -> Command {
-    Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
+    if let Ok(np) = std::env::var("NP_TEST_PROGRAM") {
+        Command::new(np)
+    } else {
+        Command::cargo_bin("noseyparker-cli").expect("noseyparker should be executable")
+    }
 }
 
 /// Create a `RegexPredicate` from the given pattern.
@@ -130,7 +143,10 @@ pub struct ScanEnv {
 impl ScanEnv {
     /// Create a new mock scanning environment.
     pub fn new() -> Self {
+        // FIXME: need to be able to override the root directory to test Docker containers via `NP_TEST_PROGRAM`
         let root = TempDir::new().expect("should be able to create tempdir");
+        assert!(root.exists());
+        assert!(root.is_dir());
         let datastore = root.child("datastore");
         assert!(!datastore.exists());
 
@@ -269,12 +285,14 @@ pub fn get_report_stdout_filters() -> Vec<(&'static str, &'static str)> {
     vec![
         (r"(?m)^(\s*File: ).*$", r"$1 <FILENAME>"),
         (r"(?m)^(\s*Blob: ).*$", r"$1 <BLOB>"),
+        (r"(?m)^(\s*Git repo: ).*$", r"$1 <REPO>"),
     ]
 }
 
 pub fn get_report_json_redactions() -> Vec<(&'static str, Redaction)> {
     vec![
         ("[].matches[].provenance[].path", Redaction::from("<ROOT>/input.txt")),
+        ("[].matches[].provenance[].repo_path", Redaction::from("<REPO>")),
         ("[].score", insta::rounded_redaction(3)),
         ("[].matches[].score", insta::rounded_redaction(3)),
     ]

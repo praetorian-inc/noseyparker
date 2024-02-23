@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::ser::SerializeSeq;
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -7,6 +8,7 @@ use crate::provenance::Provenance;
 // XXX this could be reworked to use https://docs.rs/nonempty instead of handrolling that
 
 /// A non-empty set of `Provenance` entries.
+#[derive(Debug)]
 pub struct ProvenanceSet {
     provenance: Provenance,
     more_provenance: Vec<Provenance>,
@@ -23,6 +25,21 @@ impl serde::Serialize for ProvenanceSet {
     }
 }
 
+impl JsonSchema for ProvenanceSet {
+    fn schema_name() -> String {
+        "ProvenanceSet".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let s = <Vec<Provenance>>::json_schema(gen);
+        let mut o = s.into_object();
+        o.array().min_items = Some(1);
+        let md = o.metadata();
+        md.description = Some("A non-empty set of `Provenance` entries".into());
+        schemars::schema::Schema::Object(o)
+    }
+}
+
 impl ProvenanceSet {
     /// Create a new `ProvenanceSet` from the given items, filtering out redundant less-specific
     /// `Provenance` records.
@@ -31,7 +48,7 @@ impl ProvenanceSet {
 
         for p in std::iter::once(&provenance).chain(&more_provenance) {
             if let Provenance::GitRepo(e) = p {
-                if e.commit_provenance.is_some() {
+                if e.first_commit.is_some() {
                     git_repos_with_detailed.insert(e.repo_path.clone());
                 }
             }
@@ -41,9 +58,10 @@ impl ProvenanceSet {
             .chain(more_provenance)
             .filter(|p| match p {
                 Provenance::GitRepo(e) => {
-                    e.commit_provenance.is_some() || !git_repos_with_detailed.contains(&e.repo_path)
+                    e.first_commit.is_some() || !git_repos_with_detailed.contains(&e.repo_path)
                 }
                 Provenance::File(_) => true,
+                Provenance::Extended(_) => true,
             });
 
         Self {

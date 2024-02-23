@@ -6,7 +6,7 @@ use clap::{
     crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
 };
 use std::io::IsTerminal;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use strum::Display;
 use url::Url;
 
@@ -200,17 +200,19 @@ pub enum Command {
     #[command(display_order = 4, name = "github")]
     GitHub(GitHubArgs),
 
-    #[command(display_order = 30)]
     /// Manage datastores
+    #[command(display_order = 30)]
     Datastore(DatastoreArgs),
 
-    #[command(display_order = 30)]
     /// Manage rules
+    #[command(display_order = 30)]
     Rules(RulesArgs),
 
+    /// Generate Nosey Parker release assets
+    ///
+    /// This command is used primarily for generation of artifacts to be included in releases.
     #[command(display_order = 40)]
-    /// Generate shell completions
-    ShellCompletions(ShellCompletionsArgs),
+    Generate(GenerateArgs),
 }
 
 // -----------------------------------------------------------------------------
@@ -827,7 +829,30 @@ pub struct ReportArgs {
 
 
 // -----------------------------------------------------------------------------
-// `shell-completions` command
+// `generate` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct GenerateArgs {
+    #[command(subcommand)]
+    pub command: GenerateCommand,
+}
+
+
+#[derive(Subcommand, Debug)]
+pub enum GenerateCommand {
+    /// Generate man pages
+    #[command(name="manpages")]
+    ManPages(ManPagesArgs),
+
+    /// Generate the JSON schema for the output of the `report` command
+    JsonSchema(JsonSchemaArgs),
+
+    /// Generate shell completions
+    ShellCompletions(ShellCompletionsArgs),
+}
+
+// -----------------------------------------------------------------------------
+// `generate shell-completions` command
 // -----------------------------------------------------------------------------
 #[derive(ValueEnum, Debug, Display, Clone)]
 #[clap(rename_all = "lower")]
@@ -844,6 +869,28 @@ pub enum ShellFormat {
 pub struct ShellCompletionsArgs {
     #[arg(long, short, value_name = "SHELL")]
     pub shell: ShellFormat,
+}
+
+// -----------------------------------------------------------------------------
+// `generate json-schema` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct JsonSchemaArgs {
+    /// Write output to the specified path
+    ///
+    /// If this argument is not provided, stdout will be used.
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::FilePath)]
+    pub output: Option<PathBuf>,
+}
+
+// -----------------------------------------------------------------------------
+// `generate manpages` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct ManPagesArgs {
+    /// Write output to the specified directory
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::DirPath, default_value="manpages")]
+    pub output: PathBuf,
 }
 
 // -----------------------------------------------------------------------------
@@ -867,15 +914,20 @@ pub struct OutputArgs<Format: ValueEnum + Send + Sync + 'static> {
 impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
     /// Get a writer for the specified output destination.
     pub fn get_writer(&self) -> std::io::Result<Box<dyn std::io::Write>> {
-        use std::fs::File;
-        use std::io::BufWriter;
+        get_writer_for_file_or_stdout(self.output.as_ref())
+    }
+}
 
-        match &self.output {
-            None => Ok(Box::new(BufWriter::new(std::io::stdout()))),
-            Some(p) => {
-                let f = File::create(p)?;
-                Ok(Box::new(BufWriter::new(f)))
-            }
+/// Get a writer for the file at the specified output destination, or stdout if not specified.
+pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(path: Option<P>) -> std::io::Result<Box<dyn std::io::Write>> {
+    use std::fs::File;
+    use std::io::BufWriter;
+
+    match path.as_ref() {
+        None => Ok(Box::new(BufWriter::new(std::io::stdout()))),
+        Some(p) => {
+            let f = File::create(p)?;
+            Ok(Box::new(BufWriter::new(f)))
         }
     }
 }

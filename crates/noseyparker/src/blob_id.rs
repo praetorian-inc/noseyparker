@@ -14,34 +14,32 @@ impl std::fmt::Debug for BlobId {
     }
 }
 
+impl schemars::JsonSchema for BlobId {
+    fn schema_name() -> String {
+        "BlobId".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let s = String::json_schema(gen);
+        let mut o = s.into_object();
+        o.string().pattern = Some("[0-9a-f]{40}".into());
+        let md = o.metadata();
+        md.description = Some("A hex-encoded blob ID as computed by Git".into());
+        schemars::schema::Schema::Object(o)
+    }
+}
+
 impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
     pub fn new(input: &[u8]) -> Self {
-        use crate::digest::Sha1;
+        use noseyparker_digest::Sha1;
         use std::io::Write;
 
-        // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
-        // formatting the input length. Not sure how well this actually avoids allocation.
-        struct Sha1Writer(Sha1);
-
-        impl Write for Sha1Writer {
-            #[inline]
-            fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-                self.0.update(buf);
-                Ok(buf.len())
-            }
-
-            #[inline]
-            fn flush(&mut self) -> std::io::Result<()> {
-                Ok(())
-            }
-        }
-
-        let mut writer = Sha1Writer(Sha1::default());
-        write!(&mut writer, "blob {}\0", input.len()).unwrap();
-        writer.0.update(input);
-        BlobId(writer.0.digest())
+        let mut h = Sha1::default();
+        write!(&mut h, "blob {}\0", input.len()).unwrap();
+        h.update(input);
+        BlobId(h.digest())
     }
 
     #[inline]
@@ -108,14 +106,35 @@ impl From<gix::ObjectId> for BlobId {
 impl<'a> From<&'a BlobId> for gix::ObjectId {
     #[inline]
     fn from(blob_id: &'a BlobId) -> Self {
-        gix::hash::ObjectId::from(blob_id.as_bytes())
+        gix::hash::ObjectId::try_from(blob_id.as_bytes()).unwrap()
     }
 }
 
 impl From<BlobId> for gix::ObjectId {
     #[inline]
     fn from(blob_id: BlobId) -> Self {
-        gix::hash::ObjectId::from(blob_id.as_bytes())
+        gix::hash::ObjectId::try_from(blob_id.as_bytes()).unwrap()
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{ToSql, ToSqlOutput, FromSql, FromSqlResult, FromSqlError, ValueRef};
+
+    impl ToSql for BlobId {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            Ok(self.hex().into())
+        }
+    }
+
+    impl FromSql for BlobId {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            Self::from_hex(value.as_str()?).map_err(|e| FromSqlError::Other(e.into()))
+        }
     }
 }
 

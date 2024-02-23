@@ -4,7 +4,7 @@ use super::*;
 
 impl DetailsReporter {
 
-    fn make_sarif_result(&self, finding: &MatchGroup) -> Result<sarif::Result> {
+    fn make_sarif_result(&self, finding: &Finding) -> Result<sarif::Result> {
         let matches = &finding.matches;
         let metadata = &finding.metadata;
 
@@ -30,26 +30,19 @@ impl DetailsReporter {
         let locations: Vec<sarif::Location> = matches
             .iter()
             .flat_map(|m| {
-                let ReportMatch { ps, md, m, .. } = m;
-                ps.iter().map(move |p| {
+                let ReportMatch { provenance, blob_metadata, m, .. } = m;
+                provenance.iter().map(move |p| {
                     let source_span = &m.location.source_span;
                     // let offset_span = &m.location.offset_span;
 
-                    let mut additional_properties =
-                        vec![(String::from("blob_metadata"), serde_json::json!(md))];
+                    let additional_properties =
+                        vec![(String::from("blob_metadata"), serde_json::json!(blob_metadata))];
 
-                    let uri = match p {
-                        Provenance::File(e) => e.path.to_string_lossy().into_owned(),
-                        Provenance::GitRepo(e) => {
-                            if let Some(p) = &e.commit_provenance {
-                                additional_properties.push((
-                                    String::from("commit_provenance"),
-                                    serde_json::json!(p),
-                                ));
-                            }
-                            e.repo_path.to_string_lossy().into_owned()
-                        }
-                    };
+                    let mut artifact_location = sarif::ArtifactLocationBuilder::default();
+                    if let Some(path) = p.blob_path() {
+                        artifact_location.uri(path.to_string_lossy());
+                    }
+                    let artifact_location = artifact_location.build()?;
 
                     let additional_properties =
                         std::collections::BTreeMap::from_iter(additional_properties);
@@ -60,9 +53,7 @@ impl DetailsReporter {
                     let location = sarif::LocationBuilder::default()
                         .physical_location(
                             sarif::PhysicalLocationBuilder::default()
-                                .artifact_location(
-                                    sarif::ArtifactLocationBuilder::default().uri(uri).build()?,
-                                )
+                                .artifact_location(artifact_location)
                                 // .context_region() FIXME: fill this in with location info of surrounding context
                                 .region(
                                     sarif::RegionBuilder::default()
@@ -95,7 +86,8 @@ impl DetailsReporter {
             })
             .collect::<Result<_>>()?;
 
-        let sha1_fingerprint = sha1_hexdigest(&metadata.match_content);
+        let fingerprint_name = "match_group_content/sha256/v1".to_string();
+        let fingerprint = metadata.finding_id.clone();
 
         // Build the result for the match
         let result = sarif::ResultBuilder::default()
@@ -105,7 +97,7 @@ impl DetailsReporter {
             .kind(sarif::ResultKind::Review.to_string())
             .locations(locations)
             .level(sarif::ResultLevel::Warning.to_string())
-            .partial_fingerprints([("match_group_content/sha256/v1".to_string(), sha1_fingerprint)])
+            .partial_fingerprints([(fingerprint_name, fingerprint)])
             .build()?;
         Ok(result)
     }
@@ -113,14 +105,14 @@ impl DetailsReporter {
     pub fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore: &Datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
+            .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         let mut findings = Vec::with_capacity(group_metadata.len());
         for metadata in group_metadata {
             let matches = self.get_matches(&metadata)?;
-            let match_group = MatchGroup::new(metadata, matches);
-            findings.push(self.make_sarif_result(&match_group)?);
+            let finding = Finding::new(metadata, matches);
+            findings.push(self.make_sarif_result(&finding)?);
         }
 
         let run = sarif::RunBuilder::default()

@@ -16,16 +16,15 @@ anyhow = { version = "1.0" }
 bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
 fixedbitset = "0.4"
-
-gix = { version = "0.56", features = ["max-performance", "serde"] }
-
+gix = { version = "0.58", features = ["max-performance", "serde"] }
 ignore = "0.4"
 petgraph = "0.6"
 roaring = "0.10"
+schemars = { version = "0.8" }
 serde = { version = "1.0", features = ["derive"] }
-smallvec = { version = "1.11", features = ["const_generics", "const_new", "union"] }
+smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 tracing = "0.1"
 
 [dev-dependencies]
 pretty_assertions = "1.3"
-proptest = "1.0"
+# proptest = "1.0"

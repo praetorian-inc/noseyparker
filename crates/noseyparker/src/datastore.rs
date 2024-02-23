@@ -1,23 +1,23 @@
 use anyhow::{bail, Context, Result};
 use bstr::BString;
-use bstring_serde::BStringSerde;
 use indoc::indoc;
-use input_enumerator::git_commit_metadata::CommitMetadata;
-use rusqlite::{Connection, types::FromSqlError};
-use serde::Serialize;
-use std::ffi::OsString;
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
+use noseyparker_rules::Rule;
+use rusqlite::Connection;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
-use crate::blob_id::BlobId;
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
-use crate::match_type::Match;
-use crate::provenance::{CommitKind, CommitProvenance, Provenance, ProvenanceKind};
+use crate::match_type::{Groups, Match};
+use crate::provenance::Provenance;
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
+
+const SCHEMA_60: &str = include_str!("datastore/schema_60.sql");
 
 // -------------------------------------------------------------------------------------------------
 // Datastore
@@ -50,48 +50,36 @@ impl Datastore {
     /// Create a new datastore at `root_dir` if one does not exist,
     /// or open an existing one if present.
     pub fn create_or_open(root_dir: &Path, cache_size: i64) -> Result<Self> {
-        Self::create(root_dir, cache_size)
-            .or_else(|_e| Self::open(root_dir, cache_size))
-            .with_context(|| format!("Failed to open datastore at {}", root_dir.display()))
+        debug!("Attempting to create or open an existing datastore at {}", root_dir.display());
+
+        Self::create(root_dir, cache_size).or_else(|e| {
+            debug!(
+                "Failed to create datastore: {e:#}: will try to open existing datastore instead"
+            );
+            Self::open(root_dir, cache_size)
+        })
     }
 
     /// Open the existing datastore at `root_dir`.
     pub fn open(root_dir: &Path, cache_size: i64) -> Result<Self> {
-        let db_path = root_dir.join("datastore.db");
-        let conn = Self::new_connection(&db_path, cache_size)
-            .with_context(|| format!("Failed to open database at {}", db_path.display()))?;
-        let root_dir = root_dir.canonicalize().with_context(|| {
-            format!("Failed to canonicalize datastore path at {}", root_dir.display())
-        })?;
-        let mut ds = Self { root_dir, conn };
-        ds.migrate()
-            .with_context(|| format!("Failed to migrate database at {}", db_path.display()))?;
+        debug!("Attempting to open existing datastore at {}", root_dir.display());
+
+        let ds = Self::open_impl(root_dir, cache_size)?;
+        ds.check_schema_version()?;
 
         let scratch_dir = ds.scratch_dir();
         std::fs::create_dir_all(&scratch_dir).with_context(|| {
-            format!(
-                "Failed to create scratch directory {} for datastore at {}",
-                scratch_dir.display(),
-                ds.root_dir().display()
-            )
+            format!("Failed to create scratch directory {}", scratch_dir.display(),)
         })?;
 
         let clones_dir = ds.clones_dir();
         std::fs::create_dir_all(&clones_dir).with_context(|| {
-            format!(
-                "Failed to create clones directory {} for datastore at {}",
-                clones_dir.display(),
-                ds.root_dir().display()
-            )
+            format!("Failed to create clones directory {}", clones_dir.display(),)
         })?;
 
         let blobs_dir = ds.blobs_dir();
         std::fs::create_dir_all(&blobs_dir).with_context(|| {
-            format!(
-                "Failed to create blobs directory {} for datastore at {}",
-                blobs_dir.display(),
-                ds.root_dir().display()
-            )
+            format!("Failed to create blobs directory {}", blobs_dir.display(),)
         })?;
 
         Ok(ds)
@@ -99,6 +87,8 @@ impl Datastore {
 
     /// Create a new datastore at `root_dir` and open it.
     pub fn create(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        debug!("Attempting to create new datastore at {}", root_dir.display());
+
         // Create datastore directory
         std::fs::create_dir(root_dir).with_context(|| {
             format!("Failed to create datastore root directory at {}", root_dir.display())
@@ -108,6 +98,11 @@ impl Datastore {
         std::fs::write(root_dir.join(".gitignore"), "*\n").with_context(|| {
             format!("Failed to write .gitignore to datastore at {}", root_dir.display())
         })?;
+
+        let mut ds = Self::open_impl(root_dir, cache_size)?;
+
+        ds.migrate_0_60()
+            .context("Failed to initialize database schema")?;
 
         Self::open(root_dir, cache_size)
     }
@@ -146,305 +141,332 @@ impl Datastore {
     }
 }
 
-type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<Match>);
+/// A datastore-specific ID of a blob; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+struct BlobIdInt(i64);
+
+/// A datastore-specific ID of a rule; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+struct RuleIdInt(i64);
+
+/// A datastore-specific ID of a snippet; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+struct SnippetIdInt(i64);
+
+/// A datastore-specific ID of a match; simply a newtype-like wrapper around an i64.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct MatchId(i64);
+
+type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>);
 
 pub struct Transaction<'a> {
     inner: rusqlite::Transaction<'a>,
 }
 
-impl <'a> Transaction<'a> {
+impl<'a> Transaction<'a> {
+    /// Commit this `Transaction`, consuming it.
     pub fn commit(self) -> Result<()> {
         self.inner.commit()?;
         Ok(())
     }
 
-    /// Record the given data into the datastore.
-    /// Returns the number of matches that were newly added.
-    pub fn record(&self, batch: &[BatchEntry]) -> Result<u64> {
-        let mut add_blob_get_id = self.inner.prepare_cached(indoc! {r#"
-            insert into blob(blob_id, size, mime_essence, charset)
+    fn mk_record_rule(&'a self) -> Result<impl FnMut(&'a Rule) -> rusqlite::Result<RuleIdInt>> {
+        let mut get_id = self.inner.prepare_cached(indoc! {r#"
+            select id from rule
+            where structural_id = ? and name = ? and text_id = ? and syntax = ?
+        "#})?;
+
+        let mut set_id = self.inner.prepare_cached(indoc! {r#"
+            insert into rule(structural_id, name, text_id, syntax)
             values (?, ?, ?, ?)
-            on conflict do update set
-                size = excluded.size,
-                mime_essence = coalesce(excluded.mime_essence, mime_essence),
-                charset = coalesce(excluded.charset, charset)
+            on conflict do update set syntax = excluded.syntax
+            where syntax != excluded.syntax
             returning id
         "#})?;
 
-        let mut add_git_commit = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from git_commit where commit_id = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into git_commit(
-                    commit_id,
-                    commit_date,
-                    committer_name,
-                    committer_email,
-                    author_date,
-                    author_name,
-                    author_email,
-                    message
-                ) values (?, ?, ?, ?, ?, ?, ?, ?)
-                returning id
-            "#})?;
-
-            move |c: &CommitProvenance| -> rusqlite::Result<i64> {
-                let commit_id = c.commit_metadata.commit_id.to_string();
-                let params = (
-                    &commit_id,
-                    c.commit_metadata.committer_timestamp.seconds,
-                    c.commit_metadata.committer_name.as_slice(),
-                    c.commit_metadata.committer_email.as_slice(),
-                    c.commit_metadata.author_timestamp.seconds,
-                    c.commit_metadata.author_name.as_slice(),
-                    c.commit_metadata.author_email.as_slice(),
-                    c.commit_metadata.message.as_slice(),
-                );
-                get.query((&commit_id,))?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, |row| row.get(0)), |row| row.get(0))
-            }
+        let f = move |r: &Rule| -> rusqlite::Result<RuleIdInt> {
+            let json_syntax = r.json_syntax();
+            let rule_id = add_if_missing_simple(
+                &mut get_id,
+                &mut set_id,
+                val_from_row,
+                (r.structural_id(), r.name(), r.id(), &json_syntax),
+            )?;
+            Ok(RuleIdInt(rule_id))
         };
 
-        let mut add_match = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select
-                    start_line,
-                    start_column,
-                    end_line,
-                    end_column,
-                    before_snippet,
-                    matching_input,
-                    after_snippet,
-                    group_input
-                from match
-                where
-                    blob_id = ? and
-                    start_byte = ? and
-                    end_byte = ? and
-                    group_index = ? and
-                    rule_name = ?
-            "#})?;
+        Ok(f)
+    }
 
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into match(
+    pub fn record_rules(&self, rules: &[Rule]) -> Result<()> {
+        let mut record_rule = self.mk_record_rule()?;
+        for rule in rules {
+            record_rule(rule)?;
+        }
+        Ok(())
+    }
+
+    /// Return a closure that records a blob's metadata (only if necessary), returning its integer ID
+    fn mk_record_blob_metadata(
+        &'a self,
+    ) -> Result<impl FnMut(&'a BlobMetadata) -> rusqlite::Result<BlobIdInt>> {
+        let mut get_id = self.inner.prepare_cached(indoc! {r#"
+            select id from blob where blob_id = ? and size = ?
+        "#})?;
+
+        let mut set_id = self.inner.prepare_cached(indoc! {r#"
+            insert into blob(blob_id, size)
+            values (?, ?)
+            returning id
+        "#})?;
+
+        let mut set_mime_essence = self.inner.prepare_cached(indoc! {r#"
+            insert or ignore into blob_mime_essence(blob_id, mime_essence)
+            values (?, ?)
+        "#})?;
+
+        let mut set_charset = self.inner.prepare_cached(indoc! {r#"
+            insert or ignore into blob_charset(blob_id, charset)
+            values (?, ?)
+        "#})?;
+
+        let f = move |b: &BlobMetadata| -> rusqlite::Result<BlobIdInt> {
+            let blob_id = add_if_missing_simple(
+                &mut get_id,
+                &mut set_id,
+                val_from_row,
+                (&b.id, b.num_bytes),
+            )?;
+
+            if let Some(mime_essence) = b.mime_essence() {
+                set_mime_essence.execute((blob_id, mime_essence))?;
+            }
+
+            if let Some(charset) = b.charset() {
+                set_charset.execute((blob_id, charset))?;
+            }
+
+            Ok(BlobIdInt(blob_id))
+        };
+
+        Ok(f)
+    }
+
+    /// Record provenance metadata for a blob given its integer ID
+    fn mk_record_provenance(
+        &'a self,
+    ) -> Result<impl FnMut(BlobIdInt, &'a Provenance) -> rusqlite::Result<()>> {
+        let mut add_provenance = self.inner.prepare_cached(indoc! {r#"
+            insert into blob_provenance(blob_id, provenance)
+            values (?, ?)
+            on conflict do nothing
+        "#})?;
+
+        let f = move |BlobIdInt(blob_id), provenance| -> rusqlite::Result<()> {
+            add_provenance.execute((blob_id, provenance))?;
+            Ok(())
+        };
+
+        Ok(f)
+    }
+
+    /// Record a contextual snippet, returning an integer ID for it
+    fn mk_record_snippet(&'a self) -> Result<impl FnMut(&'a [u8]) -> rusqlite::Result<i64>> {
+        let mut get = self.inner.prepare_cached(indoc! {r#"
+            select id from snippet where snippet = ?
+        "#})?;
+
+        let mut set = self.inner.prepare_cached(indoc! {r#"
+            insert into snippet(snippet)
+            values (?)
+            returning id
+        "#})?;
+
+        Ok(move |blob| add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,)))
+    }
+
+    /// Record a match, returning whether it was new or not
+    fn mk_record_match(
+        &'a self,
+    ) -> Result<impl FnMut(BlobIdInt, &'a Match, &'a Option<f64>) -> rusqlite::Result<bool>> {
+        let mut record_snippet = self.mk_record_snippet()?;
+
+        let mut get_finding_id = self.inner.prepare_cached(indoc! {r#"
+            select f.id
+            from finding f
+            where f.finding_id = ?
+        "#})?;
+
+        let mut set_finding_id = self.inner.prepare_cached(indoc! {r#"
+            insert into finding (finding_id, rule_id, groups)
+            select ?1, r.id, ?3
+            from rule r
+            where r.structural_id = ?2
+            returning id
+        "#})?;
+
+        let mut get_match_id = self.inner.prepare_cached(indoc! {r#"
+            select m.id
+            from
+                match m
+            where
+                m.blob_id = ?
+                and m.start_byte = ?
+                and m.end_byte = ?
+                and m.finding_id = ?
+        "#})?;
+
+        let mut update_match = self.inner.prepare_cached(indoc! {r#"
+            update match
+            set
+                structural_id = ?2,
+                finding_id = ?3,
+                before_snippet_id = ?4,
+                matching_snippet_id = ?5,
+                after_snippet_id = ?6
+            where
+                id = ?1 and
+                (
+                    structural_id != ?2 or
+                    finding_id != ?3 or
+                    before_snippet_id != ?4 or
+                    matching_snippet_id != ?5 or
+                    after_snippet_id != ?6
+                )
+        "#})?;
+
+        let mut add_match = self.inner.prepare_cached(indoc! {r#"
+            insert into match (
+                structural_id,
+                finding_id,
+                blob_id,
+                start_byte,
+                end_byte,
+                before_snippet_id,
+                matching_snippet_id,
+                after_snippet_id
+            )
+            select ?, ?, ?, ?, ?, ?, ?, ?
+            returning id
+        "#})?;
+
+        let mut add_blob_source_span = self.inner.prepare_cached(indoc! {r#"
+            insert into blob_source_span (blob_id, start_byte, end_byte, start_line, start_column, end_line, end_column)
+            values (?, ?, ?, ?, ?, ?, ?)
+            on conflict do update set
+                start_line = excluded.start_line,
+                start_column = excluded.start_column,
+                end_line = excluded.end_line,
+                end_column = excluded.end_column
+            where
+                start_line != excluded.start_line
+                or start_column != excluded.start_column
+                or end_line != excluded.end_line
+                or end_column != excluded.end_column
+        "#})?;
+
+        let mut set_score = self.inner.prepare_cached(indoc! {r#"
+            insert into match_score (match_id, score)
+            values (?, ?)
+            on conflict do update set score = excluded.score
+        "#})?;
+
+        let f = move |BlobIdInt(blob_id), m: &'a Match, score: &'a Option<f64>| {
+            let start_byte = m.location.offset_span.start;
+            let end_byte = m.location.offset_span.end;
+            let rule_structural_id = &m.rule_structural_id;
+            let structural_id = &m.structural_id;
+            let finding_id = &m.finding_id();
+            let groups = &m.groups;
+            let source_span = &m.location.source_span;
+
+            add_blob_source_span.execute((
+                blob_id,
+                start_byte,
+                end_byte,
+                source_span.start.line,
+                source_span.start.column,
+                source_span.end.line,
+                source_span.end.column,
+            ))?;
+
+            let finding_id: i64 = {
+                match get_finding_id
+                    .query_map((finding_id,), val_from_row)?
+                    .next()
+                {
+                    Some(finding_id) => finding_id?,
+                    None => set_finding_id
+                        .query_row((finding_id, rule_structural_id, groups), val_from_row)?,
+                }
+            };
+
+            let snippet = &m.snippet;
+            let before_snippet_id = record_snippet(snippet.before.as_slice())?;
+            let matching_snippet_id = record_snippet(snippet.matching.as_slice())?;
+            let after_snippet_id = record_snippet(snippet.after.as_slice())?;
+
+            let (match_id, new) = if let Some(match_id) = get_match_id
+                .query_map((blob_id, start_byte, end_byte, finding_id), val_from_row)?
+                .next()
+            {
+                let match_id: i64 = match_id?;
+                // existing match; update if needed
+                update_match.execute((
+                    match_id,
+                    structural_id,
+                    finding_id,
+                    before_snippet_id,
+                    matching_snippet_id,
+                    after_snippet_id,
+                ))?;
+                (match_id, false)
+            } else {
+                // totally new match
+                let match_id = add_match.query_row((
+                    structural_id,
+                    finding_id,
                     blob_id,
                     start_byte,
                     end_byte,
-                    group_index,
-                    rule_name,
+                    before_snippet_id,
+                    matching_snippet_id,
+                    after_snippet_id,
+                ), val_from_row)?;
+                (match_id, true)
+            };
 
-                    start_line,
-                    start_column,
-                    end_line,
-                    end_column,
-                    before_snippet,
-                    matching_input,
-                    after_snippet,
-                    group_input
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                on conflict do update set
-                    start_line = excluded.start_line,
-                    start_column = excluded.start_column,
-                    end_line = excluded.end_line,
-                    end_column = excluded.end_column,
-                    before_snippet = excluded.before_snippet,
-                    matching_input = excluded.matching_input,
-                    after_snippet = excluded.after_snippet,
-                    group_input = excluded.group_input
-            "#})?;
-
-            move |blob_id: i64, m: &Match| -> rusqlite::Result<bool> {
-                let params = (
-                    blob_id,
-                    m.location.offset_span.start,
-                    m.location.offset_span.end,
-                    m.capture_group_index,
-                    &m.rule_name,
-                );
-
-                let full_params = (
-                    blob_id,
-                    m.location.offset_span.start,
-                    m.location.offset_span.end,
-                    m.capture_group_index,
-                    &m.rule_name,
-
-                    m.location.source_span.start.line,
-                    m.location.source_span.start.column,
-                    m.location.source_span.end.line,
-                    m.location.source_span.end.column,
-                    m.snippet.before.as_slice(),
-                    m.snippet.matching.as_slice(),
-                    m.snippet.after.as_slice(),
-                    m.match_content.as_slice(),
-                );
-
-                let mut new = false;
-                // to reduce database writes, only insert the match data if it's meaningfully
-                // different than what's there already
-                let different = match get.query(params)?.next()? {
-                    None => {
-                        new = true;
-                        true
-                    },
-                    Some(row) => {
-                        row.get_ref(0)?.as_i64()? != full_params.5 as i64 ||
-                        row.get_ref(1)?.as_i64()? != full_params.6 as i64 ||
-                        row.get_ref(2)?.as_i64()? != full_params.7 as i64 ||
-                        row.get_ref(3)?.as_i64()? != full_params.8 as i64 ||
-                        row.get_ref(4)?.as_bytes()? != full_params.9 ||
-                        row.get_ref(5)?.as_bytes()? != full_params.10 ||
-                        row.get_ref(6)?.as_bytes()? != full_params.11 ||
-                        row.get_ref(7)?.as_bytes()? != full_params.12
-                    }
-                };
-
-                if different {
-                    set.execute(full_params)?;
-                }
-                Ok(new)
+            if let Some(score) = score {
+                set_score.execute((match_id, score))?;
             }
+
+            Ok(new)
         };
 
-        let mut add_provenance_payload_file = {
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_file(path)
-                values (?)
-                returning id
-            "#})?;
+        Ok(f)
+    }
 
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_file
-                where path = ?
-            "#})?;
-
-            move |path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (path,);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
-            }
-        };
-
-        let mut add_provenance_payload_git_repo = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_git_repo
-                where repo_path = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_git_repo(repo_path)
-                values (?)
-                returning id
-            "#})?;
-
-            move |repo_path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (repo_path,);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
-            }
-        };
-
-        let mut add_provenance_payload_git_commit = {
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance_payload_git_commit
-                where repo_path = ? and commit_id = ? and blob_path = ?
-            "#})?;
-
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance_payload_git_commit(repo_path, commit_id, blob_path)
-                values (?, ?, ?)
-                returning id
-            "#})?;
-
-            move |repo_path: &[u8], commit_id: i64, blob_path: &[u8]| -> rusqlite::Result<i64> {
-                let params = (repo_path, commit_id, blob_path);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
-            }
-        };
-
-        let mut add_provenance = {
-            let mut set = self.inner.prepare_cached(indoc! {r#"
-                insert into provenance(payload_kind, payload_id)
-                values (?, ?)
-                returning id
-            "#})?;
-
-            let mut get = self.inner.prepare_cached(indoc! {r#"
-                select id from provenance
-                where payload_kind = ? and payload_id = ?
-            "#})?;
-
-            move |kind: ProvenanceKind, payload_id: i64| -> rusqlite::Result<i64> {
-                let params = (kind, payload_id);
-                get.query(params)?
-                    .next()?
-                    .map_or_else(|| set.query_row(params, |r| r.get(0)), |row| row.get(0))
-            }
-        };
-
-        let mut add_provenance_id = self.inner.prepare_cached(indoc! {r#"
-            insert into blob_provenance(blob_id, provenance_id, kind)
-            values (?, ?, ?)
-            on conflict do nothing
-        "#})?;
+    /// Record the given data into the datastore.
+    /// Returns the number of matches that were newly added.
+    pub fn record(&self, batch: &[BatchEntry]) -> Result<u64> {
+        let mut record_blob_metadata = self.mk_record_blob_metadata()?;
+        let mut record_provenance = self.mk_record_provenance()?;
+        let mut record_match = self.mk_record_match()?;
 
         let mut num_matches_added = 0;
 
         for (ps, md, ms) in batch {
             // record blob metadata
-            let blob_id: i64 = add_blob_get_id
-                .query_row((md.id.hex(), md.num_bytes(), md.mime_essence(), md.charset()), |r| {
-                    r.get(0)
-                })
-                .context("Failed to add blob metadata")?;
+            let blob_id = record_blob_metadata(md).context("Failed to add blob metadata")?;
 
-            // record provenance
+            // // record provenance metadata
             for p in ps.iter() {
-                let (provenance_id, kind) = match p {
-                    Provenance::File(e) => {
-                        let path = e.path.as_os_str().as_bytes();
-                        let payload_id = add_provenance_payload_file(path)?;
-                        let provenance_id = add_provenance(ProvenanceKind::File, payload_id)?;
-                        (provenance_id, None)
-                    }
-                    Provenance::GitRepo(e) => {
-                        let repo_path = e.repo_path.as_os_str().as_bytes();
-                        match &e.commit_provenance {
-                            // no commit information; record just the repo
-                            None => {
-                                let payload_id = add_provenance_payload_git_repo(repo_path)?;
-                                let provenance_id =
-                                    add_provenance(ProvenanceKind::GitRepo, payload_id)?;
-                                (provenance_id, None)
-                            }
-                            // detailed commit information
-                            Some(c) => {
-                                let commit_id = add_git_commit(c)?;
-                                let blob_path = c.blob_path.as_slice();
-                                let payload_id = add_provenance_payload_git_commit(
-                                    repo_path, commit_id, blob_path,
-                                )?;
-                                let provenance_id =
-                                    add_provenance(ProvenanceKind::GitCommit, payload_id)?;
-                                (provenance_id, Some(c.commit_kind))
-                            }
-                        }
-                    }
-                };
-
-                add_provenance_id.execute((blob_id, provenance_id, kind))?;
+                record_provenance(blob_id, p).context("Failed to record blob provenance")?;
             }
 
             // record matches
-            for m in ms {
-                if add_match(blob_id, m)? {
+            for (s, m) in ms {
+                if record_match(blob_id, m, s).context("Failed to record match")? {
                     num_matches_added += 1;
                 }
             }
@@ -470,23 +492,18 @@ impl Datastore {
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
             select count(*) from match
         "#})?;
-        let num_matches: u64 = stmt.query_row((), |row| row.get(0))?;
+        let num_matches: u64 = stmt.query_row((), val_from_row)?;
         Ok(num_matches)
     }
 
     /// Summarize all recorded findings.
-    pub fn summarize(&self) -> Result<MatchSummary> {
+    pub fn summarize(&self) -> Result<FindingSummary> {
         let _span = debug_span!("Datastore::summarize", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select rule_name, count(*) grouped_count, sum(num_matches) total_count
-            from (
-                select group_input, rule_name, count(*) num_matches
-                from match
-                group by 1, 2
-            )
-            group by 1
-            order by grouped_count desc
+            select rule_name, total_findings, total_matches
+            from finding_summary
+            order by total_findings desc, rule_name, total_matches desc
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(MatchSummaryEntry {
@@ -499,30 +516,39 @@ impl Datastore {
         for e in entries {
             es.push(e?);
         }
-        Ok(MatchSummary(es))
+        Ok(FindingSummary(es))
     }
 
     /// Get metadata for all groups of identical matches recorded within this `Datastore`.
-    pub fn get_match_group_metadata(&self) -> Result<Vec<MatchGroupMetadata>> {
+    pub fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
         let _span =
-            debug_span!("Datastore::get_match_group_metadata", "{}", self.root_dir.display())
-                .entered();
+            debug_span!("Datastore::get_finding_metadata", "{}", self.root_dir.display()).entered();
 
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select m.group_input, m.rule_name, count(*), fc.comment, fs.status
-            from match m
-            left outer join finding_comment fc on (m.group_input = fc.group_input and m.rule_name = fc.rule_name)
-            left outer join finding_status fs on (m.group_input = fs.group_input and m.rule_name = fs.rule_name)
-            group by 1, 2
-            order by 2
+            select
+                finding_id,
+                groups,
+                rule_structural_id,
+                rule_text_id,
+                rule_name,
+                num_matches,
+                comment,
+                match_statuses,
+                mean_score
+            from finding_denorm
+            order by rule_name, rule_structural_id, mean_score desc, groups
         "#})?;
         let entries = stmt.query_map((), |row| {
-            Ok(MatchGroupMetadata {
-                match_content: BString::new(row.get(0)?),
-                rule_name: row.get(1)?,
-                num_matches: row.get(2)?,
-                comment: row.get(3)?,
-                status: row.get(4)?,
+            Ok(FindingMetadata {
+                finding_id: row.get(0)?,
+                groups: row.get(1)?,
+                rule_structural_id: row.get(2)?,
+                rule_text_id: row.get(3)?,
+                rule_name: row.get(4)?,
+                num_matches: row.get(5)?,
+                comment: row.get(6)?,
+                statuses: row.get(7)?,
+                mean_score: row.get(8)?,
             })
         })?;
         let mut es = Vec::new();
@@ -532,14 +558,14 @@ impl Datastore {
         Ok(es)
     }
 
-    /// Get up to `limit` matches that belong to the group with the given group metadata.
-    pub fn get_match_group_data(
+    /// Get up to `limit` matches that belong to the finding with the given finding metadata.
+    pub fn get_finding_data(
         &self,
-        metadata: &MatchGroupMetadata,
+        metadata: &FindingMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<(ProvenanceSet, BlobMetadata, MatchId, Match)>> {
+    ) -> Result<Vec<FindingDataEntry>> {
         let _span =
-            debug_span!("Datastore::get_match_group_data", "{}", self.root_dir.display()).entered();
+            debug_span!("Datastore::get_finding_data", "{}", self.root_dir.display()).entered();
 
         let match_limit: i64 = match limit {
             Some(limit) => limit.try_into().expect("limit should be convertible"),
@@ -548,36 +574,41 @@ impl Datastore {
 
         let mut get_blob_metadata_and_match = self.conn.prepare_cached(indoc! {r#"
             select
-                b.blob_id,
+                m.blob_id,
                 m.start_byte,
                 m.end_byte,
                 m.start_line,
                 m.start_column,
                 m.end_line,
                 m.end_column,
+
                 m.before_snippet,
-                m.matching_input,
+                m.matching_snippet,
                 m.after_snippet,
-                m.group_index,
+
+                m.groups,
 
                 b.size,
                 b.mime_essence,
                 b.charset,
 
-                m.id
+                m.id,
+                m.score,
+                m.comment,
+                m.status,
+                m.structural_id
 
-            from match m
-            inner join blob b on (m.blob_id = b.id)
-            where m.group_input = ?1 and m.rule_name = ?2
+            from match_denorm m
+            inner join blob_denorm b on (m.blob_id = b.blob_id)
+            where m.groups = ?1 and m.rule_structural_id = ?2
             order by m.blob_id, m.start_byte, m.end_byte
             limit ?3
         "#})?;
 
         let entries = get_blob_metadata_and_match.query_map(
-            (metadata.match_content.as_slice(), &metadata.rule_name, match_limit),
+            (&metadata.groups, &metadata.rule_structural_id, match_limit),
             |row| {
-                let v0: String = row.get(0)?;
-                let blob_id = BlobId::from_hex(&v0).map_err(|e| FromSqlError::Other(e.into()))?;
+                let blob_id = row.get(0)?;
                 let m = Match {
                     blob_id,
                     location: Location {
@@ -601,9 +632,11 @@ impl Datastore {
                         matching: BString::new(row.get(8)?),
                         after: BString::new(row.get(9)?),
                     },
-                    capture_group_index: row.get(10)?,
-                    match_content: metadata.match_content.clone(),
+                    groups: row.get(10)?,
+                    rule_structural_id: metadata.rule_structural_id.clone(),
                     rule_name: metadata.rule_name.clone(),
+                    rule_text_id: metadata.rule_text_id.clone(),
+                    structural_id: row.get(18)?,
                 };
                 let num_bytes: usize = row.get(11)?;
                 let mime_essence: Option<String> = row.get(12)?;
@@ -615,135 +648,39 @@ impl Datastore {
                     charset,
                 };
                 let id = MatchId(row.get(14)?);
-                Ok((b, id, m))
+                let m_score = row.get(15)?;
+                let m_comment = row.get(16)?;
+                let m_status = row.get(17)?;
+                Ok((b, id, m, m_score, m_comment, m_status))
             },
         )?;
         let mut es = Vec::new();
         for e in entries {
-            let (md, id, m) = e?;
+            let (md, id, m, match_score, match_comment, match_status) = e?;
             let ps = self.get_provenance_set(&md)?;
-            es.push((ps, md, id, m));
+            es.push(FindingDataEntry{
+                provenance: ps,
+                blob_metadata: md,
+                match_id: id,
+                match_val: m,
+                match_comment,
+                match_score,
+                match_status,
+            });
         }
         Ok(es)
     }
 
     fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
-        let mut get_provenance = self.conn.prepare_cached(indoc! {r#"
-            select distinct p.payload_kind, p.payload_id, bp.kind provenance_kind
-            from
-                blob_provenance bp
-                inner join blob b on (bp.blob_id = b.id)
-                inner join provenance p on (bp.provenance_id = p.id)
-            where b.blob_id = ?
+        let mut get = self.conn.prepare_cached(indoc! {r#"
+            select provenance
+            from blob_provenance_denorm
+            where blob_id = ?
+            order by provenance
         "#})?;
 
-        let mut get_provenance_payload_file = self.conn.prepare_cached(indoc! {r#"
-            select path from provenance_payload_file
-            where id = ?
-        "#})?;
+        let ps = get.query_map((metadata.id,), val_from_row)?;
 
-        let mut get_provenance_payload_git_repo = self.conn.prepare_cached(indoc! {r#"
-            select repo_path from provenance_payload_git_repo
-            where id = ?
-        "#})?;
-
-        let mut get_provenance_payload_git_commit = self.conn.prepare_cached(indoc! {r#"
-            select repo_path, commit_id, blob_path
-            from provenance_payload_git_commit
-            where id = ?
-        "#})?;
-
-        let mut get_commit_metadata = self.conn.prepare_cached(indoc! {r#"
-            select
-                commit_id,
-                committer_name,
-                committer_email,
-                commit_date,
-                author_name,
-                author_email,
-                author_date,
-                message
-            from git_commit
-            where id = ?
-        "#})?;
-
-        let ps = get_provenance.query_map((metadata.id.hex(),), |row| {
-            let payload_kind = row.get(0)?;
-            let payload_id: i64 = row.get(1)?;
-            let provenance_kind: Option<CommitKind> = row.get(2)?;
-            match payload_kind {
-                ProvenanceKind::File => {
-                    let path: Vec<u8> =
-                        get_provenance_payload_file.query_row((payload_id,), |r| r.get(0))?;
-                    let path = PathBuf::from(OsString::from_vec(path));
-                    Ok(Provenance::from_file(path))
-                }
-
-                ProvenanceKind::GitRepo => {
-                    let path: Vec<u8> =
-                        get_provenance_payload_git_repo.query_row((payload_id,), |r| r.get(0))?;
-                    let path = PathBuf::from(OsString::from_vec(path));
-                    Ok(Provenance::from_git_repo(path))
-                }
-
-                ProvenanceKind::GitCommit => {
-                    let (repo_path, commit_id, blob_path) = get_provenance_payload_git_commit
-                        .query_row((payload_id,), |row| {
-                            let repo_path: Vec<u8> = row.get(0)?;
-                            let repo_path = PathBuf::from(OsString::from_vec(repo_path));
-
-                            let commit_id: i64 = row.get(1)?;
-
-                            let blob_path: Vec<u8> = row.get(2)?;
-                            let blob_path = BString::from(blob_path);
-
-                            Ok((repo_path, commit_id, blob_path))
-                        })?;
-
-                    let commit_metadata: CommitMetadata =
-                        get_commit_metadata.query_row((commit_id,), |row| {
-                            let get_bstring = |idx: usize| -> rusqlite::Result<BString> {
-                                Ok(row.get_ref(idx)?.as_bytes()?.into())
-                            };
-
-                            let get_time = |idx: usize| -> rusqlite::Result<gix::date::Time> {
-                                let epoch_seconds = row.get_ref(idx)?.as_i64()?;
-                                Ok(gix::date::Time::new(epoch_seconds, 0))
-                            };
-
-                            let commit_id = gix::ObjectId::from_hex(row.get_ref(0)?.as_bytes()?)
-                                .map_err(|e| FromSqlError::Other(e.into()))?;
-
-                            let committer_name = get_bstring(1)?;
-                            let committer_email = get_bstring(2)?;
-                            let committer_timestamp = get_time(3)?;
-                            let author_name = get_bstring(4)?;
-                            let author_email = get_bstring(5)?;
-                            let author_timestamp = get_time(6)?;
-                            let message = get_bstring(7)?;
-
-                            Ok(CommitMetadata {
-                                commit_id,
-                                committer_name,
-                                committer_email,
-                                committer_timestamp,
-                                author_name,
-                                author_email,
-                                author_timestamp,
-                                message,
-                            })
-                        })?;
-
-                    let provenance_kind = provenance_kind.ok_or(FromSqlError::InvalidType)?;
-                    Ok(Provenance::from_git_repo_and_commit_metadata(
-                        repo_path,
-                        provenance_kind,
-                        commit_metadata,
-                        blob_path,
-                    ))
-                }
-            }
-        })?;
         let mut results = Vec::new();
         for p in ps {
             results.push(p?);
@@ -755,11 +692,18 @@ impl Datastore {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MatchId(pub i64);
-
 // Private implementation
 impl Datastore {
+    const CURRENT_SCHEMA_VERSION: u64 = 60;
+
+    fn open_impl(root_dir: &Path, cache_size: i64) -> Result<Self> {
+        let db_path = root_dir.join("datastore.db");
+        let conn = Self::new_connection(&db_path, cache_size)?;
+        let root_dir = root_dir.canonicalize()?;
+        let ds = Self { root_dir, conn };
+        Ok(ds)
+    }
+
     fn new_connection(path: &Path, cache_size: i64) -> Result<Connection> {
         let conn = Connection::open(path)?;
 
@@ -771,12 +715,24 @@ impl Datastore {
         Ok(conn)
     }
 
-    fn migrate(&mut self) -> Result<()> {
-        let _span = debug_span!("Datastore::migrate", "{}", self.root_dir.display()).entered();
+    fn check_schema_version(&self) -> Result<()> {
+        let user_version: u64 = self
+            .conn
+            .pragma_query_value(None, "user_version", val_from_row)?;
+        if user_version != Self::CURRENT_SCHEMA_VERSION {
+            bail!("Unsupported schema version {user_version} (expected {}): \
+                  datastores from other versions of Nosey Parker are not supported",
+                  Self::CURRENT_SCHEMA_VERSION);
+        }
+        Ok(())
+    }
+
+    fn migrate_0_60(&mut self) -> Result<()> {
+        let _span = debug_span!("Datastore::migrate_0_60", "{}", self.root_dir.display()).entered();
         let tx = self.conn.transaction()?;
 
         let get_user_version = || -> Result<u64> {
-            let user_version = tx.pragma_query_value(None, "user_version", |r| r.get(0))?;
+            let user_version = tx.pragma_query_value(None, "user_version", val_from_row)?;
             Ok(user_version)
         };
 
@@ -786,351 +742,25 @@ impl Datastore {
         };
 
         let user_version: u64 = get_user_version()?;
-        if user_version == 1 || user_version == 2 {
+        if user_version > 0 && user_version < Self::CURRENT_SCHEMA_VERSION {
             bail!(
-                "Datastores from earlier Nosey Parker versions cannot be migrated to \
-                  the new format; rescanning the inputs with a new datastore will be required."
+                "This datastore has schema version {user_version}. \
+                   Datastores from other Nosey Parker versions are not supported. \
+                   Rescanning the inputs with a new datastore will be required."
             );
         }
-        if user_version > 5 {
+        if user_version > Self::CURRENT_SCHEMA_VERSION {
             bail!("Unknown schema version {user_version}");
         }
 
-        // -----------------------------------------------------------------------------------------
-        // migration 3
-        // -----------------------------------------------------------------------------------------
         if user_version == 0 {
-            let new_user_version = 3;
+            let new_user_version = Self::CURRENT_SCHEMA_VERSION;
             debug!("Migrating database schema from version {user_version} to {new_user_version}");
-            tx.execute_batch(indoc! {r#"
-                create table blob
-                -- This table records various bits of metadata about blobs.
-                (
-                    id integer primary key,
-
-                    -- The blob hash, computed a la Git
-                    blob_id text unique not null,
-
-                    -- Size of the blob in bytes
-                    size integer not null,
-
-                    -- Guessed mime type of the blob
-                    mime_essence text,
-
-                    -- Guess charset encoding of the blob
-                    charset text,
-
-                    constraint valid_blob_id check(
-                        length(blob_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', blob_id)
-                    ),
-                    constraint valid_size check(0 <= size)
-                ) strict;
-
-                create table git_commit
-                -- This table records various bits of metadata about Git commits.
-                (
-                    id integer primary key,
-
-                    -- The commit hash
-                    commit_id text unique not null,
-
-                    -- The commit timestamp, in seconds since the epoch
-                    commit_date integer not null,
-
-                    -- The committer name
-                    committer_name blob not null,
-
-                    -- The committer email
-                    committer_email blob not null,
-
-                    -- The commit author timestamp, in seconds since the epoch
-                    author_date integer not null,
-
-                    -- The commit author
-                    author_name blob not null,
-
-                    -- The commit author
-                    author_email blob not null,
-
-                    -- The commit message
-                    message blob not null,
-
-                    constraint valid_commit_id check(
-                        length(commit_id) == 40 and not glob('*[^abcdefABCDEF1234567890]*', commit_id)
-                    )
-                ) strict;
-
-                create table provenance_payload_file
-                -- This table records provenance information about plain files.
-                (
-                    id integer primary key,
-
-                    -- The filesystem path of the file
-                    path blob unique not null
-                ) strict;
-
-                create table provenance_payload_git_commit
-                -- This table records provenance information about Git commits.
-                (
-                    id integer primary key,
-
-                    -- The filesystem path of the Git repo
-                    repo_path blob not null,
-
-                    commit_id integer not null references git_commit(id),
-
-                    -- The path of the blob within the commit
-                    blob_path blob not null,
-
-                    unique(repo_path, commit_id, blob_path)
-                ) strict;
-
-                create table provenance_payload_git_repo
-                -- This table records provenance information about Git repositories.
-                (
-                    id integer primary key,
-
-                    -- The filesystem path of the Git repo
-                    repo_path blob not null,
-
-                    unique(repo_path)
-                ) strict;
-
-                create table provenance
-                -- This table encodes a union of the `provenance_payload_*` tables.
-                (
-                    id integer primary key,
-
-                    payload_kind text not null,
-                    -- The ID of the provenance payload;
-                    -- references one of the `provenance_payload_*` tables depending on `kind`
-                    payload_id integer not null,
-
-                    unique(payload_kind, payload_id),
-
-                    constraint valid_payload_kind check(payload_kind in ('file', 'git_repo', 'git_commit'))
-                ) strict;
-
-                create table blob_provenance
-                -- This table records the various ways in which a blob was encountered.
-                (
-                    id integer primary key,
-                    blob_id integer not null references blob(id),
-                    provenance_id integer not null references provenance(id),
-                    kind text,
-
-                    constraint kind_valid check (kind in ('first_seen', 'last_seen')),
-                    unique(blob_id, provenance_id, kind)
-                ) strict;
-
-                create table match
-                -- This table is a representation of the matches found from scanning.
-                --
-                -- See the `noseyparker::match_type::Match` type in noseyparker for correspondence.
-                (
-                    blob_id integer not null references blob(id),
-
-                    start_byte integer not null,
-                    end_byte integer not null,
-
-                    start_line integer not null,
-                    start_column integer not null,
-
-                    end_line integer not null,
-                    end_column integer not null,
-
-                    before_snippet blob not null,
-                    matching_input blob not null,
-                    after_snippet blob not null,
-
-                    group_index integer not null,
-                    group_input blob not null,
-
-                    rule_name text not null,
-
-                    -- NOTE: Checking just these fields ought to be sufficient to ensure that
-                    --       entries in the table are unique.
-                    unique (
-                        blob_id,
-                        start_byte,
-                        end_byte,
-                        group_index,
-                        rule_name
-                    )
-                ) strict;
-
-                -- An index to allow quick grouping of equivalent matches
-                create index match_grouping_index on match (group_input, rule_name);
-            "#})?;
+            tx.execute_batch(SCHEMA_60)?;
             set_user_version(new_user_version)?;
         }
 
-        // -----------------------------------------------------------------------------------------
-        // migration 4
-        //
-        // Add an explicit `id` primary key to the match table.
-        //
-        // Sqlite doesn't allow adding a primary key via `alter table`, so we do a roundabout
-        // migration by renaming, creating a new table, copying, an dropping the old one.
-        // -----------------------------------------------------------------------------------------
-        let user_version = get_user_version()?;
-        if user_version == 3 {
-            let new_user_version = 4;
-            debug!("Migrating database schema from version {user_version} to {new_user_version}");
-            tx.execute_batch(indoc! {r#"
-                alter table match rename to old_match;
-
-                create table match
-                -- This table is a representation of the matches found from scanning.
-                --
-                -- See the `noseyparker::match_type::Match` type in noseyparker for correspondence.
-                (
-                    id integer primary key,
-                    blob_id integer not null references blob(id),
-
-                    start_byte integer not null,
-                    end_byte integer not null,
-
-                    start_line integer not null,
-                    start_column integer not null,
-
-                    end_line integer not null,
-                    end_column integer not null,
-
-                    before_snippet blob not null,
-                    matching_input blob not null,
-                    after_snippet blob not null,
-
-                    group_index integer not null,
-                    group_input blob not null,
-
-                    rule_name text not null,
-
-                    -- NOTE: Checking just these fields ought to be sufficient to ensure that
-                    --       entries in the table are unique.
-                    unique (
-                        blob_id,
-                        start_byte,
-                        end_byte,
-                        group_index,
-                        rule_name
-                    )
-                ) strict;
-
-                insert into match (
-                    blob_id,
-                    start_byte,
-                    end_byte,
-                    start_line,
-                    start_column,
-                    end_line,
-                    end_column,
-                    before_snippet,
-                    matching_input,
-                    after_snippet,
-                    group_index,
-                    group_input,
-                    rule_name
-                ) select * from old_match;
-
-                drop table old_match;
-
-                -- An index to allow quick grouping of equivalent matches
-                create index match_grouping_index on match (group_input, rule_name);
-
-            "#})?;
-            set_user_version(new_user_version)?;
-        }
-
-        // -----------------------------------------------------------------------------------------
-        // migration 5
-        //
-        // Add a couple tables for annotating findings: commenting and accept/reject status.
-        // These tables are not currently populated by open-source Nosey Parker.
-        // -----------------------------------------------------------------------------------------
-        let user_version = get_user_version()?;
-        if user_version == 4 {
-            let new_user_version = 5;
-            debug!("Migrating database schema from version {user_version} to {new_user_version}");
-
-            // determine if a finding_status table already exists in the datastore
-            let finding_status_exists: bool = tx.query_row(indoc! {r#"
-                select exists (
-                    select *
-                    from sqlite_master
-                    where type = 'table'
-                    and name = 'finding_status'
-                )
-            "#}, (), |row| row.get(0))?;
-
-            // determine if a finding_comment table already exists in the datastore
-            let finding_comment_exists: bool = tx.query_row(indoc! {r#"
-                select exists (
-                    select *
-                    from sqlite_master
-                    where type = 'table'
-                    and name = 'finding_comment'
-                )
-            "#}, (), |row| row.get(0))?;
-
-            if finding_status_exists {
-                tx.execute("alter table finding_status rename to old_finding_status", ())?;
-            }
-
-            if finding_comment_exists {
-                tx.execute("alter table finding_comment rename to old_finding_comment", ())?;
-            }
-
-            tx.execute_batch(indoc! {r#"
-                create table finding_status
-                -- This table records the accepted/rejected status of findings.
-                (
-                    id integer primary key,
-                    rule_name text not null,
-                    group_input blob not null,
-                    status text not null,
-                    constraint status_valid check (status in ('accept', 'reject')),
-                    unique (rule_name, group_input)
-                ) strict;
-
-                create table if not exists finding_comment
-                -- This table records ad-hoc comments assigned to findings.
-                (
-                    id integer primary key,
-                    rule_name text not null,
-                    group_input blob not null,
-                    comment text not null,
-                    unique (rule_name, group_input),
-                    constraint comment_valid check (comment != '')
-                ) strict;
-            "#})?;
-
-            // migrate old finding status data
-            if finding_status_exists {
-                tx.execute_batch(indoc! {r#"
-                    insert into finding_status (rule_name, group_input, status)
-                    select rule_name, group_input, status
-                    from old_finding_status;
-
-                    drop table old_finding_status;
-                "#})?;
-            }
-
-            // migrate old finding comment data
-            if finding_comment_exists {
-                tx.execute_batch(indoc! {r#"
-                    insert into finding_comment (rule_name, group_input, comment)
-                    select rule_name, group_input, comment
-                    from old_finding_comment;
-
-                    drop table old_finding_comment;
-                "#})?;
-            }
-
-            set_user_version(new_user_version)?;
-        }
-
-        assert_eq!(get_user_version()?, 5);
+        assert_eq!(get_user_version()?, Self::CURRENT_SCHEMA_VERSION);
         tx.commit()?;
 
         Ok(())
@@ -1140,6 +770,67 @@ impl Datastore {
 // -------------------------------------------------------------------------------------------------
 // Implementation Utilities
 // -------------------------------------------------------------------------------------------------
+
+/// Convert a row into a single value.
+///
+/// This function exists to work around an ergonomic deficiency in Rust's type system, which
+/// doesn't allow defining TryFrom<&rusqlite::Row<'_>> for any T that implements rusqlite::types::FromSql.
+/// Without this function, you would have to use 1-tuples all over the place instead.
+fn val_from_row<T>(row: &rusqlite::Row<'_>) -> rusqlite::Result<T>
+where
+    T: rusqlite::types::FromSql,
+{
+    row.get(0)
+}
+
+/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
+///
+/// This takes two SQL statement arguments: a getter and a setter.
+/// The getter should look up 0 or 1 rows for the given parameters.
+/// The setter should insert a new entry for the given parameters and return 1 row.
+///
+/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
+fn add_if_missing_simple<P, F, T>(
+    get: &mut rusqlite::CachedStatement<'_>,
+    set: &mut rusqlite::CachedStatement<'_>,
+    f: F,
+    params: P,
+) -> rusqlite::Result<T>
+where
+    P: rusqlite::Params + Copy,
+    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
+{
+    add_if_missing(get, set, f, params, params)
+}
+
+/// A combinator for "upsert"-like behavior that sqlite doesn't nicely natively support.
+///
+/// This takes two SQL statement arguments: a getter and a setter.
+/// The getter should look up 0 or 1 rows for the given parameters.
+/// The setter should insert a new entry for the given parameters and return 1 row.
+///
+/// Any rows returned by either the getter or the setter should be convertible by the `f` function.
+fn add_if_missing<P1, P2, F, T>(
+    get: &mut rusqlite::CachedStatement<'_>,
+    set: &mut rusqlite::CachedStatement<'_>,
+    f: F,
+    get_params: P1,
+    set_params: P2,
+) -> rusqlite::Result<T>
+where
+    P1: rusqlite::Params,
+    P2: rusqlite::Params,
+    F: Fn(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
+{
+    match get.query(get_params)?.next()? {
+        Some(row) => f(row),
+        None => f(set
+            .query(set_params)?
+            .next()?
+            .expect("either get or set statement must return a row")),
+    }
+}
+
 /// Get a path for a local clone of the given git URL underneath `root`.
 fn clone_destination(root: &std::path::Path, repo: &GitUrl) -> Result<std::path::PathBuf> {
     Ok(root.join(repo.to_path_buf()))
@@ -1177,12 +868,12 @@ mod test {
 }
 
 // -------------------------------------------------------------------------------------------------
-// MatchSummary
+// FindingSummary
 // -------------------------------------------------------------------------------------------------
 
 /// A summary of matches in a `Datastore`.
 #[derive(Serialize)]
-pub struct MatchSummary(pub Vec<MatchSummaryEntry>);
+pub struct FindingSummary(pub Vec<MatchSummaryEntry>);
 
 #[derive(Serialize)]
 pub struct MatchSummaryEntry {
@@ -1191,7 +882,7 @@ pub struct MatchSummaryEntry {
     pub total_count: usize,
 }
 
-impl std::fmt::Display for MatchSummary {
+impl std::fmt::Display for FindingSummary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for entry in self.0.iter() {
             writeln!(f, "{}: {} ({})", entry.rule_name, entry.distinct_count, entry.total_count)?;
@@ -1201,27 +892,52 @@ impl std::fmt::Display for MatchSummary {
 }
 
 // -------------------------------------------------------------------------------------------------
-// MatchGroupMetadata
+// FindingMetadata
 // -------------------------------------------------------------------------------------------------
 
 /// Metadata for a group of matches that have identical rule name and match content.
-#[derive(Debug, Serialize)]
-pub struct MatchGroupMetadata {
-    /// The name of the rule of all the matches in the group
+#[derive(Debug, Deserialize, Serialize, JsonSchema)]
+pub struct FindingMetadata {
+    /// The content-based finding identifier for this group of matches
+    pub finding_id: String,
+
+    /// The name of the rule that detected each match
     pub rule_name: String,
 
+    /// The textual identifier of the rule that detected each match
+    pub rule_text_id: String,
+
+    /// The structural identifier of the rule that detected each match
+    pub rule_structural_id: String,
+
     /// The matched content of all the matches in the group
-    #[serde(with = "BStringSerde")]
-    pub match_content: BString,
+    pub groups: Groups,
 
     /// The number of matches in the group
     pub num_matches: usize,
 
-    /// An optional status assigned to this match group
-    pub status: Option<Status>,
+    /// The unique statuses assigned to matches in the group
+    pub statuses: Statuses,
 
-    /// A comment assigned to this match group
+    /// A comment assigned to this finding
     pub comment: Option<String>,
+
+    /// The mean score in this group of matches
+    pub mean_score: Option<f64>,
+}
+
+// -------------------------------------------------------------------------------------------------
+// FindingDataEntry
+// -------------------------------------------------------------------------------------------------
+#[derive(Debug)]
+pub struct FindingDataEntry {
+    pub provenance: ProvenanceSet,
+    pub blob_metadata: BlobMetadata,
+    pub match_id: MatchId,
+    pub match_val: Match,
+    pub match_comment: Option<String>,
+    pub match_score: Option<f64>,
+    pub match_status: Option<Status>,
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1229,28 +945,67 @@ pub struct MatchGroupMetadata {
 // -------------------------------------------------------------------------------------------------
 
 /// A status assigned to a match group
-#[derive(Debug, Copy, Clone, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+// FIXME(overhaul): use an integer representation for serialization and db
 pub enum Status {
     Accept,
     Reject,
 }
 
-impl rusqlite::types::ToSql for Status {
-    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        match self {
-            Status::Accept => Ok("accept".into()),
-            Status::Reject => Ok("reject".into()),
+// -------------------------------------------------------------------------------------------------
+// Statuses
+// -------------------------------------------------------------------------------------------------
+/// A collection of statuses
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+// FIXME(overhaul): use a bitflag representation here?
+pub struct Statuses(pub SmallVec<[Status; 16]>);
+
+// -------------------------------------------------------------------------------------------------
+// sql
+// -------------------------------------------------------------------------------------------------
+mod sql {
+    use super::*;
+
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+    use rusqlite::Error::ToSqlConversionFailure;
+
+    impl ToSql for Status {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            match self {
+                Status::Accept => Ok("accept".into()),
+                Status::Reject => Ok("reject".into()),
+            }
         }
     }
-}
 
-impl rusqlite::types::FromSql for Status {
-    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
-        match value.as_str()? {
-            "accept" => Ok(Status::Accept),
-            "reject" => Ok(Status::Reject),
-            _ => Err(rusqlite::types::FromSqlError::InvalidType),
+    impl FromSql for Status {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            match value.as_str()? {
+                "accept" => Ok(Status::Accept),
+                "reject" => Ok(Status::Reject),
+                _ => Err(FromSqlError::InvalidType),
+            }
+        }
+    }
+
+    impl ToSql for Statuses {
+        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+            match serde_json::to_string(self) {
+                Err(e) => Err(ToSqlConversionFailure(e.into())),
+                Ok(s) => Ok(s.into()),
+            }
+        }
+    }
+
+    impl FromSql for Statuses {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            match value {
+                ValueRef::Text(s) => serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into())),
+                ValueRef::Blob(b) => serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into())),
+                _ => Err(FromSqlError::InvalidType),
+            }
         }
     }
 }

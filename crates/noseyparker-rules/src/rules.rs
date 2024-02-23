@@ -5,16 +5,16 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tracing::{debug, debug_span};
 
-use crate::{util, Rule, Ruleset};
+use crate::{util, RuleSyntax, RulesetSyntax};
 
 /// A collection of rules and rulesets
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Rules {
     #[serde(default)]
-    pub rules: Vec<Rule>,
+    pub rules: Vec<RuleSyntax>,
 
     #[serde(default)]
-    pub rulesets: Vec<Ruleset>,
+    pub rulesets: Vec<RulesetSyntax>,
 }
 
 impl Rules {
@@ -126,12 +126,12 @@ impl Rules {
     }
 
     #[inline]
-    pub fn iter_rules(&self) -> std::slice::Iter<'_, Rule> {
+    pub fn iter_rules(&self) -> std::slice::Iter<'_, RuleSyntax> {
         self.rules.iter()
     }
 
     #[inline]
-    pub fn iter_rulesets(&self) -> std::slice::Iter<'_, Ruleset> {
+    pub fn iter_rulesets(&self) -> std::slice::Iter<'_, RulesetSyntax> {
         self.rulesets.iter()
     }
 }

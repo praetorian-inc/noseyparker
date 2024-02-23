@@ -101,8 +101,6 @@ fn github_repos_list_user_json_format() {
     );
 }
 
-// TODO: add test using a non-default `--github-api-url URL`
-
 #[test]
 fn github_repos_list_all_organizations_no_api_url1() {
     assert_cmd_snapshot!(noseyparker_failure!(
@@ -143,3 +141,4 @@ fn github_repos_list_all_organizations_no_api_url4() {
 }
 
 // TODO(test): add tests for `github repos list --all-organizations` with a valid non-default `--github-api-url`
+// TODO(test): add test using a non-default `--github-api-url URL`

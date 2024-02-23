@@ -1,0 +1,1137 @@
+---
+source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
+expression: read_json(report_json.path()).unwrap()
+---
+[
+  {
+    "comment": null,
+    "finding_id": "75215b7418d122c6dbe619909670b64b2643ee1f",
+    "groups": [
+      "QUtJQUpFRVVPU0pYWUIyQktMTUE="
+    ],
+    "matches": [
+      {
+        "blob_id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+        "blob_metadata": {
+          "charset": null,
+          "id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+          "mime_essence": null,
+          "num_bytes": 1299
+        },
+        "comment": null,
+        "groups": [
+          "QUtJQUpFRVVPU0pYWUIyQktMTUE="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 193,
+            "start": 173
+          },
+          "source_span": {
+            "end": {
+              "column": 193,
+              "line": 1
+            },
+            "start": {
+              "column": 174,
+              "line": 1
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "tmp.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1384157507 -0800",
+                "commit_id": "efda07fbb9e3a2c172f07e441c29b6988f90fe2f",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1384157507 -0800",
+                "message": "cleanup\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS API Key",
+        "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
+        "score": null,
+        "snippet": {
+          "after": "\",\"Apple_PubSub_Socket_Render\":\"/tmp/launch-rHzB0S/Render\",\"TERM_PROGRAM_VERSION\":\"326\",\"TERM_SESSION_ID\":\"C99AE63D-8AC8-40EC-9A43-7C14ACEBE413\",\"ANT_HOME\":\"/usr/local/etc/ant\",\"CMD_DURATION\":\"1m 22.1s\",\"USER\":\"davida\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/L",
+          "before": "{\"TERM_PROGRAM\":\"Apple_Terminal\",\"TERM\":\"xterm-256color\",\"SHELL\":\"/usr/local/bin/fish\",\"CLICOLOR\":\"1\",\"TMPDIR\":\"/var/folders/xj/5v3cc4y9039fx_fhk67bvg8w0000gn/T/\",\"AWS_ID\":\"",
+          "matching": "AKIAJEEUOSJXYB2BKLMA"
+        },
+        "status": null,
+        "structural_id": "337bc475c7d91faaeaa8928bcdb69a0894cf129a"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS API Key",
+    "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+    "rule_text_id": "np.aws.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "29b2f84478d29b785a5650eb6ed22e51a2392bdd",
+    "groups": [
+      "QUtJQUpRTkYzQklQRURSNk1YRUE="
+    ],
+    "matches": [
+      {
+        "blob_id": "71ac8729b311757bcbf46e33219ea38723dcb717",
+        "blob_metadata": {
+          "charset": null,
+          "id": "71ac8729b311757bcbf46e33219ea38723dcb717",
+          "mime_essence": null,
+          "num_bytes": 1087
+        },
+        "comment": null,
+        "groups": [
+          "QUtJQUpRTkYzQklQRURSNk1YRUE="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 680,
+            "start": 660
+          },
+          "source_span": {
+            "end": {
+              "column": 680,
+              "line": 1
+            },
+            "start": {
+              "column": 661,
+              "line": 1
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "tmp.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1384160012 -0800",
+                "commit_id": "6ea21730dd131fd3bc315d19953761e2cd7bac07",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1384160012 -0800",
+                "message": "debugging statsd\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS API Key",
+        "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
+        "score": null,
+        "snippet": {
+          "after": "\",\"PWD\":\"/Users/davida/src/appmaker\",\"LANG\":\"en_CA.UTF-8\",\"PUBLISH_URL_PREFIX\":\"XXX\",\"HOME\":\"/Users/davida\",\"SHLVL\":\"2\",\"LOGNAME\":\"davida\",\"S3_BUCKET\":\"com.mozillalabs.appmaker\",\"COOKIE_SECRET\":\"I hate working as a janitor for arrogant rich people; so I cl",
+          "before": "S3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ\",\"S3_OBJECT_PREFIX\":\"flathead\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/Listeners\",\"__CF_USER_TEXT_ENCODING\":\"0x1F5:0:0\",\"PATH\":\"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin\",\"__CHECKFIX1436934\":\"1\",\"ASSET_HOST\":\"\",\"S3_KEY\":\"",
+          "matching": "AKIAJQNF3BIPEDR6MXEA"
+        },
+        "status": null,
+        "structural_id": "89884c95014e1d4ecc6a5b888c7e40575e5e19e3"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS API Key",
+    "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+    "rule_text_id": "np.aws.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "f6071e69f65a35077ac37c540a50c066de594b5d",
+    "groups": [
+      "QUtJQUpVWlBMVE5NWTJKU1hMWUE="
+    ],
+    "matches": [
+      {
+        "blob_id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+        "blob_metadata": {
+          "charset": null,
+          "id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+          "mime_essence": null,
+          "num_bytes": 523
+        },
+        "comment": null,
+        "groups": [
+          "QUtJQUpVWlBMVE5NWTJKU1hMWUE="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 377,
+            "start": 357
+          },
+          "source_span": {
+            "end": {
+              "column": 27,
+              "line": 9
+            },
+            "start": {
+              "column": 8,
+              "line": 9
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "my.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1378126038 +0100",
+                "commit_id": "9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1378126038 +0100",
+                "message": "fix both 254 and 257\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS API Key",
+        "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+        "rule_text_id": "np.aws.1",
+        "score": null,
+        "snippet": {
+          "after": "\nS3_OBJECT_PREFIX=flathead\nS3_SECRET=DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
+          "before": " a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=",
+          "matching": "AKIAJUZPLTNMY2JSXLYA"
+        },
+        "status": null,
+        "structural_id": "d8a55347f7254bef607e42f641feea9b7419b0fd"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS API Key",
+    "rule_structural_id": "np.aws.1:1e4113c48323df7405840eede9a2be89a9797520",
+    "rule_text_id": "np.aws.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "3905a4c7d3d026fed1d279817a0212530930651b",
+    "groups": [
+      "czMtdXMtd2VzdC0yLmFtYXpvbmF3cy5jb20vbWFrZXJzdHJhcA=="
+    ],
+    "matches": [
+      {
+        "blob_id": "d7d205ed74db3e8764f11224906ff71052262710",
+        "blob_metadata": {
+          "charset": null,
+          "id": "d7d205ed74db3e8764f11224906ff71052262710",
+          "mime_essence": "text/html",
+          "num_bytes": 4051
+        },
+        "comment": null,
+        "groups": [
+          "czMtdXMtd2VzdC0yLmFtYXpvbmF3cy5jb20vbWFrZXJzdHJhcA=="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 249,
+            "start": 210
+          },
+          "source_span": {
+            "end": {
+              "column": 60,
+              "line": 7
+            },
+            "start": {
+              "column": 22,
+              "line": 7
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/webmaker-auth-client/example/index.html",
+              "commit_metadata": {
+                "author_email": "cade@mozillafoundation.org",
+                "author_name": "Christopher De Cairos",
+                "author_timestamp": "1400860516 -0400",
+                "commit_id": "93a0d0b65978bb3b364f7494e28c187c363c4a73",
+                "committer_email": "cade@mozillafoundation.org",
+                "committer_name": "Christopher De Cairos",
+                "committer_timestamp": "1400860516 -0400",
+                "message": "(Issue #1177) This is why we don't commit symbolic links\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS S3 Bucket (path style)",
+        "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
+        "score": null,
+        "snippet": {
+          "after": "makerstrap.complete.min.css\" rel=\"stylesheet\">\n  <link href=\"../create-user/create-user-form.css\" rel=\"stylesheet\">\n</head>\n<body>\n\n  <!-- Modal -->\n<div\n  class=\"modal fade\"\n  id=\"webmaker-login-new-user\"\n  tabindex=\"-1\"\n  role=\"dialog\"\n  aria-labelledby=",
+          "before": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n  <meta charset=\"utf-8\">\n  <title>Persona example</title>\n  <link href=\"https:/",
+          "matching": "/s3-us-west-2.amazonaws.com/makerstrap/"
+        },
+        "status": null,
+        "structural_id": "45cb43335b67dd491372630d822a691919023aa2"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS S3 Bucket (path style)",
+    "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+    "rule_text_id": "np.s3.2",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "50fbfa2df6f6841dc3fa66750231b69cbf6ddd57",
+    "groups": [
+      "czMuYW1hem9uYXdzLmNvbS9jb20ubW96aWxsYWxhYnMuYXBwbWFrZXI="
+    ],
+    "matches": [
+      {
+        "blob_id": "1050811ad6d53febece71e56c284f91deecf38ce",
+        "blob_metadata": {
+          "charset": null,
+          "id": "1050811ad6d53febece71e56c284f91deecf38ce",
+          "mime_essence": "text/html",
+          "num_bytes": 4145
+        },
+        "comment": null,
+        "groups": [
+          "czMuYW1hem9uYXdzLmNvbS9jb20ubW96aWxsYWxhYnMuYXBwbWFrZXI="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 1194,
+            "start": 1151
+          },
+          "source_span": {
+            "end": {
+              "column": 90,
+              "line": 23
+            },
+            "start": {
+              "column": 48,
+              "line": 23
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/start.html",
+              "commit_metadata": {
+                "author_email": "secretrobotron@gmail.com",
+                "author_name": "secretrobotron",
+                "author_timestamp": "1403023494 -0400",
+                "commit_id": "ad1a555a827707a18a81f248cb30966a657fb89f",
+                "committer_email": "secretrobotron@gmail.com",
+                "committer_name": "secretrobotron",
+                "committer_timestamp": "1403023494 -0400",
+                "message": "removed appalot.me from iframe urls on start page\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS S3 Bucket (path style)",
+        "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
+        "score": null,
+        "snippet": {
+          "after": "flathead/succinct-tub-861/app\"></iframe></div>\n          <p>Use a handful of instruments and a sequencer to create some musical noise!</p>\n        </li>\n        <li>\n          <h2>Draw with Friends</h2>\n          <div class=\"links\"><a href=\"http://screechi",
+          "before": "   <div class=\"links\"><a href=\"http://succinct-tub-861.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fsuccinct-tub-861.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
+          "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
+        },
+        "status": null,
+        "structural_id": "644422e3dcd86256bd6aebca86ed5fe360b2e399"
+      },
+      {
+        "blob_id": "1050811ad6d53febece71e56c284f91deecf38ce",
+        "blob_metadata": {
+          "charset": null,
+          "id": "1050811ad6d53febece71e56c284f91deecf38ce",
+          "mime_essence": "text/html",
+          "num_bytes": 4145
+        },
+        "comment": null,
+        "groups": [
+          "czMuYW1hem9uYXdzLmNvbS9jb20ubW96aWxsYWxhYnMuYXBwbWFrZXI="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 1711,
+            "start": 1668
+          },
+          "source_span": {
+            "end": {
+              "column": 90,
+              "line": 29
+            },
+            "start": {
+              "column": 48,
+              "line": 29
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/start.html",
+              "commit_metadata": {
+                "author_email": "secretrobotron@gmail.com",
+                "author_name": "secretrobotron",
+                "author_timestamp": "1403023494 -0400",
+                "commit_id": "ad1a555a827707a18a81f248cb30966a657fb89f",
+                "committer_email": "secretrobotron@gmail.com",
+                "committer_name": "secretrobotron",
+                "committer_timestamp": "1403023494 -0400",
+                "message": "removed appalot.me from iframe urls on start page\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS S3 Bucket (path style)",
+        "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
+        "score": null,
+        "snippet": {
+          "after": "flathead/screeching-north-733/app\"></iframe></div>\n          <p>Draw and share your creativity with a group of friends!</p>\n        </li>\n        <li>\n          <h2>Track Progress</h2>\n          <div class=\"links\"><a href=\"http://wicked-animal-644.appalot.",
+          "before": "class=\"links\"><a href=\"http://screeching-north-733.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fscreeching-north-733.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
+          "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
+        },
+        "status": null,
+        "structural_id": "ce52241ddcd44de5653b7f06ced351acc3d38353"
+      },
+      {
+        "blob_id": "1050811ad6d53febece71e56c284f91deecf38ce",
+        "blob_metadata": {
+          "charset": null,
+          "id": "1050811ad6d53febece71e56c284f91deecf38ce",
+          "mime_essence": "text/html",
+          "num_bytes": 4145
+        },
+        "comment": null,
+        "groups": [
+          "czMuYW1hem9uYXdzLmNvbS9jb20ubW96aWxsYWxhYnMuYXBwbWFrZXI="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 2204,
+            "start": 2161
+          },
+          "source_span": {
+            "end": {
+              "column": 90,
+              "line": 35
+            },
+            "start": {
+              "column": 48,
+              "line": 35
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/start.html",
+              "commit_metadata": {
+                "author_email": "secretrobotron@gmail.com",
+                "author_name": "secretrobotron",
+                "author_timestamp": "1403023494 -0400",
+                "commit_id": "ad1a555a827707a18a81f248cb30966a657fb89f",
+                "committer_email": "secretrobotron@gmail.com",
+                "committer_name": "secretrobotron",
+                "committer_timestamp": "1403023494 -0400",
+                "message": "removed appalot.me from iframe urls on start page\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS S3 Bucket (path style)",
+        "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
+        "score": null,
+        "snippet": {
+          "after": "flathead/wicked-animal-644/app\"></iframe></div>\n          <p>Count progress toward a personal goal, event attendees, or any other target.</p>\n        </li>\n        <li>\n          <h2>Play Hot Potato</h2>\n          <div class=\"links\"><a href=\"http://enchant",
+          "before": " <div class=\"links\"><a href=\"http://wicked-animal-644.appalot.me/install\">Install</a> <a href=\"https://apps.webmaker.org/designer?remix=http%253A%252F%252Fwicked-animal-644.appalot.me%252Fapp\">Remix</a></div>\n          <div class=\"app\"><iframe src=\"https:/",
+          "matching": "/s3.amazonaws.com/com.mozillalabs.appmaker/"
+        },
+        "status": null,
+        "structural_id": "02fa7a100353c02b905582c872a80028d1ff5c5d"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 11,
+    "rule_name": "AWS S3 Bucket (path style)",
+    "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+    "rule_text_id": "np.s3.2",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "5bdc9f88e390b7a47d35bea172de4547e2fad893",
+    "groups": [
+      "czMuYW1hem9uYXdzLmNvbS9saXN0anM="
+    ],
+    "matches": [
+      {
+        "blob_id": "6912d7937b568c516cd64d13091b80082eaea1ef",
+        "blob_metadata": {
+          "charset": null,
+          "id": "6912d7937b568c516cd64d13091b80082eaea1ef",
+          "mime_essence": "text/markdown",
+          "num_bytes": 4280
+        },
+        "comment": null,
+        "groups": [
+          "czMuYW1hem9uYXdzLmNvbS9saXN0anM="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 267,
+            "start": 242
+          },
+          "source_span": {
+            "end": {
+              "column": 43,
+              "line": 6
+            },
+            "start": {
+              "column": 19,
+              "line": 6
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/listjs/README.md",
+              "commit_metadata": {
+                "author_email": "cade@mozillafoundation.org",
+                "author_name": "Christopher De Cairos",
+                "author_timestamp": "1400253402 -0400",
+                "commit_id": "fd18bf20a0bdf437cf5af3ce7bf3b8d998fb30c5",
+                "committer_email": "cade@mozillafoundation.org",
+                "committer_name": "Christopher De Cairos",
+                "committer_timestamp": "1400789046 -0400",
+                "message": "(Issue #1177) WebmakerAuth related vendor changes\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS S3 Bucket (path style)",
+        "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+        "rule_text_id": "np.s3.2",
+        "score": null,
+        "snippet": {
+          "after": "donate-coffee.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7ZGHV75VSD2E)\n\n### Core idea\n- Simple and invisible\n- Easy to apply to existing HTML\n- No dependencies\n- Fast\n- Small\n- Handle thousands of items\n\n### Features\n- Work",
+          "before": "# List.js\nPerfect library for adding **search**, **sort**, **filters** and **flexibility** to\n**tables**, **lists** and various HTML elements. Built to be invisible and work on existing HTML.\nReally simple and easy to use!\n\n[![Donate](https:/",
+          "matching": "/s3.amazonaws.com/listjs/"
+        },
+        "status": null,
+        "structural_id": "48b037a97d406f02ab2299d1b6b6dba44dd50296"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS S3 Bucket (path style)",
+    "rule_structural_id": "np.s3.2:a09eba269cc7230d53713d75a4c04a5bad6044a5",
+    "rule_text_id": "np.s3.2",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "e8e7221fe8508faa9cad4cf1df939a358f42212b",
+    "groups": [
+      "RCthTGNjY0xySGJkV3RDbk43NU1LSTdObWI5TlpRSFo1Y1N4d09vbQ=="
+    ],
+    "matches": [
+      {
+        "blob_id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+        "blob_metadata": {
+          "charset": null,
+          "id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+          "mime_essence": null,
+          "num_bytes": 1299
+        },
+        "comment": null,
+        "groups": [
+          "RCthTGNjY0xySGJkV3RDbk43NU1LSTdObWI5TlpRSFo1Y1N4d09vbQ=="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 1187,
+            "start": 1134
+          },
+          "source_span": {
+            "end": {
+              "column": 1187,
+              "line": 1
+            },
+            "start": {
+              "column": 1135,
+              "line": 1
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "tmp.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1384157507 -0800",
+                "commit_id": "efda07fbb9e3a2c172f07e441c29b6988f90fe2f",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1384157507 -0800",
+                "message": "cleanup\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS Secret Access Key",
+        "rule_structural_id": "np.aws.2:d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+        "rule_text_id": "np.aws.2",
+        "score": null,
+        "snippet": {
+          "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
+          "before": "Frameworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"",
+          "matching": "AWS_SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
+        },
+        "status": null,
+        "structural_id": "a7758d71b489b1ff3f045bd12f1bf670bb55e986"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS Secret Access Key",
+    "rule_structural_id": "np.aws.2:d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+    "rule_text_id": "np.aws.2",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "1bf2821d4cd3459aa63891d00d6ea9479f766c17",
+    "groups": [
+      "YXJuOmF3czpzMzo6OlhYWFhYWFhYLVhYWFgtWFhYWC1YWFhYLVhYWFhYWFhYWFhYWA=="
+    ],
+    "matches": [
+      {
+        "blob_id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+        "blob_metadata": {
+          "charset": null,
+          "id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+          "mime_essence": "text/markdown",
+          "num_bytes": 5456
+        },
+        "comment": null,
+        "groups": [
+          "YXJuOmF3czpzMzo6OlhYWFhYWFhYLVhYWFgtWFhYWC1YWFhYLVhYWFhYWFhYWFhYWA=="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 4527,
+            "start": 4477
+          },
+          "source_span": {
+            "end": {
+              "column": 71,
+              "line": 78
+            },
+            "start": {
+              "column": 22,
+              "line": 78
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "jon@jbuckley.ca",
+                "author_name": "Jon Buckley",
+                "author_timestamp": "1415394133 -0500",
+                "commit_id": "26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2",
+                "committer_email": "jon@jbuckley.ca",
+                "committer_name": "Jon Buckley",
+                "committer_timestamp": "1415398838 -0500",
+                "message": "Bug 1091261 - Dependencies for login 3.0\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          },
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "mikelarssonftw@gmail.com",
+                "author_name": "Mike Larsson",
+                "author_timestamp": "1403203651 -0400",
+                "commit_id": "ac87d310f949a883efa99499a5446242afac0c6a",
+                "committer_email": "mikelarssonftw@gmail.com",
+                "committer_name": "Mike Larsson",
+                "committer_timestamp": "1403273973 -0400",
+                "message": "Add makerstrap to project\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Amazon Resource Name",
+        "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
+        "score": null,
+        "snippet": {
+          "after": ",\n                    \"arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*\"\n                ]\n            }\n        ]\n    }\n    ```\n\n12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Proper",
+          "before": "             \"s3:ListBucket\",\n                    \"s3:DeleteObject\",\n                    \"s3:DeleteObjectVersion\",\n                    \"s3:GetObject\",\n                    \"s3:PutObject\"\n                ],\n                \"Resource\": [\n                    \"",
+          "matching": "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\""
+        },
+        "status": null,
+        "structural_id": "ac9a696bb431d7903d9706cf3e14c64312bd19d7"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Amazon Resource Name",
+    "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+    "rule_text_id": "np.arn.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "f69c3bd8a23f7e8251826775c6329f881725af39",
+    "groups": [
+      "YXJuOmF3czpzMzo6OlhYWFhYWFhYLVhYWFgtWFhYWC1YWFhYLVhYWFhYWFhYWFhYWC8q"
+    ],
+    "matches": [
+      {
+        "blob_id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+        "blob_metadata": {
+          "charset": null,
+          "id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+          "mime_essence": "text/markdown",
+          "num_bytes": 5456
+        },
+        "comment": null,
+        "groups": [
+          "YXJuOmF3czpzMzo6OlhYWFhYWFhYLVhYWFgtWFhYWC1YWFhYLVhYWFhYWFhYWFhYWC8q"
+        ],
+        "location": {
+          "offset_span": {
+            "end": 4602,
+            "start": 4550
+          },
+          "source_span": {
+            "end": {
+              "column": 73,
+              "line": 79
+            },
+            "start": {
+              "column": 22,
+              "line": 79
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "jon@jbuckley.ca",
+                "author_name": "Jon Buckley",
+                "author_timestamp": "1415394133 -0500",
+                "commit_id": "26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2",
+                "committer_email": "jon@jbuckley.ca",
+                "committer_name": "Jon Buckley",
+                "committer_timestamp": "1415398838 -0500",
+                "message": "Bug 1091261 - Dependencies for login 3.0\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          },
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "mikelarssonftw@gmail.com",
+                "author_name": "Mike Larsson",
+                "author_timestamp": "1403203651 -0400",
+                "commit_id": "ac87d310f949a883efa99499a5446242afac0c6a",
+                "committer_email": "mikelarssonftw@gmail.com",
+                "committer_name": "Mike Larsson",
+                "committer_timestamp": "1403273973 -0400",
+                "message": "Add makerstrap to project\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Amazon Resource Name",
+        "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
+        "score": null,
+        "snippet": {
+          "after": "\n                ]\n            }\n        ]\n    }\n    ```\n\n12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Properties pane, in the \"Lifecycle\" section, add a rule to expire/delete files ba",
+          "before": "                \"s3:DeleteObjectVersion\",\n                    \"s3:GetObject\",\n                    \"s3:PutObject\"\n                ],\n                \"Resource\": [\n                    \"arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\",\n                    \"",
+          "matching": "arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*\""
+        },
+        "status": null,
+        "structural_id": "13067abed46192456dd424d8fc386e3a9270c4cf"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Amazon Resource Name",
+    "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+    "rule_text_id": "np.arn.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "64a6c198e37734cc01a227bf886e01b7f5d31041",
+    "groups": [
+      "YXJuOmF3czpzMzo6OnRoZS1idWNrZXQtbmFtZS1nb2VzLWhlcmVg"
+    ],
+    "matches": [
+      {
+        "blob_id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+        "blob_metadata": {
+          "charset": null,
+          "id": "2ee7ed9ab4ed6f9109f3c6121cc42bb55a83b08f",
+          "mime_essence": "text/markdown",
+          "num_bytes": 5456
+        },
+        "comment": null,
+        "groups": [
+          "YXJuOmF3czpzMzo6OnRoZS1idWNrZXQtbmFtZS1nb2VzLWhlcmVg"
+        ],
+        "location": {
+          "offset_span": {
+            "end": 3403,
+            "start": 3363
+          },
+          "source_span": {
+            "end": {
+              "column": 0,
+              "line": 54
+            },
+            "start": {
+              "column": 92,
+              "line": 53
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "jon@jbuckley.ca",
+                "author_name": "Jon Buckley",
+                "author_timestamp": "1415394133 -0500",
+                "commit_id": "26d7daeb6c9f2bf87d62369ab33fdfaf81cc81a2",
+                "committer_email": "jon@jbuckley.ca",
+                "committer_name": "Jon Buckley",
+                "committer_timestamp": "1415398838 -0500",
+                "message": "Bug 1091261 - Dependencies for login 3.0\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          },
+          {
+            "first_commit": {
+              "blob_path": "public/vendor/bootstrap/test-infra/README.md",
+              "commit_metadata": {
+                "author_email": "mikelarssonftw@gmail.com",
+                "author_name": "Mike Larsson",
+                "author_timestamp": "1403203651 -0400",
+                "commit_id": "ac87d310f949a883efa99499a5446242afac0c6a",
+                "committer_email": "mikelarssonftw@gmail.com",
+                "committer_name": "Mike Larsson",
+                "committer_timestamp": "1403273973 -0400",
+                "message": "Add makerstrap to project\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Amazon Resource Name",
+        "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+        "rule_text_id": "np.arn.1",
+        "score": null,
+        "snippet": {
+          "after": "10. In the bucket's Properties pane, in the \"Permissions\" section, click the \"Edit bucket policy\" button.\n11. Input and submit an IAM Policy that grants the user at least read+write rights to the bucket. AWS has a policy generator and some examples to help",
+          "before": " *nix machines, you can easily generate a random UUID to use as the bucket name using Python:\n\n    ```bash\n    python -c \"import uuid; print(uuid.uuid4())\"\n    ```\n\n9. Determine and note what your bucket's ARN is. The ARN for an S3 bucket is of the form: `",
+          "matching": "arn:aws:s3:::the-bucket-name-goes-here`\n"
+        },
+        "status": null,
+        "structural_id": "f86db477a75df92d4602da375bce77baf4d4ac93"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Amazon Resource Name",
+    "rule_structural_id": "np.arn.1:9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+    "rule_text_id": "np.arn.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "062bd251ae9d6c33f92fcd161f61e2229f289227",
+    "groups": [
+      "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
+    ],
+    "matches": [
+      {
+        "blob_id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+        "blob_metadata": {
+          "charset": null,
+          "id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+          "mime_essence": null,
+          "num_bytes": 523
+        },
+        "comment": null,
+        "groups": [
+          "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 454,
+            "start": 407
+          },
+          "source_span": {
+            "end": {
+              "column": 50,
+              "line": 11
+            },
+            "start": {
+              "column": 4,
+              "line": 11
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "my.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1378126038 +0100",
+                "commit_id": "9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1378126038 +0100",
+                "message": "fix both 254 and 257\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Generic Secret",
+        "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
+        "score": null,
+        "snippet": {
+          "after": "\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
+          "before": "eir computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=AKIAJUZPLTNMY2JSXLYA\nS3_OBJECT_PREFIX=flathead\nS3_",
+          "matching": "SECRET=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"
+        },
+        "status": null,
+        "structural_id": "77559665aae5d52badf11a28112d683ec2714a1f"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Generic Secret",
+    "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+    "rule_text_id": "np.generic.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "2e5554290561de4373df400592a567032ed8c9f0",
+    "groups": [
+      "YUxjY2NMckhiZFd0Q25ONzVNS0k3Tm1iOU5aUUhaNWNTeHdPb20="
+    ],
+    "matches": [
+      {
+        "blob_id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+        "blob_metadata": {
+          "charset": null,
+          "id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
+          "mime_essence": null,
+          "num_bytes": 1299
+        },
+        "comment": null,
+        "groups": [
+          "YUxjY2NMckhiZFd0Q25ONzVNS0k3Tm1iOU5aUUhaNWNTeHdPb20="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 1187,
+            "start": 1138
+          },
+          "source_span": {
+            "end": {
+              "column": 1187,
+              "line": 1
+            },
+            "start": {
+              "column": 1139,
+              "line": 1
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "tmp.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1384157507 -0800",
+                "commit_id": "efda07fbb9e3a2c172f07e441c29b6988f90fe2f",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1384157507 -0800",
+                "message": "cleanup\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Generic Secret",
+        "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
+        "score": null,
+        "snippet": {
+          "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
+          "before": "eworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"AWS_",
+          "matching": "SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
+        },
+        "status": null,
+        "structural_id": "d099b238d17b29fa502de0f38dab4868a9b563e4"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Generic Secret",
+    "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+    "rule_text_id": "np.generic.1",
+    "statuses": []
+  },
+  {
+    "comment": null,
+    "finding_id": "277474002d4c7666aa6ad9d20ff5f354e20315f4",
+    "groups": [
+      "cWZsUUJ6TU5aM1RxbHNYc3JxQmZBMTJ3Y2lkcjVqTFE="
+    ],
+    "matches": [
+      {
+        "blob_id": "71ac8729b311757bcbf46e33219ea38723dcb717",
+        "blob_metadata": {
+          "charset": null,
+          "id": "71ac8729b311757bcbf46e33219ea38723dcb717",
+          "mime_essence": null,
+          "num_bytes": 1087
+        },
+        "comment": null,
+        "groups": [
+          "cWZsUUJ6TU5aM1RxbHNYc3JxQmZBMTJ3Y2lkcjVqTFE="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 440,
+            "start": 391
+          },
+          "source_span": {
+            "end": {
+              "column": 440,
+              "line": 1
+            },
+            "start": {
+              "column": 392,
+              "line": 1
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "tmp.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1384160012 -0800",
+                "commit_id": "6ea21730dd131fd3bc315d19953761e2cd7bac07",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1384160012 -0800",
+                "message": "debugging statsd\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "Generic Secret",
+        "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+        "rule_text_id": "np.generic.1",
+        "score": null,
+        "snippet": {
+          "after": "\",\"S3_OBJECT_PREFIX\":\"flathead\",\"SSH_AUTH_SOCK\":\"/tmp/launch-W9AsCX/Listeners\",\"__CF_USER_TEXT_ENCODING\":\"0x1F5:0:0\",\"PATH\":\"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin\",\"__CHECKFIX1436934\":\"1\",\"ASSET_HOST\":\"\",\"S3_KEY\":\"AKIAJQNF3BIPEDR6MXEA\",\"PWD\":\"/Users/",
+          "before": "8w0000gn/T/\",\"Apple_PubSub_Socket_Render\":\"/tmp/launch-rHzB0S/Render\",\"TERM_PROGRAM_VERSION\":\"326\",\"OLDPWD\":\"/Users/davida/src/appmaker\",\"TERM_SESSION_ID\":\"5600EB0F-9A8F-4DF7-BB34-CD3E7CB7408D\",\"COMPONENTS_BASE_URL\":\"//localhost:5000/\",\"USER\":\"davida\",\"S3_",
+          "matching": "SECRET\":\"gQUSS3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ"
+        },
+        "status": null,
+        "structural_id": "99dfd4cb104847ed3ccf42f881d770a574c89009"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "Generic Secret",
+    "rule_structural_id": "np.generic.1:3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+    "rule_text_id": "np.generic.1",
+    "statuses": []
+  }
+]

@@ -1,10 +1,6 @@
 ---
-source: tests/test_noseyparker_github.rs
+source: crates/noseyparker-cli/tests/github/mod.rs
 expression: stderr
 ---
-Error: Failed to enumerate GitHub repositories
-
-Caused by:
-    0: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
-    1: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
+Error: Failed to enumerate GitHub repositories: error making request: HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit): HTTP status client error (401 Unauthorized) for url (https://api.github.com/rate_limit)
 

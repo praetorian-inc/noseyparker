@@ -4,69 +4,99 @@ impl DetailsReporter {
     pub fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
         let datastore = &self.datastore;
         let group_metadata = datastore
-            .get_match_group_metadata()
+            .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
             let finding_num = finding_num + 1;
             let matches = self.get_matches(&metadata)?;
-            let match_group = MatchGroup { metadata, matches };
+            let finding = Finding { metadata, matches };
             writeln!(
                 &mut writer,
-                "{} {}",
-                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}:")),
-                PrettyMatchGroup(self, &match_group),
+                "{}",
+                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}"))
             )?;
+            writeln!(&mut writer, "{}", PrettyFinding(self, &finding))?;
         }
         Ok(())
     }
 }
 
+/// A wrapper type to allow human-oriented pretty-printing of a `Finding`.
+pub struct PrettyFinding<'a>(&'a DetailsReporter, &'a Finding);
 
-/// A wrapper type to allow human-oriented pretty-printing of a `MatchGroup`.
-pub struct PrettyMatchGroup<'a>(&'a DetailsReporter, &'a MatchGroup);
-
-impl <'a> Display for PrettyMatchGroup<'a> {
+impl<'a> Display for PrettyFinding<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let PrettyMatchGroup(reporter, group) = self;
-        writeln!(f, "{}", reporter.style_rule(group.rule_name()))?;
+        let PrettyFinding(reporter, finding) = self;
+        writeln!(
+            f,
+            "{} {}",
+            reporter.style_heading("Rule:"),
+            reporter.style_rule(finding.rule_name())
+        )?;
 
-        // write out status if set
-        if let Some(status) = group.metadata.status {
-            let status = match status {
+        // write out status if set: either `Accept`, `Reject`, or `Mixed` (when there are
+        // conflicting match statuses within the finding)
+        let statuses = &finding.metadata.statuses.0;
+        let num_statuses = statuses.len();
+        #[allow(clippy::comparison_chain)]
+        if num_statuses > 1 {
+            writeln!(f, "{} Mixed", reporter.style_heading("Status:"))?;
+        } else if num_statuses == 1 {
+            let status = match statuses[0] {
                 Status::Accept => "Accept",
                 Status::Reject => "Reject",
             };
-            writeln!(f, "{} {}", reporter.style_heading("Status:"), status)?;
+            writeln!(f, "{} {status}", reporter.style_heading("Status:"))?;
+        };
+
+        // write out score if set
+        if let Some(mean_score) = finding.metadata.mean_score {
+            writeln!(f, "{} {mean_score:.3}", reporter.style_heading("Score:"))?;
         };
 
         // write out comment if set
-        if let Some(comment) = &group.metadata.comment {
-            writeln!(f, "{} {}", reporter.style_heading("Comment:"), comment)?;
+        if let Some(comment) = &finding.metadata.comment {
+            writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
         };
 
-        // write out the group on one line if it's single-line, and multiple lines otherwise
-        let g = group.group_input();
-        let match_heading = reporter.style_heading("Match:");
-        if g.contains(&b'\n') {
-            writeln!(f, "{match_heading}")?;
-            writeln!(f)?;
-            writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
-            writeln!(f)?;
+        let mut write_group =
+            |group_heading: StyledObject<String>, g: &Group| -> std::fmt::Result {
+                let g = &g.0;
+                // write out the group on one line if it's single-line, and multiple lines otherwise
+                if g.contains(&b'\n') {
+                    writeln!(f, "{group_heading}")?;
+                    writeln!(f)?;
+                    writeln!(indented(f).with_str("    "), "{}", reporter.style_match(Escaped(g)))?;
+                    writeln!(f)?;
+                } else {
+                    writeln!(f, "{} {}", group_heading, reporter.style_match(Escaped(g)))?;
+                }
+                Ok(())
+            };
+
+        let gs = &finding.groups().0;
+        if gs.len() > 1 {
+            for (i, g) in gs.iter().enumerate() {
+                let i = i + 1;
+                let group_heading = reporter.style_heading(format!("Group {i}:"));
+                write_group(group_heading, g)?;
+            }
         } else {
-            writeln!(f, "{} {}", match_heading, reporter.style_match(Escaped(g)))?;
+            let group_heading = reporter.style_heading("Group:".into());
+            write_group(group_heading, &gs[0])?;
         }
 
         // write out count if not all matches are displayed
-        if group.num_matches() != group.total_matches() {
+        if finding.num_matches_available() != finding.total_matches() {
             writeln!(
                 f,
                 "{}",
                 reporter.style_heading(format!(
                     "Showing {}/{} occurrences:",
-                    group.num_matches(),
-                    group.total_matches()
+                    finding.num_matches_available(),
+                    finding.total_matches()
                 ))
             )?;
         }
@@ -74,24 +104,53 @@ impl <'a> Display for PrettyMatchGroup<'a> {
 
         // write out matches
         let mut f = indented(f).with_str("    ");
-        for (i, ReportMatch { ps, md, m, .. }) in group.matches.iter().enumerate() {
+        for (i, rm) in finding.matches.iter().enumerate() {
             let i = i + 1;
+            let ReportMatch {
+                provenance,
+                blob_metadata,
+                m,
+                score,
+                comment,
+                status,
+            } = rm;
+
             writeln!(
                 f,
                 "{}",
-                reporter.style_heading(format!("Occurrence {i}/{}", group.total_matches())),
+                reporter.style_heading(format!("Occurrence {i}/{}", finding.total_matches())),
             )?;
+
+            // write out match status if set
+            if let Some(status) = status {
+                let status = match status {
+                    Status::Accept => "Accept",
+                    Status::Reject => "Reject",
+                };
+                writeln!(f, "{} {status}", reporter.style_heading("Status:"))?;
+            }
+
+            // write out match score if set
+            if let Some(score) = score {
+                writeln!(f, "{} {score:.3}", reporter.style_heading("Score:"))?;
+            };
+
+            // write out match comment if set
+            if let Some(comment) = comment {
+                writeln!(f, "{} {comment}", reporter.style_heading("Comment:"))?;
+            };
 
             let blob_metadata = {
                 format!(
                     "{} bytes, {}, {}",
-                    md.num_bytes(),
-                    md.mime_essence().unwrap_or("unknown type"),
-                    md.charset().unwrap_or("unknown charset"),
+                    blob_metadata.num_bytes(),
+                    blob_metadata.mime_essence().unwrap_or("unknown type"),
+                    blob_metadata.charset().unwrap_or("unknown charset"),
                 )
             };
 
-            for p in ps.iter() {
+            // FIXME: limit the total number of provenance entries displayed
+            for p in provenance.iter() {
                 match p {
                     Provenance::File(e) => {
                         writeln!(
@@ -108,7 +167,7 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                             reporter.style_heading("Git repo:"),
                             reporter.style_metadata(e.repo_path.display()),
                         )?;
-                        if let Some(cs) = &e.commit_provenance {
+                        if let Some(cs) = &e.first_commit {
                             let cmd = &cs.commit_metadata;
                             let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
                             let atime = cmd
@@ -116,9 +175,8 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                                 .format(time::macros::format_description!("[year]-[month]-[day]"));
                             writeln!(
                                 f,
-                                "{} {} in {}",
+                                "{} first seen in {}",
                                 reporter.style_heading("Commit:"),
-                                cs.commit_kind,
                                 reporter.style_metadata(cmd.commit_id),
                             )?;
                             writeln!(f)?;
@@ -140,6 +198,15 @@ impl <'a> Display for PrettyMatchGroup<'a> {
                             )?;
                             writeln!(f)?;
                         }
+                    }
+                    // FIXME(overhaul): implement this case properly
+                    Provenance::Extended(e) => {
+                        writeln!(
+                            f,
+                            "{} {}",
+                            reporter.style_heading("Extended Provenance:"),
+                            reporter.style_metadata(e),
+                        )?;
                     }
                 }
             }

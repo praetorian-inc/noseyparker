@@ -86,7 +86,7 @@ echo "CARGO_FEATURES: $CARGO_FEATURES"
 
 
 ################################################################################
-# Create release
+# Create release directory tree
 ################################################################################
 # Go to the repository root
 cd "$HERE/.."
@@ -97,20 +97,27 @@ RELEASE_DIR="release"
 # Where does `cargo` build stuff?
 CARGO_BUILD_DIR="target/release"
 
+# What is the name of the program?
+NOSEYPARKER="noseyparker"
+
 mkdir "$RELEASE_DIR" || fatal "could not create release directory"
-mkdir "$RELEASE_DIR"/{bin,share,share/completions} || fatal "could not create release directory tree"
+mkdir "$RELEASE_DIR"/{bin,share,share/completions,share/man,share/man/man1,share/"${NOSEYPARKER}"} || fatal "could not create release directory tree"
 
-# Build release version of noseyparker into the release dir
+################################################################################
+# Build release version of noseyparker
+################################################################################
 banner "Building release with Cargo"
-cargo build --locked --profile release --features "$CARGO_FEATURES" || fatal "failed to build noseyparker"
+cargo build --locked --profile release --features "$CARGO_FEATURES" || fatal "failed to build ${NOSEYPARKER}"
 
+################################################################################
+# Copy artifacts into the release directory tree
+################################################################################
 banner "Assembling release dir"
-# Copy binary into release dir
-NP="$PWD/$RELEASE_DIR/bin/noseyparker"
-cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP"
+NP="$PWD/$RELEASE_DIR/bin/${NOSEYPARKER}"
+cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP" || fatal "failed to copy ${NOSEYPARKER}"
 
 # Copy CHANGELOG.md, LICENSE, and README.md
-cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/"
+cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/" || fatal "failed to copy assets"
 
 ################################################################################
 # Strip release binary if requested
@@ -121,11 +128,24 @@ if (( $DO_STRIP )); then
 fi
 
 ################################################################################
-# Shell completion generation
+# Generate shell completion scripts
 ################################################################################
+banner "Generating shell completion scripts"
 for SHELL in bash zsh fish powershell elvish; do
-    "$NP" shell-completions --shell zsh >"$RELEASE_DIR/share/completions/noseyparker.$SHELL"
+    "$NP" generate shell-completions --shell zsh >"${RELEASE_DIR}/share/completions/${NOSEYPARKER}.$SHELL"
 done
+
+################################################################################
+# Generate manpages
+################################################################################
+banner "Generating manpages"
+"$NP" generate manpages --output "${RELEASE_DIR}/share/man/man1"
+
+################################################################################
+# Generate JSON schema
+################################################################################
+banner "Generating JSON schema"
+"$NP" generate json-schema --output "${RELEASE_DIR}/share/${NOSEYPARKER}/report-schema.json"
 
 ################################################################################
 # Sanity checking
@@ -137,24 +157,24 @@ banner "Release disk use"
 find "$RELEASE_DIR" -type f -print0 | xargs -0 du -shc | sort -h -k1,1
 
 if [[ $PLATFORM == 'linux' ]]; then
-    banner "ldd output for noseyparker"
+    banner "ldd output for ${NOSEYPARKER}"
     ldd "$NP" || true
 
-    banner "readelf -d output for noseyparker"
+    banner "readelf -d output for ${NOSEYPARKER}"
     readelf -d "$NP"
 
 elif [[ $PLATFORM == 'macos' ]]; then
-    banner "otool -L output for noseyparker"
+    banner "otool -L output for ${NOSEYPARKER}"
     otool -L "$NP"
 
-    banner "otool -l output for noseyparker"
+    banner "otool -l output for ${NOSEYPARKER}"
     otool -l "$NP"
 
 else
     fatal "unknown platform $PLATFORM"
 fi
 
-banner "noseyparker --version"
+banner "${NOSEYPARKER} --version"
 "$NP" --version
 
 banner "Complete!"

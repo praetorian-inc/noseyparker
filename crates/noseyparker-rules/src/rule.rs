@@ -4,9 +4,11 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
+use noseyparker_digest::sha1_hexdigest;
+
 /// A pattern-based rule as represented syntactically.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct Rule {
+pub struct RuleSyntax {
     /// The human-readable name of the rule
     pub name: String,
 
@@ -36,7 +38,7 @@ lazy_static! {
         .expect("comment-stripping regex should compile");
 }
 
-impl Rule {
+impl RuleSyntax {
     /// Get the pattern for this rule with any comments removed.
     pub fn uncommented_pattern(&self) -> Cow<'_, str> {
         RULE_COMMENTS_PATTERN.replace_all(&self.pattern, "")
@@ -66,8 +68,8 @@ impl Rule {
     ///
     /// ```
     /// # use pretty_assertions::assert_eq;
-    /// # use noseyparker_rules::Rule;
-    /// let r = Rule {
+    /// # use noseyparker_rules::RuleSyntax;
+    /// let r = RuleSyntax {
     ///     name: "Test rule".to_string(),
     ///     id: "test.1".to_string(),
     ///     pattern: r"hello\s*world".to_string(),
@@ -79,5 +81,52 @@ impl Rule {
     /// ```
     pub fn as_anchored_regex(&self) -> Result<regex::bytes::Regex> {
         Self::build_regex(&format!("{}$", self.uncommented_pattern()))
+    }
+
+    /// Compute the content-based structural ID of this rule.
+    pub fn structural_id(&self) -> String {
+        let pattern_digest = sha1_hexdigest(self.pattern.as_bytes());
+        format!("{}:{}", self.id, pattern_digest)
+    }
+
+    /// Return a JSON serialization of this rule.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).expect("should be able to serialize rule syntax as JSON")
+    }
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
+pub struct Rule {
+    syntax: RuleSyntax,
+    structural_id: String,
+}
+
+impl Rule {
+    pub fn new(syntax: RuleSyntax) -> Self {
+        Self {
+            structural_id: syntax.structural_id(),
+            syntax,
+        }
+    }
+
+    // Get the AST of this rule.
+    pub fn syntax(&self) -> &RuleSyntax {
+        &self.syntax
+    }
+
+    pub fn json_syntax(&self) -> String {
+        self.syntax.to_json()
+    }
+
+    pub fn structural_id(&self) -> &str {
+        &self.structural_id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.syntax.name
+    }
+
+    pub fn id(&self) -> &str {
+        &self.syntax.id
     }
 }
