@@ -23,3 +23,4 @@ mod rules;
 // TODO(test): add tests for trying to open existing datastores from other Nosey Parker versions
 // TODO(test): add tests for enumerating GitHub Enterprise with the `--ignore-certs` optino
 // TODO(test): add tests for `scan --git-url=URL --ignore-certs`
+// TODO(test): add test case that validates `report -f json` output against the JSON schema (see the `jsonschema` crate)
