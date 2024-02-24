@@ -132,7 +132,7 @@ fi
 ################################################################################
 banner "Generating shell completion scripts"
 for SHELL in bash zsh fish powershell elvish; do
-    "$NP" generate shell-completions --shell zsh >"${RELEASE_DIR}/share/completions/${NOSEYPARKER}.$SHELL"
+    "$NP" generate shell-completions --shell "$SHELL" >"${RELEASE_DIR}/share/completions/${NOSEYPARKER}.$SHELL"
 done
 
 ################################################################################
