@@ -3,7 +3,6 @@ use tracing::debug;
 
 use super::{Auth, Client, Error, Result};
 
-
 // -------------------------------------------------------------------------------------------------
 // ClientBuilder
 // -------------------------------------------------------------------------------------------------
@@ -59,7 +58,9 @@ impl ClientBuilder {
                 return Err(Error::InvalidTokenEnvVar(env_var_name.to_string()));
             }
             Ok(val) => {
-                debug!("Using GitHub personal access token from {env_var_name} environment variable");
+                debug!(
+                    "Using GitHub personal access token from {env_var_name} environment variable"
+                );
                 self.auth = Auth::PersonalAccessToken(secrecy::SecretString::from(val));
             }
         }

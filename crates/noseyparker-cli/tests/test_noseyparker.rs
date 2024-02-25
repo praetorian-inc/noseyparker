@@ -3,10 +3,10 @@
 mod common;
 use common::*;
 
-mod scan;
-mod help;
 mod github;
+mod help;
 mod rules;
+mod scan;
 
 // TODO(test): add test for scanning with `--github-user`
 // TODO(test): add test for scanning with `--github-org`

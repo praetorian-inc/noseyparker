@@ -3,7 +3,6 @@ use serde_sarif::sarif;
 use super::*;
 
 impl DetailsReporter {
-
     fn make_sarif_result(&self, finding: &Finding) -> Result<sarif::Result> {
         let matches = &finding.matches;
         let metadata = &finding.metadata;
@@ -30,7 +29,12 @@ impl DetailsReporter {
         let locations: Vec<sarif::Location> = matches
             .iter()
             .flat_map(|m| {
-                let ReportMatch { provenance, blob_metadata, m, .. } = m;
+                let ReportMatch {
+                    provenance,
+                    blob_metadata,
+                    m,
+                    ..
+                } = m;
                 provenance.iter().map(move |p| {
                     let source_span = &m.location.source_span;
                     // let offset_span = &m.location.offset_span;
@@ -185,4 +189,3 @@ fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
         .build()
         .map_err(|e| e.into())
 }
-

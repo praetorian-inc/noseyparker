@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use gix::{OdbHandle, ObjectId, Repository, hashtable::HashMap};
+use gix::{hashtable::HashMap, ObjectId, OdbHandle, Repository};
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 // use std::time::Instant;
@@ -44,9 +44,9 @@ pub struct ObjectCounts {
 // TODO: measure how helpful or pointless it is to count the objects in advance
 // FIXME: if keeping the pre-counting step, add some new kind of progress indicator
 fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCounts> {
-    use gix::prelude::*;
     use gix::object::Kind;
     use gix::odb::store::iter::Ordering;
+    use gix::prelude::*;
 
     let mut num_commits = 0;
     let mut num_trees = 0;
@@ -70,9 +70,12 @@ fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCount
             Kind::Tag => {}
         }
     }
-    Ok(ObjectCounts { num_commits, num_trees, num_blobs })
+    Ok(ObjectCounts {
+        num_commits,
+        num_trees,
+        num_blobs,
+    })
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // enumeration return types
@@ -100,14 +103,12 @@ impl GitRepoResult {
     }
 }
 
-
 #[derive(Clone)]
 pub struct BlobMetadata {
     pub blob_oid: ObjectId,
     pub num_bytes: u64,
     pub first_seen: BlobAppearanceSet,
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // git repo enumerator, with metadata
@@ -145,7 +146,11 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         // First count the objects to figure out how big to allocate data structures.
         // We're assuming that the repository doesn't change in the meantime.
         // If it does, our allocation estimates won't be right. Too bad!
-        let ObjectCounts { num_commits, num_trees, num_blobs } = count_git_objects(odb, progress)?;
+        let ObjectCounts {
+            num_commits,
+            num_trees,
+            num_blobs,
+        } = count_git_objects(odb, progress)?;
 
         let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(num_blobs);
         let mut metadata_graph = GitMetadataGraph::with_capacity(num_commits, num_trees, num_blobs);
@@ -155,7 +160,8 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         let orig_scratch_capacity = 1024 * 1024;
         let mut scratch: Vec<u8> = Vec::with_capacity(orig_scratch_capacity);
 
-        let mut commit_metadata = HashMap::with_capacity_and_hasher(num_commits, Default::default());
+        let mut commit_metadata =
+            HashMap::with_capacity_and_hasher(num_commits, Default::default());
 
         for oid in odb
             .iter()
@@ -203,9 +209,10 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
                 Kind::Tree => {
                     let tree_idx = metadata_graph.get_tree_idx(oid);
-                    let tree_ref_iter = unwrap_or_continue!(odb.find_tree_iter(&oid, &mut scratch), |e| {
-                        warn!("Failed to find tree {oid}: {e}");
-                    });
+                    let tree_ref_iter =
+                        unwrap_or_continue!(odb.find_tree_iter(&oid, &mut scratch), |e| {
+                            warn!("Failed to find tree {oid}: {e}");
+                        });
                     for child in tree_ref_iter {
                         let child = unwrap_or_continue!(child, |e| {
                             warn!("Failed to decode entry in tree {oid}: {e}");
@@ -243,31 +250,51 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                         first_seen: Default::default(),
                     })
                     .collect();
-                Ok(GitRepoResult { path, blobs, commit_metadata })
+                Ok(GitRepoResult {
+                    path,
+                    blobs,
+                    commit_metadata,
+                })
             }
             Ok(md) => {
                 // FIXME: apply path-based ignore rules to blobs here, like the filesystem enumerator
-                let mut inverted = HashMap::<ObjectId, SmallVec<[BlobAppearance; 1]>>::with_capacity_and_hasher(num_blobs, Default::default());
+                let mut inverted =
+                    HashMap::<ObjectId, SmallVec<[BlobAppearance; 1]>>::with_capacity_and_hasher(
+                        num_blobs,
+                        Default::default(),
+                    );
                 for e in md.into_iter() {
                     for (blob_oid, path) in e.introduced_blobs.into_iter() {
                         let vals = inverted.entry(blob_oid).or_insert(SmallVec::new());
-                        vals.push(BlobAppearance{commit_oid: e.commit_oid, path });
+                        vals.push(BlobAppearance {
+                            commit_oid: e.commit_oid,
+                            path,
+                        });
                     }
                 }
 
                 let blobs = blobs
                     .into_iter()
                     .map(|(blob_oid, num_bytes)| {
-                        let first_seen = inverted.get(&blob_oid).map_or(SmallVec::new(), |v| v.clone());
-                        BlobMetadata { blob_oid, num_bytes, first_seen }
+                        let first_seen = inverted
+                            .get(&blob_oid)
+                            .map_or(SmallVec::new(), |v| v.clone());
+                        BlobMetadata {
+                            blob_oid,
+                            num_bytes,
+                            first_seen,
+                        }
                     })
                     .collect();
-                Ok(GitRepoResult { path, blobs, commit_metadata })
+                Ok(GitRepoResult {
+                    path,
+                    blobs,
+                    commit_metadata,
+                })
             }
         }
     }
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // git repo enumerator, sans metadata
@@ -326,6 +353,10 @@ impl<'a> GitRepoEnumerator<'a> {
                 first_seen: Default::default(),
             })
             .collect();
-        Ok(GitRepoResult { path, blobs, commit_metadata: Default::default() })
+        Ok(GitRepoResult {
+            path,
+            blobs,
+            commit_metadata: Default::default(),
+        })
     }
 }

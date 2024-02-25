@@ -6,7 +6,7 @@ use clap::{
     crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
 };
 use std::io::IsTerminal;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use strum::Display;
 use url::Url;
 
@@ -16,47 +16,83 @@ fn get_long_version() -> &'static str {
     concat!(
         crate_version!(),
         "\n",
-        "\n", "Build Configuration:",
         "\n",
-        "\n", "    Build Timestamp:    ", env!("VERGEN_BUILD_TIMESTAMP"),
+        "Build Configuration:",
         "\n",
-        "\n", "    Commit Timestamp:   ", env!("VERGEN_GIT_COMMIT_TIMESTAMP"),
-        "\n", "    Commit Branch:      ", env!("VERGEN_GIT_BRANCH"),
-        "\n", "    Commit SHA:         ", env!("VERGEN_GIT_SHA"),
         "\n",
-        "\n", "    Cargo Features:     ", env!("VERGEN_CARGO_FEATURES"),
-        "\n", "    Debug:              ", env!("VERGEN_CARGO_DEBUG"),
-        "\n", "    Optimization:       ", env!("VERGEN_CARGO_OPT_LEVEL"),
-        "\n", "    Target Triple:      ", env!("VERGEN_CARGO_TARGET_TRIPLE"),
+        "    Build Timestamp:    ",
+        env!("VERGEN_BUILD_TIMESTAMP"),
         "\n",
-        "\n", "Build System:",
         "\n",
-        "\n", "    OS:                 ", env!("VERGEN_SYSINFO_NAME"),
-        "\n", "    OS Version:         ", env!("VERGEN_SYSINFO_OS_VERSION"),
+        "    Commit Timestamp:   ",
+        env!("VERGEN_GIT_COMMIT_TIMESTAMP"),
         "\n",
-        "\n", "    CPU Vendor:         ", env!("VERGEN_SYSINFO_CPU_VENDOR"),
-        "\n", "    CPU Brand:          ", env!("VERGEN_SYSINFO_CPU_BRAND"),
-        "\n", "    CPU Cores:          ", env!("VERGEN_SYSINFO_CPU_CORE_COUNT"),
+        "    Commit Branch:      ",
+        env!("VERGEN_GIT_BRANCH"),
         "\n",
-        "\n", "    rustc Version:      ", env!("VERGEN_RUSTC_SEMVER"),
-        "\n", "    rustc Channel:      ", env!("VERGEN_RUSTC_CHANNEL"),
-        "\n", "    rustc Host Triple:  ", env!("VERGEN_RUSTC_HOST_TRIPLE"),
-        "\n", "    rustc Commit Date:  ", env!("VERGEN_RUSTC_COMMIT_DATE"),
-        "\n", "    rustc Commit SHA:   ", env!("VERGEN_RUSTC_COMMIT_HASH"),
-        "\n", "    rustc LLVM Version: ", env!("VERGEN_RUSTC_LLVM_VERSION"),
+        "    Commit SHA:         ",
+        env!("VERGEN_GIT_SHA"),
+        "\n",
+        "\n",
+        "    Cargo Features:     ",
+        env!("VERGEN_CARGO_FEATURES"),
+        "\n",
+        "    Debug:              ",
+        env!("VERGEN_CARGO_DEBUG"),
+        "\n",
+        "    Optimization:       ",
+        env!("VERGEN_CARGO_OPT_LEVEL"),
+        "\n",
+        "    Target Triple:      ",
+        env!("VERGEN_CARGO_TARGET_TRIPLE"),
+        "\n",
+        "\n",
+        "Build System:",
+        "\n",
+        "\n",
+        "    OS:                 ",
+        env!("VERGEN_SYSINFO_NAME"),
+        "\n",
+        "    OS Version:         ",
+        env!("VERGEN_SYSINFO_OS_VERSION"),
+        "\n",
+        "\n",
+        "    CPU Vendor:         ",
+        env!("VERGEN_SYSINFO_CPU_VENDOR"),
+        "\n",
+        "    CPU Brand:          ",
+        env!("VERGEN_SYSINFO_CPU_BRAND"),
+        "\n",
+        "    CPU Cores:          ",
+        env!("VERGEN_SYSINFO_CPU_CORE_COUNT"),
+        "\n",
+        "\n",
+        "    rustc Version:      ",
+        env!("VERGEN_RUSTC_SEMVER"),
+        "\n",
+        "    rustc Channel:      ",
+        env!("VERGEN_RUSTC_CHANNEL"),
+        "\n",
+        "    rustc Host Triple:  ",
+        env!("VERGEN_RUSTC_HOST_TRIPLE"),
+        "\n",
+        "    rustc Commit Date:  ",
+        env!("VERGEN_RUSTC_COMMIT_DATE"),
+        "\n",
+        "    rustc Commit SHA:   ",
+        env!("VERGEN_RUSTC_COMMIT_HASH"),
+        "\n",
+        "    rustc LLVM Version: ",
+        env!("VERGEN_RUSTC_LLVM_VERSION"),
     )
 }
 
 /// Get a filename-friendly short version string, suitable for naming a release archive
 fn get_short_version() -> &'static str {
-    concat!(
-        "v", clap::crate_version!(),
-        "-", env!("VERGEN_CARGO_TARGET_TRIPLE"),
-    )
+    concat!("v", clap::crate_version!(), "-", env!("VERGEN_CARGO_TARGET_TRIPLE"),)
 }
 
 const DEFAULT_DATASTORE: &str = "datastore.np";
-
 
 pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: bool) {
     use clap::error::ErrorKind;
@@ -122,10 +158,15 @@ impl CommandLineArgs {
                 .expect("datastore arg should be present");
             if let Some(ValueSource::DefaultValue) = sub_matches.value_source("datastore") {
                 if datastore_value.exists() {
-                    cmd.error(clap::error::ErrorKind::InvalidValue,
-                              format!("the default datastore at {} exists; \
+                    cmd.error(
+                        clap::error::ErrorKind::InvalidValue,
+                        format!(
+                            "the default datastore at {} exists; \
                                        explicitly specify the datastore if you wish to update it",
-                                      datastore_value.display())).exit();
+                            datastore_value.display()
+                        ),
+                    )
+                    .exit();
                 }
             }
         }
@@ -231,7 +272,7 @@ pub struct GlobalArgs {
     ///
     /// This silences WARNING, INFO, DEBUG, and TRACE messages and disables progress bars.
     /// This overrides any provided verbosity and progress reporting options.
-    #[arg(global=true, long, short)]
+    #[arg(global = true, long, short)]
     pub quiet: bool,
 
     /// Enable or disable colored output
@@ -260,7 +301,13 @@ pub struct AdvancedArgs {
     ///
     /// This should not need to be changed from the default unless you run into crashes from
     /// running out of file descriptors.
-    #[arg(hide_short_help=true, global=true, long, default_value_t=16384, value_name="LIMIT")]
+    #[arg(
+        hide_short_help = true,
+        global = true,
+        long,
+        default_value_t = 16384,
+        value_name = "LIMIT"
+    )]
     pub rlimit_nofile: u64,
 
     /// Set the cache size for sqlite connections to SIZE
@@ -305,7 +352,7 @@ impl GlobalArgs {
 
 /// A generic auto/never/always mode value
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum Mode {
     Auto,
     Never,
@@ -376,7 +423,7 @@ pub struct GitHubRepoSpecifiers {
         long,
         visible_alias = "org",
         visible_alias = "github-organization",
-        visible_alias = "github-org",
+        visible_alias = "github-org"
     )]
     pub organization: Vec<String>,
 
@@ -388,7 +435,7 @@ pub struct GitHubRepoSpecifiers {
         long,
         visible_alias = "all-orgs",
         visible_alias = "all-github-organizations",
-        visible_alias = "all-github-orgs",
+        visible_alias = "all-github-orgs"
     )]
     pub all_organizations: bool,
 }
@@ -442,7 +489,7 @@ pub struct RulesListArgs {
 // rules list output format
 // -----------------------------------------------------------------------------
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum RulesListOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -510,7 +557,6 @@ pub struct ScanArgs {
     #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
     pub num_jobs: usize,
 
-
     #[command(flatten)]
     pub rules: RuleSpecifierArgs,
 
@@ -527,7 +573,12 @@ pub struct ScanArgs {
     ///
     /// The default value typically gives between 4 and 7 lines of context before and after each
     /// match.
-    #[arg(long, value_name="BYTES", default_value_t=256, help_heading="Data Collection Options")]
+    #[arg(
+        long,
+        value_name = "BYTES",
+        default_value_t = 256,
+        help_heading = "Data Collection Options"
+    )]
     pub snippet_length: usize,
 
     /// Specify which blobs will be copied in entirety to the datastore
@@ -549,7 +600,6 @@ pub struct ScanArgs {
     /// Ignore validation of TLS certificates
     #[arg(long)]
     pub ignore_certs: bool,
-
 }
 
 #[derive(Args, Debug)]
@@ -581,7 +631,7 @@ pub struct RuleSpecifierArgs {
 
 /// The mode to use for cloning a Git repository
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum GitCloneMode {
     /// Match the behavior of `git clone --bare`
     Bare,
@@ -595,17 +645,15 @@ pub enum GitCloneMode {
 
 /// The method of handling history in discovered Git repositories
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum GitHistoryMode {
     /// Scan all history
     Full,
 
     // XXX: add an option to support bounded history, such as just blobs in the repo HEAD
-
     /// Scan no history
     None,
 }
-
 
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Metadata Collection Options")]
@@ -623,7 +671,7 @@ pub struct MetadataArgs {
 }
 
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum BlobMetadataMode {
     /// Record metadata for all encountered blobs
     All,
@@ -636,7 +684,7 @@ pub enum BlobMetadataMode {
 }
 
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum CopyBlobsMode {
     /// Copy all encountered blobs
     All,
@@ -649,7 +697,7 @@ pub enum CopyBlobsMode {
 }
 
 #[derive(Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum GitBlobProvenanceMode {
     /// The Git repository and set of commits and accompanying pathnames in which a blob is first
     /// seen
@@ -753,7 +801,7 @@ pub struct ContentFilteringArgs {
         long("max-file-size"),
         default_value_t = 100.0,
         value_name = "MEGABYTES",
-        allow_negative_numbers=true,
+        allow_negative_numbers = true
     )]
     pub max_file_size_mb: f64,
 
@@ -823,10 +871,14 @@ pub struct ReportArgs {
     /// Limit the number of matches per finding to at most N
     ///
     /// A negative value means "no limit".
-    #[arg(long, default_value_t = 3, value_name = "N", allow_negative_numbers=true)]
+    #[arg(
+        long,
+        default_value_t = 3,
+        value_name = "N",
+        allow_negative_numbers = true
+    )]
     pub max_matches: i64,
 }
-
 
 // -----------------------------------------------------------------------------
 // `generate` command
@@ -837,11 +889,10 @@ pub struct GenerateArgs {
     pub command: GenerateCommand,
 }
 
-
 #[derive(Subcommand, Debug)]
 pub enum GenerateCommand {
     /// Generate man pages
-    #[command(name="manpages")]
+    #[command(name = "manpages")]
     ManPages(ManPagesArgs),
 
     /// Generate the JSON schema for the output of the `report` command
@@ -856,13 +907,13 @@ pub enum GenerateCommand {
 // -----------------------------------------------------------------------------
 #[derive(ValueEnum, Debug, Display, Clone)]
 #[clap(rename_all = "lower")]
-#[strum(serialize_all="lowercase")]
+#[strum(serialize_all = "lowercase")]
 pub enum ShellFormat {
     Bash,
     Zsh,
     Fish,
     PowerShell,
-    Elvish
+    Elvish,
 }
 
 #[derive(Args, Debug)]
@@ -907,11 +958,11 @@ pub struct OutputArgs<Format: ValueEnum + Send + Sync + 'static> {
 
     /// Write output in the specified format
     // FIXME: make this optional, and if not specified, infer from the extension of the output file
-    #[arg(long, short, value_name="FORMAT", default_value="human")]
+    #[arg(long, short, value_name = "FORMAT", default_value = "human")]
     pub format: Format,
 }
 
-impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
+impl<Format: ValueEnum + Send + Sync> OutputArgs<Format> {
     /// Get a writer for the specified output destination.
     pub fn get_writer(&self) -> std::io::Result<Box<dyn std::io::Write>> {
         get_writer_for_file_or_stdout(self.output.as_ref())
@@ -919,7 +970,9 @@ impl <Format: ValueEnum + Send + Sync> OutputArgs<Format> {
 }
 
 /// Get a writer for the file at the specified output destination, or stdout if not specified.
-pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(path: Option<P>) -> std::io::Result<Box<dyn std::io::Write>> {
+pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(
+    path: Option<P>,
+) -> std::io::Result<Box<dyn std::io::Write>> {
     use std::fs::File;
     use std::io::BufWriter;
 
@@ -936,7 +989,7 @@ pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(path: Option<P>) -> std::io
 // report output format
 // -----------------------------------------------------------------------------
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum ReportOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -960,7 +1013,7 @@ pub enum ReportOutputFormat {
 // summarize output format
 // -----------------------------------------------------------------------------
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum SummarizeOutputFormat {
     /// A text-based format designed for humans
     Human,
@@ -978,7 +1031,7 @@ pub enum SummarizeOutputFormat {
 // github output format
 // -----------------------------------------------------------------------------
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-#[strum(serialize_all="kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum GitHubOutputFormat {
     /// A text-based format designed for humans
     Human,

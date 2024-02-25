@@ -27,7 +27,6 @@ pub fn sha1_hexdigest(input: &[u8]) -> String {
     h.hexdigest()
 }
 
-
 // XXX implement a Write instance for `Sha1`, in an attempt to avoid allocations for
 // formatting the input length. Not sure how well this actually avoids allocation.
 impl std::io::Write for Sha1 {
@@ -43,11 +42,10 @@ impl std::io::Write for Sha1 {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn empty() {

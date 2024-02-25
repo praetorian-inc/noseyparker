@@ -152,7 +152,6 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     let _rules_db =
         RulesDatabase::from_rules(rules).context("Failed to compile combined rules database")?;
 
-
     if num_warnings == 0 && num_errors == 0 {
         println!(
             "{} and {}: no issues detected",
@@ -172,7 +171,10 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     }
 
     if num_warnings != 0 && args.warnings_as_errors {
-        bail!("{}; warnings being treated as errors", Counted::regular(num_warnings, "warning"));
+        bail!(
+            "{}; warnings being treated as errors",
+            Counted::regular(num_warnings, "warning")
+        );
     }
 
     Ok(())

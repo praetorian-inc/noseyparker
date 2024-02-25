@@ -2,7 +2,7 @@ use bstr::BString;
 use gix::date::Time;
 use gix::ObjectId;
 use schemars::JsonSchema;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use bstring_serde::BStringLossyUtf8;
 
@@ -14,16 +14,15 @@ fn serialize_object_id<S: serde::Serializer>(object_id: &ObjectId, serializer: S
 
 */
 
-
 #[derive(Serialize, Deserialize)]
-#[serde(remote="Time")]
+#[serde(remote = "Time")]
 struct TextTime(
     #[serde(
         getter = "text_time::getter",
         serialize_with = "text_time::serialize",
-        deserialize_with = "text_time::deserialize",
+        deserialize_with = "text_time::deserialize"
     )]
-    Time
+    Time,
 );
 
 impl From<TextTime> for Time {
@@ -77,16 +76,15 @@ impl JsonSchema for TextTime {
     }
 }
 
-
 #[derive(Serialize, Deserialize)]
-#[serde(remote="ObjectId")]
+#[serde(remote = "ObjectId")]
 struct HexObjectId(
     #[serde(
         getter = "hex_object_id::getter",
         serialize_with = "hex_object_id::serialize",
-        deserialize_with = "hex_object_id::deserialize",
+        deserialize_with = "hex_object_id::deserialize"
     )]
-    ObjectId
+    ObjectId,
 );
 
 impl From<ObjectId> for HexObjectId {
@@ -147,7 +145,7 @@ impl JsonSchema for HexObjectId {
 /// Metadata about a Git commit.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct CommitMetadata {
-    #[serde(with="HexObjectId")]
+    #[serde(with = "HexObjectId")]
     pub commit_id: ObjectId,
 
     #[serde(with = "BStringLossyUtf8")]

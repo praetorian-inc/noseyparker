@@ -24,6 +24,12 @@ pub struct Snippet {
 
 impl Display for Snippet {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}{}", Escaped(&self.before), Escaped(&self.matching), Escaped(&self.after))
+        write!(
+            f,
+            "{}{}{}",
+            Escaped(&self.before),
+            Escaped(&self.matching),
+            Escaped(&self.after)
+        )
     }
 }

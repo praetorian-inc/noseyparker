@@ -22,13 +22,14 @@ pub struct BlobIdMap<V> {
     maps: [Mutex<HashMap<ObjectId, V>>; 256],
 }
 
-impl <V> BlobIdMap<V> {
+impl<V> BlobIdMap<V> {
     pub fn new() -> Self {
         BlobIdMap {
             // What's this weird initialization?
             // It's to get around the fact that `Mutex` is not `Copy`.
             // https://stackoverflow.com/a/69756635
-            maps: [(); 256].map(|_| Mutex::new(HashMap::with_capacity_and_hasher(1024, Default::default()))),
+            maps: [(); 256]
+                .map(|_| Mutex::new(HashMap::with_capacity_and_hasher(1024, Default::default()))),
         }
     }
 
@@ -38,14 +39,20 @@ impl <V> BlobIdMap<V> {
     #[inline]
     pub fn insert(&self, blob_id: BlobId, v: V) -> Option<V> {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.maps[bucket as usize].lock().unwrap().insert(blob_id.into(), v)
+        self.maps[bucket as usize]
+            .lock()
+            .unwrap()
+            .insert(blob_id.into(), v)
     }
 
     /// Check if the given `BlobId` is in the map without modifying it.
     #[inline]
     pub fn contains_key(&self, blob_id: &BlobId) -> bool {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.maps[bucket as usize].lock().unwrap().contains_key(&ObjectId::from(blob_id))
+        self.maps[bucket as usize]
+            .lock()
+            .unwrap()
+            .contains_key(&ObjectId::from(blob_id))
     }
 
     /// Return the total number of blob IDs contained in the map.
@@ -63,16 +70,20 @@ impl <V> BlobIdMap<V> {
     }
 }
 
-impl <V: Copy> BlobIdMap<V> {
+impl<V: Copy> BlobIdMap<V> {
     /// Get the value mapped to the given `BlobId`.
     #[inline]
     pub fn get(&self, blob_id: &BlobId) -> Option<V> {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.maps[bucket as usize].lock().unwrap().get(&ObjectId::from(blob_id)).copied()
+        self.maps[bucket as usize]
+            .lock()
+            .unwrap()
+            .get(&ObjectId::from(blob_id))
+            .copied()
     }
 }
 
-impl <V> Default for BlobIdMap<V> {
+impl<V> Default for BlobIdMap<V> {
     fn default() -> Self {
         Self::new()
     }

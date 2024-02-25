@@ -1,7 +1,7 @@
 pub use mime::Mime;
 
 mod input;
-pub use input::{Content, PrefixContent, Input};
+pub use input::{Content, Input, PrefixContent};
 
 mod output;
 pub use output::Output;

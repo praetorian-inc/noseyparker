@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 // BlobId
 // -------------------------------------------------------------------------------------------------
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Deserialize, Serialize)]
-#[serde(into="String", try_from="&str")]
+#[serde(into = "String", try_from = "&str")]
 pub struct BlobId([u8; 20]);
 
 impl std::fmt::Debug for BlobId {
@@ -58,14 +58,14 @@ impl BlobId {
     }
 }
 
-impl From<BlobId> for String where {
+impl From<BlobId> for String {
     #[inline]
     fn from(blob_id: BlobId) -> String {
         blob_id.hex()
     }
 }
 
-impl TryFrom<&str> for BlobId where {
+impl TryFrom<&str> for BlobId {
     type Error = anyhow::Error;
 
     #[inline]
@@ -123,7 +123,7 @@ impl From<BlobId> for gix::ObjectId {
 mod sql {
     use super::*;
 
-    use rusqlite::types::{ToSql, ToSqlOutput, FromSql, FromSqlResult, FromSqlError, ValueRef};
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
 
     impl ToSql for BlobId {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {

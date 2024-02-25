@@ -1,6 +1,5 @@
 /// This build script uses `vergen` to expose lots of build information at compile time.
 /// This information is used in the `noseyparker` CLI in its `version/-V/--version` commands.
-
 use std::error::Error;
 use vergen::EmitBuilder;
 

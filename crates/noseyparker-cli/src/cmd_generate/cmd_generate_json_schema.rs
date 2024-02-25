@@ -1,7 +1,7 @@
 use anyhow::Result;
 use tracing::info;
 
-use crate::args::{GlobalArgs, JsonSchemaArgs, get_writer_for_file_or_stdout};
+use crate::args::{get_writer_for_file_or_stdout, GlobalArgs, JsonSchemaArgs};
 use crate::cmd_report::Finding;
 
 pub fn run(_global_args: &GlobalArgs, args: &JsonSchemaArgs) -> Result<()> {

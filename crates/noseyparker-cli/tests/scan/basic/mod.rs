@@ -249,7 +249,6 @@ fn report_unlimited_matches() {
     });
 }
 
-
 /// Test that the `report` command uses colors as expected when *not* running under a pty:
 ///
 /// - When running with the output explicitly written to a file, colors are not used

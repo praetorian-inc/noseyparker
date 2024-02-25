@@ -1,8 +1,8 @@
 use anyhow::{bail, Result};
-use vectorscan::{BlockDatabase, Pattern, Flag};
 use regex::bytes::Regex;
 use std::time::Instant;
 use tracing::{debug, debug_span};
+use vectorscan::{BlockDatabase, Flag, Pattern};
 
 use noseyparker_rules::Rule;
 
@@ -79,7 +79,7 @@ mod test {
 
     #[test]
     pub fn test_vectorscan_sanity() -> Result<()> {
-        use vectorscan::{BlockDatabase, Pattern, Scan, BlockScanner};
+        use vectorscan::{BlockDatabase, BlockScanner, Pattern, Scan};
 
         let input = b"some test data for vectorscan";
         let pattern = Pattern::new(b"test".to_vec(), Flag::CASELESS | Flag::SOM_LEFTMOST, None);

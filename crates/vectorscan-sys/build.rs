@@ -8,8 +8,11 @@ fn env(name: &str) -> String {
 fn main() {
     let out_dir = PathBuf::from(env("OUT_DIR"));
 
-    let include_dir = out_dir.join("include").into_os_string().into_string().unwrap();
-
+    let include_dir = out_dir
+        .join("include")
+        .into_os_string()
+        .into_string()
+        .unwrap();
 
     // Choose appropriate C++ runtime library
     {

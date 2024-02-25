@@ -20,7 +20,10 @@ pub struct Rules {
 impl Rules {
     /// Create an empty collection of rules and rulesets.
     pub fn new() -> Self {
-        Self { rules: Vec::new(), rulesets: Vec::new() }
+        Self {
+            rules: Vec::new(),
+            rulesets: Vec::new(),
+        }
     }
 
     /// Update this collection of rules by adding those from another collection.
@@ -30,7 +33,9 @@ impl Rules {
     }
 
     // Load from an iterable of `(path, contents)`.
-    pub fn from_paths_and_contents<'a, I: IntoIterator<Item=(&'a Path, &'a [u8])>>(iterable: I) -> Result<Self> {
+    pub fn from_paths_and_contents<'a, I: IntoIterator<Item = (&'a Path, &'a [u8])>>(
+        iterable: I,
+    ) -> Result<Self> {
         let mut rules = Self::new();
         for (path, contents) in iterable.into_iter() {
             let rs: Self = serde_yaml::from_reader(contents)
@@ -42,7 +47,7 @@ impl Rules {
     }
 
     /// Load rules from the given paths, which may refer either to YAML files or to directories.
-    pub fn from_paths<P: AsRef<Path>, I: IntoIterator<Item=P>>(paths: I) -> Result<Self> {
+    pub fn from_paths<P: AsRef<Path>, I: IntoIterator<Item = P>>(paths: I) -> Result<Self> {
         let mut num_paths = 0;
         let mut rules = Rules::new();
         for input in paths {
@@ -56,7 +61,11 @@ impl Rules {
                 bail!("Unhandled input type: {} is neither a file nor directory", input.display());
             }
         }
-        debug!("Loaded {} rules and {} rulesets from {num_paths} paths", rules.num_rules(), rules.num_rulesets());
+        debug!(
+            "Loaded {} rules and {} rulesets from {num_paths} paths",
+            rules.num_rules(),
+            rules.num_rulesets()
+        );
         Ok(rules)
     }
 
@@ -66,19 +75,28 @@ impl Rules {
         let _span = debug_span!("Rules::from_yaml_file", "{}", path.display()).entered();
         let rules: Self = util::load_yaml_file(path)
             .with_context(|| format!("Failed to load rules YAML from {}", path.display()))?;
-        debug!("Loaded {} rules and {} rulesets from {}", rules.num_rules(), rules.num_rulesets(), path.display());
+        debug!(
+            "Loaded {} rules and {} rulesets from {}",
+            rules.num_rules(),
+            rules.num_rulesets(),
+            path.display()
+        );
         Ok(rules)
     }
 
     /// Load rules from the given YAML files.
-    pub fn from_yaml_files<P: AsRef<Path>, I: IntoIterator<Item=P>>(paths: I) -> Result<Self> {
+    pub fn from_yaml_files<P: AsRef<Path>, I: IntoIterator<Item = P>>(paths: I) -> Result<Self> {
         let mut num_paths = 0;
         let mut rules = Rules::new();
         for path in paths {
             num_paths += 1;
             rules.update(Rules::from_yaml_file(path.as_ref())?);
         }
-        debug!("Loaded {} rules and {} rulesets from {num_paths} paths", rules.num_rules(), rules.num_rulesets());
+        debug!(
+            "Loaded {} rules and {} rulesets from {num_paths} paths",
+            rules.num_rules(),
+            rules.num_rulesets()
+        );
         Ok(rules)
     }
 

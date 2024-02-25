@@ -70,12 +70,7 @@ impl RuleLoader {
 
         let id_to_rule: HashMap<String, Rule> = rules
             .into_iter()
-            .map(|r| {
-                (
-                    r.id.clone(),
-                    Rule::new(r)
-                )
-            })
+            .map(|r| (r.id.clone(), Rule::new(r)))
             .collect();
 
         let id_to_ruleset: HashMap<String, RulesetSyntax> =

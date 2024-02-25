@@ -88,4 +88,3 @@ impl<'a> Input<'a, Vec<u8>> {
         })
     }
 }
-

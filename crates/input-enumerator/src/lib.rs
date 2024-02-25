@@ -12,7 +12,7 @@ use tracing::{debug, error, warn};
 use progress::Progress;
 
 mod git_repo_enumerator;
-pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoWithMetadataEnumerator, GitRepoResult};
+pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetadataEnumerator};
 
 pub struct FilesystemEnumeratorResult {
     pub files: Vec<FileResult>,
@@ -139,7 +139,10 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             if self.enumerate_git_history {
                 match open_git_repo(path) {
                     Err(e) => {
-                        error!("Failed to open Git repository at {}: {e}; skipping", path.display());
+                        error!(
+                            "Failed to open Git repository at {}: {e}; skipping",
+                            path.display()
+                        );
                         return WalkState::Skip;
                     }
                     Ok(Some(repository)) => {
@@ -149,7 +152,10 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                             let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
                             match enumerator.run(&mut self.progress) {
                                 Err(e) => {
-                                    error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                    error!(
+                                        "Failed to enumerate Git repository at {}: {e}; skipping",
+                                        path.display()
+                                    );
                                     return WalkState::Skip;
                                 }
                                 Ok(r) => self.local_git_repos.push(r),
@@ -158,7 +164,10 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                             let enumerator = GitRepoEnumerator::new(path, &repository);
                             match enumerator.run(&mut self.progress) {
                                 Err(e) => {
-                                    error!("Failed to enumerate Git repository at {}: {e}; skipping", path.display());
+                                    error!(
+                                        "Failed to enumerate Git repository at {}: {e}; skipping",
+                                        path.display()
+                                    );
                                     return WalkState::Skip;
                                 }
                                 Ok(r) => self.local_git_repos.push(r),

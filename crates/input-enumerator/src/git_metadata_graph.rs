@@ -464,7 +464,9 @@ impl GitMetadataGraph {
             while let Some(edge) = edges.next() {
                 let edge_index = edge.id().index();
                 if visited_edges.put(edge_index) {
-                    error!("Edge {edge_index} already visited -- this was supposed to be impossible!");
+                    error!(
+                        "Edge {edge_index} already visited -- this was supposed to be impossible!"
+                    );
                     continue;
                 }
                 let child_idx = edge.target();
