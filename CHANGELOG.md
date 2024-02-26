@@ -62,6 +62,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `JSON Web Token (base64url-encoded)` rule has been improved to reduce false positives.
   Thank you @saullocarvalho for the bug report!
 
+- The prebuilt releases now include shell completion scripts for bash, fish, elvish, powershell, and zsh, instead of 5 copies of the zsh completions ((#132)[https://github.com/praetorian-inc/noseyparker/pull/132]).
+  Thank you @Marcool04!
+
 ### Changes
 - The minimum supported Rust version has been changed from 1.70 to 1.76.
 
