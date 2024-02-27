@@ -1,0 +1,29 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-case-conflict
+    -   id: check-json
+    -   id: check-symlinks
+    -   id: check-toml
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+
+-   repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+
+    hooks:
+    -   id: fmt
+    -   id: cargo-check
+
+exclude: |
+  (?x)
+  ^
+  ( crates/vectorscan-sys/vectorscan.*        (?# vendored sources )
+  | .*\.snap$                                 (?# insta.rs test cases )
+  ) $
