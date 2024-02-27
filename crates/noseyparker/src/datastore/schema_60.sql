@@ -402,7 +402,7 @@ select
     count(*),
     avg(ms.score),
     fc.comment,
-    json_group_array(distinct match_status.status order by match_status.status)
+    json_group_array(distinct match_status.status)
         filter (where match_status.status is not null) match_statuses
 from
     finding f
