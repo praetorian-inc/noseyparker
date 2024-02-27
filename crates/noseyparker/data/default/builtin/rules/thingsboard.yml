@@ -4,7 +4,7 @@ rules:
 # - https://thingsboard.io/docs/paas/reference/mqtt-api/
 # - https://thingsboard.io/docs/reference/mqtt-api/
 
-# FIXME: 
+# FIXME:
 # The default access token follows the format [a-z0-9]{20}. However users may replace it with arbitrary tokens, provided they are between 1 and 32 characters in length.
 # TODO: Update the regex pattern accordingly (currently it matches only the default format).
 # After some research it appears that most (if not all) users utilize the default format so this is a low priority issue.
