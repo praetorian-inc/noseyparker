@@ -126,7 +126,9 @@ mod test {
     #[test]
     fn ok_empty_path_01() {
         assert_eq!(
-            GitUrl::from_str("https://example.com").unwrap().to_path_buf(),
+            GitUrl::from_str("https://example.com")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/example.com")
         )
     }
@@ -134,7 +136,9 @@ mod test {
     #[test]
     fn ok_empty_path_02() {
         assert_eq!(
-            GitUrl::from_str("https://example.com/").unwrap().to_path_buf(),
+            GitUrl::from_str("https://example.com/")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/example.com")
         )
     }
@@ -142,7 +146,9 @@ mod test {
     #[test]
     fn ok_01() {
         assert_eq!(
-            GitUrl::from_str("https://github.com/praetorian-inc/noseyparker.git").unwrap().to_path_buf(),
+            GitUrl::from_str("https://github.com/praetorian-inc/noseyparker.git")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/github.com/praetorian-inc/noseyparker.git")
         );
     }
@@ -150,7 +156,9 @@ mod test {
     #[test]
     fn ok_relpath_01() {
         assert_eq!(
-            GitUrl::from_str("https://example.com/../boom.git").unwrap().to_path_buf(),
+            GitUrl::from_str("https://example.com/../boom.git")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/example.com/boom.git")
         );
     }
@@ -158,7 +166,9 @@ mod test {
     #[test]
     fn ok_relpath_02() {
         assert_eq!(
-            GitUrl::from_str("https://example.com/root/../boom.git").unwrap().to_path_buf(),
+            GitUrl::from_str("https://example.com/root/../boom.git")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/example.com/boom.git")
         );
     }
@@ -166,7 +176,9 @@ mod test {
     #[test]
     fn ok_relpath_03() {
         assert_eq!(
-            GitUrl::from_str("https://example.com/root/..").unwrap().to_path_buf(),
+            GitUrl::from_str("https://example.com/root/..")
+                .unwrap()
+                .to_path_buf(),
             Path::new("https/example.com/")
         );
     }

@@ -1,8 +1,8 @@
 use crate::error::{AsResult, Error};
 use bitflags::bitflags;
 use foreign_types::{foreign_type, ForeignType};
-use vectorscan_sys as hs;
 use std::{ffi::CString, mem::MaybeUninit, ptr};
+use vectorscan_sys as hs;
 
 foreign_type! {
     unsafe type CompileError {

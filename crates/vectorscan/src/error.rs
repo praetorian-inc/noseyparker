@@ -1,5 +1,5 @@
-use vectorscan_sys as ffi;
 use thiserror::Error;
+use vectorscan_sys as ffi;
 
 /// Hyperscan Error Codes
 #[derive(Debug, Error)]

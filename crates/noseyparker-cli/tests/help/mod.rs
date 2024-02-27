@@ -71,7 +71,6 @@ fn help_report_short() {
     });
 }
 
-
 #[test]
 fn help_datastore() {
     assert_cmd_snapshot!(noseyparker_success!("help", "datastore"));

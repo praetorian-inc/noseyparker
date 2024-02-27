@@ -3,8 +3,7 @@ use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::path::{PathBuf, Path};
-
+use std::path::{Path, PathBuf};
 
 // -------------------------------------------------------------------------------------------------
 // Provenance
@@ -22,9 +21,7 @@ pub enum Provenance {
 impl Provenance {
     /// Create a `Provenance` entry for a plain file.
     pub fn from_file(path: PathBuf) -> Self {
-        Provenance::File(FileProvenance {
-            path,
-        })
+        Provenance::File(FileProvenance { path })
     }
 
     /// Create a `Provenance` entry for a blob found within a Git repo's history, without any extra
@@ -67,7 +64,10 @@ impl Provenance {
         use bstr::ByteSlice;
         match self {
             Self::File(e) => Some(&e.path),
-            Self::GitRepo(e) => e.first_commit.as_ref().and_then(|c| c.blob_path.to_path().ok()),
+            Self::GitRepo(e) => e
+                .first_commit
+                .as_ref()
+                .and_then(|c| c.blob_path.to_path().ok()),
             Self::Extended(e) => e.path(),
         }
     }
@@ -89,7 +89,7 @@ impl std::fmt::Display for Provenance {
             },
             Provenance::Extended(e) => {
                 write!(f, "extended {}", e)
-            },
+            }
         }
     }
 }

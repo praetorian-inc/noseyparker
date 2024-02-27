@@ -199,7 +199,8 @@ mod test {
 
     #[test]
     fn url_from_path_parts_and_params_6() {
-        let res = make_url("https://api.github.com", &["praetorian-inc", "some/bogus/path/part"], &[]);
+        let res =
+            make_url("https://api.github.com", &["praetorian-inc", "some/bogus/path/part"], &[]);
         // XXX have to resort to match here because `Error` doesn't have an Eq instance
         match res {
             Err(Error::UrlSlashError(p)) if p == "some/bogus/path/part" => (),

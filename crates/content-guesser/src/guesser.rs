@@ -1,10 +1,6 @@
 use mime_guess::MimeGuess;
 
-use crate::{
-    error::GuesserError,
-    input::Input,
-    output::Output,
-};
+use crate::{error::GuesserError, input::Input, output::Output};
 
 pub struct Guesser {
     #[cfg(feature = "libmagic")]
@@ -18,9 +14,12 @@ impl Guesser {
         use magic::cookie::Flags;
         let flags = Flags::ERROR | Flags::MIME;
         assert!(!flags.contains(Flags::DEBUG));
-        let magic_cookie = magic::Cookie::open(flags).map_err(|e| GuesserError::MagicError(e.to_string()))?;
+        let magic_cookie =
+            magic::Cookie::open(flags).map_err(|e| GuesserError::MagicError(e.to_string()))?;
         // Load the default database
-        let magic_cookie = magic_cookie.load(&Default::default()).map_err(|e| GuesserError::MagicError(e.to_string()))?;
+        let magic_cookie = magic_cookie
+            .load(&Default::default())
+            .map_err(|e| GuesserError::MagicError(e.to_string()))?;
         Ok(Guesser { magic_cookie })
     }
 

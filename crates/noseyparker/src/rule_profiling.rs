@@ -13,14 +13,16 @@ impl RuleProfile {
     /// Update this rule profile by combining it with the contents of another one.
     pub fn update(&mut self, other: &Self) {
         if other.raw_match_counts.len() >= self.raw_match_counts.len() {
-            self.raw_match_counts.resize(other.raw_match_counts.len(), 0);
+            self.raw_match_counts
+                .resize(other.raw_match_counts.len(), 0);
         }
         for (i, c) in other.raw_match_counts.iter().enumerate() {
             self.raw_match_counts[i] += c;
         }
 
         if other.stage2_durations.len() >= self.stage2_durations.len() {
-            self.stage2_durations.resize(other.stage2_durations.len(), Duration::default());
+            self.stage2_durations
+                .resize(other.stage2_durations.len(), Duration::default());
         }
         for (i, c) in other.stage2_durations.iter().enumerate() {
             self.stage2_durations[i] += *c;
@@ -55,7 +57,9 @@ impl RuleProfile {
             .enumerate()
             .map(|(i, (c, d))| RuleProfileEntry {
                 rule_id: i,
-                raw_match_count: c, stage2_duration: d, })
+                raw_match_count: c,
+                stage2_duration: d,
+            })
             .collect()
     }
 
@@ -82,17 +86,16 @@ pub struct RuleProfileEntry {
     pub stage2_duration: Duration,
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // RuleStage2Timer
 // -------------------------------------------------------------------------------------------------
 pub struct RuleStage2Timer<'a> {
     rule_id: usize,
     start_time: std::time::Instant,
-    rule_stats: &'a mut RuleProfile
+    rule_stats: &'a mut RuleProfile,
 }
 
-impl <'a> RuleStage2Timer<'a> {
+impl<'a> RuleStage2Timer<'a> {
     #[inline]
     pub fn new(rule_stats: &'a mut RuleProfile, rule_id: usize) -> Self {
         RuleStage2Timer {
@@ -103,9 +106,10 @@ impl <'a> RuleStage2Timer<'a> {
     }
 }
 
-impl <'a> Drop for RuleStage2Timer<'a> {
+impl<'a> Drop for RuleStage2Timer<'a> {
     #[inline]
     fn drop(&mut self) {
-        self.rule_stats.increment_stage2_duration(self.rule_id, self.start_time.elapsed());
+        self.rule_stats
+            .increment_stage2_duration(self.rule_id, self.start_time.elapsed());
     }
 }

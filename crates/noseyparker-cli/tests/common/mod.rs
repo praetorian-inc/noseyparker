@@ -8,8 +8,11 @@ use indoc::indoc;
 pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
-pub use insta::{assert_display_snapshot, assert_json_snapshot, assert_snapshot, with_settings, internals::Redaction};
-pub use predicates::str::{RegexPredicate, is_empty};
+pub use insta::{
+    assert_display_snapshot, assert_json_snapshot, assert_snapshot, internals::Redaction,
+    with_settings,
+};
+pub use predicates::str::{is_empty, RegexPredicate};
 pub use std::path::Path;
 pub use std::process::Command;
 
@@ -57,7 +60,6 @@ macro_rules! noseyparker_success {
 macro_rules! noseyparker_failure {
     ( $( $arg:expr ),* ) => { noseyparker!($( $arg ),*).assert().failure() }
 }
-
 
 /*
 lazy_static! {
@@ -166,7 +168,8 @@ impl ScanEnv {
         let input = self.root.child(name);
         input.touch().expect("should be able to write input file");
         assert!(input.is_file());
-        input.write_str(contents)
+        input
+            .write_str(contents)
             .expect("should be able to write input file contents");
         input
     }
@@ -174,17 +177,22 @@ impl ScanEnv {
     /// Create a small input file within this mock scanning environment with the given name.
     /// The created input file will have content containing a fake GitHub PAT that should be detected.
     pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
-        self.input_file_with_contents(name, indoc! {r#"
+        self.input_file_with_contents(
+            name,
+            indoc! {r#"
             # This is fake configuration data
             USERNAME=the_dude
             GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-        "#})
+        "#},
+        )
     }
 
     /// Create a larger input file within this mock scanning environment with the given name.
     /// The created input file will have content containing a fake AWS key that should be detected.
     pub fn large_input_file_with_secret(&self, name: &str) -> ChildPath {
-        self.input_file_with_contents(name, indoc! {r#"
+        self.input_file_with_contents(
+            name,
+            indoc! {r#"
             function lorem(ipsum, dolor = 1) {
               const sit = ipsum == null ? 0 : ipsum.sit;
               dolor = sit - amet(dolor);
@@ -242,7 +250,8 @@ impl ScanEnv {
               }
               return aliqua;
             }
-        "#})
+        "#},
+        )
     }
 
     /// Create an empty directory within this mock scanning environment with the given name.
@@ -279,7 +288,6 @@ pub fn create_empty_git_repo(destination: &Path) {
         .stdout(is_empty())
         .stderr(is_empty());
 }
-
 
 pub fn get_report_stdout_filters() -> Vec<(&'static str, &'static str)> {
     vec![

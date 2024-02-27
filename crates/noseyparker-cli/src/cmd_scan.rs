@@ -5,7 +5,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error, info, trace_span, trace, warn};
+use tracing::{debug, debug_span, error, info, trace, trace_span, warn};
 
 use crate::{args, rule_loader::RuleLoader};
 
@@ -29,7 +29,6 @@ use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
 
-
 type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>);
 
 /// This command scans multiple filesystem inputs for secrets.
@@ -38,7 +37,7 @@ type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>)
 pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> {
     args::validate_github_api_url(
         &args.input_specifier_args.github_api_url,
-        args.input_specifier_args.all_github_organizations
+        args.input_specifier_args.all_github_organizations,
     );
 
     debug!("Args:\n{global_args:#?}\n{args:#?}");
@@ -60,10 +59,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Open datastore
     // ---------------------------------------------------------------------------------------------
     init_progress.set_message("Initializing datastore...");
-    let mut datastore = Datastore::create_or_open(
-        &args.datastore,
-        global_args.advanced.sqlite_cache_size,
-    ).with_context(|| format!("Failed to open datastore at {}", &args.datastore.display()))?;
+    let mut datastore =
+        Datastore::create_or_open(&args.datastore, global_args.advanced.sqlite_cache_size)
+            .with_context(|| {
+                format!("Failed to open datastore at {}", &args.datastore.display())
+            })?;
 
     // ---------------------------------------------------------------------------------------------
     // Load rules
@@ -73,7 +73,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let loaded = RuleLoader::from_rule_specifiers(&args.rules)
             .load()
             .context("Failed to load rules")?;
-        let resolved = loaded.resolve_enabled_rules()
+        let resolved = loaded
+            .resolve_enabled_rules()
             .context("Failed to resolve rules")?;
         RulesDatabase::from_rules(resolved.into_iter().cloned().collect())
             .context("Failed to compile rules")?
@@ -111,9 +112,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let mut num_found: u64 = 0;
             let api_url = args.input_specifier_args.github_api_url.clone();
 
-            for repo_string in
-                github::enumerate_repo_urls(&repo_specifiers, api_url, args.ignore_certs, Some(&mut progress))
-                    .context("Failed to enumerate GitHub repositories")?
+            for repo_string in github::enumerate_repo_urls(
+                &repo_specifiers,
+                api_url,
+                args.ignore_certs,
+                Some(&mut progress),
+            )
+            .context("Failed to enumerate GitHub repositories")?
             {
                 match GitUrl::from_str(&repo_string) {
                     Ok(repo_url) => repo_urls.push(repo_url),
@@ -292,10 +297,18 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             "Found {} from {} plain {} and {} blobs from {} Git {}",
             HumanBytes(total_bytes_found),
             HumanCount(inputs.files.len() as u64),
-            if inputs.files.len() == 1 { "file" } else { "files" },
+            if inputs.files.len() == 1 {
+                "file"
+            } else {
+                "files"
+            },
             HumanCount(inputs.git_repos.iter().map(|r| r.num_blobs()).sum()),
             HumanCount(inputs.git_repos.len() as u64),
-            if inputs.git_repos.len() == 1 { "repo" } else { "repos" },
+            if inputs.git_repos.len() == 1 {
+                "repo"
+            } else {
+                "repos"
+            },
         ));
         inputs
     };
@@ -345,7 +358,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             //
             // Record all messages in one big transaction to maximize throughput.
 
-
             let mut batch: Vec<DatastoreMessage> = Vec::with_capacity(BATCH_SIZE);
             let mut matches_in_batch: usize = 0;
 
@@ -359,7 +371,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 if batch.len() >= BATCH_SIZE || matches_in_batch >= BATCH_SIZE {
                     let t1 = std::time::Instant::now();
                     let batch_len = batch.len();
-                    let num_added = tx.record(batch.as_slice())
+                    let num_added = tx
+                        .record(batch.as_slice())
                         .context("Failed to record batch")?;
                     num_matches_added += num_added;
                     batch.clear();
@@ -377,7 +390,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let t1 = std::time::Instant::now();
 
                 let batch_len = batch.len();
-                let num_added = tx.record(batch.as_slice())
+                let num_added = tx
+                    .record(batch.as_slice())
                     .context("Failed to record batch")?;
                 num_matches_added += num_added;
                 // batch.clear();
@@ -745,15 +759,15 @@ fn run_matcher(
                 let output_path = output_dir.join(&blob_id[2..]);
                 trace!("saving blob to {}", output_path.display());
                 match std::fs::create_dir(&output_dir) {
-                    Ok(()) => {},
-                    Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {},
+                    Ok(()) => {}
+                    Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
                     Err(e) => {
                         bail!("Failed to create blob directory at {}: {}", output_dir.display(), e);
                     }
                 }
-                std::fs::write(&output_path, &blob.bytes).with_context(||
+                std::fs::write(&output_path, &blob.bytes).with_context(|| {
                     format!("Failed to write blob contents to {}", output_path.display())
-                )?;
+                })?;
             }
 
             if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {

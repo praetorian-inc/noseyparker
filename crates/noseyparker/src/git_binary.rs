@@ -39,7 +39,10 @@ impl Git {
         // };
         ;
 
-        Self { credentials, ignore_certs }
+        Self {
+            credentials,
+            ignore_certs,
+        }
     }
 
     fn git(&self) -> Command {

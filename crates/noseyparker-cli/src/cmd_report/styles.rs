@@ -10,8 +10,16 @@ pub struct Styles {
 
 impl Styles {
     pub fn new(styles_enabled: bool) -> Self {
-        let style_finding_heading = Style::new().bold().bright().white().force_styling(styles_enabled);
-        let style_rule = Style::new().bright().bold().blue().force_styling(styles_enabled);
+        let style_finding_heading = Style::new()
+            .bold()
+            .bright()
+            .white()
+            .force_styling(styles_enabled);
+        let style_rule = Style::new()
+            .bright()
+            .bold()
+            .blue()
+            .force_styling(styles_enabled);
         let style_heading = Style::new().bold().force_styling(styles_enabled);
         let style_match = Style::new().yellow().force_styling(styles_enabled);
         let style_metadata = Style::new().bright().blue().force_styling(styles_enabled);

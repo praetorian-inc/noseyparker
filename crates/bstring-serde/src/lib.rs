@@ -4,12 +4,12 @@ use serde::{Deserialize, Serialize};
 
 /// A custom `serde` codec for `bstr::BString` that uses lossy UTF-8 encoding.
 #[derive(Deserialize, Serialize)]
-#[serde(remote="BString")]
-pub struct BStringLossyUtf8 (
+#[serde(remote = "BString")]
+pub struct BStringLossyUtf8(
     #[serde(
         getter = "bstring_as_vec",
         serialize_with = "serialize_bytes_string_lossy",
-        deserialize_with = "deserialize_bytes_string",
+        deserialize_with = "deserialize_bytes_string"
     )]
     pub Vec<u8>,
 );
@@ -32,9 +32,7 @@ fn serialize_bytes_string_lossy<S: serde::Serializer>(
     s.serialize_str(&String::from_utf8_lossy(bytes))
 }
 
-fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(
-    d: D,
-) -> Result<Vec<u8>, D::Error> {
+fn deserialize_bytes_string<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<u8>, D::Error> {
     struct Vis;
     impl serde::de::Visitor<'_> for Vis {
         type Value = Vec<u8>;
@@ -69,15 +67,14 @@ impl JsonSchema for BStringLossyUtf8 {
     }
 }
 
-
 /// A custom `serde` codec for `bstr::BString` that uses standard base64.
 #[derive(Deserialize, Serialize)]
-#[serde(remote="BString")]
-pub struct BStringBase64 (
+#[serde(remote = "BString")]
+pub struct BStringBase64(
     #[serde(
         getter = "bstring_as_vec",
         serialize_with = "serialize_bytes_string_base64",
-        deserialize_with = "deserialize_bytes_string_base64",
+        deserialize_with = "deserialize_bytes_string_base64"
     )]
     pub Vec<u8>,
 );
@@ -129,7 +126,6 @@ impl JsonSchema for BStringBase64 {
         schemars::schema::Schema::Object(o)
     }
 }
-
 
 #[cfg(test)]
 mod test {

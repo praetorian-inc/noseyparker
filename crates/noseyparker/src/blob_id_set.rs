@@ -28,7 +28,8 @@ impl BlobIdSet {
             // What's this weird initialization?
             // It's to get around the fact that `Mutex` is not `Copy`.
             // https://stackoverflow.com/a/69756635
-            sets: [(); 256].map(|_| Mutex::new(HashSet::with_capacity_and_hasher(1024, Default::default()))),
+            sets: [(); 256]
+                .map(|_| Mutex::new(HashSet::with_capacity_and_hasher(1024, Default::default()))),
         }
     }
 
@@ -38,14 +39,20 @@ impl BlobIdSet {
     #[inline]
     pub fn insert(&self, blob_id: BlobId) -> bool {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.sets[bucket as usize].lock().unwrap().insert(blob_id.into())
+        self.sets[bucket as usize]
+            .lock()
+            .unwrap()
+            .insert(blob_id.into())
     }
 
     /// Check if the given `BlobId` is in the set without modifying it.
     #[inline]
     pub fn contains(&self, blob_id: &BlobId) -> bool {
         let bucket: u8 = blob_id.as_bytes()[0];
-        self.sets[bucket as usize].lock().unwrap().contains(&ObjectId::from(blob_id))
+        self.sets[bucket as usize]
+            .lock()
+            .unwrap()
+            .contains(&ObjectId::from(blob_id))
     }
 
     /// Return the total number of blob IDs contained in the set.

@@ -4,8 +4,14 @@ use super::*;
 fn scan_invalid_snippet_length() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_dir("empty_dir");
-    noseyparker_failure!("scan", "--datastore", scan_env.dspath(), input.path(), "--snippet-length=-1")
-        .stderr(is_match("error: invalid value .* for .*: invalid digit found in string"));
+    noseyparker_failure!(
+        "scan",
+        "--datastore",
+        scan_env.dspath(),
+        input.path(),
+        "--snippet-length=-1"
+    )
+    .stderr(is_match("error: invalid value .* for .*: invalid digit found in string"));
 }
 
 #[test]
@@ -25,7 +31,6 @@ fn scan_changing_snippet_length() {
         assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath()));
     });
 
-
     let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
     let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
     with_settings!({
@@ -33,7 +38,6 @@ fn scan_changing_snippet_length() {
     }, {
         assert_json_snapshot!(json_output);
     });
-
 
     // now rescan with longer snippet length
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path(), "--snippet-length=32")
@@ -46,7 +50,6 @@ fn scan_changing_snippet_length() {
     }, {
         assert_cmd_snapshot!(noseyparker_success!("report", "-d", scan_env.dspath()));
     });
-
 
     let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
     let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();

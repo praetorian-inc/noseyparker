@@ -2,7 +2,7 @@ use bstr::BString;
 use bstring_serde::BStringBase64;
 use noseyparker_digest::Sha1;
 use schemars::JsonSchema;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::io::Write;
 use tracing::debug;
@@ -193,8 +193,7 @@ impl Match {
 
     pub fn finding_id(&self) -> String {
         let mut h = Sha1::new();
-        write!(&mut h, "{}\0", self.rule_structural_id)
-            .expect("should be able to write to memory");
+        write!(&mut h, "{}\0", self.rule_structural_id).expect("should be able to write to memory");
         serde_json::to_writer(&mut h, &self.groups)
             .expect("should be able to serialize groups as JSON");
         h.hexdigest()

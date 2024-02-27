@@ -40,18 +40,10 @@ impl Reportable for RulesReporter {
 
 impl RulesReporter {
     fn get_entries(&self) -> Entries<'_> {
-        let mut rules: Vec<_> = self
-            .loaded
-            .iter_rules()
-            .map(RuleEntry::new)
-            .collect();
+        let mut rules: Vec<_> = self.loaded.iter_rules().map(RuleEntry::new).collect();
         rules.sort_by(|r1, r2| r1.id.cmp(r2.id));
 
-        let mut rulesets: Vec<_> = self
-            .loaded
-            .iter_rulesets()
-            .map(RulesetEntry::new)
-            .collect();
+        let mut rulesets: Vec<_> = self.loaded.iter_rulesets().map(RulesetEntry::new).collect();
         rulesets.sort_by(|r1, r2| r1.id.cmp(r2.id));
 
         Entries { rules, rulesets }

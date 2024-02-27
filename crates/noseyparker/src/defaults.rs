@@ -12,14 +12,13 @@ use noseyparker_rules::Rules;
 //
 // https://doc.rust-lang.org/nightly/proc_macro/tracked_path/index.html
 
-
 pub static DEFAULT_RULES_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/data/default/builtin");
 
-pub static DEFAULT_IGNORE_RULES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/default/ignore.conf"));
+pub static DEFAULT_IGNORE_RULES: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/default/ignore.conf"));
 
 fn load_yaml_files<'a>(dir: &Dir<'a>) -> Vec<(&'a Path, &'a [u8])> {
-    dir
-        .find("**/*.yml")
+    dir.find("**/*.yml")
         .expect("Constant glob should compile")
         .filter_map(|e| e.as_file())
         .map(|f| (f.path(), f.contents()))
@@ -37,7 +36,6 @@ fn get_default_rule_files() -> Vec<(&'static Path, &'static [u8])> {
 pub fn get_builtin_rules() -> Result<Rules> {
     Rules::from_paths_and_contents(get_default_rule_files())
 }
-
 
 #[cfg(test)]
 mod test {

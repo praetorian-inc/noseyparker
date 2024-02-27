@@ -31,10 +31,8 @@ pub struct Progress {
 impl Progress {
     pub fn new_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
         let inner = if enabled {
-            let style = ProgressStyle::with_template(
-                "{spinner} {msg} [{elapsed_precise}]",
-            )
-            .expect("progress bar style template should compile");
+            let style = ProgressStyle::with_template("{spinner} {msg} [{elapsed_precise}]")
+                .expect("progress bar style template should compile");
 
             let inner = ProgressBar::new_spinner()
                 .with_style(style)
@@ -64,10 +62,9 @@ impl Progress {
 
     pub fn new_countup_spinner<T: Into<Cow<'static, str>>>(message: T, enabled: bool) -> Self {
         let inner = if enabled {
-            let style = ProgressStyle::with_template(
-                "{spinner} {msg} {human_len} [{elapsed_precise}]",
-            )
-            .expect("progress bar style template should compile");
+            let style =
+                ProgressStyle::with_template("{spinner} {msg} {human_len} [{elapsed_precise}]")
+                    .expect("progress bar style template should compile");
 
             let inner = ProgressBar::new_spinner()
                 .with_style(style)

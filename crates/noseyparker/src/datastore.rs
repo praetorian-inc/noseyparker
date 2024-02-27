@@ -423,16 +423,19 @@ impl<'a> Transaction<'a> {
                 (match_id, false)
             } else {
                 // totally new match
-                let match_id = add_match.query_row((
-                    structural_id,
-                    finding_id,
-                    blob_id,
-                    start_byte,
-                    end_byte,
-                    before_snippet_id,
-                    matching_snippet_id,
-                    after_snippet_id,
-                ), val_from_row)?;
+                let match_id = add_match.query_row(
+                    (
+                        structural_id,
+                        finding_id,
+                        blob_id,
+                        start_byte,
+                        end_byte,
+                        before_snippet_id,
+                        matching_snippet_id,
+                        after_snippet_id,
+                    ),
+                    val_from_row,
+                )?;
                 (match_id, true)
             };
 
@@ -658,7 +661,7 @@ impl Datastore {
         for e in entries {
             let (md, id, m, match_score, match_comment, match_status) = e?;
             let ps = self.get_provenance_set(&md)?;
-            es.push(FindingDataEntry{
+            es.push(FindingDataEntry {
                 provenance: ps,
                 blob_metadata: md,
                 match_id: id,
@@ -720,9 +723,11 @@ impl Datastore {
             .conn
             .pragma_query_value(None, "user_version", val_from_row)?;
         if user_version != Self::CURRENT_SCHEMA_VERSION {
-            bail!("Unsupported schema version {user_version} (expected {}): \
+            bail!(
+                "Unsupported schema version {user_version} (expected {}): \
                   datastores from other versions of Nosey Parker are not supported",
-                  Self::CURRENT_SCHEMA_VERSION);
+                Self::CURRENT_SCHEMA_VERSION
+            );
         }
         Ok(())
     }
@@ -1002,8 +1007,12 @@ mod sql {
     impl FromSql for Statuses {
         fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
             match value {
-                ValueRef::Text(s) => serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into())),
-                ValueRef::Blob(b) => serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into())),
+                ValueRef::Text(s) => {
+                    serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into()))
+                }
+                ValueRef::Blob(b) => {
+                    serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into()))
+                }
                 _ => Err(FromSqlError::InvalidType),
             }
         }

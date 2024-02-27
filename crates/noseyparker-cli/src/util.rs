@@ -14,7 +14,7 @@ pub enum Counted<'a> {
     },
 }
 
-impl <'a> Counted<'a> {
+impl<'a> Counted<'a> {
     /// Create a new `Counted` value with the given count, singular, and plural values.
     pub fn new(count: usize, singular: &'a str, plural: &'a str) -> Self {
         Counted::Explicit {
@@ -27,17 +27,18 @@ impl <'a> Counted<'a> {
     /// Create a new `Counted` value with the given count and singular form, which is pluralized by
     /// adding an `s`.
     pub fn regular(count: usize, singular: &'a str) -> Self {
-        Counted::Regular {
-            singular,
-            count,
-        }
+        Counted::Regular { singular, count }
     }
 }
 
-impl <'a> std::fmt::Display for Counted<'a> {
+impl<'a> std::fmt::Display for Counted<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            Counted::Explicit { singular, plural, count } => {
+            Counted::Explicit {
+                singular,
+                plural,
+                count,
+            } => {
                 if count == 1 {
                     write!(f, "1 {}", singular)
                 } else {

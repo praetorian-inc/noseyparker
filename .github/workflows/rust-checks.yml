@@ -6,8 +6,12 @@
 # mistakes in your Rust code and help improve your Rust code.
 # More details at https://github.com/rust-lang/rust-clippy
 # and https://rust-lang.github.io/rust-clippy/
+# rust-fmt is a tool that checks if your Rust code is formatted
+# according to the style guidelines. More details at
+# https://github.com/rust-lang/rustfmt and
+# https://rust-lang.github.io/rustfmt/.
 
-name: Clippy
+name: Rust Checks
 
 on:
   push:
@@ -60,3 +64,23 @@ jobs:
         with:
           sarif_file: rust-clippy-results.sarif
           wait-for-processing: true
+
+  rust-fmt:
+    name: Rustfmt Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        id: install-rust-toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run rust-fmt
+        run: cargo fmt --all --check

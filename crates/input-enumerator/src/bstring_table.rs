@@ -1,4 +1,4 @@
-use bstr::{BString, BStr};
+use bstr::{BStr, BString};
 use std::collections::{hash_map::Entry, HashMap};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -15,19 +15,22 @@ pub trait SymbolType: Copy + PartialEq + Eq + std::hash::Hash {
 impl SymbolType for Symbol<usize> {
     #[inline]
     fn to_range(self) -> std::ops::Range<usize> {
-        self.i .. self.j
+        self.i..self.j
     }
 
     #[inline]
     fn from_range(r: std::ops::Range<usize>) -> Self {
-        Self { i: r.start, j: r.end }
+        Self {
+            i: r.start,
+            j: r.end,
+        }
     }
 }
 
 impl SymbolType for Symbol<u32> {
     #[inline]
     fn to_range(self) -> std::ops::Range<usize> {
-        self.i as usize .. self.j as usize
+        self.i as usize..self.j as usize
     }
 
     #[inline]
@@ -38,14 +41,13 @@ impl SymbolType for Symbol<u32> {
     }
 }
 
-
 #[derive(Default)]
 pub struct BStringTable<S = Symbol<u32>> {
     storage: Vec<u8>,
     mapping: HashMap<BString, S>,
 }
 
-impl <S: SymbolType> BStringTable<S> {
+impl<S: SymbolType> BStringTable<S> {
     pub fn new() -> Self {
         Self::with_capacity(32 * 1024, 1024 * 1024)
     }
@@ -79,8 +81,8 @@ impl <S: SymbolType> BStringTable<S> {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::{assert_eq, assert_ne};
     use super::*;
+    use pretty_assertions::{assert_eq, assert_ne};
 
     #[test]
     fn simple_roundtrip() {
