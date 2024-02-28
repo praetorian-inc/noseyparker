@@ -12,7 +12,6 @@ repos:
     -   id: check-toml
     -   id: check-yaml
     -   id: destroyed-symlinks
-    -   id: end-of-file-fixer
     -   id: trailing-whitespace
 
 -   repo: https://github.com/doublify/pre-commit-rust
