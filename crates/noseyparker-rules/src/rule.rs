@@ -85,8 +85,7 @@ impl RuleSyntax {
 
     /// Compute the content-based structural ID of this rule.
     pub fn structural_id(&self) -> String {
-        let pattern_digest = sha1_hexdigest(self.pattern.as_bytes());
-        format!("{}:{}", self.id, pattern_digest)
+        sha1_hexdigest(self.pattern.as_bytes())
     }
 
     /// Return a JSON serialization of this rule.

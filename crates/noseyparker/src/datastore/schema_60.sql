@@ -97,7 +97,7 @@ CREATE TABLE rule
     -- The textual identifier defined in the rule
     text_id text not null,
 
-    -- A content-based identifier, defined as `text id:sha1 hash of the pattern`.
+    -- A content-based identifier, defined as the hex-encoded sha1 hash of the pattern.
     structural_id text unique not null,
 
     -- The minified JSON serialization of the rule
