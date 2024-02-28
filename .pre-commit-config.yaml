@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.5.0
 
     hooks:
     -   id: check-added-large-files
@@ -11,6 +11,7 @@ repos:
     -   id: check-symlinks
     -   id: check-toml
     -   id: check-yaml
+    -   id: destroyed-symlinks
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 
