@@ -199,7 +199,7 @@ The examples are used in automated testing via the `noseyparker rules check` com
 We don't want to facilitate drive-by hacking by advertising real leaked secrets here.
 
 ### Test your rules to find problems
-The `noseyparker rules check PATH` command runs a number of checks over the rules found at `PATH` and ensures that the examples in the rule match (or not) as expected.
+The `noseyparker rules check --rules <PATH>` command runs a number of checks over the rules found at `<PATH>` and ensures that the examples in the rule match (or not) as expected.
 
 
 ## Performance notes
