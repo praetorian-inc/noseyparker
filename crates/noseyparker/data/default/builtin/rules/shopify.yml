@@ -16,8 +16,8 @@ rules:
   - https://help.shopify.com/en/manual/domains
 
   examples:
-  - 'handsomestranger.myshopify.com' 
-  - 'store.handsomestranger.myshopify.com' 
+  - 'handsomestranger.myshopify.com'
+  - 'store.handsomestranger.myshopify.com'
 
 
 - name: Shopify App Secret
