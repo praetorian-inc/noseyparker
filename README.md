@@ -237,6 +237,12 @@ Developing new regex rules is detailed in a [separate document](docs/RULES.md).
 
 If you are considering making significant code changes, please [open an issue](https://github.com/praetorian-inc/noseyparker/issues/new) or [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose) first.
 
+This project has a number of [pre-commit](https://pre-commit.com/) hooks enabled, which you are encouraged to use.
+To install them in your local repo, make sure you have `pre-commit` installed and run:
+```shell
+pre-commit install
+```
+
 
 ## License
 Nosey Parker is licensed under the [Apache License, Version 2.0](LICENSE).
