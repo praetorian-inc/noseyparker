@@ -145,27 +145,35 @@ impl JsonSchema for HexObjectId {
 /// Metadata about a Git commit.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct CommitMetadata {
+    /// The commit ID
     #[serde(with = "HexObjectId")]
     pub commit_id: ObjectId,
 
+    /// The committer name
     #[serde(with = "BStringLossyUtf8")]
     pub committer_name: BString,
 
+    /// The committer email
     #[serde(with = "BStringLossyUtf8")]
     pub committer_email: BString,
 
+    /// The committer timestamp
     #[serde(with = "TextTime")]
     pub committer_timestamp: Time,
 
+    /// The author name
     #[serde(with = "BStringLossyUtf8")]
     pub author_name: BString,
 
+    /// The author email
     #[serde(with = "BStringLossyUtf8")]
     pub author_email: BString,
 
+    /// The author timestamp
     #[serde(with = "TextTime")]
     pub author_timestamp: Time,
 
+    /// The commit message
     #[serde(with = "BStringLossyUtf8")]
     pub message: BString,
 }
