@@ -8,10 +8,7 @@ use indoc::indoc;
 pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
-pub use insta::{
-    assert_display_snapshot, assert_json_snapshot, assert_snapshot, internals::Redaction,
-    with_settings,
-};
+pub use insta::{assert_json_snapshot, assert_snapshot, internals::Redaction, with_settings};
 pub use predicates::str::{is_empty, RegexPredicate};
 pub use std::path::Path;
 pub use std::process::Command;
@@ -25,7 +22,7 @@ macro_rules! assert_cmd_snapshot {
         let cmd = $cmd;
         let output = cmd.get_output();
         let status = output.status;
-        assert_display_snapshot!(status);
+        assert_snapshot!(status);
         let stdout = String::from_utf8(output.stdout.clone()).unwrap();
         assert_snapshot!(stdout);
         let stderr = String::from_utf8(output.stderr.clone()).unwrap();
