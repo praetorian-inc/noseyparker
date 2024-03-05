@@ -6,17 +6,16 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
 
 ### Additions
 - A new `--ignore-certs` command-line option has been added to the `scan` and `github` commands.
-  This option causes TLS certificate validation to be skipped ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre!).
+  This option causes TLS certificate validation to be skipped ([#125](https://github.com/praetorian-inc/noseyparker/pull/125); thank you @seqre).
 
-- The `scan` and `github` commands now support the `--all_organizations` flag.
-  When supplied along with a custom GitHub API URL, Nosey Parker will scan the provided GitHub instance for all organizations to be further enumerated for additional repositories.
-  ([#126](https://github.com/praetorian-inc/noseyparker/pull/126); thank you @seqre!)
+- The `scan` and `github` commands now support the `--all-organizations` flag.
+  When supplied along with a custom GitHub API URL, Nosey Parker will scan the provided GitHub instance for all organizations to be further enumerated for additional repositories ([#126](https://github.com/praetorian-inc/noseyparker/pull/126); thank you @seqre).
 
-- New rules have been added (thank you @gemesa!):
+- New rules have been added (thank you @gemesa):
 
   - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
   - Blynk Device Access Token ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
@@ -47,8 +46,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `generate` command has been added, which generates various assets that are included in prebuilt releases:
 
   - Shell completion scripts via `generate shell-completions`
-  - A JSON Schema for the `report -f json` output via `generate json-schema` ((#128)[https://github.com/praetorian-inc/noseyparker/issues/128])
-  - Manpages via `generate manpages` ((#88)[https://github.com/praetorian-inc/noseyparker/issues/88])
+  - A JSON Schema for the `report -f json` output via `generate json-schema` ([#128](https://github.com/praetorian-inc/noseyparker/issues/128))
+  - Manpages via `generate manpages` ([#88](https://github.com/praetorian-inc/noseyparker/issues/88))
 
 ### Fixes
 - Several rules have been fixed that in certain circumstances would fail to match and produce a runtime error message:
@@ -60,10 +59,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `netrc Credentials` rule has been modified to avoid a runtime message about an empty capture group.
 
 - The `JSON Web Token (base64url-encoded)` rule has been improved to reduce false positives.
-  Thank you @saullocarvalho for the bug report!
+  Thank you @saullocarvalho for the bug report.
 
-- The prebuilt releases now include shell completion scripts for bash, fish, elvish, powershell, and zsh, instead of 5 copies of the zsh completions ((#132)[https://github.com/praetorian-inc/noseyparker/pull/132]).
-  Thank you @Marcool04!
+- The prebuilt releases now include shell completion scripts for bash, fish, elvish, powershell, and zsh, instead of 5 copies of the zsh completions ([#132](https://github.com/praetorian-inc/noseyparker/pull/132); thank you @Marcool04).
 
 ### Changes
 - The minimum supported Rust version has been changed from 1.70 to 1.76.
