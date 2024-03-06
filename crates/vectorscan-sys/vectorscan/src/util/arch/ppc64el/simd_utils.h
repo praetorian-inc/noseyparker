@@ -43,6 +43,11 @@
 
 #include <string.h> // for memcpy
 
+#if defined(__clang__) && (__clang_major__ == 15)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
+#endif // defined(__clang__) && (__clang_major__ == 15)
+
 typedef __vector unsigned long long int  uint64x2_t;
 typedef __vector   signed long long int   int64x2_t;
 typedef __vector unsigned int            uint32x4_t;
@@ -124,8 +129,8 @@ static really_really_inline
 m128 rshift_m128(m128 a, unsigned b) {
     if (b == 0) return a;
     m128 sl = (m128) vec_splats((uint8_t) b << 3);
-    m128 result = (m128) vec_sro((uint8x16_t) a, (uint8x16_t) sl);
-    return result;
+    uint8x16_t result = vec_sro((uint8x16_t) a, (uint8x16_t) sl);
+    return (m128) result;
 }
 
 static really_really_inline
@@ -152,7 +157,7 @@ static really_inline u32 movemask128(m128 a) {
    static uint8x16_t perm = { 16, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
    uint8x16_t bitmask = vec_gb((uint8x16_t) a);
    bitmask = (uint8x16_t) vec_perm(vec_splat_u8(0), bitmask, perm);
-   u32 movemask;
+   u32 ALIGN_ATTR(16) movemask;
    vec_ste((uint32x4_t) bitmask, 0, &movemask);
    return movemask;
 }
@@ -285,27 +290,27 @@ m128 loadbytes128(const void *ptr, unsigned int n) {
     return a;
 }
 
-#define CASE_ALIGN_VECTORS(a, b, offset)  case offset: return (m128)vec_sld((int8x16_t)(b), (int8x16_t)(a), (16 - offset)); break;
+#define CASE_ALIGN_VECTORS(a, b, offset)  case offset: return (m128)vec_sld((int8x16_t)(a), (int8x16_t)(b), (16 - offset)); break;
 
 static really_really_inline
 m128 palignr_imm(m128 r, m128 l, int offset) {
     switch (offset) {
     case 0: return l; break;
-    CASE_ALIGN_VECTORS(l, r, 1);
-    CASE_ALIGN_VECTORS(l, r, 2);
-    CASE_ALIGN_VECTORS(l, r, 3);
-    CASE_ALIGN_VECTORS(l, r, 4);
-    CASE_ALIGN_VECTORS(l, r, 5);
-    CASE_ALIGN_VECTORS(l, r, 6);
-    CASE_ALIGN_VECTORS(l, r, 7);
-    CASE_ALIGN_VECTORS(l, r, 8);
-    CASE_ALIGN_VECTORS(l, r, 9);
-    CASE_ALIGN_VECTORS(l, r, 10);
-    CASE_ALIGN_VECTORS(l, r, 11);
-    CASE_ALIGN_VECTORS(l, r, 12);
-    CASE_ALIGN_VECTORS(l, r, 13);
-    CASE_ALIGN_VECTORS(l, r, 14);
-    CASE_ALIGN_VECTORS(l, r, 15);
+    CASE_ALIGN_VECTORS(r, l, 1);
+    CASE_ALIGN_VECTORS(r, l, 2);
+    CASE_ALIGN_VECTORS(r, l, 3);
+    CASE_ALIGN_VECTORS(r, l, 4);
+    CASE_ALIGN_VECTORS(r, l, 5);
+    CASE_ALIGN_VECTORS(r, l, 6);
+    CASE_ALIGN_VECTORS(r, l, 7);
+    CASE_ALIGN_VECTORS(r, l, 8);
+    CASE_ALIGN_VECTORS(r, l, 9);
+    CASE_ALIGN_VECTORS(r, l, 10);
+    CASE_ALIGN_VECTORS(r, l, 11);
+    CASE_ALIGN_VECTORS(r, l, 12);
+    CASE_ALIGN_VECTORS(r, l, 13);
+    CASE_ALIGN_VECTORS(r, l, 14);
+    CASE_ALIGN_VECTORS(r, l, 15);
     case 16: return r; break;
     default: return zeroes128(); break;
     } 
@@ -419,5 +424,9 @@ m128 set2x64(u64a hi, u64a lo) {
     uint64x2_t v = { lo, hi };
     return (m128) v;
 }
+
+#if defined(__clang__) && (__clang_major__ == 15)
+#pragma clang diagnostic pop
+#endif // defined(__clang__) && (__clang_major__ == 15)
 
 #endif // ARCH_PPC64EL_SIMD_UTILS_H

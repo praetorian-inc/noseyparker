@@ -162,7 +162,7 @@ BuiltExpression NFABuilderImpl::getGraph() {
         throw CompileError("Pattern too large.");
     }
 
-    return { expr, move(graph) };
+    return { expr, std::move(graph) };
 }
 
 void NFABuilderImpl::setNodeReportID(Position pos, int offsetAdjust) {

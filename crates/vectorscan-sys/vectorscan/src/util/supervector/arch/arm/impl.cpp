@@ -518,7 +518,7 @@ template <>
 really_inline SuperVector<16> SuperVector<16>::load(void const *ptr)
 {
     assert(ISALIGNED_N(ptr, alignof(SuperVector::size)));
-    ptr = assume_aligned(ptr, SuperVector::size);
+    ptr = vectorscan_assume_aligned(ptr, SuperVector::size);
     return {vld1q_s32((const int32_t *)ptr)};
 }
 

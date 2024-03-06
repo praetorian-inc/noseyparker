@@ -39,12 +39,7 @@
  * the individual component headers for documentation.
  */
 
-/* The current Hyperscan version information. */
-
-#define HS_MAJOR      5
-#define HS_MINOR      4
-#define HS_PATCH      0
-
+#include "hs_version.h"
 #include "hs_compile.h"
 #include "hs_runtime.h"
 

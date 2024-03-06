@@ -57,6 +57,7 @@ char unhex(const char *start, UNUSED const char *end) {
 
 %%{
     machine FileCorporaParser;
+    alphtype unsigned char;
 
     action accumulateNum {
         num = (num * 10) + (fc - '0');

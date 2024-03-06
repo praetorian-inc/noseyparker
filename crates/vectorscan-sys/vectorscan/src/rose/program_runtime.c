@@ -959,7 +959,7 @@ m128 getData128(const struct core_info *ci, s64a offset, u32 *valid_data_mask) {
         *valid_data_mask = 0xffff;
         return loadu128(ci->buf + offset);
     }
-    ALIGN_DIRECTIVE u8 data[sizeof(m128)];
+    ALIGN_DIRECTIVE u8 data[sizeof(m128)] = { 0 };
     *valid_data_mask = getBufferDataComplex(ci, offset, data, 16);
     return *(m128 *)data;
 }

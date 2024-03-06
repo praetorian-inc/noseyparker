@@ -101,13 +101,13 @@ void NfaGeneratedCorpora::generate(unsigned id, vector<Corpus> &data) {
         pl.logicalKeyRenumber();
         const auto &m_lkey = pl.getLkeyMap();
         assert(!m_lkey.empty());
-        u32 a_subid; // arbitrary sub id
+        u32 a_subid = 0; // arbitrary sub id
         unordered_map<u32, vector<Corpus>> m_data;
         for (const auto &it : m_lkey) {
             a_subid = it.first;
             vector<Corpus> sub_data;
             generate(a_subid, sub_data);
-            m_data.emplace(a_subid, move(sub_data));
+            m_data.emplace(a_subid, std::move(sub_data));
         }
         assert(!m_data.empty());
         size_t num_corpus = m_data[a_subid].size();

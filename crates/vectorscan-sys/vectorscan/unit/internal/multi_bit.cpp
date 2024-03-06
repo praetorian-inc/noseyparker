@@ -1327,16 +1327,19 @@ static const MultiBitTestParam multibitTests[] = {
     { 1024, 1 },
     { 1025, 1 },
     { 2099, 1 },
+#ifdef NDEBUG
     { 10000, 1 },
     { 32768, 1 },
     { 32769, 1 },
     { 200000, 1 },
+#endif
 
     // Larger cases, bigger strides.
     { 1U << 18, 3701 },
     { 1U << 19, 3701 },
     { 1U << 20, 3701 },
     { 1U << 21, 3701 },
+#ifdef NDEBUG
     { 1U << 22, 3701 },
     { 1U << 23, 3701 },
     { 1U << 24, 3701 },
@@ -1347,6 +1350,7 @@ static const MultiBitTestParam multibitTests[] = {
     { 1U << 29, 24413 },
     { 1U << 30, 50377 },
     { 1U << 31, 104729 },
+#endif
 };
 
 INSTANTIATE_TEST_CASE_P(MultiBit, MultiBitTest, ValuesIn(multibitTests));

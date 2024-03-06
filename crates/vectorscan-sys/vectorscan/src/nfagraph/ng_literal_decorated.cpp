@@ -237,7 +237,7 @@ bool handleDecoratedLiterals(RoseBuild &rose, const NGHolder &g,
             DEBUG_PRINTF("failed validation\n");
             return false;
         }
-        masks.emplace_back(move(pm));
+        masks.emplace_back(std::move(pm));
     }
 
     for (const auto &pm : masks) {

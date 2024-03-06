@@ -55,6 +55,7 @@ enum ParamKey {
 
 %%{
     machine ExpressionParser;
+    alphtype unsigned char;
 
     action accumulateNum {
         num = (num * 10) + (fc - '0');

@@ -462,7 +462,7 @@ unique_ptr<raw_report_info> mcclellan_build_strat::gatherReports(
         *isSingleReport = 0;
     }
 
-    return move(ri);
+    return std::move(ri);
 }
 
 u32 raw_report_info_impl::getReportListSize() const {
@@ -1484,12 +1484,12 @@ bytecode_ptr<NFA> mcclellanCompile_i(raw_dfa &raw, accel_dfa_build_strat &strat,
             find_wide_state(info);
         }
 
-        u16 total_daddy = 0;
         bool any_cyclic_near_anchored_state
             = is_cyclic_near(raw, raw.start_anchored);
 
         // Sherman optimization
         if (info.impl_alpha_size > 16) {
+            u16 total_daddy = 0;
             for (u32 i = 0; i < info.size(); i++) {
                 if (info.is_widestate(i)) {
                     continue;

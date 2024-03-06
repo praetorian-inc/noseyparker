@@ -278,14 +278,14 @@ static really_inline m128 andnot128(m128 a, m128 b) {
 // aligned load
 static really_inline m128 load128(const void *ptr) {
     assert(ISALIGNED_N(ptr, alignof(m128)));
-    ptr = assume_aligned(ptr, 16);
+    ptr = vectorscan_assume_aligned(ptr, 16);
     return _mm_load_si128((const m128 *)ptr);
 }
 
 // aligned store
 static really_inline void store128(void *ptr, m128 a) {
     assert(ISALIGNED_N(ptr, alignof(m128)));
-    ptr = assume_aligned(ptr, 16);
+    ptr = vectorscan_assume_aligned(ptr, 16);
     *(m128 *)ptr = a;
 }
 

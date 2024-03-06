@@ -31,6 +31,8 @@
 #include "ue2common.h"
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
 #include "util/arch/x86/cpuid_inline.h"
+#elif defined(ARCH_AARCH64)
+#include "util/arch/arm/cpuid_inline.h"
 #endif
 
 HS_PUBLIC_API
@@ -43,7 +45,11 @@ hs_error_t HS_CDECL hs_valid_platform(void) {
         return HS_ARCH_ERROR;
     }
 #elif defined(ARCH_ARM32) || defined(ARCH_AARCH64)
-    return HS_SUCCESS;
+   if (check_neon()) {
+        return HS_SUCCESS;
+    } else {
+        return HS_ARCH_ERROR;
+    }
 #elif defined(ARCH_PPC64EL)
     return HS_SUCCESS;    
 #endif

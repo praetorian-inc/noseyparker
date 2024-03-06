@@ -199,11 +199,13 @@ hs_compile_multi_int(const char *const *expressions, const unsigned *flags,
     }
 
 #if defined(FAT_RUNTIME)
+#if defined(ARCH_IA32) || defined(ARCH_X86_64)
     if (!check_ssse3()) {
         *db = nullptr;
         *comp_error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
     }
+#endif
 #endif
 
     if (!checkMode(mode, comp_error)) {
@@ -320,13 +322,14 @@ hs_compile_lit_multi_int(const char *const *expressions, const unsigned *flags,
         *comp_error = generateCompileError("Invalid parameter: elements is zero", -1);
         return HS_COMPILER_ERROR;
     }
-
 #if defined(FAT_RUNTIME)
+#if defined(ARCH_IA32) || defined(ARCH_X86_64)
     if (!check_ssse3()) {
         *db = nullptr;
         *comp_error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
     }
+#endif
 #endif
 
     if (!checkMode(mode, comp_error)) {
@@ -500,10 +503,12 @@ hs_error_t hs_expression_info_int(const char *expression, unsigned int flags,
     }
 
 #if defined(FAT_RUNTIME)
+#if defined(ARCH_IA32) || defined(ARCH_X86_64)
     if (!check_ssse3()) {
         *error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
     }
+#endif
 #endif
 
     if (!info) {
@@ -631,9 +636,11 @@ hs_error_t HS_CDECL hs_populate_platform(hs_platform_info_t *platform) {
 extern "C" HS_PUBLIC_API
 hs_error_t HS_CDECL hs_free_compile_error(hs_compile_error_t *error) {
 #if defined(FAT_RUNTIME)
+#if defined(ARCH_IA32) || defined(ARCH_X86_64)
     if (!check_ssse3()) {
         return HS_ARCH_ERROR;
     }
+#endif
 #endif
     freeCompileError(error);
     return HS_SUCCESS;

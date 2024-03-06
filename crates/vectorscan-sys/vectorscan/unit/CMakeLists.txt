@@ -56,14 +56,9 @@ set(unit_hyperscan_SOURCES
     hyperscan/test_util.h
     )
 add_executable(unit-hyperscan ${unit_hyperscan_SOURCES})
-if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
-target_link_libraries(unit-hyperscan hs_shared expressionutil)
-else()
 target_link_libraries(unit-hyperscan hs expressionutil)
-endif()
 
-
-if (NOT FAT_RUNTIME )
+if (NOT FAT_RUNTIME AND BUILD_STATIC_LIBS)
 set(unit_internal_SOURCES
     ${gtest_SOURCES}
     internal/bitfield.cpp
@@ -133,7 +128,7 @@ endif(NOT RELEASE_BUILD)
 add_executable(unit-internal ${unit_internal_SOURCES})
 set_target_properties(unit-internal PROPERTIES COMPILE_FLAGS "${HS_CXX_FLAGS}")
 target_link_libraries(unit-internal hs corpusomatic)
-endif(NOT FAT_RUNTIME)
+endif (NOT FAT_RUNTIME AND BUILD_STATIC_LIBS)
 
 if (BUILD_CHIMERA)
     # enable Chimera unit tests

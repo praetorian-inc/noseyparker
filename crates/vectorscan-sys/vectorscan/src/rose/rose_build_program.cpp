@@ -135,7 +135,7 @@ RoseProgram::iterator RoseProgram::insert(RoseProgram::iterator it,
     assert(it != end());
     assert(prog.back()->code() == ROSE_INSTR_END);
 
-    return prog.insert(it, move(ri));
+    return prog.insert(it, std::move(ri));
 }
 
 RoseProgram::iterator RoseProgram::insert(RoseProgram::iterator it,
@@ -183,7 +183,7 @@ void RoseProgram::add_before_end(RoseProgram &&block) {
         return;
     }
 
-    insert(prev(prog.end()), move(block));
+    insert(prev(prog.end()), std::move(block));
 }
 
 void RoseProgram::add_block(RoseProgram &&block) {
@@ -202,6 +202,15 @@ void RoseProgram::add_block(RoseProgram &&block) {
                    block.prog.front().get());
     prog.insert(prog.end(), make_move_iterator(block.prog.begin()),
                 make_move_iterator(block.prog.end()));
+}
+
+template<class Iter>
+void RoseProgram::replace(Iter it, std::unique_ptr<RoseInstruction> ri) {
+    assert(!prog.empty());
+
+    const RoseInstruction *old_ptr = it->get();
+    *it = std::move(ri);
+    update_targets(prog.begin(), prog.end(), old_ptr, it->get());
 }
 
 bytecode_ptr<char> writeProgram(RoseEngineBlob &blob,
@@ -298,19 +307,19 @@ void addEnginesEodProgram(u32 eodNfaIterOffset, RoseProgram &program) {
 
     RoseProgram block;
     block.add_before_end(std::make_unique<RoseInstrEnginesEod>(eodNfaIterOffset));
-    program.add_block(move(block));
+    program.add_block(std::move(block));
 }
 
 void addSuffixesEodProgram(RoseProgram &program) {
     RoseProgram block;
     block.add_before_end(std::make_unique<RoseInstrSuffixesEod>());
-    program.add_block(move(block));
+    program.add_block(std::move(block));
 }
 
 void addMatcherEodProgram(RoseProgram &program) {
     RoseProgram block;
     block.add_before_end(std::make_unique<RoseInstrMatcherEod>());
-    program.add_block(move(block));
+    program.add_block(std::move(block));
 }
 
 void addFlushCombinationProgram(RoseProgram &program) {
@@ -350,7 +359,7 @@ void makeRoleCheckLeftfix(const RoseBuildImpl &build,
                                               build.g[v].left.leftfix_report,
                                               end_inst);
     }
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -385,7 +394,7 @@ void makeAnchoredLiteralDelay(const RoseBuildImpl &build,
 
     const auto *end_inst = program.end_instruction();
     auto ri = std::make_unique<RoseInstrAnchoredDelay>(groups, anch_id, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -395,7 +404,7 @@ void makeDedupe(const ReportManager &rm, const Report &report,
     auto ri =
         std::make_unique<RoseInstrDedupe>(report.quashSom, rm.getDkey(report),
                                      report.offsetAdjust, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -405,7 +414,7 @@ void makeDedupeSom(const ReportManager &rm, const Report &report,
     auto ri = std::make_unique<RoseInstrDedupeSom>(report.quashSom,
                                               rm.getDkey(report),
                                               report.offsetAdjust, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -513,11 +522,11 @@ void addLogicalSetRequired(const Report &report, ReportManager &rm,
     // set matching status of current lkey
     auto risl = std::make_unique<RoseInstrSetLogical>(report.lkey,
                                                  report.offsetAdjust);
-    program.add_before_end(move(risl));
+    program.add_before_end(std::move(risl));
     // set current lkey's corresponding ckeys active, pending to check
     for (auto ckey : rm.getRelateCKeys(report.lkey)) {
         auto risc = std::make_unique<RoseInstrSetCombination>(ckey);
-        program.add_before_end(move(risc));
+        program.add_before_end(std::move(risc));
     }
 }
 
@@ -534,14 +543,14 @@ void makeReport(const RoseBuildImpl &build, const ReportID id,
     if (report.minOffset > 0 || report.maxOffset < MAX_OFFSET) {
         auto ri = std::make_unique<RoseInstrCheckBounds>(report.minOffset,
                                                     report.maxOffset, end_inst);
-        report_block.add_before_end(move(ri));
+        report_block.add_before_end(std::move(ri));
     }
 
     // If this report has an exhaustion key, we can check it in the program
     // rather than waiting until we're in the callback adaptor.
     if (report.ekey != INVALID_EKEY) {
         auto ri = std::make_unique<RoseInstrCheckExhausted>(report.ekey, end_inst);
-        report_block.add_before_end(move(ri));
+        report_block.add_before_end(std::move(ri));
     }
 
     // External SOM reports that aren't passthrough need their SOM value
@@ -550,7 +559,7 @@ void makeReport(const RoseBuildImpl &build, const ReportID id,
         report.type != EXTERNAL_CALLBACK_SOM_PASS) {
         auto ri = std::make_unique<RoseInstrSomFromReport>();
         writeSomOperation(report, &ri->som);
-        report_block.add_before_end(move(ri));
+        report_block.add_before_end(std::move(ri));
     }
 
     // Min length constraint.
@@ -558,7 +567,7 @@ void makeReport(const RoseBuildImpl &build, const ReportID id,
         assert(build.hasSom);
         auto ri = std::make_unique<RoseInstrCheckMinLength>(
             report.offsetAdjust, report.minLength, end_inst);
-        report_block.add_before_end(move(ri));
+        report_block.add_before_end(std::move(ri));
     }
 
     if (report.quashSom) {
@@ -641,11 +650,11 @@ void makeReport(const RoseBuildImpl &build, const ReportID id,
         if (has_som) {
             auto ri = std::make_unique<RoseInstrReportSomAware>();
             writeSomOperation(report, &ri->som);
-            report_block.add_before_end(move(ri));
+            report_block.add_before_end(std::move(ri));
         } else {
             auto ri = std::make_unique<RoseInstrReportSomInt>();
             writeSomOperation(report, &ri->som);
-            report_block.add_before_end(move(ri));
+            report_block.add_before_end(std::move(ri));
         }
         break;
     case INTERNAL_ROSE_CHAIN: {
@@ -706,7 +715,7 @@ void makeReport(const RoseBuildImpl &build, const ReportID id,
         throw CompileError("Unable to generate bytecode.");
     }
 
-    program.add_block(move(report_block));
+    program.add_block(std::move(report_block));
 }
 
 static
@@ -736,7 +745,7 @@ void makeRoleReports(const RoseBuildImpl &build,
     for (ReportID id : g[v].reports) {
         makeReport(build, id, report_som, report_block);
     }
-    program.add_before_end(move(report_block));
+    program.add_before_end(std::move(report_block));
 }
 
 static
@@ -807,7 +816,7 @@ void makeCheckLiteralInstruction(const rose_literal_id &lit,
             ri = std::make_unique<RoseInstrCheckMedLit>(lit.s.get_string(),
                                                    end_inst);
         }
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
         return;
     }
 
@@ -825,7 +834,7 @@ void makeCheckLiteralInstruction(const rose_literal_id &lit,
     } else {
         ri = std::make_unique<RoseInstrCheckLongLit>(lit.s.get_string(), end_inst);
     }
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -841,7 +850,7 @@ void makeRoleCheckNotHandled(ProgramBuild &prog_build, RoseVertex v,
 
     const auto *end_inst = program.end_instruction();
     auto ri = std::make_unique<RoseInstrCheckNotHandled>(handled_key, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -970,7 +979,7 @@ bool makeRoleByte(const vector<LookEntry> &look, RoseProgram &program) {
         const auto *end_inst = program.end_instruction();
         auto ri = std::make_unique<RoseInstrCheckByte>(andmask_u8, cmpmask_u8, flip,
                                                   checkbyte_offset, end_inst);
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
         return true;
     }
     return false;
@@ -1002,7 +1011,7 @@ bool makeRoleMask(const vector<LookEntry> &look, RoseProgram &program) {
         const auto *end_inst = program.end_instruction();
         auto ri = std::make_unique<RoseInstrCheckMask>(and_mask, cmp_mask, neg_mask,
                                                   base_offset, end_inst);
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
         return true;
     }
     return false;
@@ -1057,7 +1066,7 @@ bool makeRoleMask32(const vector<LookEntry> &look,
     const auto *end_inst = program.end_instruction();
     auto ri = std::make_unique<RoseInstrCheckMask32>(and_mask, cmp_mask, neg_mask,
                                                 base_offset, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
     return true;
 }
 
@@ -1100,7 +1109,7 @@ bool makeRoleMask64(const vector<LookEntry> &look,
     const auto *end_inst = program.end_instruction();
     auto ri = std::make_unique<RoseInstrCheckMask64>(and_mask, cmp_mask, neg_mask,
                                                 base_offset, end_inst);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
     return true;
 }
 
@@ -1465,7 +1474,7 @@ bool makeRoleShufti(const vector<LookEntry> &look, RoseProgram &program,
         }
     }
     assert(ri);
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 
     return true;
 }
@@ -1488,7 +1497,7 @@ void makeLookaroundInstruction(const vector<LookEntry> &look,
         const CharReach &reach = look.begin()->reach;
         auto ri = std::make_unique<RoseInstrCheckSingleLookaround>(offset, reach,
                                                      program.end_instruction());
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
         return;
     }
 
@@ -1510,7 +1519,7 @@ void makeLookaroundInstruction(const vector<LookEntry> &look,
 
     auto ri = std::make_unique<RoseInstrCheckLookaround>(look,
                                                     program.end_instruction());
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -1765,7 +1774,7 @@ bool makeRoleMultipathShufti(const vector<vector<LookEntry>> &multi_look,
         auto ri = std::make_unique<RoseInstrCheckMultipathShufti16x8>
                   (nib_mask, bucket_select_lo, data_select_mask, hi_bits_mask,
                    lo_bits_mask, neg_mask, base_offset, last_start, end_inst);
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
     } else if (multi_len == 32) {
         neg_mask &= 0xffffffff;
         assert(!(hi_bits_mask & ~0xffffffffULL));
@@ -1775,20 +1784,20 @@ bool makeRoleMultipathShufti(const vector<vector<LookEntry>> &multi_look,
                       (hi_mask, lo_mask, bucket_select_lo, data_select_mask,
                        hi_bits_mask, lo_bits_mask, neg_mask, base_offset,
                        last_start, end_inst);
-            program.add_before_end(move(ri));
+            program.add_before_end(std::move(ri));
         } else {
             auto ri = std::make_unique<RoseInstrCheckMultipathShufti32x16>
                       (hi_mask, lo_mask, bucket_select_hi, bucket_select_lo,
                        data_select_mask, hi_bits_mask, lo_bits_mask, neg_mask,
                        base_offset, last_start, end_inst);
-            program.add_before_end(move(ri));
+            program.add_before_end(std::move(ri));
         }
     } else {
         auto ri = std::make_unique<RoseInstrCheckMultipathShufti64>
                   (hi_mask, lo_mask, bucket_select_lo, data_select_mask,
                    hi_bits_mask, lo_bits_mask, neg_mask, base_offset,
                    last_start, end_inst);
-        program.add_before_end(move(ri));
+        program.add_before_end(std::move(ri));
     }
     return true;
 }
@@ -1856,10 +1865,10 @@ void makeRoleMultipathLookaround(const vector<vector<LookEntry>> &multi_look,
         ordered_look.emplace_back(multi_entry);
     }
 
-    auto ri = std::make_unique<RoseInstrMultipathLookaround>(move(ordered_look),
+    auto ri = std::make_unique<RoseInstrMultipathLookaround>(std::move(ordered_look),
                                                         last_start, start_mask,
                                                     program.end_instruction());
-    program.add_before_end(move(ri));
+    program.add_before_end(std::move(ri));
 }
 
 static
@@ -1884,7 +1893,7 @@ void makeRoleLookaround(const RoseBuildImpl &build,
         vector<LookEntry> look;
         vector<LookEntry> look_more;
         if (!looks.empty()) {
-            look = move(looks.front());
+            look = std::move(looks.front());
         }
         findLookaroundMasks(build, v, look_more);
         mergeLookaround(look, look_more);
@@ -1992,7 +2001,7 @@ void makeRoleInfixTriggers(const RoseBuildImpl &build,
         triggers.emplace_back(g[e].rose_cancel_prev_top, lbi.queue, top);
     }
 
-    addInfixTriggerInstructions(move(triggers), program);
+    addInfixTriggerInstructions(std::move(triggers), program);
 }
 
 
@@ -2054,7 +2063,7 @@ void makeRoleEagerEodReports(const RoseBuildImpl &build,
             RoseProgram block;
             makeRoleReports(build, leftfix_info, needs_catchup,
                             target(e, build.g), block);
-            eod_program.add_block(move(block));
+            eod_program.add_block(std::move(block));
         }
     }
 
@@ -2068,7 +2077,7 @@ void makeRoleEagerEodReports(const RoseBuildImpl &build,
         addCheckOnlyEodInstruction(program);
     }
 
-    program.add_before_end(move(eod_program));
+    program.add_before_end(std::move(eod_program));
 }
 
 /** Makes a program for a role/vertex given a specific pred/in_edge. */
@@ -2115,33 +2124,33 @@ RoseProgram makeRoleProgram(const RoseBuildImpl &build,
     RoseProgram reports_block;
     makeRoleReports(build, leftfix_info, prog_build.needs_catchup, v,
                     reports_block);
-    effects_block.add_block(move(reports_block));
+    effects_block.add_block(std::move(reports_block));
 
     RoseProgram infix_block;
     makeRoleInfixTriggers(build, leftfix_info, engine_info_by_queue, v,
                           infix_block);
-    effects_block.add_block(move(infix_block));
+    effects_block.add_block(std::move(infix_block));
 
     // Note: SET_GROUPS instruction must be after infix triggers, as an infix
     // going dead may switch off groups.
     RoseProgram groups_block;
     makeRoleGroups(build.g, prog_build, v, groups_block);
-    effects_block.add_block(move(groups_block));
+    effects_block.add_block(std::move(groups_block));
 
     RoseProgram suffix_block;
     makeRoleSuffix(build, suffixes, engine_info_by_queue, v, suffix_block);
-    effects_block.add_block(move(suffix_block));
+    effects_block.add_block(std::move(suffix_block));
 
     RoseProgram state_block;
     makeRoleSetState(roleStateIndices, v, state_block);
-    effects_block.add_block(move(state_block));
+    effects_block.add_block(std::move(state_block));
 
     // Note: EOD eager reports may generate a CHECK_ONLY_EOD instruction (if
     // the program doesn't have one already).
     RoseProgram eod_block;
     makeRoleEagerEodReports(build, leftfix_info, prog_build.needs_catchup, v,
                             eod_block);
-    effects_block.add_block(move(eod_block));
+    effects_block.add_block(std::move(eod_block));
 
     /* a 'ghost role' may do nothing if we know that its groups are already set
      * - in this case we can avoid producing a program at all. */
@@ -2149,7 +2158,7 @@ RoseProgram makeRoleProgram(const RoseBuildImpl &build,
         return {};
     }
 
-    program.add_before_end(move(effects_block));
+    program.add_before_end(std::move(effects_block));
     return program;
 }
 
@@ -2195,7 +2204,7 @@ RoseProgram assembleProgramBlocks(vector<RoseProgram> &&blocks_in) {
             continue;
         }
 
-        blocks.emplace_back(move(block));
+        blocks.emplace_back(std::move(block));
         seen.emplace(blocks.back());
     }
 
@@ -2210,10 +2219,10 @@ RoseProgram assembleProgramBlocks(vector<RoseProgram> &&blocks_in) {
         if (!prog.empty() && reads_work_done_flag(block)) {
             RoseProgram clear_block;
             clear_block.add_before_end(std::make_unique<RoseInstrClearWorkDone>());
-            prog.add_block(move(clear_block));
+            prog.add_block(std::move(clear_block));
         }
 
-        prog.add_block(move(block));
+        prog.add_block(std::move(block));
     }
 
     return prog;
@@ -2256,7 +2265,7 @@ RoseProgram makeLiteralProgram(const RoseBuildImpl &build,
                                          engine_info_by_queue, roleStateIndices,
                                          prog_build, e);
         if (!role_prog.empty()) {
-            pred_blocks[pred_state].add_block(move(role_prog));
+            pred_blocks[pred_state].add_block(std::move(role_prog));
         }
     }
 
@@ -2275,7 +2284,7 @@ RoseProgram makeLiteralProgram(const RoseBuildImpl &build,
         auto role_prog = makeRoleProgram(build, leftfix_info, suffixes,
                                          engine_info_by_queue, roleStateIndices,
                                          prog_build, e);
-        role_programs.add_block(move(role_prog));
+        role_programs.add_block(std::move(role_prog));
     }
 
     if (lit_id == build.eod_event_literal_id) {
@@ -2290,8 +2299,8 @@ RoseProgram makeLiteralProgram(const RoseBuildImpl &build,
     // Literal may squash groups.
     makeGroupSquashInstruction(build, lit_id, unconditional_block);
 
-    role_programs.add_block(move(unconditional_block));
-    lit_program.add_before_end(move(role_programs));
+    role_programs.add_block(std::move(unconditional_block));
+    lit_program.add_before_end(std::move(role_programs));
 
     return lit_program;
 }
@@ -2322,10 +2331,10 @@ RoseProgram makeDelayRebuildProgram(const RoseBuildImpl &build,
         makePushDelayedInstructions(build.literals, prog_build,
                                     build.literal_info.at(lit_id).delayed_ids,
                                     prog);
-        blocks.emplace_back(move(prog));
+        blocks.emplace_back(std::move(prog));
     }
 
-    return assembleProgramBlocks(move(blocks));
+    return assembleProgramBlocks(std::move(blocks));
 }
 
 RoseProgram makeEodAnchorProgram(const RoseBuildImpl &build,
@@ -2352,7 +2361,7 @@ RoseProgram makeEodAnchorProgram(const RoseBuildImpl &build,
     for (const auto &id : g[v].reports) {
         makeReport(build, id, has_som, report_block);
     }
-    program.add_before_end(move(report_block));
+    program.add_before_end(std::move(report_block));
 
     return program;
 }
@@ -2404,7 +2413,7 @@ void addIncludedJumpProgram(RoseProgram &program, u32 child_offset,
     RoseProgram block;
     block.add_before_end(std::make_unique<RoseInstrIncludedJump>(child_offset,
                                                             squash));
-    program.add_block(move(block));
+    program.add_block(std::move(block));
 }
 
 static
@@ -2414,7 +2423,7 @@ void addPredBlockSingle(u32 pred_state, RoseProgram &pred_block,
     const auto *end_inst = pred_block.end_instruction();
     pred_block.insert(begin(pred_block),
                       std::make_unique<RoseInstrCheckState>(pred_state, end_inst));
-    program.add_block(move(pred_block));
+    program.add_block(std::move(pred_block));
 }
 
 static
@@ -2429,7 +2438,7 @@ void addPredBlocksAny(map<u32, RoseProgram> &pred_blocks, u32 num_states,
 
     const RoseInstruction *end_inst = sparse_program.end_instruction();
     auto ri = std::make_unique<RoseInstrSparseIterAny>(num_states, keys, end_inst);
-    sparse_program.add_before_end(move(ri));
+    sparse_program.add_before_end(std::move(ri));
 
     RoseProgram &block = pred_blocks.begin()->second;
 
@@ -2437,8 +2446,8 @@ void addPredBlocksAny(map<u32, RoseProgram> &pred_blocks, u32 num_states,
      * blocks are being collapsed together */
     stripCheckHandledInstruction(block);
 
-    sparse_program.add_before_end(move(block));
-    program.add_block(move(sparse_program));
+    sparse_program.add_before_end(std::move(block));
+    program.add_block(std::move(sparse_program));
 }
 
 static
@@ -2453,14 +2462,14 @@ void addPredBlocksMulti(map<u32, RoseProgram> &pred_blocks,
     // BEGIN instruction.
     auto ri_begin = std::make_unique<RoseInstrSparseIterBegin>(num_states, end_inst);
     RoseInstrSparseIterBegin *begin_inst = ri_begin.get();
-    sparse_program.add_before_end(move(ri_begin));
+    sparse_program.add_before_end(std::move(ri_begin));
 
     // NEXT instructions, one per pred program.
     u32 prev_key = pred_blocks.begin()->first;
     for (auto it = next(begin(pred_blocks)); it != end(pred_blocks); ++it) {
         auto ri = std::make_unique<RoseInstrSparseIterNext>(prev_key, begin_inst,
                                                        end_inst);
-        sparse_program.add_before_end(move(ri));
+        sparse_program.add_before_end(std::move(ri));
         prev_key = it->first;
     }
 
@@ -2474,7 +2483,7 @@ void addPredBlocksMulti(map<u32, RoseProgram> &pred_blocks,
 
         assert(dynamic_cast<const RoseInstrSparseIterBegin *>(out_it->get()) ||
                dynamic_cast<const RoseInstrSparseIterNext *>(out_it->get()));
-        out_it = sparse_program.insert(++out_it, move(flat_prog));
+        out_it = sparse_program.insert(++out_it, std::move(flat_prog));
 
         // Jump table target for this key is the beginning of the block we just
         // spliced in.
@@ -2486,9 +2495,9 @@ void addPredBlocksMulti(map<u32, RoseProgram> &pred_blocks,
     }
 
     // Write the jump table back into the SPARSE_ITER_BEGIN instruction.
-    begin_inst->jump_table = move(jump_table);
+    begin_inst->jump_table = std::move(jump_table);
 
-    program.add_block(move(sparse_program));
+    program.add_block(std::move(sparse_program));
 }
 
 void addPredBlocks(map<u32, RoseProgram> &pred_blocks, u32 num_states,

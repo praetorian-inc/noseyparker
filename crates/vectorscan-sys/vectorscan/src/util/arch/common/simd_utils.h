@@ -254,7 +254,7 @@ static really_inline m256 loadu2x128(const void *ptr) {
 // aligned store
 static really_inline void store256(void *ptr, m256 a) {
     assert(ISALIGNED_N(ptr, alignof(m256)));
-    ptr = assume_aligned(ptr, 16);
+    ptr = vectorscan_assume_aligned(ptr, 16);
     *(m256 *)ptr = a;
 }
 
@@ -486,7 +486,7 @@ static really_inline m384 load384(const void *ptr) {
 // aligned store
 static really_inline void store384(void *ptr, m384 a) {
     assert(ISALIGNED_16(ptr));
-    ptr = assume_aligned(ptr, 16);
+    ptr = vectorscan_assume_aligned(ptr, 16);
     *(m384 *)ptr = a;
 }
 

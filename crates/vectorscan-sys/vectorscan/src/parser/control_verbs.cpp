@@ -1,5 +1,5 @@
 
-#line 1 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 1 "src/parser/control_verbs.rl"
 /*
  * Copyright (c) 2017, Intel Corporation
  *
@@ -55,148 +55,11 @@ const char *read_control_verbs(const char *ptr, const char *end, size_t start,
     UNUSED int act;
 
     
-#line 59 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 59 "src/parser/control_verbs.cpp"
 static const char _ControlVerbs_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
 	7, 1, 8, 1, 9
-};
-
-static const unsigned char _ControlVerbs_key_offsets[] = {
-	0, 7, 8, 10, 12, 14, 16, 18, 
-	20, 21, 23, 25, 27, 30, 32, 34, 
-	36, 38, 40, 42, 44, 46, 48, 50, 
-	52, 55, 57, 59, 61, 63, 66, 68, 
-	70, 72, 74, 76, 79, 82, 84, 86, 
-	88, 90, 92, 94, 96, 98, 100, 102, 
-	105, 107, 109, 111, 113, 115, 117, 119, 
-	121, 123, 125, 127, 129, 131, 133, 135, 
-	137, 139, 141, 143, 146, 148, 149, 151, 
-	155, 157, 159, 160, 161
-};
-
-static const char _ControlVerbs_trans_keys[] = {
-	41, 65, 66, 67, 76, 78, 85, 41, 
-	41, 78, 41, 89, 41, 67, 41, 82, 
-	41, 76, 41, 70, 41, 41, 83, 41, 
-	82, 41, 95, 41, 65, 85, 41, 78, 
-	41, 89, 41, 67, 41, 78, 41, 73, 
-	41, 67, 41, 79, 41, 68, 41, 69, 
-	41, 82, 41, 76, 41, 70, 73, 41, 
-	77, 41, 73, 41, 84, 41, 95, 41, 
-	77, 82, 41, 65, 41, 84, 41, 67, 
-	41, 72, 41, 61, 41, 48, 57, 41, 
-	48, 57, 41, 69, 41, 67, 41, 85, 
-	41, 82, 41, 83, 41, 73, 41, 79, 
-	41, 78, 41, 79, 41, 95, 41, 65, 
-	83, 41, 85, 41, 84, 41, 79, 41, 
-	95, 41, 80, 41, 79, 41, 83, 41, 
-	83, 41, 69, 41, 83, 41, 83, 41, 
-	84, 41, 65, 41, 82, 41, 84, 41, 
-	95, 41, 79, 41, 80, 41, 84, 41, 
-	67, 84, 41, 80, 41, 41, 70, 41, 
-	49, 51, 56, 41, 54, 41, 50, 41, 
-	40, 42, 0
-};
-
-static const char _ControlVerbs_single_lengths[] = {
-	7, 1, 2, 2, 2, 2, 2, 2, 
-	1, 2, 2, 2, 3, 2, 2, 2, 
-	2, 2, 2, 2, 2, 2, 2, 2, 
-	3, 2, 2, 2, 2, 3, 2, 2, 
-	2, 2, 2, 1, 1, 2, 2, 2, 
-	2, 2, 2, 2, 2, 2, 2, 3, 
-	2, 2, 2, 2, 2, 2, 2, 2, 
-	2, 2, 2, 2, 2, 2, 2, 2, 
-	2, 2, 2, 3, 2, 1, 2, 4, 
-	2, 2, 1, 1, 1
-};
-
-static const char _ControlVerbs_range_lengths[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 1, 1, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
-};
-
-static const short _ControlVerbs_index_offsets[] = {
-	0, 8, 10, 13, 16, 19, 22, 25, 
-	28, 30, 33, 36, 39, 43, 46, 49, 
-	52, 55, 58, 61, 64, 67, 70, 73, 
-	76, 80, 83, 86, 89, 92, 96, 99, 
-	102, 105, 108, 111, 114, 117, 120, 123, 
-	126, 129, 132, 135, 138, 141, 144, 147, 
-	151, 154, 157, 160, 163, 166, 169, 172, 
-	175, 178, 181, 184, 187, 190, 193, 196, 
-	199, 202, 205, 208, 212, 215, 217, 220, 
-	225, 228, 231, 233, 235
-};
-
-static const char _ControlVerbs_indicies[] = {
-	0, 2, 3, 4, 5, 6, 7, 1, 
-	8, 1, 8, 9, 1, 8, 10, 1, 
-	11, 12, 1, 8, 13, 1, 8, 14, 
-	1, 8, 15, 1, 11, 1, 8, 16, 
-	1, 8, 17, 1, 8, 18, 1, 8, 
-	19, 20, 1, 8, 21, 1, 8, 22, 
-	1, 8, 12, 1, 8, 23, 1, 8, 
-	24, 1, 8, 25, 1, 8, 26, 1, 
-	8, 27, 1, 8, 15, 1, 8, 28, 
-	1, 11, 14, 1, 8, 15, 29, 1, 
-	8, 30, 1, 8, 31, 1, 8, 32, 
-	1, 8, 33, 1, 8, 34, 35, 1, 
-	8, 36, 1, 8, 37, 1, 8, 38, 
-	1, 8, 39, 1, 8, 40, 1, 8, 
-	41, 1, 11, 41, 1, 8, 42, 1, 
-	8, 43, 1, 8, 44, 1, 8, 45, 
-	1, 8, 46, 1, 8, 47, 1, 8, 
-	48, 1, 8, 39, 1, 8, 49, 1, 
-	8, 50, 1, 8, 51, 52, 1, 8, 
-	53, 1, 8, 54, 1, 8, 55, 1, 
-	8, 56, 1, 8, 57, 1, 8, 58, 
-	1, 8, 59, 1, 8, 60, 1, 8, 
-	61, 1, 8, 62, 1, 8, 15, 1, 
-	8, 63, 1, 8, 64, 1, 8, 65, 
-	1, 8, 66, 1, 8, 67, 1, 8, 
-	68, 1, 8, 69, 1, 8, 15, 1, 
-	8, 70, 71, 1, 8, 72, 1, 73, 
-	1, 8, 74, 1, 75, 76, 77, 78, 
-	1, 8, 15, 1, 8, 15, 1, 75, 
-	1, 80, 79, 82, 81, 0
-};
-
-static const char _ControlVerbs_trans_targs[] = {
-	75, 1, 2, 9, 22, 24, 45, 67, 
-	75, 3, 4, 75, 5, 6, 7, 8, 
-	10, 11, 12, 13, 16, 14, 15, 17, 
-	18, 19, 20, 21, 23, 25, 26, 27, 
-	28, 29, 30, 37, 31, 32, 33, 34, 
-	35, 36, 38, 39, 40, 41, 42, 43, 
-	44, 46, 47, 48, 59, 49, 50, 51, 
-	52, 53, 54, 55, 56, 57, 58, 60, 
-	61, 62, 63, 64, 65, 66, 68, 70, 
-	69, 75, 71, 75, 72, 73, 74, 75, 
-	76, 75, 0
-};
-
-static const char _ControlVerbs_trans_actions[] = {
-	19, 0, 0, 0, 0, 0, 0, 0, 
-	13, 0, 0, 11, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 9, 0, 7, 0, 0, 0, 15, 
-	5, 17, 0
 };
 
 static const char _ControlVerbs_to_state_actions[] = {
@@ -225,19 +88,6 @@ static const char _ControlVerbs_from_state_actions[] = {
 	0, 0, 0, 3, 0
 };
 
-static const short _ControlVerbs_eof_trans[] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 0, 82
-};
-
 static const int ControlVerbs_start = 75;
 static const int ControlVerbs_first_final = 75;
 static const int ControlVerbs_error = -1;
@@ -245,7 +95,7 @@ static const int ControlVerbs_error = -1;
 static const int ControlVerbs_en_main = 75;
 
 
-#line 249 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 99 "src/parser/control_verbs.cpp"
 	{
 	cs = ControlVerbs_start;
 	ts = 0;
@@ -253,18 +103,15 @@ static const int ControlVerbs_en_main = 75;
 	act = 0;
 	}
 
-#line 105 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 106 "src/parser/control_verbs.rl"
 
 
     try {
         
-#line 262 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 112 "src/parser/control_verbs.cpp"
 	{
-	int _klen;
-	unsigned int _trans;
 	const char *_acts;
 	unsigned int _nacts;
-	const char *_keys;
 
 	if ( p == pe )
 		goto _test_eof;
@@ -277,90 +124,590 @@ _resume:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 281 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 128 "src/parser/control_verbs.cpp"
 		}
 	}
 
-	_keys = _ControlVerbs_trans_keys + _ControlVerbs_key_offsets[cs];
-	_trans = _ControlVerbs_index_offsets[cs];
-
-	_klen = _ControlVerbs_single_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (unsigned int)(_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
+	switch ( cs ) {
+case 75:
+	if ( (*p) == 40u )
+		goto tr80;
+	goto tr79;
+case 76:
+	if ( (*p) == 42u )
+		goto tr82;
+	goto tr81;
+case 0:
+	switch( (*p) ) {
+		case 41u: goto tr0;
+		case 65u: goto tr2;
+		case 66u: goto tr3;
+		case 67u: goto tr4;
+		case 76u: goto tr5;
+		case 78u: goto tr6;
+		case 85u: goto tr7;
+	}
+	goto tr1;
+case 1:
+	if ( (*p) == 41u )
+		goto tr8;
+	goto tr1;
+case 2:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 78u: goto tr9;
+	}
+	goto tr1;
+case 3:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 89u: goto tr10;
+	}
+	goto tr1;
+case 4:
+	switch( (*p) ) {
+		case 41u: goto tr11;
+		case 67u: goto tr12;
+	}
+	goto tr1;
+case 5:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 82u: goto tr13;
+	}
+	goto tr1;
+case 6:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 76u: goto tr14;
+	}
+	goto tr1;
+case 7:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 70u: goto tr15;
+	}
+	goto tr1;
+case 8:
+	if ( (*p) == 41u )
+		goto tr11;
+	goto tr1;
+case 9:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr16;
+	}
+	goto tr1;
+case 10:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 82u: goto tr17;
+	}
+	goto tr1;
+case 11:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 95u: goto tr18;
+	}
+	goto tr1;
+case 12:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 65u: goto tr19;
+		case 85u: goto tr20;
+	}
+	goto tr1;
+case 13:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 78u: goto tr21;
+	}
+	goto tr1;
+case 14:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 89u: goto tr22;
+	}
+	goto tr1;
+case 15:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 67u: goto tr12;
+	}
+	goto tr1;
+case 16:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 78u: goto tr23;
+	}
+	goto tr1;
+case 17:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 73u: goto tr24;
+	}
+	goto tr1;
+case 18:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 67u: goto tr25;
+	}
+	goto tr1;
+case 19:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr26;
+	}
+	goto tr1;
+case 20:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 68u: goto tr27;
+	}
+	goto tr1;
+case 21:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 69u: goto tr15;
+	}
+	goto tr1;
+case 22:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 82u: goto tr28;
+	}
+	goto tr1;
+case 23:
+	switch( (*p) ) {
+		case 41u: goto tr11;
+		case 76u: goto tr14;
+	}
+	goto tr1;
+case 24:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 70u: goto tr15;
+		case 73u: goto tr29;
+	}
+	goto tr1;
+case 25:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 77u: goto tr30;
+	}
+	goto tr1;
+case 26:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 73u: goto tr31;
+	}
+	goto tr1;
+case 27:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr32;
+	}
+	goto tr1;
+case 28:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 95u: goto tr33;
+	}
+	goto tr1;
+case 29:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 77u: goto tr34;
+		case 82u: goto tr35;
+	}
+	goto tr1;
+case 30:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 65u: goto tr36;
+	}
+	goto tr1;
+case 31:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr37;
+	}
+	goto tr1;
+case 32:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 67u: goto tr38;
+	}
+	goto tr1;
+case 33:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 72u: goto tr39;
+	}
+	goto tr1;
+case 34:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 61u: goto tr40;
+	}
+	goto tr1;
+case 35:
+	if ( (*p) == 41u )
+		goto tr8;
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr41;
+	goto tr1;
+case 36:
+	if ( (*p) == 41u )
+		goto tr11;
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr41;
+	goto tr1;
+case 37:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 69u: goto tr42;
+	}
+	goto tr1;
+case 38:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 67u: goto tr43;
+	}
+	goto tr1;
+case 39:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 85u: goto tr44;
+	}
+	goto tr1;
+case 40:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 82u: goto tr45;
+	}
+	goto tr1;
+case 41:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr46;
+	}
+	goto tr1;
+case 42:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 73u: goto tr47;
+	}
+	goto tr1;
+case 43:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr48;
+	}
+	goto tr1;
+case 44:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 78u: goto tr39;
+	}
+	goto tr1;
+case 45:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr49;
+	}
+	goto tr1;
+case 46:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 95u: goto tr50;
+	}
+	goto tr1;
+case 47:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 65u: goto tr51;
+		case 83u: goto tr52;
+	}
+	goto tr1;
+case 48:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 85u: goto tr53;
+	}
+	goto tr1;
+case 49:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr54;
+	}
+	goto tr1;
+case 50:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr55;
+	}
+	goto tr1;
+case 51:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 95u: goto tr56;
+	}
+	goto tr1;
+case 52:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 80u: goto tr57;
+	}
+	goto tr1;
+case 53:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr58;
+	}
+	goto tr1;
+case 54:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr59;
+	}
+	goto tr1;
+case 55:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr60;
+	}
+	goto tr1;
+case 56:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 69u: goto tr61;
+	}
+	goto tr1;
+case 57:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr62;
+	}
+	goto tr1;
+case 58:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 83u: goto tr15;
+	}
+	goto tr1;
+case 59:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr63;
+	}
+	goto tr1;
+case 60:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 65u: goto tr64;
+	}
+	goto tr1;
+case 61:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 82u: goto tr65;
+	}
+	goto tr1;
+case 62:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr66;
+	}
+	goto tr1;
+case 63:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 95u: goto tr67;
+	}
+	goto tr1;
+case 64:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 79u: goto tr68;
+	}
+	goto tr1;
+case 65:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 80u: goto tr69;
+	}
+	goto tr1;
+case 66:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 84u: goto tr15;
+	}
+	goto tr1;
+case 67:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 67u: goto tr70;
+		case 84u: goto tr71;
+	}
+	goto tr1;
+case 68:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 80u: goto tr72;
+	}
+	goto tr1;
+case 69:
+	if ( (*p) == 41u )
+		goto tr73;
+	goto tr1;
+case 70:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 70u: goto tr74;
+	}
+	goto tr1;
+case 71:
+	switch( (*p) ) {
+		case 41u: goto tr75;
+		case 49u: goto tr76;
+		case 51u: goto tr77;
+		case 56u: goto tr78;
+	}
+	goto tr1;
+case 72:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 54u: goto tr15;
+	}
+	goto tr1;
+case 73:
+	switch( (*p) ) {
+		case 41u: goto tr8;
+		case 50u: goto tr15;
+	}
+	goto tr1;
+case 74:
+	if ( (*p) == 41u )
+		goto tr75;
+	goto tr1;
 	}
 
-	_klen = _ControlVerbs_range_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
+	tr82: cs = 0; goto _again;
+	tr1: cs = 1; goto _again;
+	tr2: cs = 2; goto _again;
+	tr9: cs = 3; goto _again;
+	tr10: cs = 4; goto _again;
+	tr12: cs = 5; goto _again;
+	tr13: cs = 6; goto _again;
+	tr14: cs = 7; goto _again;
+	tr15: cs = 8; goto _again;
+	tr3: cs = 9; goto _again;
+	tr16: cs = 10; goto _again;
+	tr17: cs = 11; goto _again;
+	tr18: cs = 12; goto _again;
+	tr19: cs = 13; goto _again;
+	tr21: cs = 14; goto _again;
+	tr22: cs = 15; goto _again;
+	tr20: cs = 16; goto _again;
+	tr23: cs = 17; goto _again;
+	tr24: cs = 18; goto _again;
+	tr25: cs = 19; goto _again;
+	tr26: cs = 20; goto _again;
+	tr27: cs = 21; goto _again;
+	tr4: cs = 22; goto _again;
+	tr28: cs = 23; goto _again;
+	tr5: cs = 24; goto _again;
+	tr29: cs = 25; goto _again;
+	tr30: cs = 26; goto _again;
+	tr31: cs = 27; goto _again;
+	tr32: cs = 28; goto _again;
+	tr33: cs = 29; goto _again;
+	tr34: cs = 30; goto _again;
+	tr36: cs = 31; goto _again;
+	tr37: cs = 32; goto _again;
+	tr38: cs = 33; goto _again;
+	tr39: cs = 34; goto _again;
+	tr40: cs = 35; goto _again;
+	tr41: cs = 36; goto _again;
+	tr35: cs = 37; goto _again;
+	tr42: cs = 38; goto _again;
+	tr43: cs = 39; goto _again;
+	tr44: cs = 40; goto _again;
+	tr45: cs = 41; goto _again;
+	tr46: cs = 42; goto _again;
+	tr47: cs = 43; goto _again;
+	tr48: cs = 44; goto _again;
+	tr6: cs = 45; goto _again;
+	tr49: cs = 46; goto _again;
+	tr50: cs = 47; goto _again;
+	tr51: cs = 48; goto _again;
+	tr53: cs = 49; goto _again;
+	tr54: cs = 50; goto _again;
+	tr55: cs = 51; goto _again;
+	tr56: cs = 52; goto _again;
+	tr57: cs = 53; goto _again;
+	tr58: cs = 54; goto _again;
+	tr59: cs = 55; goto _again;
+	tr60: cs = 56; goto _again;
+	tr61: cs = 57; goto _again;
+	tr62: cs = 58; goto _again;
+	tr52: cs = 59; goto _again;
+	tr63: cs = 60; goto _again;
+	tr64: cs = 61; goto _again;
+	tr65: cs = 62; goto _again;
+	tr66: cs = 63; goto _again;
+	tr67: cs = 64; goto _again;
+	tr68: cs = 65; goto _again;
+	tr69: cs = 66; goto _again;
+	tr7: cs = 67; goto _again;
+	tr70: cs = 68; goto _again;
+	tr72: cs = 69; goto _again;
+	tr71: cs = 70; goto _again;
+	tr74: cs = 71; goto _again;
+	tr76: cs = 72; goto _again;
+	tr77: cs = 73; goto _again;
+	tr78: cs = 74; goto _again;
+	tr0: cs = 75; goto f0;
+	tr8: cs = 75; goto f1;
+	tr11: cs = 75; goto f2;
+	tr73: cs = 75; goto f3;
+	tr75: cs = 75; goto f4;
+	tr79: cs = 75; goto f7;
+	tr81: cs = 75; goto f9;
+	tr80: cs = 76; goto f8;
 
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += (unsigned int)((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
+	f8: _acts = _ControlVerbs_actions + 5; goto execFuncs;
+	f4: _acts = _ControlVerbs_actions + 7; goto execFuncs;
+	f3: _acts = _ControlVerbs_actions + 9; goto execFuncs;
+	f2: _acts = _ControlVerbs_actions + 11; goto execFuncs;
+	f1: _acts = _ControlVerbs_actions + 13; goto execFuncs;
+	f7: _acts = _ControlVerbs_actions + 15; goto execFuncs;
+	f9: _acts = _ControlVerbs_actions + 17; goto execFuncs;
+	f0: _acts = _ControlVerbs_actions + 19; goto execFuncs;
 
-_match:
-	_trans = _ControlVerbs_indicies[_trans];
-_eof_trans:
-	cs = _ControlVerbs_trans_targs[_trans];
-
-	if ( _ControlVerbs_trans_actions[_trans] == 0 )
-		goto _again;
-
-	_acts = _ControlVerbs_actions + _ControlVerbs_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
-	{
-		switch ( *_acts++ )
-		{
+execFuncs:
+	_nacts = *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
 	case 2:
 #line 1 "NONE"
 	{te = p+1;}
 	break;
 	case 3:
-#line 76 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 77 "src/parser/control_verbs.rl"
 	{te = p+1;{
                 mode.utf8 = true;
             }}
 	break;
 	case 4:
-#line 80 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 81 "src/parser/control_verbs.rl"
 	{te = p+1;{
                 mode.ucp = true;
             }}
 	break;
 	case 5:
-#line 84 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 85 "src/parser/control_verbs.rl"
 	{te = p+1;{
                 ostringstream str;
                 str << "Unsupported control verb " << string(ts, te - ts);
@@ -368,7 +715,7 @@ _eof_trans:
             }}
 	break;
 	case 6:
-#line 90 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 91 "src/parser/control_verbs.rl"
 	{te = p+1;{
                 ostringstream str;
                 str << "Unknown control verb " << string(ts, te - ts);
@@ -376,29 +723,30 @@ _eof_trans:
             }}
 	break;
 	case 7:
-#line 97 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 98 "src/parser/control_verbs.rl"
 	{te = p+1;{
                 p--;
                 {p++; goto _out; }
             }}
 	break;
 	case 8:
-#line 97 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 98 "src/parser/control_verbs.rl"
 	{te = p;p--;{
                 p--;
                 {p++; goto _out; }
             }}
 	break;
 	case 9:
-#line 97 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 98 "src/parser/control_verbs.rl"
 	{{p = ((te))-1;}{
                 p--;
                 {p++; goto _out; }
             }}
 	break;
-#line 400 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 747 "src/parser/control_verbs.cpp"
 		}
 	}
+	goto _again;
 
 _again:
 	_acts = _ControlVerbs_actions + _ControlVerbs_to_state_actions[cs];
@@ -409,7 +757,7 @@ _again:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 413 "vectorscan-sys/vectorscan/src/parser/control_verbs.cpp"
+#line 761 "src/parser/control_verbs.cpp"
 		}
 	}
 
@@ -418,16 +766,90 @@ _again:
 	_test_eof: {}
 	if ( p == eof )
 	{
-	if ( _ControlVerbs_eof_trans[cs] > 0 ) {
-		_trans = _ControlVerbs_eof_trans[cs] - 1;
-		goto _eof_trans;
+	switch ( cs ) {
+	case 76: goto tr81;
+	case 0: goto tr0;
+	case 1: goto tr0;
+	case 2: goto tr0;
+	case 3: goto tr0;
+	case 4: goto tr0;
+	case 5: goto tr0;
+	case 6: goto tr0;
+	case 7: goto tr0;
+	case 8: goto tr0;
+	case 9: goto tr0;
+	case 10: goto tr0;
+	case 11: goto tr0;
+	case 12: goto tr0;
+	case 13: goto tr0;
+	case 14: goto tr0;
+	case 15: goto tr0;
+	case 16: goto tr0;
+	case 17: goto tr0;
+	case 18: goto tr0;
+	case 19: goto tr0;
+	case 20: goto tr0;
+	case 21: goto tr0;
+	case 22: goto tr0;
+	case 23: goto tr0;
+	case 24: goto tr0;
+	case 25: goto tr0;
+	case 26: goto tr0;
+	case 27: goto tr0;
+	case 28: goto tr0;
+	case 29: goto tr0;
+	case 30: goto tr0;
+	case 31: goto tr0;
+	case 32: goto tr0;
+	case 33: goto tr0;
+	case 34: goto tr0;
+	case 35: goto tr0;
+	case 36: goto tr0;
+	case 37: goto tr0;
+	case 38: goto tr0;
+	case 39: goto tr0;
+	case 40: goto tr0;
+	case 41: goto tr0;
+	case 42: goto tr0;
+	case 43: goto tr0;
+	case 44: goto tr0;
+	case 45: goto tr0;
+	case 46: goto tr0;
+	case 47: goto tr0;
+	case 48: goto tr0;
+	case 49: goto tr0;
+	case 50: goto tr0;
+	case 51: goto tr0;
+	case 52: goto tr0;
+	case 53: goto tr0;
+	case 54: goto tr0;
+	case 55: goto tr0;
+	case 56: goto tr0;
+	case 57: goto tr0;
+	case 58: goto tr0;
+	case 59: goto tr0;
+	case 60: goto tr0;
+	case 61: goto tr0;
+	case 62: goto tr0;
+	case 63: goto tr0;
+	case 64: goto tr0;
+	case 65: goto tr0;
+	case 66: goto tr0;
+	case 67: goto tr0;
+	case 68: goto tr0;
+	case 69: goto tr0;
+	case 70: goto tr0;
+	case 71: goto tr0;
+	case 72: goto tr0;
+	case 73: goto tr0;
+	case 74: goto tr0;
 	}
 	}
 
 	_out: {}
 	}
 
-#line 109 "vectorscan-sys/vectorscan/src/parser/control_verbs.rl"
+#line 110 "src/parser/control_verbs.rl"
     } catch (LocatedParseError &error) {
         if (ts >= ptr && ts <= pe) {
             error.locate(ts - ptr + start);

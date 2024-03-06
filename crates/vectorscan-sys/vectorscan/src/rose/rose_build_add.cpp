@@ -216,9 +216,9 @@ RoseRoleHistory selectHistory(const RoseBuildImpl &tbi, const RoseBuildData &bd,
     const bool fixed_offset_src = g[u].fixedOffset();
     const bool has_bounds = g[e].minBound || (g[e].maxBound != ROSE_BOUND_INF);
 
-    DEBUG_PRINTF("edge %zu->%zu, bounds=[%u,%u], fixed_u=%d, prefix=%d\n",
+    /*DEBUG_PRINTF("edge %zu->%zu, bounds=[%u,%u], fixed_u=%d, prefix=%d\n",
                  g[u].index, g[v].index, g[e].minBound, g[e].maxBound,
-                 (int)g[u].fixedOffset(), (int)g[v].left);
+                 (int)g[u].fixedOffset(), (int)g[v].left);*/
 
     if (g[v].left) {
         // Roles with prefix engines have their history handled by that prefix.
@@ -1780,7 +1780,7 @@ bool RoseBuildImpl::addOutfix(const NGHolder &h) {
     }
 
     if (rdfa) {
-        outfixes.emplace_back(OutfixInfo(move(rdfa)));
+        outfixes.emplace_back(OutfixInfo(std::move(rdfa)));
     } else {
         outfixes.emplace_back(OutfixInfo(cloneHolder(h)));
     }

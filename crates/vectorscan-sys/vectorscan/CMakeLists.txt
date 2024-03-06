@@ -1,10 +1,16 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.18.4)
+
 project (vectorscan C CXX)
 
 set (HS_MAJOR_VERSION 5)
 set (HS_MINOR_VERSION 4)
-set (HS_PATCH_VERSION 8)
+set (HS_PATCH_VERSION 11)
 set (HS_VERSION ${HS_MAJOR_VERSION}.${HS_MINOR_VERSION}.${HS_PATCH_VERSION})
+
+string (TIMESTAMP BUILD_DATE "%Y-%m-%d")
+message(STATUS "Build date: ${BUILD_DATE}")
+
+# Dependencies check
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(CheckCCompilerFlag)
@@ -18,8 +24,22 @@ INCLUDE (CheckSymbolExists)
 include (CMakeDependentOption)
 include (GNUInstallDirs)
 include (${CMAKE_MODULE_PATH}/platform.cmake)
+include (${CMAKE_MODULE_PATH}/boost.cmake)
+# PATCH
+# include (${CMAKE_MODULE_PATH}/ragel.cmake)
+# /PATCH
 
-find_package(PkgConfig QUIET)
+find_package(PkgConfig REQUIRED)
+
+# PATCH
+# find_program(RAGEL ragel)
+# 
+# if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
+#     message(FATAL_ERROR "Ragel state machine compiler not found")
+# endif()
+# /PATCH
+
+# Build type check
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "Default build type 'Release with debug info'")
@@ -53,83 +73,83 @@ foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${LIBDIR}")
 endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-    set(XCODE TRUE)
-endif()
-
-# older versions of cmake don't know things support isystem
-if (XCODE OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem")
-endif ()
-
 set(CMAKE_INCLUDE_CURRENT_DIR 1)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(SYSTEM include)
 
-include (${CMAKE_MODULE_PATH}/boost.cmake)
+# Compiler detection
 
-# find_package(Python COMPONENTS Interpreter)
-#
-# if(NOT Python_Interpreter_FOUND)
-#     message(FATAL_ERROR "No python interpreter found")
-# endif()
+include (${CMAKE_MODULE_PATH}/compiler.cmake)
 
-# # allow for reproducible builds - python for portability
-# if (DEFINED ENV{SOURCE_DATE_EPOCH})
-#       execute_process(
-#           COMMAND "${PYTHON}" "${CMAKE_MODULE_PATH}/formatdate.py" "$ENV{SOURCE_DATE_EPOCH}"
-#           OUTPUT_VARIABLE BUILD_DATE
-#           OUTPUT_STRIP_TRAILING_WHITESPACE)
-# else ()
-    string (TIMESTAMP BUILD_DATE "%Y-%m-%d")
-# endif ()
-message(STATUS "Build date: ${BUILD_DATE}")
+# CMake options
 
+if (BUILD_STATIC_AND_SHARED)
+    message(FATAL_ERROR "This option is no longer supported, please set at least one of BUILD_STATIC_LIBS and BUILD_SHARED_LIBS")
+endif()
 
-option(DEBUG_OUTPUT "Enable debug output (warning: very verbose)" FALSE)
+option(BUILD_SHARED_LIBS "Build shared libs" OFF)
+option(BUILD_STATIC_LIBS "Build static libs" OFF)
 
+if (BUILD_SHARED_LIBS)
+    message(STATUS "Building shared libraries")
+endif()
+if (BUILD_STATIC_LIBS)
+    message(STATUS "Building static libraries")
+endif()
+
+if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+    # if none are set build static libs
+    message(STATUS "Neither shared nor static libraries were requested, building static libraries")
+    set(BUILD_STATIC_LIBS ON)
+endif ()
+
+CMAKE_DEPENDENT_OPTION(DUMP_SUPPORT "Dump code support; normally on, except in release builds" ON "NOT RELEASE_BUILD" OFF)
+CMAKE_DEPENDENT_OPTION(DISABLE_ASSERTS "Disable assert(); Asserts are enabled in debug builds, disabled in release builds" OFF "NOT RELEASE_BUILD" ON)
+
+option(DEBUG_OUTPUT "Enable debug output (warning: very verbose)" OFF)
 if(DEBUG_OUTPUT)
     add_definitions(-DDEBUG)
     set(RELEASE_BUILD FALSE)
 endif(DEBUG_OUTPUT)
 
-option(BUILD_SHARED_LIBS "Build shared libs instead of static" OFF)
-option(BUILD_STATIC_AND_SHARED "Build shared libs as well as static" OFF)
-
-if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
-        message(STATUS "Building shared libraries")
-else()
-        message(STATUS "Building static libraries")
-endif()
-
-if (NOT BUILD_SHARED_LIBS)
-    # build static libs
-    set(BUILD_STATIC_LIBS ON)
-    mark_as_advanced(BUILD_STATIC_LIBS)
-endif ()
 
 #for config
 if (RELEASE_BUILD)
     set(HS_OPTIMIZE ON)
+    add_definitions(-DNDEBUG)
 endif()
+
+# Detect OS and if Fat Runtime is available
+include (${CMAKE_MODULE_PATH}/osdetection.cmake)
+
+if (ARCH_IA32 OR ARCH_X86_64)
+    include (${CMAKE_MODULE_PATH}/cflags-x86.cmake)
+    set(ARCH_FLAG march)
+elseif (ARCH_ARM32 OR ARCH_AARCH64)
+    include (${CMAKE_MODULE_PATH}/cflags-arm.cmake)
+    set(ARCH_FLAG march)
+elseif (ARCH_PPC64EL)
+    include (${CMAKE_MODULE_PATH}/cflags-ppc64le.cmake)
+    set(ARCH_FLAG mcpu)
+endif ()
+
+# Detect Native arch flags if requested
+include (${CMAKE_MODULE_PATH}/archdetect.cmake)
+
+# Configure Compiler flags (Generic)
 
 include (${CMAKE_MODULE_PATH}/sanitize.cmake)
 
-CMAKE_DEPENDENT_OPTION(DUMP_SUPPORT "Dump code support; normally on, except in release builds" ON "NOT RELEASE_BUILD" OFF)
-
-CMAKE_DEPENDENT_OPTION(DISABLE_ASSERTS "Disable assert(); Asserts are enabled in debug builds, disabled in release builds" OFF "NOT RELEASE_BUILD" ON)
-
-option(BUILD_AVX512 "Experimental: support avx512 in the fat runtime" OFF)
-
-option(BUILD_AVX512VBMI "Experimental: support avx512vbmi in the fat runtime" OFF)
-
-if (BUILD_AVX512VBMI)
-    set(BUILD_AVX512 ON)
-endif ()
-
-# TODO: per platform config files?
+if (NOT FAT_RUNTIME)
+    if (GNUCC_TUNE)
+        set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
+        set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
+    else()
+        set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_C_FLAGS}")
+        set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_CXX_FLAGS}")
+    endif()
+endif()
 
 # remove CMake's idea of optimisation
 foreach (CONFIG ${CMAKE_BUILD_TYPE} ${CMAKE_CONFIGURATION_TYPES})
@@ -137,133 +157,8 @@ foreach (CONFIG ${CMAKE_BUILD_TYPE} ${CMAKE_CONFIGURATION_TYPES})
     string(REGEX REPLACE "-O[^ ]*" "" CMAKE_CXX_FLAGS_${CONFIG} "${CMAKE_CXX_FLAGS_${CONFIG}}")
 endforeach ()
 
-if (CMAKE_C_COMPILER_ID MATCHES "Intel")
-    set(SKYLAKE_FLAG "-xCORE-AVX512")
-else ()
-    set(SKYLAKE_FLAG "-march=skylake-avx512")
-    set(ICELAKE_FLAG "-march=icelake-server")
-endif ()
-
-if(ARCH_PPC64EL)
-    set(ARCH_FLAG mcpu)
-else()
-    set(ARCH_FLAG march)
-endif()
-
-# Detect best GNUCC_ARCH to tune for
-if (CMAKE_COMPILER_IS_GNUCC AND NOT CROSS_COMPILE)
-    message(STATUS "gcc version ${CMAKE_C_COMPILER_VERSION}")
-
-    # If gcc doesn't recognise the host cpu, then mtune=native becomes
-    # generic, which isn't very good in some cases. march=native looks at
-    # cpuid info and then chooses the best microarch it can (and replaces
-    # the flag), so use that for tune.
-
-    # arg1 might exist if using ccache
-    string (STRIP "${CMAKE_C_COMPILER_ARG1}" CC_ARG1)
-    set (EXEC_ARGS ${CC_ARG1} -c -Q --help=target -${ARCH_FLAG}=native -mtune=native)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} ${EXEC_ARGS}
-        OUTPUT_VARIABLE _GCC_OUTPUT)
-    string(FIND "${_GCC_OUTPUT}" "${ARCH_FLAG}" POS)
-    string(SUBSTRING "${_GCC_OUTPUT}" ${POS} -1 _GCC_OUTPUT)
-    string(REGEX REPLACE "${ARCH_FLAG}=[ \t]*([^ \n]*)[ \n].*" "\\1" GNUCC_ARCH "${_GCC_OUTPUT}")
-
-    # test the parsed flag
-    set (EXEC_ARGS ${CC_ARG1} -E - -mtune=${GNUCC_ARCH})
-    execute_process(COMMAND ${CMAKE_C_COMPILER} ${EXEC_ARGS}
-        OUTPUT_QUIET ERROR_QUIET
-        INPUT_FILE /dev/null
-        RESULT_VARIABLE GNUCC_TUNE_TEST)
-    if (NOT GNUCC_TUNE_TEST EQUAL 0)
-        message(WARNING "Something went wrong determining gcc tune: -mtune=${GNUCC_ARCH} not valid, falling back to -mtune=native")
-        set(TUNE_FLAG native)
-    else()
-        set(TUNE_FLAG ${GNUCC_ARCH})
-        message(STATUS "gcc will tune for ${GNUCC_ARCH}, ${TUNE_FLAG}")
-    endif()
-elseif (CMAKE_COMPILER_IS_CLANG AND NOT CROSS_COMPILE)
-    if (ARCH_IA32 OR ARCH_X86_64)
-        set(GNUCC_ARCH native)
-        set(TUNE_FLAG generic)
-    elseif(ARCH_AARCH64)
-       set(GNUCC_ARCH armv8)
-       set(TUNE_FLAG generic)
-    elseif(ARCH_ARM32)
-       set(GNUCC_ARCH armv7a)
-       set(TUNE_FLAG generic)
-    else()
-       set(GNUCC_ARCH native)
-       set(TUNE_FLAG generic)
-    endif()
-    message(STATUS "clang will tune for ${GNUCC_ARCH}, ${TUNE_FLAG}")
-elseif (CROSS_COMPILE)
-    set(GNUCC_ARCH generic)
-    set(TUNE_FLAG generic)
-endif()
-
-if (ARCH_IA32 OR ARCH_X86_64)
-    if (NOT FAT_RUNTIME)
-        if (BUILD_AVX512)
-            set(ARCH_C_FLAGS "${SKYLAKE_FLAG}")
-            set(ARCH_CXX_FLAGS "${SKYLAKE_FLAG}")
-        elseif (BUILD_AVX2)
-            set(ARCH_C_FLAGS "-mavx2")
-            set(ARCH_CXX_FLAGS "-mavx2")
-        else()
-            set(ARCH_C_FLAGS "-msse4.2")
-            set(ARCH_CXX_FLAGS "-msse4.2")
-        endif()
-    else()
-       set(ARCH_C_FLAGS "-msse4.2")
-       set(ARCH_CXX_FLAGS "-msse4.2")
-    endif()
-endif()
-
-if (ARCH_AARCH64)
-    if (BUILD_SVE2_BITPERM)
-        set(GNUCC_ARCH "${GNUCC_ARCH}+sve2-bitperm")
-    elseif (BUILD_SVE2)
-        set(GNUCC_ARCH "${GNUCC_ARCH}+sve2")
-    elseif (BUILD_SVE)
-        set(GNUCC_ARCH "${GNUCC_ARCH}+sve")
-    endif ()
-endif(ARCH_AARCH64)
-
-
 message(STATUS "ARCH_C_FLAGS   : ${ARCH_C_FLAGS}")
 message(STATUS "ARCH_CXX_FLAGS : ${ARCH_CXX_FLAGS}")
-
-if (NOT FAT_RUNTIME)
-    set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_C_FLAGS}")
-    set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_CXX_FLAGS}")
-endif()
-
-#if (ARCH_IA32 OR ARCH_X86_64 OR ARCH_ARM32 OR ARCH_AARCH64)
-#    if (NOT CMAKE_C_FLAGS MATCHES .*march.* AND NOT CMAKE_C_FLAGS MATCHES .*mtune.*)
-#        set(ARCH_C_FLAGS "-march=${GNUCC_ARCH} -mtune=${TUNE_FLAG}")
-#    endif()
-#    if (NOT CMAKE_CXX_FLAGS MATCHES .*march.* AND NOT CMAKE_CXX_FLAGS MATCHES .*mtune.*)
-#        set(ARCH_CXX_FLAGS "-march=${GNUCC_ARCH} -mtune=${TUNE_FLAG}")
-#    endif()
-#endif()
-
-#if(ARCH_PPC64EL)
-#    if (NOT CMAKE_C_FLAGS MATCHES .*march.* AND NOT CMAKE_C_FLAGS MATCHES .*mtune.*)
-#        set(ARCH_C_FLAGS "-mtune=${TUNE_FLAG}")
-#    endif()
-#    if (NOT CMAKE_CXX_FLAGS MATCHES .*march.* AND NOT CMAKE_CXX_FLAGS MATCHES .*mtune.*)
-#        set(ARCH_CXX_FLAGS "-mtune=${TUNE_FLAG}")
-#    endif()
-#endif()
-
-# compiler version checks TODO: test more compilers
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(GNUCXX_MINVER "9")
-    message(STATUS "g++ version ${CMAKE_CXX_COMPILER_VERSION}")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS GNUCXX_MINVER)
-        message(FATAL_ERROR "A minimum of g++ ${GNUCXX_MINVER} is required for C++17 support")
-    endif()
-endif()
 
 if(RELEASE_BUILD)
     if (NOT CMAKE_BUILD_TYPE MATCHES MINSIZEREL)
@@ -278,238 +173,12 @@ else()
     set(OPT_CXX_FLAG "-O0")
 endif(RELEASE_BUILD)
 
-# set compiler flags - more are tested and added later
-set(EXTRA_C_FLAGS "${OPT_C_FLAG} -std=c17 -Wall -Wextra -Wshadow -Wcast-qual -fno-strict-aliasing")
-set(EXTRA_CXX_FLAGS "${OPT_CXX_FLAG} -std=c++17 -Wall -Wextra -Wshadow -Wswitch -Wreturn-type -Wcast-qual -Wno-deprecated -Wnon-virtual-dtor -fno-strict-aliasing")
-if (NOT CMAKE_COMPILER_IS_CLANG)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -fno-new-ttp-matching")
-endif()
-
-if (NOT RELEASE_BUILD)
-    # -Werror is most useful during development, don't potentially break
-    # release builds
-    # set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
-    # set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Werror")
-endif()
-
-if (DISABLE_ASSERTS)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -DNDEBUG")
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -DNDEBUG")
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCC)
-    # spurious warnings?
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-array-bounds -Wno-maybe-uninitialized")
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-maybe-uninitialized")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-        set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -fabi-version=0")
-    endif ()
-    # don't complain about abi
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-abi")
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-abi")
-endif()
-
-if (NOT(ARCH_IA32 AND RELEASE_BUILD))
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -fno-omit-frame-pointer")
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -fno-omit-frame-pointer")
-endif()
-
-CHECK_INCLUDE_FILES(unistd.h HAVE_UNISTD_H)
-if (ARCH_IA32 OR ARCH_X86_64)
-  CHECK_INCLUDE_FILES(intrin.h HAVE_C_INTRIN_H)
-  CHECK_INCLUDE_FILE_CXX(intrin.h HAVE_CXX_INTRIN_H)
-  CHECK_INCLUDE_FILES(x86intrin.h HAVE_C_X86INTRIN_H)
-  CHECK_INCLUDE_FILE_CXX(x86intrin.h HAVE_CXX_X86INTRIN_H)
-elseif (ARCH_ARM32 OR ARCH_AARCH64)
-  CHECK_INCLUDE_FILE_CXX(arm_neon.h HAVE_C_ARM_NEON_H)
-  if (BUILD_SVE OR BUILD_SVE2 OR BUILD_SVE2_BITPERM)
-    CHECK_INCLUDE_FILE_CXX(arm_sve.h HAVE_C_ARM_SVE_H)
-    if (NOT HAVE_C_ARM_SVE_H)
-      message(FATAL_ERROR "arm_sve.h is required to build for SVE.")
-    endif()
-  endif()
-elseif (ARCH_PPC64EL)
-  CHECK_INCLUDE_FILE_CXX(altivec.h HAVE_C_PPC64EL_ALTIVEC_H)
-endif()
-
-CHECK_FUNCTION_EXISTS(posix_memalign HAVE_POSIX_MEMALIGN)
-CHECK_FUNCTION_EXISTS(_aligned_malloc HAVE__ALIGNED_MALLOC)
-
-# these end up in the config file
-CHECK_C_COMPILER_FLAG(-fvisibility=hidden HAS_C_HIDDEN)
-CHECK_CXX_COMPILER_FLAG(-fvisibility=hidden HAS_CXX_HIDDEN)
-
-# are we using libc++
-CHECK_CXX_SYMBOL_EXISTS(_LIBCPP_VERSION ciso646 HAVE_LIBCPP)
-
-if (RELEASE_BUILD)
-    if (HAS_C_HIDDEN)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -fvisibility=hidden")
-    endif()
-    if (HAS_CXX_HIDDEN)
-        set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -fvisibility=hidden")
-    endif()
-endif()
-
-option(FAT_RUNTIME "Build a library that supports multiple microarchitectures" ON)
-if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND FAT_RUNTIME MATCHES "ON")
-    # This is a Linux-only feature for now - requires platform support
-    # elsewhere
-    message(STATUS "generator is ${CMAKE_GENERATOR}")
-    if (CMAKE_C_COMPILER_IS_CLANG AND CMAKE_C_COMPILER_VERSION VERSION_LESS "3.9")
-        message (STATUS "Clang v3.9 or higher required for fat runtime, cannot build fat runtime")
-        set (FAT_RUNTIME_REQUISITES FALSE)
-    elseif (NOT (CMAKE_GENERATOR MATCHES "Unix Makefiles" OR
-            (CMAKE_VERSION VERSION_GREATER "3.0" AND CMAKE_GENERATOR MATCHES "Ninja")))
-        message (STATUS "Building the fat runtime requires the Unix Makefiles generator, or Ninja with CMake v3.0 or higher")
-        set (FAT_RUNTIME_REQUISITES FALSE)
-    else()
-        include (${CMAKE_MODULE_PATH}/attrib.cmake)
-        if (NOT HAS_C_ATTR_IFUNC)
-            message(STATUS "Compiler does not support ifunc attribute, cannot build fat runtime")
-            set (FAT_RUNTIME_REQUISITES FALSE)
-        else ()
-            set (FAT_RUNTIME_REQUISITES TRUE)
-        endif()
-    endif()
-    if (NOT FAT_RUNTIME_REQUISITES OR NOT RELEASE_BUILD)
-      set (FAT_RUNTIME OFF)
-    endif()
-endif ()
-
-include (${CMAKE_MODULE_PATH}/arch.cmake)
-
-# testing a builtin takes a little more work
-CHECK_C_SOURCE_COMPILES("void *aa_test(void *x) { return __builtin_assume_aligned(x, 16);}\nint main(void) { return 0; }" HAVE_CC_BUILTIN_ASSUME_ALIGNED)
-CHECK_CXX_SOURCE_COMPILES("void *aa_test(void *x) { return __builtin_assume_aligned(x, 16);}\nint main(void) { return 0; }" HAVE_CXX_BUILTIN_ASSUME_ALIGNED)
-# Clang does not use __builtin_constant_p() the same way as gcc
-if (NOT CMAKE_COMPILER_IS_CLANG)
-   CHECK_C_SOURCE_COMPILES("int main(void) { __builtin_constant_p(0); }" HAVE__BUILTIN_CONSTANT_P)
-endif()
-
-set(C_FLAGS_TO_CHECK
-# Variable length arrays are way bad, most especially at run time
-"-Wvla"
-# Pointer arith on void pointers is doing it wrong.
- "-Wpointer-arith"
-# Build our C code with -Wstrict-prototypes -Wmissing-prototypes
- "-Wstrict-prototypes"
- "-Wmissing-prototypes"
-)
-foreach (FLAG ${C_FLAGS_TO_CHECK})
-    # munge the name so it doesn't break things
-    string(REPLACE "-" "_" FNAME C_FLAG${FLAG})
-    CHECK_C_COMPILER_FLAG("${FLAG}" ${FNAME})
-    if (${FNAME})
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} ${FLAG}")
-    endif()
-endforeach()
-
-set(CXX_FLAGS_TO_CHECK
-"-Wvla"
-"-Wpointer-arith"
-)
-foreach (FLAG ${CXX_FLAGS_TO_CHECK})
-    string(REPLACE "-" "_" FNAME CXX_FLAG${FLAG})
-    CHECK_CXX_COMPILER_FLAG("${FLAG}" ${FNAME})
-    if (${FNAME})
-        set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} ${FLAG}")
-    endif()
-endforeach()
-
-# self-assign should be thrown away, but clang whinges
-CHECK_C_COMPILER_FLAG("-Wself-assign" CC_SELF_ASSIGN)
-if (CC_SELF_ASSIGN)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-self-assign")
-endif()
-CHECK_CXX_COMPILER_FLAG("-Wself-assign" CXX_SELF_ASSIGN)
-if (CXX_SELF_ASSIGN)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-self-assign")
-endif()
-
-# clang gets up in our face for going paren crazy with macros
-CHECK_C_COMPILER_FLAG("-Wparentheses-equality" CC_PAREN_EQUALITY)
-if (CC_PAREN_EQUALITY)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-parentheses-equality")
-endif()
-
-# clang complains about unused const vars in our Ragel-generated code.
-CHECK_CXX_COMPILER_FLAG("-Wunused-const-variable" CXX_UNUSED_CONST_VAR)
-if (CXX_UNUSED_CONST_VAR)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-unused-const-variable")
-endif()
-
-# gcc 6 complains about type attributes that get ignored, like alignment
-CHECK_CXX_COMPILER_FLAG("-Wignored-attributes" CXX_IGNORED_ATTR)
-if (CXX_IGNORED_ATTR)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-ignored-attributes")
-endif()
-
-# gcc 9 complains about redundant move for returned variable
-CHECK_CXX_COMPILER_FLAG("-Wredundant-move" CXX_REDUNDANT_MOVE)
-if (CXX_REDUNDANT_MOVE)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-redundant-move")
-endif()
-
-# note this for later
-# g++ doesn't have this flag but clang does
-CHECK_CXX_COMPILER_FLAG("-Wweak-vtables" CXX_WEAK_VTABLES)
-if (CXX_WEAK_VTABLES)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wweak-vtables")
-endif()
-
-CHECK_CXX_COMPILER_FLAG("-Wmissing-declarations" CXX_MISSING_DECLARATIONS)
-if (CXX_MISSING_DECLARATIONS)
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wmissing-declarations")
-endif()
-
-CHECK_CXX_COMPILER_FLAG("-Wunused-local-typedefs" CXX_UNUSED_LOCAL_TYPEDEFS)
-
-# gcc5 complains about this
-CHECK_CXX_COMPILER_FLAG("-Wunused-variable" CXX_WUNUSED_VARIABLE)
-
-# gcc 10 complains about this
-CHECK_C_COMPILER_FLAG("-Wstringop-overflow" CC_STRINGOP_OVERFLOW)
-if(CC_STRINGOP_OVERFLOW)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-stringop-overflow")
-endif()
+include (${CMAKE_MODULE_PATH}/cflags-generic.cmake)
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(LINUX TRUE)
-endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
-
-if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-    set(FREEBSD true)
-endif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-
-
-if (FAT_RUNTIME)
-    if (NOT (ARCH_IA32 OR ARCH_X86_64))
-        message(FATAL_ERROR "Fat runtime is not supported on non-Intel architectures")
-    else()
-        message(STATUS "Building runtime for multiple microarchitectures")
-    endif()
-else()
-    if (CROSS_COMPILE)
-        message(STATUS "Building for target CPU: ${ARCH_C_FLAGS}")
-    else()
-        message(STATUS "Building for current host CPU: ${ARCH_C_FLAGS}")
-    endif()
-endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_CXX_FLAGS}")
-
-add_subdirectory(util)
-
-option(BUILD_DOCS "Enable building of documentation (default TRUE)" TRUE)
-if(BUILD_DOCS)
-    add_subdirectory(doc/dev-reference)
-endif()
 
 # PCRE check, we have a fixed requirement for PCRE to use Chimera
 # and hscollider
@@ -526,23 +195,27 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
     set(BUILD_CHIMERA TRUE)
 endif()
 
-option(BUILD_UNITTESTS "Build unit tests (default TRUE)" TRUE)
-if(BUILD_UNITTESTS)
-    add_subdirectory(unit)
-endif()
-
-option(BUILD_TOOLS "Build supporting tools (default TRUE)" TRUE)
-if (BUILD_TOOLS AND EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
-    add_subdirectory(tools)
-endif()
-if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
-    add_subdirectory(chimera)
-endif()
+# PATCH
+# set(RAGEL_C_FLAGS "-Wno-unused -funsigned-char")
+# 
+# set_source_files_properties(
+#     src/parser/Parser.cpp
+#     PROPERTIES
+#         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
+# 
+# ragelmaker(src/parser/Parser.rl)
+# 
+# set_source_files_properties(
+#    src/parser/control_verbs.cpp
+#     PROPERTIES
+#         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
+# 
+# ragelmaker(src/parser/control_verbs.rl)
+# /PATCH
 
 # do substitutions
 configure_file(${CMAKE_MODULE_PATH}/config.h.in ${PROJECT_BINARY_DIR}/config.h)
 configure_file(src/hs_version.h.in ${PROJECT_BINARY_DIR}/hs_version.h)
-
 
 configure_file(libhs.pc.in libhs.pc @ONLY) # only replace @ quoted vars
 install(FILES ${CMAKE_BINARY_DIR}/libhs.pc
@@ -557,19 +230,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
 endif()
 
-set(RAGEL_C_FLAGS "-Wno-unused")
-
-set_source_files_properties(
-    src/parser/Parser.cpp
-    PROPERTIES
-        COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-
-set_source_files_properties(
-    src/parser/control_verbs.cpp
-    PROPERTIES
-        COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-
 SET(hs_HEADERS
+    ${PROJECT_BINARY_DIR}/hs_version.h
     src/hs.h
     src/hs_common.h
     src/hs_compile.h
@@ -589,16 +251,20 @@ set (hs_exec_common_SRCS
     ${hs_exec_common_SRCS}
     src/util/arch/x86/cpuid_flags.c
     )
-elseif (ARCH_ARM32 OR ARCH_AARCH64 OR ARCH_PPC64EL)
+elseif (ARCH_ARM32 OR ARCH_AARCH64)
 set (hs_exec_common_SRCS
     ${hs_exec_common_SRCS}
     src/util/arch/arm/cpuid_flags.c
     )
+elseif (ARCH_PPC64EL)
+set (hs_exec_common_SRCS
+    ${hs_exec_common_SRCS}
+    src/util/arch/ppc64el/cpuid_flags.c)
 endif ()
 
 set (hs_exec_SRCS
     ${hs_HEADERS}
-    src/hs_version.h
+    src/hs_version.h.in
     src/ue2common.h
     src/allocator.h
     src/crc32.c
@@ -738,10 +404,10 @@ set (hs_exec_SRCS
     src/database.h
 )
 
-if (NOT RELEASE_BUILD OR FAT_RUNTIME)
 if (ARCH_IA32 OR ARCH_X86_64)
 set (hs_exec_SRCS
     ${hs_exec_SRCS}
+    src/nfa/vermicelli_simd.cpp
     src/util/supervector/arch/x86/impl.cpp)
 elseif (ARCH_ARM32 OR ARCH_AARCH64)
 set (hs_exec_SRCS
@@ -750,21 +416,24 @@ set (hs_exec_SRCS
 elseif (ARCH_PPC64EL)
 set (hs_exec_SRCS
     ${hs_exec_SRCS}
+    src/nfa/vermicelli_simd.cpp
     src/util/supervector/arch/ppc64el/impl.cpp)
-endif ()
 endif()
 
-if (NOT BUILD_SVE2)
-set (hs_exec_SRCS
-    ${hs_exec_SRCS}
-    src/nfa/vermicelli_simd.cpp)
+if (ARCH_IA32 OR ARCH_X86_64)
+    set (hs_exec_avx2_SRCS
+        src/fdr/teddy_avx2.c
+        src/util/arch/x86/masked_move.c
+        src/util/arch/x86/masked_move.h
+    )
 endif()
 
-set (hs_exec_avx2_SRCS
-    src/fdr/teddy_avx2.c
-    src/util/arch/x86/masked_move.c
-    src/util/arch/x86/masked_move.h
-)
+if (ARCH_ARM32 OR ARCH_AARCH64)
+    set (hs_exec_neon_SRCS
+        src/nfa/vermicelli_simd.cpp)
+    set (hs_exec_sve_SRCS
+        src/nfa/vermicelli_simd.cpp)
+endif()
 
 SET (hs_compile_SRCS
     ${hs_HEADERS}
@@ -774,7 +443,7 @@ SET (hs_compile_SRCS
     src/grey.h
     src/hs.cpp
     src/hs_internal.h
-    src/hs_version.h
+    src/hs_version.h.in
     src/scratch.h
     src/state.h
     src/ue2common.h
@@ -1210,11 +879,20 @@ set (LIB_VERSION ${HS_VERSION})
 set (LIB_SOVERSION ${HS_MAJOR_VERSION})
 
 if (NOT FAT_RUNTIME)
-
     set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_common_SRCS})
 
-    if (BUILD_AVX2)
-        set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+    if (ARCH_IA32 OR ARCH_X86_64)
+        if (BUILD_AVX2)
+            set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+        endif()
+    elseif (ARCH_AARCH64)
+        if (BUILD_SVE2)
+            set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_sve2_SRCS})
+        elseif (BUILD_SVE)
+            set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_sve_SRCS})
+        else()
+            set(hs_exec_SRCS ${hs_exec_SRCS} ${hs_exec_neon_SRCS})
+        endif()
     endif()
 
     if (BUILD_STATIC_LIBS)
@@ -1231,150 +909,227 @@ if (NOT FAT_RUNTIME)
             $<TARGET_OBJECTS:hs_compile>)
     endif (BUILD_STATIC_LIBS)
 
-    if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
+    if (BUILD_SHARED_LIBS)
         add_library(hs_exec_shared OBJECT ${hs_exec_SRCS})
         set_target_properties(hs_exec_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
         add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
         set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
     endif()
+else ()
+    if (ARCH_IA32 OR ARCH_X86_64)
+        set(BUILD_WRAPPER "${PROJECT_SOURCE_DIR}/cmake/build_wrapper.sh")
+        if (NOT BUILD_AVX512)
+            set (DISPATCHER_DEFINE "-DDISABLE_AVX512_DISPATCH")
+        endif (NOT BUILD_AVX512)
+        if (NOT BUILD_AVX512VBMI)
+            set (DISPATCHER_DEFINE "${DISPATCHER_DEFINE} -DDISABLE_AVX512VBMI_DISPATCH")
+        endif (NOT BUILD_AVX512VBMI)
+        set_source_files_properties(src/dispatcher.c PROPERTIES
+            COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")
 
-else (FAT_RUNTIME)
-
-    set(BUILD_WRAPPER "${PROJECT_SOURCE_DIR}/cmake/build_wrapper.sh")
-    if (NOT BUILD_AVX512)
-        set (DISPATCHER_DEFINE "-DDISABLE_AVX512_DISPATCH")
-    endif (NOT BUILD_AVX512)
-    if (NOT BUILD_AVX512VBMI)
-        set (DISPATCHER_DEFINE "${DISPATCHER_DEFINE} -DDISABLE_AVX512VBMI_DISPATCH")
-    endif (NOT BUILD_AVX512VBMI)
-    set_source_files_properties(src/dispatcher.c PROPERTIES
-        COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")
-
-    if (BUILD_STATIC_LIBS)
-        add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
-        list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
-        set_target_properties(hs_exec_core2 PROPERTIES
-            COMPILE_FLAGS "-march=core2 -msse4.2"
-            RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
-            )
-
-        add_library(hs_exec_corei7 OBJECT ${hs_exec_SRCS})
-        list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_corei7>)
-        set_target_properties(hs_exec_corei7 PROPERTIES
-            COMPILE_FLAGS "-march=corei7 -msse4.2"
-            RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} corei7 ${CMAKE_MODULE_PATH}/keep.syms.in"
-            )
-
-        if (BUILD_AVX2)
-            add_library(hs_exec_avx2 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx2>)
-            set_target_properties(hs_exec_avx2 PROPERTIES
-                COMPILE_FLAGS "-march=core-avx2 -mavx2"
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+        if (BUILD_STATIC_LIBS)
+            add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
+            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
+            set_target_properties(hs_exec_core2 PROPERTIES
+                COMPILE_FLAGS "-march=core2 -msse4.2"
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                 )
-        endif (BUILD_AVX2)
-        if (BUILD_AVX512)
-            add_library(hs_exec_avx512 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512>)
-            set_target_properties(hs_exec_avx512 PROPERTIES
-                COMPILE_FLAGS "${SKYLAKE_FLAG}"
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
-        endif (BUILD_AVX512)
-        if (BUILD_AVX512VBMI)
-            add_library(hs_exec_avx512vbmi OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512vbmi>)
-            set_target_properties(hs_exec_avx512vbmi PROPERTIES
-                COMPILE_FLAGS "${ICELAKE_FLAG}"
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512vbmi ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
-        endif (BUILD_AVX512VBMI)
 
-        add_library(hs_exec_common OBJECT
+            add_library(hs_exec_corei7 OBJECT ${hs_exec_SRCS})
+            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_corei7>)
+            set_target_properties(hs_exec_corei7 PROPERTIES
+                COMPILE_FLAGS "-march=corei7 -msse4.2"
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} corei7 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+
+            if (BUILD_AVX2)
+                add_library(hs_exec_avx2 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx2>)
+                set_target_properties(hs_exec_avx2 PROPERTIES
+                    COMPILE_FLAGS "-march=core-avx2 -mavx2"
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX2)
+            if (BUILD_AVX512)
+                add_library(hs_exec_avx512 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512>)
+                set_target_properties(hs_exec_avx512 PROPERTIES
+                    COMPILE_FLAGS "${SKYLAKE_FLAG}"
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX512)
+            if (BUILD_AVX512VBMI)
+                add_library(hs_exec_avx512vbmi OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512vbmi>)
+                set_target_properties(hs_exec_avx512vbmi PROPERTIES
+                    COMPILE_FLAGS "${ICELAKE_FLAG}"
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512vbmi ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX512VBMI)
+
+            add_library(hs_exec_common OBJECT
+                ${hs_exec_common_SRCS}
+                src/dispatcher.c
+                )
+
+            # hs_version.c is added explicitly to avoid some build systems that refuse to
+            # create a lib without any src (I'm looking at you Xcode)
+
+            add_library(hs_runtime STATIC src/hs_version.c
+                $<TARGET_OBJECTS:hs_exec_common>
+                ${RUNTIME_LIBS})
+            set_target_properties(hs_runtime PROPERTIES LINKER_LANGUAGE C)
+            add_library(hs_compile OBJECT ${hs_compile_SRCS})
+
+            # we want the static lib for testing
+            add_library(hs STATIC src/hs_version.c src/hs_valid_platform.c
+                $<TARGET_OBJECTS:hs_compile>
+                $<TARGET_OBJECTS:hs_exec_common>
+                ${RUNTIME_LIBS})
+        endif (BUILD_STATIC_LIBS)
+
+        if (BUILD_SHARED_LIBS)
+            # build shared libs
+            add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
+            set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+            add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
+            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
+            set_target_properties(hs_exec_shared_core2 PROPERTIES
+                COMPILE_FLAGS "-march=core2 -msse4.2"
+                POSITION_INDEPENDENT_CODE TRUE
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+            add_library(hs_exec_shared_corei7 OBJECT ${hs_exec_SRCS})
+            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_corei7>)
+            set_target_properties(hs_exec_shared_corei7 PROPERTIES
+                COMPILE_FLAGS "-march=corei7 -msse4.2"
+                POSITION_INDEPENDENT_CODE TRUE
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} corei7 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+
+            if (BUILD_AVX2)
+                add_library(hs_exec_shared_avx2 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx2>)
+                set_target_properties(hs_exec_shared_avx2 PROPERTIES
+                    COMPILE_FLAGS "-march=core-avx2 -mavx2"
+                    POSITION_INDEPENDENT_CODE TRUE
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX2)
+            if (BUILD_AVX512)
+                add_library(hs_exec_shared_avx512 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx512>)
+                set_target_properties(hs_exec_shared_avx512 PROPERTIES
+                    COMPILE_FLAGS "${SKYLAKE_FLAG}"
+                    POSITION_INDEPENDENT_CODE TRUE
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX512)
+            if (BUILD_AVX512VBMI)
+                add_library(hs_exec_shared_avx512vbmi OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
+                list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx512vbmi>)
+                set_target_properties(hs_exec_shared_avx512vbmi PROPERTIES
+                    COMPILE_FLAGS "${ICELAKE_FLAG}"
+                    POSITION_INDEPENDENT_CODE TRUE
+                    RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512vbmi ${CMAKE_MODULE_PATH}/keep.syms.in"
+                    )
+            endif (BUILD_AVX512VBMI)
+            add_library(hs_exec_common_shared OBJECT
             ${hs_exec_common_SRCS}
             src/dispatcher.c
             )
+            set_target_properties(hs_exec_common_shared PROPERTIES
+                OUTPUT_NAME hs_exec_common
+                POSITION_INDEPENDENT_CODE TRUE)
 
-        # hs_version.c is added explicitly to avoid some build systems that refuse to
-        # create a lib without any src (I'm looking at you Xcode)
+        endif() # SHARED
+    endif (ARCH_IA32 OR ARCH_X86_64)
+    if (ARCH_AARCH64)
+        set(BUILD_WRAPPER "${PROJECT_SOURCE_DIR}/cmake/build_wrapper.sh")
+        if (BUILD_STATIC_LIBS)
+            add_library(hs_exec_neon OBJECT ${hs_exec_SRCS} ${hs_exec_neon_SRCS})
+            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_neon>)
+            set_target_properties(hs_exec_neon PROPERTIES
+                COMPILE_FLAGS "-march=${ARMV8_ARCH}"
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} neon ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
 
-        add_library(hs_runtime STATIC src/hs_version.c
-            $<TARGET_OBJECTS:hs_exec_common>
-            ${RUNTIME_LIBS})
-        set_target_properties(hs_runtime PROPERTIES LINKER_LANGUAGE C)
-        add_library(hs_compile OBJECT ${hs_compile_SRCS})
+            add_library(hs_exec_sve OBJECT ${hs_exec_SRCS} ${hs_exec_sve_SRCS})
+            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_sve>)
+            set_target_properties(hs_exec_sve PROPERTIES
+                COMPILE_FLAGS "-march=${SVE_ARCH}"
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} sve ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+            add_library(hs_exec_sve2 OBJECT ${hs_exec_SRCS} ${hs_exec_sve2_SRCS})
+            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_sve2>)
+            set_target_properties(hs_exec_sve2 PROPERTIES
+                COMPILE_FLAGS "-march=${SVE2_BITPERM_ARCH}"
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} sve2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
 
-        # we want the static lib for testing
-        add_library(hs STATIC src/hs_version.c src/hs_valid_platform.c
-            $<TARGET_OBJECTS:hs_compile>
-            $<TARGET_OBJECTS:hs_exec_common>
-            ${RUNTIME_LIBS})
+            add_library(hs_exec_common OBJECT
+                ${hs_exec_common_SRCS}
+                src/dispatcher.c
+                )
 
-    endif (BUILD_STATIC_LIBS)
+            # hs_version.c is added explicitly to avoid some build systems that refuse to
+            # create a lib without any src (I'm looking at you Xcode)
 
-    if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
-        # build shared libs
-        add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
-        set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-        add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
-        list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
-        set_target_properties(hs_exec_shared_core2 PROPERTIES
-            COMPILE_FLAGS "-march=core2 -msse4.2"
-            POSITION_INDEPENDENT_CODE TRUE
-            RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+            add_library(hs_runtime STATIC src/hs_version.c
+                $<TARGET_OBJECTS:hs_exec_common>
+                ${RUNTIME_LIBS})
+            set_target_properties(hs_runtime PROPERTIES LINKER_LANGUAGE C)
+            add_library(hs_compile OBJECT ${hs_compile_SRCS})
+
+            # we want the static lib for testing
+            add_library(hs STATIC src/hs_version.c src/hs_valid_platform.c
+                $<TARGET_OBJECTS:hs_compile>
+                $<TARGET_OBJECTS:hs_exec_common>
+                ${RUNTIME_LIBS})
+        endif (BUILD_STATIC_LIBS)
+
+        if (BUILD_SHARED_LIBS)
+            # build shared libs
+            add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
+            set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+	          add_library(hs_exec_shared_neon OBJECT ${hs_exec_SRCS} ${hs_exec_neon_SRCS})
+            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_neon>)
+            set_target_properties(hs_exec_shared_neon PROPERTIES
+                COMPILE_FLAGS "-march=${ARMV8_ARCH}"
+                POSITION_INDEPENDENT_CODE TRUE
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} neon ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+
+            add_library(hs_exec_shared_sve OBJECT ${hs_exec_SRCS} ${hs_exec_sve_SRCS})
+            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_sve>)
+            set_target_properties(hs_exec_shared_sve PROPERTIES
+		            COMPILE_FLAGS "-march=${SVE_ARCH}"
+                POSITION_INDEPENDENT_CODE TRUE
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} sve ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+            add_library(hs_exec_shared_sve2 OBJECT ${hs_exec_SRCS} ${hs_exec_sve2_SRCS})
+            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_sve2>)
+            set_target_properties(hs_exec_shared_sve2 PROPERTIES
+                COMPILE_FLAGS "-march=${SVE2_BITPERM_ARCH}"
+                POSITION_INDEPENDENT_CODE TRUE
+                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} sve2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                )
+            add_library(hs_exec_common_shared OBJECT
+            ${hs_exec_common_SRCS}
+            src/dispatcher.c
             )
-        add_library(hs_exec_shared_corei7 OBJECT ${hs_exec_SRCS})
-        list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_corei7>)
-        set_target_properties(hs_exec_shared_corei7 PROPERTIES
-            COMPILE_FLAGS "-march=corei7 -msse4.2"
-            POSITION_INDEPENDENT_CODE TRUE
-            RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} corei7 ${CMAKE_MODULE_PATH}/keep.syms.in"
-            )
-
-        if (BUILD_AVX2)
-            add_library(hs_exec_shared_avx2 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx2>)
-            set_target_properties(hs_exec_shared_avx2 PROPERTIES
-                COMPILE_FLAGS "-march=core-avx2 -mavx2"
-                POSITION_INDEPENDENT_CODE TRUE
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx2 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
-        endif (BUILD_AVX2)
-        if (BUILD_AVX512)
-            add_library(hs_exec_shared_avx512 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx512>)
-            set_target_properties(hs_exec_shared_avx512 PROPERTIES
-                COMPILE_FLAGS "${SKYLAKE_FLAG}"
-                POSITION_INDEPENDENT_CODE TRUE
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
-        endif (BUILD_AVX512)
-        if (BUILD_AVX512VBMI)
-            add_library(hs_exec_shared_avx512vbmi OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
-            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx512vbmi>)
-            set_target_properties(hs_exec_shared_avx512vbmi PROPERTIES
-                COMPILE_FLAGS "${ICELAKE_FLAG}"
-                POSITION_INDEPENDENT_CODE TRUE
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} avx512vbmi ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
-        endif (BUILD_AVX512VBMI)
-        add_library(hs_exec_common_shared OBJECT
-        ${hs_exec_common_SRCS}
-        src/dispatcher.c
-        )
-        set_target_properties(hs_exec_common_shared PROPERTIES
-            OUTPUT_NAME hs_exec_common
-            POSITION_INDEPENDENT_CODE TRUE)
-    endif() # SHARED
-
-
+            set_target_properties(hs_exec_common_shared PROPERTIES
+                OUTPUT_NAME hs_exec_common
+                POSITION_INDEPENDENT_CODE TRUE)
+        endif() # SHARED
+    endif (ARCH_AARCH64)
 endif (NOT FAT_RUNTIME)
 
-if (NOT BUILD_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
     install(TARGETS hs_runtime DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
     if (NOT FAT_RUNTIME)
         add_library(hs_runtime_shared SHARED src/hs_version.c
             src/hs_valid_platform.c $<TARGET_OBJECTS:hs_exec_shared>
@@ -1398,22 +1153,21 @@ if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (NOT BUILD_SHARED_LIBS)
+# PATCH
+# if (BUILD_STATIC_LIBS)
+#     add_dependencies(hs ragel_Parser)
+# endif ()
+# /PATCH
+
+if (BUILD_STATIC_LIBS)
     install(TARGETS hs DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
     set(hs_shared_SRCS
         src/hs_version.c
         src/hs_valid_platform.c
         $<TARGET_OBJECTS:hs_compile_shared>)
-
-    if (XCODE)
-        # force this lib to use C++ linkage
-        add_custom_command(OUTPUT empty.cxx
-            COMMAND ${CMAKE_COMMAND} -E touch empty.cxx)
-        set (hs_shared_SRCS ${hs_shared_SRCS} empty.cxx)
-    endif (XCODE)
 
     if (NOT FAT_RUNTIME)
         set(hs_shared_SRCS
@@ -1428,6 +1182,9 @@ if (BUILD_STATIC_AND_SHARED OR BUILD_SHARED_LIBS)
 
     add_library(hs_shared SHARED ${hs_shared_SRCS} hs.def)
 
+    # PATCH
+    # add_dependencies(hs_shared ragel_Parser)
+    # /PATCH
     set_target_properties(hs_shared PROPERTIES
         OUTPUT_NAME hs
         VERSION ${LIB_VERSION}
@@ -1446,6 +1203,22 @@ if (NOT BUILD_STATIC_LIBS)
     add_library(hs ALIAS hs_shared)
 endif ()
 
+add_subdirectory(util)
+
+option(BUILD_UNIT "Build Hyperscan unit tests (default TRUE)" TRUE)
+if(BUILD_UNIT)
+    add_subdirectory(unit)
+endif()
+
+option(BUILD_TOOLS "Build Hyperscan tools (default TRUE)" TRUE)
+if(EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt AND BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
+
+if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
+    add_subdirectory(chimera)
+endif()
+
 option(BUILD_EXAMPLES "Build Hyperscan example code (default TRUE)" TRUE)
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
@@ -1454,4 +1227,9 @@ endif()
 option(BUILD_BENCHMARKS "Build benchmarks (default TRUE)" TRUE)
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
+endif()
+
+option(BUILD_DOC "Build the Hyperscan documentation (default TRUE)" TRUE)
+if(BUILD_DOC)
+    add_subdirectory(doc/dev-reference)
 endif()

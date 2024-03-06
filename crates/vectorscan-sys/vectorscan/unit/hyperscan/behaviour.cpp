@@ -157,7 +157,11 @@ TEST_P(HyperscanScanGigabytesMatch, StreamingMatch) {
 
     // gb is the number of gigabytes to scan between pre-block and post-block
     // run over 1,2,4,8 gb
+#ifdef NDEBUG
     for (unsigned long long gb = 1; gb <= 8; gb *= 2) {
+#else
+    for (unsigned long long gb = 1; gb <= 2; gb *= 2) {
+#endif
         SCOPED_TRACE(gb);
 
         hs_stream_t *stream = nullptr;
@@ -261,12 +265,12 @@ TEST_P(HyperscanScanGigabytesMatch, BlockMatch) {
         1*1024,
 #ifdef BIG_BLOCKS
         4*1024, 32*1024, 128*1024, 512*1024,
+#ifdef NDEBUG
         // gigabytes
         1024*1024,
-#ifdef ARCH_X86_64
         // big cases for big beefy machines
         2048*1024, 3072*1024
-#endif // ARCH_X86_64
+#endif // NDEBUG
 #endif // BIG_BLOCKS
     };
 
@@ -1333,6 +1337,7 @@ TEST(regression, UE_2425) {
     hs_free_database(db);
 }
 
+#ifdef NDEBUG
 TEST(regression, UE_2485) {
     const char regex[] = "(?:(.EeEa|((a{2}BD[bc]Bd[eae]|[DCd]|c|ebCa|d)){7,21})(E{5,}A{4,}[Cc].cc{3,6}|eCec|e+CaBEd|[Bb])){10}DB(a|[AAda])..A?DE?E";
     unsigned flags = HS_FLAG_DOTALL | HS_FLAG_CASELESS | HS_FLAG_UTF8 |
@@ -1348,6 +1353,7 @@ TEST(regression, UE_2485) {
     ASSERT_NE(nullptr, db);
     hs_free_database(db);
 }
+#endif
 
 TEST(regression, UE_2452) {
     const char regex[] = "/ab.b[bca]{2,}ca((?:c|(abc(?sxmi-xm)){10,14}|c|b|[abcb])){4,23}acbcbb*ba((?:(a|.{4,}|.|[acba])){3,16}a)+";
@@ -1364,6 +1370,7 @@ TEST(regression, UE_2452) {
     hs_free_database(db);
 }
 
+#ifdef NDEBUG
 TEST(regression, UE_2595) {
     const char regex[] = "(?:(?:acAa|c[EAA]aEb|((?:CC[bdd].cE((?x-msix)BE){32}(?:\\B)){16,19}CdD.E(E|E|B)){3,6}|E(a|d|.)(?:(?xs-isxm)|b|.|C))){17,}";
     unsigned flags = HS_FLAG_MULTILINE | HS_FLAG_CASELESS |
@@ -1378,6 +1385,7 @@ TEST(regression, UE_2595) {
     ASSERT_NE(nullptr, db);
     hs_free_database(db);
 }
+#endif
 
 TEST(regression, UE_2762) {
     const vector<pattern> patterns = {

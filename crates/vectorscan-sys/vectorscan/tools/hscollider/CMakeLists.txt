@@ -16,10 +16,14 @@ CHECK_FUNCTION_EXISTS(sigaltstack HAVE_SIGALTSTACK)
 CHECK_FUNCTION_EXISTS(sigaction HAVE_SIGACTION)
 CHECK_FUNCTION_EXISTS(setrlimit HAVE_SETRLIMIT)
 
-set_source_files_properties(
-    ColliderCorporaParser.cpp
-    PROPERTIES
-    COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
+# PATCH
+# set_source_files_properties(
+#     ColliderCorporaParser.cpp
+#     PROPERTIES
+#     COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
+#
+# ragelmaker(ColliderCorporaParser.rl)
+# /PATCH
 
 if (BUILD_CHIMERA)
     add_definitions(-DHS_HYBRID)
@@ -61,6 +65,9 @@ SET(hscollider_SOURCES
 set_source_files_properties(${hscollider_SOURCES} PROPERTIES
     INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(hscollider ${hscollider_SOURCES})
+# PATCH
+# add_dependencies(hscollider ragel_ColliderCorporaParser)
+# /PATCH
 
 if (BUILD_CHIMERA)
     target_link_libraries(hscollider hs chimera ${PCRE_LDFLAGS} databaseutil

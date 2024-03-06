@@ -11,28 +11,14 @@ find_package(PkgConfig QUIET)
 pkg_check_modules(SQLITE3 sqlite3)
 endif()
 
-if (NOT SQLITE3_FOUND)
-    message(STATUS "looking for sqlite3 in source tree")
-    # look in the source tree
-    if (EXISTS "${PROJECT_SOURCE_DIR}/sqlite3/sqlite3.h" AND
-            EXISTS "${PROJECT_SOURCE_DIR}/sqlite3/sqlite3.c")
-        message(STATUS "  found sqlite3 in source tree")
-        set(SQLITE3_FOUND TRUE)
-        set(SQLITE3_BUILD_SOURCE TRUE)
-        set(SQLITE3_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/sqlite3")
-        set(SQLITE3_LDFLAGS sqlite3_static)
-    else()
-        message(STATUS "  no sqlite3 in source tree")
-    endif()
-endif()
-
 # now do version checks
 if (SQLITE3_FOUND)
     list(INSERT CMAKE_REQUIRED_INCLUDES 0 "${SQLITE3_INCLUDE_DIRS}")
-    CHECK_C_SOURCE_COMPILES("#include <sqlite3.h>\n#if SQLITE_VERSION_NUMBER >= 3008007 && SQLITE_VERSION_NUMBER < 3008010\n#error broken sqlite\n#endif\nint main() {return 0;}" SQLITE_VERSION_OK)
-    if (NOT SQLITE_VERSION_OK)
+    if (SQLITE_VERSION LESS "3.8.10")
         message(FATAL_ERROR "sqlite3 is broken from 3.8.7 to 3.8.10 - please find a working version")
     endif()
+endif()
+
 if (NOT SQLITE3_BUILD_SOURCE)
     set(_SAVED_FLAGS ${CMAKE_REQUIRED_FLAGS})
     list(INSERT CMAKE_REQUIRED_LIBRARIES 0 ${SQLITE3_LDFLAGS})
@@ -45,7 +31,6 @@ else()
     add_library(sqlite3_static STATIC "${PROJECT_SOURCE_DIR}/sqlite3/sqlite3.c")
     set_target_properties(sqlite3_static PROPERTIES COMPILE_FLAGS "-Wno-error -Wno-extra -Wno-unused -Wno-cast-qual -DSQLITE_OMIT_LOAD_EXTENSION")
     endif()
-endif()
 endif()
 
 # that's enough about sqlite

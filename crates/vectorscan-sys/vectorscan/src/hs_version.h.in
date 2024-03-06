@@ -36,5 +36,9 @@
 
 #define HS_VERSION_32BIT ((@HS_MAJOR_VERSION@ << 24) | (@HS_MINOR_VERSION@ << 16) | (@HS_PATCH_VERSION@ << 8) | 0)
 
+#define HS_MAJOR      @HS_MAJOR_VERSION@
+#define HS_MINOR      @HS_MINOR_VERSION@
+#define HS_PATCH      @HS_PATCH_VERSION@
+
 #endif /* HS_VERSION_H_C6428FAF8E3713 */
 

@@ -280,7 +280,11 @@ TEST_P(BadPattern, Stream) {
 
 static
 vector<BadPatternParam> getBadPatterns() {
+#ifdef NDEBUG
     string filename = "unit/hyperscan/bad_patterns.txt";
+#else
+    string filename = "unit/hyperscan/bad_patterns_fast.txt";
+#endif
 
     ifstream f;
     f.open(filename.c_str(), ifstream::in);

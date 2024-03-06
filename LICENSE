@@ -205,7 +205,7 @@
 This product bundles Boost 1.84.0, which is available under the Boost Software
 License Version 1.0. For details, see `vectorscan-sys/vectorscan/include/boost`.
 
-This product bundles Vectorscan 5.4.8, which is available under a "3-clause
+This product bundles Vectorscan 5.4.11, which is available under a "3-clause
 BSD" software license. For details, see `vectorscan-sys/vectorscan`.
 
 This product includes Rust bindings for Vectorscan that was heavily modified

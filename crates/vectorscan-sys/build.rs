@@ -69,11 +69,11 @@ fn main() {
             .profile(profile)
             .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
             .define("FAT_RUNTIME", fat_runtime)
-            .define("BUILD_AVX512", "OFF") // could enable for x86_64?
+            // .define("BUILD_AVX512", "OFF") // could enable for x86_64?
             .define("BUILD_EXAMPLES", "OFF")
             .define("BUILD_BENCHMARKS", "OFF")
-            .define("BUILD_UNITTESTS", "OFF")
-            .define("BUILD_DOCS", "OFF")
+            .define("BUILD_UNIT", "OFF")
+            .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF")
             .build();
 
