@@ -19,7 +19,8 @@ The various other APIs such as stream- and vector-based matching are not exposed
 Other features too, like the Chimera PCRE library, test code, benchmark code, and supporting utilities are disabled.
 
 The source of Vectorscan 5.4.8 is included here in the `vectorscan` directory.
-The source of Boost version 1.83.0 is also included in the `vectorscan/include/boost` directory.
+The partial source of Boost version 1.84.0 is also included in the `vectorscan/include/boost` directory.
+Only the parts of Boost required by Vectorscan are included.
 
 The Vectorscan sources were patched for a few reasons:
 

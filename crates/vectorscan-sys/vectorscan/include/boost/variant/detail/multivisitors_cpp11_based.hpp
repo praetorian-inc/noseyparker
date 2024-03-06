@@ -3,7 +3,7 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013-2014.
+//  Copyright Antony Polukhin, 2013-2023.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
@@ -17,14 +17,9 @@
 #endif
 
 #include <boost/variant/detail/apply_visitor_unary.hpp>
-#include <boost/variant/variant_fwd.hpp> // for BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
-#include <boost/move/utility.hpp>
+#include <boost/variant/variant_fwd.hpp>
 #include <boost/type_traits/is_lvalue_reference.hpp>
 #include <boost/core/enable_if.hpp>
-
-#if defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_HDR_TUPLE)
-#   error "This file requires <tuple> and variadic templates support"
-#endif
 
 #include <tuple>
 
@@ -64,7 +59,7 @@ namespace detail { namespace variant {
     typename enable_if_c<Wrapper::MoveSemantics, typename Wrapper::T>::type
         unwrap(Wrapper& w)
     {
-        return ::boost::move(w.v);
+        return std::move(w.v);
     }
 
     template <typename Wrapper>
@@ -189,7 +184,7 @@ namespace detail { namespace variant {
                     ),
                 std::tuple<>()
                 ),
-                ::boost::forward<T1>(v1)
+                std::forward<T1>(v1)
             );
     }
     
@@ -207,7 +202,7 @@ namespace detail { namespace variant {
                     ),
                 std::tuple<>()
                 ),
-                ::boost::forward<T1>(v1)
+                std::forward<T1>(v1)
             );
     }
 
