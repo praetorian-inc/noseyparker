@@ -146,7 +146,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    {
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+        return shell{};
+    }
     else
         return cmd(proc.get(), ec);
 

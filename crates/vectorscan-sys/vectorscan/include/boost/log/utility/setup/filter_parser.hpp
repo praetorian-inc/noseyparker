@@ -16,7 +16,7 @@
 #define BOOST_LOG_UTILITY_SETUP_FILTER_PARSER_HPP_INCLUDED_
 
 #include <string>
-#include <boost/lexical_cast.hpp>
+#include <sstream>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/phoenix/operator/comparison.hpp>
@@ -217,7 +217,12 @@ public:
      */
     virtual value_type parse_argument(string_type const& arg)
     {
-        return boost::lexical_cast< value_type >(arg);
+        std::basic_istringstream< typename base_type::char_type > strm(arg);
+        value_type val{};
+        strm >> val;
+        if (BOOST_UNLIKELY((strm.rdstate() & (std::ios_base::badbit | std::ios_base::failbit)) != 0))
+            BOOST_LOG_THROW_DESCR(parse_error, "Failed to parse argument value from \"" + boost::log::aux::to_narrow(arg) + "\"");
+        return val;
     }
 };
 

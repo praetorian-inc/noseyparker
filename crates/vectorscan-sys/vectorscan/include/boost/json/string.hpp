@@ -138,7 +138,7 @@ private:
     template<class T>
     using is_inputit = typename std::enable_if<
         std::is_convertible<typename
-            std::iterator_traits<T>::value_type,
+            std::iterator_traits<T>::reference,
             char>::value>::type;
 
     storage_ptr sp_; // must come first

@@ -44,7 +44,7 @@ namespace impl
 
         // serialization is done by accumulators it depends on
         template<class Archive>
-        void serialize(Archive & ar, const unsigned int file_version) {}
+        void serialize(Archive & /* ar */, const unsigned int /* file_version */) {}
     };
 
     template<typename Sample, typename Tag>
@@ -76,8 +76,8 @@ namespace impl
         }
 
         template<class Archive>
-        void serialize(Archive & ar, const unsigned int file_version)
-        { 
+        void serialize(Archive & ar, const unsigned int /* file_version */)
+        {
             ar & mean;
         }
 

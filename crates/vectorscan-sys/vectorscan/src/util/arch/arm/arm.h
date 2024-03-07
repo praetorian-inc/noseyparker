@@ -41,5 +41,17 @@
 #define VECTORSIZE 16
 #endif
 
+#if defined(__ARM_FEATURE_SVE)
+#define HAVE_SVE
+#endif
+
+#if defined(__ARM_FEATURE_SVE2)
+#define HAVE_SVE2
+#endif
+
+#if defined(__ARM_FEATURE_SVE2_BITPERM)
+#define HAVE_SVE2_BITPERM
+#endif
+
 #endif // UTIL_ARCH_ARM_H_
 

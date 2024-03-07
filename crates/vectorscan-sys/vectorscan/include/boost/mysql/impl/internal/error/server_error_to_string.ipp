@@ -1841,6 +1841,9 @@ const char* boost::mysql::detail::mysql_error_to_string(int v) noexcept
     case 4160: return "er_install_component_set_null_value";
     case 4161: return "er_install_component_set_unused_value";
     case 4162: return "er_warn_deprecated_user_defined_collations";
+    case 4163: return "er_user_lock_overlong_name";
+    case 4164: return "er_warn_no_space_version_comment";
+    case 4165: return "er_validate_password_insufficient_changed_characters";
 
     default: return "<unknown MySQL-specific server error>";
     }
@@ -2195,6 +2198,8 @@ const char* boost::mysql::detail::mariadb_error_to_string(int v) noexcept
     case 4190: return "warn_option_changing";
     case 4191: return "er_cm_option_missing_requirement";
     case 4192: return "er_slave_statement_timeout";
+    case 4193: return "er_json_invalid_value_for_keyword";
+    case 4194: return "er_json_schema_keyword_unsupported";
 
     default: return "<unknown MariaDB-specific server error>";
     }

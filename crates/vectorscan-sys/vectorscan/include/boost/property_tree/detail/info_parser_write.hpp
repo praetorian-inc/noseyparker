@@ -138,6 +138,7 @@ namespace boost { namespace property_tree { namespace info_parser
                              const info_writer_settings<typename Ptree::key_type::value_type> &settings)
     {
         write_info_helper(stream, pt, -1, settings);
+        stream.flush();
         if (!stream.good())
             BOOST_PROPERTY_TREE_THROW(info_parser_error("write error", filename, 0));
     }

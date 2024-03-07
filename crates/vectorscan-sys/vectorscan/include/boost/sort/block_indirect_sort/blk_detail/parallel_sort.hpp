@@ -134,6 +134,7 @@ parallel_sort<Block_size, Iter_t, Compare>
 ::parallel_sort(backbone_t &bkbn, Iter_t first, Iter_t last)
  : bk(bkbn), counter(0)
 {
+    using std::swap;
     assert((last - first) >= 0);
     size_t nelem = size_t(last - first);
 
@@ -153,7 +154,7 @@ parallel_sort<Block_size, Iter_t, Compare>
         size_t nelem2 = nelem >> 1;
         Iter_t it1 = first, it2 = last - 1;
         for (size_t i = 0; i < nelem2; ++i)
-            std::swap(*(it1++), *(it2--));
+            swap(*(it1++), *(it2--));
         return;
     };
 
@@ -188,6 +189,7 @@ template<uint32_t Block_size, class Iter_t, class Compare>
 void parallel_sort<Block_size, Iter_t, Compare>
 ::divide_sort(Iter_t first, Iter_t last, uint32_t level)
 {
+    using std::swap;
     //------------------- check if sort -----------------------------------
     bool sorted = true;
     for (Iter_t it1 = first, it2 = first + 1;
@@ -211,14 +213,14 @@ void parallel_sort<Block_size, Iter_t, Compare>
 
     while (c_first < c_last)
     {
-        std::swap(*(c_first++), *(c_last--));
+        swap(*(c_first++), *(c_last--));
         while (bk.cmp(*c_first, val))
             ++c_first;
         while (bk.cmp(val, *c_last))
             --c_last;
     };
 
-    std::swap(*first, *c_last);
+    swap(*first, *c_last);
 
     // insert  the work of the second half in the stack of works
     function_divide_sort(c_first, last, level - 1, counter, bk.error);

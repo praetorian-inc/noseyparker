@@ -2809,6 +2809,15 @@ constexpr int er_install_component_set_unused_value = 4161;
 /// Server error specific to mysql. Error number: 4162, symbol: ER_WARN_DEPRECATED_USER_DEFINED_COLLATIONS.
 constexpr int er_warn_deprecated_user_defined_collations = 4162;
 
+/// Server error specific to mysql. Error number: 4163, symbol: ER_USER_LOCK_OVERLONG_NAME.
+constexpr int er_user_lock_overlong_name = 4163;
+
+/// Server error specific to mysql. Error number: 4164, symbol: ER_WARN_NO_SPACE_VERSION_COMMENT.
+constexpr int er_warn_no_space_version_comment = 4164;
+
+/// Server error specific to mysql. Error number: 4165, symbol: ER_VALIDATE_PASSWORD_INSUFFICIENT_CHANGED_CHARACTERS.
+constexpr int er_validate_password_insufficient_changed_characters = 4165;
+
 }  // namespace mysql_server_errc
 
 }  // namespace mysql

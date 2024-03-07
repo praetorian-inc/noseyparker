@@ -73,7 +73,9 @@ typedef u32 ReportID;
 
 /* Shorthand for attribute to mark a function as part of our public API.
  * Functions without this attribute will be hidden. */
+#ifndef HS_PUBLIC_API
 #define HS_PUBLIC_API     __attribute__((visibility("default")))
+#endif
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof((a)[0]))
 

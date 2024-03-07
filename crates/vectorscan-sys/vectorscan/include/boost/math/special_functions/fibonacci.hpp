@@ -32,8 +32,8 @@ inline BOOST_CXX14_CONSTEXPR T unchecked_fibonacci(unsigned long long n) noexcep
     if (n <= 2) return n == 0 ? 0 : 1;
     /* 
      * This is based on the following identities by Dijkstra:
-     *   F(2*n)   = F(n)^2 + F(n+1)^2
-     *   F(2*n+1) = (2 * F(n) + F(n+1)) * F(n+1)
+     *   F(2*n-1) = F(n-1)^2 + F(n)^2
+     *   F(2*n)   = (2*F(n-1) + F(n)) * F(n)
      * The implementation is iterative and is unrolled version of trivial recursive implementation.
      */
     unsigned long long mask = 1;

@@ -44,9 +44,9 @@ namespace detail
     using Base::Base;
 
     constexpr inline exception_type &assume_exception() & noexcept;
-    constexpr inline const exception_type &assume_exception() const &noexcept;
+    constexpr inline const exception_type &assume_exception() const & noexcept;
     constexpr inline exception_type &&assume_exception() && noexcept;
-    constexpr inline const exception_type &&assume_exception() const &&noexcept;
+    constexpr inline const exception_type &&assume_exception() const && noexcept;
 
     constexpr inline exception_type &exception() &;
     constexpr inline const exception_type &exception() const &;
@@ -59,8 +59,16 @@ namespace detail
   {
   public:
     using Base::Base;
-    constexpr void assume_exception() const noexcept { NoValuePolicy::narrow_exception_check(this); }
-    constexpr void exception() const { NoValuePolicy::wide_exception_check(this); }
+
+    constexpr void assume_exception() & noexcept { NoValuePolicy::narrow_exception_check(*this); }
+    constexpr void assume_exception() const & noexcept { NoValuePolicy::narrow_exception_check(*this); }
+    constexpr void assume_exception() && noexcept { NoValuePolicy::narrow_exception_check(std::move(*this)); }
+    constexpr void assume_exception() const && noexcept { NoValuePolicy::narrow_exception_check(std::move(*this)); }
+
+    constexpr void exception() & { NoValuePolicy::wide_exception_check(*this); }
+    constexpr void exception() const & { NoValuePolicy::wide_exception_check(*this); }
+    constexpr void exception() && { NoValuePolicy::wide_exception_check(std::move(*this)); }
+    constexpr void exception() const && { NoValuePolicy::wide_exception_check(std::move(*this)); }
   };
 
 }  // namespace detail

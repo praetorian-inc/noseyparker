@@ -63,8 +63,10 @@ namespace json {
     @see
         https://en.wikipedia.org/wiki/Region-based_memory_management
 */
-class BOOST_JSON_CLASS_DECL
-    static_resource final
+class
+    BOOST_JSON_DECL
+    BOOST_SYMBOL_VISIBLE
+static_resource final
     : public memory_resource
 {
     void* p_;
@@ -79,16 +81,6 @@ public:
     /// Copy assignment (deleted)
     static_resource& operator=(
         static_resource const&) = delete;
-
-    /** Destructor
-
-        @par Complexity
-        Constant.
-
-        @par Exception Safety
-        No-throw guarantee.
-    */
-    ~static_resource() noexcept;
 
     /** Constructor
 

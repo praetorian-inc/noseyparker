@@ -133,7 +133,7 @@ void CNGInfo::compile() {
             auto pl = std::make_unique<ParsedLogical>();
             pl->parseLogicalCombination(id, re.c_str(), ~0U, 0, ~0ULL);
             pl->logicalKeyRenumber();
-            cng = make_unique<CompiledNG>(move(pl));
+            cng = make_unique<CompiledNG>(std::move(pl));
             return;
         }
 
@@ -192,7 +192,7 @@ void CNGInfo::compile() {
             }
         }
 
-        cng = make_unique<CompiledNG>(move(g), move(rm));
+        cng = make_unique<CompiledNG>(std::move(g), std::move(rm));
     } catch (CompileError &e) {
         throw NGCompileFailure(e.reason);
     } catch (NGUnsupportedFailure &e) {

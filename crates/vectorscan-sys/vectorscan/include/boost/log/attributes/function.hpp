@@ -15,7 +15,6 @@
 #ifndef BOOST_LOG_ATTRIBUTES_FUNCTION_HPP_INCLUDED_
 #define BOOST_LOG_ATTRIBUTES_FUNCTION_HPP_INCLUDED_
 
-#include <boost/static_assert.hpp>
 #include <boost/utility/result_of.hpp>
 #include <boost/type_traits/is_void.hpp>
 #include <boost/type_traits/remove_cv.hpp>
@@ -49,7 +48,7 @@ template< typename R >
 class function :
     public attribute
 {
-    BOOST_STATIC_ASSERT_MSG(!is_void< R >::value, "Boost.Log: Function object return type must not be void");
+    static_assert(!is_void< R >::value, "Boost.Log: Function object return type must not be void");
 
 public:
     //! The attribute value type

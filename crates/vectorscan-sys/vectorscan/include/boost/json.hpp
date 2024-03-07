@@ -23,6 +23,7 @@
 #include <boost/json/null_resource.hpp>
 #include <boost/json/object.hpp>
 #include <boost/json/parse.hpp>
+#include <boost/json/parse_into.hpp>
 #include <boost/json/parse_options.hpp>
 #include <boost/json/parser.hpp>
 #include <boost/json/pilfer.hpp>

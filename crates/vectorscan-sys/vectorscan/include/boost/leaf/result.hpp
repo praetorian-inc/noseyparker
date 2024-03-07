@@ -1,12 +1,13 @@
 #ifndef BOOST_LEAF_RESULT_HPP_INCLUDED
 #define BOOST_LEAF_RESULT_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/leaf/config.hpp>
+#include <boost/leaf/detail/print.hpp>
 #include <boost/leaf/exception.hpp>
 
 #include <climits>
@@ -36,23 +37,57 @@ public:
 
 namespace leaf_detail
 {
+    template <class T, bool Printable = is_printable<T>::value>
+    struct result_value_printer;
+
+    template <class T>
+    struct result_value_printer<T, true>
+    {
+        template <class CharT, class Traits>
+        static void print( std::basic_ostream<CharT, Traits> & s, T const & x )
+        {
+            (void) (s << x);
+        }
+    };
+
+    template <class T>
+    struct result_value_printer<T, false>
+    {
+        template <class CharT, class Traits>
+        static void print( std::basic_ostream<CharT, Traits> & s, T const & )
+        {
+            (void) (s << "{not printable}");
+        }
+    };
+
+    template <class CharT, class Traits, class T>
+    void print_result_value( std::basic_ostream<CharT, Traits> & s, T const & x )
+    {
+        result_value_printer<T>::print(s, x);
+    }
+}
+
+////////////////////////////////////////
+
+namespace leaf_detail
+{
     template <class T>
     struct stored
     {
         using type = T;
-        using value_type = T;
-        using value_type_const = T const;
+        using value_no_ref = T;
+        using value_no_ref_const = T const;
         using value_cref = T const &;
         using value_ref = T &;
         using value_rv_cref = T const &&;
         using value_rv_ref = T &&;
 
-        static value_type_const * cptr( type const & v ) noexcept
+        static value_no_ref_const * cptr( type const & v ) noexcept
         {
             return &v;
         }
 
-        static value_type * ptr( type & v ) noexcept
+        static value_no_ref * ptr( type & v ) noexcept
         {
             return &v;
         }
@@ -62,19 +97,19 @@ namespace leaf_detail
     struct stored<T &>
     {
         using type = std::reference_wrapper<T>;
-        using value_type_const = T;
-        using value_type = T;
+        using value_no_ref = T;
+        using value_no_ref_const = T;
         using value_ref = T &;
         using value_cref = T &;
         using value_rv_ref = T &;
         using value_rv_cref = T &;
 
-        static value_type_const * cptr( type const & v ) noexcept
+        static value_no_ref_const * cptr( type const & v ) noexcept
         {
             return &v.get();
         }
 
-        static value_type * ptr( type const & v ) noexcept
+        static value_no_ref * ptr( type const & v ) noexcept
         {
             return &v.get();
         }
@@ -130,7 +165,7 @@ namespace leaf_detail
 ////////////////////////////////////////
 
 template <class T>
-class result
+class BOOST_LEAF_NODISCARD result
 {
     template <class U>
     friend class result;
@@ -191,8 +226,8 @@ class result
     };
 
     using stored_type = typename leaf_detail::stored<T>::type;
-    using value_type = typename leaf_detail::stored<T>::value_type;
-    using value_type_const = typename leaf_detail::stored<T>::value_type_const;
+    using value_no_ref = typename leaf_detail::stored<T>::value_no_ref;
+    using value_no_ref_const = typename leaf_detail::stored<T>::value_no_ref_const;
     using value_ref = typename leaf_detail::stored<T>::value_ref;
     using value_cref = typename leaf_detail::stored<T>::value_cref;
     using value_rv_ref = typename leaf_detail::stored<T>::value_rv_ref;
@@ -257,11 +292,20 @@ class result
 
     error_id get_error_id() const noexcept
     {
-        BOOST_LEAF_ASSERT(what_.kind()!=result_discriminant::val);
+        BOOST_LEAF_ASSERT(what_.kind() != result_discriminant::val);
 #if BOOST_LEAF_CFG_CAPTURE
-        return what_.kind()==result_discriminant::ctx_ptr ? ctx_->captured_id_ : what_.get_error_id();
+        if( what_.kind() == result_discriminant::ctx_ptr )
+        {
+            BOOST_LEAF_ASSERT(ctx_ && ctx_->captured_id_);
+            return ctx_->captured_id_;
+        }
+        else
+        {
+            BOOST_LEAF_ASSERT(what_.kind() == result_discriminant::err_id);
+            return what_.get_error_id();
+        }
 #else
-        BOOST_LEAF_ASSERT(what_.kind()!=result_discriminant::ctx_ptr); // Possible ODR violation.
+        BOOST_LEAF_ASSERT(what_.kind() != result_discriminant::ctx_ptr); // Possible ODR violation.
         return what_.get_error_id();
 #endif
     }
@@ -286,6 +330,8 @@ protected:
 
 public:
 
+    using value_type = T;
+
     result( result && x ) noexcept:
         what_(move_from(std::move(x)))
     {
@@ -303,13 +349,13 @@ public:
     {
     }
 
-    result( value_type && v ) noexcept:
-        stored_(std::forward<value_type>(v)),
+    result( value_no_ref && v ) noexcept:
+        stored_(std::forward<value_no_ref>(v)),
         what_(result_discriminant::kind_val{})
     {
     }
 
-    result( value_type const & v ):
+    result( value_no_ref const & v ):
         stored_(v),
         what_(result_discriminant::kind_val{})
     {
@@ -365,10 +411,18 @@ public:
 #endif
 
 #if BOOST_LEAF_CFG_CAPTURE
+    result( context_ptr const & ctx ) noexcept:
+        ctx_(ctx),
+        what_(result_discriminant::kind_ctx_ptr{})
+    {
+        BOOST_LEAF_ASSERT(ctx_ && ctx_->captured_id_);
+    }
+
     result( context_ptr && ctx ) noexcept:
         ctx_(std::move(ctx)),
         what_(result_discriminant::kind_ctx_ptr{})
     {
+        BOOST_LEAF_ASSERT(ctx_ && ctx_->captured_id_);
     }
 #endif
 
@@ -449,12 +503,12 @@ public:
 
 #endif
 
-    value_type_const * operator->() const noexcept
+    value_no_ref_const * operator->() const noexcept
     {
         return has_value() ? leaf_detail::stored<T>::cptr(stored_) : nullptr;
     }
 
-    value_type * operator->() noexcept
+    value_no_ref * operator->() noexcept
     {
         return has_value() ? leaf_detail::stored<T>::ptr(stored_) : nullptr;
     }
@@ -517,6 +571,35 @@ public:
     {
         return error_id(error()).load(std::forward<Item>(item)...);
     }
+
+    template <class CharT, class Traits>
+    void print( std::basic_ostream<CharT, Traits> & os ) const
+    {
+        switch(what_.kind())
+        {
+        case result_discriminant::val:
+            leaf_detail::print_result_value(os, value());
+            break;
+        case result_discriminant::ctx_ptr:
+#if BOOST_LEAF_CFG_CAPTURE
+            BOOST_LEAF_ASSERT(ctx_ && ctx_->captured_id_);
+            os << "Error ID " << ctx_->captured_id_ << ", captured error objects:\n" << *ctx_;
+            break;
+#else
+            BOOST_LEAF_ASSERT(0); // Possible ODR violation.
+#endif
+        default:
+            os << "Error ID " << what_.get_error_id();
+        }
+    }
+
+
+    template <class CharT, class Traits>
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, result const & r )
+    {
+        r.print(os);
+        return os;
+    }
 };
 
 ////////////////////////////////////////
@@ -527,7 +610,7 @@ namespace leaf_detail
 }
 
 template <>
-class result<void>:
+class BOOST_LEAF_NODISCARD result<void>:
     result<leaf_detail::void_>
 {
     using result_discriminant = leaf_detail::result_discriminant;
@@ -574,6 +657,11 @@ public:
 #endif
 
 #if BOOST_LEAF_CFG_CAPTURE
+    result( context_ptr const & ctx ) noexcept:
+        base(ctx)
+    {
+    }
+
     result( context_ptr && ctx ) noexcept:
         base(std::move(ctx))
     {
@@ -602,6 +690,22 @@ public:
     void operator*() const noexcept
     {
         BOOST_LEAF_ASSERT(has_value());
+    }
+
+    template <class CharT, class Traits>
+    void print( std::basic_ostream<CharT, Traits> & os ) const
+    {
+        if( what_.kind() == result_discriminant::val )
+            os << "No error";
+        else
+            os << *static_cast<base const *>(this);
+    }
+
+    template <class CharT, class Traits>
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, result const & r )
+    {
+        r.print(os);
+        return os;
     }
 
     using base::operator=;

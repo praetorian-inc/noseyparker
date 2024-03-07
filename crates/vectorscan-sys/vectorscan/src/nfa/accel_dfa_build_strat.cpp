@@ -130,14 +130,14 @@ void extend(const raw_dfa &rdfa, const vector<CharReach> &rev_map,
         } else {
             path pp = append(p, CharReach(), p.dest);
             all[p.dest].emplace_back(pp);
-            out.emplace_back(move(pp));
+            out.emplace_back(std::move(pp));
         }
     }
 
     if (!s.reports_eod.empty()) {
         path pp = append(p, CharReach(), p.dest);
         all[p.dest].emplace_back(pp);
-        out.emplace_back(move(pp));
+        out.emplace_back(std::move(pp));
     }
 
     flat_map<u32, CharReach> dest;
@@ -157,7 +157,7 @@ void extend(const raw_dfa &rdfa, const vector<CharReach> &rev_map,
         DEBUG_PRINTF("----good: [%s] -> %u\n",
                      describeClasses(pp.reach).c_str(), pp.dest);
         all[e.first].emplace_back(pp);
-        out.emplace_back(move(pp));
+        out.emplace_back(std::move(pp));
     }
 }
 
@@ -174,7 +174,7 @@ vector<vector<CharReach>> generate_paths(const raw_dfa &rdfa,
             extend(rdfa, rev_map, p, all, next_gen);
         }
 
-        paths = move(next_gen);
+        paths = std::move(next_gen);
     }
 
     dump_paths(paths);

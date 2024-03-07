@@ -19,7 +19,6 @@
 #include <string>
 #include <iterator>
 #include <boost/assert.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
@@ -561,7 +560,7 @@ class char_decorator_gen2
 
     typedef typename boost::log::aux::deduce_char_type< typename range_value< FromRangeT >::type >::type from_char_type;
     typedef typename boost::log::aux::deduce_char_type< typename range_value< ToRangeT >::type >::type to_char_type;
-    BOOST_STATIC_ASSERT_MSG((is_same< from_char_type, to_char_type >::value), "Boost.Log: character decorator cannot be instantiated with different character types for source and replacement strings");
+    static_assert(is_same< from_char_type, to_char_type >::value, "Boost.Log: character decorator cannot be instantiated with different character types for source and replacement strings");
 
 public:
     char_decorator_gen2(FromRangeT const& from, ToRangeT const& to) : m_from(from), m_to(to)

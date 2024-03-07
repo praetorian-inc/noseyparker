@@ -14,6 +14,8 @@
 
 #include <vector>
 
+#include <boost/range/size.hpp>
+
 #include <boost/geometry/algorithms/area.hpp>
 #include <boost/geometry/core/point_order.hpp>
 #include <boost/geometry/core/radian_access.hpp>

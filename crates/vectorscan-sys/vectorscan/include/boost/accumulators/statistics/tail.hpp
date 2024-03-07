@@ -88,7 +88,7 @@ namespace detail
         }
 
     private:
-        stat_assign_visitor &operator =(stat_assign_visitor const &);
+        BOOST_DELETED_FUNCTION(stat_assign_visitor &operator =(stat_assign_visitor const &))
         Args const &args;
         std::size_t index;
     };
@@ -264,7 +264,7 @@ namespace impl
             }
 
         private:
-            indirect_cmp &operator =(indirect_cmp const &);
+            BOOST_DELETED_FUNCTION(indirect_cmp &operator =(indirect_cmp const &))
             std::vector<Sample> const &samples;
         };
 

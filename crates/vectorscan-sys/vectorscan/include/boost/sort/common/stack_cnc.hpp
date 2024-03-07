@@ -99,7 +99,7 @@ public:
     {
         std::lock_guard < spinlock_t > guard(spl);
         v_t.emplace_back(std::forward< Args > (args)...);
-    };
+    }
 
     //
     //-------------------------------------------------------------------------
@@ -116,7 +116,7 @@ public:
         P = std::move(v_t.back());
         v_t.pop_back();
         return true;
-    };
+    }
     //-------------------------------------------------------------------------
     //  function : push_back
     /// @brief Insert one vector at the end of the container
@@ -132,7 +132,7 @@ public:
             v_t.push_back(v_other[i]);
         }
         return *this;
-    };
+    }
 };
 // end class stack_cnc
 

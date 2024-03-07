@@ -6,9 +6,9 @@
 
 //
 // Contains type traits machinery for incomplete arrays. MPL compatibility
-// is included for completeness, but is not necessary for the current 
+// is included for completeness, but is not necessary for the current
 // application.
-// 
+//
 
 #ifndef BOOST_MOVE_PTR_ARRAYS_HPP_INCLUDED
 #define BOOST_MOVE_PTR_ARRAYS_HPP_INCLUDED
@@ -31,11 +31,11 @@ namespace boost { namespace ptr_container_detail { namespace move_ptrs {
 // From Howard Hinnant.
 template<typename T, typename U>
 struct is_array_convertible {
-    typedef typename remove_bounds<T>::type      t_element; 
-    typedef typename remove_bounds<U>::type      u_element; 
-    typedef typename remove_cv<t_element>::type  t_base; 
-    typedef typename remove_cv<u_element>::type  u_base; 
-    typedef typename 
+    typedef typename remove_bounds<T>::type      t_element;
+    typedef typename remove_bounds<U>::type      u_element;
+    typedef typename remove_cv<t_element>::type  t_base;
+    typedef typename remove_cv<u_element>::type  u_base;
+    typedef typename
             mpl::and_<
                 is_array<T>,
                 is_array<U>,
@@ -47,18 +47,18 @@ struct is_array_convertible {
 };
 
 template<typename T, typename U>
-struct is_smart_ptr_convertible 
+struct is_smart_ptr_convertible
     : mpl::if_<
           is_array<T>,
           is_array_convertible<T, U>,
-          is_convertible<T*, U*> 
+          is_convertible<T*, U*>
       >::type
     { };
 
 #ifndef BOOST_NO_SFINAE
     template<typename Src, typename Tgt, typename T = void>
-    struct enable_if_convertible 
-        : enable_if< 
+    struct enable_if_convertible
+        : enable_if<
               is_smart_ptr_convertible<Src, Tgt>,
               T
           >

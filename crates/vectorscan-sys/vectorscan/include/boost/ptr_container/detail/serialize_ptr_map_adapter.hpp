@@ -10,10 +10,10 @@
 #include <boost/ptr_container/detail/serialize_xml_names.hpp>
 #include <boost/core/serialization.hpp>
 
-namespace boost 
+namespace boost
 {
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class T, class VoidPtrMap, class CloneAllocator, bool Ordered>
@@ -22,7 +22,7 @@ void save(Archive& ar, const ptr_container_detail::ptr_map_adapter_base<T, VoidP
     typedef ptr_container_detail::ptr_map_adapter_base<T, VoidPtrMap, CloneAllocator,Ordered> container;
     typedef BOOST_DEDUCED_TYPENAME container::const_iterator const_iterator;
 
-    ar << boost::serialization::make_nvp( ptr_container_detail::count(), 
+    ar << boost::serialization::make_nvp( ptr_container_detail::count(),
                                           ptr_container_detail::serialize_as_const(c.size()) );
 
     const_iterator i = c.begin(), e = c.end();
@@ -53,7 +53,7 @@ void load(Archive& ar, ptr_map_adapter<T, VoidPtrMap, CloneAllocator,Ordered>& c
         ar >> boost::serialization::make_nvp( ptr_container_detail::first(), key );
         ar >> boost::serialization::make_nvp( ptr_container_detail::second(), value );
         std::pair<iterator, bool> p = c.insert(key, value);
-        ar.reset_object_address(&p.first->first, &key); 
+        ar.reset_object_address(&p.first->first, &key);
     }
 }
 

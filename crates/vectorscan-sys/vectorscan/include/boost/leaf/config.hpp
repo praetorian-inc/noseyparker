@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_CONFIG_HPP_INCLUDED
 #define BOOST_LEAF_CONFIG_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -112,6 +112,10 @@
 
 #if BOOST_LEAF_CFG_GNUC_STMTEXPR!=0 && BOOST_LEAF_CFG_GNUC_STMTEXPR!=1
 #   error BOOST_LEAF_CFG_GNUC_STMTEXPR must be 0 or 1.
+#endif
+
+#if BOOST_LEAF_CFG_STD_SYSTEM_ERROR && !BOOST_LEAF_CFG_STD_STRING
+#   error BOOST_LEAF_CFG_STD_SYSTEM_ERROR != 0 requires BOOST_LEAF_CFG_STD_STRING != 0
 #endif
 
 ////////////////////////////////////////

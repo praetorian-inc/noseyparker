@@ -194,9 +194,19 @@ namespace { void _set_se_translator( void* ) {} }
 #  include <boost/core/demangle.hpp>
 #endif
 
-#if !defined(BOOST_MSSTL_VERSION) || (BOOST_MSSTL_VERSION >= 120)
+#if (!defined(BOOST_MSSTL_VERSION) || (BOOST_MSSTL_VERSION >= 120)) && (!defined(__GLIBC__) || ((__GLIBC__ > 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ >= 2))))
+// glibc 2.2 - 2.17 required __STDC_FORMAT_MACROS to be defined for use of PRIxPTR
+#  if defined(__GLIBC__) && !((__GLIBC__ > 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ >= 18)))
+#    ifndef __STDC_FORMAT_MACROS
+#      define __STDC_FORMAT_MACROS 1
+#      define BOOST_TEST_DEFINED_STDC_FORMAT_MACROS
+#    endif
+#  endif
 #  include <inttypes.h>
 #  define BOOST_TEST_PRIxPTR PRIxPTR
+#  ifdef BOOST_TEST_DEFINED_STDC_FORMAT_MACROS
+#    undef __STDC_FORMAT_MACROS
+#  endif
 #else
 #  define BOOST_TEST_PRIxPTR "08lx"
 #endif

@@ -142,6 +142,9 @@ enum class error
     /// `double` was expected during conversion
     not_double,
 
+    /// JSON integer was expected during conversion
+    not_integer,
+
     /// source composite has size incompatible with target
     size_mismatch,
 
@@ -150,7 +153,6 @@ enum class error
 
     /// the key does not correspond to a known name
     unknown_name,
-
 };
 
 /** Error conditions corresponding to JSON errors

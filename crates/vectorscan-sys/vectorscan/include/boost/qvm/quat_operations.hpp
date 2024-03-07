@@ -14,8 +14,7 @@
 #include <boost/qvm/assert.hpp>
 #include <boost/qvm/error.hpp>
 #include <boost/qvm/throw_exception.hpp>
-#include <string>
-#include <cmath>
+#include <boost/qvm/to_string.hpp>
 
 namespace boost { namespace qvm {
 
@@ -44,12 +43,6 @@ msvc_parse_bug_workaround
         };
     }
 
-namespace
-qvm_to_string_detail
-    {
-    template <class T>
-    std::string to_string( T const & x );
-    }
 
 template <class A>
 inline

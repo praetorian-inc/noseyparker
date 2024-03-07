@@ -15,10 +15,10 @@
 #include <boost/ptr_container/detail/serialize_reversible_cont.hpp>
 #include <boost/ptr_container/ptr_unordered_set.hpp>
 
-namespace boost 
+namespace boost
 {
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class T, class Hash, class Pred, class CloneAllocator, class Allocator>

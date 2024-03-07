@@ -14,7 +14,6 @@
 /// std::shared_ptr types.
 
 #include <boost/type_index/runtime_cast/detail/runtime_cast_impl.hpp>
-#include <boost/type_traits/is_base_and_derived.hpp>
 #include <memory>
 
 #ifdef BOOST_HAS_PRAGMA_ONCE
@@ -35,7 +34,7 @@ namespace boost { namespace typeindex {
 /// If no such conversion exists, returns std::shared_ptr<T>();
 template<typename T, typename U>
 std::shared_ptr<T> runtime_pointer_cast(std::shared_ptr<U> const& u) {
-    T* value = detail::runtime_cast_impl<T>(u.get(), boost::is_base_and_derived<T, U>());
+    T* value = detail::runtime_cast_impl<T>(u.get(), std::is_base_of<T, U>());
     if(value)
         return std::shared_ptr<T>(u, value);
     return std::shared_ptr<T>();

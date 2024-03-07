@@ -113,8 +113,10 @@ public:
         @par Exception Safety
         No-throw guarantee.
     */
+#ifdef BOOST_JSON_DOCS
     BOOST_JSON_DECL
     ~serializer() noexcept;
+#endif // BOOST_JSON_DOCS
 
     /** Constructor
 

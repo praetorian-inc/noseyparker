@@ -23,7 +23,6 @@
 #include <boost/beast/core/detail/buffer.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
 #include <boost/assert.hpp>
 #include <boost/throw_exception.hpp>
 #include <memory>
@@ -145,7 +144,7 @@ build_response(
     res.result(http::status::switching_protocols);
     res.version(req.version());
     res.set(http::field::upgrade, "websocket");
-    res.set(http::field::connection, "upgrade");
+    res.set(http::field::connection, "Upgrade");
     {
         detail::sec_ws_accept_type acc;
         detail::make_sec_ws_accept(acc, key);

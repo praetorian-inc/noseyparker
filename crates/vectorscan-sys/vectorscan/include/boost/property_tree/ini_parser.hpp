@@ -320,6 +320,10 @@ namespace boost { namespace property_tree { namespace ini_parser
             BOOST_PROPERTY_TREE_THROW(ini_parser_error(
                 e.message(), filename, e.line()));
         }
+        stream.flush();
+        if (!stream)
+            BOOST_PROPERTY_TREE_THROW(ini_parser_error(
+                "write error", filename, 0));
     }
 
 } } }

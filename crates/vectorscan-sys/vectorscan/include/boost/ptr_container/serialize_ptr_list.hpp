@@ -9,10 +9,10 @@
 #include <boost/ptr_container/detail/serialize_reversible_cont.hpp>
 #include <boost/ptr_container/ptr_list.hpp>
 
-namespace boost 
+namespace boost
 {
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class T, class CloneAllocator, class Allocator>

@@ -110,7 +110,7 @@ namespace detail
 class status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class indirecting_domain;
+  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
 
 public:
   //! Type of the unique id for this domain.
@@ -298,8 +298,8 @@ public:
       auto dest = static_cast<atomic_refcounted_string_ref *>(_dest);      // NOLINT
       auto src = static_cast<const atomic_refcounted_string_ref *>(_src);  // NOLINT
       (void) src;
-      assert(dest->_thunk == _refcounted_string_thunk);                    // NOLINT
-      assert(src == nullptr || src->_thunk == _refcounted_string_thunk);   // NOLINT
+      assert(dest->_thunk == _refcounted_string_thunk);                   // NOLINT
+      assert(src == nullptr || src->_thunk == _refcounted_string_thunk);  // NOLINT
       switch(op)
       {
       case _thunk_op::copy:

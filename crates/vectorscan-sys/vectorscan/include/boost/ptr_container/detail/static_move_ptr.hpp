@@ -4,25 +4,25 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt.)
 
-// Implementation of the move_ptr from the "Move Proposal" 
-// (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1377.htm) 
+// Implementation of the move_ptr from the "Move Proposal"
+// (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1377.htm)
 // enhanced to support custom deleters and safe boolean conversions.
 //
 // The implementation is based on an implementation by Daniel Wallin, at
 // "http://aspn.activestate.com/ASPN/Mail/Message/Attachments/boost/
-// 400DC271.1060903@student.umu.se/move_ptr.hpp". The current was adapted 
-// by Jonathan Turkanis to incorporating ideas of Howard Hinnant and 
-// Rani Sharoni. 
+// 400DC271.1060903@student.umu.se/move_ptr.hpp". The current was adapted
+// by Jonathan Turkanis to incorporating ideas of Howard Hinnant and
+// Rani Sharoni.
 
 #ifndef BOOST_STATIC_MOVE_PTR_HPP_INCLUDED
 #define BOOST_STATIC_MOVE_PTR_HPP_INCLUDED
 
 #include <boost/config.hpp> // Member template friends, put size_t in std.
 #include <cstddef>          // size_t
-#include <boost/compressed_pair.hpp> 
-#include <boost/ptr_container/detail/default_deleter.hpp>       
-#include <boost/ptr_container/detail/is_convertible.hpp>       
-#include <boost/ptr_container/detail/move.hpp>       
+#include <boost/compressed_pair.hpp>
+#include <boost/ptr_container/detail/default_deleter.hpp>
+#include <boost/ptr_container/detail/is_convertible.hpp>
+#include <boost/ptr_container/detail/move.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/is_array.hpp>
@@ -34,11 +34,11 @@
 
 namespace boost { namespace ptr_container_detail {
 
-    
-template< typename T, 
-          typename Deleter = 
+
+template< typename T,
+          typename Deleter =
               move_ptrs::default_deleter<T> >
-class static_move_ptr 
+class static_move_ptr
 {
 public:
 
@@ -46,7 +46,7 @@ public:
     typedef Deleter                                     deleter_type;
 
 private:
-    
+
     struct safe_bool_helper { int x; };
     typedef int safe_bool_helper::* safe_bool;
     typedef boost::compressed_pair<element_type*, Deleter> impl_type;
@@ -60,24 +60,24 @@ public:
     static_move_ptr() : impl_(0) { }
 
     static_move_ptr(const static_move_ptr& p)
-        : impl_(p.get(), p.get_deleter())    
-        { 
+        : impl_(p.get(), p.get_deleter())
+        {
             const_cast<static_move_ptr&>(p).release();
         }
 
-#if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x564))    
+#if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x564))
     static_move_ptr( const move_ptrs::move_source<static_move_ptr<T,Deleter> >& src )
 #else
     static_move_ptr( const move_ptrs::move_source<static_move_ptr>& src )
-#endif    
+#endif
             : impl_(src.ptr().get(), src.ptr().get_deleter())
             {
                 src.ptr().release();
             }
-    
+
     template<typename TT>
-    static_move_ptr(TT* tt, Deleter del) 
-        : impl_(tt, del) 
+    static_move_ptr(TT* tt, Deleter del)
+        : impl_(tt, del)
         { }
 
         // Destructor
@@ -96,25 +96,25 @@ public:
 
     element_type* get() const { return ptr(); }
 
-    element_type& operator*() 
-        { 
-            /*BOOST_STATIC_ASSERT(!is_array);*/ return *ptr(); 
+    element_type& operator*()
+        {
+            /*BOOST_STATIC_ASSERT(!is_array);*/ return *ptr();
         }
 
-    const element_type& operator*() const 
-        { 
-            /*BOOST_STATIC_ASSERT(!is_array);*/ return *ptr(); 
+    const element_type& operator*() const
+        {
+            /*BOOST_STATIC_ASSERT(!is_array);*/ return *ptr();
         }
 
-    element_type* operator->()  
-        { 
-            /*BOOST_STATIC_ASSERT(!is_array);*/ return ptr(); 
-        }    
+    element_type* operator->()
+        {
+            /*BOOST_STATIC_ASSERT(!is_array);*/ return ptr();
+        }
 
-    const element_type* operator->() const 
-        { 
-            /*BOOST_STATIC_ASSERT(!is_array);*/ return ptr(); 
-        }    
+    const element_type* operator->() const
+        {
+            /*BOOST_STATIC_ASSERT(!is_array);*/ return ptr();
+        }
 
 
     element_type* release()
@@ -131,7 +131,7 @@ public:
         }
 
     template<typename TT>
-    void reset(TT* tt, Deleter dd) 
+    void reset(TT* tt, Deleter dd)
         {
             static_move_ptr(tt, dd).swap(*this);
         }
@@ -149,31 +149,31 @@ private:
         {
             typedef move_ptrs::is_smart_ptr_convertible<TT, T> convertible;
             BOOST_STATIC_ASSERT(convertible::value);
-        }   
+        }
 
 #if defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING) || defined(BOOST_NO_SFINAE)
 // give up on this behavior
-#else 
+#else
 
     template<typename Ptr> struct cant_move_from_const;
 
-    template<typename TT, typename DD> 
-    struct cant_move_from_const< const static_move_ptr<TT, DD> > { 
-        typedef typename static_move_ptr<TT, DD>::error type; 
+    template<typename TT, typename DD>
+    struct cant_move_from_const< const static_move_ptr<TT, DD> > {
+        typedef typename static_move_ptr<TT, DD>::error type;
     };
 
-    template<typename Ptr> 
+    template<typename Ptr>
     static_move_ptr(Ptr&, typename cant_move_from_const<Ptr>::type = 0);
 
 
 public:
     static_move_ptr(static_move_ptr&);
 
-    
+
 private:
     template<typename TT, typename DD>
     static_move_ptr( static_move_ptr<TT, DD>&,
-                     typename 
+                     typename
                      move_ptrs::enable_if_convertible<
                          TT, T, static_move_ptr&
                      >::type::type* = 0 );
@@ -186,10 +186,10 @@ private:
 //#else
     public:
 //#endif
-    typename impl_type::first_reference 
-    ptr() { return impl_.first(); } 
+    typename impl_type::first_reference
+    ptr() { return impl_.first(); }
 
-    typename impl_type::first_const_reference 
+    typename impl_type::first_const_reference
     ptr() const { return impl_.first(); }
 
     impl_type impl_;

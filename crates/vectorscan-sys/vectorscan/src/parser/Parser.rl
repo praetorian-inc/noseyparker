@@ -163,7 +163,7 @@ ComponentSequence *enterSequence(ComponentSequence *parent,
     assert(child);
 
     ComponentSequence *seq = child.get();
-    parent->addComponent(move(child));
+    parent->addComponent(std::move(child));
     return seq;
 }
 
@@ -175,7 +175,7 @@ void addLiteral(ComponentSequence *currentSeq, char c, const ParseMode &mode) {
         assert(cc);
         cc->add(c);
         cc->finalize();
-        currentSeq->addComponent(move(cc));
+        currentSeq->addComponent(std::move(cc));
     } else {
         currentSeq->addComponent(getLiteralComponentClass(c, mode.caseless));
     }
@@ -190,7 +190,7 @@ void addEscaped(ComponentSequence *currentSeq, unichar accum,
         assert(cc);
         cc->add(accum);
         cc->finalize();
-        currentSeq->addComponent(move(cc));
+        currentSeq->addComponent(std::move(cc));
     } else {
         if (accum > 255) {
             throw LocatedParseError(err_msg);
@@ -272,6 +272,7 @@ unichar readUtf8CodePoint4c(const char *s) {
 
 %%{
     machine regex;
+    alphtype unsigned char;
 
     action throwUnsupportedEscape {
         ostringstream str;
@@ -329,7 +330,7 @@ unichar readUtf8CodePoint4c(const char *s) {
         PUSH_SEQUENCE;
         auto seq = std::make_unique<ComponentSequence>();
         seq->setCaptureIndex(groupIndex++);
-        currentSeq = enterSequence(currentSeq, move(seq));
+        currentSeq = enterSequence(currentSeq, std::move(seq));
     }
 
     # enter a NAMED CAPTURING group ( e.g. (?'<hatstand>blah) )
@@ -346,7 +347,7 @@ unichar readUtf8CodePoint4c(const char *s) {
         auto seq = std::make_unique<ComponentSequence>();
         seq->setCaptureIndex(groupIndex++);
         seq->setCaptureName(label);
-        currentSeq = enterSequence(currentSeq, move(seq));
+        currentSeq = enterSequence(currentSeq, std::move(seq));
     }
 
     # enter a NON-CAPTURING group where we're modifying flags
@@ -723,7 +724,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                      ([^^] ${ fhold; fcall readUCP; })
                       '}' ${ if (!inCharClass) { // not inside [..]
                                  currentCls->finalize();
-                                 currentSeq->addComponent(move(currentCls));
+                                 currentSeq->addComponent(std::move(currentCls));
                              }
                              fret; 
                            })
@@ -734,7 +735,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_C, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -742,7 +743,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_L, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -750,7 +751,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_M, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -758,7 +759,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_N, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret;
         };
@@ -766,7 +767,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_P, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -774,7 +775,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_S, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -782,7 +783,7 @@ unichar readUtf8CodePoint4c(const char *s) {
             currentCls->add(CLASS_UCP_Z, negated); 
             if (!inCharClass) {
                 currentCls->finalize();
-                currentSeq->addComponent(move(currentCls));
+                currentSeq->addComponent(std::move(currentCls));
             }
             fret; 
         };
@@ -1105,7 +1106,7 @@ unichar readUtf8CodePoint4c(const char *s) {
 
               ']' => {
                   currentCls->finalize();
-                  currentSeq->addComponent(move(currentCls));
+                  currentSeq->addComponent(std::move(currentCls));
                   inCharClass = false;
                   fgoto main;
               };
@@ -1162,7 +1163,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint2c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               utf8_3c when is_utf8 => {
@@ -1171,7 +1172,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint3c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               utf8_4c when is_utf8 => {
@@ -1180,7 +1181,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint4c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               hi_byte when is_utf8 => {
@@ -1617,52 +1618,52 @@ unichar readUtf8CodePoint4c(const char *s) {
               # Word character
               '\\w' => {
                   auto cc = generateComponent(CLASS_WORD, false, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Non word character
               '\\W' => {
                   auto cc = generateComponent(CLASS_WORD, true, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Whitespace character
               '\\s' => {
                   auto cc = generateComponent(CLASS_SPACE, false, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Non whitespace character
               '\\S' => {
                   auto cc = generateComponent(CLASS_SPACE, true, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Digit character
               '\\d' => {
                   auto cc = generateComponent(CLASS_DIGIT, false, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Non digit character
               '\\D' => {
                   auto cc = generateComponent(CLASS_DIGIT, true, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Horizontal whitespace
               '\\h' => {
                   auto cc = generateComponent(CLASS_HORZ, false, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Not horizontal whitespace
               '\\H' => {
                   auto cc = generateComponent(CLASS_HORZ, true, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Vertical whitespace
               '\\v' => {
                   auto cc = generateComponent(CLASS_VERT, false, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
               # Not vertical whitespace
               '\\V' => {
                   auto cc = generateComponent(CLASS_VERT, true, mode);
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               '\\p{' => {
@@ -1786,7 +1787,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   ComponentAssertion *a_seq = a.get();
                   PUSH_SEQUENCE;
                   currentSeq = enterSequence(currentSeq,
-                        std::make_unique<ComponentCondReference>(move(a)));
+                        std::make_unique<ComponentCondReference>(std::move(a)));
                   PUSH_SEQUENCE;
                   currentSeq = a_seq;
               };
@@ -1797,7 +1798,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   ComponentAssertion *a_seq = a.get();
                   PUSH_SEQUENCE;
                   currentSeq = enterSequence(currentSeq,
-                        std::make_unique<ComponentCondReference>(move(a)));
+                        std::make_unique<ComponentCondReference>(std::move(a)));
                   PUSH_SEQUENCE;
                   currentSeq = a_seq;
               };
@@ -1808,7 +1809,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   ComponentAssertion *a_seq = a.get();
                   PUSH_SEQUENCE;
                   currentSeq = enterSequence(currentSeq,
-                        std::make_unique<ComponentCondReference>(move(a)));
+                        std::make_unique<ComponentCondReference>(std::move(a)));
                   PUSH_SEQUENCE;
                   currentSeq = a_seq;
               };
@@ -1819,7 +1820,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   ComponentAssertion *a_seq = a.get();
                   PUSH_SEQUENCE;
                   currentSeq = enterSequence(currentSeq,
-                        std::make_unique<ComponentCondReference>(move(a)));
+                        std::make_unique<ComponentCondReference>(std::move(a)));
                   PUSH_SEQUENCE;
                   currentSeq = a_seq;
               };
@@ -1860,7 +1861,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint2c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               utf8_3c when is_utf8 => {
@@ -1869,7 +1870,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint3c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               utf8_4c when is_utf8 => {
@@ -1878,7 +1879,7 @@ unichar readUtf8CodePoint4c(const char *s) {
                   auto cc = getComponentClass(mode);
                   cc->add(readUtf8CodePoint4c(ts));
                   cc->finalize();
-                  currentSeq->addComponent(move(cc));
+                  currentSeq->addComponent(std::move(cc));
               };
 
               hi_byte when is_utf8 => {
@@ -2023,7 +2024,7 @@ unique_ptr<Component> parse(const char *ptr, ParseMode &globalMode) {
         // Ensure that all references are valid.
         checkReferences(*rootSeq, groupIndex, groupNames);
 
-        return move(rootSeq);
+        return std::move(rootSeq);
     } catch (LocatedParseError &error) {
         if (ts >= ptr && ts <= pe) {
             error.locate(ts - ptr);

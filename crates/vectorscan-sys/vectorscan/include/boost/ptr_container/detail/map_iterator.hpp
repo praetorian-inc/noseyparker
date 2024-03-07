@@ -21,13 +21,13 @@
 #include <boost/utility/compare_pointees.hpp>
 #include <utility>
 
-#if defined(BOOST_MSVC)  
-# pragma warning(push)  
-# pragma warning(disable:4512)    // Assignment operator could not be generated.  
-#endif 
+#if defined(BOOST_MSVC)
+# pragma warning(push)
+# pragma warning(disable:4512)    // Assignment operator could not be generated.
+#endif
 
 namespace boost
-{ 
+{
     namespace ptr_container_detail
     {
         template< class F, class S >
@@ -56,7 +56,7 @@ namespace boost
 
             friend inline bool operator==( ref_pair l, ref_pair r )
             {
-                return l.first == r.first && 
+                return l.first == r.first &&
                        boost::equal_pointees( l.second, r.second );
             }
 
@@ -69,7 +69,7 @@ namespace boost
             {
                 if( l.first == r.first )
                     return boost::less_pointees( l.second, r.second );
-                else 
+                else
                     return l.first < r.first;
             }
 
@@ -90,43 +90,43 @@ namespace boost
 
         };
     }
-    
-    template< 
-              class I, // base iterator 
+
+    template<
+              class I, // base iterator
               class F, // first type, key type
               class S  // second type, mapped type
-            > 
-    class ptr_map_iterator : 
-        public boost::iterator_adaptor< ptr_map_iterator<I,F,S>, I, 
-                                        ptr_container_detail::ref_pair<F,S>, 
-                                        use_default, 
+            >
+    class ptr_map_iterator :
+        public boost::iterator_adaptor< ptr_map_iterator<I,F,S>, I,
+                                        ptr_container_detail::ref_pair<F,S>,
+                                        use_default,
                                         ptr_container_detail::ref_pair<F,S> >
     {
-        typedef boost::iterator_adaptor< ptr_map_iterator<I,F,S>, I, 
+        typedef boost::iterator_adaptor< ptr_map_iterator<I,F,S>, I,
                                          ptr_container_detail::ref_pair<F,S>,
-                                         use_default, 
-                                         ptr_container_detail::ref_pair<F,S> > 
+                                         use_default,
+                                         ptr_container_detail::ref_pair<F,S> >
             base_type;
 
 
     public:
-        ptr_map_iterator() : base_type()                                 
+        ptr_map_iterator() : base_type()
         { }
-        
+
         explicit ptr_map_iterator( const I& i ) : base_type(i)
         { }
 
         template< class I2, class F2, class S2 >
-            ptr_map_iterator( const ptr_map_iterator<I2,F2,S2>& r ) 
+            ptr_map_iterator( const ptr_map_iterator<I2,F2,S2>& r )
          : base_type(r.base())
         { }
-        
+
    }; // class 'ptr_map_iterator'
 
 }
 
-#if defined(BOOST_MSVC)  
-# pragma warning(pop)  
-#endif 
+#if defined(BOOST_MSVC)
+# pragma warning(pop)
+#endif
 
 #endif

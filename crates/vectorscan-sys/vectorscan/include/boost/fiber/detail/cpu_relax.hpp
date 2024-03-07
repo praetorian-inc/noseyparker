@@ -59,7 +59,11 @@ namespace detail {
 //               processors
 // extended mnemonics (available with POWER7)
 // yield   ==   or 27, 27, 27
+# if defined(__POWERPC__) // Darwin PPC
+# define cpu_relax() asm volatile ("or r27,r27,r27" ::: "memory");
+# else
 # define cpu_relax() asm volatile ("or 27,27,27" ::: "memory");
+# endif
 #elif BOOST_ARCH_X86
 # if BOOST_COMP_MSVC || BOOST_COMP_MSVC_EMULATED
 #  define cpu_relax() YieldProcessor();

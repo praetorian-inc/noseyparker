@@ -95,8 +95,8 @@ namespace boost
         {
             size_t i = 0;
             for( ; i != N; ++i )
-                this->base()[i] = this->null_policy_allocate_clone( 
-                                        static_cast<const U*>( &r[i] ) ); 
+                this->base()[i] = this->null_policy_allocate_clone(
+                                        static_cast<const U*>( &r[i] ) );
         }
 
         template< class U >
@@ -104,8 +104,8 @@ namespace boost
         {
             size_t i = 0;
             for( ; i != N; ++i )
-                this->base()[i] = this->null_policy_allocate_clone( 
-                                        static_cast<const T*>( &r[i] ) ); 
+                this->base()[i] = this->null_policy_allocate_clone(
+                                        static_cast<const T*>( &r[i] ) );
         }
 
 #ifndef BOOST_NO_AUTO_PTR
@@ -120,7 +120,7 @@ namespace boost
         ptr_array& operator=( ptr_array r )
         {
             this->swap( r );
-            return *this;            
+            return *this;
         }
 
 #ifndef BOOST_NO_AUTO_PTR
@@ -195,9 +195,9 @@ namespace boost
             BOOST_STATIC_ASSERT( idx < N );
 
             this->enforce_null_policy( r, "Null pointer in 'ptr_array::replace()'" );
-            auto_type res( static_cast<U*>(this->base()[idx]), *this ); // nothrow                    
+            auto_type res( static_cast<U*>(this->base()[idx]), *this ); // nothrow
             this->base()[idx] = r;                                      // nothrow
-            return boost::ptr_container::move(res);                     // nothrow 
+            return boost::ptr_container::move(res);                     // nothrow
         }
 
 #ifndef BOOST_NO_AUTO_PTR
@@ -225,7 +225,7 @@ namespace boost
 
             auto_type res( static_cast<U*>(this->base()[idx]), *this ); // nothrow
             this->base()[idx] = ptr.release();                          // nothrow
-            return boost::ptr_container::move(res);                     // nothrow 
+            return boost::ptr_container::move(res);                     // nothrow
         }
 
 #ifndef BOOST_NO_AUTO_PTR

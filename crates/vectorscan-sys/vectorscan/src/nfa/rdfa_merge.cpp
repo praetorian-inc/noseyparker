@@ -319,7 +319,7 @@ void mergeDfas(vector<unique_ptr<raw_dfa>> &dfas, size_t max_states,
 
     queue<unique_ptr<raw_dfa>> q;
     for (auto &dfa : dfas) {
-        q.push(move(dfa));
+        q.push(std::move(dfa));
     }
 
     // All DFAs are now on the queue, so we'll clear the vector and use it for
@@ -328,30 +328,30 @@ void mergeDfas(vector<unique_ptr<raw_dfa>> &dfas, size_t max_states,
 
     while (q.size() > 1) {
         // Attempt to merge the two front elements of the queue.
-        unique_ptr<raw_dfa> d1 = move(q.front());
+        unique_ptr<raw_dfa> d1 = std::move(q.front());
         q.pop();
-        unique_ptr<raw_dfa> d2 = move(q.front());
+        unique_ptr<raw_dfa> d2 = std::move(q.front());
         q.pop();
 
         auto rdfa = mergeTwoDfas(d1.get(), d2.get(), max_states, rm, grey);
         if (rdfa) {
-            q.push(move(rdfa));
+            q.push(std::move(rdfa));
         } else {
             DEBUG_PRINTF("failed to merge\n");
             // Put the larger of the two DFAs on the output list, retain the
             // smaller one on the queue for further merge attempts.
             if (d2->states.size() > d1->states.size()) {
-                dfas.emplace_back(move(d2));
-                q.push(move(d1));
+                dfas.emplace_back(std::move(d2));
+                q.push(std::move(d1));
             } else {
-                dfas.emplace_back(move(d1));
-                q.push(move(d2));
+                dfas.emplace_back(std::move(d1));
+                q.push(std::move(d2));
             }
         }
     }
 
     while (!q.empty()) {
-        dfas.emplace_back(move(q.front()));
+        dfas.emplace_back(std::move(q.front()));
         q.pop();
     }
 

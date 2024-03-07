@@ -124,13 +124,7 @@ public:
      * \brief Replace the instruction pointed to by the given iterator.
      */
     template<class Iter>
-    void replace(Iter it, std::unique_ptr<RoseInstruction> ri) {
-        assert(!prog.empty());
-
-        const RoseInstruction *old_ptr = it->get();
-        *it = move(ri);
-        update_targets(prog.begin(), prog.end(), old_ptr, it->get());
-    }
+    void replace(Iter it, std::unique_ptr<RoseInstruction> ri);
 };
 
 bytecode_ptr<char> writeProgram(RoseEngineBlob &blob,

@@ -5,7 +5,6 @@
 
 #include <boost/core/ref.hpp>
 #include <boost/bind/bind.hpp>
-#include <boost/format.hpp>
 
 #include <iterator>
 #include <sstream>

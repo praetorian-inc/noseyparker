@@ -35,25 +35,25 @@ namespace ptr_container
 
     template< class PtrContainer >
     class ptr_front_insert_iterator;
-    
+
     template< class PtrContainer >
     class ptr_insert_iterator;
 
     template< class PtrContainer >
-    ptr_back_insert_iterator<PtrContainer> 
+    ptr_back_insert_iterator<PtrContainer>
     ptr_back_inserter( PtrContainer& cont );
 
     template< class PtrContainer >
-    ptr_front_insert_iterator<PtrContainer> 
+    ptr_front_insert_iterator<PtrContainer>
     ptr_front_inserter( PtrContainer& cont );
 
     template< class PtrContainer >
-    ptr_insert_iterator<PtrContainer> 
+    ptr_insert_iterator<PtrContainer>
     ptr_inserter( PtrContainer& cont, typename PtrContainer::iterator before );
 
     //////////////////////////////////////////////////////////////////////////
     // Implementation
-    ////////////////////////////////////////////////////////////////////////// 
+    //////////////////////////////////////////////////////////////////////////
 
 
     template< class PtrContainer >
@@ -72,10 +72,10 @@ namespace ptr_container
         : container(&cont)
         { }
 
-        ptr_back_insert_iterator& 
+        ptr_back_insert_iterator&
         operator=( typename PtrContainer::value_type r )
         {
-            typename PtrContainer::value_type obj 
+            typename PtrContainer::value_type obj
                           = container->null_policy_allocate_clone(r);
             container->push_back( obj );
             return *this;
@@ -83,7 +83,7 @@ namespace ptr_container
 
 #ifndef BOOST_NO_AUTO_PTR
         template< class T >
-        ptr_back_insert_iterator& 
+        ptr_back_insert_iterator&
         operator=( std::auto_ptr<T> r )
         {
             container->push_back( r );
@@ -92,7 +92,7 @@ namespace ptr_container
 #endif
 #ifndef BOOST_NO_CXX11_SMART_PTR
         template< class T >
-        ptr_back_insert_iterator& 
+        ptr_back_insert_iterator&
         operator=( std::unique_ptr<T> r )
         {
             container->push_back( std::move( r ) );
@@ -100,7 +100,7 @@ namespace ptr_container
         }
 #endif
 
-        ptr_back_insert_iterator& 
+        ptr_back_insert_iterator&
         operator=( typename PtrContainer::const_reference r )
         {
             container->push_back( container->null_policy_allocate_clone(&r) );
@@ -108,26 +108,26 @@ namespace ptr_container
         }
 
         ptr_back_insert_iterator& operator*()
-        { 
+        {
             return *this;
         }
 
         ptr_back_insert_iterator& operator++()
-        { 
+        {
             return *this;
         }
 
         ptr_back_insert_iterator operator++(int)
-        { 
+        {
             return *this;
         }
-        
+
     protected:
         PtrContainer* container;
     };
 
 
-    
+
     template< class PtrContainer >
     class ptr_front_insert_iterator
     {
@@ -144,10 +144,10 @@ namespace ptr_container
         : container(&cont)
         { }
 
-        ptr_front_insert_iterator& 
+        ptr_front_insert_iterator&
         operator=( typename PtrContainer::value_type r )
         {
-            typename PtrContainer::value_type obj 
+            typename PtrContainer::value_type obj
                               = container->null_policy_allocate_clone(r);
             container->push_front( obj );
             return *this;
@@ -155,7 +155,7 @@ namespace ptr_container
 
 #ifndef BOOST_NO_AUTO_PTR
         template< class T >
-        ptr_front_insert_iterator& 
+        ptr_front_insert_iterator&
         operator=( std::auto_ptr<T> r )
         {
             container->push_front( r );
@@ -164,15 +164,15 @@ namespace ptr_container
 #endif
 #ifndef BOOST_NO_CXX11_SMART_PTR
         template< class T >
-        ptr_front_insert_iterator& 
+        ptr_front_insert_iterator&
         operator=( std::unique_ptr<T> r )
         {
             container->push_front( std::move( r ) );
             return *this;
         }
 #endif
-        
-        ptr_front_insert_iterator& 
+
+        ptr_front_insert_iterator&
         operator=( typename PtrContainer::const_reference r )
         {
             container->push_front( container->null_policy_allocate_clone(&r) );
@@ -180,26 +180,26 @@ namespace ptr_container
         }
 
         ptr_front_insert_iterator& operator*()
-        { 
+        {
             return *this;
         }
 
         ptr_front_insert_iterator& operator++()
-        { 
+        {
             return *this;
         }
 
         ptr_front_insert_iterator operator++(int)
-        { 
+        {
             return *this;
         }
-        
+
     protected:
         PtrContainer* container;
     };
 
 
-    
+
     template< class PtrContainer >
     class ptr_insert_iterator
     {
@@ -217,10 +217,10 @@ namespace ptr_container
         : container(&cont), iter(before)
         { }
 
-        ptr_insert_iterator& 
+        ptr_insert_iterator&
         operator=( typename PtrContainer::value_type r )
         {
-            typename PtrContainer::value_type obj = 
+            typename PtrContainer::value_type obj =
                         container->null_policy_allocate_clone(r);
 
             iter = container->insert( iter, obj );
@@ -229,7 +229,7 @@ namespace ptr_container
 
 #ifndef BOOST_NO_AUTO_PTR
         template< class T >
-        ptr_insert_iterator& 
+        ptr_insert_iterator&
         operator=( std::auto_ptr<T> r )
         {
             iter = container->insert( iter, r );
@@ -238,64 +238,64 @@ namespace ptr_container
 #endif
 #ifndef BOOST_NO_CXX11_SMART_PTR
         template< class T >
-        ptr_insert_iterator& 
+        ptr_insert_iterator&
         operator=( std::unique_ptr<T> r )
         {
             iter = container->insert( iter, std::move( r ) );
             return *this;
         }
 #endif
-        
-        ptr_insert_iterator& 
+
+        ptr_insert_iterator&
         operator=( typename PtrContainer::const_reference r )
         {
-            iter = container->insert( iter, 
+            iter = container->insert( iter,
                               container->null_policy_allocate_clone(&r) );
             return *this;
         }
 
         ptr_insert_iterator& operator*()
-        { 
+        {
             return *this;
         }
 
         ptr_insert_iterator& operator++()
-        { 
+        {
             return *this;
         }
 
         ptr_insert_iterator operator++(int)
-        { 
+        {
             return *this;
         }
-        
+
     protected:
         PtrContainer*                    container;
         typename PtrContainer::iterator  iter;
     };
 
     template< class PtrContainer >
-    inline ptr_back_insert_iterator<PtrContainer> 
+    inline ptr_back_insert_iterator<PtrContainer>
     ptr_back_inserter( PtrContainer& cont )
     {
         return ptr_back_insert_iterator<PtrContainer>( cont );
     }
 
     template< class PtrContainer >
-    inline ptr_front_insert_iterator<PtrContainer> 
+    inline ptr_front_insert_iterator<PtrContainer>
     ptr_front_inserter( PtrContainer& cont )
     {
         return ptr_front_insert_iterator<PtrContainer>( cont );
     }
 
     template< class PtrContainer >
-    inline ptr_insert_iterator<PtrContainer> 
-    ptr_inserter( PtrContainer& cont, 
+    inline ptr_insert_iterator<PtrContainer>
+    ptr_inserter( PtrContainer& cont,
                     typename PtrContainer::iterator before )
     {
         return ptr_insert_iterator<PtrContainer>( cont, before );
     }
-    
+
 } // namespace 'ptr_container'
 } // namespace 'boost'
 

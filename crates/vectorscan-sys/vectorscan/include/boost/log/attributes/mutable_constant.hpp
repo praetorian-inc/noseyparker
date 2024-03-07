@@ -15,7 +15,6 @@
 #ifndef BOOST_LOG_ATTRIBUTES_MUTABLE_CONSTANT_HPP_INCLUDED_
 #define BOOST_LOG_ATTRIBUTES_MUTABLE_CONSTANT_HPP_INCLUDED_
 
-#include <boost/static_assert.hpp>
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <boost/move/core.hpp>
 #include <boost/move/utility_core.hpp>
@@ -99,7 +98,7 @@ protected:
         typedef ScopedReadLockT scoped_read_lock;
         //! Exclusive lock type
         typedef ScopedWriteLockT scoped_write_lock;
-        BOOST_STATIC_ASSERT_MSG(!(is_void< mutex_type >::value || is_void< scoped_read_lock >::value || is_void< scoped_write_lock >::value), "Boost.Log: Mutex and both lock types either must not be void or must all be void");
+        static_assert(!(is_void< mutex_type >::value || is_void< scoped_read_lock >::value || is_void< scoped_write_lock >::value), "Boost.Log: Mutex and both lock types either must not be void or must all be void");
         //! Attribute value wrapper
         typedef attribute_value_impl< value_type > attr_value;
 

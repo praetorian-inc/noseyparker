@@ -15,7 +15,6 @@
 #ifndef BOOST_LOG_ATTRIBUTES_COUNTER_HPP_INCLUDED_
 #define BOOST_LOG_ATTRIBUTES_COUNTER_HPP_INCLUDED_
 
-#include <boost/static_assert.hpp>
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/log/detail/config.hpp>
 #include <boost/log/attributes/attribute.hpp>
@@ -48,7 +47,7 @@ template< typename T >
 class counter :
     public attribute
 {
-    BOOST_STATIC_ASSERT_MSG(is_integral< T >::value, "Boost.Log: Only integral types are supported by the counter attribute");
+    static_assert(is_integral< T >::value, "Boost.Log: Only integral types are supported by the counter attribute");
 
 public:
     //! A counter value type

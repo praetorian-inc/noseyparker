@@ -92,8 +92,9 @@ void rearrange(Iter_data global_first, Iter_index itx_first,
 
         while ((pos_src = pos(itx_src)) != pos_ini)
         {
+	    using std::swap;
             data[pos_dest] = std::move(data[pos_src]);
-            std::swap(itx_src, index[pos_src]);
+            swap(itx_src, index[pos_src]);
             pos_dest = pos_src;
         };
 

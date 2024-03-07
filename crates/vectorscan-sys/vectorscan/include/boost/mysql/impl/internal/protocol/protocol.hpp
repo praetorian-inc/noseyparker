@@ -84,8 +84,18 @@ struct ping_command
     BOOST_MYSQL_DECL std::size_t get_size() const noexcept;
     BOOST_MYSQL_DECL void serialize(span<std::uint8_t> buffer) const noexcept;
 };
+
+// Reset connection
+struct reset_connection_command
+{
+    BOOST_MYSQL_DECL std::size_t get_size() const noexcept;
+    BOOST_MYSQL_DECL void serialize(span<std::uint8_t> buffer) const noexcept;
+};
+
+// Deserializes a response that may be an OK or an error packet.
+// Applicable for ping and reset connection
 BOOST_ATTRIBUTE_NODISCARD BOOST_MYSQL_DECL error_code
-deserialize_ping_response(span<const std::uint8_t> message, db_flavor flavor, diagnostics& diag);
+deserialize_ok_response(span<const std::uint8_t> message, db_flavor flavor, diagnostics& diag);
 
 // Query
 struct query_command

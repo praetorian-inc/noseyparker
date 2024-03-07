@@ -54,7 +54,6 @@ using getaddrinfo_error = status_error<_getaddrinfo_code_domain>;
 class _getaddrinfo_code_domain : public status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
   using _base = status_code_domain;
 
 public:

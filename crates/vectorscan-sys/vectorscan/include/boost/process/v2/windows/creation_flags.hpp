@@ -31,13 +31,18 @@ struct process_creation_flags
                       const filesystem::path &, 
                       const std::wstring &) const
   {
-    launcher.startup_info.StartupInfo.dwFlags |= Flags;
+    launcher.creation_flags |= Flags;
     return error_code {};
   };
 };
 
+
+
 /// A flag to create a new process group. Necessary to allow interrupts for the subprocess.
 constexpr static process_creation_flags<CREATE_NEW_PROCESS_GROUP> create_new_process_group;
+
+constexpr static process_creation_flags<CREATE_BREAKAWAY_FROM_JOB> create_breakaway_from_job;
+constexpr static process_creation_flags<CREATE_NEW_CONSOLE>        create_new_console;
 
 }
 BOOST_PROCESS_V2_END_NAMESPACE

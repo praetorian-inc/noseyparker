@@ -27,18 +27,18 @@
 
 namespace boost
 {
-    
+
     template
-    < 
-        class Key, 
-        class T, 
+    <
+        class Key,
+        class T,
         class Hash           = boost::hash<Key>,
         class Pred           = std::equal_to<Key>,
         class CloneAllocator = heap_clone_allocator,
         class Allocator      = std::allocator< std::pair<const Key,
                            typename ptr_container_detail::void_ptr<T>::type> >
     >
-    class ptr_unordered_map : 
+    class ptr_unordered_map :
         public ptr_map_adapter<T,boost::unordered_map<Key,
             typename ptr_container_detail::void_ptr<T>::type,Hash,Pred,Allocator>,
                                CloneAllocator,false>
@@ -52,7 +52,7 @@ namespace boost
 
     public:
         typedef typename base_type::size_type size_type;
-        
+
     private:
         using base_type::lower_bound;
         using base_type::upper_bound;
@@ -64,7 +64,7 @@ namespace boost
         using base_type::value_comp;
         using base_type::front;
         using base_type::back;
-        
+
     public:
         using base_type::begin;
         using base_type::end;
@@ -79,7 +79,7 @@ namespace boost
         using base_type::rehash;
         using base_type::key_eq;
         using base_type::hash_function;
-        
+
     public:
         ptr_unordered_map()
         { }
@@ -87,29 +87,29 @@ namespace boost
         explicit ptr_unordered_map( size_type n )
         : base_type( n, ptr_container_detail::unordered_associative_container_tag() )
         { }
-        
+
         ptr_unordered_map( size_type n,
                            const Hash& comp,
-                           const Pred& pred   = Pred(),                                         
+                           const Pred& pred   = Pred(),
                            const Allocator& a = Allocator() )
-         : base_type( n, comp, pred, a ) 
+         : base_type( n, comp, pred, a )
         { }
 
         template< typename InputIterator >
         ptr_unordered_map( InputIterator first, InputIterator last )
          : base_type( first, last )
         { }
-        
+
         template< typename InputIterator >
         ptr_unordered_map( InputIterator first, InputIterator last,
                            const Hash& comp,
                            const Pred& pred   = Pred(),
                            const Allocator& a = Allocator() )
-         : base_type( first, last, comp, pred, a ) 
+         : base_type( first, last, comp, pred, a )
         { }
 
-        BOOST_PTR_CONTAINER_DEFINE_RELEASE_AND_CLONE( ptr_unordered_map, 
-                                                      base_type, 
+        BOOST_PTR_CONTAINER_DEFINE_RELEASE_AND_CLONE( ptr_unordered_map,
+                                                      base_type,
                                                       this_type )
 
         template< class U >
@@ -122,19 +122,19 @@ namespace boost
             return *this;
         }
     };
-    
+
 
 
     template
-    < 
-        class Key, 
-        class T, 
+    <
+        class Key,
+        class T,
         class Hash           = boost::hash<Key>,
         class Pred           = std::equal_to<Key>,
         class CloneAllocator = heap_clone_allocator,
         class Allocator      = std::allocator< std::pair<const Key,void*> >
     >
-    class ptr_unordered_multimap : 
+    class ptr_unordered_multimap :
         public ptr_multimap_adapter<T,boost::unordered_multimap<Key,void*,Hash,Pred,Allocator>,
                                     CloneAllocator,false>
     {
@@ -146,7 +146,7 @@ namespace boost
 
     public:
         typedef typename base_type::size_type size_type;
-        
+
     private:
         using base_type::lower_bound;
         using base_type::upper_bound;
@@ -158,7 +158,7 @@ namespace boost
         using base_type::value_comp;
         using base_type::front;
         using base_type::back;
-        
+
     public:
         using base_type::begin;
         using base_type::end;
@@ -173,7 +173,7 @@ namespace boost
         using base_type::rehash;
         using base_type::key_eq;
         using base_type::hash_function;
-        
+
     public:
         ptr_unordered_multimap()
         { }
@@ -181,29 +181,29 @@ namespace boost
         explicit ptr_unordered_multimap( size_type n )
         : base_type( n, ptr_container_detail::unordered_associative_container_tag() )
         { }
-        
+
         ptr_unordered_multimap( size_type n,
                                 const Hash& comp,
-                                const Pred& pred   = Pred(),                                         
+                                const Pred& pred   = Pred(),
                                 const Allocator& a = Allocator() )
-         : base_type( n, comp, pred, a ) 
+         : base_type( n, comp, pred, a )
         { }
 
         template< typename InputIterator >
         ptr_unordered_multimap( InputIterator first, InputIterator last )
          : base_type( first, last )
         { }
-        
+
         template< typename InputIterator >
         ptr_unordered_multimap( InputIterator first, InputIterator last,
                                 const Hash& comp,
                                 const Pred& pred   = Pred(),
                                 const Allocator& a = Allocator() )
-         : base_type( first, last, comp, pred, a ) 
+         : base_type( first, last, comp, pred, a )
         { }
 
-        BOOST_PTR_CONTAINER_DEFINE_RELEASE_AND_CLONE( ptr_unordered_multimap, 
-                                                      base_type, 
+        BOOST_PTR_CONTAINER_DEFINE_RELEASE_AND_CLONE( ptr_unordered_multimap,
+                                                      base_type,
                                                       this_type )
 
         template< class U >
@@ -216,19 +216,19 @@ namespace boost
             return *this;
         }
     };
-    
+
     //////////////////////////////////////////////////////////////////////////////
     // clonability
 
     template< class K, class T, class H, class P, class CA, class A >
-    inline ptr_unordered_map<K,T,H,P,CA,A>* 
+    inline ptr_unordered_map<K,T,H,P,CA,A>*
     new_clone( const ptr_unordered_map<K,T,H,P,CA,A>& r )
     {
         return r.clone().release();
     }
 
     template< class K, class T, class H, class P, class CA, class A >
-    inline ptr_unordered_multimap<K,T,H,P,CA,A>* 
+    inline ptr_unordered_multimap<K,T,H,P,CA,A>*
     new_clone( const ptr_unordered_multimap<K,T,H,P,CA,A>& r )
     {
         return r.clone().release();
@@ -238,14 +238,14 @@ namespace boost
     // swap
 
     template< class K, class T, class H, class P, class CA, class A >
-    inline void swap( ptr_unordered_map<K,T,H,P,CA,A>& l, 
+    inline void swap( ptr_unordered_map<K,T,H,P,CA,A>& l,
                       ptr_unordered_map<K,T,H,P,CA,A>& r )
     {
         l.swap(r);
     }
 
     template< class K, class T, class H, class P, class CA, class A >
-    inline void swap( ptr_unordered_multimap<K,T,H,P,CA,A>& l, 
+    inline void swap( ptr_unordered_multimap<K,T,H,P,CA,A>& l,
                       ptr_unordered_multimap<K,T,H,P,CA,A>& r )
     {
         l.swap(r);

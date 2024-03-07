@@ -1,5 +1,5 @@
 
-#line 1 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 1 "tools/hscollider/ColliderCorporaParser.rl"
 /*
  * Copyright (c) 2015-2017, Intel Corporation
  *
@@ -58,7 +58,7 @@ char unhex(const char *start, UNUSED const char *end) {
 }
 
 
-#line 62 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 62 "tools/hscollider/ColliderCorporaParser.cpp"
 static const char _FileCorporaParser_actions[] = {
 	0, 1, 0, 1, 3, 1, 4, 1, 
 	5, 1, 6, 1, 7, 1, 8, 1, 
@@ -68,72 +68,6 @@ static const char _FileCorporaParser_actions[] = {
 	21, 1, 22, 1, 23, 1, 24, 2, 
 	0, 2, 2, 3, 0, 3, 1, 0, 
 	2
-};
-
-static const char _FileCorporaParser_key_offsets[] = {
-	0, 0, 2, 6, 7, 13, 19, 25, 
-	31, 34, 34, 35, 52, 54, 71, 72, 
-	75, 79
-};
-
-static const char _FileCorporaParser_trans_keys[] = {
-	48, 57, 58, 61, 48, 57, 34, 48, 
-	57, 65, 70, 97, 102, 48, 57, 65, 
-	70, 97, 102, 48, 57, 65, 70, 97, 
-	102, 48, 57, 65, 70, 97, 102, 32, 
-	48, 57, 92, 48, 97, 110, 114, 116, 
-	118, 120, 49, 57, 65, 90, 98, 100, 
-	101, 102, 103, 122, 34, 92, 48, 97, 
-	110, 114, 116, 118, 120, 49, 57, 65, 
-	90, 98, 100, 101, 102, 103, 122, 58, 
-	32, 48, 57, 32, 44, 48, 57, 32, 
-	44, 0
-};
-
-static const char _FileCorporaParser_single_lengths[] = {
-	0, 0, 2, 1, 0, 0, 0, 0, 
-	1, 0, 1, 7, 2, 7, 1, 1, 
-	2, 2
-};
-
-static const char _FileCorporaParser_range_lengths[] = {
-	0, 1, 1, 0, 3, 3, 3, 3, 
-	1, 0, 0, 5, 0, 5, 0, 1, 
-	1, 0
-};
-
-static const char _FileCorporaParser_index_offsets[] = {
-	0, 0, 2, 6, 8, 12, 16, 20, 
-	24, 27, 28, 30, 43, 46, 59, 61, 
-	64, 68
-};
-
-static const char _FileCorporaParser_indicies[] = {
-	0, 1, 3, 4, 2, 1, 5, 1, 
-	7, 7, 7, 6, 8, 8, 8, 6, 
-	10, 10, 10, 9, 11, 11, 11, 9, 
-	12, 13, 1, 1, 15, 14, 18, 18, 
-	18, 18, 18, 18, 19, 16, 16, 16, 
-	18, 16, 17, 21, 22, 20, 25, 25, 
-	25, 25, 25, 25, 26, 23, 23, 23, 
-	25, 23, 24, 27, 1, 28, 29, 1, 
-	31, 32, 13, 30, 31, 32, 30, 0
-};
-
-static const char _FileCorporaParser_trans_targs[] = {
-	2, 0, 2, 9, 3, 9, 10, 5, 
-	10, 12, 7, 12, 8, 16, 10, 11, 
-	10, 10, 10, 4, 12, 12, 13, 12, 
-	12, 12, 6, 14, 8, 16, 15, 17, 
-	15
-};
-
-static const char _FileCorporaParser_trans_actions[] = {
-	53, 0, 47, 5, 0, 7, 25, 0, 
-	15, 39, 0, 27, 0, 1, 21, 13, 
-	23, 19, 17, 0, 33, 35, 13, 37, 
-	31, 29, 0, 41, 3, 50, 45, 0, 
-	43
 };
 
 static const char _FileCorporaParser_to_state_actions[] = {
@@ -148,12 +82,6 @@ static const char _FileCorporaParser_from_state_actions[] = {
 	0, 0
 };
 
-static const char _FileCorporaParser_eof_trans[] = {
-	0, 0, 0, 0, 7, 7, 10, 10, 
-	0, 0, 0, 17, 0, 24, 0, 0, 
-	31, 31
-};
-
 static const int FileCorporaParser_start = 1;
 static const int FileCorporaParser_first_final = 9;
 static const int FileCorporaParser_error = 0;
@@ -165,7 +93,7 @@ static const int FileCorporaParser_en_match_list = 15;
 static const int FileCorporaParser_en_main = 1;
 
 
-#line 88 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 89 "tools/hscollider/ColliderCorporaParser.rl"
 
 
 } // namespace
@@ -185,7 +113,7 @@ bool parseCorpus(const string &line, Corpus &c, unsigned int &id) {
     string &sout = c.data;
 
     
-#line 189 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 117 "tools/hscollider/ColliderCorporaParser.cpp"
 	{
 	cs = FileCorporaParser_start;
 	ts = 0;
@@ -193,13 +121,10 @@ bool parseCorpus(const string &line, Corpus &c, unsigned int &id) {
 	act = 0;
 	}
 
-#line 197 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 125 "tools/hscollider/ColliderCorporaParser.cpp"
 	{
-	int _klen;
-	unsigned int _trans;
 	const char *_acts;
 	unsigned int _nacts;
-	const char *_keys;
 
 	if ( p == pe )
 		goto _test_eof;
@@ -214,96 +139,250 @@ _resume:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 218 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 143 "tools/hscollider/ColliderCorporaParser.cpp"
 		}
 	}
 
-	_keys = _FileCorporaParser_trans_keys + _FileCorporaParser_key_offsets[cs];
-	_trans = _FileCorporaParser_index_offsets[cs];
-
-	_klen = _FileCorporaParser_single_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
-
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (unsigned int)(_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
+	switch ( cs ) {
+case 1:
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr0;
+	goto tr1;
+case 0:
+	goto _out;
+case 2:
+	switch( (*p) ) {
+		case 58u: goto tr3;
+		case 61u: goto tr4;
+	}
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr2;
+	goto tr1;
+case 9:
+	goto tr1;
+case 3:
+	if ( (*p) == 34u )
+		goto tr5;
+	goto tr1;
+case 10:
+	if ( (*p) == 92u )
+		goto tr15;
+	goto tr14;
+case 11:
+	switch( (*p) ) {
+		case 48u: goto tr18;
+		case 97u: goto tr18;
+		case 110u: goto tr18;
+		case 114u: goto tr18;
+		case 116u: goto tr18;
+		case 118u: goto tr18;
+		case 120u: goto tr19;
+	}
+	if ( (*p) < 98u ) {
+		if ( (*p) > 57u ) {
+			if ( 65u <= (*p) && (*p) <= 90u )
+				goto tr16;
+		} else if ( (*p) >= 49u )
+			goto tr16;
+	} else if ( (*p) > 100u ) {
+		if ( (*p) > 102u ) {
+			if ( 103u <= (*p) && (*p) <= 122u )
+				goto tr16;
+		} else if ( (*p) >= 101u )
+			goto tr18;
+	} else
+		goto tr16;
+	goto tr17;
+case 4:
+	if ( (*p) < 65u ) {
+		if ( 48u <= (*p) && (*p) <= 57u )
+			goto tr7;
+	} else if ( (*p) > 70u ) {
+		if ( 97u <= (*p) && (*p) <= 102u )
+			goto tr7;
+	} else
+		goto tr7;
+	goto tr6;
+case 5:
+	if ( (*p) < 65u ) {
+		if ( 48u <= (*p) && (*p) <= 57u )
+			goto tr8;
+	} else if ( (*p) > 70u ) {
+		if ( 97u <= (*p) && (*p) <= 102u )
+			goto tr8;
+	} else
+		goto tr8;
+	goto tr6;
+case 12:
+	switch( (*p) ) {
+		case 34u: goto tr21;
+		case 92u: goto tr22;
+	}
+	goto tr20;
+case 13:
+	switch( (*p) ) {
+		case 48u: goto tr25;
+		case 97u: goto tr25;
+		case 110u: goto tr25;
+		case 114u: goto tr25;
+		case 116u: goto tr25;
+		case 118u: goto tr25;
+		case 120u: goto tr26;
+	}
+	if ( (*p) < 98u ) {
+		if ( (*p) > 57u ) {
+			if ( 65u <= (*p) && (*p) <= 90u )
+				goto tr23;
+		} else if ( (*p) >= 49u )
+			goto tr23;
+	} else if ( (*p) > 100u ) {
+		if ( (*p) > 102u ) {
+			if ( 103u <= (*p) && (*p) <= 122u )
+				goto tr23;
+		} else if ( (*p) >= 101u )
+			goto tr25;
+	} else
+		goto tr23;
+	goto tr24;
+case 6:
+	if ( (*p) < 65u ) {
+		if ( 48u <= (*p) && (*p) <= 57u )
+			goto tr10;
+	} else if ( (*p) > 70u ) {
+		if ( 97u <= (*p) && (*p) <= 102u )
+			goto tr10;
+	} else
+		goto tr10;
+	goto tr9;
+case 7:
+	if ( (*p) < 65u ) {
+		if ( 48u <= (*p) && (*p) <= 57u )
+			goto tr11;
+	} else if ( (*p) > 70u ) {
+		if ( 97u <= (*p) && (*p) <= 102u )
+			goto tr11;
+	} else
+		goto tr11;
+	goto tr9;
+case 14:
+	if ( (*p) == 58u )
+		goto tr27;
+	goto tr1;
+case 15:
+	if ( (*p) == 32u )
+		goto tr28;
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr29;
+	goto tr1;
+case 8:
+	if ( (*p) == 32u )
+		goto tr12;
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr13;
+	goto tr1;
+case 16:
+	switch( (*p) ) {
+		case 32u: goto tr31;
+		case 44u: goto tr32;
+	}
+	if ( 48u <= (*p) && (*p) <= 57u )
+		goto tr13;
+	goto tr30;
+case 17:
+	switch( (*p) ) {
+		case 32u: goto tr31;
+		case 44u: goto tr32;
+	}
+	goto tr30;
 	}
 
-	_klen = _FileCorporaParser_range_lengths[cs];
-	if ( _klen > 0 ) {
-		const char *_lower = _keys;
-		const char *_mid;
-		const char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
+	tr1: cs = 0; goto _again;
+	tr0: cs = 2; goto f1;
+	tr2: cs = 2; goto f2;
+	tr4: cs = 3; goto _again;
+	tr19: cs = 4; goto _again;
+	tr7: cs = 5; goto _again;
+	tr26: cs = 6; goto _again;
+	tr10: cs = 7; goto _again;
+	tr12: cs = 8; goto _again;
+	tr28: cs = 8; goto f22;
+	tr3: cs = 9; goto f3;
+	tr5: cs = 9; goto f4;
+	tr6: cs = 10; goto f5;
+	tr8: cs = 10; goto f6;
+	tr14: cs = 10; goto f11;
+	tr16: cs = 10; goto f13;
+	tr17: cs = 10; goto f14;
+	tr18: cs = 10; goto f15;
+	tr15: cs = 11; goto f12;
+	tr9: cs = 12; goto f7;
+	tr11: cs = 12; goto f8;
+	tr20: cs = 12; goto f16;
+	tr21: cs = 12; goto f17;
+	tr23: cs = 12; goto f18;
+	tr24: cs = 12; goto f19;
+	tr25: cs = 12; goto f20;
+	tr22: cs = 13; goto f12;
+	tr27: cs = 14; goto f21;
+	tr30: cs = 15; goto f24;
+	tr32: cs = 15; goto f25;
+	tr13: cs = 16; goto f9;
+	tr29: cs = 16; goto f23;
+	tr31: cs = 17; goto _again;
 
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += (unsigned int)((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
+	f9: _acts = _FileCorporaParser_actions + 1; goto execFuncs;
+	f22: _acts = _FileCorporaParser_actions + 3; goto execFuncs;
+	f3: _acts = _FileCorporaParser_actions + 5; goto execFuncs;
+	f4: _acts = _FileCorporaParser_actions + 7; goto execFuncs;
+	f12: _acts = _FileCorporaParser_actions + 13; goto execFuncs;
+	f6: _acts = _FileCorporaParser_actions + 15; goto execFuncs;
+	f15: _acts = _FileCorporaParser_actions + 17; goto execFuncs;
+	f14: _acts = _FileCorporaParser_actions + 19; goto execFuncs;
+	f11: _acts = _FileCorporaParser_actions + 21; goto execFuncs;
+	f13: _acts = _FileCorporaParser_actions + 23; goto execFuncs;
+	f5: _acts = _FileCorporaParser_actions + 25; goto execFuncs;
+	f8: _acts = _FileCorporaParser_actions + 27; goto execFuncs;
+	f20: _acts = _FileCorporaParser_actions + 29; goto execFuncs;
+	f19: _acts = _FileCorporaParser_actions + 31; goto execFuncs;
+	f16: _acts = _FileCorporaParser_actions + 33; goto execFuncs;
+	f17: _acts = _FileCorporaParser_actions + 35; goto execFuncs;
+	f18: _acts = _FileCorporaParser_actions + 37; goto execFuncs;
+	f7: _acts = _FileCorporaParser_actions + 39; goto execFuncs;
+	f21: _acts = _FileCorporaParser_actions + 41; goto execFuncs;
+	f25: _acts = _FileCorporaParser_actions + 43; goto execFuncs;
+	f24: _acts = _FileCorporaParser_actions + 45; goto execFuncs;
+	f2: _acts = _FileCorporaParser_actions + 47; goto execFuncs;
+	f23: _acts = _FileCorporaParser_actions + 50; goto execFuncs;
+	f1: _acts = _FileCorporaParser_actions + 53; goto execFuncs;
 
-_match:
-	_trans = _FileCorporaParser_indicies[_trans];
-_eof_trans:
-	cs = _FileCorporaParser_trans_targs[_trans];
-
-	if ( _FileCorporaParser_trans_actions[_trans] == 0 )
-		goto _again;
-
-	_acts = _FileCorporaParser_actions + _FileCorporaParser_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
-	{
-		switch ( *_acts++ )
-		{
+execFuncs:
+	_nacts = *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
 	case 0:
-#line 61 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 62 "tools/hscollider/ColliderCorporaParser.rl"
 	{
         num = (num * 10) + ((*p) - '0');
     }
 	break;
 	case 1:
-#line 107 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 108 "tools/hscollider/ColliderCorporaParser.rl"
 	{num = 0;}
 	break;
 	case 2:
-#line 107 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 108 "tools/hscollider/ColliderCorporaParser.rl"
 	{id = num;}
 	break;
 	case 3:
-#line 133 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 134 "tools/hscollider/ColliderCorporaParser.rl"
 	{num = 0;}
 	break;
 	case 4:
-#line 137 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 138 "tools/hscollider/ColliderCorporaParser.rl"
 	{ {cs = 10;goto _again;} }
 	break;
 	case 5:
-#line 140 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 141 "tools/hscollider/ColliderCorporaParser.rl"
 	{ c.hasMatches = true; {cs = 12;goto _again;} }
 	break;
 	case 8:
@@ -311,13 +390,13 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 9:
-#line 65 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 66 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{
         sout.push_back(unhex(ts, te));
     }}
 	break;
 	case 10:
-#line 69 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 70 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{
         switch (*(ts+1)) {
             case '0': sout.push_back('\x00'); break;
@@ -333,29 +412,29 @@ _eof_trans:
     }}
 	break;
 	case 11:
-#line 116 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 117 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{ sout.push_back(*(ts + 1)); }}
 	break;
 	case 12:
-#line 117 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 118 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{ sout.push_back(*ts); }}
 	break;
 	case 13:
-#line 117 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 118 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p;p--;{ sout.push_back(*ts); }}
 	break;
 	case 14:
-#line 117 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 118 "tools/hscollider/ColliderCorporaParser.rl"
 	{{p = ((te))-1;}{ sout.push_back(*ts); }}
 	break;
 	case 15:
-#line 65 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 66 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{
         sout.push_back(unhex(ts, te));
     }}
 	break;
 	case 16:
-#line 69 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 70 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{
         switch (*(ts+1)) {
             case '0': sout.push_back('\x00'); break;
@@ -371,44 +450,45 @@ _eof_trans:
     }}
 	break;
 	case 17:
-#line 123 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 124 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{ sout.push_back(*(ts + 1)); }}
 	break;
 	case 18:
-#line 124 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 125 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{ sout.push_back(*ts); }}
 	break;
 	case 19:
-#line 125 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 126 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{ {cs = 14;goto _again;} }}
 	break;
 	case 20:
-#line 124 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 125 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p;p--;{ sout.push_back(*ts); }}
 	break;
 	case 21:
-#line 124 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 125 "tools/hscollider/ColliderCorporaParser.rl"
 	{{p = ((te))-1;}{ sout.push_back(*ts); }}
 	break;
 	case 22:
-#line 129 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 130 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{{cs = 15;goto _again;} }}
 	break;
 	case 23:
-#line 83 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 84 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p+1;{
         c.matches.insert(num);
     }}
 	break;
 	case 24:
-#line 83 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 84 "tools/hscollider/ColliderCorporaParser.rl"
 	{te = p;p--;{
         c.matches.insert(num);
     }}
 	break;
-#line 410 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 489 "tools/hscollider/ColliderCorporaParser.cpp"
 		}
 	}
+	goto _again;
 
 _again:
 	_acts = _FileCorporaParser_actions + _FileCorporaParser_to_state_actions[cs];
@@ -419,7 +499,7 @@ _again:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 423 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp"
+#line 503 "tools/hscollider/ColliderCorporaParser.cpp"
 		}
 	}
 
@@ -430,16 +510,22 @@ _again:
 	_test_eof: {}
 	if ( p == eof )
 	{
-	if ( _FileCorporaParser_eof_trans[cs] > 0 ) {
-		_trans = _FileCorporaParser_eof_trans[cs] - 1;
-		goto _eof_trans;
+	switch ( cs ) {
+	case 11: goto tr16;
+	case 4: goto tr6;
+	case 5: goto tr6;
+	case 13: goto tr23;
+	case 6: goto tr9;
+	case 7: goto tr9;
+	case 16: goto tr30;
+	case 17: goto tr30;
 	}
 	}
 
 	_out: {}
 	}
 
-#line 147 "vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.rl"
+#line 148 "tools/hscollider/ColliderCorporaParser.rl"
 
 
     return (cs != FileCorporaParser_error) && (p == pe);

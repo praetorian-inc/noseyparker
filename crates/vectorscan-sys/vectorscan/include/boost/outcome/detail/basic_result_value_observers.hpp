@@ -48,7 +48,7 @@ namespace detail
       NoValuePolicy::narrow_value_check(static_cast<basic_result_value_observers &>(*this));
       return this->_state._value;  // NOLINT
     }
-    constexpr const value_type &assume_value() const &noexcept
+    constexpr const value_type &assume_value() const & noexcept
     {
       NoValuePolicy::narrow_value_check(static_cast<const basic_result_value_observers &>(*this));
       return this->_state._value;  // NOLINT
@@ -58,7 +58,7 @@ namespace detail
       NoValuePolicy::narrow_value_check(static_cast<basic_result_value_observers &&>(*this));
       return static_cast<value_type &&>(this->_state._value);  // NOLINT
     }
-    constexpr const value_type &&assume_value() const &&noexcept
+    constexpr const value_type &&assume_value() const && noexcept
     {
       NoValuePolicy::narrow_value_check(static_cast<const basic_result_value_observers &&>(*this));
       return static_cast<const value_type &&>(this->_state._value);  // NOLINT
@@ -90,8 +90,15 @@ namespace detail
   public:
     using Base::Base;
 
-    constexpr void assume_value() const noexcept { NoValuePolicy::narrow_value_check(*this); }
-    constexpr void value() const { NoValuePolicy::wide_value_check(*this); }
+    constexpr void assume_value() & noexcept { NoValuePolicy::narrow_value_check(static_cast<basic_result_value_observers &>(*this)); }
+    constexpr void assume_value() const & noexcept { NoValuePolicy::narrow_value_check(static_cast<const basic_result_value_observers &>(*this)); }
+    constexpr void assume_value() && noexcept { NoValuePolicy::narrow_value_check(static_cast<basic_result_value_observers &&>(*this)); }
+    constexpr void assume_value() const && noexcept { NoValuePolicy::narrow_value_check(static_cast<const basic_result_value_observers &&>(*this)); }
+
+    constexpr void value() & { NoValuePolicy::wide_value_check(static_cast<basic_result_value_observers &>(*this)); }
+    constexpr void value() const & { NoValuePolicy::wide_value_check(static_cast<const basic_result_value_observers &>(*this)); }
+    constexpr void value() && { NoValuePolicy::wide_value_check(static_cast<basic_result_value_observers &&>(*this)); }
+    constexpr void value() const && { NoValuePolicy::wide_value_check(static_cast<const basic_result_value_observers &&>(*this)); }
   };
 }  // namespace detail
 

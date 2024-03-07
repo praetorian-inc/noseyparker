@@ -13,7 +13,7 @@
 
 #include <boost/spirit/home/qi/stream/detail/match_manip.hpp>
 #include <boost/spirit/home/qi/auto/create_parser.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <boost/core/enable_if.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace boost { namespace spirit { namespace qi { namespace detail

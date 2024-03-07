@@ -31,7 +31,7 @@
 #include <boost/core/enable_if.hpp>
 #endif
 #if defined(BOOST_LOG_TYPEOF) && defined(BOOST_NO_CXX11_TRAILING_RESULT_TYPES)
-#include <boost/utility/declval.hpp>
+#include <boost/type_traits/declval.hpp>
 #endif
 #include <boost/log/detail/header.hpp>
 

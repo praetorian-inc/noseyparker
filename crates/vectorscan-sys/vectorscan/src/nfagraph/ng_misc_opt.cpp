@@ -385,8 +385,7 @@ bool improveGraph(NGHolder &g, som_type som) {
 
     const vector<NFAVertex> ordering = getTopoOrdering(g);
 
-    return enlargeCyclicCR(g, som, ordering)
-        | enlargeCyclicCR_rev(g, ordering);
+    return enlargeCyclicCR(g, som, ordering) || enlargeCyclicCR_rev(g, ordering);
 }
 
 /** finds a smaller reachability for a state by the reverse transformation of

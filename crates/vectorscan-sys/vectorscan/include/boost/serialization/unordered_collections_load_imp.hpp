@@ -59,7 +59,12 @@ inline void load_unordered_collection(Archive & ar, Container &s)
         ar >> BOOST_SERIALIZATION_NVP(item_version);
     }
     s.clear();
-    s.rehash(bucket_count);
+    // rehash() will pre-allocate the appropriate number of buckets
+    // given the number of items to be inserted. Therefore it is
+    // unneccesary to use bucket_count here, especially when bucket_count
+    // may be much larger than what is neccessary for 'count' items.
+    //
+    s.rehash(count);
     InputFunction ifunc;
     while(count-- > 0){
         ifunc(ar, s, item_version);

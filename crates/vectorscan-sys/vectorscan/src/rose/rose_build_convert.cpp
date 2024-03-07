@@ -212,7 +212,7 @@ void convertFloodProneSuffix(RoseBuildImpl &tbi, RoseVertex v, u32 lit_id,
 
     // Apply the NFA.
     assert(!g[v].suffix);
-    g[v].suffix.graph = move(h);
+    g[v].suffix.graph = std::move(h);
     g[v].reports.clear();
 
     // Swap v's literal for a shorter one.
@@ -561,6 +561,10 @@ bool handleMixedPrefixCliche(const NGHolder &h, RoseGraph &g, RoseVertex v,
     DEBUG_PRINTF("woot?\n");
 
     shared_ptr<NGHolder> h_new = make_shared<NGHolder>();
+    if (!h_new) {
+        assert(0);
+        throw std::bad_alloc();
+    }
     unordered_map<NFAVertex, NFAVertex> rhs_map;
     vector<NFAVertex> exits_vec;
     insert(&exits_vec, exits_vec.end(), exits);

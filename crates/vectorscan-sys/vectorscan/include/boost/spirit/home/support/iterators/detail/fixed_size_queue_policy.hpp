@@ -9,6 +9,7 @@
 
 #include <boost/spirit/home/support/iterators/detail/multi_pass.hpp>
 #include <boost/spirit/home/support/iterators/detail/fixed_size_queue.hpp>
+#include <boost/core/invoke_swap.hpp>
 #include <boost/assert.hpp>
 #include <cstdlib>
 
@@ -45,7 +46,7 @@ namespace boost { namespace spirit { namespace iterator_policies
 
             void swap(unique& x)
             {
-                boost::swap(queued_position, x.queued_position);
+                boost::core::invoke_swap(queued_position, x.queued_position);
             }
 
             //  This is called when the iterator is dereferenced. It's a 

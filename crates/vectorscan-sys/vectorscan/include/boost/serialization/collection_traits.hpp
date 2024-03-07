@@ -16,7 +16,7 @@
 
 //  See http://www.boost.org for updates, documentation, and revision history.
 
-// This header assigns a level implemenation trait to a collection type
+// This header assigns a level implementation trait to a collection type
 // for all primitives.  It is needed so that archives which are meant to be
 // portable don't write class information in the archive.  Since, not all
 // compiles recognize the same set of primitive types, the possibility

@@ -70,44 +70,6 @@ try_reserve(
 }
 
 
-template<class T>
-using has_push_back_helper
-    = decltype(std::declval<T&>().push_back(std::declval<value_type<T>>()));
-template<class T>
-using has_push_back = mp11::mp_valid<has_push_back_helper, T>;
-template<class T>
-using inserter_implementation = mp11::mp_cond<
-    is_tuple_like<T>, mp11::mp_int<2>,
-    has_push_back<T>, mp11::mp_int<1>,
-    mp11::mp_true,    mp11::mp_int<0>>;
-
-template<class T>
-iterator_type<T>
-inserter(
-    T& target,
-    mp11::mp_int<2>)
-{
-    return target.begin();
-}
-
-template<class T>
-std::back_insert_iterator<T>
-inserter(
-    T& target,
-    mp11::mp_int<1>)
-{
-    return std::back_inserter(target);
-}
-
-template<class T>
-std::insert_iterator<T>
-inserter(
-    T& target,
-    mp11::mp_int<0>)
-{
-    return std::inserter( target, target.end() );
-}
-
 // identity conversion
 template< class Ctx >
 result<value>
@@ -376,27 +338,11 @@ value_to_impl(
         *arr, ctx, boost::mp11::make_index_sequence<N>());
 }
 
-template< class T>
-struct is_optional
-    : std::false_type
-{ };
-
-#ifndef BOOST_NO_CXX17_HDR_OPTIONAL
-template< class T>
-struct is_optional< std::optional<T> >
-    : std::true_type
-{ };
-#endif // BOOST_NO_CXX17_HDR_OPTIONAL
-
 template< class Ctx, class T, bool non_throwing = true >
 struct to_described_member
 {
     using Ds = describe::describe_members<
         T, describe::mod_public | describe::mod_inherited>;
-
-    template< class D >
-    using described_member_t = remove_cvref<decltype(
-        std::declval<T&>().* D::pointer )>;
 
     using result_type = mp11::mp_eval_if_c< !non_throwing, T, result, T >;
 
@@ -413,12 +359,12 @@ struct to_described_member
             return;
 
         using D = mp11::mp_at<Ds, I>;
-        using M = described_member_t<D>;
+        using M = described_member_t<T, D>;
 
         auto const found = obj.find(D::name);
         if( found == obj.end() )
         {
-            BOOST_IF_CONSTEXPR( !is_optional<M>::value )
+            BOOST_IF_CONSTEXPR( !is_optional_like<M>::value )
             {
                 error_code ec;
                 BOOST_JSON_FAIL(ec, error::unknown_name);
@@ -515,6 +461,100 @@ value_to_impl(
 #endif
 
     return {system::in_place_value, val};
+}
+
+// optionals
+template< class T, class Ctx >
+result<T>
+value_to_impl(
+    optional_conversion_tag,
+    try_value_to_tag<T>,
+    value const& jv,
+    Ctx const& ctx)
+{
+    using Inner = value_result_type<T>;
+    if( jv.is_null() )
+        return {};
+    else
+        return try_value_to<Inner>(jv, ctx);
+}
+
+// variants
+template< class T, class V, class I >
+using variant_construction_category = mp11::mp_cond<
+    std::is_constructible< T, variant2::in_place_index_t<I::value>, V >,
+        mp11::mp_int<2>,
+#ifndef BOOST_NO_CXX17_HDR_VARIANT
+    std::is_constructible< T, std::in_place_index_t<I::value>, V >,
+        mp11::mp_int<1>,
+#endif // BOOST_NO_CXX17_HDR_VARIANT
+    mp11::mp_true,
+        mp11::mp_int<0> >;
+
+template< class T, class I, class V >
+T
+initialize_variant( V&& v, mp11::mp_int<0> )
+{
+    T t;
+    t.template emplace<I::value>( std::move(v) );
+    return t;
+}
+
+template< class T, class I, class V >
+T
+initialize_variant( V&& v, mp11::mp_int<2> )
+{
+    return T( variant2::in_place_index_t<I::value>(), std::move(v) );
+}
+
+#ifndef BOOST_NO_CXX17_HDR_VARIANT
+template< class T, class I, class V >
+T
+initialize_variant( V&& v, mp11::mp_int<1> )
+{
+    return T( std::in_place_index_t<I::value>(), std::move(v) );
+}
+#endif // BOOST_NO_CXX17_HDR_VARIANT
+
+template< class T, class Ctx >
+struct alternative_converter
+{
+    result<T>& res;
+    value const& jv;
+    Ctx const& ctx;
+
+    template< class I >
+    void operator()( I ) const
+    {
+        if( res )
+            return;
+
+        using V = mp11::mp_at<T, I>;
+        auto attempt = try_value_to<V>(jv, ctx);
+        if( attempt )
+        {
+            using cat = variant_construction_category<T, V, I>;
+            res = initialize_variant<T, I>( std::move(*attempt), cat() );
+        }
+    }
+};
+
+template< class T, class Ctx >
+result<T>
+value_to_impl(
+    variant_conversion_tag,
+    try_value_to_tag<T>,
+    value const& jv,
+    Ctx const& ctx)
+{
+    error_code ec;
+    BOOST_JSON_FAIL(ec, error::exhausted_variants);
+
+    using Is = mp11::mp_iota< mp11::mp_size<T> >;
+
+    result<T> res = {system::in_place_error, ec};
+    mp11::mp_for_each<Is>( alternative_converter<T, Ctx>{res, jv, ctx} );
+    return res;
 }
 
 //----------------------------------------------------------
@@ -822,22 +862,7 @@ using value_to_category = conversion_category<
 
 } // detail
 
-// std::optional
 #ifndef BOOST_NO_CXX17_HDR_OPTIONAL
-template< class T, class Ctx1, class Ctx2 >
-result< std::optional<T> >
-tag_invoke(
-    try_value_to_tag< std::optional<T> >,
-    value const& jv,
-    Ctx1 const&,
-    Ctx2 const& ctx)
-{
-    if( jv.is_null() )
-        return std::optional<T>();
-    else
-        return try_value_to<T>(jv, ctx);
-}
-
 inline
 result<std::nullopt_t>
 tag_invoke(
@@ -851,35 +876,6 @@ tag_invoke(
     return ec;
 }
 #endif
-
-// std::variant
-#ifndef BOOST_NO_CXX17_HDR_VARIANT
-template< class... Ts, class Ctx1, class Ctx2 >
-result< std::variant<Ts...> >
-tag_invoke(
-    try_value_to_tag< std::variant<Ts...> >,
-    value const& jv,
-    Ctx1 const&,
-    Ctx2 const& ctx)
-{
-    error_code ec;
-    BOOST_JSON_FAIL(ec, error::exhausted_variants);
-
-    using Variant = std::variant<Ts...>;
-    result<Variant> res = {system::in_place_error, ec};
-    mp11::mp_for_each< mp11::mp_iota_c<sizeof...(Ts)> >([&](auto I) {
-        if( res )
-            return;
-
-        using T = std::variant_alternative_t<I.value, Variant>;
-        auto attempt = try_value_to<T>(jv, ctx);
-        if( attempt)
-            res.emplace(std::in_place_index_t<I>(), std::move(*attempt));
-    });
-
-    return res;
-}
-#endif // BOOST_NO_CXX17_HDR_VARIANT
 
 } // namespace json
 } // namespace boost

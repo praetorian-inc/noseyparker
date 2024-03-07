@@ -176,7 +176,7 @@ public:
    *  @param errcode The error code to return to the environment.
    *  @returns Will not return.
    */
-  static void abort(int errcode);
+  [[noreturn]] static void abort(int errcode);
 
   /** Determine if the MPI environment has already been initialized.
    *

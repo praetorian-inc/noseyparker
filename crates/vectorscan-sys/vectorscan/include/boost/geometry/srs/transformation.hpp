@@ -14,6 +14,7 @@
 #include <string>
 #include <type_traits>
 
+#include <boost/range/size.hpp>
 #include <boost/throw_exception.hpp>
 
 #include <boost/geometry/algorithms/convert.hpp>

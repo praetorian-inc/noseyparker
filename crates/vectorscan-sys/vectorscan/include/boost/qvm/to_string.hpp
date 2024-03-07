@@ -6,21 +6,16 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#if __cplusplus >= 201103L
-
 #include <string>
+
+#if __cplusplus >= 201103L
 
 namespace boost { namespace qvm {
 
 namespace
 qvm_to_string_detail
     {
-    template <class T>
-    std::string
-    to_string( T const & x )
-        {
-        return std::to_string(x);
-        }
+    using std::to_string;
     }
 
 } }

@@ -673,8 +673,15 @@ TEST(SimdUtilsTest, movq) {
     int64x2_t a = { 0x123456789abcdefLL, ~0LL };
     simd = vreinterpretq_s32_s64(a);
 #elif defined(ARCH_PPC64EL)
+#if defined(__clang__) && (__clang_major__ >= 15)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
+#endif // defined(__clang__) && (__clang_major__ == 15)
     int64x2_t a = {0x123456789abcdefLL, ~0LL };
-    simd = (m128) a;
+    simd = reinterpret_cast<m128>(a);
+#if defined(__clang__) && (__clang_major__ >= 15)
+#pragma clang diagnostic pop
+#endif // defined(__clang__) && (__clang_major__ == 15)
 #endif
 #endif
     r = movq(simd);

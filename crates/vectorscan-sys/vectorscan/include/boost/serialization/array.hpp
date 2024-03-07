@@ -8,7 +8,7 @@
 
 // for serialization of <array>. If <array> not supported by the standard
 // library - this file becomes empty.  This is to avoid breaking backward
-// compatibiliy for applications which used this header to support
+// compatibility for applications which used this header to support
 // serialization of native arrays.  Code to serialize native arrays is
 // now always include by default.  RR
 

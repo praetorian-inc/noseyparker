@@ -48,8 +48,8 @@ const char LF                   = 0x0A;
 
 // Exactly one of the following three flags must be present.
 
-const int posix             = 1;    // Use CR as line separator.
-const int mac               = 2;    // Use LF as line separator.
+const int posix             = 1;    // Use LF as line separator.
+const int mac               = 2;    // Use CR as line separator.
 const int dos               = 4;    // Use CRLF as line separator.
 const int mixed             = 8;    // Mixed line endings.
 const int final_newline     = 16;

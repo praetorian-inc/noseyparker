@@ -56,7 +56,7 @@ inline int libbacktrace_full_callback(void *data, uintptr_t /*pc*/, const char *
     return 0;
 }
 
-inline void libbacktrace_error_callback(void* /*data*/, const char* /*msg*/, int /*errnum*/) BOOST_NOEXCEPT {
+inline void libbacktrace_error_callback(void* /*data*/, const char* /*msg*/, int /*errnum*/) noexcept {
     // Do nothing, just return.
 }
 
@@ -68,7 +68,7 @@ inline void libbacktrace_error_callback(void* /*data*/, const char* /*msg*/, int
 //
 // Currently `backtrace_create_state` can not detect file name on Windows https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82543
 // That's why we provide a `prog_location` here.
-BOOST_SYMBOL_VISIBLE inline ::backtrace_state* construct_state(const program_location& prog_location) BOOST_NOEXCEPT {
+BOOST_SYMBOL_VISIBLE inline ::backtrace_state* construct_state(const program_location& prog_location) noexcept {
     // [dcl.inline]: A static local variable in an inline function with external linkage always refers to the same object.
 
     // TODO: The most obvious solution:
@@ -155,7 +155,7 @@ struct to_string_using_backtrace {
         return true;
     }
 
-    to_string_using_backtrace() BOOST_NOEXCEPT {
+    to_string_using_backtrace() noexcept {
         state = boost::stacktrace::detail::construct_state(prog_location);
     }
 };

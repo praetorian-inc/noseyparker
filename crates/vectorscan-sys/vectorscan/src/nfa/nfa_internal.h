@@ -66,10 +66,6 @@ enum NFAEngineType {
     LBR_NFA_DOT,        /**< magic pseudo nfa */
     LBR_NFA_VERM,       /**< magic pseudo nfa */
     LBR_NFA_NVERM,      /**< magic pseudo nfa */
-#ifdef HAVE_SVE2
-    LBR_NFA_VERM16,     /**< magic pseudo nfa */
-    LBR_NFA_NVERM16,    /**< magic pseudo nfa */
-#endif // HAVE_SVE2
     LBR_NFA_SHUF,       /**< magic pseudo nfa */
     LBR_NFA_TRUF,       /**< magic pseudo nfa */
     CASTLE_NFA,         /**< magic pseudo nfa */
@@ -81,6 +77,10 @@ enum NFAEngineType {
     SHENG_NFA_64,       /**< magic pseudo nfa */
     MCSHENG_64_NFA_8,   /**< magic pseudo nfa */
     MCSHENG_64_NFA_16,  /**< magic pseudo nfa */
+#ifdef HAVE_SVE2
+    LBR_NFA_VERM16,     /**< magic pseudo nfa */
+    LBR_NFA_NVERM16,    /**< magic pseudo nfa */
+#endif // HAVE_SVE2
     /** \brief bogus NFA - not used */
     INVALID_NFA
 };

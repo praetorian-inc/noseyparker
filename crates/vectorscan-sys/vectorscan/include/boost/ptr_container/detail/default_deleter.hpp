@@ -4,12 +4,12 @@
 
 // Contains the definition of move_ptrs::default_deleter, the default
 // Deleter template argument to move_ptr. Uses a technique of Daniel
-// Wallin to capture the type of a pointer at the time the deleter 
-// is constructed, so that move_ptrs can delete objects of incomplete 
+// Wallin to capture the type of a pointer at the time the deleter
+// is constructed, so that move_ptrs can delete objects of incomplete
 // type by default.
 
 #ifndef BOOST_MOVE_PTR_DEFAULT_DELETER_HPP_INCLUDED
-#define BOOST_MOVE_PTR_DEFAULT_DELETER_HPP_INCLUDED 
+#define BOOST_MOVE_PTR_DEFAULT_DELETER_HPP_INCLUDED
 
 #include <boost/checked_delete.hpp>
 #include <boost/mpl/if.hpp>
@@ -29,7 +29,7 @@ struct deleter_base {
 };
 
 template<class T>
-typename deleter_base<T>::deleter 
+typename deleter_base<T>::deleter
 deleter_base<T>::delete_;
 
 template<typename T>
@@ -40,7 +40,7 @@ struct scalar_deleter : deleter_base<T> {
 };
 
 template<typename T>
-struct array_deleter 
+struct array_deleter
     : deleter_base<typename remove_bounds<T>::type>
 {
     typedef typename remove_bounds<T>::type element_type;
@@ -58,7 +58,7 @@ struct default_deleter
           ptr_container_detail::array_deleter<T>,
           ptr_container_detail::scalar_deleter<T>
       >::type
-{ 
+{
     default_deleter() { }
     template<typename TT>
     default_deleter(default_deleter<TT>) { }

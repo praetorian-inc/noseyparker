@@ -29,51 +29,51 @@ namespace boost
 {
 
     template
-    < 
-        class T, 
+    <
+        class T,
         class CloneAllocator = heap_clone_allocator,
         class Allocator      = std::allocator<typename ptr_container_detail::void_ptr<T>::type>
     >
-    class ptr_list : public 
+    class ptr_list : public
         ptr_sequence_adapter< T, std::list<
-            typename ptr_container_detail::void_ptr<T>::type,Allocator>, 
+            typename ptr_container_detail::void_ptr<T>::type,Allocator>,
                               CloneAllocator >
     {
         typedef    ptr_sequence_adapter< T, std::list<
-            typename ptr_container_detail::void_ptr<T>::type,Allocator>, 
+            typename ptr_container_detail::void_ptr<T>::type,Allocator>,
                                          CloneAllocator >
             base_class;
 
         typedef ptr_list<T,CloneAllocator,Allocator>  this_type;
         typedef BOOST_DEDUCED_TYPENAME boost::remove_nullable<T>::type U;
-        
+
     public:
-        BOOST_PTR_CONTAINER_DEFINE_SEQEUENCE_MEMBERS( ptr_list, 
+        BOOST_PTR_CONTAINER_DEFINE_SEQEUENCE_MEMBERS( ptr_list,
                                                       base_class,
                                                       this_type )
 
         typedef BOOST_DEDUCED_TYPENAME base_class::value_type value_type;
-        
+
     public:
         using base_class::merge;
-        
-        void merge( ptr_list& x )                                 
+
+        void merge( ptr_list& x )
         {
             merge( x, std::less<U>() );
         }
 
-        template< typename Compare > 
-        void merge( ptr_list& x, Compare comp )                   
+        template< typename Compare >
+        void merge( ptr_list& x, Compare comp )
         {
             this->base().merge( x.base(), void_ptr_indirect_fun<Compare,U>( comp ) ); }
 
-        void sort()                                                    
-        { 
-            sort( std::less<U>() ); 
+        void sort()
+        {
+            sort( std::less<U>() );
         };
 
-        template< typename Compare > 
-        void sort( Compare comp )                             
+        template< typename Compare >
+        void sort( Compare comp )
         {
             this->base().sort( void_ptr_indirect_fun<Compare,U>( comp ) );
         }
@@ -83,14 +83,14 @@ namespace boost
         {
             base_class::erase_if( first, last, pred );
         }
-        
+
         template< class Pred >
         void erase_if( Pred pred )
         {
-            this->base().remove_if( BOOST_DEDUCED_TYPENAME base_class:: 
+            this->base().remove_if( BOOST_DEDUCED_TYPENAME base_class::
                     BOOST_NESTED_TEMPLATE void_ptr_delete_if<Pred,value_type>
                                     (pred) );
-        } 
+        }
 
     }; // class 'ptr_list'
 
@@ -102,7 +102,7 @@ namespace boost
     {
         return r.clone().release();
     }
-    
+
     /////////////////////////////////////////////////////////////////////////
     // swap
 

@@ -22,7 +22,6 @@
 #include <type_traits>
 #include <vector>
 #include <cstddef>
-#include <boost/sort/common/util/insert.hpp>
 #include <boost/sort/common/util/traits.hpp>
 #include <boost/sort/common/util/algorithm.hpp>
 

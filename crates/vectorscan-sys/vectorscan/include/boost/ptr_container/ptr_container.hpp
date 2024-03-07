@@ -8,7 +8,7 @@
 //
 // For more information, see http://www.boost.org/libs/ptr_container/
 //
- 
+
 #ifndef BOOST_PTR_CONTAINER_HPP
 #define BOOST_PTR_CONTAINER_HPP
 

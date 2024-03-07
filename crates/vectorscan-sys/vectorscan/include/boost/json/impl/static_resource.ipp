@@ -19,9 +19,6 @@ namespace boost {
 namespace json {
 
 static_resource::
-~static_resource() noexcept = default;
-
-static_resource::
 static_resource(
     unsigned char* buffer,
     std::size_t size) noexcept

@@ -355,7 +355,9 @@ namespace boost { namespace math { namespace detail {
          if ((a < 0) && (a == ceil(a)) && (a > -50))
             return detail::hypergeometric_1F1_generic_series(a, b, z, pol, log_scaling, function);
 
-         return (b + z) * exp(z) / b;
+         log_scaling = lltrunc(floor(z));
+         T local_z = z - log_scaling;
+         return (b + z) * exp(local_z) / b;
       }
 
       if ((a == 1) && (b == 2))

@@ -23,7 +23,7 @@ struct to_string_using_nothing {
         res = boost::stacktrace::frame(addr).name();
     }
 
-    bool prepare_source_location(const void* /*addr*/) const BOOST_NOEXCEPT {
+    bool prepare_source_location(const void* /*addr*/) const noexcept {
         return false;
     }
 };

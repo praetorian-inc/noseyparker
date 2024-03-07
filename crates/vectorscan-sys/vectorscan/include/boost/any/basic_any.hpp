@@ -21,21 +21,12 @@
 #include <boost/any/bad_any_cast.hpp>
 #include <boost/any/fwd.hpp>
 #include <boost/assert.hpp>
-#include <boost/aligned_storage.hpp>
 #include <boost/type_index.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/decay.hpp>
-#include <boost/type_traits/remove_cv.hpp>
-#include <boost/type_traits/add_reference.hpp>
-#include <boost/type_traits/is_reference.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_nothrow_move_constructible.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/core/enable_if.hpp>
-#include <boost/core/addressof.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/type_traits/conditional.hpp>
+
+#include <memory>  // for std::addressof
+#include <type_traits>
+
 
 namespace boost {
 
@@ -63,10 +54,10 @@ namespace anys {
     template <std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     class basic_any
     {
-        BOOST_STATIC_ASSERT_MSG(OptimizeForSize > 0 && OptimizeForAlignment > 0, "Size and Align shall be positive values");
-        BOOST_STATIC_ASSERT_MSG(OptimizeForSize >= OptimizeForAlignment, "Size shall non less than Align");
-        BOOST_STATIC_ASSERT_MSG((OptimizeForAlignment & (OptimizeForAlignment - 1)) == 0, "Align shall be a power of 2");
-        BOOST_STATIC_ASSERT_MSG(OptimizeForSize % OptimizeForAlignment == 0, "Size shall be multiple of alignment");
+        static_assert(OptimizeForSize > 0 && OptimizeForAlignment > 0, "Size and Align shall be positive values");
+        static_assert(OptimizeForSize >= OptimizeForAlignment, "Size shall non less than Align");
+        static_assert((OptimizeForAlignment & (OptimizeForAlignment - 1)) == 0, "Align shall be a power of 2");
+        static_assert(OptimizeForSize % OptimizeForAlignment == 0, "Size shall be multiple of alignment");
     private:
         /// @cond
         enum operation
@@ -94,11 +85,7 @@ namespace anys {
                     BOOST_ASSERT(!right->empty());
                     BOOST_ASSERT(right->type() == boost::typeindex::type_id<ValueType>());
                     ValueType* value = reinterpret_cast<ValueType*>(&const_cast<basic_any*>(right)->content.small_value);
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
                     new (&left.content.small_value) ValueType(std::move(*value));
-#else
-                    new (&left.content.small_value) ValueType(*value);
-#endif
                     left.man = right->man;
                     reinterpret_cast<ValueType const*>(&right->content.small_value)->~ValueType();
                     const_cast<basic_any*>(right)->man = 0;
@@ -118,10 +105,10 @@ namespace anys {
                     BOOST_ASSERT(info);
                     BOOST_ASSERT(!left.empty());
                     return boost::typeindex::type_id<ValueType>() == *info ?
-                            reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value) : 0;
+                            reinterpret_cast<typename std::remove_cv<ValueType>::type *>(&left.content.small_value) : 0;
                 case UnsafeCast:
                     BOOST_ASSERT(!left.empty());
-                    return reinterpret_cast<typename remove_cv<ValueType>::type *>(&left.content.small_value);
+                    return reinterpret_cast<typename std::remove_cv<ValueType>::type *>(&left.content.small_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));
             }
@@ -160,10 +147,10 @@ namespace anys {
                     BOOST_ASSERT(info);
                     BOOST_ASSERT(!left.empty());
                     return boost::typeindex::type_id<ValueType>() == *info ?
-                            static_cast<typename remove_cv<ValueType>::type *>(left.content.large_value) : 0;
+                            static_cast<typename std::remove_cv<ValueType>::type *>(left.content.large_value) : 0;
                 case UnsafeCast:
                     BOOST_ASSERT(!left.empty());
-                    return reinterpret_cast<typename remove_cv<ValueType>::type *>(left.content.large_value);
+                    return reinterpret_cast<typename std::remove_cv<ValueType>::type *>(left.content.large_value);
                 case Typeinfo:
                     return const_cast<void*>(static_cast<const void*>(&boost::typeindex::type_id<ValueType>().type_info()));
             }
@@ -172,56 +159,54 @@ namespace anys {
         }
 
         template <typename ValueType>
-        struct is_small_object : boost::integral_constant<bool, sizeof(ValueType) <= OptimizeForSize &&
-            boost::alignment_of<ValueType>::value <= OptimizeForAlignment &&
-            boost::is_nothrow_move_constructible<ValueType>::value>
+        struct is_small_object : std::integral_constant<bool, sizeof(ValueType) <= OptimizeForSize &&
+            alignof(ValueType) <= OptimizeForAlignment &&
+            std::is_nothrow_move_constructible<ValueType>::value>
         {};
 
         template <typename ValueType>
-        static void create(basic_any& any, const ValueType& value, boost::true_type)
+        static void create(basic_any& any, const ValueType& value, std::true_type)
         {
-            typedef typename boost::decay<const ValueType>::type DecayedType;
+            typedef typename std::decay<const ValueType>::type DecayedType;
 
             any.man = &small_manager<DecayedType>;
             new (&any.content.small_value) ValueType(value);
         }
 
         template <typename ValueType>
-        static void create(basic_any& any, const ValueType& value, boost::false_type)
+        static void create(basic_any& any, const ValueType& value, std::false_type)
         {
-            typedef typename boost::decay<const ValueType>::type DecayedType;
+            typedef typename std::decay<const ValueType>::type DecayedType;
 
             any.man = &large_manager<DecayedType>;
             any.content.large_value = new DecayedType(value);
         }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
         template <typename ValueType>
-        static void create(basic_any& any, ValueType&& value, boost::true_type)
+        static void create(basic_any& any, ValueType&& value, std::true_type)
         {
-            typedef typename boost::decay<const ValueType>::type DecayedType;
+            typedef typename std::decay<const ValueType>::type DecayedType;
             any.man = &small_manager<DecayedType>;
-            new (&any.content.small_value) DecayedType(static_cast<ValueType&&>(value));
+            new (&any.content.small_value) DecayedType(std::forward<ValueType>(value));
         }
 
         template <typename ValueType>
-        static void create(basic_any& any, ValueType&& value, boost::false_type)
+        static void create(basic_any& any, ValueType&& value, std::false_type)
         {
-            typedef typename boost::decay<const ValueType>::type DecayedType;
+            typedef typename std::decay<const ValueType>::type DecayedType;
             any.man = &large_manager<DecayedType>;
-            any.content.large_value = new DecayedType(static_cast<ValueType&&>(value));
+            any.content.large_value = new DecayedType(std::forward<ValueType>(value));
         }
-#endif
         /// @endcond
 
     public: // non-type template parameters accessors
-            static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_size = OptimizeForSize;
-            static BOOST_CONSTEXPR_OR_CONST std::size_t buffer_align = OptimizeForAlignment;
+            static constexpr std::size_t buffer_size = OptimizeForSize;
+            static constexpr std::size_t buffer_align = OptimizeForAlignment;
 
     public: // structors
 
         /// \post this->empty() is true.
-        BOOST_CONSTEXPR basic_any() BOOST_NOEXCEPT
+        constexpr basic_any() noexcept
             : man(0), content()
         {
         }
@@ -240,11 +225,11 @@ namespace anys {
         basic_any(const ValueType & value)
             : man(0), content()
         {
-            BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<ValueType, boost::any>::value),
+            static_assert(
+                !std::is_same<ValueType, boost::any>::value,
                 "boost::anys::basic_any shall not be constructed from boost::any"
             );
-            BOOST_STATIC_ASSERT_MSG(
+            static_assert(
                 !anys::detail::is_basic_any<ValueType>::value,
                 "boost::anys::basic_any<A, B> shall not be constructed from boost::anys::basic_any<C, D>"
             );
@@ -268,14 +253,12 @@ namespace anys {
             }
         }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
         /// Move constructor that moves content of
         /// `other` into new instance and leaves `other` empty.
         ///
-        /// \pre C++11 compatible compiler
         /// \post other->empty() is true
         /// \throws Nothing.
-        basic_any(basic_any&& other) BOOST_NOEXCEPT
+        basic_any(basic_any&& other) noexcept
           : man(0), content()
         {
             if (other.man)
@@ -292,32 +275,30 @@ namespace anys {
         /// move constructible and `sizeof(value) <= OptimizeForSize` and
         /// `alignof(value) <= OptimizeForAlignment`.
         ///
-        /// \pre C++11 compatible compiler.
         /// \throws std::bad_alloc or any exceptions arising from the move or
         /// copy constructor of the contained type.
         template<typename ValueType>
         basic_any(ValueType&& value
-            , typename boost::disable_if<boost::is_same<basic_any&, ValueType> >::type* = 0 // disable if value has type `basic_any&`
-            , typename boost::disable_if<boost::is_const<ValueType> >::type* = 0) // disable if value has type `const ValueType&&`
+            , typename std::enable_if<!std::is_same<basic_any&, ValueType>::value >::type* = 0 // disable if value has type `basic_any&`
+            , typename std::enable_if<!std::is_const<ValueType>::value >::type* = 0) // disable if value has type `const ValueType&&`
           : man(0), content()
         {
-            typedef typename boost::decay<ValueType>::type DecayedType;
-            BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<DecayedType, boost::any>::value),
+            typedef typename std::decay<ValueType>::type DecayedType;
+            static_assert(
+                !std::is_same<DecayedType, boost::any>::value,
                 "boost::anys::basic_any shall not be constructed from boost::any"
             );
-            BOOST_STATIC_ASSERT_MSG(
+            static_assert(
                 !anys::detail::is_basic_any<DecayedType>::value,
                 "boost::anys::basic_any<A, B> shall not be constructed from boost::anys::basic_any<C, D>"
             );
             create(*this, static_cast<ValueType&&>(value), is_small_object<DecayedType>());
         }
-#endif
 
         /// Releases any and all resources used in management of instance.
         ///
         /// \throws Nothing.
-        ~basic_any() BOOST_NOEXCEPT
+        ~basic_any() noexcept
         {
             if (man)
             {
@@ -331,7 +312,7 @@ namespace anys {
         ///
         /// \returns `*this`
         /// \throws Nothing.
-        basic_any & swap(basic_any & rhs) BOOST_NOEXCEPT
+        basic_any & swap(basic_any & rhs) noexcept
         {
             if (this == &rhs)
             {
@@ -371,47 +352,15 @@ namespace anys {
             return *this;
         }
 
-
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-        /// Makes a copy of `rhs`,
-        /// discarding previous content, so that the new content of is
-        /// equivalent in both type and value to
-        /// `rhs`.
-        ///
-        /// Does not dynamically allocate if `ValueType` is nothrow
-        /// move constructible and `sizeof(value) <= OptimizeForSize` and
-        /// `alignof(value) <= OptimizeForAlignment`.
-        ///
-        /// \throws std::bad_alloc
-        /// or any exceptions arising from the copy constructor of the
-        /// contained type. Assignment satisfies the strong guarantee
-        /// of exception safety.
-        template<typename ValueType>
-        basic_any & operator=(const ValueType & rhs)
-        {
-            BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<ValueType, boost::any>::value),
-                "boost::any shall not be assigned into boost::anys::basic_any"
-            );
-            BOOST_STATIC_ASSERT_MSG(
-                !anys::detail::is_basic_any<ValueType>::value,
-                "boost::anys::basic_any<A, B> shall not be assigned into boost::anys::basic_any<C, D>"
-            );
-            basic_any(rhs).swap(*this);
-            return *this;
-        }
-
-#else
         /// Moves content of `rhs` into
         /// current instance, discarding previous content, so that the
         /// new content is equivalent in both type and value to the
         /// content of `rhs` before move, or empty if
         /// `rhs.empty()`.
         ///
-        /// \pre C++11 compatible compiler.
         /// \post `rhs->empty()` is true
         /// \throws Nothing.
-        basic_any & operator=(basic_any&& rhs) BOOST_NOEXCEPT
+        basic_any & operator=(basic_any&& rhs) noexcept
         {
             rhs.swap(*this);
             basic_any().swap(rhs);
@@ -427,7 +376,6 @@ namespace anys {
         /// move constructible and `sizeof(value) <= OptimizeForSize` and
         /// `alignof(value) <= OptimizeForAlignment`.
         ///
-        /// \pre C++11 compatible compiler.
         /// \throws std::bad_alloc
         /// or any exceptions arising from the move or copy constructor of the
         /// contained type. Assignment satisfies the strong guarantee
@@ -435,31 +383,30 @@ namespace anys {
         template <class ValueType>
         basic_any & operator=(ValueType&& rhs)
         {
-            typedef typename boost::decay<ValueType>::type DecayedType;
-            BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_same<DecayedType, boost::any>::value),
+            typedef typename std::decay<ValueType>::type DecayedType;
+            static_assert(
+                !std::is_same<DecayedType, boost::any>::value,
                 "boost::any shall not be assigned into boost::anys::basic_any"
             );
-            BOOST_STATIC_ASSERT_MSG(
-                (!anys::detail::is_basic_any<DecayedType>::value || boost::is_same<DecayedType, basic_any>::value),
+            static_assert(
+                !anys::detail::is_basic_any<DecayedType>::value || std::is_same<DecayedType, basic_any>::value,
                 "boost::anys::basic_any<A, B> shall not be assigned into boost::anys::basic_any<C, D>"
             );
-            basic_any(static_cast<ValueType&&>(rhs)).swap(*this);
+            basic_any(std::forward<ValueType>(rhs)).swap(*this);
             return *this;
         }
-#endif
 
     public: // queries
 
         /// \returns `true` if instance is empty, otherwise `false`.
         /// \throws Nothing.
-        bool empty() const BOOST_NOEXCEPT
+        bool empty() const noexcept
         {
             return !man;
         }
 
         /// \post this->empty() is true
-        void clear() BOOST_NOEXCEPT
+        void clear() noexcept
         {
             basic_any().swap(*this);
         }
@@ -480,10 +427,10 @@ namespace anys {
     private: // representation
         /// @cond
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
-        friend ValueType * any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
+        friend ValueType * any_cast(basic_any<Size, Alignment> *) noexcept;
 
         template<typename ValueType, std::size_t Size, std::size_t Alignment>
-        friend ValueType * unsafe_any_cast(basic_any<Size, Alignment> *) BOOST_NOEXCEPT;
+        friend ValueType * unsafe_any_cast(basic_any<Size, Alignment> *) noexcept;
 
         typedef void*(*manager)(operation op, basic_any& left, const basic_any* right, const boost::typeindex::type_info* info);
 
@@ -491,7 +438,7 @@ namespace anys {
 
         union content {
             void * large_value;
-            typename boost::aligned_storage<OptimizeForSize, OptimizeForAlignment>::type small_value;
+            alignas(OptimizeForAlignment) unsigned char small_value[OptimizeForSize];
         } content;
         /// @endcond
     };
@@ -499,7 +446,7 @@ namespace anys {
     /// Exchange of the contents of `lhs` and `rhs`.
     /// \throws Nothing.
     template<std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    void swap(basic_any<OptimizeForSize, OptimizeForAlignment>& lhs, basic_any<OptimizeForSize, OptimizeForAlignment>& rhs) BOOST_NOEXCEPT
+    void swap(basic_any<OptimizeForSize, OptimizeForAlignment>& lhs, basic_any<OptimizeForSize, OptimizeForAlignment>& rhs) noexcept
     {
         lhs.swap(rhs);
     }
@@ -507,17 +454,17 @@ namespace anys {
     /// \returns Pointer to a ValueType stored in `operand`, nullptr if
     /// `operand` does not contain specified `ValueType`.
     template<typename ValueType, std::size_t Size, std::size_t Alignment>
-    ValueType * any_cast(basic_any<Size, Alignment> * operand) BOOST_NOEXCEPT
+    ValueType * any_cast(basic_any<Size, Alignment> * operand) noexcept
     {
         return operand->man ?
-                static_cast<typename boost::remove_cv<ValueType>::type *>(operand->man(basic_any<Size, Alignment>::AnyCast, *operand, 0, &boost::typeindex::type_id<ValueType>().type_info()))
+                static_cast<typename std::remove_cv<ValueType>::type *>(operand->man(basic_any<Size, Alignment>::AnyCast, *operand, 0, &boost::typeindex::type_id<ValueType>().type_info()))
                 : 0;
     }
 
     /// \returns Const pointer to a ValueType stored in `operand`, nullptr if
     /// `operand` does not contain specified `ValueType`.
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline const ValueType * any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline const ValueType * any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) noexcept
     {
         return boost::anys::any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }
@@ -528,9 +475,9 @@ namespace anys {
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     ValueType any_cast(basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
-        typedef typename remove_reference<ValueType>::type nonref;
+        typedef typename std::remove_reference<ValueType>::type nonref;
 
-        nonref * result = boost::anys::any_cast<nonref>(boost::addressof(operand));
+        nonref * result = boost::anys::any_cast<nonref>(std::addressof(operand));
         if(!result)
             boost::throw_exception(bad_any_cast());
 
@@ -538,10 +485,10 @@ namespace anys {
         // `ValueType` is not a reference. Example:
         // `static_cast<std::string>(*result);`
         // which is equal to `std::string(*result);`
-        typedef typename boost::conditional<
-            boost::is_reference<ValueType>::value,
+        typedef typename std::conditional<
+            std::is_reference<ValueType>::value,
             ValueType,
-            typename boost::add_reference<ValueType>::type
+            typename std::add_lvalue_reference<ValueType>::type
         >::type ref_type;
 
 #ifdef BOOST_MSVC
@@ -560,25 +507,23 @@ namespace anys {
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     inline ValueType any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> & operand)
     {
-        typedef typename remove_reference<ValueType>::type nonref;
+        typedef typename std::remove_reference<ValueType>::type nonref;
         return boost::anys::any_cast<const nonref &>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> &>(operand));
     }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     /// \returns `ValueType` stored in `operand`, leaving the `operand` empty.
     /// \throws boost::bad_any_cast if `operand` does not contain
     /// specified `ValueType`.
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
     inline ValueType any_cast(basic_any<OptimizeForSize, OptimizeForAlignment>&& operand)
     {
-        BOOST_STATIC_ASSERT_MSG(
-            boost::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
-            || boost::is_const< typename boost::remove_reference<ValueType>::type >::value,
+        static_assert(
+            std::is_rvalue_reference<ValueType&&>::value /*true if ValueType is rvalue or just a value*/
+            || std::is_const< typename std::remove_reference<ValueType>::type >::value,
             "boost::any_cast shall not be used for getting nonconst references to temporary objects"
         );
         return boost::anys::any_cast<ValueType>(operand);
     }
-#endif
 
 
     /// @cond
@@ -589,13 +534,13 @@ namespace anys {
     // use typeid() comparison, e.g., when our types may travel across
     // different shared libraries.
     template<typename ValueType, std::size_t OptimizedForSize, std::size_t OptimizeForAlignment>
-    inline ValueType * unsafe_any_cast(basic_any<OptimizedForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline ValueType * unsafe_any_cast(basic_any<OptimizedForSize, OptimizeForAlignment> * operand) noexcept
     {
         return static_cast<ValueType*>(operand->man(basic_any<OptimizedForSize, OptimizeForAlignment>::UnsafeCast, *operand, 0, 0));
     }
 
     template<typename ValueType, std::size_t OptimizeForSize, std::size_t OptimizeForAlignment>
-    inline const ValueType * unsafe_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) BOOST_NOEXCEPT
+    inline const ValueType * unsafe_any_cast(const basic_any<OptimizeForSize, OptimizeForAlignment> * operand) noexcept
     {
         return boost::anys::unsafe_any_cast<ValueType>(const_cast<basic_any<OptimizeForSize, OptimizeForAlignment> *>(operand));
     }

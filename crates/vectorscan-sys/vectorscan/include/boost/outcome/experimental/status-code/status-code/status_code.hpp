@@ -470,7 +470,7 @@ public:
   /***** KEEP THESE IN SYNC WITH ERRORED_STATUS_CODE *****/
   //! Implicit construction from any type where an ADL discovered `make_status_code(T, Args ...)` returns a `status_code`.
   BOOST_OUTCOME_SYSTEM_ERROR2_TEMPLATE(
-  class T, class... Args,                                               //
+  class T, class... Args,  //
   class MakeStatusCodeResult =
   typename detail::safe_get_make_status_code_result<T, Args...>::type)  // Safe ADL lookup of make_status_code(), returns void if not found
   BOOST_OUTCOME_SYSTEM_ERROR2_TREQUIRES(BOOST_OUTCOME_SYSTEM_ERROR2_TPRED(!std::is_same<typename std::decay<T>::type, status_code>::value       // not copy/move of self
@@ -617,7 +617,7 @@ public:
   {
   }
   //! Implicit move construction from any other status code if its value type is trivially copyable or move bitcopying and it would fit into our storage
-  BOOST_OUTCOME_SYSTEM_ERROR2_TEMPLATE(class DomainType)                                     //
+  BOOST_OUTCOME_SYSTEM_ERROR2_TEMPLATE(class DomainType)  //
   BOOST_OUTCOME_SYSTEM_ERROR2_TREQUIRES(BOOST_OUTCOME_SYSTEM_ERROR2_TPRED(detail::domain_value_type_erasure_is_safe<detail::erased<ErasedType>, DomainType>::value))
   BOOST_OUTCOME_SYSTEM_ERROR2_CONSTEXPR14 status_code(status_code<DomainType> &&v) noexcept  // NOLINT
       : _base(typename _base::_value_type_constructor{}, v._domain_ptr(), detail::erasure_cast<value_type>(v.value()))
@@ -630,7 +630,7 @@ public:
   }
   //! Implicit construction from any type where an ADL discovered `make_status_code(T, Args ...)` returns a `status_code`.
   BOOST_OUTCOME_SYSTEM_ERROR2_TEMPLATE(
-  class T, class... Args,                                               //
+  class T, class... Args,  //
   class MakeStatusCodeResult =
   typename detail::safe_get_make_status_code_result<T, Args...>::type)  // Safe ADL lookup of make_status_code(), returns void if not found
   BOOST_OUTCOME_SYSTEM_ERROR2_TREQUIRES(BOOST_OUTCOME_SYSTEM_ERROR2_TPRED(!std::is_same<typename std::decay<T>::type, status_code>::value       // not copy/move of self
@@ -654,7 +654,7 @@ public:
 #if defined(_CPPUNWIND) || defined(__EXCEPTIONS) || defined(BOOST_OUTCOME_STANDARDESE_IS_IN_THE_HOUSE)
   //! Explicit copy construction from an unknown status code. Note that this will throw an exception if its value type is not trivially copyable or would not
   //! fit into our storage or the source domain's `_do_erased_copy()` refused the copy.
-  explicit BOOST_OUTCOME_SYSTEM_ERROR2_CONSTEXPR14 status_code(const status_code<void> &v)  // NOLINT
+  explicit BOOST_OUTCOME_SYSTEM_ERROR2_CONSTEXPR14 status_code(in_place_t, const status_code<void> &v)  // NOLINT
       : _base(typename _base::_value_type_constructor{}, v._domain_ptr(), value_type{})
   {
     status_code_domain::payload_info_t info{sizeof(value_type), sizeof(status_code), alignof(status_code)};

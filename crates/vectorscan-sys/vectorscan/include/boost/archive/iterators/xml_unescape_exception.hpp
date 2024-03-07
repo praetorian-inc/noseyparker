@@ -35,7 +35,7 @@ public:
     xml_unescape_exception()
     {}
 
-    virtual const char *what( ) const throw( )
+    virtual const char *what( ) const BOOST_NOEXCEPT_OR_NOTHROW
     {
         return "xml contained un-recognized escape code";
     }

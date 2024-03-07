@@ -48,7 +48,7 @@ namespace ptr_container_detail
     {
         typedef typename T::iterator type;
     };
-    
+
     template< class T >
     struct select_local_iterator
     {

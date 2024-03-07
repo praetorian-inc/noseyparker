@@ -56,7 +56,7 @@ namespace impl
         
         // serialization is done by accumulators it depends on
         template<class Archive>
-        void serialize(Archive & ar, const unsigned int file_version) {}
+        void serialize(Archive & /* ar */, const unsigned int /* file_version */) {}
     };
 
     //! Iterative calculation of variance.
@@ -119,8 +119,8 @@ namespace impl
 
         // make this accumulator serializeable
         template<class Archive>
-        void serialize(Archive & ar, const unsigned int file_version)
-        { 
+        void serialize(Archive & ar, const unsigned int /* file_version */)
+        {
             ar & variance;
         }
 

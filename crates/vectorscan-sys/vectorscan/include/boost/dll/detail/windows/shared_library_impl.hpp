@@ -15,7 +15,7 @@
 #include <boost/dll/detail/windows/path_from_handle.hpp>
 
 #include <boost/move/utility.hpp>
-#include <boost/swap.hpp>
+#include <boost/core/invoke_swap.hpp>
 
 #include <boost/winapi/dll.hpp>
 
@@ -123,7 +123,7 @@ public:
     }
 
     void swap(shared_library_impl& rhs) BOOST_NOEXCEPT {
-        boost::swap(handle_, rhs.handle_);
+        boost::core::invoke_swap(handle_, rhs.handle_);
     }
 
     boost::dll::fs::path full_module_path(boost::dll::fs::error_code &ec) const {

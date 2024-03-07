@@ -14,7 +14,7 @@
 
 // Same format as BOOST_VERSION:
 //   major * 100000 + minor * 100 + patch
-#define BOOST_LAMBDA2_VERSION 108300
+#define BOOST_LAMBDA2_VERSION 108400
 
 namespace boost
 {

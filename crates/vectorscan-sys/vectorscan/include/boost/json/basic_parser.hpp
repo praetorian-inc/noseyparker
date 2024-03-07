@@ -280,7 +280,7 @@ class basic_parser
         num1,  num2,  num3,  num4,
         num5,  num6,  num7,  num8,
         exp1,  exp2,  exp3,
-        val1,  val2
+        val1,  val2, val3
     };
 
     struct number

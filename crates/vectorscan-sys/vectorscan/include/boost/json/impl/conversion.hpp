@@ -21,8 +21,8 @@
 #include <boost/mp11/utility.hpp>
 
 #include <iterator>
-#include <utility>
 #include <tuple>
+#include <utility>
 #ifndef BOOST_NO_CXX17_HDR_VARIANT
 # include <variant>
 #endif // BOOST_NO_CXX17_HDR_VARIANT
@@ -132,6 +132,44 @@ try_size(T&, mp11::mp_int<0>)
     return 0;
 }
 
+template<class T>
+using has_push_back_helper
+    = decltype(std::declval<T&>().push_back(std::declval<value_type<T>>()));
+template<class T>
+using has_push_back = mp11::mp_valid<has_push_back_helper, T>;
+template<class T>
+using inserter_implementation = mp11::mp_cond<
+    is_tuple_like<T>, mp11::mp_int<2>,
+    has_push_back<T>, mp11::mp_int<1>,
+    mp11::mp_true,    mp11::mp_int<0>>;
+
+template<class T>
+iterator_type<T>
+inserter(
+    T& target,
+    mp11::mp_int<2>)
+{
+    return target.begin();
+}
+
+template<class T>
+std::back_insert_iterator<T>
+inserter(
+    T& target,
+    mp11::mp_int<1>)
+{
+    return std::back_inserter(target);
+}
+
+template<class T>
+std::insert_iterator<T>
+inserter(
+    T& target,
+    mp11::mp_int<0>)
+{
+    return std::inserter( target, target.end() );
+}
+
 using value_from_conversion = mp11::mp_true;
 using value_to_conversion = mp11::mp_false;
 
@@ -145,6 +183,8 @@ struct array_conversion_tag : native_conversion_tag { };
 struct string_conversion_tag : native_conversion_tag { };
 struct bool_conversion_tag : native_conversion_tag { };
 struct number_conversion_tag : native_conversion_tag { };
+struct integral_conversion_tag : number_conversion_tag { };
+struct floating_point_conversion_tag : number_conversion_tag { };
 struct null_like_conversion_tag { };
 struct string_like_conversion_tag { };
 struct map_like_conversion_tag { };
@@ -152,6 +192,8 @@ struct sequence_conversion_tag { };
 struct tuple_conversion_tag { };
 struct described_class_conversion_tag { };
 struct described_enum_conversion_tag { };
+struct variant_conversion_tag { };
+struct optional_conversion_tag { };
 struct no_conversion_tag { };
 
 template<class... Args>
@@ -216,31 +258,80 @@ template< class T >
 using described_bases = describe::describe_bases<
     T, describe::mod_any_access>;
 
+#if defined(BOOST_MSVC) && BOOST_MSVC < 1920
+
+template< class T >
+struct described_member_t_impl;
+
+template< class T, class C >
+struct described_member_t_impl<T C::*>
+{
+    using type = T;
+};
+
+template< class T, class D >
+using described_member_t = remove_cvref<
+    typename described_member_t_impl<
+        remove_cvref<decltype(D::pointer)> >::type>;
+
+#else
+
+template< class T, class D >
+using described_member_t = remove_cvref<decltype(
+    std::declval<T&>().* D::pointer )>;
+
+#endif
+
+// user conversion (via tag_invoke)
+template< class Ctx, class T, class Dir >
+using user_conversion_category = mp11::mp_cond<
+    has_user_conversion3<Ctx, T, Dir>, full_context_conversion_tag,
+    has_user_conversion2<Ctx, T, Dir>, context_conversion_tag,
+    has_user_conversion1<T, Dir>,      user_conversion_tag>;
+
+// native conversions (constructors and member functions of value)
+template< class T >
+using native_conversion_category = mp11::mp_cond<
+    std::is_same<T, value>,  value_conversion_tag,
+    std::is_same<T, array>,  array_conversion_tag,
+    std::is_same<T, object>, object_conversion_tag,
+    std::is_same<T, string>, string_conversion_tag>;
+
+// generic conversions
+template< class T >
+using generic_conversion_category = mp11::mp_cond<
+    std::is_same<T, bool>,     bool_conversion_tag,
+    std::is_integral<T>,       integral_conversion_tag,
+    std::is_floating_point<T>, floating_point_conversion_tag,
+    is_null_like<T>,           null_like_conversion_tag,
+    is_string_like<T>,         string_like_conversion_tag,
+    is_map_like<T>,            map_like_conversion_tag,
+    is_sequence_like<T>,       sequence_conversion_tag,
+    is_tuple_like<T>,          tuple_conversion_tag,
+    is_described_class<T>,     described_class_conversion_tag,
+    is_described_enum<T>,      described_enum_conversion_tag,
+    is_variant_like<T>,        variant_conversion_tag,
+    is_optional_like<T>,       optional_conversion_tag,
+    // failed to find a suitable implementation
+    mp11::mp_true,             no_conversion_tag>;
+
+template< class T >
+using nested_type = typename T::type;
+template< class T1, class T2 >
+using conversion_category_impl_helper = mp11::mp_eval_if_not<
+    std::is_same<detail::no_conversion_tag, T1>,
+    T1,
+    mp11::mp_eval_or_q, T1, mp11::mp_quote<nested_type>, T2>;
 template< class Ctx, class T, class Dir >
 struct conversion_category_impl
 {
-    using type = mp11::mp_cond<
-        // user conversion (via tag_invoke)
-        has_user_conversion3<Ctx, T, Dir>, full_context_conversion_tag,
-        has_user_conversion2<Ctx, T, Dir>, context_conversion_tag,
-        has_user_conversion1<T, Dir>,      user_conversion_tag,
-        // native conversions (constructors and member functions of value)
-        std::is_same<T, value>,            value_conversion_tag,
-        std::is_same<T, array>,            array_conversion_tag,
-        std::is_same<T, object>,           object_conversion_tag,
-        std::is_same<T, string>,           string_conversion_tag,
-        std::is_same<T, bool>,             bool_conversion_tag,
-        std::is_arithmetic<T>,             number_conversion_tag,
-        // generic conversions
-        is_null_like<T>,                   null_like_conversion_tag,
-        is_string_like<T>,                 string_like_conversion_tag,
-        is_map_like<T>,                    map_like_conversion_tag,
-        is_sequence_like<T>,               sequence_conversion_tag,
-        is_tuple_like<T>,                  tuple_conversion_tag,
-        is_described_class<T>,             described_class_conversion_tag,
-        is_described_enum<T>,              described_enum_conversion_tag,
-        // failed to find a suitable implementation
-        mp11::mp_true,                     no_conversion_tag>;
+    using type = mp11::mp_fold<
+        mp11::mp_list<
+            mp11::mp_defer<user_conversion_category, Ctx, T, Dir>,
+            mp11::mp_defer<native_conversion_category, T>,
+            mp11::mp_defer<generic_conversion_category, T>>,
+        no_conversion_tag,
+        conversion_category_impl_helper>;
 };
 template< class Ctx, class T, class Dir >
 using conversion_category =
@@ -362,6 +453,17 @@ struct supported_context< std::tuple<Ctxs...>, T, Dir >
     }
 };
 
+template< class T >
+using value_result_type = typename std::decay<
+    decltype( std::declval<T&>().value() )>::type;
+
+template< class T >
+using can_reset = decltype( std::declval<T&>().reset() );
+
+template< class T >
+using has_valueless_by_exception =
+    decltype( std::declval<T const&>().valueless_by_exception() );
+
 } // namespace detail
 
 template <class T>
@@ -423,6 +525,18 @@ struct is_described_class
 template<class T>
 struct is_described_enum
     : describe::has_describe_enumerators<T>
+{ };
+
+template<class T>
+struct is_variant_like : mp11::mp_valid<detail::has_valueless_by_exception, T>
+{ };
+
+template<class T>
+struct is_optional_like
+    : mp11::mp_and<
+        mp11::mp_not<std::is_void<
+            mp11::mp_eval_or<void, detail::value_result_type, T>>>,
+        mp11::mp_valid<detail::can_reset, T>>
 { };
 
 } // namespace json

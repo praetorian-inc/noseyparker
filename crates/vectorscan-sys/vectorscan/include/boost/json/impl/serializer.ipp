@@ -38,9 +38,6 @@ enum class serializer::state : char
 //----------------------------------------------------------
 
 serializer::
-~serializer() noexcept = default;
-
-serializer::
 serializer(
     storage_ptr sp,
     unsigned char* buf,

@@ -61,7 +61,6 @@ using com_error = status_error<_com_code_domain>;
 class _com_code_domain : public status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
   using _base = status_code_domain;
 
   //! Construct from a `HRESULT` error code

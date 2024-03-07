@@ -19,8 +19,6 @@
 #include <utility>
 #include <iterator>
 #include <algorithm>
-#include <boost/array.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/type_index.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/size.hpp>
@@ -82,7 +80,7 @@ private:
         p->first = typeindex::type_id< T >();
 
         typedef void (*trampoline_t)(void*, T const&);
-        BOOST_STATIC_ASSERT_MSG(sizeof(trampoline_t) == sizeof(void*), "Boost.Log: Unsupported platform, the size of a function pointer differs from the size of a pointer");
+        static_assert(sizeof(trampoline_t) == sizeof(void*), "Boost.Log: Unsupported platform, the size of a function pointer differs from the size of a pointer");
         union
         {
             void* as_pvoid;
@@ -98,7 +96,7 @@ private:
 class type_sequence_dispatcher_base :
     public type_dispatcher
 {
-private:
+protected:
     //! Dispatching map element type
     typedef std::pair< typeindex::type_index, void* > dispatching_map_element_type;
 
@@ -156,11 +154,8 @@ public:
     typedef TypeSequenceT supported_types;
 
 private:
-    //! The dispatching map
-    typedef array<
-        std::pair< typeindex::type_index, void* >,
-        mpl::size< supported_types >::value
-    > dispatching_map;
+    //! Number of entries in the dispatching map
+    static BOOST_CONSTEXPR_OR_CONST std::size_t dispatching_map_size = mpl::size< supported_types >::value;
 
 public:
     /*!
@@ -168,33 +163,33 @@ public:
      */
     template< typename VisitorT >
     explicit type_sequence_dispatcher(VisitorT& visitor) :
-        type_sequence_dispatcher_base(get_dispatching_map< VisitorT >().data(), dispatching_map::static_size, (void*)boost::addressof(visitor))
+        type_sequence_dispatcher_base(get_dispatching_map< VisitorT >(), dispatching_map_size, (void*)boost::addressof(visitor))
     {
     }
 
 private:
     //! The method returns the dispatching map instance
     template< typename VisitorT >
-    static dispatching_map const& get_dispatching_map()
+    static const dispatching_map_element_type* get_dispatching_map()
     {
-        static const dispatching_map* pinstance = NULL;
+        static const dispatching_map_element_type* pinstance = NULL;
 
         BOOST_LOG_ONCE_BLOCK()
         {
-            static dispatching_map instance;
-            typename dispatching_map::value_type* p = &*instance.begin();
+            static dispatching_map_element_type instance[dispatching_map_size];
+            dispatching_map_element_type* p = instance;
 
             typedef typename mpl::begin< supported_types >::type begin_iterator_type;
             typedef typename mpl::end< supported_types >::type end_iterator_type;
             typedef dispatching_map_initializer< VisitorT > initializer;
             initializer::init(static_cast< begin_iterator_type* >(0), static_cast< end_iterator_type* >(0), p);
 
-            std::sort(instance.begin(), instance.end(), dispatching_map_order());
+            std::sort(instance, instance + dispatching_map_size, dispatching_map_order());
 
-            pinstance = &instance;
+            pinstance = instance;
         }
 
-        return *pinstance;
+        return pinstance;
     }
 
     //  Copying and assignment closed

@@ -26,7 +26,7 @@ namespace boost
     public:
         bad_ptr_container_operation( const char* what ) : what_( what )
         { }
-        
+
         virtual const char* what() const throw()
         {
             return what_;
@@ -34,7 +34,7 @@ namespace boost
     };
 
 
-    
+
     class bad_index : public bad_ptr_container_operation
     {
     public:
@@ -49,7 +49,7 @@ namespace boost
     public:
         bad_pointer() : bad_ptr_container_operation( "Null pointer not allowed in a pointer container!" )
         { }
-        
+
         bad_pointer( const char* text ) : bad_ptr_container_operation( text )
         { }
     };

@@ -18,7 +18,7 @@
 #include <boost/config.hpp> /* keep it first to prevent nasty warns in MSVC */
 #include <algorithm>
 #include <boost/core/addressof.hpp>
-#include <boost/core/swap.hpp>
+#include <boost/core/invoke_swap.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/flyweight/detail/default_value_policy.hpp>
 #include <boost/flyweight/detail/flyweight_core.hpp>
@@ -255,7 +255,7 @@ public:
 
   /* modifiers */
 
-  void swap(flyweight& x){boost::swap(h,x.h);}
+  void swap(flyweight& x){boost::core::invoke_swap(h,x.h);}
   
 private:
   handle_type h;

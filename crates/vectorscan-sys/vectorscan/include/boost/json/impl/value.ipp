@@ -231,13 +231,28 @@ value(
     storage_ptr sp)
 {
     if(value_ref::maybe_object(init))
+    {
         ::new(&obj_) object(
             value_ref::make_object(
                 init, std::move(sp)));
+    }
     else
-        ::new(&arr_) array(
-            value_ref::make_array(
-                init, std::move(sp)));
+    {
+#ifndef BOOST_JSON_LEGACY_INIT_LIST_BEHAVIOR
+        if( init.size() == 1 )
+        {
+            ::new(&sca_) scalar();
+            value temp = init.begin()->make_value( std::move(sp) );
+            swap(temp);
+        }
+        else
+#endif
+        {
+            ::new(&arr_) array(
+                value_ref::make_array(
+                    init, std::move(sp)));
+        }
+    }
 }
 
 //----------------------------------------------------------

@@ -92,11 +92,7 @@ public:
 
     mutex()
     {
-#if BOOST_PLAT_WINDOWS_RUNTIME
-        boost::signals2::detail::InitializeCriticalSectionEx(reinterpret_cast< boost::signals2::detail::rtl_critical_section* >(&cs_), 4000, 0);
-#else
         boost::signals2::detail::InitializeCriticalSection(reinterpret_cast< boost::signals2::detail::rtl_critical_section* >(&cs_)); 
-#endif
     }
 
     ~mutex()

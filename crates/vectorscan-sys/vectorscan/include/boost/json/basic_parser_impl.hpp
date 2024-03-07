@@ -785,7 +785,15 @@ resume_value(const char* p,
         p = parse_comment(p, std::false_type(), std::false_type());
         if(BOOST_JSON_UNLIKELY(p == sentinel()))
             return maybe_suspend(p, state::val2);
+        if(BOOST_JSON_UNLIKELY( p == end_ ))
+            return maybe_suspend(p, state::val3);
         BOOST_ASSERT(st_.empty());
+        return parse_value(p, std::true_type(), std::true_type(), allow_trailing, allow_bad_utf8);
+    }
+
+    case state::val3:
+    {
+        st_.pop(st);
         return parse_value(p, std::true_type(), std::true_type(), allow_trailing, allow_bad_utf8);
     }
     }

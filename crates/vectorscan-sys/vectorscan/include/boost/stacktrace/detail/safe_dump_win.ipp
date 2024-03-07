@@ -23,7 +23,7 @@
 
 namespace boost { namespace stacktrace { namespace detail {
 
-std::size_t dump(void* /*fd*/, const native_frame_ptr_t* /*frames*/, std::size_t /*frames_count*/) BOOST_NOEXCEPT {
+std::size_t dump(void* /*fd*/, const native_frame_ptr_t* /*frames*/, std::size_t /*frames_count*/) noexcept {
 #if 0 // This code potentially could cause deadlocks (according to the MSDN). Disabled
     boost::winapi::DWORD_ written;
     const boost::winapi::DWORD_ bytes_to_write = static_cast<boost::winapi::DWORD_>(
@@ -38,7 +38,7 @@ std::size_t dump(void* /*fd*/, const native_frame_ptr_t* /*frames*/, std::size_t
     return 0;
 }
 
-std::size_t dump(const char* /*file*/, const native_frame_ptr_t* /*frames*/, std::size_t /*frames_count*/) BOOST_NOEXCEPT {
+std::size_t dump(const char* /*file*/, const native_frame_ptr_t* /*frames*/, std::size_t /*frames_count*/) noexcept {
 #if 0 // This code causing deadlocks on some platforms. Disabled
     void* const fd = boost::winapi::CreateFileA(
         file,

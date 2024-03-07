@@ -9,10 +9,10 @@
 #include <boost/ptr_container/detail/serialize_ptr_map_adapter.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
-namespace boost 
+namespace boost
 {
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class Key, class T, class Compare, class CloneAllocator, class Allocator>

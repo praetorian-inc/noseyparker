@@ -18,28 +18,7 @@
 # include <boost/assert.hpp>
 # include <boost/pointer_cast.hpp>
 # include <boost/throw_exception.hpp>
-# include <boost/utility/declval.hpp>
-# ifdef BOOST_NO_CXX11_DECLTYPE
-#   include <boost/typeof/typeof.hpp>
-# endif
 
-#include <boost/config/pragma_message.hpp>
-#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || \
-    defined(BOOST_NO_CXX11_AUTO_DECLARATIONS) || \
-    defined(BOOST_NO_CXX11_CONSTEXPR) || \
-    defined(BOOST_NO_CXX11_NULLPTR) || \
-    defined(BOOST_NO_CXX11_NOEXCEPT) || \
-    defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) || \
-    defined(BOOST_NO_CXX11_FINAL) || \
-    defined(BOOST_NO_CXX11_ALIGNOF) || \
-    defined(BOOST_NO_CXX11_STATIC_ASSERT) || \
-    defined(BOOST_NO_CXX11_SMART_PTR) || \
-    defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST) || \
-    defined(BOOST_NO_CXX11_HDR_TYPE_TRAITS)
-
-BOOST_PRAGMA_MESSAGE("C++03 support is deprecated in Boost.Conversion 1.82 and will be removed in Boost.Conversion 1.84.")
-
-#endif
 
 namespace boost
 {
@@ -59,36 +38,20 @@ namespace boost
 
     //  Contributed by Boris Rasin
 
-    namespace detail
-    {
-        template <typename Target, typename Source>
-        struct dynamic_pointer_cast_result
-        {
-#ifdef BOOST_NO_CXX11_DECLTYPE
-            BOOST_TYPEOF_NESTED_TYPEDEF_TPL(nested, dynamic_pointer_cast<Target>(boost::declval<Source>()))
-            typedef typename nested::type type;
-#else
-            typedef decltype(dynamic_pointer_cast<Target>(boost::declval<Source>())) type;
-#endif
-        };
-    }
-
     template <typename Target, typename Source>
-    inline typename detail::dynamic_pointer_cast_result<Target, Source>::type
-    polymorphic_pointer_downcast (const Source& x)
+    inline auto polymorphic_pointer_downcast (const Source& x)
+        -> decltype(static_pointer_cast<Target>(x))
     {
         BOOST_ASSERT(dynamic_pointer_cast<Target> (x) == x);
         return static_pointer_cast<Target> (x);
     }
 
     template <typename Target, typename Source>
-    inline typename detail::dynamic_pointer_cast_result<Target, Source>::type
-    polymorphic_pointer_cast (const Source& x)
+    inline auto polymorphic_pointer_cast (const Source& x)
+        -> decltype(dynamic_pointer_cast<Target>(x))
     {
-        typename detail::dynamic_pointer_cast_result<Target, Source>::type tmp
-            = dynamic_pointer_cast<Target> (x);
+        auto tmp = dynamic_pointer_cast<Target> (x);
         if ( !tmp ) boost::throw_exception( std::bad_cast() );
-
         return tmp;
     }
 

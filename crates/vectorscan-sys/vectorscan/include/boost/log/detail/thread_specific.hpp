@@ -16,7 +16,6 @@
 #ifndef BOOST_LOG_DETAIL_THREAD_SPECIFIC_HPP_INCLUDED_
 #define BOOST_LOG_DETAIL_THREAD_SPECIFIC_HPP_INCLUDED_
 
-#include <boost/static_assert.hpp>
 #include <boost/type_traits/is_pod.hpp>
 #include <boost/log/detail/config.hpp>
 
@@ -62,7 +61,7 @@ template< typename T >
 class thread_specific :
     public thread_specific_base
 {
-    BOOST_STATIC_ASSERT_MSG(sizeof(T) <= sizeof(void*) && is_pod< T >::value, "Boost.Log: Thread-specific values must be PODs and must not exceed the size of a pointer");
+    static_assert(sizeof(T) <= sizeof(void*) && is_pod< T >::value, "Boost.Log: Thread-specific values must be PODs and must not exceed the size of a pointer");
 
     //! Union to perform type casting
     union value_storage

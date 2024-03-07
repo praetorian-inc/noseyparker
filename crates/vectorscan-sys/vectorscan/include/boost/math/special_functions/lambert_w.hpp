@@ -55,6 +55,7 @@ BOOST_MATH_INSTRUMENT_LAMBERT_W_SMALL_Z_SERIES_ITERATIONS  // Show evaluation of
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/log1p.hpp> // for log (1 + x)
 #include <boost/math/constants/constants.hpp> // For exp_minus_one == 3.67879441171442321595523770161460867e-01.
+#include <boost/math/special_functions/next.hpp>  // for has_denorm_now
 #include <boost/math/special_functions/pow.hpp> // powers with compile time exponent, used in arbitrary precision code.
 #include <boost/math/tools/series.hpp> // series functor.
 //#include <boost/math/tools/polynomial.hpp>  // polynomial.
@@ -1797,7 +1798,7 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
       return -tools::max_value<T>();
     }
   }
-  if (std::numeric_limits<T>::has_denorm)
+  if (boost::math::detail::has_denorm_now<T>())
   { // All real types except arbitrary precision.
     if (!(boost::math::isnormal)(z))
     { // Almost zero - might also just return infinity like z == 0 or max_value?

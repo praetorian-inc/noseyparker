@@ -86,7 +86,7 @@ class object
     template<class T>
     using is_inputit = typename std::enable_if<
         std::is_constructible<key_value_pair,
-        typename std::iterator_traits<T>::value_type
+        typename std::iterator_traits<T>::reference
             >::value>::type;
 
     BOOST_JSON_DECL
@@ -249,7 +249,7 @@ public:
         @code
         std::is_constructible_v<
             key_value_pair,
-            std::iterator_traits<InputIt>::value_type>
+            std::iterator_traits<InputIt>::reference>
         @endcode
 
         @par Complexity
@@ -988,7 +988,7 @@ public:
 
         @par Constraints
         @code
-        std::is_constructible_v<value_type, std::iterator_traits<InputIt>::value_type>
+        std::is_constructible_v<value_type, std::iterator_traits<InputIt>::reference>
         @endcode
 
         @par Complexity

@@ -71,7 +71,7 @@ struct async_out_buffer : ::boost::process::detail::posix::handler_base_ext,
     }
 
     template <typename Executor>
-    inline void on_success(Executor &exec)
+    inline void on_success(Executor &)
     {
         auto  pipe              = this->pipe;
         boost::asio::async_read(*pipe, buf,

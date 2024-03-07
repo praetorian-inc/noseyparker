@@ -41,13 +41,13 @@ namespace boost
             typedef typename Type::type type;
         };
     }
-    
+
     template
-    < 
+    <
               class Fun
 #ifdef BOOST_NO_SFINAE
             , class Result = bool
-#endif        
+#endif
     >
     class indirect_fun
     {
@@ -55,31 +55,31 @@ namespace boost
     public:
         indirect_fun() : fun(Fun())
         { }
-        
+
         indirect_fun( Fun f ) : fun(f)
         { }
-    
+
         template< class T >
 #ifdef BOOST_NO_SFINAE
-        Result    
-#else            
-        typename boost::result_of< const Fun( typename pointee<T>::type& ) >::type 
-#endif            
+        Result
+#else
+        typename boost::result_of< const Fun( typename pointee<T>::type& ) >::type
+#endif
         operator()( const T& r ) const
-        { 
+        {
             return fun( *r );
         }
-    
+
         template< class T, class U >
 #ifdef BOOST_NO_SFINAE
-        Result    
-#else                        
+        Result
+#else
         typename boost::result_of< const Fun( typename pointee<T>::type&,
                                               typename pointee<U>::type& ) >::type
-#endif            
+#endif
         operator()( const T& r, const U& r2 ) const
-        { 
-            return fun( *r, *r2 ); 
+        {
+            return fun( *r, *r2 );
         }
     };
 
@@ -91,35 +91,35 @@ namespace boost
 
 
     template
-    < 
-        class Fun, 
-        class Arg1, 
-        class Arg2 = Arg1 
+    <
+        class Fun,
+        class Arg1,
+        class Arg2 = Arg1
 #ifdef BOOST_NO_SFINAE
-      , class Result = bool   
-#endif           
+      , class Result = bool
+#endif
     >
     class void_ptr_indirect_fun
     {
         Fun fun;
-                
+
     public:
-        
+
         void_ptr_indirect_fun() : fun(Fun())
         { }
 
         void_ptr_indirect_fun( Fun f ) : fun(f)
         { }
-        
+
         template< class Void >
 #ifdef BOOST_NO_SFINAE
-        Result    
-#else            
+        Result
+#else
         typename ptr_container_detail::make_lazy<
             boost::result_of<const Fun(const Arg1&)>, Void>::type
-#endif            
+#endif
         operator()( const Void* r ) const
-        { 
+        {
             BOOST_STATIC_ASSERT(boost::is_void<Void>::value);
             BOOST_ASSERT( r != 0 );
             return fun( * static_cast<const Arg1*>( r ) );
@@ -127,13 +127,13 @@ namespace boost
 
         template< class Void >
 #ifdef BOOST_NO_SFINAE
-        Result    
-#else                    
+        Result
+#else
         typename ptr_container_detail::make_lazy<
             boost::result_of<const Fun(const Arg1&, const Arg2&)>, Void>::type
-#endif            
+#endif
         operator()( const Void* l, const Void* r ) const
-        { 
+        {
             BOOST_STATIC_ASSERT(boost::is_void<Void>::value);
             BOOST_ASSERT( l != 0 && r != 0 );
             return fun( * static_cast<const Arg1*>( l ), * static_cast<const Arg2*>( r ) );
@@ -145,7 +145,7 @@ namespace boost
     {
         return void_ptr_indirect_fun<Fun,Arg>( f );
     }
-     
+
 } // namespace 'boost'
 
 #endif

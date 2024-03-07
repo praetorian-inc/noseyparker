@@ -60,10 +60,10 @@ struct coordinate_cast<rational<T> >
 
         // Note: decimal comma is not (yet) supported, it does (and should) not
         // occur in a WKT, where points are comma separated.
-        std::string::size_type p = source.find(".");
+        std::string::size_type p = source.find('.');
         if (p == std::string::npos)
         {
-            p = source.find("/");
+            p = source.find('/');
             if (p == std::string::npos)
             {
                 return rational<T>(atol(source.c_str()));

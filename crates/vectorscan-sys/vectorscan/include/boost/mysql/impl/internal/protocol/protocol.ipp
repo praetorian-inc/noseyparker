@@ -305,7 +305,14 @@ void boost::mysql::detail::ping_command::serialize(span<std::uint8_t> buff) cons
     serialize_command_id(buff, 0x0e);
 }
 
-boost::mysql::error_code boost::mysql::detail::deserialize_ping_response(
+// reset connection
+std::size_t boost::mysql::detail::reset_connection_command::get_size() const noexcept { return 1u; }
+void boost::mysql::detail::reset_connection_command::serialize(span<std::uint8_t> buff) const noexcept
+{
+    serialize_command_id(buff, 0x1f);
+}
+
+boost::mysql::error_code boost::mysql::detail::deserialize_ok_response(
     span<const std::uint8_t> message,
     db_flavor flavor,
     diagnostics& diag
@@ -671,8 +678,8 @@ error_code deserialize_binary_row(
 {
     // Skip packet header (it is not part of the message in the binary
     // protocol but it is in the text protocol, so we include it for homogeneity)
-    // The caller will have checked we have this byte already for us
-    BOOST_ASSERT(ctx.enough_size(1));
+    if (!ctx.enough_size(1))
+        return client_errc::incomplete_message;
     ctx.advance(1);
 
     // Number of fields

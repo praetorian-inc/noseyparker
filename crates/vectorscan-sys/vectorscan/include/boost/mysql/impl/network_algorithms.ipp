@@ -23,6 +23,7 @@
 #include <boost/mysql/impl/internal/network_algorithms/read_resultset_head.hpp>
 #include <boost/mysql/impl/internal/network_algorithms/read_some_rows.hpp>
 #include <boost/mysql/impl/internal/network_algorithms/read_some_rows_dynamic.hpp>
+#include <boost/mysql/impl/internal/network_algorithms/reset_connection.hpp>
 #include <boost/mysql/impl/internal/network_algorithms/start_execution.hpp>
 
 void boost::mysql::detail::connect_erased(
@@ -221,6 +222,20 @@ void boost::mysql::detail::ping_erased(channel& chan, error_code& code, diagnost
 void boost::mysql::detail::async_ping_erased(channel& chan, diagnostics& diag, any_void_handler handler)
 {
     async_ping_impl(chan, diag, std::move(handler));
+}
+
+void boost::mysql::detail::reset_connection_erased(channel& chan, error_code& code, diagnostics& diag)
+{
+    reset_connection_impl(chan, code, diag);
+}
+
+void boost::mysql::detail::async_reset_connection_erased(
+    channel& chan,
+    diagnostics& diag,
+    any_void_handler handler
+)
+{
+    async_reset_connection_impl(chan, diag, std::move(handler));
 }
 
 void boost::mysql::detail::close_connection_erased(channel& chan, error_code& code, diagnostics& diag)

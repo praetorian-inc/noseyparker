@@ -19,7 +19,7 @@
 #include <boost/container/allocator_traits.hpp>
 #include <boost/container/vector.hpp>
 #include <boost/core/pointer_traits.hpp>
-#include <boost/core/swap.hpp>
+#include <boost/core/invoke_swap.hpp>
 
 #include <boost/geometry/index/detail/rtree/options.hpp>
 #include <boost/geometry/index/detail/rtree/node/concept.hpp>
@@ -228,8 +228,8 @@ public:
 
     void swap(allocators & a)
     {
-        boost::swap(internal_node_allocator(), a.internal_node_allocator());
-        boost::swap(leaf_allocator(), a.leaf_allocator());
+        boost::core::invoke_swap(internal_node_allocator(), a.internal_node_allocator());
+        boost::core::invoke_swap(leaf_allocator(), a.leaf_allocator());
     }
 
     bool operator==(allocators const& a) const { return leaf_allocator() == a.leaf_allocator(); }

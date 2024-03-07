@@ -23,7 +23,6 @@
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
-#include <boost/asio/post.hpp>
 #include <boost/assert.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -454,11 +453,13 @@ public:
             std::size_t bytes_transferred   // Number of bytes read.
         );
         @endcode
-        Regardless of whether the asynchronous operation completes
-        immediately or not, the handler will not be invoked from within
-        this function. Invocation of the handler will be performed in a
-        manner equivalent to using `net::post`.
-
+        If the handler has an associated immediate executor,
+        an immediate completion will be dispatched to it.
+        Otherwise, the handler will not be invoked from within
+        this function. Invocation of the handler will be performed
+        by dispatching to the immediate executor. If no
+        immediate executor is specified, this is equivalent
+        to using `net::post`.
         @note The `async_read_some` operation may not read all of the requested number of
         bytes. Consider using the function `net::async_read` if you need
         to ensure that the requested amount of data is read before the asynchronous
@@ -468,7 +469,7 @@ public:
         class MutableBufferSequence,
         BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler
             BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
     async_read_some(
         MutableBufferSequence const& buffers,
         ReadHandler&& handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
@@ -534,11 +535,13 @@ public:
             std::size_t bytes_transferred   // Number of bytes written.
         );
         @endcode
-        Regardless of whether the asynchronous operation completes
-        immediately or not, the handler will not be invoked from within
-        this function. Invocation of the handler will be performed in a
-        manner equivalent to using `net::post`.
-
+        If the handler has an associated immediate executor,
+        an immediate completion will be dispatched to it.
+        Otherwise, the handler will not be invoked from within
+        this function. Invocation of the handler will be performed
+        by dispatching to the immediate executor. If no
+        immediate executor is specified, this is equivalent
+        to using `net::post`.
         @note The `async_write_some` operation may not transmit all of the data to
         the peer. Consider using the function `net::async_write` if you need
         to ensure that all data is written before the asynchronous operation completes.
@@ -547,7 +550,7 @@ public:
         class ConstBufferSequence,
         BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler
             BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
     async_write_some(
         ConstBufferSequence const& buffers,
         WriteHandler&& handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type)

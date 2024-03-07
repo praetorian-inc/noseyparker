@@ -456,7 +456,7 @@ public :
             << " x=\"" << get<0>(map_point) + offset_x << "\""
             << " y=\"" << get<1>(map_point) + offset_y << "\""
             << ">";
-        if (s.find("\n") == std::string::npos)
+        if (s.find('\n') == std::string::npos)
         {
              m_stream  << s;
         }

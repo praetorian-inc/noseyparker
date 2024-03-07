@@ -12,13 +12,14 @@
 #   pragma once
 #endif
 
-#include <boost/array.hpp>
+#include <array>
+#include <cstddef>  // std::size_t
 
 namespace boost { namespace stacktrace { namespace detail {
 
 // We do not use boost::lexical_cast in this function to reduce module dependencies
-inline boost::array<char, 40> to_dec_array(std::size_t value) BOOST_NOEXCEPT {
-    boost::array<char, 40> ret;
+inline std::array<char, 40> to_dec_array(std::size_t value) noexcept {
+    std::array<char, 40> ret;
     if (!value) {
         ret[0] = '0';
         ret[1] = '\0';

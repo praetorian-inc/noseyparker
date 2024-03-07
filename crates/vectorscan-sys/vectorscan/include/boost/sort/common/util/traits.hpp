@@ -112,7 +112,7 @@ struct constructor
     void operator()(Args && ... args)
     {
         T(std::forward<Args> (args) ...);
-    };
+    }
 };
 //
 //****************************************************************************

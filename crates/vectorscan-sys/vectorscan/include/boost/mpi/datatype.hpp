@@ -320,6 +320,7 @@ BOOST_MPI_DATATYPE(signed char, MPI_SIGNED_CHAR, builtin);
 namespace detail {
   inline MPI_Datatype build_mpi_datatype_for_bool()
   {
+    // this is explicitly freed in mpi_datatype_map::clear
     MPI_Datatype type;
     MPI_Type_contiguous(sizeof(bool), MPI_BYTE, &type);
     MPI_Type_commit(&type);

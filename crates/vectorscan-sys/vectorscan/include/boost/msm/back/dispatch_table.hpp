@@ -420,7 +420,10 @@ struct dispatch_table
     }
 
     // The singleton instance.
-    static const dispatch_table instance;
+    static const dispatch_table& instance() {
+        static dispatch_table table;
+        return table;
+    }
 
  public: // data members
      // +1 => 0 is reserved for this fsm (internal transitions)

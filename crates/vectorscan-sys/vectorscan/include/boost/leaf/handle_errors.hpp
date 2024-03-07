@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_HANDLE_ERRORS_HPP_INCLUDED
 #define BOOST_LEAF_HANDLE_ERRORS_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -9,7 +9,6 @@
 #include <boost/leaf/config.hpp>
 #include <boost/leaf/context.hpp>
 #include <boost/leaf/capture.hpp>
-#include <boost/leaf/detail/demangle.hpp>
 
 namespace boost { namespace leaf {
 
@@ -89,7 +88,7 @@ public:
     }
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<( std::basic_ostream<CharT, Traits> & os, error_info const & x )
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, error_info const & x )
     {
         os << "leaf::error_info: ";
         x.print(os);
@@ -123,7 +122,7 @@ protected:
 public:
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<( std::basic_ostream<CharT, Traits> & os, diagnostic_info const & x )
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, diagnostic_info const & x )
     {
         os << "leaf::diagnostic_info for ";
         x.print(os);
@@ -173,7 +172,7 @@ protected:
 public:
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<( std::basic_ostream<CharT, Traits> & os, diagnostic_info const & x )
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, diagnostic_info const & x )
     {
         os <<
             "leaf::diagnostic_info requires #define BOOST_LEAF_CFG_DIAGNOSTICS 1\n"
@@ -232,14 +231,15 @@ protected:
 public:
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<( std::basic_ostream<CharT, Traits> & os, verbose_diagnostic_info const & x )
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, verbose_diagnostic_info const & x )
     {
         os << "leaf::verbose_diagnostic_info for ";
+        int const err_id = x.error().value();
         x.print(os);
         os << ":\n";
-        x.print_(os, x.tup_, x.error().value());
+        x.print_(os, x.tup_, err_id);
         if( x.e_ui_ )
-            x.e_ui_->print(os);
+            x.e_ui_->print(os, err_id);
         return os;
     }
 };
@@ -282,7 +282,7 @@ protected:
 public:
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<( std::basic_ostream<CharT, Traits> & os, verbose_diagnostic_info const & x )
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, verbose_diagnostic_info const & x )
     {
         os <<
             "leaf::verbose_diagnostic_info requires #define BOOST_LEAF_CFG_DIAGNOSTICS 1\n"

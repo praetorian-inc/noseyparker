@@ -19,7 +19,8 @@
 #include <memory>
 #include <boost/log/detail/config.hpp>
 #if defined(BOOST_NO_CXX11_ALLOCATOR)
-#include <boost/container/allocator_traits.hpp>
+#include <boost/core/allocator_access.hpp>
+#include <boost/core/allocator_traits.hpp>
 #endif
 #include <boost/log/utility/use_std_allocator.hpp>
 #include <boost/log/detail/header.hpp>
@@ -38,15 +39,14 @@ namespace aux {
 #if !defined(BOOST_NO_CXX11_ALLOCATOR)
 using std::allocator_traits;
 #else
-using boost::container::allocator_traits;
+using boost::allocator_traits;
 #endif
 
 /*!
  * \brief A standalone trait to rebind an allocator to another type.
  *
- * The important difference from <tt>std::allocator_traits&lt;Alloc&gt;::rebind_alloc&lt;U&gt;</tt> is that this
- * trait does not require template aliases and thus is compatible with C++03. There is
- * <tt>boost::container::allocator_traits&lt;Alloc&gt;::portable_rebind_alloc&lt;U&gt;</tt>, but it is not present in <tt>std::allocator_traits</tt>.
+ * This trait mostly exists to hide differences between <tt>std::allocator_traits</tt> and <tt>boost::allocator_traits</tt>
+ * in terms of allocator rebinding and also provide custom behavior in some cases.
  */
 template< typename Allocator, typename U >
 struct rebind_alloc
@@ -54,7 +54,7 @@ struct rebind_alloc
 #if !defined(BOOST_NO_CXX11_ALLOCATOR)
     typedef typename std::allocator_traits< Allocator >::BOOST_NESTED_TEMPLATE rebind_alloc< U > type;
 #else
-    typedef typename boost::container::allocator_traits< Allocator >::BOOST_NESTED_TEMPLATE portable_rebind_alloc< U >::type type;
+    typedef typename boost::allocator_rebind< Allocator, U >::type type;
 #endif
 };
 

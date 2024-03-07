@@ -85,7 +85,7 @@ struct basic_process_handle_win
 
     template<typename Executor1>
     basic_process_handle_win(basic_process_handle_win<Executor1> && handle)
-            : pid_(handle.pid_), handle_(handle.handle_.get_executor())
+            : pid_(handle.pid_), handle_(std::move(handle.handle_))
     {
     }
 

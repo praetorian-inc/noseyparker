@@ -21,7 +21,7 @@
 
 namespace boost { namespace stacktrace { namespace detail {
 
-std::size_t dump(int fd, const native_frame_ptr_t* frames, std::size_t frames_count) BOOST_NOEXCEPT {
+std::size_t dump(int fd, const native_frame_ptr_t* frames, std::size_t frames_count) noexcept {
     // We do not retry, because this function must be typically called from signal handler so it's:
     //  * to scary to continue in case of EINTR
     //  * EAGAIN or EWOULDBLOCK may occur only in case of O_NONBLOCK is set for fd,
@@ -33,7 +33,7 @@ std::size_t dump(int fd, const native_frame_ptr_t* frames, std::size_t frames_co
     return frames_count;
 }
 
-std::size_t dump(const char* file, const native_frame_ptr_t* frames, std::size_t frames_count) BOOST_NOEXCEPT {
+std::size_t dump(const char* file, const native_frame_ptr_t* frames, std::size_t frames_count) noexcept {
     const int fd = ::open(
         file,
         O_CREAT | O_WRONLY | O_TRUNC,

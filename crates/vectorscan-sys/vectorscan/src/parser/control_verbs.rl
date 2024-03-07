@@ -54,6 +54,7 @@ const char *read_control_verbs(const char *ptr, const char *end, size_t start,
 
     %%{
         machine ControlVerbs;
+        alphtype unsigned char;
 
         # Verbs that we recognise but do not support.
         unhandledVerbs = '(*' (

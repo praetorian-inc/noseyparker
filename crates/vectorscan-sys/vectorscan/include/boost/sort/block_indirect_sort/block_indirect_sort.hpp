@@ -216,7 +216,8 @@ block_indirect_sort<Block_size, Group_size, Iter_t, Compare>
             Iter_t it1 = first, it2 = last - 1;
             for (size_t i = 0; i < nelem2; ++i)
             {
-                std::swap(*(it1++), *(it2--));
+		using std::swap;
+                swap(*(it1++), *(it2--));
             };
             return;
         };

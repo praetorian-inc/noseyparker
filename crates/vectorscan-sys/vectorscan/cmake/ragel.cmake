@@ -7,7 +7,7 @@ function(ragelmaker src_rl)
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}/${src_file}.cpp
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}
-        COMMAND ${RAGEL} ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl} -o ${rl_out}
+        COMMAND ${RAGEL} ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl} -o ${rl_out} -G0
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl}
         )
     add_custom_target(ragel_${src_file} DEPENDS ${rl_out})

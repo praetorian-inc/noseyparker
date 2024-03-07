@@ -32,7 +32,6 @@
 #include "ue2common.h"
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
 #include "util/arch/x86/cpuid_inline.h"
-#endif
 #include "util/join.h"
 
 #if defined(DISABLE_AVX512_DISPATCH)
@@ -83,6 +82,46 @@
     HS_PUBLIC_API                                                              \
     RTYPE NAME(__VA_ARGS__) __attribute__((ifunc("resolve_" #NAME)))
 
+#elif defined(ARCH_AARCH64)
+#include "util/arch/arm/cpuid_inline.h"
+#include "util/join.h"
+
+#define CREATE_DISPATCH(RTYPE, NAME, ...)                                      \
+    /* create defns */                                                         \
+    RTYPE JOIN(sve2_, NAME)(__VA_ARGS__);                                      \
+    RTYPE JOIN(sve_, NAME)(__VA_ARGS__);                                       \
+    RTYPE JOIN(neon_, NAME)(__VA_ARGS__);                                      \
+                                                                               \
+    /* error func */                                                           \
+    static inline RTYPE JOIN(error_, NAME)(__VA_ARGS__) {                      \
+        return (RTYPE)HS_ARCH_ERROR;                                           \
+    }                                                                          \
+                                                                               \
+    /* resolver */                                                             \
+    static RTYPE (*JOIN(resolve_, NAME)(void))(__VA_ARGS__) {                  \
+        if (check_sve2()) {                                                    \
+            return JOIN(sve2_, NAME);                                          \
+        }                                                                      \
+        if (check_sve()) {                                                     \
+            return JOIN(sve_, NAME);                                           \
+        }                                                                      \
+        if (check_neon()) {                                                    \
+            return JOIN(neon_, NAME);                                          \
+        }                                                                      \
+        /* anything else is fail */                                            \
+        return JOIN(error_, NAME);                                             \
+    }                                                                          \
+                                                                               \
+    /* function */                                                             \
+    HS_PUBLIC_API                                                              \
+    RTYPE NAME(__VA_ARGS__) __attribute__((ifunc("resolve_" #NAME)))
+
+#endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 CREATE_DISPATCH(hs_error_t, hs_scan, const hs_database_t *db, const char *data,
                 unsigned length, unsigned flags, hs_scratch_t *scratch,
                 match_event_handler onEvent, void *userCtx);
@@ -151,3 +190,6 @@ CREATE_DISPATCH(hs_error_t, hs_reset_and_expand_stream, hs_stream_t *to_stream,
 /** INTERNALS **/
 
 CREATE_DISPATCH(u32, Crc32c_ComputeBuf, u32 inCrc32, const void *buf, size_t bufLen);
+
+#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop

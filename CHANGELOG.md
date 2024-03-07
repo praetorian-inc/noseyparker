@@ -5,6 +5,12 @@ All notable changes to the project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changes
+- The vendored copy of Boost included in the internal `vectorscan-sys` crate has been upgraded from version 1.83 to 1.84.
+- The vendored copy of the Vectorscan regular expression library has been upgraded from version 5.4.8 to 5.4.11.
+
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
 

@@ -87,6 +87,9 @@ public:
                      circular_t *ptr_circ)
                     : merge_block_t(first, last, comp, ptr_circ)
     {
+        auto nelem = last - first;
+        assert (nelem >= 0);
+        if (nelem < 2) return;
         divide(index.begin(), index.end());
         rearrange_with_index();
     };

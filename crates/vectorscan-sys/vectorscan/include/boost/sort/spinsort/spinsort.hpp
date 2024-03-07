@@ -209,8 +209,10 @@ static bool check_stable_sort(const range<Iter1_t> &rng_data,
     size_t nreverse = it2 - rng_data.first;
     Iter1_t alpha(rng_data.first), beta(it2 - 1), mid(
                     rng_data.first + (nreverse >> 1));
-    while (alpha != mid)
-        std::swap(*(alpha++), *(beta--));
+    while (alpha != mid) {
+	using std::swap;
+        swap(*(alpha++), *(beta--));
+    }
 
     // insert the elements between it1 and last
     if (it2 != rng_data.last)
@@ -470,10 +472,11 @@ spinsort <Iter_t, Compare>
          it2 != last and (sw = comp(*it2, *it1)); it1 = it2++);
     if (sw)
     {
+	using std::swap;
         size_t nelem2 = nelem >> 1;
         Iter_t it1 = first, it2 = last - 1;
         for (size_t i = 0; i < nelem2; ++i)
-            std::swap(*(it1++), *(it2--));
+            swap(*(it1++), *(it2--));
         return;
     };
 

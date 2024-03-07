@@ -17,6 +17,7 @@
 #include <boost/serialization/detail/stack_constructor.hpp>
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/utility.hpp>
+#include <boost/serialization/library_version_type.hpp>
 
 namespace boost { namespace property_tree
 {
@@ -55,7 +56,6 @@ namespace boost { namespace property_tree
                                   basic_ptree<K, D, C> &t)
         {
             namespace bsl = boost::serialization;
-            namespace bsa = boost::archive;
 
             typedef basic_ptree<K, D, C> tree;
             typedef typename tree::value_type value_type;
@@ -63,10 +63,10 @@ namespace boost { namespace property_tree
             bsl::collection_size_type count;
             ar >> BOOST_SERIALIZATION_NVP(count);
             bsl::item_version_type item_version(0);
-            const bsa::library_version_type library_version(
+            const bsl::library_version_type library_version(
                 ar.get_library_version()
             );
-            if(bsa::library_version_type(3) < library_version){
+            if(bsl::library_version_type(3) < library_version){
                 ar >> BOOST_SERIALIZATION_NVP(item_version);
             }
             // Can't use the serialization helper, it expects resize() to exist

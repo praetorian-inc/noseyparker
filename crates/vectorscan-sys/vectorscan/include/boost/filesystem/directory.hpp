@@ -189,6 +189,8 @@ public:
 
     file_status status(system::error_code& ec) const BOOST_NOEXCEPT
     {
+        ec.clear();
+
         if (!filesystem::status_known(m_status))
             refresh_impl(&ec);
         return m_status;
@@ -203,6 +205,8 @@ public:
 
     file_status symlink_status(system::error_code& ec) const BOOST_NOEXCEPT
     {
+        ec.clear();
+
         if (!filesystem::status_known(m_symlink_status))
             refresh_impl(&ec);
         return m_symlink_status;
@@ -217,6 +221,8 @@ public:
 
     filesystem::file_type file_type(system::error_code& ec) const BOOST_NOEXCEPT
     {
+        ec.clear();
+
         if (!filesystem::type_present(m_status))
             refresh_impl(&ec);
         return m_status.type();
@@ -231,6 +237,8 @@ public:
 
     filesystem::file_type symlink_file_type(system::error_code& ec) const BOOST_NOEXCEPT
     {
+        ec.clear();
+
         if (!filesystem::type_present(m_symlink_status))
             refresh_impl(&ec);
         return m_symlink_status.type();

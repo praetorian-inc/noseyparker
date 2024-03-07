@@ -42,7 +42,7 @@ public:
     base64_exception(exception_code c = other_exception) : code(c)
     {}
 
-    virtual const char *what( ) const throw( )
+    virtual const char *what( ) const BOOST_NOEXCEPT_OR_NOTHROW
     {
         const char *msg = "unknown exception code";
         switch(code){

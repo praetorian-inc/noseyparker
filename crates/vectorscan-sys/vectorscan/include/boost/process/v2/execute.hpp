@@ -66,7 +66,7 @@ struct execute_op
     template<typename Self>
     void operator()(Self && self)
     {
-        self.reset_cancellation_state();
+        self.reset_cancellation_state(BOOST_PROCESS_V2_ASIO_NAMESPACE::enable_total_cancellation());
         BOOST_PROCESS_V2_ASIO_NAMESPACE::cancellation_slot s = self.get_cancellation_state().slot();
         if (s.is_connected())
             s.emplace<cancel>(proc.get());

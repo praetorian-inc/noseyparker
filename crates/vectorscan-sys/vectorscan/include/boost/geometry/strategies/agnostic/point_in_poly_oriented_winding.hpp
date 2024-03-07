@@ -2,6 +2,10 @@
 
 // Copyright (c) 2011-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
+// Copyright (c) 2023, Oracle and/or its affiliates.
+
+// Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
+
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
 
@@ -13,6 +17,7 @@
 #define BOOST_GEOMETRY_STRATEGY_AGNOSTIC_POINT_IN_POLY_ORIENTED_WINDING_HPP
 
 
+#include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/point_order.hpp>
 #include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/select_calculation_type.hpp>

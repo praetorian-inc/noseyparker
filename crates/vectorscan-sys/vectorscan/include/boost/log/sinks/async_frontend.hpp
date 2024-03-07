@@ -26,7 +26,6 @@
 #error Boost.Log: Asynchronous sink frontend is only supported in multithreaded environment
 #endif
 
-#include <boost/static_assert.hpp>
 #include <boost/memory_order.hpp>
 #include <boost/atomic/atomic.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -221,7 +220,7 @@ public:
     //! Sink implementation type
     typedef SinkBackendT sink_backend_type;
     //! \cond
-    BOOST_STATIC_ASSERT_MSG((has_requirement< typename sink_backend_type::frontend_requirements, synchronized_feeding >::value), "Asynchronous sink frontend is incompatible with the specified backend: thread synchronization requirements are not met");
+    static_assert(has_requirement< typename sink_backend_type::frontend_requirements, synchronized_feeding >::value, "Asynchronous sink frontend is incompatible with the specified backend: thread synchronization requirements are not met");
     //! \endcond
 
 #ifndef BOOST_LOG_DOXYGEN_PASS

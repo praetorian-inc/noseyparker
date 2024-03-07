@@ -83,8 +83,10 @@ namespace json {
     @see
         https://en.wikipedia.org/wiki/Region-based_memory_management
 */
-class BOOST_JSON_CLASS_DECL
-    monotonic_resource final
+class
+    BOOST_JSON_DECL
+    BOOST_SYMBOL_VISIBLE
+monotonic_resource final
     : public memory_resource
 {
     struct block;

@@ -1442,7 +1442,7 @@ void mergeLeftfixesVariableLag(RoseBuildImpl &build) {
 
     vector<vector<left_id>> chunks;
     for (auto &raw_group : engine_groups | map_values) {
-        chunk(move(raw_group), &chunks, MERGE_GROUP_SIZE_MAX);
+        chunk(std::move(raw_group), &chunks, MERGE_GROUP_SIZE_MAX);
     }
     engine_groups.clear();
 
@@ -1511,7 +1511,7 @@ namespace {
 struct DedupeLeftKey {
     DedupeLeftKey(const RoseBuildImpl &build,
                   flat_set<pair<size_t, u32>> preds_in, const left_id &left)
-        : left_hash(hashLeftfix(left)), preds(move(preds_in)),
+        : left_hash(hashLeftfix(left)), preds(std::move(preds_in)),
           transient(contains(build.transient, left)) {
     }
 
@@ -1599,7 +1599,7 @@ void dedupeLeftfixesVariableLag(RoseBuildImpl &build) {
                 continue;
             }
         }
-        engine_groups[DedupeLeftKey(build, move(preds), left)].emplace_back(left);
+        engine_groups[DedupeLeftKey(build, std::move(preds), left)].emplace_back(left);
     }
 
     /* We don't bother chunking as we expect deduping to be successful if the
@@ -2048,7 +2048,7 @@ void mergeCastleLeftfixes(RoseBuildImpl &build) {
 
     vector<vector<left_id>> chunks;
     for (auto &raw_group : by_reach | map_values) {
-        chunk(move(raw_group), &chunks, MERGE_CASTLE_GROUP_SIZE_MAX);
+        chunk(std::move(raw_group), &chunks, MERGE_CASTLE_GROUP_SIZE_MAX);
     }
     by_reach.clear();
 
@@ -2429,7 +2429,7 @@ void pairwiseDfaMerge(vector<RawDfa *> &dfas,
             RawDfa *dfa_ptr = rdfa.get();
             dfa_mapping[dfa_ptr] = dfa_mapping[*it];
             dfa_mapping.erase(*it);
-            winner.proto = move(rdfa);
+            winner.proto = std::move(rdfa);
 
             mergeOutfixInfo(winner, victim);
 
@@ -2546,7 +2546,7 @@ void mergeOutfixCombo(RoseBuildImpl &tbi, const ReportManager &rm,
             // Transform this outfix into a DFA and add it to the merge set.
             dfa_mapping[rdfa.get()] = it - tbi.outfixes.begin();
             dfas.emplace_back(rdfa.get());
-            outfix.proto = move(rdfa);
+            outfix.proto = std::move(rdfa);
             new_dfas++;
         }
     }

@@ -116,7 +116,7 @@ void ComponentSequence::accept(ConstComponentVisitor &v) const {
 }
 
 void ComponentSequence::addComponent(unique_ptr<Component> comp) {
-    children.emplace_back(move(comp));
+    children.emplace_back(std::move(comp));
 }
 
 bool ComponentSequence::addRepeat(u32 min, u32 max,
@@ -131,7 +131,7 @@ bool ComponentSequence::addRepeat(u32 min, u32 max,
         return false;
     }
 
-    children.back() = makeComponentRepeat(move(children.back()), min, max,
+    children.back() = makeComponentRepeat(std::move(children.back()), min, max,
                                           type);
     assert(children.back());
     return true;
@@ -144,14 +144,14 @@ void ComponentSequence::addAlternation() {
 
     auto seq = std::make_unique<ComponentSequence>();
     seq->children.swap(children);
-    alternation->append(move(seq));
+    alternation->append(std::move(seq));
 }
 
 void ComponentSequence::finalize() {
     if (alternation) {
         addAlternation();
         assert(children.empty());
-        children.emplace_back(move(alternation));
+        children.emplace_back(std::move(alternation));
         alternation = nullptr;
     }
 }

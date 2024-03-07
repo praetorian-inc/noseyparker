@@ -15,7 +15,7 @@
 
 #include <boost/config.hpp> /* keep it first to prevent nasty warns in MSVC */
 #include <algorithm>
-#include <boost/core/swap.hpp>
+#include <boost/core/invoke_swap.hpp>
 #include <boost/detail/atomic_count.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/flyweight/refcounted_fwd.hpp>
@@ -138,7 +138,7 @@ public:
 
   void swap(refcounted_handle& x)
   {
-    std::swap(h,x.h);
+    boost::core::invoke_swap(h,x.h);
   }
 
 private:
@@ -161,7 +161,7 @@ void swap(
 } /* namespace flyweights::detail */
 
 #if BOOST_WORKAROUND(BOOST_MSVC,<=1500)
-/* swap lookup by boost::swap fails under obscure circumstances */
+/* swap lookup by boost::core::invoke_swap fails under obscure circumstances */
 
 } /* namespace flyweights */
 

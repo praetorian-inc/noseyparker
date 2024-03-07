@@ -3595,7 +3595,7 @@ class numeric_limits<boost::multiprecision::number<boost::multiprecision::gmp_fl
    static constexpr number_type        infinity() { return number_type(); }
    static constexpr number_type        quiet_NaN() { return number_type(); }
    static constexpr number_type        signaling_NaN() { return number_type(); }
-   static constexpr number_type        denorm_min() { return number_type(); }
+   static constexpr number_type        denorm_min() { return (min)(); }
    static constexpr bool               is_iec559       = false;
    static constexpr bool               is_bounded      = true;
    static constexpr bool               is_modulo       = false;
@@ -3871,7 +3871,7 @@ class numeric_limits<boost::multiprecision::number<boost::multiprecision::gmp_ra
    static number_type                        infinity() { return number_type(); }
    static number_type                        quiet_NaN() { return number_type(); }
    static number_type                        signaling_NaN() { return number_type(); }
-   static number_type                        denorm_min() { return number_type(); }
+   static number_type                        denorm_min() { return (min)(); }
    static constexpr bool               is_iec559       = false;
    static constexpr bool               is_bounded      = false;
    static constexpr bool               is_modulo       = false;

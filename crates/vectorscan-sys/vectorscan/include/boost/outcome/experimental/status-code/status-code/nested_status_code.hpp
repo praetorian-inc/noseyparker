@@ -96,32 +96,32 @@ namespace detail
     {
       assert(code.domain() == *this);
       const auto &c = static_cast<const _mycode &>(code);  // NOLINT
-      return typename StatusCode::domain_type()._do_failure(c.value()->sc);
+      return static_cast<status_code_domain &&>(typename StatusCode::domain_type())._do_failure(c.value()->sc);
     }
     virtual bool _do_equivalent(const status_code<void> &code1, const status_code<void> &code2) const noexcept override  // NOLINT
     {
       assert(code1.domain() == *this);
       const auto &c1 = static_cast<const _mycode &>(code1);  // NOLINT
-      return typename StatusCode::domain_type()._do_equivalent(c1.value()->sc, code2);
+      return static_cast<status_code_domain &&>(typename StatusCode::domain_type())._do_equivalent(c1.value()->sc, code2);
     }
     virtual generic_code _generic_code(const status_code<void> &code) const noexcept override  // NOLINT
     {
       assert(code.domain() == *this);
       const auto &c = static_cast<const _mycode &>(code);  // NOLINT
-      return typename StatusCode::domain_type()._generic_code(c.value()->sc);
+      return static_cast<status_code_domain &&>(typename StatusCode::domain_type())._generic_code(c.value()->sc);
     }
     virtual string_ref _do_message(const status_code<void> &code) const noexcept override  // NOLINT
     {
       assert(code.domain() == *this);
       const auto &c = static_cast<const _mycode &>(code);  // NOLINT
-      return typename StatusCode::domain_type()._do_message(c.value()->sc);
+      return static_cast<status_code_domain &&>(typename StatusCode::domain_type())._do_message(c.value()->sc);
     }
 #if defined(_CPPUNWIND) || defined(__EXCEPTIONS) || defined(BOOST_OUTCOME_STANDARDESE_IS_IN_THE_HOUSE)
     BOOST_OUTCOME_SYSTEM_ERROR2_NORETURN virtual void _do_throw_exception(const status_code<void> &code) const override  // NOLINT
     {
       assert(code.domain() == *this);
       const auto &c = static_cast<const _mycode &>(code);  // NOLINT
-      typename StatusCode::domain_type()._do_throw_exception(c.value()->sc);
+      static_cast<status_code_domain &&>(typename StatusCode::domain_type())._do_throw_exception(c.value()->sc);
       abort();                                             // suppress buggy GCC warning
     }
 #endif

@@ -51,9 +51,9 @@ struct box_areal
     }
 
     template <typename Result, typename Strategy>
-    static inline void apply(Box const& box, Areal const& areal,
-                             Result& result,
-                             Strategy const& strategy,
+    static inline void apply(Box const& /* box */, Areal const& /* areal */,
+                             Result& /* result */,
+                             Strategy const& /* strategy */,
                              std::false_type /*is_cartesian*/)
     {
         BOOST_GEOMETRY_STATIC_ASSERT_FALSE(

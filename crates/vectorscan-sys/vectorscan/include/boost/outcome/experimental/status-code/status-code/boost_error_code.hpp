@@ -66,7 +66,6 @@ namespace mixins
 class _boost_error_code_domain final : public status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
   using _base = status_code_domain;
   using _error_code_type = boost::system::error_code;
   using _error_category_type = boost::system::error_category;

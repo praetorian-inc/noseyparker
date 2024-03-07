@@ -61,7 +61,7 @@ struct ping_op : boost::asio::coroutine
             BOOST_ASIO_CORO_YIELD chan_.async_read_one(chan_.shared_sequence_number(), std::move(self));
 
             // Verify it's what we expected
-            self.complete(deserialize_ping_response(buff, chan_.flavor(), diag_));
+            self.complete(deserialize_ok_response(buff, chan_.flavor(), diag_));
         }
     }
 };
@@ -86,7 +86,7 @@ inline void ping_impl(channel& chan, error_code& err, diagnostics& diag)
         return;
 
     // Verify it's what we expected
-    err = deserialize_ping_response(response, chan.flavor(), diag);
+    err = deserialize_ok_response(response, chan.flavor(), diag);
 }
 
 template <class CompletionToken>

@@ -15,8 +15,6 @@
 #include <iosfwd>
 #include <string>
 
-#include <boost/core/explicit_operator_bool.hpp>
-
 #include <boost/stacktrace/safe_dump_to.hpp> // boost::stacktrace::detail::native_frame_ptr_t
 #include <boost/stacktrace/detail/void_ptr_cast.hpp>
 
@@ -47,7 +45,7 @@ public:
     ///
     /// @b Async-Handler-Safety: Safe.
     /// @throws Nothing.
-    BOOST_CONSTEXPR frame() BOOST_NOEXCEPT
+    constexpr frame() noexcept
         : addr_(0)
     {}
 
@@ -75,7 +73,7 @@ public:
     ///
     /// @b Async-Handler-Safety: Safe.
     /// @throws Nothing.
-    BOOST_CONSTEXPR explicit frame(native_frame_ptr_t addr) BOOST_NOEXCEPT
+    constexpr explicit frame(native_frame_ptr_t addr) noexcept
         : addr_(addr)
     {}
 
@@ -86,7 +84,7 @@ public:
     /// @b Async-Handler-Safety: Safe.
     /// @throws Nothing.
     template <class T>
-    explicit frame(T* function_addr) BOOST_NOEXCEPT
+    explicit frame(T* function_addr) noexcept
         : addr_(boost::stacktrace::detail::void_ptr_cast<native_frame_ptr_t>(function_addr))
     {}
 
@@ -104,7 +102,7 @@ public:
     ///
     /// @b Async-Handler-Safety: Safe.
     /// @throws Nothing.
-    BOOST_CONSTEXPR native_frame_ptr_t address() const BOOST_NOEXCEPT {
+    constexpr native_frame_ptr_t address() const noexcept {
         return addr_;
     }
 
@@ -131,7 +129,7 @@ public:
     /// @b Complexity: O(1)
     ///
     /// @b Async-Handler-Safety: Safe.
-    BOOST_EXPLICIT_OPERATOR_BOOL()
+    constexpr explicit operator bool () const noexcept { return !empty(); }
 
     /// @brief Checks that frame references NULL address.
     /// @returns `true` if `this->address() == 0`
@@ -139,11 +137,7 @@ public:
     /// @b Complexity: O(1)
     ///
     /// @b Async-Handler-Safety: Safe.
-    BOOST_CONSTEXPR bool empty() const BOOST_NOEXCEPT { return !address(); }
-    
-    /// @cond
-    BOOST_CONSTEXPR bool operator!() const BOOST_NOEXCEPT { return !address(); }
-    /// @endcond
+    constexpr bool empty() const noexcept { return !address(); }
 };
 
 

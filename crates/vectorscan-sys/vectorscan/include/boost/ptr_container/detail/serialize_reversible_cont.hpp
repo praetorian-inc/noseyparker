@@ -10,7 +10,7 @@
 #include <boost/ptr_container/detail/serialize_xml_names.hpp>
 #include <boost/core/serialization.hpp>
 
-namespace boost 
+namespace boost
 {
 
 namespace ptr_container_detail
@@ -25,8 +25,8 @@ void save_helper(Archive& ar, const ptr_container_detail::reversible_ptr_contain
 
     const_iterator i = c.begin(), e = c.end();
     for(; i != e; ++i)
-        ar << boost::serialization::make_nvp( ptr_container_detail::item(), 
-                ptr_container_detail::serialize_as_const(static_cast<value_type>(*i.base()))); 
+        ar << boost::serialization::make_nvp( ptr_container_detail::item(),
+                ptr_container_detail::serialize_as_const(static_cast<value_type>(*i.base())));
     }
 
 template<class Archive, class Config, class CloneAllocator>
@@ -41,7 +41,7 @@ void load_helper(Archive& ar, ptr_container_detail::reversible_ptr_container<Con
     // Called after an appropriate reserve on c.
     //
 
-    c.clear();            
+    c.clear();
     for(size_type i = 0u; i != n; ++i)
     {
         //
@@ -49,20 +49,20 @@ void load_helper(Archive& ar, ptr_container_detail::reversible_ptr_container<Con
         // so we need not call ar.reset_object_address(v, u)
         //
         value_type ptr;
-        ar >> boost::serialization::make_nvp( ptr_container_detail::item(), ptr ); 
+        ar >> boost::serialization::make_nvp( ptr_container_detail::item(), ptr );
         c.insert(c.end(), ptr);
     }
 }
 
 } // namespace ptr_container_detail
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class Config, class CloneAllocator>
 void save(Archive& ar, const ptr_container_detail::reversible_ptr_container<Config, CloneAllocator>& c, unsigned int /*version*/)
-{   
-    ar << boost::serialization::make_nvp( ptr_container_detail::count(), 
+{
+    ar << boost::serialization::make_nvp( ptr_container_detail::count(),
                                           ptr_container_detail::serialize_as_const(c.size()) );
     ptr_container_detail::save_helper(ar, c);
 }
@@ -72,11 +72,11 @@ void load(Archive& ar, ptr_container_detail::reversible_ptr_container<Config, Cl
 {
     typedef ptr_container_detail::reversible_ptr_container<Config, CloneAllocator> container_type;
     typedef BOOST_DEDUCED_TYPENAME container_type::size_type size_type;
-    
+
     size_type n;
     ar >> boost::serialization::make_nvp( ptr_container_detail::count(), n );
     ptr_container_detail::load_helper(ar, c, n);
-    
+
 }
 
 } // namespace serialization

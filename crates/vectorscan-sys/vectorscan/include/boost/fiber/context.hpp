@@ -45,6 +45,8 @@
 #include <boost/fiber/segmented_stack.hpp>
 #include <boost/fiber/type.hpp>
 #include <boost/fiber/waker.hpp>
+#include <boost/fiber/stack_allocator_wrapper.hpp>
+#include <boost/fiber/algo/algorithm.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -222,6 +224,9 @@ public:
             return nullptr == impl_;
         }
     };
+
+    // Returns true if the thread could be initialize, false otherwise (it was already initialized previously).
+    static bool initialize_thread(algo::algorithm::ptr_t algo, stack_allocator_wrapper&& salloc) noexcept;
 
     static context * active() noexcept;
 

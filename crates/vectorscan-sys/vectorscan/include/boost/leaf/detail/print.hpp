@@ -1,15 +1,13 @@
 #ifndef BOOST_LEAF_DETAIL_PRINT_HPP_INCLUDED
 #define BOOST_LEAF_DETAIL_PRINT_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/leaf/config.hpp>
 #include <boost/leaf/detail/demangle.hpp>
-
-#if BOOST_LEAF_CFG_DIAGNOSTICS
 
 #include <type_traits>
 #include <exception>
@@ -96,7 +94,7 @@ namespace leaf_detail
         template <class CharT, class Traits>
         static void print( std::basic_ostream<CharT, Traits> & os, Wrapper const & )
         {
-            os << type<Wrapper>() << ": {Non-Printable}";
+            os << type<Wrapper>() << ": {not printable}";
         }
     };
 
@@ -125,7 +123,5 @@ namespace leaf_detail
 }
 
 } }
-
-#endif
 
 #endif

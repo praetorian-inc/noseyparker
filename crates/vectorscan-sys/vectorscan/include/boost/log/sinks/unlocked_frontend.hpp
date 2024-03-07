@@ -15,7 +15,6 @@
 #ifndef BOOST_LOG_SINKS_UNLOCKED_FRONTEND_HPP_INCLUDED_
 #define BOOST_LOG_SINKS_UNLOCKED_FRONTEND_HPP_INCLUDED_
 
-#include <boost/static_assert.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/preprocessor/control/if.hpp>
@@ -72,7 +71,7 @@ public:
     //! Sink implementation type
     typedef SinkBackendT sink_backend_type;
     //! \cond
-    BOOST_STATIC_ASSERT_MSG((has_requirement< typename sink_backend_type::frontend_requirements, concurrent_feeding >::value), "Unlocked sink frontend is incompatible with the specified backend: thread synchronization requirements are not met");
+    static_assert(has_requirement< typename sink_backend_type::frontend_requirements, concurrent_feeding >::value, "Unlocked sink frontend is incompatible with the specified backend: thread synchronization requirements are not met");
     //! \endcond
 
     //! Type of pointer to the backend

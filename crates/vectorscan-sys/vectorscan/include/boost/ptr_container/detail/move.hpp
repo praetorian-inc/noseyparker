@@ -12,11 +12,11 @@ namespace boost { namespace ptr_container_detail {
 
 namespace move_ptrs {
 
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)    
-#pragma warning(push)    
-#pragma warning(disable:4512)  
-#endif  
-    
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
+#pragma warning(push)
+#pragma warning(disable:4512)
+#endif
+
 template<typename Ptr>
 class move_source {
 public:
@@ -27,15 +27,15 @@ private:
     move_source(const Ptr&);
 };
 
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)    
-#pragma warning(pop)    
-#endif  
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
+#pragma warning(pop)
+#endif
 
 } // End namespace move_ptrs.
 
 
 template<typename T>
-move_ptrs::move_source<T> move(T& x) 
+move_ptrs::move_source<T> move(T& x)
 { return move_ptrs::move_source<T>(x); }
 
 } // namespace 'ptr_container_detail'

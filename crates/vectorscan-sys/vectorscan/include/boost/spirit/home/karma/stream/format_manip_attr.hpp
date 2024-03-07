@@ -10,7 +10,9 @@
 
 #include <boost/spirit/home/karma/stream/format_manip.hpp>
 
+#include <boost/mpl/bool.hpp>
 #include <boost/fusion/include/vector.hpp>
+#include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/iterate.hpp>
 #include <boost/preprocessor/repetition/enum.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>

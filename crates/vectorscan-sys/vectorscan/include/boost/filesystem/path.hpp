@@ -1090,8 +1090,7 @@ public:
     bool is_relative() const { return !is_absolute(); }
     bool is_absolute() const
     {
-        // Windows CE has no root name (aka drive letters)
-#if defined(BOOST_WINDOWS_API) && !defined(UNDER_CE)
+#if defined(BOOST_WINDOWS_API)
         return has_root_name() && has_root_directory();
 #else
         return has_root_directory();

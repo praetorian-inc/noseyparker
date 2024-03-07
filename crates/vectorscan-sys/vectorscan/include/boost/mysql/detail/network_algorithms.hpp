@@ -686,6 +686,41 @@ async_ping_interface(channel& chan, diagnostics& diag, CompletionToken&& token)
 }
 
 //
+// reset_connection
+//
+BOOST_MYSQL_DECL
+void reset_connection_erased(channel& chan, error_code& code, diagnostics& diag);
+
+BOOST_MYSQL_DECL
+void async_reset_connection_erased(channel& chan, diagnostics& diag, any_void_handler handler);
+
+struct reset_connection_initiation
+{
+    template <class Handler>
+    void operator()(Handler&& handler, channel* chan, diagnostics* diag)
+    {
+        async_reset_connection_erased(*chan, *diag, std::forward<Handler>(handler));
+    }
+};
+
+inline void reset_connection_interface(channel& chan, error_code& code, diagnostics& diag)
+{
+    reset_connection_erased(chan, code, diag);
+}
+
+template <class CompletionToken>
+BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error_code))
+async_reset_connection_interface(channel& chan, diagnostics& diag, CompletionToken&& token)
+{
+    return asio::async_initiate<CompletionToken, void(error_code)>(
+        reset_connection_initiation(),
+        token,
+        &chan,
+        &diag
+    );
+}
+
+//
 // close connection
 //
 BOOST_MYSQL_DECL

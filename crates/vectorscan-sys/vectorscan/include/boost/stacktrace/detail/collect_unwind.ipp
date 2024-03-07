@@ -63,7 +63,7 @@ inline _Unwind_Reason_Code unwind_callback(::_Unwind_Context* context, void* arg
 }
 #endif //!defined(BOOST_STACKTRACE_USE_LIBC_BACKTRACE_FUNCTION)
 
-std::size_t this_thread_frames::collect(native_frame_ptr_t* out_frames, std::size_t max_frames_count, std::size_t skip) BOOST_NOEXCEPT {
+std::size_t this_thread_frames::collect(native_frame_ptr_t* out_frames, std::size_t max_frames_count, std::size_t skip) noexcept {
     std::size_t frames_count = 0;
     if (!max_frames_count) {
         return frames_count;

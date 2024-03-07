@@ -38,6 +38,9 @@ pcre
 # but not pcre subdirs!
 !pcre/
 
+# ignore boost symlink if it exists
+include/boost
+
 # ignore sqlite3 symlink if it exists
 sqlite3
 
@@ -45,6 +48,7 @@ sqlite3
 src/config.h
 src/config.h.in
 src/hs_version.h
+src/parser/Parser.cpp
 
 # Generated PCRE files
 pcre/pcre_chartables.c

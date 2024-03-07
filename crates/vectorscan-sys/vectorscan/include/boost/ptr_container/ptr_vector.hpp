@@ -31,12 +31,12 @@ namespace boost
 {
 
     template
-    < 
-        class T, 
+    <
+        class T,
         class CloneAllocator = heap_clone_allocator,
         class Allocator      = void
     >
-    class ptr_vector : public 
+    class ptr_vector : public
         ptr_sequence_adapter< T,
             std::vector<
                 typename ptr_container_detail::void_ptr<T>::type,
@@ -44,7 +44,7 @@ namespace boost
                     std::allocator<typename ptr_container_detail::void_ptr<T>::type>, Allocator>::type
             >,
             CloneAllocator >
-    {  
+    {
         typedef
 
             ptr_sequence_adapter< T,
@@ -58,19 +58,19 @@ namespace boost
             base_class;
 
         typedef ptr_vector<T,CloneAllocator,Allocator> this_type;
-        
+
     public:
 
-        BOOST_PTR_CONTAINER_DEFINE_SEQEUENCE_MEMBERS( ptr_vector, 
+        BOOST_PTR_CONTAINER_DEFINE_SEQEUENCE_MEMBERS( ptr_vector,
                                                       base_class,
                                                       this_type )
-        
+
         explicit ptr_vector( size_type n,
                              const allocator_type& alloc = allocator_type() )
           : base_class(alloc)
         {
             this->base().reserve( n );
-        }        
+        }
     };
 
     //////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ namespace boost
     {
         l.swap(r);
     }
-    
+
 }
 
 #if defined(BOOST_PTR_CONTAINER_DISABLE_DEPRECATED)

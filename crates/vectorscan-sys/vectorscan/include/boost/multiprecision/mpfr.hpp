@@ -3434,7 +3434,7 @@ class numeric_limits<boost::multiprecision::number<boost::multiprecision::mpfr_f
    {
       return number_type(0);
    }
-   static constexpr number_type denorm_min() { return number_type(0); }
+   static constexpr number_type denorm_min() { return (min)(); }
    static constexpr bool        is_iec559         = false;
    static constexpr bool        is_bounded        = true;
    static constexpr bool        is_modulo         = false;
@@ -3550,7 +3550,7 @@ class numeric_limits<boost::multiprecision::number<boost::multiprecision::mpfr_f
       return value;
    }
    static number_type          signaling_NaN() { return number_type(0); }
-   static number_type          denorm_min() { return number_type(0); }
+   static number_type          denorm_min() { return (min)(); }
    static constexpr bool is_iec559                = false;
    static constexpr bool is_bounded               = true;
    static constexpr bool is_modulo                = false;

@@ -42,9 +42,7 @@ DEALINGS IN THE SOFTWARE.
 BOOST_OUTCOME_SYSTEM_ERROR2_NAMESPACE_BEGIN
 
 // Fix for issue #48 Issue compiling on arm-none-eabi (newlib) with GNU extensions off
-#ifdef __APPLE__
-#include <cstring>
-#elif !defined(_MSC_VER)
+#if !defined(_MSC_VER) && !defined(__APPLE__)
 namespace detail
 {
   namespace avoid_string_include
@@ -81,7 +79,6 @@ namespace mixins
 class _posix_code_domain : public status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
   using _base = status_code_domain;
 
   static _base::string_ref _make_string_ref(int c) noexcept

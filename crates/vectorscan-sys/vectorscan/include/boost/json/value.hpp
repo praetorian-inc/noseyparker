@@ -1014,11 +1014,16 @@ public:
 
     /** Construct from an initializer-list
 
-        If the initializer list consists of key/value
-        pairs, an @ref object is created. Otherwise
-        an @ref array is created. The contents of the
-        initializer list are copied to the newly constructed
-        value using the specified memory resource.
+        @li If the initializer list consists of key/value
+        pairs, an @ref object is created; otherwise,
+
+        @li if the size of the initializer list is exactly 1, the object is
+        constructed directly from that sole element; otherwise,
+
+        @li an @ref array is created.
+
+        The contents of the initializer list are copied to the newly
+        constructed value using the specified memory resource.
 
         @par Complexity
         Linear in `init.size()`.
@@ -1032,6 +1037,20 @@ public:
         @param sp A pointer to the @ref memory_resource
         to use. The container will acquire shared
         ownership of the memory resource.
+
+        @par Note
+        The previous behavior of this constructor was to always
+        construct either an @ref object or an @ref array. In practice though,
+        several C++ implementations did not treat `value{x}` as a constructor
+        from initializer list. This effectively resulted in different behavior
+        on different implementations. <br>
+
+        If you need the legacy behavior define macro
+        `BOOST_JSON_LEGACY_INIT_LIST_BEHAVIOR` when you are building the
+        library. The macro and the functionality will be deprecated in the
+        future and then removed, so we urge you to change your code for the new
+        behavior as soon as possible. The simplest way to create an @ref array
+        with 1 element using an initializer list is via `array{x}`.
     */
     BOOST_JSON_DECL
     value(
@@ -2620,6 +2639,14 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_int64()`
+
+        @par Note
+        This function is intended for direct access to the underlying object,
+        __if__ it has the type `std::int64_t`. It does not convert the
+        underlying object to type `std::int64_t` even if a lossless conversion
+        is possible. If you are not sure which kind your `value` has, and you
+        only care about getting a `std::int64_t` number, consider using
+        @ref to_number instead.
     */
     std::int64_t&
     as_int64()
@@ -2643,6 +2670,14 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_int64()`
+
+        @par Note
+        This function is the const-qualified overload of @ref as_int64, which
+        is intended for direct access to the underlying object, __if__ it has
+        the type `std::int64_t`. It does not convert the underlying object to
+        type `std::int64_t` even if a lossless conversion is possible. If you
+        are not sure which kind your `value` has, and you only care about
+        getting a `std::int64_t` number, consider using @ref to_number instead.
     */
     std::int64_t
     as_int64() const
@@ -2666,6 +2701,14 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_uint64()`
+
+        @par Note
+        This function is intended for direct access to the underlying object,
+        __if__ it has the type `std::uint64_t`. It does not convert the
+        underlying object to type `std::uint64_t` even if a lossless conversion
+        is possible. If you are not sure which kind your `value` has, and you
+        only care about getting a `std::uint64_t` number, consider using
+        @ref to_number instead.
     */
     std::uint64_t&
     as_uint64()
@@ -2689,6 +2732,15 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_uint64()`
+
+        @par Note
+        This function is the const-qualified overload of @ref as_uint64, which
+        is intended for direct access to the underlying object, __if__ it has
+        the type `std::uint64_t`. It does not convert the underlying object to
+        type `std::uint64_t` even if a lossless conversion is possible. If you
+        are not sure which kind your `value` has, and you only care about
+        getting a `std::uint64_t` number, consider using
+        @ref to_number instead.
     */
     std::uint64_t
     as_uint64() const
@@ -2712,6 +2764,13 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_double()`
+
+        @par Note
+        This function is intended for direct access to the underlying object,
+        __if__ it has the type `double`. It does not convert the underlying
+        object to type `double` even if a lossless conversion is possible. If
+        you are not sure which kind your `value` has, and you only care about
+        getting a `double` number, consider using @ref to_number instead.
     */
     double&
     as_double()
@@ -2735,6 +2794,14 @@ public:
         Strong guarantee.
 
         @throw system_error `! this->is_double()`
+
+        @par Note
+        This function is the const-qualified overload of @ref as_double, which
+        is intended for direct access to the underlying object, __if__ it has
+        the type `double`. It does not convert the underlying object to type
+        `double` even if a lossless conversion is possible. If you are not sure
+        which kind your `value` has, and you only care about getting a `double`
+        number, consider using @ref to_number instead.
     */
     double
     as_double() const

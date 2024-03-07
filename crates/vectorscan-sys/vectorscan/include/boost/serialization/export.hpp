@@ -125,7 +125,7 @@ struct guid_initializer
     guid_initializer const & export_guid() const {
         BOOST_STATIC_WARNING(boost::is_polymorphic< T >::value);
         // note: exporting an abstract base class will have no effect
-        // and cannot be used to instantitiate serialization code
+        // and cannot be used to instantiate serialization code
         // (one might be using this in a DLL to instantiate code)
         //BOOST_STATIC_WARNING(! boost::serialization::is_abstract< T >::value);
         export_guid(boost::serialization::is_abstract< T >());

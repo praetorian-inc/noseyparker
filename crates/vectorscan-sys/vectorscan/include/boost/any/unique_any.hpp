@@ -17,23 +17,7 @@
 /// \file boost/any/unique_any.hpp
 /// \brief \copybrief boost::anys::unique_any
 
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-#error Header <boost/any/unique_any.hpp> requires C++11 compatible compiler with move semantics
-#endif
-
-#ifdef BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
-#error Header <boost/any/unique_any.hpp> requires C++11 compatible compiler with defaulted functions
-#endif
-
-#ifdef BOOST_NO_CXX11_SMART_PTR
-#error Header <boost/any/unique_any.hpp> requires C++11 compatible standard library with std::unique_ptr
-#endif
-#include <memory>
-
-#ifdef BOOST_NO_CXX11_HDR_INITIALIZER_LIST
-#error Header <boost/any/unique_any.hpp> requires C++11 compatible standard library with std::initializer_list
-#endif
-
+#include <memory>  // for std::unique_ptr
 #include <utility>
 #include <type_traits>
 
@@ -41,6 +25,7 @@
 #include <boost/any/bad_any_cast.hpp>
 #include <boost/any/detail/placeholder.hpp>
 
+#include <boost/throw_exception.hpp>
 #include <boost/type_index.hpp>
 
 namespace boost { namespace anys {
@@ -58,8 +43,6 @@ constexpr in_place_type_t<T> in_place_type{};
 
 /// \brief A class whose instances can hold instances of any
 /// type (including non-copyable and non-movable types).
-///
-/// \pre C++11 compatible compiler.
 class unique_any {
 public:
     /// \post this->has_value() is false.

@@ -1494,6 +1494,71 @@ public:
     }
 
     /**
+     * \brief Resets server-side session state, like variables and prepared statements.
+     * \details
+     * Resets all server-side state for the current session:
+     * \n
+     *   \li Rolls back any active transactions and resets autocommit mode.
+     *   \li Releases all table locks.
+     *   \li Drops all temporary tables.
+     *   \li Resets all session system variables to their default values (including the ones set by `SET
+     * NAMES`) and clears all user-defined variables. \li Closes all prepared statements.
+     * \n
+     * A full reference on the affected session state can be found
+     * <a href="https://dev.mysql.com/doc/c-api/8.0/en/mysql-reset-connection.html">here</a>.
+     * \n
+     * This function will not reset the current physical connection and won't cause re-authentication.
+     * It is faster than closing and re-opening a connection.
+     * \n
+     * The connection must be connected and authenticated before calling this function.
+     * This function involves communication with the server, and thus may fail.
+     */
+    void reset_connection(error_code& err, diagnostics& diag)
+    {
+        detail::reset_connection_interface(channel_.get(), err, diag);
+    }
+
+    /// \copydoc reset_connection
+    void reset_connection()
+    {
+        error_code err;
+        diagnostics diag;
+        reset_connection(err, diag);
+        detail::throw_on_error_loc(err, diag, BOOST_CURRENT_LOCATION);
+    }
+
+    /**
+     * \copydoc reset_connection
+     * \details
+     * \n
+     * \par Handler signature
+     * The handler signature for this operation is `void(boost::mysql::error_code)`.
+     */
+    template <BOOST_ASIO_COMPLETION_TOKEN_FOR(void(::boost::mysql::error_code))
+                  CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error_code))
+    async_reset_connection(CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
+    {
+        return async_reset_connection(shared_diag(), std::forward<CompletionToken>(token));
+    }
+
+    /// \copydoc async_reset_connection
+    template <BOOST_ASIO_COMPLETION_TOKEN_FOR(void(::boost::mysql::error_code))
+                  CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error_code))
+    async_reset_connection(
+        diagnostics& diag,
+        CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type)
+    )
+    {
+        return detail::async_reset_connection_interface(
+            channel_.get(),
+            diag,
+            std::forward<CompletionToken>(token)
+        );
+    }
+
+    /**
      * \brief Closes the connection to the server.
      * \details
      * This function is only available if `Stream` satisfies the `SocketStream` concept.

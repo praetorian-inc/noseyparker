@@ -133,7 +133,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
             );
 #elif defined(__sun)
     return fileystem::canonical(
-            filesystem::path("/proc") / std::to_string(pid) / "path/a.out"
+            filesystem::path("/proc") / std::to_string(pid) / "path/a.out", ec
             );
 #endif
 }

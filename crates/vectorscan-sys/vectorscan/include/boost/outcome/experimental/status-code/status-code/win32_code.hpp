@@ -93,7 +93,6 @@ namespace mixins
 class _win32_code_domain : public status_code_domain
 {
   template <class DomainType> friend class status_code;
-  template <class StatusCode, class Allocator> friend class detail::indirecting_domain;
   friend class _com_code_domain;
   using _base = status_code_domain;
   static int _win32_code_to_errno(win32::DWORD c)

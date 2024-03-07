@@ -103,7 +103,7 @@ void ComponentAlternation::accept(ConstComponentVisitor &v) const {
 }
 
 void ComponentAlternation::append(unique_ptr<Component> component) {
-    children.emplace_back(move(component));
+    children.emplace_back(std::move(component));
 }
 
 vector<PositionInfo> ComponentAlternation::first() const {

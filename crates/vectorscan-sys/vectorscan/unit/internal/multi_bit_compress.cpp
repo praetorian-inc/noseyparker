@@ -165,10 +165,12 @@ TEST(MultiBitComp, CompCompsizeSparse) {
         257,
         4097,
         (1U << 18) + 1,
+#ifdef NDEBUG
         (1U << 24) + 1,
         (1U << 30) + 1
+#endif
     };
-    for (u32 i = 0; i < 5; i++) {
+    for (u32 i = 0; i < sizeof(test_set)/sizeof(u32); i++) {
         u32 test_size = test_set[i];
         mmbit_holder ba(test_size);
 
@@ -225,10 +227,12 @@ TEST(MultiBitComp, CompCompsizeDense) {
         257,
         4097,
         (1U << 18) + 1,
+#ifdef NDEBUG
         (1U << 24) + 1,
         (1U << 30) + 1
+#endif
     };
-    for (u32 i = 0; i < 5; i++) {
+    for (u32 i = 0; i < sizeof(test_set)/sizeof(u32); i++) {
         u32 test_size = test_set[i];
         mmbit_holder ba(test_size);
 
@@ -760,16 +764,19 @@ static const MultiBitCompTestParam multibitCompTests[] = {
     { 1025, 1 },
     { 2099, 1 },    // 4097 = 64 ^ 2 + 1
     { 4097, 1 },
+#ifdef NDEBUG
     { 10000, 1 },
     { 32768, 1 },
     { 32769, 1 },
     { 200000, 1 },
     { 262145, 1 },  // 262145 = 64 * 3 + 1
+#endif
 
     // Larger cases, bigger strides.
     { 1U << 19, 3701 },
     { 1U << 20, 3701 },
     { 1U << 21, 3701 },
+#ifdef NDEBUG
     { 1U << 22, 3701 },
     { 1U << 23, 3701 },
     { 1U << 24, 3701 },
@@ -780,6 +787,7 @@ static const MultiBitCompTestParam multibitCompTests[] = {
     { 1U << 29, 24413 },
     { 1U << 30, 50377 },
     { 1U << 31, 104729 },
+#endif
 };
 
 INSTANTIATE_TEST_CASE_P(MultiBitComp, MultiBitCompTest,

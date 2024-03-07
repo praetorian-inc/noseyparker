@@ -21,7 +21,9 @@
 #include <system_error>
 #include <boost/system/api_config.hpp>
 
+#include <boost/throw_exception.hpp>
 #include <boost/process/exception.hpp>
+#include <boost/assert/source_location.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
@@ -71,31 +73,33 @@ inline std::error_code get_last_error() noexcept
 }
 #endif
 
-inline void throw_last_error(const std::string & msg)
+inline void throw_last_error(const std::string & msg, boost::source_location const & loc = boost::source_location())
 {
-    throw process_error(get_last_error(), msg);
+    boost::throw_exception(process_error(get_last_error(), msg), loc);
 }
 
-inline void throw_last_error(const char * msg)
+inline void throw_last_error(const char * msg, boost::source_location const & loc = boost::source_location())
 {
-    throw process_error(get_last_error(), msg);
+    boost::throw_exception(process_error(get_last_error(), msg), loc);
 }
 
-inline void throw_last_error()
+inline void throw_last_error(boost::source_location const & loc = boost::source_location())
 {
-    throw process_error(get_last_error());
+    boost::throw_exception(process_error(get_last_error()), loc);
 }
 
-inline void throw_error(const std::error_code& ec)
+inline void throw_error(const std::error_code& ec,
+                        boost::source_location const & loc = boost::source_location())
 {
     if (ec)
-        throw process_error(ec);
+        boost::throw_exception(process_error(ec), loc);
 }
 
-inline void throw_error(const std::error_code& ec, const char* msg)
+inline void throw_error(const std::error_code& ec, const char* msg,
+                        boost::source_location const & loc = boost::source_location())
 {
     if (ec)
-        throw process_error(ec, msg);
+        boost::throw_exception(process_error(ec, msg), loc);
 }
 
 template<typename Char> constexpr Char null_char();

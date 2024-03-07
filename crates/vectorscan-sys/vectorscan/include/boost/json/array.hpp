@@ -282,7 +282,7 @@ public:
         @par Constraints
 
         @code
-        std::is_constructible_v<value, std::iterator_traits<InputIt>::value_type>
+        std::is_constructible_v<value, std::iterator_traits<InputIt>::reference>
         @endcode
 
         @par Complexity
@@ -312,7 +312,7 @@ public:
         ,class = typename std::enable_if<
             std::is_constructible<value,
                 typename std::iterator_traits<
-                    InputIt>::value_type>::value>::type
+                    InputIt>::reference>::value>::type
     #endif
     >
     array(
@@ -1239,7 +1239,7 @@ public:
 
         @par Mandates
         @code
-        std::is_constructible_v<value, std::iterator_traits<InputIt>::value_type>
+        std::is_constructible_v<value, std::iterator_traits<InputIt>::reference>
         @endcode
 
         @par Complexity
@@ -1270,7 +1270,7 @@ public:
         ,class = typename std::enable_if<
             std::is_constructible<value,
                 typename std::iterator_traits<
-                    InputIt>::value_type>::value>::type
+                    InputIt>::reference>::value>::type
     #endif
     >
     iterator

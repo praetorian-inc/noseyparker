@@ -46,7 +46,11 @@ namespace boost { namespace wave { namespace util
     inline std::string leaf(boost::filesystem::path const& p)
     {
 #if BOOST_FILESYSTEM_VERSION >= 3
+#if BOOST_VERSION >= 108400
+        return p.filename().string();
+#else
         return p.leaf().string();
+#endif
 #else
         return p.leaf();
 #endif
@@ -54,12 +58,20 @@ namespace boost { namespace wave { namespace util
 
     inline boost::filesystem::path branch_path(boost::filesystem::path const& p)
     {
+#if BOOST_FILESYSTEM_VERSION >= 3 && BOOST_VERSION >= 108400
+        return p.parent_path();
+#else
         return p.branch_path();
+#endif
     }
 
     inline boost::filesystem::path normalize(boost::filesystem::path& p)
     {
+#if BOOST_FILESYSTEM_VERSION >= 3 && BOOST_VERSION >= 108400
+        return p.lexically_normal().make_preferred();
+#else
         return p.normalize().make_preferred();
+#endif
     }
 
     inline std::string native_file_string(boost::filesystem::path const& p)
@@ -75,7 +87,9 @@ namespace boost { namespace wave { namespace util
         boost::filesystem::path const& p)
     {
 #if BOOST_FILESYSTEM_VERSION >= 3
-#if BOOST_VERSION >= 105000
+#if BOOST_VERSION >= 108400
+        return boost::filesystem::absolute(p, initial_path());
+#elif BOOST_VERSION >= 105000
         return boost::filesystem::complete(p, initial_path());
 #else
         return boost::filesystem3::complete(p, initial_path());
@@ -89,7 +103,9 @@ namespace boost { namespace wave { namespace util
         boost::filesystem::path const& p, boost::filesystem::path const& base)
     {
 #if BOOST_FILESYSTEM_VERSION >= 3
-#if BOOST_VERSION >= 105000
+#if BOOST_VERSION >= 108400
+        return boost::filesystem::absolute(p, base);
+#elif BOOST_VERSION >= 105000
         return boost::filesystem::complete(p, base);
 #else
         return boost::filesystem3::complete(p, base);

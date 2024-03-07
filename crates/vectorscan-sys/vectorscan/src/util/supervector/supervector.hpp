@@ -76,17 +76,17 @@ using Z_TYPE = u32;
 // it's available. Note that we need to handle C or C++ compilation.
 #ifdef __cplusplus
 #  ifdef HAVE_CXX_BUILTIN_ASSUME_ALIGNED
-#    define assume_aligned(x, y) __builtin_assume_aligned((x), (y))
+#    define vectorscan_assume_aligned(x, y) __builtin_assume_aligned((x), (y))
 #  endif
 #else
 #  ifdef HAVE_CC_BUILTIN_ASSUME_ALIGNED
-#    define assume_aligned(x, y) __builtin_assume_aligned((x), (y))
+#    define vectorscan_assume_aligned(x, y) __builtin_assume_aligned((x), (y))
 #  endif
 #endif
 
 // Fallback to identity case.
-#ifndef assume_aligned
-#define assume_aligned(x, y) (x)
+#ifndef vectorscan_assume_aligned
+#define vectorscan_assume_aligned(x, y) (x)
 #endif
 
 template <uint16_t SIZE>

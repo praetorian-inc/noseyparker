@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_CAPTURE_HPP_INCLUDED
 #define BOOST_LEAF_CAPTURE_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -34,19 +34,19 @@ namespace leaf_detail
 
 namespace leaf_detail
 {
-    template <class R, class F, class... A>
+    template <class R, class F, class... A, class ContextPtr>
     inline
     decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))
-    capture_impl(is_result_tag<R, false>, context_ptr && ctx, F && f, A... a) noexcept
+    capture_impl(is_result_tag<R, false>, ContextPtr && ctx, F && f, A... a) noexcept
     {
         auto active_context = activate_context(*ctx);
         return std::forward<F>(f)(std::forward<A>(a)...);
     }
 
-    template <class R, class F, class... A>
+    template <class R, class F, class... A, class ContextPtr>
     inline
     decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))
-    capture_impl(is_result_tag<R, true>, context_ptr && ctx, F && f, A... a) noexcept
+    capture_impl(is_result_tag<R, true>, ContextPtr && ctx, F && f, A... a) noexcept
     {
         auto active_context = activate_context(*ctx);
         if( auto r = std::forward<F>(f)(std::forward<A>(a)...) )
@@ -54,7 +54,7 @@ namespace leaf_detail
         else
         {
             ctx->captured_id_ = r.error();
-            return std::move(ctx);
+            return std::forward<ContextPtr>(ctx);
         }
     }
 
@@ -90,9 +90,10 @@ namespace leaf_detail
 
     public:
 
-        capturing_exception(std::exception_ptr && ex, context_ptr && ctx) noexcept:
+        template <class ContextPtr>
+        capturing_exception(std::exception_ptr && ex, ContextPtr && ctx) noexcept:
             ex_(std::move(ex)),
-            ctx_(std::move(ctx))
+            ctx_(std::forward<ContextPtr>(ctx))
         {
             BOOST_LEAF_ASSERT(ex_);
             BOOST_LEAF_ASSERT(ctx_);
@@ -106,18 +107,12 @@ namespace leaf_detail
             ctx_->propagate(ctx_->captured_id_);
             std::rethrow_exception(ex_);
         }
-
-        template <class CharT, class Traits>
-        void print( std::basic_ostream<CharT, Traits> & os ) const
-        {
-            ctx_->print(os);
-        }
     };
 
-    template <class R, class F, class... A>
+    template <class R, class F, class... A, class ContextPtr>
     inline
     decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))
-    capture_impl(is_result_tag<R, false>, context_ptr && ctx, F && f, A... a)
+    capture_impl(is_result_tag<R, false>, ContextPtr && ctx, F && f, A... a)
     {
         auto active_context = activate_context(*ctx);
         error_monitor cur_err;
@@ -132,19 +127,19 @@ namespace leaf_detail
         catch( exception_base const & e )
         {
             ctx->captured_id_ = e.get_error_id();
-            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::move(ctx)) );
+            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::forward<ContextPtr>(ctx)) );
         }
         catch(...)
         {
             ctx->captured_id_ = cur_err.assigned_error_id();
-            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::move(ctx)) );
+            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::forward<ContextPtr>(ctx)) );
         }
     }
 
-    template <class R, class F, class... A>
+    template <class R, class F, class... A, class ContextPtr>
     inline
     decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))
-    capture_impl(is_result_tag<R, true>, context_ptr && ctx, F && f, A... a)
+    capture_impl(is_result_tag<R, true>, ContextPtr && ctx, F && f, A... a)
     {
         auto active_context = activate_context(*ctx);
         error_monitor cur_err;
@@ -155,7 +150,7 @@ namespace leaf_detail
             else
             {
                 ctx->captured_id_ = r.error();
-                return std::move(ctx);
+                return std::forward<ContextPtr>(ctx);
             }
         }
         catch( capturing_exception const & )
@@ -165,12 +160,12 @@ namespace leaf_detail
         catch( exception_base const & e )
         {
             ctx->captured_id_ = e.get_error_id();
-            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::move(ctx)) );
+            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::forward<ContextPtr>(ctx)) );
         }
         catch(...)
         {
             ctx->captured_id_ = cur_err.assigned_error_id();
-            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::move(ctx)) );
+            leaf_detail::throw_exception_impl( capturing_exception(std::current_exception(), std::forward<ContextPtr>(ctx)) );
         }
     }
 
@@ -209,6 +204,15 @@ namespace leaf_detail
 }
 
 #endif
+
+template <class F, class... A>
+inline
+decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))
+capture(context_ptr const & ctx, F && f, A... a)
+{
+    using namespace leaf_detail;
+    return capture_impl(is_result_tag<decltype(std::declval<F>()(std::forward<A>(std::declval<A>())...))>(), ctx, std::forward<F>(f), std::forward<A>(a)...);
+}
 
 template <class F, class... A>
 inline

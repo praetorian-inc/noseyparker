@@ -12,7 +12,8 @@
 
 #include <boost/spirit/home/karma/stream/detail/format_manip.hpp>
 #include <boost/spirit/home/karma/auto/create_generator.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <boost/core/enable_if.hpp>
+#include <boost/mpl/bool.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace boost { namespace spirit { namespace karma { namespace detail

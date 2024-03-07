@@ -35,18 +35,6 @@ public:
     null_resource& operator=(
         null_resource const&) = delete;
 
-    /** Destructor
-
-        This destroys the resource.
-
-        @par Complexity
-        Constant.
-
-        @part Exception Safety
-        No-throw guarantee.
-    */
-    ~null_resource() noexcept = default;
-
     /** Constructor
 
         This constructs the resource.

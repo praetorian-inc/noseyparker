@@ -29,7 +29,7 @@ scatterv_impl(const communicator& comm, const T* in_values, T* out_values, int o
               const int* sizes, const int* displs, int root, mpl::true_)
 {
   assert(!sizes || out_size == sizes[comm.rank()]);
-  assert(bool(sizes) == bool(in_values));
+  assert(!bool(in_values) || bool(sizes));
   
   scoped_array<int> new_offsets_mem(make_offsets(comm, sizes, displs, root));
   if (new_offsets_mem) displs = new_offsets_mem.get();

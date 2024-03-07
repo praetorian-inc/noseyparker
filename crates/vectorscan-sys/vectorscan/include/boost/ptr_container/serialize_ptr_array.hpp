@@ -9,10 +9,10 @@
 #include <boost/ptr_container/detail/serialize_reversible_cont.hpp>
 #include <boost/ptr_container/ptr_array.hpp>
 
-namespace boost 
+namespace boost
 {
 
-namespace serialization 
+namespace serialization
 {
 
 template<class Archive, class T, std::size_t N, class CloneAllocator>
@@ -26,7 +26,7 @@ void load(Archive& ar, ptr_array<T, N, CloneAllocator>& c, unsigned int /*versio
 {
     typedef ptr_array<T, N, CloneAllocator> container_type;
     typedef BOOST_DEDUCED_TYPENAME container_type::size_type size_type;
-    
+
     for(size_type i = 0u; i != N; ++i)
     {
         T* p;
