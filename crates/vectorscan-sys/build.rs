@@ -52,13 +52,13 @@ fn main() {
 
         let fat_runtime = {
             let arch = env("CARGO_CFG_TARGET_ARCH");
-            let vendor = env("CARGO_CFG_TARGET_VENDOR");
-            if arch == "x86_64" && vendor != "apple" {
-                // NOTE: The fat runtime might also work on macOS isntead of just Linux.
+            let os = env("CARGO_CFG_TARGET_OS");
+            if (arch == "x86_64" || arch == "aarch64") && os == "linux" {
+                // NOTE: The fat runtime might also work on macOS instead of just Linux.
                 //       But this would need at minimum the vectorscan/cmake/build_wrapper.sh
                 //       script overhauled to get working.
                 //
-                //       For now just do not use the fat runtime for macOS.
+                //       For now only enable the fat runtime for Linux x86_64.
                 "ON"
             } else {
                 "OFF"
