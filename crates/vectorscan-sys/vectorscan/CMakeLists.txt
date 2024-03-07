@@ -195,21 +195,23 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
     set(BUILD_CHIMERA TRUE)
 endif()
 
+set(RAGEL_C_FLAGS "-Wno-unused -funsigned-char")
+
+set_source_files_properties(
+    src/parser/Parser.cpp
+    PROPERTIES
+        COMPILE_FLAGS "${RAGEL_C_FLAGS}")
+
 # PATCH
-# set(RAGEL_C_FLAGS "-Wno-unused -funsigned-char")
-# 
-# set_source_files_properties(
-#     src/parser/Parser.cpp
-#     PROPERTIES
-#         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-# 
 # ragelmaker(src/parser/Parser.rl)
-# 
-# set_source_files_properties(
-#    src/parser/control_verbs.cpp
-#     PROPERTIES
-#         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-# 
+# /PATCH
+
+set_source_files_properties(
+   src/parser/control_verbs.cpp
+    PROPERTIES
+        COMPILE_FLAGS "${RAGEL_C_FLAGS}")
+
+# PATCH
 # ragelmaker(src/parser/control_verbs.rl)
 # /PATCH
 

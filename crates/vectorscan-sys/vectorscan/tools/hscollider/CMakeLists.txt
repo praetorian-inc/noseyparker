@@ -16,12 +16,12 @@ CHECK_FUNCTION_EXISTS(sigaltstack HAVE_SIGALTSTACK)
 CHECK_FUNCTION_EXISTS(sigaction HAVE_SIGACTION)
 CHECK_FUNCTION_EXISTS(setrlimit HAVE_SETRLIMIT)
 
+set_source_files_properties(
+    ColliderCorporaParser.cpp
+    PROPERTIES
+    COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
+
 # PATCH
-# set_source_files_properties(
-#     ColliderCorporaParser.cpp
-#     PROPERTIES
-#     COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
-#
 # ragelmaker(ColliderCorporaParser.rl)
 # /PATCH
 
