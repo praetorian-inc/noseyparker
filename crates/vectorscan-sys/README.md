@@ -20,7 +20,7 @@ Other features too, like the Chimera PCRE library, test code, benchmark code, an
 
 The source of Vectorscan 5.4.11 is included here in the `vectorscan` directory.
 The partial source of Boost version 1.84.0 is also included in the `vectorscan/include/boost` directory.
-Only the parts of Boost required by Vectorscan are included.
+(Only the `boost` directory of header files is included.)
 
 The Vectorscan sources were patched for a few reasons:
 
