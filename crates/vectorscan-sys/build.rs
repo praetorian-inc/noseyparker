@@ -50,35 +50,35 @@ fn main() {
             }
         };
 
-        let fat_runtime = {
-            let arch = env("CARGO_CFG_TARGET_ARCH");
-            let os = env("CARGO_CFG_TARGET_OS");
-            if (arch == "x86_64" || arch == "aarch64") && os == "linux" {
-                // NOTE: The fat runtime might also work on macOS instead of just Linux.
-                //       But this would need at minimum the vectorscan/cmake/build_wrapper.sh
-                //       script overhauled to get working.
-                //
-                //       For now only enable the fat runtime for Linux x86_64.
-                "ON"
-            } else {
-                "OFF"
-            }
-        };
+        let mut cfg = cmake::Config::new(&vectorscan_src_dir);
 
-        let dst = cmake::Config::new(&vectorscan_src_dir)
-            .profile(profile)
+        cfg.profile(profile)
             .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
             .define("BUILD_SHARED_LIBS", "OFF")
             .define("BUILD_STATIC_LIBS", "ON")
             .define("USE_CPU_NATIVE", "OFF")
-            .define("FAT_RUNTIME", fat_runtime)
-            // .define("BUILD_AVX512", "OFF") // could enable for x86_64?
+            .define("FAT_RUNTIME", "OFF")
             .define("BUILD_EXAMPLES", "OFF")
             .define("BUILD_BENCHMARKS", "OFF")
             .define("BUILD_UNIT", "OFF")
             .define("BUILD_DOC", "OFF")
-            .define("BUILD_TOOLS", "OFF")
-            .build();
+            .define("BUILD_TOOLS", "OFF");
+
+        // NOTE: The following feature flags could hypothetically be set based on available CPU
+        // features. But this is fragile in scenarios where you try to build on one machine and
+        // distribute to others that may have different instruction set support, so simply turn
+        // these all off.
+        //
+        // If revisiting in the future, see the Rust options like `cfg!(target_feature = "avx2")`:
+        // https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute
+        cfg.define("BUILD_AVX2", "OFF")
+            .define("BUILD_AVX512", "OFF")
+            .define("BUILD_AVX512VBMI", "OFF")
+            .define("BUILD_SVE", "OFF")
+            .define("BUILD_SVE2", "OFF")
+            .define("BUILD_SVE2_BITPERM", "OFF");
+
+        let dst = cfg.build();
 
         println!("cargo:rustc-link-lib=static=hs");
         println!("cargo:rustc-link-search={}", dst.join("lib").to_str().unwrap());
