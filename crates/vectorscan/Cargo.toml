@@ -8,6 +8,18 @@ license = "Apache-2.0 OR MIT"
 name = "vectorscan"
 version = "0.0.0"
 
+[features]
+# Specialize the build of Vectorscan to use available SIMD instructions on the build system's CPU.
+# This will result in binary that is not portable to other CPUs.
+simd_specialization = ["vectorscan-sys/simd_specialization"]
+
+# Specialize the build of Vectorscan for the microarchitecture of the build system's CPU.
+# This will result in binary that is not portable to other CPUs.
+cpu_native = ["vectorscan-sys/cpu_native"]
+
+# Enable all features that can improve speed but break binary portability.
+fast_nonportable = ["cpu_native", "simd_specialization"]
+
 [dependencies]
 bitflags = "2.0"
 foreign-types = "0.5"

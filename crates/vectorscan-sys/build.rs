@@ -56,7 +56,6 @@ fn main() {
             .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
             .define("BUILD_SHARED_LIBS", "OFF")
             .define("BUILD_STATIC_LIBS", "ON")
-            .define("USE_CPU_NATIVE", "OFF")
             .define("FAT_RUNTIME", "OFF")
             .define("BUILD_EXAMPLES", "OFF")
             .define("BUILD_BENCHMARKS", "OFF")
@@ -64,19 +63,73 @@ fn main() {
             .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF");
 
-        // NOTE: The following feature flags could hypothetically be set based on available CPU
-        // features. But this is fragile in scenarios where you try to build on one machine and
-        // distribute to others that may have different instruction set support, so simply turn
-        // these all off.
+        if cfg!(feature = "cpu_native") {
+            cfg.define("USE_CPU_NATIVE", "ON");
+        } else {
+            cfg.define("USE_CPU_NATIVE", "OFF");
+        }
+
+        // NOTE: Several Vectorscan feature flags can be set based on available CPU SIMD features.
+        // Enabling these according to availability on the build system CPU is fragile, however:
+        // the resulting binary will not work correctly on machines with CPUs with different SIMD
+        // support.
         //
-        // If revisiting in the future, see the Rust options like `cfg!(target_feature = "avx2")`:
+        // By default, we simply disable these options. However, using the `simd-specialization`
+        // feature flag, these Vectorscan features will be enabled if the build system's CPU
+        // supports them.
+        //
+        // See
         // https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute
-        cfg.define("BUILD_AVX2", "OFF")
-            .define("BUILD_AVX512", "OFF")
-            .define("BUILD_AVX512VBMI", "OFF")
-            .define("BUILD_SVE", "OFF")
-            .define("BUILD_SVE2", "OFF")
-            .define("BUILD_SVE2_BITPERM", "OFF");
+        // for supported target_feature values.
+
+        if cfg!(feature = "simd_specialization") {
+            macro_rules! x86_64_feature {
+                ($feature: tt) => {{
+                    #[cfg(target_arch = "x86_64")]
+                    let enabled = std::arch::is_x86_feature_detected!($feature);
+                    #[cfg(not(target_arch = "x86_64"))]
+                    let enabled = false;
+
+                    if enabled {
+                        "ON"
+                    } else {
+                        "OFF"
+                    }
+                }};
+            }
+
+            macro_rules! aarch64_feature {
+                ($feature: tt) => {{
+                    #[cfg(target_arch = "aarch64")]
+                    let enabled = std::arch::is_aarch64_feature_detected!($feature);
+                    #[cfg(not(target_arch = "aarch64"))]
+                    let enabled = false;
+
+                    if enabled {
+                        "ON"
+                    } else {
+                        "OFF"
+                    }
+                }};
+            }
+
+            cfg.define("BUILD_AVX2", x86_64_feature!("avx2"));
+            // XXX use avx512vbmi as a proxy for this, as it's not clear which particular avx512
+            // instructions are needed
+            cfg.define("BUILD_AVX512", x86_64_feature!("avx512vbmi"));
+            cfg.define("BUILD_AVX512VBMI", x86_64_feature!("avx512vbmi"));
+
+            cfg.define("BUILD_SVE", aarch64_feature!("sve"));
+            cfg.define("BUILD_SVE2", aarch64_feature!("sve2"));
+            cfg.define("BUILD_SVE2_BITPERM", aarch64_feature!("sve2-bitperm"));
+        } else {
+            cfg.define("BUILD_AVX2", "OFF")
+                .define("BUILD_AVX512", "OFF")
+                .define("BUILD_AVX512VBMI", "OFF")
+                .define("BUILD_SVE", "OFF")
+                .define("BUILD_SVE2", "OFF")
+                .define("BUILD_SVE2_BITPERM", "OFF");
+        }
 
         let dst = cfg.build();
 
