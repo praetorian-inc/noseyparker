@@ -8,9 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Changes
-- The vendored copy of Boost included in the internal `vectorscan-sys` crate has been upgraded from version 1.83 to 1.84.
-- The vendored copy of the Vectorscan regular expression library has been upgraded from version 5.4.8 to 5.4.11.
 
+- The vendored copy of the Vectorscan regular expression library has been upgraded from version 5.4.8 to 5.4.11.
+- The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the
+  system-provided Boost.
+  This change is only relevant to building Nosey Parker from source.
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
 

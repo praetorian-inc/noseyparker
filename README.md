@@ -41,6 +41,7 @@ This has been tested with several versions of Ubuntu Linux on x86_64 and with ma
 Required dependencies:
 - `cargo`: recommended approach: install from <https://rustup.rs>
 - `cmake`: needed for building the `vectorscan-sys` crate and some other dependencies
+- `boost`: needed for building the `vectorscan-sys` crate (supported version `>=1.57`)
 - `git`: needed for embedding version information into the `noseyparker` CLI
 - `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
 - `zsh`: needed for build scripts
