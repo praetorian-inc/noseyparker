@@ -31,6 +31,18 @@ libmagic = ["content-guesser/libmagic"]
 # Compile out `trace`-level log and tracing messages in release builds
 disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug"]
 
+# Specialize the build of Vectorscan for the microarchitecture of the build system's CPU.
+# This will result in binary that is not portable to other CPUs.
+vectorscan_cpu_native = ["vectorscan/cpu_native"]
+
+# Specialize the build of Vectorscan to use available SIMD instructions on the build system's CPU.
+# This will result in binary that is not portable to other CPUs.
+vectorscan_simd_specialization = ["vectorscan/simd_specialization"]
+
+# Enable all Vectorscan features that can improve speed but break binary portability.
+vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
+
+
 # Enable features that are desirable in a release build
 release = ["disable_trace"]
 

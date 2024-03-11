@@ -11,8 +11,19 @@ version = "0.0.0"
 build = "build.rs"
 
 [features]
-# The `gen` features causes `bindgen` to run to produce the raw Rust bindings to Vectorscan.
+# This feature causes `bindgen` to run to produce the raw Rust bindings to Vectorscan.
 gen = ["bindgen"]
+
+# This feature causes Vectorscan to build using available SIMD
+# microarchitecture support from the build system CPU, such as AVX2, AVX512,
+# SVE, and SVE2. The resulting binary will not be portable to CPUs that lack
+# SIMD support that the build system has.
+simd_specialization = []
+
+# This feature causes Vectorscan to build with code tuned for the
+# microarchitecture of the build system's CPU. The resulting binary will not be
+# portable to CPUs that lack SIMD support that the build system has.
+cpu_native = []
 
 [build-dependencies]
 bindgen = { version = "0.69", optional = true }
