@@ -5,7 +5,7 @@ This crate implements minimal Rust bindings to the [https://github.com/Vectorcam
 This crate builds a vendored copy of Vectorscan from source.
 
 ## Prerequisites
-To build this crate, you need CMake.
+To build this crate, you need CMake and Boost >= 1.57.
 Additionally, if you build with the `gen` feature enabled, you will need Clang installed so that `bindgen` can produce the raw Rust bindings to Vectorscan.
 
 This has been tested on x86_64 Linux and Intel and ARM macOS.
@@ -19,8 +19,6 @@ The various other APIs such as stream- and vector-based matching are not exposed
 Other features too, like the Chimera PCRE library, test code, benchmark code, and supporting utilities are disabled.
 
 The source of Vectorscan 5.4.11 is included here in the `vectorscan` directory.
-The partial source of Boost version 1.84.0 is also included in the `vectorscan/include/boost` directory.
-(Only the `boost` directory of header files is included.)
 
 The Vectorscan sources were patched for a few reasons:
 
@@ -35,4 +33,3 @@ This was an expedient approach, but something that should be reworked if additio
 ## Licensing
 Vectorscan is released under a 3-clause BSD license.
 pyperscan is released under the Apache License Version 2.0 or the MIT license.
-Boost is released under the Boost License Version 1.0.
