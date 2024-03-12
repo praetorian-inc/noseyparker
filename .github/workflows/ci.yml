@@ -61,7 +61,7 @@ jobs:
           profile: release
           features: release
           install_dependencies: |
-            sudo apt-get install zsh
+            sudo apt-get install zsh libboost-all-dev
 
           check_docs: false
           check_rules: false
@@ -73,7 +73,7 @@ jobs:
           profile: test
           features:
           install_dependencies: |
-            sudo apt-get install zsh
+            sudo apt-get install zsh libboost-all-dev
 
           check_docs: true
           check_rules: true
@@ -85,7 +85,7 @@ jobs:
           profile: test
           features:
           install_dependencies: |
-            brew install coreutils
+            brew install coreutils boost
 
           check_docs: false
           check_rules: false
@@ -97,7 +97,7 @@ jobs:
           profile: test
           features:
           install_dependencies: |
-            brew install coreutils
+            brew install coreutils boost
 
           check_docs: false
           check_rules: false

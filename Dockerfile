@@ -18,6 +18,7 @@ RUN apt-get update &&\
     apt-get install -y \
         cmake \
         zsh \
+        libboost-all-dev \
         &&\
     apt-get clean
 

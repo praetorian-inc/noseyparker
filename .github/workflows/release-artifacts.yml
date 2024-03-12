@@ -123,19 +123,19 @@ jobs:
           os: ubuntu-20.04
           rust: stable
           install_dependencies: |
-            sudo apt-get install zsh
+            sudo apt-get install zsh libboost-all-dev
 
         - build: macos-13.x86_64
           os: macos-13
           rust: stable
           install_dependencies: |
-            brew install coreutils
+            brew install coreutils boost
 
         - build: macos-13.arm64
           os: macos-13-xlarge
           rust: stable
           install_dependencies: |
-            brew install coreutils
+            brew install coreutils boost
 
     steps:
     - uses: actions/checkout@v4

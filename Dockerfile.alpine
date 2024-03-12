@@ -16,6 +16,7 @@ RUN apk add --no-cache --no-interactive \
         openssl-dev \
         perl \
         zsh \
+        boost-dev \
         && \
     apk cache clean
 
