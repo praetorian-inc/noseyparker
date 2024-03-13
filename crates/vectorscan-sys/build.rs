@@ -36,9 +36,17 @@ fn main() {
 
     // Run cmake for vectorscan
     {
-        let vectorscan_src_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("vectorscan");
+        let main_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let vectorscan_src_dir = main_dir.join("vectorscan");
         if !vectorscan_src_dir.exists() {
-            panic!("Vectorscan source directory is missing");
+            use flate2::read::GzDecoder;
+            let response = reqwest::blocking::get("https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.11.tar.gz").expect("Could not download Vectorscan source files");
+            let gz = GzDecoder::new(response);
+            let mut tar = tar::Archive::new(gz);
+            tar.unpack(&main_dir)
+                .expect("Could not unpack Vectorscan source files");
+            std::fs::rename(main_dir.join("vectorscan-vectorscan-5.4.11"), &vectorscan_src_dir)
+                .expect("Could not rename Vectorscan source directory");
         }
 
         let profile = {
