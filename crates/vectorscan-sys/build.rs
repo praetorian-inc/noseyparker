@@ -6,6 +6,8 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=vectorscan.patch");
     let out_dir = PathBuf::from(env("OUT_DIR"));
 
     let include_dir = out_dir
@@ -36,17 +38,42 @@ fn main() {
 
     // Run cmake for vectorscan
     {
+        const VERSION: &'static str = "5.4.11";
         let main_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
         let vectorscan_src_dir = main_dir.join("vectorscan");
-        if !vectorscan_src_dir.exists() {
+        let marker = vectorscan_src_dir.join(".version");
+        let is_valid_marker =
+            std::fs::read_to_string(&marker).is_ok_and(|v| v.starts_with(VERSION));
+
+        if !vectorscan_src_dir.exists() || !is_valid_marker {
             use flate2::read::GzDecoder;
-            let response = reqwest::blocking::get("https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.11.tar.gz").expect("Could not download Vectorscan source files");
+            let response = reqwest::blocking::get(format!("https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/{VERSION}.tar.gz")).expect("Could not download Vectorscan source files");
             let gz = GzDecoder::new(response);
             let mut tar = tar::Archive::new(gz);
             tar.unpack(&main_dir)
                 .expect("Could not unpack Vectorscan source files");
-            std::fs::rename(main_dir.join("vectorscan-vectorscan-5.4.11"), &vectorscan_src_dir)
-                .expect("Could not rename Vectorscan source directory");
+            std::fs::rename(
+                main_dir.join(format!("vectorscan-vectorscan-{VERSION}")),
+                &vectorscan_src_dir,
+            )
+            .expect("Could not rename Vectorscan source directory");
+
+            std::fs::write(&marker, VERSION).expect("Could not create marker file");
+        }
+
+        let is_valid_marker =
+            std::fs::read_to_string(&marker).is_ok_and(|v| v.ends_with("patched"));
+        if !is_valid_marker {
+            use git2::{ApplyLocation, Diff, Repository};
+            let repo = Repository::open_from_env().expect("Could not open Vectorscan repository");
+            let patch = main_dir.join("vectorscan.patch");
+            let patch = std::fs::read(&patch).expect("Could not read patch file");
+            let patch = Diff::from_buffer(&patch).expect("Could not create diff from patch");
+            repo.apply(&patch, ApplyLocation::WorkDir, None)
+                .expect("Could not apply patch to Vectorscan repository");
+
+            std::fs::write(&marker, format!("{VERSION}-patched"))
+                .expect("Could not create marker file");
         }
 
         let profile = {
