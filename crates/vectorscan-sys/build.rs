@@ -38,7 +38,7 @@ fn main() {
 
     // Run cmake for vectorscan
     {
-        const VERSION: &'static str = "5.4.11";
+        const VERSION: &str = "5.4.11";
         let main_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
         let vectorscan_src_dir = main_dir.join("vectorscan");
         let marker = vectorscan_src_dir.join(".version");
@@ -50,7 +50,7 @@ fn main() {
             let response = reqwest::blocking::get(format!("https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/{VERSION}.tar.gz")).expect("Could not download Vectorscan source files");
             let gz = GzDecoder::new(response);
             let mut tar = tar::Archive::new(gz);
-            tar.unpack(&main_dir)
+            tar.unpack(main_dir)
                 .expect("Could not unpack Vectorscan source files");
             std::fs::rename(
                 main_dir.join(format!("vectorscan-vectorscan-{VERSION}")),
@@ -67,7 +67,7 @@ fn main() {
             use git2::{ApplyLocation, Diff, Repository};
             let repo = Repository::open_from_env().expect("Could not open Vectorscan repository");
             let patch = main_dir.join("vectorscan.patch");
-            let patch = std::fs::read(&patch).expect("Could not read patch file");
+            let patch = std::fs::read(patch).expect("Could not read patch file");
             let patch = Diff::from_buffer(&patch).expect("Could not create diff from patch");
             repo.apply(&patch, ApplyLocation::WorkDir, None)
                 .expect("Could not apply patch to Vectorscan repository");
