@@ -1,3 +1,0 @@
-2000:/abcdef[^X].*[^X](A|B(CDE)?F)Y?foobar/s
-2001:/[^abab]+\Z/si
-2002:/mj(?:[pajl]|o)[tplh]thd.hq.b[frt]pk(\b)hb/i8L
