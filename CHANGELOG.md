@@ -13,10 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changes
 
-- The vendored copy of the Vectorscan regular expression library has been upgraded from version 5.4.8 to 5.4.11.
 - The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the
   system-provided Boost.
   This change is only relevant to building Nosey Parker from source.
+- The vendored copy of the Vectorscan regular expression library included in the internal `vectorscan-sys` crate has
+  been removed in favor of downloading its sources and patching them during the build phase. The version of Vectorscan
+  used is 5.4.11.
 - SARIF reporting format is now listed as experimental.
 
 
