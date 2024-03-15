@@ -32,9 +32,8 @@ Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) 
 
 **Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
 
+### Building from source
 <details>
-<summary><h3>Building from source</h3></summary>
-
 **1. Prerequisites**
 This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and ARM64.
 
@@ -81,9 +80,8 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
+### Scanning filesystem content for secrets
 <details>
-<summary><h3>Scanning filesystem content for secrets</h3></summary>
-
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
 
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
@@ -107,9 +105,8 @@ Run the `report` command next to show finding details.
 ```
 </details>
 
+### Scanning Git repos by URL, GitHub username, or GitHub organization name
 <details>
-<summary><h3>Scanning Git repos by URL, GitHub username, or GitHub organization name</h3></summary>
-
 Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
 The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
 
@@ -129,9 +126,8 @@ Providing an access token gives a higher API rate limit and may make additional 
 See `noseyparker help scan` for more details.
 </details>
 
+### Summarizing findings
 <details>
-<summary><h3>Summarizing findings</h3></summary>
-
 Nosey Parker prints out a summary of its findings when it finishes
 scanning.  You can also run this step separately:
 ```
@@ -150,9 +146,8 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 </details>
 
 
+### Reporting detailed findings
 <details>
-<summary><h3>Reporting detailed findings</h3></summary>
-
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
 ```
@@ -203,9 +198,8 @@ Showing 3/29 occurrences:
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 </details>
 
+### Enumerating repositories from GitHub
 <details>
-<summary><h3>Enumerating repositories from GitHub</h3></summary>
-
 To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
 This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
 For example:
