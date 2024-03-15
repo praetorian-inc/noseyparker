@@ -136,6 +136,7 @@ Run the `report` command next to show finding details.
 </details>
 
 ### Scanning Git repos by URL, GitHub username, or GitHub organization name
+
 <details>
 
 Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
@@ -160,8 +161,9 @@ See `noseyparker help scan` for more details.
 ### Summarizing findings
 
 <details>
-Nosey Parker prints out a summary of its findings when it finishes
-scanning.  You can also run this step separately:
+
+Nosey Parker prints out a summary of its findings when it finishes scanning.
+You can also run this step separately:
 ```shell
 $ noseyparker summarize --datastore np.cpython
 
@@ -181,6 +183,7 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 ### Reporting detailed findings
 
 <details>
+
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
 ```shell
@@ -232,7 +235,9 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 </details>
 
 ### Enumerating repositories from GitHub
+
 <details>
+
 To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
 This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
 For example:
