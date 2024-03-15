@@ -8,22 +8,31 @@ Nosey Parker is a command-line tool that finds secrets and sensitive information
 - It groups matches together that share the same secret, further emphasizing signal over noise
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source history in less than 2 minutes on an older MacBook Pro
 
-An internal version of Nosey Parker has been used in hundreds of offensive security engagements at [Praetorian](https://praetorian.com). The internal version has additional capabilities for false positive suppression and a rule-free machine learning-based detection engine. Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
+An internal version of Nosey Parker has found secrets in hundreds of offensive security engagements at [Praetorian](https://praetorian.com).
+The internal version has additional capabilities for false positive suppression and a rule-free machine learning-based detection engine.
+Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
 
 
 ## Installation
 
+### Homebrew Formula
+
+Nosey Parker is available in [Homebrew](https://brew.sh):
+```shell
+$ brew install noseyparker
+```
+
 ### Prebuilt Binaries
 
 Prebuilt binaries are available for x86_64 Linux and x86_64/ARM64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
-This is the simplest way to get started and will give good performance.
+This is a simple way to get started and will give good performance.
 
 ### Docker Image
 
 A prebuilt multiplatform Docker image is available for the latest release for x86_64 and ARM64:
 
-```
-docker pull ghcr.io/praetorian-inc/noseyparker:latest
+``` shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
 Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
@@ -31,6 +40,10 @@ Additionally, A prebuilt Docker image is also available for the most recent comm
 Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker-alpine:edge`).
 
 **Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
+
+### Arch Linux Package
+
+Nosey Parker is available in the [Arch User Repository](https://aur.archlinux.org/packages/noseyparker).
 
 ### Building from source
 <details>
@@ -46,8 +59,8 @@ Required dependencies:
 - `zsh`: needed for build scripts
 
 **2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script**
-```
-rm -rf release && ./scripts/create-release.zsh
+```shell
+$ rm -rf release && ./scripts/create-release.zsh
 ```
 
 If successful, this will produce a directory structure at `release` populated with release artifacts.
@@ -69,12 +82,11 @@ Running the `noseyparker` binary without arguments prints top-level help and exi
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
 More detailed help is available with the `help` command or long-form `--help` option.
 
-
 #### Docker usage note
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
-```
-docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
+```shell
+$ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
@@ -87,7 +99,7 @@ Nosey Parker has built-in support for scanning files, recursively scanning direc
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
 Nosey Parker will create a new datastore at `np.cpython` and saves its findings there.
 (The name `np.cpython` is nonessential; it can be whatever you want.)
-```
+```shell
 $ noseyparker scan --datastore np.cpython cpython.git
 Found 28.30 GiB from 18 plain files and 427,712 blobs from 1 Git repos [00:00:04]
 Scanning content  ████████████████████ 100%  28.30 GiB/28.30 GiB  [00:00:53]
@@ -102,7 +114,7 @@ Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 n
  md5crypt Hash                           1               2
 
 Run the `report` command next to show finding details.
-```
+```shell
 </details>
 
 ### Scanning Git repos by URL, GitHub username, or GitHub organization name
@@ -111,12 +123,12 @@ Nosey Parker can also scan Git repos that have not already been cloned to the lo
 The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
 
 For example, to scan the Nosey Parker repo itself:
-```
+```shell
 $ noseyparker scan --datastore np.noseyparker --git-url https://github.com/praetorian-inc/noseyparker
 ```
 
 For example, to scan accessible repositories belonging to [`octocat`](https://github.com/octocat):
-```
+```shell
 $ noseyparker scan --datastore np.noseyparker --github-user octocat
 ```
 
@@ -130,7 +142,7 @@ See `noseyparker help scan` for more details.
 <details>
 Nosey Parker prints out a summary of its findings when it finishes
 scanning.  You can also run this step separately:
-```
+```shell
 $ noseyparker summarize --datastore np.cpython
 
  Rule                      Distinct Groups   Total Matches
@@ -150,7 +162,7 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 <details>
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
-```
+```shell
 $ noseyparker report --datastore np.cpython
 Finding 1/1452: Generic API Key
 Match: QTP4LAknlFml0NuPAbCdtvH4KQaokiQE
@@ -203,7 +215,7 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
 This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
 For example:
-```
+```shell
 $ noseyparker github repos list --user octocat
 https://github.com/octocat/Hello-World.git
 https://github.com/octocat/Spoon-Knife.git
