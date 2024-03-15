@@ -22,33 +22,46 @@ Nosey Parker is available in [Homebrew](https://brew.sh):
 $ brew install noseyparker
 ```
 
+
 ### Prebuilt Binaries
 
-Prebuilt binaries are available for x86_64 Linux and x86_64/ARM64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
+Prebuilt binaries are available for x86_64 Linux and x86_64/aarch64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
 This is a simple way to get started and will give good performance.
+
 
 ### Docker Image
 
-A prebuilt multiplatform Docker image is available for the latest release for x86_64 and ARM64:
-
-``` shell
+<details>
+A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
+```shell
 $ docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
+Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker:edge
+```
 
-Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker-alpine:edge`).
+Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
+```
 
 **Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
+</details>
+
 
 ### Arch Linux Package
 
 Nosey Parker is available in the [Arch User Repository](https://aur.archlinux.org/packages/noseyparker).
 
+
 ### Building from source
+
 <details>
-**1. Prerequisites**
-This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and ARM64.
+
+#### 1. Install prerequisites
+This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and aarch64.
 
 Required dependencies:
 - `cargo`: recommended approach: install from <https://rustup.rs>
@@ -59,7 +72,7 @@ Required dependencies:
 - `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
 - `zsh`: needed for build scripts
 
-**2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script**
+#### 2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script
 ```shell
 $ rm -rf release && ./scripts/create-release.zsh
 ```
@@ -67,6 +80,7 @@ $ rm -rf release && ./scripts/create-release.zsh
 If successful, this will produce a directory structure at `release` populated with release artifacts.
 The command-line program will be at `release/bin/noseyparker`.
 </details>
+
 
 ## Usage quick start
 
@@ -87,14 +101,16 @@ More detailed help is available with the `help` command or long-form `--help` op
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
 ```shell
-$ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
+docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
 ### Scanning filesystem content for secrets
+
 <details>
+
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
 
 For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
@@ -115,11 +131,12 @@ Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 n
  md5crypt Hash                           1               2
 
 Run the `report` command next to show finding details.
-```shell
+```
 </details>
 
 ### Scanning Git repos by URL, GitHub username, or GitHub organization name
 <details>
+
 Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
 The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
 
@@ -140,6 +157,7 @@ See `noseyparker help scan` for more details.
 </details>
 
 ### Summarizing findings
+
 <details>
 Nosey Parker prints out a summary of its findings when it finishes
 scanning.  You can also run this step separately:
@@ -160,6 +178,7 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 
 
 ### Reporting detailed findings
+
 <details>
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
@@ -238,6 +257,7 @@ See `noseyparker help github` for more details.
 
 
 ## Contributing
+
 Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
 
 Contributions are welcome, particularly new regex rules.
@@ -253,6 +273,7 @@ pre-commit install
 
 
 ## License
+
 Nosey Parker is licensed under the [Apache License, Version 2.0](LICENSE).
 
 Any contribution intentionally submitted for inclusion in Nosey Parker by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
