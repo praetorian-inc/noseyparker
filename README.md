@@ -32,6 +32,7 @@ This is a simple way to get started and will give good performance.
 ### Docker Image
 
 <details>
+
 A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
 ```shell
 $ docker pull ghcr.io/praetorian-inc/noseyparker:latest
