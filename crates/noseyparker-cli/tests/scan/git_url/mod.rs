@@ -7,7 +7,7 @@ fn https_nonexistent() {
     let path = "https://example.com/nothere.git";
     noseyparker_failure!("scan", "-d", scan_env.dspath(), "--git-url", path)
         .stderr(is_match(r"(?m)^Cloning into bare repository .*$"))
-        .stderr(is_match(r"(?m)^fatal: repository .* not found$"))
+        .stderr(is_match(r"(?m)^fatal: (repository .* not found$|unable to access .*$)"))
         .stderr(is_match(r"(?m)^Error: No inputs to scan$"));
 }
 
