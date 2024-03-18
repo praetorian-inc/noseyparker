@@ -101,7 +101,7 @@ You can get abbreviated help for a particular command by running `noseyparker CO
 More detailed help is available with the `help` command or long-form `--help` option.
 
 The prebuilt releases also include manpages that collect the command-line help in one place.
-These manpages are also included in the repository [here](docs/v0.17.0/man/man1).
+These manpages converted into Markdown format are also included in the repository [here](docs/v0.17.0/man/man1).
 
 
 ### Terminology and data model
