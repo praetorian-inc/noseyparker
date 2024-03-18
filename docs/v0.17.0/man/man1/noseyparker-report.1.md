@@ -32,13 +32,13 @@ Write output in the specified format
   
 *Possible values:*
 
--   human: A text-based format designed for humans
+- human: A text-based format designed for humans
 
--   json: Pretty-printed JSON format
+- json: Pretty-printed JSON format
 
--   jsonl: JSON Lines format
+- jsonl: JSON Lines format
 
--   sarif: SARIF format
+- sarif: SARIF format
 
 **--max-matches**=*N* \[default: 3\]  
 Limit the number of matches per finding to at most N

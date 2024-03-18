@@ -50,9 +50,9 @@ Write output in the specified format
   
 *Possible values:*
 
--   human: A text-based format designed for humans
+- human: A text-based format designed for humans
 
--   json: Pretty-printed JSON format
+- json: Pretty-printed JSON format
 
 **-v**, **--verbose**  
 Enable verbose output

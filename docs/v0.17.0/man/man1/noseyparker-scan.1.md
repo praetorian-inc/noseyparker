@@ -134,9 +134,9 @@ Use the specified method for cloning Git repositories
   
 *Possible values:*
 
--   bare: Match the behavior of \`git clone --bare\`
+- bare: Match the behavior of \`git clone --bare\`
 
--   mirror: Match the behavior of \`git clone --mirror\`
+- mirror: Match the behavior of \`git clone --mirror\`
 
 **--git-history**=*MODE* \[default: full\]  
 Use the specified mode for handling Git history
@@ -151,9 +151,9 @@ scanning.
   
 *Possible values:*
 
--   full: Scan all history
+- full: Scan all history
 
--   none: Scan no history
+- none: Scan no history
 
 **--max-file-size**=*MEGABYTES* \[default: 100\]  
 Do not scan files larger than the specified size
@@ -176,11 +176,11 @@ Specify which blobs will have metadata recorded
   
 *Possible values:*
 
--   all: Record metadata for all encountered blobs
+- all: Record metadata for all encountered blobs
 
--   matching: Record metadata only for blobs with matches
+- matching: Record metadata only for blobs with matches
 
--   none: Record metadata for no blobs
+- none: Record metadata for no blobs
 
 **--git-blob-provenance**=*MODE* \[default: first-seen\]  
 Specify which Git commit provenance metadata will be collected
@@ -191,10 +191,10 @@ performance problems on a problematic Git repository input.
   
 *Possible values:*
 
--   first-seen: The Git repository and set of commits and accompanying
-    pathnames in which a blob is first seen
+- first-seen: The Git repository and set of commits and accompanying
+  pathnames in which a blob is first seen
 
--   minimal: Only the Git repository in which a blob is seen
+- minimal: Only the Git repository in which a blob is seen
 
 **--snippet-length**=*BYTES* \[default: 256\]  
 Include up to the specified number of bytes before and after each match
@@ -217,11 +217,11 @@ blobs are not used elsewhere in Nosey Parker at this point.
   
 *Possible values:*
 
--   all: Copy all encountered blobs
+- all: Copy all encountered blobs
 
--   matching: Copy only blobs with matches
+- matching: Copy only blobs with matches
 
--   none: Copy no blobs
+- none: Copy no blobs
 
 **--ignore-certs**  
 Ignore validation of TLS certificates
