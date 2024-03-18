@@ -1,0 +1,236 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH noseyparker-scan 1  "scan "
+.SH NAME
+noseyparker\-scan \- Scan content for secrets
+.SH SYNOPSIS
+\fBnoseyparker scan\fR [\fB\-d\fR|\fB\-\-datastore\fR] [\fB\-j\fR|\fB\-\-jobs\fR] [\fB\-\-rules\fR] [\fB\-\-ruleset\fR] [\fB\-\-git\-url\fR] [\fB\-\-github\-user\fR] [\fB\-\-github\-organization\fR] [\fB\-\-all\-github\-organizations\fR] [\fB\-\-github\-api\-url\fR] [\fB\-\-git\-clone\fR] [\fB\-\-git\-history\fR] [\fB\-\-max\-file\-size\fR] [\fB\-i\fR|\fB\-\-ignore\fR] [\fB\-\-blob\-metadata\fR] [\fB\-\-git\-blob\-provenance\fR] [\fB\-\-snippet\-length\fR] [\fB\-\-copy\-blobs\fR] [\fB\-\-ignore\-certs\fR] [\fB\-v\fR|\fB\-\-verbose\fR]... [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-\-color\fR] [\fB\-\-progress\fR] [\fB\-\-rlimit\-nofile\fR] [\fB\-\-sqlite\-cache\-size\fR] [\fB\-\-enable\-backtraces\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fIINPUT\fR]
+.SH DESCRIPTION
+Scan content for secrets
+.PP
+This command uses regex\-based rules to identify hardcoded secrets and other potentially sensitive information in textual content (or in inputs that can have textual content extracted from them).
+.PP
+The findings from scanning are recorded into a datastore. The recorded findings can later be reported in several formats using the `summarize` and `report` commands.
+.PP
+Several types of inputs can be specified:
+.PP
+\- Positional input arguments can be either files or directories. Files are scanned directly; directories are recursively enumerated and scanned. Any directories encountered that are Git repositories will have their entire history scanned.
+.PP
+\- A Git repository URL can be specified with the `\-\-git\-repo=URL` argument. This will cause Nosey Parker to clone that repository to its datastore and scan its history.
+.PP
+\- A GitHub user can be specified with the `\-\-github\-user=NAME` argument. This will cause Nosey Parker to enumerate accessible repositories belonging to that user, clone them to its datastore, and scan their entire history.
+.PP
+\- A GitHub organization can be specified with the `\-\-github\-org=NAME` argument. This will cause Nosey Parker to enumerate accessible repositories belonging to that organization, clone them to its datastore, and scan their entire history.
+.PP
+The `git` binary on the PATH is used to clone any required Git repositories. It is careful invoked to avoid using any system\-wide or user\-specific configuration.
+.PP
+By default, when cloning repositories from GitHub or enumerating GitHub users or organizations, unauthenticated access is used. An optional personal access token can be specified using the `NP_GITHUB_TOKEN` environment variable. Using a personal access token gives higher rate limits and may make additional content accessible.
+.SH OPTIONS
+.TP
+\fB\-d\fR, \fB\-\-datastore\fR=\fIPATH\fR [default: datastore.np]
+Use the specified datastore
+
+The datastore will be created if it does not exist.
+.RS
+May also be specified with the \fBNP_DATASTORE\fR environment variable.
+.RE
+.TP
+\fB\-j\fR, \fB\-\-jobs\fR=\fIN\fR [default: 4]
+Use N parallel scanning threads
+.TP
+\fB\-\-rules\fR=\fIPATH\fR
+Load additional rules and rulesets from the specified file or directory
+
+The paths can be either files or directories. Directories are recursively walked and all discovered YAML files of rules and rulesets will be loaded.
+
+This option can be repeated.
+.TP
+\fB\-\-ruleset\fR=\fIID\fR [default: default]
+Enable the ruleset with the specified ID
+
+The ID must resolve to a built\-in ruleset or to an additional ruleset loaded with the `\-\-rules=PATH` option.
+
+The special `all` ID causes all loaded rules to be used.
+
+This option can be repeated.
+
+Specifying this option disables the default ruleset. If you want to use a custom ruleset in addition to the default ruleset, specify this option twice, e.g., `\-\-ruleset default \-\-ruleset CUSTOM_ID`.
+.TP
+\fB\-\-git\-url\fR=\fIURL\fR
+Clone and scan the Git repository at the specified URL
+
+Only https URLs without credentials, query parameters, or fragment identifiers are supported.
+
+This option can be repeated.
+.TP
+\fB\-\-github\-user\fR=\fINAME\fR
+Clone and scan accessible repositories belonging to the specified GitHub user
+
+This option can be repeated.
+.TP
+\fB\-\-github\-organization\fR=\fINAME\fR
+Clone and scan accessible repositories belonging to the specified GitHub organization
+
+This option can be repeated.
+.TP
+\fB\-\-all\-github\-organizations\fR
+Clone and scan accessible repositories from all accessible GitHub organizations
+
+This only works with a GitHub Enterprise Server instance. A non\-default option for the `\-\-github\-api\-url` option must be specified.
+.TP
+\fB\-\-github\-api\-url\fR=\fIURL\fR [default: https://api.github.com/]
+Use the specified URL for GitHub API access
+
+If accessing a GitHub Enterprise Server instance, this value should be the entire base URL include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
+.TP
+\fB\-\-git\-clone\fR=\fIMODE\fR [default: bare]
+Use the specified method for cloning Git repositories
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+bare: Match the behavior of `git clone \-\-bare`
+.IP \(bu 2
+mirror: Match the behavior of `git clone \-\-mirror`
+.RE
+.TP
+\fB\-\-git\-history\fR=\fIMODE\fR [default: full]
+Use the specified mode for handling Git history
+
+Git history can be completely ignored when scanning by using `\-\-git\-history=none`. Note that this will interfere with other input specifiers that cause Git repositories to be automatically cloned. For example, specifying an input with `\-\-git\-url=<URL>` while simultaneously using `\-\-git\-history=none` will not result in useful scanning.
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+full: Scan all history
+.IP \(bu 2
+none: Scan no history
+.RE
+.TP
+\fB\-\-max\-file\-size\fR=\fIMEGABYTES\fR [default: 100]
+Do not scan files larger than the specified size
+
+The value is parsed as a floating point literal, and hence fractional values can be supplied. A negative value means "no limit". Note that scanning requires reading the entire contents of each file into memory, so using an excessively large limit may be problematic.
+.TP
+\fB\-i\fR, \fB\-\-ignore\fR=\fIFILE\fR
+Use custom path\-based ignore rules from the specified file
+
+The ignore file should contain gitignore\-style rules.
+
+This option can be repeated.
+.TP
+\fB\-\-blob\-metadata\fR=\fIMODE\fR [default: matching]
+Specify which blobs will have metadata recorded
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+all: Record metadata for all encountered blobs
+.IP \(bu 2
+matching: Record metadata only for blobs with matches
+.IP \(bu 2
+none: Record metadata for no blobs
+.RE
+.TP
+\fB\-\-git\-blob\-provenance\fR=\fIMODE\fR [default: first\-seen]
+Specify which Git commit provenance metadata will be collected
+
+This should not need to be changed unless you are running into performance problems on a problematic Git repository input.
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+first\-seen: The Git repository and set of commits and accompanying pathnames in which a blob is first seen
+.IP \(bu 2
+minimal: Only the Git repository in which a blob is seen
+.RE
+.TP
+\fB\-\-snippet\-length\fR=\fIBYTES\fR [default: 256]
+Include up to the specified number of bytes before and after each match
+
+The default value typically gives between 4 and 7 lines of context before and after each match.
+.TP
+\fB\-\-copy\-blobs\fR=\fIMODE\fR [default: none]
+Specify which blobs will be copied in entirety to the datastore
+
+If this option is enabled, corresponding blobs will be written to the `blobs` directory within the datastore. The format of that directory is similar to Git\*(Aqs "loose" object format: the first 2 characters of the hex\-encoded blob ID name a subdirectory, and the remaining characters are used as the filename.
+
+This mechanism exists to aid in ad\-hoc downstream investigation. Copied blobs are not used elsewhere in Nosey Parker at this point.
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+all: Copy all encountered blobs
+.IP \(bu 2
+matching: Copy only blobs with matches
+.IP \(bu 2
+none: Copy no blobs
+.RE
+.TP
+\fB\-\-ignore\-certs\fR
+Ignore validation of TLS certificates
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Enable verbose output
+
+This can be repeated up to 3 times to enable successively more output.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress non\-error feedback messages
+
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables progress bars. This overrides any provided verbosity and progress reporting options.
+.TP
+\fB\-\-color\fR=\fIMODE\fR [default: auto]
+Enable or disable colored output
+
+When this is "auto", colors are enabled for stdout and stderr when they are terminals.
+
+If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `\-\-color=never`.
+.br
+
+.br
+[\fIpossible values: \fRauto, never, always]
+.TP
+\fB\-\-progress\fR=\fIMODE\fR [default: auto]
+Enable or disable progress bars
+
+When this is "auto", progress bars are enabled when stderr is a terminal.
+.br
+
+.br
+[\fIpossible values: \fRauto, never, always]
+.TP
+\fB\-\-rlimit\-nofile\fR=\fILIMIT\fR [default: 16384]
+Set the rlimit for number of open files to LIMIT
+
+This should not need to be changed from the default unless you run into crashes from running out of file descriptors.
+.TP
+\fB\-\-sqlite\-cache\-size\fR=\fISIZE\fR [default: \-1048576]
+Set the cache size for sqlite connections to SIZE
+
+This has the effect of setting SQLite\*(Aqs `pragma cache_size=SIZE`. The default value is set to use a maximum of 1GiB for database cache. See <https://sqlite.org/pragma.html#pragma_cache_size> for more details.
+.TP
+\fB\-\-enable\-backtraces\fR=\fIBOOL\fR [default: true]
+Enable or disable backtraces on panic
+
+This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
+.br
+
+.br
+[\fIpossible values: \fRtrue, false]
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+[\fIINPUT\fR]
+Scan the specified file, directory, or local Git repository

@@ -1,0 +1,69 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH noseyparker-rules 1  "rules "
+.SH NAME
+noseyparker\-rules \- Manage rules
+.SH SYNOPSIS
+\fBnoseyparker rules\fR [\fB\-v\fR|\fB\-\-verbose\fR]... [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-\-color\fR] [\fB\-\-progress\fR] [\fB\-\-rlimit\-nofile\fR] [\fB\-\-sqlite\-cache\-size\fR] [\fB\-\-enable\-backtraces\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIsubcommands\fR>
+.SH DESCRIPTION
+Manage rules
+.SH OPTIONS
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Enable verbose output
+
+This can be repeated up to 3 times to enable successively more output.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress non\-error feedback messages
+
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables progress bars. This overrides any provided verbosity and progress reporting options.
+.TP
+\fB\-\-color\fR=\fIMODE\fR [default: auto]
+Enable or disable colored output
+
+When this is "auto", colors are enabled for stdout and stderr when they are terminals.
+
+If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `\-\-color=never`.
+.br
+
+.br
+[\fIpossible values: \fRauto, never, always]
+.TP
+\fB\-\-progress\fR=\fIMODE\fR [default: auto]
+Enable or disable progress bars
+
+When this is "auto", progress bars are enabled when stderr is a terminal.
+.br
+
+.br
+[\fIpossible values: \fRauto, never, always]
+.TP
+\fB\-\-rlimit\-nofile\fR=\fILIMIT\fR [default: 16384]
+Set the rlimit for number of open files to LIMIT
+
+This should not need to be changed from the default unless you run into crashes from running out of file descriptors.
+.TP
+\fB\-\-sqlite\-cache\-size\fR=\fISIZE\fR [default: \-1048576]
+Set the cache size for sqlite connections to SIZE
+
+This has the effect of setting SQLite\*(Aqs `pragma cache_size=SIZE`. The default value is set to use a maximum of 1GiB for database cache. See <https://sqlite.org/pragma.html#pragma_cache_size> for more details.
+.TP
+\fB\-\-enable\-backtraces\fR=\fIBOOL\fR [default: true]
+Enable or disable backtraces on panic
+
+This has the effect of setting the `RUST_BACKTRACE` environment variable to 1.
+.br
+
+.br
+[\fIpossible values: \fRtrue, false]
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.SH SUBCOMMANDS
+.TP
+noseyparker\-rules\-check(1)
+Check rules for problems
+.TP
+noseyparker\-rules\-list(1)
+List available rules

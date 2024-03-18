@@ -32,8 +32,6 @@ This is a simple way to get started and will give good performance.
 
 ### Docker image
 
-<details>
-
 A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
 ```shell
 $ docker pull ghcr.io/praetorian-inc/noseyparker:latest
@@ -50,7 +48,6 @@ $ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
 ```
 
 **Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
-</details>
 
 
 ### Arch Linux package
@@ -84,15 +81,27 @@ The command-line program will be at `release/bin/noseyparker`.
 </details>
 
 
-## Usage overview
+## Usage
+
+### Overview
 
 Nosey Parker is essentially a special-purpose `grep`-like tool for detection of secrets.
-The typical workflow is two phases:
+The typical workflow is three phases:
 
 1. Scan inputs of interest using the `scan` command
 2. Report details of scan results using the `report` command
+3. Review and triage findings
 
-Though you normally want to run both the scanning and reporting steps, they are implemented as separate commands because you may wish to generate several reports from one expensive scan run.
+The scanning and reporting steps are implemented as separate commands because you may wish to generate several reports from one expensive scan run.
+
+
+### Getting help
+Running the `noseyparker` binary without arguments prints top-level help and exits.
+You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
+More detailed help is available with the `help` command or long-form `--help` option.
+
+The prebuilt releases also include manpages that collect the command-line help in one place.
+These manpages are also included in the repository [here](docs/v0.17.0/man/man1).
 
 
 ### Terminology and data model
@@ -132,17 +141,9 @@ This is Nosey Parker's top-level unit of reporting.
 </details>
 
 
-### Getting help
-Running the `noseyparker` binary without arguments prints top-level help and exits.
-You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
-More detailed help is available with the `help` command or long-form `--help` option.
-
-
 ## Usage examples
 
-### Docker usage note
-
-<details>
+### Docker note
 
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
@@ -151,7 +152,6 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
-</details>
 
 
 ### Scan filesystem content for secrets
@@ -312,16 +312,17 @@ See `noseyparker help github` for more details.
 
 Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
 
-Contributions are welcome, particularly new regex rules.
+Contributions are welcome, especially new regex rules.
 Developing new regex rules is detailed in a [separate document](docs/RULES.md).
 
 If you are considering making significant code changes, please [open an issue](https://github.com/praetorian-inc/noseyparker/issues/new) or [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose) first.
 
-This project has a number of [pre-commit](https://pre-commit.com/) hooks enabled, which you are encouraged to use.
+This project has a number of [pre-commit](https://pre-commit.com/) hooks enabled that you are encouraged to use.
 To install them in your local repo, make sure you have `pre-commit` installed and run:
 ```
 $ pre-commit install
 ```
+These checks will help to quickly detect simple errors.
 
 
 ## License
