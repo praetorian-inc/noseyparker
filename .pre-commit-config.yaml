@@ -26,4 +26,5 @@ exclude: |
   ^
   ( crates/vectorscan-sys/vectorscan.*        (?# vendored sources )
   | .*\.snap$                                 (?# insta.rs test cases )
+  | docs/v0\.17\.0/.*                         (?# manpages for convenience )
   ) $

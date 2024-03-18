@@ -3,86 +3,160 @@
 Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
 
 **Key features:**
-- It supports scanning files, directories, and the entire history of Git repositories
-- It uses regular expression matching with a set of 139 patterns chosen for high signal-to-noise based on experience and feedback from offensive security engagements
-- It groups matches together that share the same secret, further emphasizing signal over noise
+- It can natively scan files, directories, and Git repository history
+- It uses regular expression matching with a set of [139 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high signal-to-noise based on experience and feedback from offensive security engagements
+- It deduplicates its findings, grouping matches together that share the same secret, which in practice can reduce review burden by 100x or more
 - It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source history in less than 2 minutes on an older MacBook Pro
+- It scales: it has scanned inputs as large as 20TiB during security engagements
 
-An internal version of Nosey Parker has been used in hundreds of offensive security engagements at [Praetorian](https://praetorian.com). The internal version has additional capabilities for false positive suppression and a rule-free machine learning-based detection engine. Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
+An internal version of Nosey Parker has found secrets in hundreds of offensive security engagements at [Praetorian](https://praetorian.com).
+The internal version has additional capabilities for false positive suppression and a rule-free machine learning-based detection engine.
+Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
 
 
 ## Installation
 
-### Prebuilt Binaries
+### Homebrew formula
 
-Prebuilt binaries are available for x86_64 Linux and x86_64/ARM64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
-This is the simplest way to get started and will give good performance.
-
-### Docker Image
-
-A prebuilt multiplatform Docker image is available for the latest release for x86_64 and ARM64:
-
-```
-docker pull ghcr.io/praetorian-inc/noseyparker:latest
+Nosey Parker is available in [Homebrew](https://brew.sh):
+```shell
+$ brew install noseyparker
 ```
 
-Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker:edge`).
 
-Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64 (`ghcr.io/praetorian-inc/noseyparker-alpine:edge`).
+### Prebuilt binaries
 
-**Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
+Prebuilt binaries are available for x86_64 Linux and x86_64/aarch64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
+This is a simple way to get started and will give good performance.
+
+
+### Docker image
+
+A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker:latest
+```
+
+Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker:edge
+```
+
+Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
+```
+
+**Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
+
+
+### Arch Linux package
+
+Nosey Parker is available in the [Arch User Repository](https://aur.archlinux.org/packages/noseyparker).
+
+
+### Building from source
 
 <details>
-<summary><h3>Building from source</h3></summary>
 
-**1. Prerequisites**
-This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and ARM64.
+#### 1. Install prerequisites
+This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and aarch64.
 
 Required dependencies:
 - `cargo`: recommended approach: install from <https://rustup.rs>
 - `cmake`: needed for building the `vectorscan-sys` crate and some other dependencies
 - `boost`: needed for building the `vectorscan-sys` crate (supported version `>=1.57`)
 - `git`: needed for embedding version information into the `noseyparker` CLI
+- `pkg-config`: needed for building the `vectorscan-sys` crate
 - `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
 - `zsh`: needed for build scripts
 
-**2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script**
-```
-rm -rf release && ./scripts/create-release.zsh
+#### 2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script
+```shell
+$ rm -rf release && ./scripts/create-release.zsh
 ```
 
 If successful, this will produce a directory structure at `release` populated with release artifacts.
 The command-line program will be at `release/bin/noseyparker`.
 </details>
 
-## Usage quick start
+
+## Usage
 
 ### Overview
+
+Nosey Parker is essentially a special-purpose `grep`-like tool for detection of secrets.
+The typical workflow is three phases:
+
+1. Scan inputs of interest using the `scan` command
+2. Report details of scan results using the `report` command
+3. Review and triage findings
+
+The scanning and reporting steps are implemented as separate commands because you may wish to generate several reports from one expensive scan run.
+
+
+### Getting help
+Running the `noseyparker` binary without arguments prints top-level help and exits.
+You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
+More detailed help is available with the `help` command or long-form `--help` option.
+
+The prebuilt releases also include manpages that collect the command-line help in one place.
+These manpages converted into Markdown format are also included in the repository [here](docs/v0.17.0/man/man1).
+
+
+### Terminology and data model
+
+<details>
 
 #### The datastore
 Most Nosey Parker commands use a _datastore_, which is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
 A datastore will be implicitly created by the `scan` command if needed.
 
-The usual workflow is to create a datastore with the `scan` command, and then pass that populated datastore to the `report` command to render results in the desired format.
+#### Blobs
+Each input that Nosey Parker scans is called a _blob_, and has a unique blob ID, which is a SHA-1 digest computed the same way `git` does.
 
-#### Getting help
-Running the `noseyparker` binary without arguments prints top-level help and exits.
-You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
-More detailed help is available with the `help` command or long-form `--help` option.
+#### Provenance
+Each blob has one or more _provenance_ entries associated with it.
+A provenance entry is metadata that describes how the input was discovered, such as a file on the filesystem or an entry in Git repository history.
+
+#### Rules
+Nosey Parker is a rule-based system that uses regular expressions.
+Each _rule_ has a single pattern with at least one capture group that isolates the match content from the surrounding context.
+You can list available rules with `noseyparker rules list`.
+
+#### Rulesets
+A collection of rules is organized into a _ruleset_.
+Nosey Parker's default ruleset includes rules that detect things that appear to be hardcoded secrets.
+Other rulesets are available; you can list them with `noseyparker rules list.`
+
+#### Matches
+When a rule's pattern matches an input, it produces a _match_.
+A match is defined by a rule, blob ID, start byte offset, and end byte offset; these fields are used to determine a unique match identifier.
+
+#### Findings
+Matches that were produced by the same rule and share the same capture groups are grouped into a _finding_.
+In other words, a _finding_ is a group of matches.
+This is Nosey Parker's top-level unit of reporting.
+
+</details>
 
 
-#### Docker usage note
+## Usage examples
+
+### Docker note
+
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
-```
+```shell
 docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
+### Scan filesystem content for secrets
+
 <details>
-<summary><h3>Scanning filesystem content for secrets</h3></summary>
 
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
 
@@ -107,8 +181,9 @@ Run the `report` command next to show finding details.
 ```
 </details>
 
+### Scan Git history by URL, GitHub username, or GitHub organization name
+
 <details>
-<summary><h3>Scanning Git repos by URL, GitHub username, or GitHub organization name</h3></summary>
 
 Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
 The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
@@ -129,11 +204,12 @@ Providing an access token gives a higher API rate limit and may make additional 
 See `noseyparker help scan` for more details.
 </details>
 
-<details>
-<summary><h3>Summarizing findings</h3></summary>
+### Summarize findings
 
-Nosey Parker prints out a summary of its findings when it finishes
-scanning.  You can also run this step separately:
+<details>
+
+Nosey Parker prints out a summary of its findings when it finishes scanning.
+You can also run this step separately:
 ```
 $ noseyparker summarize --datastore np.cpython
 
@@ -150,8 +226,9 @@ Additional output formats are supported, including JSON and JSON lines, via the 
 </details>
 
 
+### Report finding details
+
 <details>
-<summary><h3>Reporting detailed findings</h3></summary>
 
 To see details of Nosey Parker's findings, use the `report` command.
 This prints out a text-based report designed for human consumption:
@@ -203,8 +280,9 @@ Showing 3/29 occurrences:
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 </details>
 
+### Enumerate repositories from GitHub
+
 <details>
-<summary><h3>Enumerating repositories from GitHub</h3></summary>
 
 To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
 This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
@@ -231,21 +309,24 @@ See `noseyparker help github` for more details.
 
 
 ## Contributing
+
 Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
 
-Contributions are welcome, particularly new regex rules.
+Contributions are welcome, especially new regex rules.
 Developing new regex rules is detailed in a [separate document](docs/RULES.md).
 
 If you are considering making significant code changes, please [open an issue](https://github.com/praetorian-inc/noseyparker/issues/new) or [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose) first.
 
-This project has a number of [pre-commit](https://pre-commit.com/) hooks enabled, which you are encouraged to use.
+This project has a number of [pre-commit](https://pre-commit.com/) hooks enabled that you are encouraged to use.
 To install them in your local repo, make sure you have `pre-commit` installed and run:
-```shell
-pre-commit install
 ```
+$ pre-commit install
+```
+These checks will help to quickly detect simple errors.
 
 
 ## License
+
 Nosey Parker is licensed under the [Apache License, Version 2.0](LICENSE).
 
 Any contribution intentionally submitted for inclusion in Nosey Parker by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
