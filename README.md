@@ -97,6 +97,8 @@ Though you normally want to run both the scanning and reporting steps, they are 
 
 ### Terminology and data model
 
+<details>
+
 #### The datastore
 Most Nosey Parker commands use a _datastore_, which is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
 A datastore will be implicitly created by the `scan` command if needed.
@@ -127,6 +129,7 @@ Matches that were produced by the same rule and share the same capture groups ar
 In other words, a _finding_ is a group of matches.
 This is Nosey Parker's top-level unit of reporting.
 
+</details>
 
 
 ### Getting help
