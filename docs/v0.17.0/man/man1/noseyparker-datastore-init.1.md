@@ -4,10 +4,11 @@ noseyparker-datastore-init - Initialize a new datastore
 
 # SYNOPSIS
 
-**noseyparker datastore init** \[**-d**\|**--datastore**\]
-\[**-v**\|**--verbose**\]... \[**-q**\|**--quiet**\] \[**--color**\]
-\[**--progress**\] \[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
-\[**--enable-backtraces**\] \[**-h**\|**--help**\]
+**noseyparker datastore init** \[**-d**\|**\--datastore**\]
+\[**-v**\|**\--verbose**\]\... \[**-q**\|**\--quiet**\] \[**\--color**\]
+\[**\--progress**\] \[**\--rlimit-nofile**\]
+\[**\--sqlite-cache-size**\] \[**\--enable-backtraces**\]
+\[**-h**\|**\--help**\]
 
 # DESCRIPTION
 
@@ -15,65 +16,77 @@ Initialize a new datastore
 
 # OPTIONS
 
-**-d**, **--datastore**=*PATH* \[default: datastore.np\]  
-Initialize the datastore at specified path
+**-d**, **\--datastore**=*PATH* \[default: datastore.np\]
 
-May also be specified with the **NP_DATASTORE** environment variable.
+:   Initialize the datastore at specified path
 
-**-v**, **--verbose**  
-Enable verbose output
+    May also be specified with the **NP_DATASTORE** environment
+    variable.
 
-This can be repeated up to 3 times to enable successively more output.
+**-v**, **\--verbose**
 
-**-q**, **--quiet**  
-Suppress non-error feedback messages
+:   Enable verbose output
 
-This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-progress bars. This overrides any provided verbosity and progress
-reporting options.
+    This can be repeated up to 3 times to enable successively more
+    output.
 
-**--color**=*MODE* \[default: auto\]  
-Enable or disable colored output
+**-q**, **\--quiet**
 
-When this is "auto", colors are enabled for stdout and stderr when they
-are terminals.
+:   Suppress non-error feedback messages
 
-If the \`NO_COLOR\` environment variable is set, it takes precedence and
-is equivalent to \`--color=never\`.  
+    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+    progress bars. This overrides any provided verbosity and progress
+    reporting options.
 
-  
-\[*possible values:* auto, never, always\]
+**\--color**=*MODE* \[default: auto\]
 
-**--progress**=*MODE* \[default: auto\]  
-Enable or disable progress bars
+:   Enable or disable colored output
 
-When this is "auto", progress bars are enabled when stderr is a
-terminal.  
+    When this is \"auto\", colors are enabled for stdout and stderr when
+    they are terminals.
 
-  
-\[*possible values:* auto, never, always\]
+    If the \`NO_COLOR\` environment variable is set, it takes precedence
+    and is equivalent to \`\--color=never\`.\
 
-**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
-Set the rlimit for number of open files to LIMIT
+    \
+    \[*possible values:* auto, never, always\]
 
-This should not need to be changed from the default unless you run into
-crashes from running out of file descriptors.
+**\--progress**=*MODE* \[default: auto\]
 
-**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
-Set the cache size for sqlite connections to SIZE
+:   Enable or disable progress bars
 
-This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
-default value is set to use a maximum of 1GiB for database cache. See
-\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
+    When this is \"auto\", progress bars are enabled when stderr is a
+    terminal.\
 
-**--enable-backtraces**=*BOOL* \[default: true\]  
-Enable or disable backtraces on panic
+    \
+    \[*possible values:* auto, never, always\]
 
-This has the effect of setting the \`RUST_BACKTRACE\` environment
-variable to 1.  
+**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
 
-  
-\[*possible values:* true, false\]
+:   Set the rlimit for number of open files to LIMIT
 
-**-h**, **--help**  
-Print help (see a summary with -h)
+    This should not need to be changed from the default unless you run
+    into crashes from running out of file descriptors.
+
+**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
+
+:   Set the cache size for sqlite connections to SIZE
+
+    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
+    The default value is set to use a maximum of 1GiB for database
+    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
+    more details.
+
+**\--enable-backtraces**=*BOOL* \[default: true\]
+
+:   Enable or disable backtraces on panic
+
+    This has the effect of setting the \`RUST_BACKTRACE\` environment
+    variable to 1.\
+
+    \
+    \[*possible values:* true, false\]
+
+**-h**, **\--help**
+
+:   Print help (see a summary with -h)

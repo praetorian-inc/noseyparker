@@ -4,11 +4,12 @@ noseyparker-report - Report detailed scan findings
 
 # SYNOPSIS
 
-**noseyparker report** \[**-d**\|**--datastore**\]
-\[**-o**\|**--output**\] \[**-f**\|**--format**\] \[**--max-matches**\]
-\[**-v**\|**--verbose**\]... \[**-q**\|**--quiet**\] \[**--color**\]
-\[**--progress**\] \[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
-\[**--enable-backtraces**\] \[**-h**\|**--help**\]
+**noseyparker report** \[**-d**\|**\--datastore**\]
+\[**-o**\|**\--output**\] \[**-f**\|**\--format**\]
+\[**\--max-matches**\] \[**-v**\|**\--verbose**\]\...
+\[**-q**\|**\--quiet**\] \[**\--color**\] \[**\--progress**\]
+\[**\--rlimit-nofile**\] \[**\--sqlite-cache-size**\]
+\[**\--enable-backtraces**\] \[**-h**\|**\--help**\]
 
 # DESCRIPTION
 
@@ -16,89 +17,104 @@ Report detailed scan findings
 
 # OPTIONS
 
-**-d**, **--datastore**=*PATH* \[default: datastore.np\]  
-Use the specified datastore
+**-d**, **\--datastore**=*PATH* \[default: datastore.np\]
 
-May also be specified with the **NP_DATASTORE** environment variable.
+:   Use the specified datastore
 
-**-o**, **--output**=*PATH*  
-Write output to the specified path
+    May also be specified with the **NP_DATASTORE** environment
+    variable.
 
-If this argument is not provided, stdout will be used.
+**-o**, **\--output**=*PATH*
 
-**-f**, **--format**=*FORMAT* \[default: human\]  
-Write output in the specified format  
+:   Write output to the specified path
 
-  
-*Possible values:*
+    If this argument is not provided, stdout will be used.
 
-- human: A text-based format designed for humans
+**-f**, **\--format**=*FORMAT* \[default: human\]
 
-- json: Pretty-printed JSON format
+:   Write output in the specified format\
 
-- jsonl: JSON Lines format
+    \
+    *Possible values:*
 
-- sarif: SARIF format
+    -   human: A text-based format designed for humans
 
-**--max-matches**=*N* \[default: 3\]  
-Limit the number of matches per finding to at most N
+    -   json: Pretty-printed JSON format
 
-A negative value means "no limit".
+    -   jsonl: JSON Lines format
 
-**-v**, **--verbose**  
-Enable verbose output
+    -   sarif: SARIF format
 
-This can be repeated up to 3 times to enable successively more output.
+**\--max-matches**=*N* \[default: 3\]
 
-**-q**, **--quiet**  
-Suppress non-error feedback messages
+:   Limit the number of matches per finding to at most N
 
-This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-progress bars. This overrides any provided verbosity and progress
-reporting options.
+    A negative value means \"no limit\".
 
-**--color**=*MODE* \[default: auto\]  
-Enable or disable colored output
+**-v**, **\--verbose**
 
-When this is "auto", colors are enabled for stdout and stderr when they
-are terminals.
+:   Enable verbose output
 
-If the \`NO_COLOR\` environment variable is set, it takes precedence and
-is equivalent to \`--color=never\`.  
+    This can be repeated up to 3 times to enable successively more
+    output.
 
-  
-\[*possible values:* auto, never, always\]
+**-q**, **\--quiet**
 
-**--progress**=*MODE* \[default: auto\]  
-Enable or disable progress bars
+:   Suppress non-error feedback messages
 
-When this is "auto", progress bars are enabled when stderr is a
-terminal.  
+    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+    progress bars. This overrides any provided verbosity and progress
+    reporting options.
 
-  
-\[*possible values:* auto, never, always\]
+**\--color**=*MODE* \[default: auto\]
 
-**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
-Set the rlimit for number of open files to LIMIT
+:   Enable or disable colored output
 
-This should not need to be changed from the default unless you run into
-crashes from running out of file descriptors.
+    When this is \"auto\", colors are enabled for stdout and stderr when
+    they are terminals.
 
-**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
-Set the cache size for sqlite connections to SIZE
+    If the \`NO_COLOR\` environment variable is set, it takes precedence
+    and is equivalent to \`\--color=never\`.\
 
-This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
-default value is set to use a maximum of 1GiB for database cache. See
-\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
+    \
+    \[*possible values:* auto, never, always\]
 
-**--enable-backtraces**=*BOOL* \[default: true\]  
-Enable or disable backtraces on panic
+**\--progress**=*MODE* \[default: auto\]
 
-This has the effect of setting the \`RUST_BACKTRACE\` environment
-variable to 1.  
+:   Enable or disable progress bars
 
-  
-\[*possible values:* true, false\]
+    When this is \"auto\", progress bars are enabled when stderr is a
+    terminal.\
 
-**-h**, **--help**  
-Print help (see a summary with -h)
+    \
+    \[*possible values:* auto, never, always\]
+
+**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
+
+:   Set the rlimit for number of open files to LIMIT
+
+    This should not need to be changed from the default unless you run
+    into crashes from running out of file descriptors.
+
+**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
+
+:   Set the cache size for sqlite connections to SIZE
+
+    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
+    The default value is set to use a maximum of 1GiB for database
+    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
+    more details.
+
+**\--enable-backtraces**=*BOOL* \[default: true\]
+
+:   Enable or disable backtraces on panic
+
+    This has the effect of setting the \`RUST_BACKTRACE\` environment
+    variable to 1.\
+
+    \
+    \[*possible values:* true, false\]
+
+**-h**, **\--help**
+
+:   Print help (see a summary with -h)
