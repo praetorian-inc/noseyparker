@@ -49,7 +49,7 @@ Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) 
 $ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
 ```
 
-**Note:** The Docker images runs noticeably slower than a native binary, particularly on macOS.
+**Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
 </details>
 
 
@@ -137,7 +137,13 @@ Running the `noseyparker` binary without arguments prints top-level help and exi
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
 More detailed help is available with the `help` command or long-form `--help` option.
 
+
+## Usage examples
+
 ### Docker usage note
+
+<details>
+
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
 ```shell
@@ -145,9 +151,8 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 ```
 
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
+</details>
 
-
-## Usage examples
 
 ### Scan filesystem content for secrets
 
