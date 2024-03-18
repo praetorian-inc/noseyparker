@@ -61,17 +61,17 @@ limits and may make additional content accessible.
 
 # OPTIONS
 
-**-d**, **--datastore**=*PATH* \[default: datastore.np\]
+**-d**, **--datastore**=*PATH* \[default: datastore.np\]  
 Use the specified datastore
 
 The datastore will be created if it does not exist.
 
 May also be specified with the **NP_DATASTORE** environment variable.
 
-**-j**, **--jobs**=*N* \[default: 4\]
+**-j**, **--jobs**=*N* \[default: 4\]  
 Use N parallel scanning threads
 
-**--rules**=*PATH*
+**--rules**=*PATH*  
 Load additional rules and rulesets from the specified file or directory
 
 The paths can be either files or directories. Directories are
@@ -80,7 +80,7 @@ will be loaded.
 
 This option can be repeated.
 
-**--ruleset**=*ID* \[default: default\]
+**--ruleset**=*ID* \[default: default\]  
 Enable the ruleset with the specified ID
 
 The ID must resolve to a built-in ruleset or to an additional ruleset
@@ -94,7 +94,7 @@ Specifying this option disables the default ruleset. If you want to use
 a custom ruleset in addition to the default ruleset, specify this option
 twice, e.g., \`--ruleset default --ruleset CUSTOM_ID\`.
 
-**--git-url**=*URL*
+**--git-url**=*URL*  
 Clone and scan the Git repository at the specified URL
 
 Only https URLs without credentials, query parameters, or fragment
@@ -102,43 +102,43 @@ identifiers are supported.
 
 This option can be repeated.
 
-**--github-user**=*NAME*
+**--github-user**=*NAME*  
 Clone and scan accessible repositories belonging to the specified GitHub
 user
 
 This option can be repeated.
 
-**--github-organization**=*NAME*
+**--github-organization**=*NAME*  
 Clone and scan accessible repositories belonging to the specified GitHub
 organization
 
 This option can be repeated.
 
-**--all-github-organizations**
+**--all-github-organizations**  
 Clone and scan accessible repositories from all accessible GitHub
 organizations
 
 This only works with a GitHub Enterprise Server instance. A non-default
 option for the \`--github-api-url\` option must be specified.
 
-**--github-api-url**=*URL* \[default: https://api.github.com/\]
+**--github-api-url**=*URL* \[default: https://api.github.com/\]  
 Use the specified URL for GitHub API access
 
 If accessing a GitHub Enterprise Server instance, this value should be
 the entire base URL include the \`api/v3\` portion, e.g.,
 \`https://github.example.com/api/v3\`.
 
-**--git-clone**=*MODE* \[default: bare\]
-Use the specified method for cloning Git repositories
+**--git-clone**=*MODE* \[default: bare\]  
+Use the specified method for cloning Git repositories  
 
-
+  
 *Possible values:*
 
 - bare: Match the behavior of \`git clone --bare\`
 
 - mirror: Match the behavior of \`git clone --mirror\`
 
-**--git-history**=*MODE* \[default: full\]
+**--git-history**=*MODE* \[default: full\]  
 Use the specified mode for handling Git history
 
 Git history can be completely ignored when scanning by using
@@ -146,16 +146,16 @@ Git history can be completely ignored when scanning by using
 specifiers that cause Git repositories to be automatically cloned. For
 example, specifying an input with \`--git-url=\<URL\>\` while
 simultaneously using \`--git-history=none\` will not result in useful
-scanning.
+scanning.  
 
-
+  
 *Possible values:*
 
 - full: Scan all history
 
 - none: Scan no history
 
-**--max-file-size**=*MEGABYTES* \[default: 100\]
+**--max-file-size**=*MEGABYTES* \[default: 100\]  
 Do not scan files larger than the specified size
 
 The value is parsed as a floating point literal, and hence fractional
@@ -163,17 +163,17 @@ values can be supplied. A negative value means "no limit". Note that
 scanning requires reading the entire contents of each file into memory,
 so using an excessively large limit may be problematic.
 
-**-i**, **--ignore**=*FILE*
+**-i**, **--ignore**=*FILE*  
 Use custom path-based ignore rules from the specified file
 
 The ignore file should contain gitignore-style rules.
 
 This option can be repeated.
 
-**--blob-metadata**=*MODE* \[default: matching\]
-Specify which blobs will have metadata recorded
+**--blob-metadata**=*MODE* \[default: matching\]  
+Specify which blobs will have metadata recorded  
 
-
+  
 *Possible values:*
 
 - all: Record metadata for all encountered blobs
@@ -182,13 +182,13 @@ Specify which blobs will have metadata recorded
 
 - none: Record metadata for no blobs
 
-**--git-blob-provenance**=*MODE* \[default: first-seen\]
+**--git-blob-provenance**=*MODE* \[default: first-seen\]  
 Specify which Git commit provenance metadata will be collected
 
 This should not need to be changed unless you are running into
-performance problems on a problematic Git repository input.
+performance problems on a problematic Git repository input.  
 
-
+  
 *Possible values:*
 
 - first-seen: The Git repository and set of commits and accompanying
@@ -196,13 +196,13 @@ performance problems on a problematic Git repository input.
 
 - minimal: Only the Git repository in which a blob is seen
 
-**--snippet-length**=*BYTES* \[default: 256\]
+**--snippet-length**=*BYTES* \[default: 256\]  
 Include up to the specified number of bytes before and after each match
 
 The default value typically gives between 4 and 7 lines of context
 before and after each match.
 
-**--copy-blobs**=*MODE* \[default: none\]
+**--copy-blobs**=*MODE* \[default: none\]  
 Specify which blobs will be copied in entirety to the datastore
 
 If this option is enabled, corresponding blobs will be written to the
@@ -212,9 +212,9 @@ hex-encoded blob ID name a subdirectory, and the remaining characters
 are used as the filename.
 
 This mechanism exists to aid in ad-hoc downstream investigation. Copied
-blobs are not used elsewhere in Nosey Parker at this point.
+blobs are not used elsewhere in Nosey Parker at this point.  
 
-
+  
 *Possible values:*
 
 - all: Copy all encountered blobs
@@ -223,66 +223,66 @@ blobs are not used elsewhere in Nosey Parker at this point.
 
 - none: Copy no blobs
 
-**--ignore-certs**
+**--ignore-certs**  
 Ignore validation of TLS certificates
 
-**-v**, **--verbose**
+**-v**, **--verbose**  
 Enable verbose output
 
 This can be repeated up to 3 times to enable successively more output.
 
-**-q**, **--quiet**
+**-q**, **--quiet**  
 Suppress non-error feedback messages
 
 This silences WARNING, INFO, DEBUG, and TRACE messages and disables
 progress bars. This overrides any provided verbosity and progress
 reporting options.
 
-**--color**=*MODE* \[default: auto\]
+**--color**=*MODE* \[default: auto\]  
 Enable or disable colored output
 
 When this is "auto", colors are enabled for stdout and stderr when they
 are terminals.
 
 If the \`NO_COLOR\` environment variable is set, it takes precedence and
-is equivalent to \`--color=never\`.
+is equivalent to \`--color=never\`.  
 
-
+  
 \[*possible values:* auto, never, always\]
 
-**--progress**=*MODE* \[default: auto\]
+**--progress**=*MODE* \[default: auto\]  
 Enable or disable progress bars
 
 When this is "auto", progress bars are enabled when stderr is a
-terminal.
+terminal.  
 
-
+  
 \[*possible values:* auto, never, always\]
 
-**--rlimit-nofile**=*LIMIT* \[default: 16384\]
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
 Set the rlimit for number of open files to LIMIT
 
 This should not need to be changed from the default unless you run into
 crashes from running out of file descriptors.
 
-**--sqlite-cache-size**=*SIZE* \[default: -1048576\]
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
 Set the cache size for sqlite connections to SIZE
 
 This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
 default value is set to use a maximum of 1GiB for database cache. See
 \<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-**--enable-backtraces**=*BOOL* \[default: true\]
+**--enable-backtraces**=*BOOL* \[default: true\]  
 Enable or disable backtraces on panic
 
 This has the effect of setting the \`RUST_BACKTRACE\` environment
-variable to 1.
+variable to 1.  
 
-
+  
 \[*possible values:* true, false\]
 
-**-h**, **--help**
+**-h**, **--help**  
 Print help (see a summary with -h)
 
-\[*INPUT*\]
+\[*INPUT*\]  
 Scan the specified file, directory, or local Git repository
