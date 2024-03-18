@@ -4,11 +4,10 @@ noseyparker-generate-manpages - Generate man pages
 
 # SYNOPSIS
 
-**noseyparker generate manpages** \[**-o**\|**\--output**\]
-\[**-v**\|**\--verbose**\]\... \[**-q**\|**\--quiet**\] \[**\--color**\]
-\[**\--progress**\] \[**\--rlimit-nofile**\]
-\[**\--sqlite-cache-size**\] \[**\--enable-backtraces**\]
-\[**-h**\|**\--help**\]
+**noseyparker generate manpages** \[**-o**\|**--output**\]
+\[**-v**\|**--verbose**\]... \[**-q**\|**--quiet**\] \[**--color**\]
+\[**--progress**\] \[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
+\[**--enable-backtraces**\] \[**-h**\|**--help**\]
 
 # DESCRIPTION
 
@@ -16,74 +15,63 @@ Generate man pages
 
 # OPTIONS
 
-**-o**, **\--output**=*PATH* \[default: manpages\]
+**-o**, **--output**=*PATH* \[default: manpages\]  
+Write output to the specified directory
 
-:   Write output to the specified directory
+**-v**, **--verbose**  
+Enable verbose output
 
-**-v**, **\--verbose**
+This can be repeated up to 3 times to enable successively more output.
 
-:   Enable verbose output
+**-q**, **--quiet**  
+Suppress non-error feedback messages
 
-    This can be repeated up to 3 times to enable successively more
-    output.
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+progress bars. This overrides any provided verbosity and progress
+reporting options.
 
-**-q**, **\--quiet**
+**--color**=*MODE* \[default: auto\]  
+Enable or disable colored output
 
-:   Suppress non-error feedback messages
+When this is "auto", colors are enabled for stdout and stderr when they
+are terminals.
 
-    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-    progress bars. This overrides any provided verbosity and progress
-    reporting options.
+If the \`NO_COLOR\` environment variable is set, it takes precedence and
+is equivalent to \`--color=never\`.  
 
-**\--color**=*MODE* \[default: auto\]
+  
+\[*possible values:* auto, never, always\]
 
-:   Enable or disable colored output
+**--progress**=*MODE* \[default: auto\]  
+Enable or disable progress bars
 
-    When this is \"auto\", colors are enabled for stdout and stderr when
-    they are terminals.
+When this is "auto", progress bars are enabled when stderr is a
+terminal.  
 
-    If the \`NO_COLOR\` environment variable is set, it takes precedence
-    and is equivalent to \`\--color=never\`.\
+  
+\[*possible values:* auto, never, always\]
 
-    \
-    \[*possible values:* auto, never, always\]
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
+Set the rlimit for number of open files to LIMIT
 
-**\--progress**=*MODE* \[default: auto\]
+This should not need to be changed from the default unless you run into
+crashes from running out of file descriptors.
 
-:   Enable or disable progress bars
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
+Set the cache size for sqlite connections to SIZE
 
-    When this is \"auto\", progress bars are enabled when stderr is a
-    terminal.\
+This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
+default value is set to use a maximum of 1GiB for database cache. See
+\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-    \
-    \[*possible values:* auto, never, always\]
+**--enable-backtraces**=*BOOL* \[default: true\]  
+Enable or disable backtraces on panic
 
-**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
+This has the effect of setting the \`RUST_BACKTRACE\` environment
+variable to 1.  
 
-:   Set the rlimit for number of open files to LIMIT
+  
+\[*possible values:* true, false\]
 
-    This should not need to be changed from the default unless you run
-    into crashes from running out of file descriptors.
-
-**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
-
-:   Set the cache size for sqlite connections to SIZE
-
-    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
-    The default value is set to use a maximum of 1GiB for database
-    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
-    more details.
-
-**\--enable-backtraces**=*BOOL* \[default: true\]
-
-:   Enable or disable backtraces on panic
-
-    This has the effect of setting the \`RUST_BACKTRACE\` environment
-    variable to 1.\
-
-    \
-    \[*possible values:* true, false\]
-
-**-h**, **\--help**
-
-:   Print help (see a summary with -h)
+**-h**, **--help**  
+Print help (see a summary with -h)

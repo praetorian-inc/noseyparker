@@ -4,18 +4,17 @@ noseyparker-scan - Scan content for secrets
 
 # SYNOPSIS
 
-**noseyparker scan** \[**-d**\|**\--datastore**\]
-\[**-j**\|**\--jobs**\] \[**\--rules**\] \[**\--ruleset**\]
-\[**\--git-url**\] \[**\--github-user**\] \[**\--github-organization**\]
-\[**\--all-github-organizations**\] \[**\--github-api-url**\]
-\[**\--git-clone**\] \[**\--git-history**\] \[**\--max-file-size**\]
-\[**-i**\|**\--ignore**\] \[**\--blob-metadata**\]
-\[**\--git-blob-provenance**\] \[**\--snippet-length**\]
-\[**\--copy-blobs**\] \[**\--ignore-certs**\]
-\[**-v**\|**\--verbose**\]\... \[**-q**\|**\--quiet**\] \[**\--color**\]
-\[**\--progress**\] \[**\--rlimit-nofile**\]
-\[**\--sqlite-cache-size**\] \[**\--enable-backtraces**\]
-\[**-h**\|**\--help**\] \[*INPUT*\]
+**noseyparker scan** \[**-d**\|**--datastore**\] \[**-j**\|**--jobs**\]
+\[**--rules**\] \[**--ruleset**\] \[**--git-url**\]
+\[**--github-user**\] \[**--github-organization**\]
+\[**--all-github-organizations**\] \[**--github-api-url**\]
+\[**--git-clone**\] \[**--git-history**\] \[**--max-file-size**\]
+\[**-i**\|**--ignore**\] \[**--blob-metadata**\]
+\[**--git-blob-provenance**\] \[**--snippet-length**\]
+\[**--copy-blobs**\] \[**--ignore-certs**\] \[**-v**\|**--verbose**\]...
+\[**-q**\|**--quiet**\] \[**--color**\] \[**--progress**\]
+\[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
+\[**--enable-backtraces**\] \[**-h**\|**--help**\] \[*INPUT*\]
 
 # DESCRIPTION
 
@@ -36,19 +35,19 @@ are scanned directly; directories are recursively enumerated and
 scanned. Any directories encountered that are Git repositories will have
 their entire history scanned.
 
-\- A Git repository URL can be specified with the \`\--git-repo=URL\`
+\- A Git repository URL can be specified with the \`--git-repo=URL\`
 argument. This will cause Nosey Parker to clone that repository to its
 datastore and scan its history.
 
-\- A GitHub user can be specified with the \`\--github-user=NAME\`
+\- A GitHub user can be specified with the \`--github-user=NAME\`
 argument. This will cause Nosey Parker to enumerate accessible
 repositories belonging to that user, clone them to its datastore, and
 scan their entire history.
 
-\- A GitHub organization can be specified with the
-\`\--github-org=NAME\` argument. This will cause Nosey Parker to
-enumerate accessible repositories belonging to that organization, clone
-them to its datastore, and scan their entire history.
+\- A GitHub organization can be specified with the \`--github-org=NAME\`
+argument. This will cause Nosey Parker to enumerate accessible
+repositories belonging to that organization, clone them to its
+datastore, and scan their entire history.
 
 The \`git\` binary on the PATH is used to clone any required Git
 repositories. It is careful invoked to avoid using any system-wide or
@@ -62,263 +61,228 @@ limits and may make additional content accessible.
 
 # OPTIONS
 
-**-d**, **\--datastore**=*PATH* \[default: datastore.np\]
+**-d**, **--datastore**=*PATH* \[default: datastore.np\]  
+Use the specified datastore
 
-:   Use the specified datastore
+The datastore will be created if it does not exist.
 
-    The datastore will be created if it does not exist.
+May also be specified with the **NP_DATASTORE** environment variable.
 
-    May also be specified with the **NP_DATASTORE** environment
-    variable.
+**-j**, **--jobs**=*N* \[default: 4\]  
+Use N parallel scanning threads
 
-**-j**, **\--jobs**=*N* \[default: 4\]
+**--rules**=*PATH*  
+Load additional rules and rulesets from the specified file or directory
 
-:   Use N parallel scanning threads
+The paths can be either files or directories. Directories are
+recursively walked and all discovered YAML files of rules and rulesets
+will be loaded.
 
-**\--rules**=*PATH*
+This option can be repeated.
 
-:   Load additional rules and rulesets from the specified file or
-    directory
+**--ruleset**=*ID* \[default: default\]  
+Enable the ruleset with the specified ID
 
-    The paths can be either files or directories. Directories are
-    recursively walked and all discovered YAML files of rules and
-    rulesets will be loaded.
+The ID must resolve to a built-in ruleset or to an additional ruleset
+loaded with the \`--rules=PATH\` option.
 
-    This option can be repeated.
+The special \`all\` ID causes all loaded rules to be used.
 
-**\--ruleset**=*ID* \[default: default\]
+This option can be repeated.
 
-:   Enable the ruleset with the specified ID
+Specifying this option disables the default ruleset. If you want to use
+a custom ruleset in addition to the default ruleset, specify this option
+twice, e.g., \`--ruleset default --ruleset CUSTOM_ID\`.
 
-    The ID must resolve to a built-in ruleset or to an additional
-    ruleset loaded with the \`\--rules=PATH\` option.
+**--git-url**=*URL*  
+Clone and scan the Git repository at the specified URL
 
-    The special \`all\` ID causes all loaded rules to be used.
+Only https URLs without credentials, query parameters, or fragment
+identifiers are supported.
 
-    This option can be repeated.
+This option can be repeated.
 
-    Specifying this option disables the default ruleset. If you want to
-    use a custom ruleset in addition to the default ruleset, specify
-    this option twice, e.g., \`\--ruleset default \--ruleset
-    CUSTOM_ID\`.
+**--github-user**=*NAME*  
+Clone and scan accessible repositories belonging to the specified GitHub
+user
 
-**\--git-url**=*URL*
+This option can be repeated.
 
-:   Clone and scan the Git repository at the specified URL
+**--github-organization**=*NAME*  
+Clone and scan accessible repositories belonging to the specified GitHub
+organization
 
-    Only https URLs without credentials, query parameters, or fragment
-    identifiers are supported.
+This option can be repeated.
 
-    This option can be repeated.
+**--all-github-organizations**  
+Clone and scan accessible repositories from all accessible GitHub
+organizations
 
-**\--github-user**=*NAME*
+This only works with a GitHub Enterprise Server instance. A non-default
+option for the \`--github-api-url\` option must be specified.
 
-:   Clone and scan accessible repositories belonging to the specified
-    GitHub user
+**--github-api-url**=*URL* \[default: https://api.github.com/\]  
+Use the specified URL for GitHub API access
 
-    This option can be repeated.
+If accessing a GitHub Enterprise Server instance, this value should be
+the entire base URL include the \`api/v3\` portion, e.g.,
+\`https://github.example.com/api/v3\`.
 
-**\--github-organization**=*NAME*
+**--git-clone**=*MODE* \[default: bare\]  
+Use the specified method for cloning Git repositories  
 
-:   Clone and scan accessible repositories belonging to the specified
-    GitHub organization
+  
+*Possible values:*
 
-    This option can be repeated.
+-   bare: Match the behavior of \`git clone --bare\`
 
-**\--all-github-organizations**
+-   mirror: Match the behavior of \`git clone --mirror\`
 
-:   Clone and scan accessible repositories from all accessible GitHub
-    organizations
+**--git-history**=*MODE* \[default: full\]  
+Use the specified mode for handling Git history
 
-    This only works with a GitHub Enterprise Server instance. A
-    non-default option for the \`\--github-api-url\` option must be
-    specified.
+Git history can be completely ignored when scanning by using
+\`--git-history=none\`. Note that this will interfere with other input
+specifiers that cause Git repositories to be automatically cloned. For
+example, specifying an input with \`--git-url=\<URL\>\` while
+simultaneously using \`--git-history=none\` will not result in useful
+scanning.  
 
-**\--github-api-url**=*URL* \[default: https://api.github.com/\]
+  
+*Possible values:*
 
-:   Use the specified URL for GitHub API access
+-   full: Scan all history
 
-    If accessing a GitHub Enterprise Server instance, this value should
-    be the entire base URL include the \`api/v3\` portion, e.g.,
-    \`https://github.example.com/api/v3\`.
+-   none: Scan no history
 
-**\--git-clone**=*MODE* \[default: bare\]
+**--max-file-size**=*MEGABYTES* \[default: 100\]  
+Do not scan files larger than the specified size
 
-:   Use the specified method for cloning Git repositories\
+The value is parsed as a floating point literal, and hence fractional
+values can be supplied. A negative value means "no limit". Note that
+scanning requires reading the entire contents of each file into memory,
+so using an excessively large limit may be problematic.
 
-    \
-    *Possible values:*
+**-i**, **--ignore**=*FILE*  
+Use custom path-based ignore rules from the specified file
 
-    -   bare: Match the behavior of \`git clone \--bare\`
+The ignore file should contain gitignore-style rules.
 
-    -   mirror: Match the behavior of \`git clone \--mirror\`
+This option can be repeated.
 
-**\--git-history**=*MODE* \[default: full\]
+**--blob-metadata**=*MODE* \[default: matching\]  
+Specify which blobs will have metadata recorded  
 
-:   Use the specified mode for handling Git history
+  
+*Possible values:*
 
-    Git history can be completely ignored when scanning by using
-    \`\--git-history=none\`. Note that this will interfere with other
-    input specifiers that cause Git repositories to be automatically
-    cloned. For example, specifying an input with \`\--git-url=\<URL\>\`
-    while simultaneously using \`\--git-history=none\` will not result
-    in useful scanning.\
+-   all: Record metadata for all encountered blobs
 
-    \
-    *Possible values:*
+-   matching: Record metadata only for blobs with matches
 
-    -   full: Scan all history
+-   none: Record metadata for no blobs
 
-    -   none: Scan no history
+**--git-blob-provenance**=*MODE* \[default: first-seen\]  
+Specify which Git commit provenance metadata will be collected
 
-**\--max-file-size**=*MEGABYTES* \[default: 100\]
+This should not need to be changed unless you are running into
+performance problems on a problematic Git repository input.  
 
-:   Do not scan files larger than the specified size
+  
+*Possible values:*
 
-    The value is parsed as a floating point literal, and hence
-    fractional values can be supplied. A negative value means \"no
-    limit\". Note that scanning requires reading the entire contents of
-    each file into memory, so using an excessively large limit may be
-    problematic.
+-   first-seen: The Git repository and set of commits and accompanying
+    pathnames in which a blob is first seen
 
-**-i**, **\--ignore**=*FILE*
+-   minimal: Only the Git repository in which a blob is seen
 
-:   Use custom path-based ignore rules from the specified file
+**--snippet-length**=*BYTES* \[default: 256\]  
+Include up to the specified number of bytes before and after each match
 
-    The ignore file should contain gitignore-style rules.
+The default value typically gives between 4 and 7 lines of context
+before and after each match.
 
-    This option can be repeated.
+**--copy-blobs**=*MODE* \[default: none\]  
+Specify which blobs will be copied in entirety to the datastore
 
-**\--blob-metadata**=*MODE* \[default: matching\]
+If this option is enabled, corresponding blobs will be written to the
+\`blobs\` directory within the datastore. The format of that directory
+is similar to Gits "loose" object format: the first 2 characters of the
+hex-encoded blob ID name a subdirectory, and the remaining characters
+are used as the filename.
 
-:   Specify which blobs will have metadata recorded\
+This mechanism exists to aid in ad-hoc downstream investigation. Copied
+blobs are not used elsewhere in Nosey Parker at this point.  
 
-    \
-    *Possible values:*
+  
+*Possible values:*
 
-    -   all: Record metadata for all encountered blobs
+-   all: Copy all encountered blobs
 
-    -   matching: Record metadata only for blobs with matches
+-   matching: Copy only blobs with matches
 
-    -   none: Record metadata for no blobs
+-   none: Copy no blobs
 
-**\--git-blob-provenance**=*MODE* \[default: first-seen\]
+**--ignore-certs**  
+Ignore validation of TLS certificates
 
-:   Specify which Git commit provenance metadata will be collected
+**-v**, **--verbose**  
+Enable verbose output
 
-    This should not need to be changed unless you are running into
-    performance problems on a problematic Git repository input.\
+This can be repeated up to 3 times to enable successively more output.
 
-    \
-    *Possible values:*
+**-q**, **--quiet**  
+Suppress non-error feedback messages
 
-    -   first-seen: The Git repository and set of commits and
-        accompanying pathnames in which a blob is first seen
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+progress bars. This overrides any provided verbosity and progress
+reporting options.
 
-    -   minimal: Only the Git repository in which a blob is seen
+**--color**=*MODE* \[default: auto\]  
+Enable or disable colored output
 
-**\--snippet-length**=*BYTES* \[default: 256\]
+When this is "auto", colors are enabled for stdout and stderr when they
+are terminals.
 
-:   Include up to the specified number of bytes before and after each
-    match
+If the \`NO_COLOR\` environment variable is set, it takes precedence and
+is equivalent to \`--color=never\`.  
 
-    The default value typically gives between 4 and 7 lines of context
-    before and after each match.
+  
+\[*possible values:* auto, never, always\]
 
-**\--copy-blobs**=*MODE* \[default: none\]
+**--progress**=*MODE* \[default: auto\]  
+Enable or disable progress bars
 
-:   Specify which blobs will be copied in entirety to the datastore
+When this is "auto", progress bars are enabled when stderr is a
+terminal.  
 
-    If this option is enabled, corresponding blobs will be written to
-    the \`blobs\` directory within the datastore. The format of that
-    directory is similar to Gits \"loose\" object format: the first 2
-    characters of the hex-encoded blob ID name a subdirectory, and the
-    remaining characters are used as the filename.
+  
+\[*possible values:* auto, never, always\]
 
-    This mechanism exists to aid in ad-hoc downstream investigation.
-    Copied blobs are not used elsewhere in Nosey Parker at this point.\
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
+Set the rlimit for number of open files to LIMIT
 
-    \
-    *Possible values:*
+This should not need to be changed from the default unless you run into
+crashes from running out of file descriptors.
 
-    -   all: Copy all encountered blobs
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
+Set the cache size for sqlite connections to SIZE
 
-    -   matching: Copy only blobs with matches
+This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
+default value is set to use a maximum of 1GiB for database cache. See
+\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-    -   none: Copy no blobs
+**--enable-backtraces**=*BOOL* \[default: true\]  
+Enable or disable backtraces on panic
 
-**\--ignore-certs**
+This has the effect of setting the \`RUST_BACKTRACE\` environment
+variable to 1.  
 
-:   Ignore validation of TLS certificates
+  
+\[*possible values:* true, false\]
 
-**-v**, **\--verbose**
+**-h**, **--help**  
+Print help (see a summary with -h)
 
-:   Enable verbose output
-
-    This can be repeated up to 3 times to enable successively more
-    output.
-
-**-q**, **\--quiet**
-
-:   Suppress non-error feedback messages
-
-    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-    progress bars. This overrides any provided verbosity and progress
-    reporting options.
-
-**\--color**=*MODE* \[default: auto\]
-
-:   Enable or disable colored output
-
-    When this is \"auto\", colors are enabled for stdout and stderr when
-    they are terminals.
-
-    If the \`NO_COLOR\` environment variable is set, it takes precedence
-    and is equivalent to \`\--color=never\`.\
-
-    \
-    \[*possible values:* auto, never, always\]
-
-**\--progress**=*MODE* \[default: auto\]
-
-:   Enable or disable progress bars
-
-    When this is \"auto\", progress bars are enabled when stderr is a
-    terminal.\
-
-    \
-    \[*possible values:* auto, never, always\]
-
-**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
-
-:   Set the rlimit for number of open files to LIMIT
-
-    This should not need to be changed from the default unless you run
-    into crashes from running out of file descriptors.
-
-**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
-
-:   Set the cache size for sqlite connections to SIZE
-
-    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
-    The default value is set to use a maximum of 1GiB for database
-    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
-    more details.
-
-**\--enable-backtraces**=*BOOL* \[default: true\]
-
-:   Enable or disable backtraces on panic
-
-    This has the effect of setting the \`RUST_BACKTRACE\` environment
-    variable to 1.\
-
-    \
-    \[*possible values:* true, false\]
-
-**-h**, **\--help**
-
-:   Print help (see a summary with -h)
-
-\[*INPUT*\]
-
-:   Scan the specified file, directory, or local Git repository
+\[*INPUT*\]  
+Scan the specified file, directory, or local Git repository

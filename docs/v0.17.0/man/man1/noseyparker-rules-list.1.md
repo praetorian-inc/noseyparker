@@ -4,12 +4,11 @@ noseyparker-rules-list - List available rules
 
 # SYNOPSIS
 
-**noseyparker rules list** \[**\--rules**\] \[**\--ruleset**\]
-\[**-o**\|**\--output**\] \[**-f**\|**\--format**\]
-\[**-v**\|**\--verbose**\]\... \[**-q**\|**\--quiet**\] \[**\--color**\]
-\[**\--progress**\] \[**\--rlimit-nofile**\]
-\[**\--sqlite-cache-size**\] \[**\--enable-backtraces**\]
-\[**-h**\|**\--help**\]
+**noseyparker rules list** \[**--rules**\] \[**--ruleset**\]
+\[**-o**\|**--output**\] \[**-f**\|**--format**\]
+\[**-v**\|**--verbose**\]... \[**-q**\|**--quiet**\] \[**--color**\]
+\[**--progress**\] \[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
+\[**--enable-backtraces**\] \[**-h**\|**--help**\]
 
 # DESCRIPTION
 
@@ -17,114 +16,98 @@ List available rules
 
 # OPTIONS
 
-**\--rules**=*PATH*
+**--rules**=*PATH*  
+Load additional rules and rulesets from the specified file or directory
 
-:   Load additional rules and rulesets from the specified file or
-    directory
+The paths can be either files or directories. Directories are
+recursively walked and all discovered YAML files of rules and rulesets
+will be loaded.
 
-    The paths can be either files or directories. Directories are
-    recursively walked and all discovered YAML files of rules and
-    rulesets will be loaded.
+This option can be repeated.
 
-    This option can be repeated.
+**--ruleset**=*ID* \[default: default\]  
+Enable the ruleset with the specified ID
 
-**\--ruleset**=*ID* \[default: default\]
+The ID must resolve to a built-in ruleset or to an additional ruleset
+loaded with the \`--rules=PATH\` option.
 
-:   Enable the ruleset with the specified ID
+The special \`all\` ID causes all loaded rules to be used.
 
-    The ID must resolve to a built-in ruleset or to an additional
-    ruleset loaded with the \`\--rules=PATH\` option.
+This option can be repeated.
 
-    The special \`all\` ID causes all loaded rules to be used.
+Specifying this option disables the default ruleset. If you want to use
+a custom ruleset in addition to the default ruleset, specify this option
+twice, e.g., \`--ruleset default --ruleset CUSTOM_ID\`.
 
-    This option can be repeated.
+**-o**, **--output**=*PATH*  
+Write output to the specified path
 
-    Specifying this option disables the default ruleset. If you want to
-    use a custom ruleset in addition to the default ruleset, specify
-    this option twice, e.g., \`\--ruleset default \--ruleset
-    CUSTOM_ID\`.
+If this argument is not provided, stdout will be used.
 
-**-o**, **\--output**=*PATH*
+**-f**, **--format**=*FORMAT* \[default: human\]  
+Write output in the specified format  
 
-:   Write output to the specified path
+  
+*Possible values:*
 
-    If this argument is not provided, stdout will be used.
+-   human: A text-based format designed for humans
 
-**-f**, **\--format**=*FORMAT* \[default: human\]
+-   json: Pretty-printed JSON format
 
-:   Write output in the specified format\
+**-v**, **--verbose**  
+Enable verbose output
 
-    \
-    *Possible values:*
+This can be repeated up to 3 times to enable successively more output.
 
-    -   human: A text-based format designed for humans
+**-q**, **--quiet**  
+Suppress non-error feedback messages
 
-    -   json: Pretty-printed JSON format
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+progress bars. This overrides any provided verbosity and progress
+reporting options.
 
-**-v**, **\--verbose**
+**--color**=*MODE* \[default: auto\]  
+Enable or disable colored output
 
-:   Enable verbose output
+When this is "auto", colors are enabled for stdout and stderr when they
+are terminals.
 
-    This can be repeated up to 3 times to enable successively more
-    output.
+If the \`NO_COLOR\` environment variable is set, it takes precedence and
+is equivalent to \`--color=never\`.  
 
-**-q**, **\--quiet**
+  
+\[*possible values:* auto, never, always\]
 
-:   Suppress non-error feedback messages
+**--progress**=*MODE* \[default: auto\]  
+Enable or disable progress bars
 
-    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-    progress bars. This overrides any provided verbosity and progress
-    reporting options.
+When this is "auto", progress bars are enabled when stderr is a
+terminal.  
 
-**\--color**=*MODE* \[default: auto\]
+  
+\[*possible values:* auto, never, always\]
 
-:   Enable or disable colored output
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
+Set the rlimit for number of open files to LIMIT
 
-    When this is \"auto\", colors are enabled for stdout and stderr when
-    they are terminals.
+This should not need to be changed from the default unless you run into
+crashes from running out of file descriptors.
 
-    If the \`NO_COLOR\` environment variable is set, it takes precedence
-    and is equivalent to \`\--color=never\`.\
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
+Set the cache size for sqlite connections to SIZE
 
-    \
-    \[*possible values:* auto, never, always\]
+This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
+default value is set to use a maximum of 1GiB for database cache. See
+\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-**\--progress**=*MODE* \[default: auto\]
+**--enable-backtraces**=*BOOL* \[default: true\]  
+Enable or disable backtraces on panic
 
-:   Enable or disable progress bars
+This has the effect of setting the \`RUST_BACKTRACE\` environment
+variable to 1.  
 
-    When this is \"auto\", progress bars are enabled when stderr is a
-    terminal.\
+  
+\[*possible values:* true, false\]
 
-    \
-    \[*possible values:* auto, never, always\]
-
-**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
-
-:   Set the rlimit for number of open files to LIMIT
-
-    This should not need to be changed from the default unless you run
-    into crashes from running out of file descriptors.
-
-**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
-
-:   Set the cache size for sqlite connections to SIZE
-
-    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
-    The default value is set to use a maximum of 1GiB for database
-    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
-    more details.
-
-**\--enable-backtraces**=*BOOL* \[default: true\]
-
-:   Enable or disable backtraces on panic
-
-    This has the effect of setting the \`RUST_BACKTRACE\` environment
-    variable to 1.\
-
-    \
-    \[*possible values:* true, false\]
-
-**-h**, **\--help**
-
-:   Print help (see a summary with -h)
+**-h**, **--help**  
+Print help (see a summary with -h)

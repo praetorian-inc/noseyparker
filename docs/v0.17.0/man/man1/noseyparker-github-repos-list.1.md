@@ -5,14 +5,12 @@ specific user or organization
 
 # SYNOPSIS
 
-**noseyparker github repos list** \[**\--user**\]
-\[**\--organization**\] \[**\--all-organizations**\]
-\[**-o**\|**\--output**\] \[**-f**\|**\--format**\]
-\[**\--ignore-certs**\] \[**\--github-api-url**\]
-\[**-v**\|**\--verbose**\]\... \[**-q**\|**\--quiet**\] \[**\--color**\]
-\[**\--progress**\] \[**\--rlimit-nofile**\]
-\[**\--sqlite-cache-size**\] \[**\--enable-backtraces**\]
-\[**-h**\|**\--help**\]
+**noseyparker github repos list** \[**--user**\] \[**--organization**\]
+\[**--all-organizations**\] \[**-o**\|**--output**\]
+\[**-f**\|**--format**\] \[**--ignore-certs**\] \[**--github-api-url**\]
+\[**-v**\|**--verbose**\]... \[**-q**\|**--quiet**\] \[**--color**\]
+\[**--progress**\] \[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
+\[**--enable-backtraces**\] \[**-h**\|**--help**\]
 
 # DESCRIPTION
 
@@ -20,120 +18,103 @@ List repositories belonging to a specific user or organization
 
 # OPTIONS
 
-**\--user**=*USER*
+**--user**=*USER*  
+Select repositories belonging to the specified user
 
-:   Select repositories belonging to the specified user
+This option can be repeated.
 
-    This option can be repeated.
+**--organization**=*ORGANIZATION*  
+Select repositories belonging to the specified organization
 
-**\--organization**=*ORGANIZATION*
+This option can be repeated.
 
-:   Select repositories belonging to the specified organization
+**--all-organizations**  
+Select repositories belonging to all organizations
 
-    This option can be repeated.
+This only works with a GitHub Enterprise Server instance. The
+\`--github-api-url\` option must be specified.
 
-**\--all-organizations**
+**-o**, **--output**=*PATH*  
+Write output to the specified path
 
-:   Select repositories belonging to all organizations
+If this argument is not provided, stdout will be used.
 
-    This only works with a GitHub Enterprise Server instance. The
-    \`\--github-api-url\` option must be specified.
+**-f**, **--format**=*FORMAT* \[default: human\]  
+Write output in the specified format  
 
-**-o**, **\--output**=*PATH*
+  
+*Possible values:*
 
-:   Write output to the specified path
+-   human: A text-based format designed for humans
 
-    If this argument is not provided, stdout will be used.
+-   json: Pretty-printed JSON format
 
-**-f**, **\--format**=*FORMAT* \[default: human\]
+-   jsonl: JSON Lines format
 
-:   Write output in the specified format\
+**--ignore-certs**  
+Ignore validation of TLS certificates
 
-    \
-    *Possible values:*
+**--github-api-url**=*URL* \[default: https://api.github.com/\]  
+Use the specified URL for GitHub API access
 
-    -   human: A text-based format designed for humans
+If accessing a GitHub Enterprise Server instance, this value should be
+the entire base URL include the \`api/v3\` portion, e.g.,
+\`https://github.example.com/api/v3\`.
 
-    -   json: Pretty-printed JSON format
+**-v**, **--verbose**  
+Enable verbose output
 
-    -   jsonl: JSON Lines format
+This can be repeated up to 3 times to enable successively more output.
 
-**\--ignore-certs**
+**-q**, **--quiet**  
+Suppress non-error feedback messages
 
-:   Ignore validation of TLS certificates
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+progress bars. This overrides any provided verbosity and progress
+reporting options.
 
-**\--github-api-url**=*URL* \[default: https://api.github.com/\]
+**--color**=*MODE* \[default: auto\]  
+Enable or disable colored output
 
-:   Use the specified URL for GitHub API access
+When this is "auto", colors are enabled for stdout and stderr when they
+are terminals.
 
-    If accessing a GitHub Enterprise Server instance, this value should
-    be the entire base URL include the \`api/v3\` portion, e.g.,
-    \`https://github.example.com/api/v3\`.
+If the \`NO_COLOR\` environment variable is set, it takes precedence and
+is equivalent to \`--color=never\`.  
 
-**-v**, **\--verbose**
+  
+\[*possible values:* auto, never, always\]
 
-:   Enable verbose output
+**--progress**=*MODE* \[default: auto\]  
+Enable or disable progress bars
 
-    This can be repeated up to 3 times to enable successively more
-    output.
+When this is "auto", progress bars are enabled when stderr is a
+terminal.  
 
-**-q**, **\--quiet**
+  
+\[*possible values:* auto, never, always\]
 
-:   Suppress non-error feedback messages
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
+Set the rlimit for number of open files to LIMIT
 
-    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-    progress bars. This overrides any provided verbosity and progress
-    reporting options.
+This should not need to be changed from the default unless you run into
+crashes from running out of file descriptors.
 
-**\--color**=*MODE* \[default: auto\]
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
+Set the cache size for sqlite connections to SIZE
 
-:   Enable or disable colored output
+This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
+default value is set to use a maximum of 1GiB for database cache. See
+\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-    When this is \"auto\", colors are enabled for stdout and stderr when
-    they are terminals.
+**--enable-backtraces**=*BOOL* \[default: true\]  
+Enable or disable backtraces on panic
 
-    If the \`NO_COLOR\` environment variable is set, it takes precedence
-    and is equivalent to \`\--color=never\`.\
+This has the effect of setting the \`RUST_BACKTRACE\` environment
+variable to 1.  
 
-    \
-    \[*possible values:* auto, never, always\]
+  
+\[*possible values:* true, false\]
 
-**\--progress**=*MODE* \[default: auto\]
-
-:   Enable or disable progress bars
-
-    When this is \"auto\", progress bars are enabled when stderr is a
-    terminal.\
-
-    \
-    \[*possible values:* auto, never, always\]
-
-**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
-
-:   Set the rlimit for number of open files to LIMIT
-
-    This should not need to be changed from the default unless you run
-    into crashes from running out of file descriptors.
-
-**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
-
-:   Set the cache size for sqlite connections to SIZE
-
-    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
-    The default value is set to use a maximum of 1GiB for database
-    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
-    more details.
-
-**\--enable-backtraces**=*BOOL* \[default: true\]
-
-:   Enable or disable backtraces on panic
-
-    This has the effect of setting the \`RUST_BACKTRACE\` environment
-    variable to 1.\
-
-    \
-    \[*possible values:* true, false\]
-
-**-h**, **\--help**
-
-:   Print help (see a summary with -h)
+**-h**, **--help**  
+Print help (see a summary with -h)

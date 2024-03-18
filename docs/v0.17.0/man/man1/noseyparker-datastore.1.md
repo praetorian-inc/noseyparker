@@ -4,10 +4,10 @@ noseyparker-datastore - Manage datastores
 
 # SYNOPSIS
 
-**noseyparker datastore** \[**-v**\|**\--verbose**\]\...
-\[**-q**\|**\--quiet**\] \[**\--color**\] \[**\--progress**\]
-\[**\--rlimit-nofile**\] \[**\--sqlite-cache-size**\]
-\[**\--enable-backtraces**\] \[**-h**\|**\--help**\] \<*subcommands*\>
+**noseyparker datastore** \[**-v**\|**--verbose**\]...
+\[**-q**\|**--quiet**\] \[**--color**\] \[**--progress**\]
+\[**--rlimit-nofile**\] \[**--sqlite-cache-size**\]
+\[**--enable-backtraces**\] \[**-h**\|**--help**\] \<*subcommands*\>
 
 # DESCRIPTION
 
@@ -15,76 +15,65 @@ Manage datastores
 
 # OPTIONS
 
-**-v**, **\--verbose**
+**-v**, **--verbose**  
+Enable verbose output
 
-:   Enable verbose output
+This can be repeated up to 3 times to enable successively more output.
 
-    This can be repeated up to 3 times to enable successively more
-    output.
+**-q**, **--quiet**  
+Suppress non-error feedback messages
 
-**-q**, **\--quiet**
+This silences WARNING, INFO, DEBUG, and TRACE messages and disables
+progress bars. This overrides any provided verbosity and progress
+reporting options.
 
-:   Suppress non-error feedback messages
+**--color**=*MODE* \[default: auto\]  
+Enable or disable colored output
 
-    This silences WARNING, INFO, DEBUG, and TRACE messages and disables
-    progress bars. This overrides any provided verbosity and progress
-    reporting options.
+When this is "auto", colors are enabled for stdout and stderr when they
+are terminals.
 
-**\--color**=*MODE* \[default: auto\]
+If the \`NO_COLOR\` environment variable is set, it takes precedence and
+is equivalent to \`--color=never\`.  
 
-:   Enable or disable colored output
+  
+\[*possible values:* auto, never, always\]
 
-    When this is \"auto\", colors are enabled for stdout and stderr when
-    they are terminals.
+**--progress**=*MODE* \[default: auto\]  
+Enable or disable progress bars
 
-    If the \`NO_COLOR\` environment variable is set, it takes precedence
-    and is equivalent to \`\--color=never\`.\
+When this is "auto", progress bars are enabled when stderr is a
+terminal.  
 
-    \
-    \[*possible values:* auto, never, always\]
+  
+\[*possible values:* auto, never, always\]
 
-**\--progress**=*MODE* \[default: auto\]
+**--rlimit-nofile**=*LIMIT* \[default: 16384\]  
+Set the rlimit for number of open files to LIMIT
 
-:   Enable or disable progress bars
+This should not need to be changed from the default unless you run into
+crashes from running out of file descriptors.
 
-    When this is \"auto\", progress bars are enabled when stderr is a
-    terminal.\
+**--sqlite-cache-size**=*SIZE* \[default: -1048576\]  
+Set the cache size for sqlite connections to SIZE
 
-    \
-    \[*possible values:* auto, never, always\]
+This has the effect of setting SQLites \`pragma cache_size=SIZE\`. The
+default value is set to use a maximum of 1GiB for database cache. See
+\<https://sqlite.org/pragma.html#pragma_cache_size\> for more details.
 
-**\--rlimit-nofile**=*LIMIT* \[default: 16384\]
+**--enable-backtraces**=*BOOL* \[default: true\]  
+Enable or disable backtraces on panic
 
-:   Set the rlimit for number of open files to LIMIT
+This has the effect of setting the \`RUST_BACKTRACE\` environment
+variable to 1.  
 
-    This should not need to be changed from the default unless you run
-    into crashes from running out of file descriptors.
+  
+\[*possible values:* true, false\]
 
-**\--sqlite-cache-size**=*SIZE* \[default: -1048576\]
-
-:   Set the cache size for sqlite connections to SIZE
-
-    This has the effect of setting SQLites \`pragma cache_size=SIZE\`.
-    The default value is set to use a maximum of 1GiB for database
-    cache. See \<https://sqlite.org/pragma.html#pragma_cache_size\> for
-    more details.
-
-**\--enable-backtraces**=*BOOL* \[default: true\]
-
-:   Enable or disable backtraces on panic
-
-    This has the effect of setting the \`RUST_BACKTRACE\` environment
-    variable to 1.\
-
-    \
-    \[*possible values:* true, false\]
-
-**-h**, **\--help**
-
-:   Print help (see a summary with -h)
+**-h**, **--help**  
+Print help (see a summary with -h)
 
 # SUBCOMMANDS
 
-noseyparker-datastore-init(1)
-
-:   Initialize a new datastore
+noseyparker-datastore-init(1)  
+Initialize a new datastore
