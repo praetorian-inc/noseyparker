@@ -6,6 +6,7 @@ repos:
 
     hooks:
     -   id: check-added-large-files
+        args: ['--maxkb=1024']
     -   id: check-case-conflict
     -   id: check-json
     -   id: check-symlinks
