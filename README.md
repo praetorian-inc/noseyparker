@@ -30,7 +30,9 @@ Prebuilt binaries are available for x86_64 Linux and x86_64/aarch64 macOS on the
 This is a simple way to get started and will give good performance.
 
 
-### Docker image
+### Docker images
+
+<details>
 
 A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
 ```shell
@@ -48,6 +50,8 @@ $ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
 ```
 
 **Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
+
+</details>
 
 
 ### Arch Linux package
@@ -96,12 +100,15 @@ The scanning and reporting steps are implemented as separate commands because yo
 
 
 ### Getting help
+
 Running the `noseyparker` binary without arguments prints top-level help and exits.
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
 More detailed help is available with the `help` command or long-form `--help` option.
 
 The prebuilt releases also include manpages that collect the command-line help in one place.
 These manpages converted into Markdown format are also included in the repository [here](docs/v0.17.0/man/man1).
+
+If you have a question that's not answered by this documentation, feel free to [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose).
 
 
 ### Terminology and data model
@@ -143,7 +150,7 @@ This is Nosey Parker's top-level unit of reporting.
 
 ## Usage examples
 
-### Docker note
+### NOTE: When using Docker...
 
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
@@ -156,6 +163,7 @@ The Docker container runs with `/scan` as its working directory, so mounting `$P
 
 ### Scan filesystem content for secrets
 
+<img src="docs/usage-examples/gifs/02-scan-git-history.gif" alt="Screenshot showing Nosey Parker's workflow for scanning Git history for secrets" height=600 />
 <details>
 
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
@@ -180,6 +188,7 @@ Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 n
 Run the `report` command next to show finding details.
 ```
 </details>
+
 
 ### Scan Git history by URL, GitHub username, or GitHub organization name
 
