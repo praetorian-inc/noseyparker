@@ -4,10 +4,10 @@
 This directory contains scripts to produce GIFs of Nosey Parker usage examples.
 
 These scripts are written using [`vhs`](https://github.com/charmbracelet/vhs), a console script runner and recording tool.
-The example script fragments are in the [`examples`] directory.
-Each one is a `vhs` fragment, which is cobbled together with some common settings using the [`record-examples.zsh`] script.
+The example script fragments are in the [`examples`](examples) directory.
+Each one is a `vhs` fragment, which is cobbled together with some common settings using the [`record-examples.zsh`](record-examples.zsh) script.
 
-The generated GIFs are stored in the [`gifs`] directory.
+The generated GIFs are stored in the [`gifs`](gifs) directory.
 
 ## Generating GIFs
 - Install `vhs`
