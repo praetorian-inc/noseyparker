@@ -1,5 +1,7 @@
 # Nosey Parker: Find secrets in textual data
 
+## Overview
+
 Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
 
 **Key features:**
@@ -161,9 +163,11 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
-### Scan filesystem content for secrets
+### Scan inputs for secrets
 
-<img src="docs/usage-examples/gifs/02-scan-git-history.gif" alt="Screenshot showing Nosey Parker's workflow for scanning Git history for secrets" height=600 />
+#### Filesystem content, including local Git repos
+![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](docs/usage-examples/gifs/02-scan-git-history.gif)
+
 <details>
 
 Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
@@ -190,7 +194,7 @@ Run the `report` command next to show finding details.
 </details>
 
 
-### Scan Git history by URL, GitHub username, or GitHub organization name
+#### Git repos given URL, GitHub username, or GitHub organization name
 
 <details>
 
@@ -213,29 +217,8 @@ Providing an access token gives a higher API rate limit and may make additional 
 See `noseyparker help scan` for more details.
 </details>
 
-### Summarize findings
 
-<details>
-
-Nosey Parker prints out a summary of its findings when it finishes scanning.
-You can also run this step separately:
-```
-$ noseyparker summarize --datastore np.cpython
-
- Rule                      Distinct Groups   Total Matches
-───────────────────────────────────────────────────────────
- PEM-Encoded Private Key             1,076           1,192
- Generic Secret                        331             478
- netrc Credentials                      42           3,201
- Generic API Key                         2              31
- md5crypt Hash                           1               2
-```
-
-Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
-</details>
-
-
-### Report finding details
+### Report findings
 
 <details>
 
@@ -286,8 +269,37 @@ Showing 3/29 occurrences:
 ```
 
 (Note: the findings above are synthetic, invalid secrets.)
+Additional output formats are supported, including JSON, JSON lines, and SARIF, via the `--format=FORMAT` option.
+</details>
+
+#### Human-readable text format
+![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](docs/usage-examples/gifs/03-report-human.gif)
+
+#### JSON format
+![Screenshot showing Nosey Parker's workflow for rendering its findings in JSON format](docs/usage-examples/gifs/04-report-json.gif)
+
+
+### Summarize findings
+
+<details>
+
+Nosey Parker prints out a summary of its findings when it finishes scanning.
+You can also run this step separately:
+```
+$ noseyparker summarize --datastore np.cpython
+
+ Rule                      Distinct Groups   Total Matches
+───────────────────────────────────────────────────────────
+ PEM-Encoded Private Key             1,076           1,192
+ Generic Secret                        331             478
+ netrc Credentials                      42           3,201
+ Generic API Key                         2              31
+ md5crypt Hash                           1               2
+```
+
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 </details>
+
 
 ### Enumerate repositories from GitHub
 
