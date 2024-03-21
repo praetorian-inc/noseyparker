@@ -1,5 +1,7 @@
 # Nosey Parker: Find secrets in textual data
 
+## Overview
+
 Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
 
 **Key features:**
@@ -30,7 +32,9 @@ Prebuilt binaries are available for x86_64 Linux and x86_64/aarch64 macOS on the
 This is a simple way to get started and will give good performance.
 
 
-### Docker image
+### Docker images
+
+<details>
 
 A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
 ```shell
@@ -48,6 +52,8 @@ $ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
 ```
 
 **Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
+
+</details>
 
 
 ### Arch Linux package
@@ -96,12 +102,15 @@ The scanning and reporting steps are implemented as separate commands because yo
 
 
 ### Getting help
+
 Running the `noseyparker` binary without arguments prints top-level help and exits.
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
 More detailed help is available with the `help` command or long-form `--help` option.
 
 The prebuilt releases also include manpages that collect the command-line help in one place.
 These manpages converted into Markdown format are also included in the repository [here](docs/v0.17.0/man/man1).
+
+If you have a question that's not answered by this documentation, feel free to [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose).
 
 
 ### Terminology and data model
@@ -143,7 +152,7 @@ This is Nosey Parker's top-level unit of reporting.
 
 ## Usage examples
 
-### Docker note
+### NOTE: When using Docker...
 
 If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
@@ -154,7 +163,10 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
-### Scan filesystem content for secrets
+### Scan inputs for secrets
+
+#### Filesystem content, including local Git repos
+![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](docs/usage-examples/gifs/02-scan-git-history.gif)
 
 <details>
 
@@ -181,7 +193,8 @@ Run the `report` command next to show finding details.
 ```
 </details>
 
-### Scan Git history by URL, GitHub username, or GitHub organization name
+
+#### Git repos given URL, GitHub username, or GitHub organization name
 
 <details>
 
@@ -204,29 +217,8 @@ Providing an access token gives a higher API rate limit and may make additional 
 See `noseyparker help scan` for more details.
 </details>
 
-### Summarize findings
 
-<details>
-
-Nosey Parker prints out a summary of its findings when it finishes scanning.
-You can also run this step separately:
-```
-$ noseyparker summarize --datastore np.cpython
-
- Rule                      Distinct Groups   Total Matches
-───────────────────────────────────────────────────────────
- PEM-Encoded Private Key             1,076           1,192
- Generic Secret                        331             478
- netrc Credentials                      42           3,201
- Generic API Key                         2              31
- md5crypt Hash                           1               2
-```
-
-Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
-</details>
-
-
-### Report finding details
+### Report findings
 
 <details>
 
@@ -277,8 +269,37 @@ Showing 3/29 occurrences:
 ```
 
 (Note: the findings above are synthetic, invalid secrets.)
+Additional output formats are supported, including JSON, JSON lines, and SARIF, via the `--format=FORMAT` option.
+</details>
+
+#### Human-readable text format
+![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](docs/usage-examples/gifs/03-report-human.gif)
+
+#### JSON format
+![Screenshot showing Nosey Parker's workflow for rendering its findings in JSON format](docs/usage-examples/gifs/04-report-json.gif)
+
+
+### Summarize findings
+
+<details>
+
+Nosey Parker prints out a summary of its findings when it finishes scanning.
+You can also run this step separately:
+```
+$ noseyparker summarize --datastore np.cpython
+
+ Rule                      Distinct Groups   Total Matches
+───────────────────────────────────────────────────────────
+ PEM-Encoded Private Key             1,076           1,192
+ Generic Secret                        331             478
+ netrc Credentials                      42           3,201
+ Generic API Key                         2              31
+ md5crypt Hash                           1               2
+```
+
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 </details>
+
 
 ### Enumerate repositories from GitHub
 
