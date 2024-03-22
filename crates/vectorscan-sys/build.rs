@@ -1,4 +1,6 @@
-use std::path::{Path, PathBuf};
+use std::fs::File;
+use std::path::PathBuf;
+use std::process::Command;
 
 /// Get the environment variable with the given name, panicking if it is not set.
 fn env(name: &str) -> String {
@@ -6,8 +8,12 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
+    // Note: use `rerun-if-changed=build.rs` to indicate that this build script *shouldn't* be
+    // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=vectorscan.patch");
+
+    let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
 
     let include_dir = out_dir
@@ -19,7 +25,7 @@ fn main() {
     // Choose appropriate C++ runtime library
     {
         let compiler_version_out = String::from_utf8(
-            std::process::Command::new("c++")
+            Command::new("c++")
                 .args(["-v"])
                 .output()
                 .expect("Failed to get C++ compiler version")
@@ -36,46 +42,50 @@ fn main() {
         }
     }
 
-    // Run cmake for vectorscan
+    const VERSION: &str = "5.4.11";
+
+    let tarball_path = out_dir.join(format!("vectorscan-{VERSION}.tar.gz"));
+    let vectorscan_src_dir = out_dir.join(format!("vectorscan-vectorscan-{VERSION}"));
+
+    // Note: patchfile created by diffing pristing extracted release directory tree with modified
+    // directory tree, and then running `diff -ruN PRISTINE MODIFIED >PATCHFILE`
+    let patchfile = manifest_dir.join("vectorscan.patch");
+
+    // Copy release tarball
     {
-        const VERSION: &str = "5.4.11";
-        let main_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-        let vectorscan_src_dir = main_dir.join("vectorscan");
-        let marker = vectorscan_src_dir.join(".version");
-        let is_valid_marker =
-            std::fs::read_to_string(&marker).is_ok_and(|v| v.starts_with(VERSION));
+        let release = manifest_dir.join("5.4.11.tar.gz");
+        std::fs::copy(release, &tarball_path).expect("Failed to copy Vectorscan release tarball");
+    }
 
-        if !vectorscan_src_dir.exists() || !is_valid_marker {
-            use flate2::read::GzDecoder;
-            let response = reqwest::blocking::get(format!("https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/{VERSION}.tar.gz")).expect("Could not download Vectorscan source files");
-            let gz = GzDecoder::new(response);
-            let mut tar = tar::Archive::new(gz);
-            tar.unpack(main_dir)
-                .expect("Could not unpack Vectorscan source files");
-            std::fs::rename(
-                main_dir.join(format!("vectorscan-vectorscan-{VERSION}")),
-                &vectorscan_src_dir,
-            )
-            .expect("Could not rename Vectorscan source directory");
+    // Extract release tarball
+    {
+        let infile = File::open(&tarball_path).expect("Failed to open Vectorscan release tarball");
+        let gz = flate2::read::GzDecoder::new(infile);
+        let mut tar = tar::Archive::new(gz);
+        // Note: unpack into `out_dir`, giving us the directory at `vectorscan_src_dir`.
+        // The downloaded tarball has `vectorscan-vectorscan-{VERSION}` as a prefix on all its entries.
+        tar.unpack(&out_dir)
+            .expect("Could not unpack Vectorscan source files");
+        eprintln!("Tarball extracted to {}", out_dir.display());
+    }
 
-            std::fs::write(&marker, VERSION).expect("Could not create marker file");
-        }
+    eprintln!("Vectorscan source directory is at {}", vectorscan_src_dir.display());
 
-        let is_valid_marker =
-            std::fs::read_to_string(&marker).is_ok_and(|v| v.ends_with("patched"));
-        if !is_valid_marker {
-            use git2::{ApplyLocation, Diff, Repository};
-            let repo = Repository::open_from_env().expect("Could not open Vectorscan repository");
-            let patch = main_dir.join("vectorscan.patch");
-            let patch = std::fs::read(patch).expect("Could not read patch file");
-            let patch = Diff::from_buffer(&patch).expect("Could not create diff from patch");
-            repo.apply(&patch, ApplyLocation::WorkDir, None)
-                .expect("Could not apply patch to Vectorscan repository");
+    // Patch release tarball
+    {
+        let patchfile = File::open(patchfile).expect("Failed to open patchfile");
+        let output = Command::new("patch")
+            .args(["-p1", "-f"])
+            .current_dir(&vectorscan_src_dir)
+            .stdin(patchfile)
+            .output()
+            .expect("Failed to apply patchfile");
+        assert!(output.status.success());
+        eprintln!("Successfully applied patches to Vectorscan source directory");
+    }
 
-            std::fs::write(&marker, format!("{VERSION}-patched"))
-                .expect("Could not create marker file");
-        }
-
+    // Build with cmake
+    {
         let profile = {
             // See https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level for possible values
             match env("OPT_LEVEL").as_str() {

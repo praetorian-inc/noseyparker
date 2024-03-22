@@ -1,8 +1,7 @@
-diff --git a/crates/vectorscan-sys/vectorscan/CMakeLists.txt b/crates/vectorscan-sys/vectorscan/CMakeLists.txt
-index 1db128ba..fcee9b69 100644
---- a/crates/vectorscan-sys/vectorscan/CMakeLists.txt
-+++ b/crates/vectorscan-sys/vectorscan/CMakeLists.txt
-@@ -25,15 +25,19 @@ include (CMakeDependentOption)
+diff -ruN vectorscan-vectorscan-5.4.11/CMakeLists.txt vectorscan/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan/CMakeLists.txt	2024-03-22 16:24:54
+@@ -25,16 +25,20 @@
  include (GNUInstallDirs)
  include (${CMAKE_MODULE_PATH}/platform.cmake)
  include (${CMAKE_MODULE_PATH}/boost.cmake)
@@ -14,10 +13,6 @@ index 1db128ba..fcee9b69 100644
  find_package(PkgConfig REQUIRED)
  
 -find_program(RAGEL ragel)
--
--if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
--    message(FATAL_ERROR "Ragel state machine compiler not found")
--endif()
 +# PATCH
 +# find_program(RAGEL ragel)
 +# 
@@ -26,9 +21,14 @@ index 1db128ba..fcee9b69 100644
 +# endif()
 +# /PATCH
  
+-if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
+-    message(FATAL_ERROR "Ragel state machine compiler not found")
+-endif()
+-
  # Build type check
  
-@@ -198,14 +202,18 @@ set_source_files_properties(
+ if (NOT CMAKE_BUILD_TYPE)
+@@ -198,14 +202,18 @@
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
@@ -49,7 +49,7 @@ index 1db128ba..fcee9b69 100644
  
  # do substitutions
  configure_file(${CMAKE_MODULE_PATH}/config.h.in ${PROJECT_BINARY_DIR}/config.h)
-@@ -1147,9 +1155,11 @@ if (BUILD_SHARED_LIBS)
+@@ -1147,9 +1155,11 @@
          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
  endif()
  
@@ -64,7 +64,7 @@ index 1db128ba..fcee9b69 100644
  
  if (BUILD_STATIC_LIBS)
      install(TARGETS hs DESTINATION ${CMAKE_INSTALL_LIBDIR})
-@@ -1174,7 +1184,9 @@ if (BUILD_SHARED_LIBS)
+@@ -1174,7 +1184,9 @@
  
      add_library(hs_shared SHARED ${hs_shared_SRCS} hs.def)
  
@@ -75,7 +75,7 @@ index 1db128ba..fcee9b69 100644
      set_target_properties(hs_shared PROPERTIES
          OUTPUT_NAME hs
          VERSION ${LIB_VERSION}
-@@ -1194,11 +1206,17 @@ if (NOT BUILD_STATIC_LIBS)
+@@ -1194,11 +1206,17 @@
  endif ()
  
  add_subdirectory(util)
@@ -95,7 +95,7 @@ index 1db128ba..fcee9b69 100644
  if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
      add_subdirectory(chimera)
  endif()
-@@ -1213,4 +1231,7 @@ if(BUILD_BENCHMARKS)
+@@ -1213,4 +1231,7 @@
      add_subdirectory(benchmarks)
  endif()
  
@@ -104,11 +104,9 @@ index 1db128ba..fcee9b69 100644
 +if(BUILD_DOC)
 +    add_subdirectory(doc/dev-reference)
 +endif()
-diff --git a/crates/vectorscan-sys/vectorscan/src/parser/Parser.cpp b/crates/vectorscan-sys/vectorscan/src/parser/Parser.cpp
-new file mode 100644
-index 00000000..7f70d013
---- /dev/null
-+++ b/crates/vectorscan-sys/vectorscan/src/parser/Parser.cpp
+diff -ruN vectorscan-vectorscan-5.4.11/src/parser/Parser.cpp vectorscan/src/parser/Parser.cpp
+--- vectorscan-vectorscan-5.4.11/src/parser/Parser.cpp	1969-12-31 19:00:00
++++ vectorscan/src/parser/Parser.cpp	2024-03-22 16:24:54
 @@ -0,0 +1,11614 @@
 +
 +#line 1 "src/parser/Parser.rl"
@@ -11724,11 +11722,9 @@ index 00000000..7f70d013
 +}
 +
 +} // namespace ue2
-diff --git a/crates/vectorscan-sys/vectorscan/src/parser/control_verbs.cpp b/crates/vectorscan-sys/vectorscan/src/parser/control_verbs.cpp
-new file mode 100644
-index 00000000..d527f792
---- /dev/null
-+++ b/crates/vectorscan-sys/vectorscan/src/parser/control_verbs.cpp
+diff -ruN vectorscan-vectorscan-5.4.11/src/parser/control_verbs.cpp vectorscan/src/parser/control_verbs.cpp
+--- vectorscan-vectorscan-5.4.11/src/parser/control_verbs.cpp	1969-12-31 19:00:00
++++ vectorscan/src/parser/control_verbs.cpp	2024-03-22 16:24:54
 @@ -0,0 +1,865 @@
 +
 +#line 1 "src/parser/control_verbs.rl"
@@ -12595,11 +12591,10 @@ index 00000000..d527f792
 +}
 +
 +} // namespace ue2
-diff --git a/crates/vectorscan-sys/vectorscan/tools/hscollider/CMakeLists.txt b/crates/vectorscan-sys/vectorscan/tools/hscollider/CMakeLists.txt
-index f9e71404..9dafc35e 100644
---- a/crates/vectorscan-sys/vectorscan/tools/hscollider/CMakeLists.txt
-+++ b/crates/vectorscan-sys/vectorscan/tools/hscollider/CMakeLists.txt
-@@ -21,7 +21,9 @@ set_source_files_properties(
+diff -ruN vectorscan-vectorscan-5.4.11/tools/hscollider/CMakeLists.txt vectorscan/tools/hscollider/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11/tools/hscollider/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan/tools/hscollider/CMakeLists.txt	2024-03-22 16:24:54
+@@ -21,7 +21,9 @@
      PROPERTIES
      COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
  
@@ -12610,7 +12605,7 @@ index f9e71404..9dafc35e 100644
  
  if (BUILD_CHIMERA)
      add_definitions(-DHS_HYBRID)
-@@ -63,7 +65,9 @@ SET(hscollider_SOURCES
+@@ -63,7 +65,9 @@
  set_source_files_properties(${hscollider_SOURCES} PROPERTIES
      INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
  add_executable(hscollider ${hscollider_SOURCES})
@@ -12621,11 +12616,9 @@ index f9e71404..9dafc35e 100644
  
  if (BUILD_CHIMERA)
      target_link_libraries(hscollider hs chimera ${PCRE_LDFLAGS} databaseutil
-diff --git a/crates/vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp b/crates/vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp
-new file mode 100644
-index 00000000..3a7c781a
---- /dev/null
-+++ b/crates/vectorscan-sys/vectorscan/tools/hscollider/ColliderCorporaParser.cpp
+diff -ruN vectorscan-vectorscan-5.4.11/tools/hscollider/ColliderCorporaParser.cpp vectorscan/tools/hscollider/ColliderCorporaParser.cpp
+--- vectorscan-vectorscan-5.4.11/tools/hscollider/ColliderCorporaParser.cpp	1969-12-31 19:00:00
++++ vectorscan/tools/hscollider/ColliderCorporaParser.cpp	2024-03-22 16:24:54
 @@ -0,0 +1,532 @@
 +
 +#line 1 "tools/hscollider/ColliderCorporaParser.rl"
@@ -13159,11 +13152,10 @@ index 00000000..3a7c781a
 +
 +    return (cs != FileCorporaParser_error) && (p == pe);
 +}
-diff --git a/crates/vectorscan-sys/vectorscan/util/CMakeLists.txt b/crates/vectorscan-sys/vectorscan/util/CMakeLists.txt
-index 97fd4c7d..a0955274 100644
---- a/crates/vectorscan-sys/vectorscan/util/CMakeLists.txt
-+++ b/crates/vectorscan-sys/vectorscan/util/CMakeLists.txt
-@@ -13,7 +13,9 @@ set_source_files_properties(
+diff -ruN vectorscan-vectorscan-5.4.11/util/CMakeLists.txt vectorscan/util/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11/util/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan/util/CMakeLists.txt	2024-03-22 16:24:54
+@@ -13,7 +13,9 @@
      PROPERTIES
      COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
@@ -13174,7 +13166,7 @@ index 97fd4c7d..a0955274 100644
  
  set(expressionutil_SRCS
      expressions.cpp
-@@ -22,7 +24,9 @@ set(expressionutil_SRCS
+@@ -22,7 +24,9 @@
      ExpressionParser.cpp
      )
  add_library(expressionutil STATIC ${expressionutil_SRCS})
@@ -13185,11 +13177,9 @@ index 97fd4c7d..a0955274 100644
  
  SET(corpusomatic_SRCS
      ng_corpus_editor.h
-diff --git a/crates/vectorscan-sys/vectorscan/util/ExpressionParser.cpp b/crates/vectorscan-sys/vectorscan/util/ExpressionParser.cpp
-new file mode 100644
-index 00000000..e53f942c
---- /dev/null
-+++ b/crates/vectorscan-sys/vectorscan/util/ExpressionParser.cpp
+diff -ruN vectorscan-vectorscan-5.4.11/util/ExpressionParser.cpp vectorscan/util/ExpressionParser.cpp
+--- vectorscan-vectorscan-5.4.11/util/ExpressionParser.cpp	1969-12-31 19:00:00
++++ vectorscan/util/ExpressionParser.cpp	2024-03-22 16:24:54
 @@ -0,0 +1,627 @@
 +
 +#line 1 "util/ExpressionParser.rl"

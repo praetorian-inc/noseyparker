@@ -73,6 +73,7 @@ Required dependencies:
 - `cmake`: needed for building the `vectorscan-sys` crate and some other dependencies
 - `boost`: needed for building the `vectorscan-sys` crate (supported version `>=1.57`)
 - `git`: needed for embedding version information into the `noseyparker` CLI
+- `patch`: needed for building the `vectorscan-sys` crate
 - `pkg-config`: needed for building the `vectorscan-sys` crate
 - `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
 - `zsh`: needed for build scripts
