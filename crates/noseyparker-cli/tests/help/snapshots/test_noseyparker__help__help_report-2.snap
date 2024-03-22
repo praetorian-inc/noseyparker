@@ -31,7 +31,7 @@ Output Options:
           - human: A text-based format designed for humans
           - json:  Pretty-printed JSON format
           - jsonl: JSON Lines format
-          - sarif: SARIF format
+          - sarif: SARIF format (experimental)
 
       --max-matches <N>
           Limit the number of matches per finding to at most N
@@ -96,4 +96,3 @@ Advanced Global Options:
           
           [default: true]
           [possible values: true, false]
-
