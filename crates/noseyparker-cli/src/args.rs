@@ -963,10 +963,13 @@ pub enum ReportOutputFormat {
     /// This is a sequence of JSON objects, one per line.
     Jsonl,
 
-    /// SARIF format
+    /// SARIF format (experimental)
     ///
     /// This is the Static Analysis Results Interchange Format, a standardized JSON-based format used by many tools.
     /// See the spec at <https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html>.
+    ///
+    /// Support for SARIF output is experimental.
+    /// If you run into problems when using this, please create an issue in the GitHub project: <https://github.com/praetorian-inc/noseyparker>.
     Sarif,
 }
 
