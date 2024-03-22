@@ -269,7 +269,7 @@ Showing 3/29 occurrences:
 ```
 
 (Note: the findings above are synthetic, invalid secrets.)
-Additional output formats are supported, including JSON, JSON lines, and SARIF, via the `--format=FORMAT` option.
+Additional output formats are supported, including JSON, JSON lines, and SARIF (experimental), via the `--format=FORMAT` option.
 </details>
 
 #### Human-readable text format
