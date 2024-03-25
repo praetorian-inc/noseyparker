@@ -53,7 +53,7 @@ fn main() {
 
     // Extract release tarball
     {
-        let infile = File::open(&tarball_path).expect("Failed to open Vectorscan release tarball");
+        let infile = File::open(tarball_path).expect("Failed to open Vectorscan release tarball");
         let gz = flate2::read::GzDecoder::new(infile);
         let mut tar = tar::Archive::new(gz);
         // Note: unpack into `out_dir`, giving us the directory at `vectorscan_src_dir`.
