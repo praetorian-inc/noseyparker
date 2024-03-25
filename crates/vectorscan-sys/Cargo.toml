@@ -28,6 +28,8 @@ cpu_native = []
 [build-dependencies]
 bindgen = { version = "0.69", optional = true }
 cmake = "0.1"
+flate2 = "1.0"
+tar = "0.4"
 
 [lib]
 doctest = false

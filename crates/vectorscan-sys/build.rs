@@ -1,4 +1,6 @@
-use std::path::{Path, PathBuf};
+use std::fs::File;
+use std::path::PathBuf;
+use std::process::Command;
 
 /// Get the environment variable with the given name, panicking if it is not set.
 fn env(name: &str) -> String {
@@ -6,6 +8,12 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
+    // Note: use `rerun-if-changed=build.rs` to indicate that this build script *shouldn't* be
+    // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=vectorscan.patch");
+
+    let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
 
     let include_dir = out_dir
@@ -17,7 +25,7 @@ fn main() {
     // Choose appropriate C++ runtime library
     {
         let compiler_version_out = String::from_utf8(
-            std::process::Command::new("c++")
+            Command::new("c++")
                 .args(["-v"])
                 .output()
                 .expect("Failed to get C++ compiler version")
@@ -34,13 +42,44 @@ fn main() {
         }
     }
 
-    // Run cmake for vectorscan
-    {
-        let vectorscan_src_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("vectorscan");
-        if !vectorscan_src_dir.exists() {
-            panic!("Vectorscan source directory is missing");
-        }
+    const VERSION: &str = "5.4.11";
 
+    let tarball_path = manifest_dir.join(format!("{VERSION}.tar.gz"));
+    let vectorscan_src_dir = out_dir.join(format!("vectorscan-vectorscan-{VERSION}"));
+
+    // Note: patchfile created by diffing pristine extracted release directory tree with modified
+    // directory tree, and then running `diff -ruN PRISTINE MODIFIED >PATCHFILE`
+    let patchfile = manifest_dir.join("vectorscan.patch");
+
+    // Extract release tarball
+    {
+        let infile = File::open(tarball_path).expect("Failed to open Vectorscan release tarball");
+        let gz = flate2::read::GzDecoder::new(infile);
+        let mut tar = tar::Archive::new(gz);
+        // Note: unpack into `out_dir`, giving us the directory at `vectorscan_src_dir`.
+        // The downloaded tarball has `vectorscan-vectorscan-{VERSION}` as a prefix on all its entries.
+        tar.unpack(&out_dir)
+            .expect("Could not unpack Vectorscan source files");
+        eprintln!("Tarball extracted to {}", out_dir.display());
+    }
+
+    eprintln!("Vectorscan source directory is at {}", vectorscan_src_dir.display());
+
+    // Patch release tarball
+    {
+        let patchfile = File::open(patchfile).expect("Failed to open patchfile");
+        let output = Command::new("patch")
+            .args(["-p1", "-f"])
+            .current_dir(&vectorscan_src_dir)
+            .stdin(patchfile)
+            .output()
+            .expect("Failed to apply patchfile");
+        assert!(output.status.success());
+        eprintln!("Successfully applied patches to Vectorscan source directory");
+    }
+
+    // Build with cmake
+    {
         let profile = {
             // See https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level for possible values
             match env("OPT_LEVEL").as_str() {
