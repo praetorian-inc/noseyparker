@@ -44,18 +44,12 @@ fn main() {
 
     const VERSION: &str = "5.4.11";
 
-    let tarball_path = out_dir.join(format!("vectorscan-{VERSION}.tar.gz"));
+    let tarball_path = manifest_dir.join(format!("{VERSION}.tar.gz"));
     let vectorscan_src_dir = out_dir.join(format!("vectorscan-vectorscan-{VERSION}"));
 
-    // Note: patchfile created by diffing pristing extracted release directory tree with modified
+    // Note: patchfile created by diffing pristine extracted release directory tree with modified
     // directory tree, and then running `diff -ruN PRISTINE MODIFIED >PATCHFILE`
     let patchfile = manifest_dir.join("vectorscan.patch");
-
-    // Copy release tarball
-    {
-        let release = manifest_dir.join("5.4.11.tar.gz");
-        std::fs::copy(release, &tarball_path).expect("Failed to copy Vectorscan release tarball");
-    }
 
     // Extract release tarball
     {
