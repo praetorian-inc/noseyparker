@@ -9,16 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
-- The README now includes several animated GIFs that demonstrate simple example use cases.
+- The README now includes several animated GIFs that demonstrate simple example use cases ([#154](https://github.com/praetorian-inc/noseyparker/pull/154)).
 
 ### Changes
 
-- The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the
-  system-provided Boost.
+- The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the system-provided Boost ([#150](https://github.com/praetorian-inc/noseyparker/pull/150) from @seqre).
   This change is only relevant to building Nosey Parker from source.
-- The vendored copy of the Vectorscan regular expression library included in the internal `vectorscan-sys` crate has
-  been removed in favor of downloading its sources and patching them during the build phase. The version of Vectorscan
-  used is 5.4.11.
+- The vendored copy of the Vectorscan regular expression library included in the internal `vectorscan-sys` crate has been removed ([#151](https://github.com/praetorian-inc/noseyparker/pull/151) from @seqre).
+  Instead, a copy of the Vectorscan 5.4.11 source tarball is included in this repository, and is extracted and patched during the build phase.
 - SARIF reporting format is now listed as experimental.
 
 
