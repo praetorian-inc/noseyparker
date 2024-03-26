@@ -105,6 +105,8 @@ mkdir "$RELEASE_DIR"/{bin,share,share/completions,share/man,share/man/man1,share
 
 ################################################################################
 # Build release version of noseyparker
+#
+# WARNING: If the invocation below changes, update the Dockerfile as well.
 ################################################################################
 banner "Building release with Cargo"
 cargo build --locked --profile release --features "$CARGO_FEATURES" || fatal "failed to build ${NOSEYPARKER}"
