@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, TimeZone, Utc};
+use chrono::{DateTime, Duration, TimeDelta, TimeZone, Utc};
 use reqwest;
 use reqwest::{header, header::HeaderValue, StatusCode, Url};
 use secrecy::ExposeSecret;
@@ -284,7 +284,8 @@ impl Client {
         //     time at which the current rate limit window resets in UTC epoch seconds.
         if response.status() == StatusCode::FORBIDDEN {
             if let Some(retry_after) = response.headers().get("Retry-After") {
-                let wait = atoi::atoi::<i64>(retry_after.as_bytes()).map(Duration::seconds);
+                let wait =
+                    atoi::atoi::<i64>(retry_after.as_bytes()).and_then(TimeDelta::try_seconds);
                 let client_error = response.json().await?;
                 return Err(Error::RateLimited { client_error, wait });
             }
