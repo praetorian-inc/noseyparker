@@ -115,7 +115,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             for repo_string in github::enumerate_repo_urls(
                 &repo_specifiers,
                 api_url,
-                args.ignore_certs,
+                global_args.ignore_certs,
                 Some(&mut progress),
             )
             .context("Failed to enumerate GitHub repositories")?
@@ -160,7 +160,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
         };
-        let git = Git::new(args.ignore_certs);
+        let git = Git::new(global_args.ignore_certs);
 
         let mut progress =
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);

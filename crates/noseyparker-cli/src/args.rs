@@ -250,6 +250,10 @@ pub struct GlobalArgs {
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
     pub progress: Mode,
 
+    /// Ignore validation of TLS certificates
+    #[arg(long)]
+    pub ignore_certs: bool,
+
     #[command(flatten)]
     pub advanced: AdvancedArgs,
 }
@@ -363,13 +367,10 @@ pub struct GitHubReposListArgs {
 
     #[command(flatten)]
     pub output_args: OutputArgs<GitHubOutputFormat>,
-
-    /// Ignore validation of TLS certificates
-    #[arg(long)]
-    pub ignore_certs: bool,
 }
 
 #[derive(Args, Debug, Clone)]
+#[command(next_help_heading = "Input Specifier Options")]
 pub struct GitHubRepoSpecifiers {
     /// Select repositories belonging to the specified user
     ///
@@ -557,10 +558,6 @@ pub struct ScanArgs {
         help_heading="Data Collection Options",
     )]
     pub copy_blobs: CopyBlobsMode,
-
-    /// Ignore validation of TLS certificates
-    #[arg(long)]
-    pub ignore_certs: bool,
 }
 
 #[derive(Args, Debug)]
