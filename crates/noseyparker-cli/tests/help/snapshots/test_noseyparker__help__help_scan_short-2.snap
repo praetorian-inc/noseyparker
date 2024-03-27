@@ -12,8 +12,11 @@ Options:
   -h, --help              Print help (see more with '--help')
 
 Rule Selection Options:
-      --rules <PATH>  Load additional rules and rulesets from the specified file or directory
-      --ruleset <ID>  Enable the ruleset with the specified ID [default: default]
+      --rules-path <PATH>     Load additional rules and rulesets from the specified file or
+                              directory
+      --ruleset <ID>          Enable the ruleset with the specified ID [default: default]
+      --load-builtins <BOOL>  Control whether built-in rules and rulesets are loaded [default: true]
+                              [possible values: true, false]
 
 Input Specifier Options:
   [INPUT]...                    Scan the specified file, directory, or local Git repository
@@ -55,4 +58,3 @@ Global Options:
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
                          never, always]
-

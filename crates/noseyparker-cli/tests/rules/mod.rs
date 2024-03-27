@@ -26,3 +26,9 @@ fn rules_list_jsonl() {
 fn rules_check_builtins() {
     assert_cmd_snapshot!(noseyparker_success!("rules", "check", "--warnings-as-errors"));
 }
+
+/// Check that the `rules list --builtins false` option works as expected
+#[test]
+fn rules_list_no_builtins() {
+    assert_cmd_snapshot!(noseyparker_success!("rules", "list", "--load-builtins=false"));
+}
