@@ -5,6 +5,7 @@ use common::*;
 
 mod github;
 mod help;
+mod report;
 mod rules;
 mod scan;
 

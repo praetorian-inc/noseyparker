@@ -1,5 +1,5 @@
 ---
-source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+source: crates/noseyparker-cli/tests/report/mod.rs
 expression: output1_contents
 ---
 Finding 1/1
@@ -14,7 +14,3 @@ Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
         # This is fake configuration data
         USERNAME=the_dude
         GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-
-
-
-

@@ -107,10 +107,7 @@ impl DetailsReporter {
     }
 
     pub fn sarif_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore: &Datastore = &self.datastore;
-        let group_metadata = datastore
-            .get_finding_metadata()
-            .context("Failed to get match group metadata from datastore")?;
+        let group_metadata = self.get_finding_metadata()?;
 
         let mut findings = Vec::with_capacity(group_metadata.len());
         for metadata in group_metadata {

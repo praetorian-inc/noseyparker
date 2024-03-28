@@ -16,6 +16,23 @@ Options:
   -h, --help
           Print help (see a summary with '-h')
 
+Filtering Options:
+      --max-matches <N>
+          Limit the number of matches per finding to at most N
+          
+          A negative value means "no limit".
+          
+          [default: 3]
+
+      --finding-status <FINDING_STATUS>
+          Include only findings with the assigned status
+
+          Possible values:
+          - accept: Findings with `accept` matches
+          - reject: Findings with `reject` matches
+          - mixed:  Findings with both `accept` and `reject` matches
+          - null:   Findings without any `accept` or `reject` matches
+
 Output Options:
   -o, --output <PATH>
           Write output to the specified path
@@ -32,13 +49,6 @@ Output Options:
           - json:  Pretty-printed JSON format
           - jsonl: JSON Lines format
           - sarif: SARIF format (experimental)
-
-      --max-matches <N>
-          Limit the number of matches per finding to at most N
-          
-          A negative value means "no limit".
-          
-          [default: 3]
 
 Global Options:
   -v, --verbose...
