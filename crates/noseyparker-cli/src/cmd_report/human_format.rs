@@ -2,11 +2,7 @@ use super::*;
 
 impl DetailsReporter {
     pub fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let datastore = &self.datastore;
-        let group_metadata = datastore
-            .get_finding_metadata()
-            .context("Failed to get match group metadata from datastore")?;
-
+        let group_metadata = self.get_finding_metadata()?;
         let num_findings = group_metadata.len();
         for (finding_num, metadata) in group_metadata.into_iter().enumerate() {
             let finding_num = finding_num + 1;

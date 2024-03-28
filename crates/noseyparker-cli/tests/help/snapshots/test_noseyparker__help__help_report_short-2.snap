@@ -10,11 +10,17 @@ Options:
   -d, --datastore <PATH>  Use the specified datastore [env: NP_DATASTORE=] [default: datastore.np]
   -h, --help              Print help (see more with '--help')
 
+Filtering Options:
+      --max-matches <N>
+          Limit the number of matches per finding to at most N [default: 3]
+      --finding-status <FINDING_STATUS>
+          Include only findings with the assigned status [possible values: accept, reject, mixed,
+          null]
+
 Output Options:
   -o, --output <PATH>    Write output to the specified path
   -f, --format <FORMAT>  Write output in the specified format [default: human] [possible values:
                          human, json, jsonl, sarif]
-      --max-matches <N>  Limit the number of matches per finding to at most N [default: 3]
 
 Global Options:
   -v, --verbose...       Enable verbose output
@@ -23,4 +29,3 @@ Global Options:
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
                          never, always]
-

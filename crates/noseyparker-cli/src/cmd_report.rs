@@ -13,7 +13,7 @@ use noseyparker::match_type::{Group, Groups, Match};
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 
-use crate::args::{GlobalArgs, ReportArgs, ReportOutputFormat};
+use crate::args::{FindingStatus, GlobalArgs, ReportArgs, ReportOutputFormat};
 use crate::reportable::Reportable;
 
 mod human_format;
@@ -30,10 +30,10 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
         .get_writer()
         .context("Failed to get output writer")?;
 
-    let max_matches = if args.max_matches <= 0 {
+    let max_matches = if args.filter_args.max_matches <= 0 {
         None
     } else {
-        Some(args.max_matches.try_into().unwrap())
+        Some(args.filter_args.max_matches.try_into().unwrap())
     };
 
     // enable output styling:
@@ -50,6 +50,7 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     let reporter = DetailsReporter {
         datastore,
         max_matches,
+        finding_status: args.filter_args.finding_status,
         styles,
     };
     reporter.report(args.output_args.format, output)
@@ -58,10 +59,36 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
 struct DetailsReporter {
     datastore: Datastore,
     max_matches: Option<usize>,
+    finding_status: Option<FindingStatus>,
     styles: Styles,
 }
 
 impl DetailsReporter {
+    fn include_finding(&self, metadata: &FindingMetadata) -> bool {
+        match self.finding_status {
+            None => true,
+            Some(status) => match (status, metadata.statuses.0.as_slice()) {
+                (FindingStatus::Accept, &[Status::Accept]) => true,
+                (FindingStatus::Reject, &[Status::Reject]) => true,
+                (FindingStatus::Null, &[]) => true,
+                (FindingStatus::Mixed, &[Status::Accept, Status::Reject]) => true,
+                (FindingStatus::Mixed, &[Status::Reject, Status::Accept]) => true,
+                _ => false,
+            },
+        }
+    }
+
+    fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
+        let datastore = &self.datastore;
+        let mut group_metadata = datastore
+            .get_finding_metadata()
+            .context("Failed to get match group metadata from datastore")?;
+
+        group_metadata.retain(|md| self.include_finding(&md));
+
+        Ok(group_metadata)
+    }
+
     fn get_matches(&self, metadata: &FindingMetadata) -> Result<Vec<ReportMatch>> {
         Ok(self
             .datastore
@@ -123,10 +150,7 @@ impl DetailsReporter {
         sep: Option<&str>,
         end: Option<&str>,
     ) -> Result<()> {
-        let datastore = &self.datastore;
-        let group_metadata = datastore
-            .get_finding_metadata()
-            .context("Failed to get match group metadata from datastore")?;
+        let group_metadata = self.get_finding_metadata()?;
 
         if let Some(begin) = begin {
             write!(writer, "{}", begin)?;

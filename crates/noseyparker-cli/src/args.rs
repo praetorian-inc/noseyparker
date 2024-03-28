@@ -830,8 +830,15 @@ pub struct ReportArgs {
     pub datastore: PathBuf,
 
     #[command(flatten)]
-    pub output_args: OutputArgs<ReportOutputFormat>,
+    pub filter_args: ReportFilterArgs,
 
+    #[command(flatten)]
+    pub output_args: OutputArgs<ReportOutputFormat>,
+}
+
+#[derive(Args, Debug)]
+#[command(next_help_heading = "Filtering Options")]
+pub struct ReportFilterArgs {
     /// Limit the number of matches per finding to at most N
     ///
     /// A negative value means "no limit".
@@ -842,6 +849,24 @@ pub struct ReportArgs {
         allow_negative_numbers = true
     )]
     pub max_matches: i64,
+
+    /// Include only findings with the assigned status
+    #[arg(long)]
+    pub finding_status: Option<FindingStatus>,
+}
+
+#[derive(ValueEnum, Debug, Display, Clone, Copy)]
+#[clap(rename_all = "lower")]
+#[strum(serialize_all = "lowercase")]
+pub enum FindingStatus {
+    /// Findings with `accept` matches
+    Accept,
+    /// Findings with `reject` matches
+    Reject,
+    /// Findings with both `accept` and `reject` matches
+    Mixed,
+    /// Findings without any `accept` or `reject` matches
+    Null,
 }
 
 // -----------------------------------------------------------------------------
