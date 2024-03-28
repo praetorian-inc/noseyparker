@@ -40,6 +40,13 @@ env:
   CARGO_PROFILE_DEV_DEBUG: '0'
   CARGO_PROFILE_TEST_DEBUG: '0'
 
+  # Enable Cargo output explaining why things are being rebuilt.
+  # This can be useful to investigate why caching is not working as expected.
+  #
+  # https://stackoverflow.com/a/70174212
+  # https://doc.crates.io/contrib/implementation/debugging.html#logging
+  CARGO_LOG: 'cargo::core::compiler::fingerprint=info'
+
 jobs:
   tests:
     name: CI
