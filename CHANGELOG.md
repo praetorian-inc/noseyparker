@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - SARIF reporting format is now listed as experimental.
 - In the `scan` and `rules` command, the command-line option to load additional rules and rulesets from files has been renamed from `--rules` to `--rules-path`.
   The old `--rules` option is still supported as an alias, but this is deprecated and will be removed in the v0.19 release.
-- The `rules list` command now includes additional fields when using JSON format.
+- The `rules list` command now includes additional fields when using JSON format ([#161](https://github.com/praetorian-inc/noseyparker/pull/161)).
 
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
