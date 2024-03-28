@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Additions
 
 - The README now includes several animated GIFs that demonstrate simple example use cases ([#154](https://github.com/praetorian-inc/noseyparker/pull/154)).
-- The `report` command now offers a new `--finding-status=STATUS` filtering option, which causes only the findings with the requested status to be reported.
+- The `report` command now offers a new `--finding-status=STATUS` filtering option, which causes only the findings with the requested status to be reported ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
 
 ### Changes
 
