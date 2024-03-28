@@ -6,559 +6,2778 @@ expression: stdout
   "rules": [
     {
       "id": "np.adafruit.1",
-      "name": "Adafruit IO Key"
+      "structural_id": "19448da7d8fd49c857113af93639bacbc1b61d29",
+      "name": "Adafruit IO Key",
+      "syntax": {
+        "name": "Adafruit IO Key",
+        "id": "np.adafruit.1",
+        "pattern": "(?x)\n\\b\n(aio\\_[a-zA-Z0-9]{28})\n\\b\n",
+        "examples": [
+          "#define IO_KEY       \"aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH\"",
+          "export IO_KEY=\"aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH\"",
+          "ADAFRUIT_IO_KEY = \"aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://io.adafruit.com/api/docs"
+        ]
+      }
     },
     {
       "id": "np.adobe.1",
-      "name": "Adobe OAuth Client Secret"
+      "structural_id": "39b71f2c4d7706bb039a571fbba9795558f61d76",
+      "name": "Adobe OAuth Client Secret",
+      "syntax": {
+        "name": "Adobe OAuth Client Secret",
+        "id": "np.adobe.1",
+        "pattern": "(?x)(?i)\n\\b\n(p8e-[a-z0-9-]{32})\n(?:[^a-z0-9-]|$)\n",
+        "examples": [
+          "{\n \"client_credentials\": {\n  \"client_id\": \"a65b0146769d433a835f36660881db50\",\n  \"client_secret\": \"p8e-ibndcvsmAp9ZgPBZ606FSlYIZVlsZ-g5\"\n},\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developer.adobe.com/developer-console/docs/guides/authentication/",
+          "https://developer.adobe.com/developer-console/docs/guides/authentication/OAuthIntegration/",
+          "https://developer.adobe.com/developer-console/docs/guides/authentication/OAuth/"
+        ]
+      }
     },
     {
       "id": "np.age.1",
-      "name": "Age Recipient (X25519 public key)"
+      "structural_id": "6df96c73b7f68f2da5d6e6ad28bab305f23ae980",
+      "name": "Age Recipient (X25519 public key)",
+      "syntax": {
+        "name": "Age Recipient (X25519 public key)",
+        "id": "np.age.1",
+        "pattern": "\\b(age1[0-9a-z]{58})\\b",
+        "examples": [
+          "age1zvkyg2lqzraa2lnjvqej32nkuu0ues2s82hzrye869xeexvn73equnujwj"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://age-encryption.org",
+          "https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html",
+          "https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type"
+        ]
+      }
     },
     {
       "id": "np.age.2",
-      "name": "Age Identity (X22519 secret key)"
+      "structural_id": "38d79636a56aca1ce25e14c468e7c59823ae62cc",
+      "name": "Age Identity (X22519 secret key)",
+      "syntax": {
+        "name": "Age Identity (X22519 secret key)",
+        "id": "np.age.2",
+        "pattern": "\\b(AGE-SECRET-KEY-1[0-9A-Z]{58})\\b",
+        "examples": [
+          "# created: 2022-09-26T21:55:47-05:00\n# public key: age1epzmwwzw8n09slh0c7z1z52x43nnga7lkksx3qrh07tqz5v7lcys45428t\nAGE-SECRET-KEY-1HJCRJVK7EE3A5N8CRP8YSEUGZKNW90Y5UR2RGYAS8L279LFP6LCQU5ADNR\n",
+          "AGE-SECRET-KEY-1GFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPQ4EGAEX"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://age-encryption.org",
+          "https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html",
+          "https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type"
+        ]
+      }
     },
     {
       "id": "np.arn.1",
-      "name": "Amazon Resource Name"
+      "structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
+      "name": "Amazon Resource Name",
+      "syntax": {
+        "name": "Amazon Resource Name",
+        "id": "np.arn.1",
+        "pattern": "(?x)\n\\b\n(\n  arn\n  :\n  (?: aws | aws-cn | aws-us-gov )         (?# partition )\n  :\n  [a-zA-Z0-9_-]{2,}                       (?# service )\n  :\n  (?: af-south-1\n    | ap-east-1\n    | ap-northeast-1\n    | ap-northeast-2\n    | ap-northeast-3\n    | ap-south-1\n    | ap-south-2\n    | ap-southeast-1\n    | ap-southeast-2\n    | ap-southeast-3\n    | ap-southeast-4\n    | ca-central-1\n    | eu-central-1\n    | eu-central-2\n    | eu-north-1\n    | eu-south-1\n    | eu-south-2\n    | eu-west-1\n    | eu-west-2\n    | eu-west-3\n    | me-central-1\n    | me-south-1\n    | sa-east-1\n    | us-east-1\n    | us-east-2\n    | us-gov-east-1\n    | us-gov-west-1\n    | us-west-1\n    | us-west-2\n    )?                                    (?# region )\n  :\n  (?: \\d{12} )?                           (?# account ID sans hyphens )\n  :\n  (?: [a-zA-Z0-9_-]+ [:/])?               (?# resource type)\n  [^\\s\"'&<>\\\\%]+                          (?# resource ID)\n)\n(?: [\\s\"'&<>\\\\%] | $ )\n",
+        "examples": [
+          "arn:aws:s3:::my_corporate_bucket/*",
+          "arn:aws:s3:::my_corporate_bucket/Development/*",
+          "arn:aws:iam::123456789012:user/Development/product_1234/*",
+          "alerts: \"arn:aws:sns:us-west-2:123456789023:CloudwatchMetricAlarm\"",
+          "\"Principal\":{\"Federated\":[\"arn:aws:iam:::oidc-provider/localhost:8080/auth/realms/quickstart\"]},",
+          "\"KeyId\": \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\",",
+          "\"aws-kms://arn:aws:kms:us-east-1:003084325827:key/84a66985-f968-4bac-82c2-365518adf157\";",
+          "return f\"arn:aws:s3:::{bucket_name}\"",
+          "return f\"arn:aws:s3:::${bucket_name}\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html"
+        ]
+      }
     },
     {
       "id": "np.artifactory.1",
-      "name": "Artifactory API Key"
+      "structural_id": "52eba6e9f2282ca84b15cee4a3d91374eba6e11d",
+      "name": "Artifactory API Key",
+      "syntax": {
+        "name": "Artifactory API Key",
+        "id": "np.artifactory.1",
+        "pattern": "(?i)artifactory.{0,50}\\b([a-z0-9]{73})\\b",
+        "examples": [
+          "export HOMEBREW_ARTIFACTORY_API_TOKEN=AKCp8igrDNFerC357m4422e4tmu7xB983QLPxJhKFcSMfoux2RFvp8rc4jC8t9ncdmYCMFD8W\nexport HOMEBREW_ARTIFACTORY_API_USER=kashorn\n",
+          "jfrog rt dl --url=http://localhost:8071/artifactory --apikey=AKCp2WXX7SDvcsmny528sSDnaB3zACkNQoRcD8D1WmxhMV9gk6Wp8mVWC8bh38kJQbXagUT8Z generic-local/hello.txt"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://jfrog.com/help/r/jfrog-rest-apis/introduction-to-the-artifactory-rest-apis"
+        ]
+      }
     },
     {
       "id": "np.aws.1",
-      "name": "AWS API Key"
+      "structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
+      "name": "AWS API Key",
+      "syntax": {
+        "name": "AWS API Key",
+        "id": "np.aws.1",
+        "pattern": "\\b((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})\\b",
+        "examples": [
+          "A3T0ABCDEFGHIJKLMNOP",
+          "AKIADEADBEEFDEADBEEF"
+        ],
+        "negative_examples": [
+          "A3T0ABCDEFGHIJKLMNO",
+          "A3T0ABCDEFGHIjklmnop",
+          "======================",
+          "//////////////////////",
+          "++++++++++++++++++++++"
+        ],
+        "references": [
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
+          "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ]
+      }
     },
     {
       "id": "np.aws.2",
-      "name": "AWS Secret Access Key"
+      "structural_id": "d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+      "name": "AWS Secret Access Key",
+      "syntax": {
+        "name": "AWS Secret Access Key",
+        "id": "np.aws.2",
+        "pattern": "(?x)(?i)\n\\b\naws_? (?:secret)? _? (?:access)? _? (?:key)?\n[\"'']?\n\\s{0,30}\n(?::|=>|=)\n\\s{0,30}\n[\"'']?\n([a-z0-9/+=]{40})\n\\b\n",
+        "examples": [
+          "aws_secret_access_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "negative_examples": [
+          "export AWS_SECRET_ACCESS_KEY=ded7db27a4558e2ea9bbf0bf36ae0e8521618f366c",
+          "\"aws_secret_access_key\" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend",
+          "\"aws_secret_access_key\" =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaendbbbbbbb",
+          "\"aws_sEcReT_key\"  =  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaend",
+          "aws_secret_key: OOzkR1+hF+1ABCsIFDJMEUtqmtnZ1234567890",
+          "======================",
+          "//////////////////////",
+          "++++++++++++++++++++++"
+        ],
+        "references": [
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
+          "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ]
+      }
     },
     {
       "id": "np.aws.3",
-      "name": "AWS Account ID"
+      "structural_id": "ce1a70ee97cbf7b5715fba1515b6feba0fd1f322",
+      "name": "AWS Account ID",
+      "syntax": {
+        "name": "AWS Account ID",
+        "id": "np.aws.3",
+        "pattern": "(?i)aws_?(?:account)_?(?:id)?[\"'`]?\\s{0,30}(?::|=>|=)\\s{0,30}[\"'`]?([0-9]{4}-?[0-9]{4}-?[0-9]{4})",
+        "examples": [
+          "KeyMetadata: {\n    AWSAccountId: \"324320755747\",\n    Arn: \"arn:aws:kms:us-east-2:324320755747:key/54348bc1-6e3b-4cda-8b18-c6033ca7d328\",\n    CreationDate: 2019-07-12 18:23:13 +0000 UTC,\n    Description: \"\",\n    Enabled: true,\n    KeyId: \"54348bc1-6e3b-4cda-8b18-c6033ca7d328\",\n    KeyManager: \"CUSTOMER\",\n    KeyState: \"Enabled\",\n    KeyUsage: \"ENCRYPT_DECRYPT\",\n    Origin: \"AWS_KMS\"\n}\n",
+          "4. login into ecr\n\n```bash\naws_region=eu-central-1\naws_account_id=891511536143\naws_profile=serverless-bert\n\naws ecr get-login-password \\\n    --region $aws_region \\\n    --profile $aws_profile \\\n| docker login \\\n    --username AWS \\\n    --password-stdin $aws_account_id.dkr.ecr.$aws_region.amazonaws.com\n```\n"
+        ],
+        "negative_examples": [
+          "======================",
+          "//////////////////////",
+          "++++++++++++++++++++++"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.aws.4",
-      "name": "AWS Session Token"
+      "structural_id": "c1ba1b2b61e6634b8d89afda2de422642ae50053",
+      "name": "AWS Session Token",
+      "syntax": {
+        "name": "AWS Session Token",
+        "id": "np.aws.4",
+        "pattern": "(?i)(?:aws.?session|aws.?session.?token|aws.?token)[\"'`]?\\s{0,30}(?::|=>|=)\\s{0,30}[\"'`]?([a-z0-9/+=]{16,200})[^a-z0-9/+=]",
+        "examples": [
+          "export AWS_ACCESS_KEY_ID=\"I08BCX2ACV45ED1DOC9J\"\nexport AWS_SECRET_ACCESS_KEY=\"0qk+o7XctJMmG6ydO8537c9+TofLJU1K0PiVBXSg\"\nexport AWS_SESSION_TOKEN=\"eyJhbGciOiJIUzUxMi53InR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJJMDhCQ1gySkpWNDVFRDFET0M5SiIsImFjciI6Ij53LCJhdWQiOiJhY2NvdW50IiwiYXV0aF90aW1lIjowLCJhenAiOiJtaW5pbyIsImVtYWlsIjoiYWlkYW4uY29wZUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImV4cCI6MTU4MDUwMDIzOCwiZmFtaWx5X25hbWUiOiJDb3BlIiwiZ2l2ZW5fbmFtZSI6IkFpZGFuIENvcGUiLCJpYXQiOjE1ODA0OTk5MzgsImlzcyI6Imh0dHBzOi8vYXV0aHN0Zy5wb3BkYXRhLmJjLmNhL2F1dGgvcmVhbG1zL3NhbXBsZSIsImp0aSI6IjU5ZTM5ODAxLWQxMmUtNDVhYS04NmQzLWVhMmNmZDU0NmE2MiIsIm1pbmlvX3BvbGljeSI6ImRhdGFzZXRfMV9ybyIsIm5hbWUiOiJBaWRhbiBDb3BlIENvcGUiLCJuYmYiOjAsInByZWZlcnJlZF91c2VybmFtZSI6ImFjb3BlLTk5LXQwNSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2Vzc2lvbl9zdGF0ZSI6IjcxYjczZWJjLThlMzMtNGMyMi04NmE2LWI0MzhhNDM4ZmI2MiIsInN1YiI6IjVkOTBlOTgzLTA1NDItNDYyYS1hZWIwLWYxZWVmNjcwYzdlNSIsInR5cCI6IkJlYXJlciJ9.J-a9PORJToz7MUrnPQlOywcqtVMNkXy53Gedp_V4PW-Gbf1_BAMjwuw_X7fKRd6hkNfEn43CKKju7muzi_d1Ig\"\n"
+        ],
+        "negative_examples": [
+          "======================",
+          "//////////////////////",
+          "++++++++++++++++++++++"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.aws.5",
-      "name": "Amazon MWS Auth Token"
+      "structural_id": "bc702aa85c7053c431844c9f469f4c3ba9c54d13",
+      "name": "Amazon MWS Auth Token",
+      "syntax": {
+        "name": "Amazon MWS Auth Token",
+        "id": "np.aws.5",
+        "pattern": "(?i)(amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
+        "examples": [
+          "AWS Access Key:AKIAIDQJ6PTGDFFWYX7A\nsecret key:IwJz1SHMccAKUKuskdVoHFfkre73BTyF80nRmcWc\nMWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.developer.amazonservices.com/en_US/dev_guide/index.html"
+        ]
+      }
     },
     {
       "id": "np.azure.1",
-      "name": "Azure Connection String"
+      "structural_id": "8d2b8482f72be3b33030ff0f584e4f26bfef2656",
+      "name": "Azure Connection String",
+      "syntax": {
+        "name": "Azure Connection String",
+        "id": "np.azure.1",
+        "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^;]{1,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([^;]{1,100})\n(?: ;|$ )\n",
+        "examples": [
+          "# Azure Storage Connection String\nAzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=hanatour9833;AccountKey=6jqh42QQjWWBwoPGGR/Jr0PZjhBMZVbHm/gkhEfHvOj8aV6+oI8ed6ZAAwB5a6993WqyQDiuJJB0QpseJwqYxw==;EndpointSuffix=core.windows.net\n",
+          "DefaultEndpointsProtocol=http;AccountName=testacc1;\nAccountKey=1gy3lpE7Du1j5ljKiupgKzywSw2isjsa69sfsdfsdsgfsgfdgfdgfd/YThisv/OVVLfIOv9kQ==;\nBlobEndpoint=http://127.0.0.1:8440/testacc1;\nTableEndpoint=http://127.0.0.1:8440/testacc1;\nQueueEndpoint=http://127.0.0.1:8440/testacc1;\n",
+          "\"IOTHUB_CONNECTION_STRING\": {\n  \"value\": \"HostName=d1-vi-ioth521.azure-devices.net;SharedAccessKeyName=registryReadWrite;SharedAccessKey=S8ii67l3Gd1Ba69az78iP9UksewzhjvUfh1DIuDs30w=\"\n}\n",
+          "\"AZURE_STORAGE_CONNECTION_STRING\": {\n  \"value\": \"DefaultEndpointsProtocol=https;AccountName=d1biblobstor521;AccountKey=NjEwGHd9+piK+iCi2C2XURWPmeDDjif9UKN1HAszYptL4iQ+yD7/dgjLMZc3VOpURsa53aJ4HZfbVWzL429C5g==;EndpointSuffix=core.windows.net\"\n}\n"
+        ],
+        "negative_examples": [
+          "InstrumentationKey=00000000-0000-0000-0000-000000000000;EndpointSuffix=ai.contoso.com;",
+          "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://custom.com:111/;LiveEndpoint=https://custom.com:222/;ProfilerEndpoint=https://custom.com:333/;SnapshotEndpoint=https://custom.com:444/;"
+        ],
+        "references": [
+          "https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/",
+          "https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string",
+          "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#best-practices-when-using-sas"
+        ]
+      }
     },
     {
       "id": "np.azure.2",
-      "name": "Azure App Configuration Connection String"
+      "structural_id": "fa60e25bcc04af344fddb0df1e579e23fd4486a8",
+      "name": "Azure App Configuration Connection String",
+      "syntax": {
+        "name": "Azure App Configuration Connection String",
+        "id": "np.azure.2",
+        "pattern": "(?x)\n(https://[a-zA-Z0-9-]+\\.azconfig\\.io);\nId=(.{4}-.{2}-.{2}:[a-zA-Z0-9+/]{18,22});\nSecret=([a-zA-Z0-9+/]{36,50}=)\n",
+        "examples": [
+          "Endpoint=https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOPqRSa53VWX05zaBCdE/fg9hi4k=",
+          "https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOA53ST8uVWX05zaBCdE/fg9hi4k=",
+          "Endpoint=https://appconfig-test01.azconfig.io;Id=09pv-l0-s0:opFCQMC6+9485xJgN5Ws;Secret=GcoEA53t7GLRNJ910M46IrbHO/Vg0tt4HujRdsaCoTY=",
+          "        private static string appConfigurationConnectionString = \"Endpoint=https://appcs-fg-pwc.azconfig.io;Id=pi5x-l9-s0:SZLlhHA53Nz2MpAl04cU;Secret=CQ+mlfQqkzfZv4XA53gigJ/seeXMKwNsqW/rM3wmtuE=\";"
+        ],
+        "negative_examples": [
+          "text:\n  az appconfig feature delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel\n"
+        ],
+        "references": [
+          "https://docs.microsoft.com/en-us/azure/azure-app-configuration/",
+          "https://docs.microsoft.com/en-us/azure/azure-app-configuration/howto-best-practices",
+          "https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/appconfiguration/azure-appconfiguration/azure/appconfiguration/_utils.py"
+        ]
+      }
     },
     {
       "id": "np.blynk.1",
-      "name": "Blynk Device Access Token"
+      "structural_id": "7d7b4a3c990889ccbda6d47ec656719c22f9413c",
+      "name": "Blynk Device Access Token",
+      "syntax": {
+        "name": "Blynk Device Access Token",
+        "id": "np.blynk.1",
+        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/external/api/[a-zA-Z0-9/]*\\?token=\n([a-zA-Z0-9_\\-]{32})\n&\n",
+        "examples": [
+          "curl \"https://blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1\"",
+          "curl \"https://fra1.blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1\"",
+          "curl \"https://lon1.blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1\"",
+          "curl \"https://blynk.cloud/external/api/update/property?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&pin=v1&isDisabled=true\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://blynk.io/",
+          "https://docs.blynk.io/en/blynk.cloud/device-https-api",
+          "https://docs.blynk.io/en/blynk.cloud/device-https-api/get-datastream-value",
+          "https://docs.blynk.io/en/blynk.cloud/device-https-api/troubleshooting",
+          "https://docs.blynk.io/en/getting-started/activating-devices/manual-device-activation#step-3-getting-auth-token"
+        ]
+      }
     },
     {
       "id": "np.blynk.2",
-      "name": "Blynk Organization Access Token (URL first)"
+      "structural_id": "30262e4c789ab867b395736820fbe957b113c67e",
+      "name": "Blynk Organization Access Token (URL first)",
+      "syntax": {
+        "name": "Blynk Organization Access Token (URL first)",
+        "id": "np.blynk.2",
+        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api/[a-zA-Z0-9_\\-\\s/\\\\]*\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"\n",
+        "examples": [
+          "curl https://fra1.blynk.cloud/api/organization/profile -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\"",
+          "curl https://fra1.blynk.cloud/api/organization/profile \\\n-H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info"
+        ]
+      }
     },
     {
       "id": "np.blynk.3",
-      "name": "Blynk Organization Access Token (URL last)"
+      "structural_id": "33c505fcd1d36eb537769fb4e39d880ae55bed94",
+      "name": "Blynk Organization Access Token (URL last)",
+      "syntax": {
+        "name": "Blynk Organization Access Token (URL last)",
+        "id": "np.blynk.3",
+        "pattern": "(?x)\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api\n",
+        "examples": [
+          "curl -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\" https://fra1.blynk.cloud/api/organization/profile",
+          "curl -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\" \\\nhttps://fra1.blynk.cloud/api/organization/profile\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info"
+        ]
+      }
     },
     {
       "id": "np.blynk.4",
-      "name": "Blynk Organization Client ID (URL first)"
+      "structural_id": "db24fc0cd5595b6b4b366ea3c7e7c9693da139d2",
+      "name": "Blynk Organization Client ID (URL first)",
+      "syntax": {
+        "name": "Blynk Organization Client ID (URL first)",
+        "id": "np.blynk.4",
+        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?::|&client_secret=)\n(?:[a-zA-Z0-9_\\-]{40})\n",
+        "examples": [
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp",
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \\\n-u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp\n",
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials&client_id=oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-&client_secret=5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        ]
+      }
     },
     {
       "id": "np.blynk.5",
-      "name": "Blynk Organization Client ID (URL last)"
+      "structural_id": "0fcc835ce5095d3df35317fcbd9ae268bd937921",
+      "name": "Blynk Organization Client ID (URL last)",
+      "syntax": {
+        "name": "Blynk Organization Client ID (URL last)",
+        "id": "np.blynk.5",
+        "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:(?:[a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
+        "examples": [
+          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",
+          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \\\nhttps://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        ]
+      }
     },
     {
       "id": "np.blynk.6",
-      "name": "Blynk Organization Client Secret (URL first)"
+      "structural_id": "4e0a588ff73dd061b8b19c19adf029de5cf7b8c0",
+      "name": "Blynk Organization Client Secret (URL first)",
+      "syntax": {
+        "name": "Blynk Organization Client Secret (URL first)",
+        "id": "np.blynk.6",
+        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(?:oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?::|&client_secret=)\n([a-zA-Z0-9_\\-]{40})\n",
+        "examples": [
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp",
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \\\n-u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp\n",
+          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials&client_id=oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-&client_secret=5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        ]
+      }
     },
     {
       "id": "np.blynk.7",
-      "name": "Blynk Organization Client Secret (URL last)"
+      "structural_id": "df489c15f4f568f54106d6ec719e17b5c2cfb479",
+      "name": "Blynk Organization Client Secret (URL last)",
+      "syntax": {
+        "name": "Blynk Organization Client Secret (URL last)",
+        "id": "np.blynk.7",
+        "pattern": "(?x)\n\\b\n(?:oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
+        "examples": [
+          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",
+          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \\\nhttps://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        ]
+      }
     },
     {
       "id": "np.codeclimate.1",
-      "name": "CodeClimate Reporter ID"
+      "structural_id": "d8617e5046ad06f17130511e5bd0bcbeab25cca3",
+      "name": "CodeClimate Reporter ID",
+      "syntax": {
+        "name": "CodeClimate Reporter ID",
+        "id": "np.codeclimate.1",
+        "pattern": "(?x)\n(?: CODECLIMATE_REPO_TOKEN | CC_TEST_REPORTER_ID)\n\\s* [:=] \\s*\n([a-f0-9]{64})\\b\n",
+        "examples": [
+          " - RAILS_ENV=test CODECLIMATE_REPO_TOKEN=d37a8b9e09642cb73cfcf4e1284815fc3d6a55a7714110187ac59856ae4ab5ad",
+          "- uses: paambaati/codeclimate-action@v2.2.4\nenv:\n  CC_TEST_REPORTER_ID: 945dfb58a832d233a3caeb84e3e6d3be212e8c7abcb48117fce63b9adcb43647\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://github.com/codeclimate/javascript-test-reporter",
+          "https://github.com/codeclimate/php-test-reporter",
+          "https://github.com/codeclimate/python-test-reporter",
+          "https://github.com/codeclimate/ruby-test-reporter",
+          "https://github.com/codeclimate/ruby-test-reporter/issues/34",
+          "https://docs.codeclimate.com/docs/finding-your-test-coverage-token#should-i-keep-my-test-reporter-id-secret"
+        ]
+      }
     },
     {
       "id": "np.cratesio.1",
-      "name": "crates.io API Key"
+      "structural_id": "38f101445bae9a3389069b9e95e3abefda18938b",
+      "name": "crates.io API Key",
+      "syntax": {
+        "name": "crates.io API Key",
+        "id": "np.cratesio.1",
+        "pattern": "\\b(cio[a-zA-Z0-9]{32})\\b",
+        "examples": [
+          "Bearer: ciotgp8BGZBlX192iExSQPm0SrUlBunG8zd"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://crates.io/data-access",
+          "https://github.com/rust-lang/crates.io/blob/master/src/util/token.rs"
+        ]
+      }
     },
     {
       "id": "np.digitalocean.1",
-      "name": "DigitalOcean Application Access Token"
+      "structural_id": "f43e1590624961d1a9984818101cb6a91ca00081",
+      "name": "DigitalOcean Application Access Token",
+      "syntax": {
+        "name": "DigitalOcean Application Access Token",
+        "id": "np.digitalocean.1",
+        "pattern": "(?x)(?i)\n\\b\n(doo_v1_[a-f0-9]{64})\n\\b\n",
+        "examples": [
+          "curl -X GET -H \"Content-Type: application/json\" -H \"Authorization: Bearer doo_v1_c46dde8bd620fcc382e70d5d43be6eebb141fa2452e8f8fa882433377898ebf2\" \"https://api.digitalocean.com/v2/cdn/endpoints\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.digitalocean.com/reference/api/"
+        ]
+      }
     },
     {
       "id": "np.digitalocean.2",
-      "name": "DigitalOcean Personal Access Token"
+      "structural_id": "2f89ed43dacde4ab4174a69492b0f7dc2fd26dde",
+      "name": "DigitalOcean Personal Access Token",
+      "syntax": {
+        "name": "DigitalOcean Personal Access Token",
+        "id": "np.digitalocean.2",
+        "pattern": "(?x)(?i)\n\\b\n(dop_v1_[a-f0-9]{64})\n\\b\n",
+        "examples": [
+          "token         = \"dop_v1_ef0e04edc13918192246e0c90f0735c7f4db7a5a036a857e48d6cc98f1c9576b\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.digitalocean.com/reference/api/"
+        ]
+      }
     },
     {
       "id": "np.digitalocean.3",
-      "name": "DigitalOcean Refresh Token"
+      "structural_id": "c28c79da44ff53116c2279a0638e6754f7741115",
+      "name": "DigitalOcean Refresh Token",
+      "syntax": {
+        "name": "DigitalOcean Refresh Token",
+        "id": "np.digitalocean.3",
+        "pattern": "(?x)(?i)\n\\b\n(dor_v1_[a-f0-9]{64})\n\\b\n",
+        "examples": [
+          "  \"refresh_token\": \"dor_v1_d6ce5b93104521c47be0b580e9296454ef4a319b02b5513469f0ec71d99af2e2\","
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.digitalocean.com/reference/api/"
+        ]
+      }
     },
     {
       "id": "np.dockerhub.1",
-      "name": "Docker Hub Personal Access Token"
+      "structural_id": "ee5a64a1fc638eb07dcae2cfd5a32bb3f583395b",
+      "name": "Docker Hub Personal Access Token",
+      "syntax": {
+        "name": "Docker Hub Personal Access Token",
+        "id": "np.dockerhub.1",
+        "pattern": "(?x)\n\\b\n(dckr_pat_[a-zA-Z0-9_-]{27})\n(?: $ | [^a-zA-Z0-9_-] )\n",
+        "examples": [
+          "docker login -u gemesa -p dckr_pat_hc8VxYclixyTr2rDFsa2rqzkP3Y",
+          "docker login -u gemesa -p dckr_pat_tkzBYxjNNC3R_Yg6jd_O-G8FbrJ",
+          "docker login -u gemesa -p dckr_pat_1q8yKET1VDJTpfCwseUDzT8vFh-"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.docker.com/security/for-developers/access-tokens/"
+        ]
+      }
     },
     {
       "id": "np.doppler.1",
-      "name": "Doppler CLI Token"
+      "structural_id": "5897a515c3feab2c757db1edff7c8862f711498f",
+      "name": "Doppler CLI Token",
+      "syntax": {
+        "name": "Doppler CLI Token",
+        "id": "np.doppler.1",
+        "pattern": "(?x)\n\\b\n(dp\\.ct\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.ct.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.doppler.2",
-      "name": "Doppler Personal Token"
+      "structural_id": "cec244fd4f2a45e7a69dcfc15fa6767a6db779fd",
+      "name": "Doppler Personal Token",
+      "syntax": {
+        "name": "Doppler Personal Token",
+        "id": "np.doppler.2",
+        "pattern": "(?x)\n\\b\n(dp\\.pt\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.pt.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.doppler.3",
-      "name": "Doppler Service Token"
+      "structural_id": "6c98aefe21c8ef0dc8de7931fd69a8125b47a155",
+      "name": "Doppler Service Token",
+      "syntax": {
+        "name": "Doppler Service Token",
+        "id": "np.doppler.3",
+        "pattern": "(?x)\n\\b\n(dp\\.st\\.(?:[a-z0-9\\-_]{2,35}\\.)?[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.st.dev.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.doppler.4",
-      "name": "Doppler Service Account Token"
+      "structural_id": "7ea3829a1e208e89f11077ef5e6b3ea362459c1c",
+      "name": "Doppler Service Account Token",
+      "syntax": {
+        "name": "Doppler Service Account Token",
+        "id": "np.doppler.4",
+        "pattern": "(?x)\n\\b\n(dp\\.sa\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.sa.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.doppler.5",
-      "name": "Doppler SCIM Token"
+      "structural_id": "8bdd28d4df94e65a8871e200372d1fe6acfdc028",
+      "name": "Doppler SCIM Token",
+      "syntax": {
+        "name": "Doppler SCIM Token",
+        "id": "np.doppler.5",
+        "pattern": "(?x)\n\\b\n(dp\\.scim\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.scim.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.doppler.6",
-      "name": "Doppler Audit Token"
+      "structural_id": "944cb00ec1171703227be911788cf3f97bd8d39d",
+      "name": "Doppler Audit Token",
+      "syntax": {
+        "name": "Doppler Audit Token",
+        "id": "np.doppler.6",
+        "pattern": "(?x)\n\\b\n(dp\\.audit\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "examples": [
+          "dp.audit.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.doppler.com/reference/api",
+          "https://docs.doppler.com/reference/auth-token-formats"
+        ]
+      }
     },
     {
       "id": "np.dropbox.1",
-      "name": "Dropbox Access Token"
+      "structural_id": "6d901041cd6c14ade4811d81988be9d0c91d08be",
+      "name": "Dropbox Access Token",
+      "syntax": {
+        "name": "Dropbox Access Token",
+        "id": "np.dropbox.1",
+        "pattern": "(?x)\n\\b\n(sl\\.[a-zA-Z0-9_-]{130,152})\n(?: $ | [^a-zA-Z0-9_-] )\n",
+        "examples": [
+          "curl -X POST https://api.dropboxapi.com/2/users/get_current_account --header \"Authorization: Bearer sl.hAi61Jx1hs3XlhrnsCxnctrEmxK2Q-UK29hbdxxHyAykldSeHmipBAauxTzuBEIqt2jdyyUZw8kgY3t_ars-PNIPS27ySa1ab22132U3sUuqYTXHzf2XlvMxSesUhkzx2G11_9W1f-eo\"",
+          "  \"access_token\": \"sl.AbX9y6Fe3AuH5o66-gmJpR032jwAwQPIVVzWXZNkdzcYT02akC2de219dZi6gxYPVnYPrpvISRSf9lxKWJzYLjtMPH-d9fo_0gXex7X37VIvpty4-G8f4-WX45AcEPfRnJJDwzv-\","
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developers.dropbox.com/oauth-guide",
+          "https://www.dropbox.com/developers/",
+          "https://www.dropbox.com/developers/documentation/http/documentation"
+        ]
+      }
     },
     {
       "id": "np.dtrack.1",
-      "name": "Dependency-Track API Key"
+      "structural_id": "3c432e7c77bc184649a82b3693678e3420cd1403",
+      "name": "Dependency-Track API Key",
+      "syntax": {
+        "name": "Dependency-Track API Key",
+        "id": "np.dtrack.1",
+        "pattern": "\\b(odt_[A-Za-z0-9]{32,255})\\b",
+        "examples": [
+          "odt_KTJlDq2AGGGlqG4riKdT7p980AW8RlU5",
+          "odt_ABCDDq2AGxGlrF4ribBT7p98AOM9TlU8",
+          "odt_FHxhQGh77JAHHIYpZ818UQ0aYjXIdMIxxgeR"
+        ],
+        "negative_examples": [
+          "KTJlDq2AGGGlqG8riKdT7p980AW8RlU5",
+          "ABCDDq2AGxGlqG 4ribBT7p98AOM9TlU8",
+          "FHxhQGh77_JAHHIYpZ818UQ0aYjXIdMIxxgeR"
+        ],
+        "references": [
+          "https://docs.dependencytrack.org/integrations/rest-api/",
+          "https://docs.dependencytrack.org/getting-started/configuration/",
+          "https://github.com/stevespringett/Alpine/blob/92fdb7de7e5623b8c986de08997480036af5f472/alpine-model/src/main/java/alpine/model/ApiKey.java",
+          "https://github.com/DependencyTrack/dependency-track/pull/3047"
+        ]
+      }
     },
     {
       "id": "np.dynatrace.1",
-      "name": "Dynatrace Token"
+      "structural_id": "a4cb030b5aae7d1204167bfaf4b53ecc9f9a6440",
+      "name": "Dynatrace Token",
+      "syntax": {
+        "name": "Dynatrace Token",
+        "id": "np.dynatrace.1",
+        "pattern": "\\b(dt0[a-zA-Z]{1}[0-9]{2}\\.[A-Z0-9]{24}\\.[A-Z0-9]{64})\\b",
+        "examples": [
+          "helmCharts:\n- name: dynatrace-operator\n  namespace: dynatrace\n  version: 0.4.1\n  repo: https://raw.githubusercontent.com/Dynatrace/helm-charts/master/repos/stable\n  releaseName: dynatrace-operator\n  includeCRDs: true\n  valuesInline:\n    apiUrl: https://fqp43822.live.dynatrace.com/api\n    apiToken: dt0c01.FJEGSO2NBAXCOEA7WOSKOA2G.GGMUK6GJDH2TWLNKQT6F68FH22252VXP2F3QAMBUVUDV5TSYYHAWZVVFCUQLF2UA\n    paasToken: dt0c01.QS7G6CAS5G64DLXFMEDEJ2O7.XVJQTFD2H7XG45V5RTDGA78GAI5W44MFTLZTUOMH4JEXPAV6NSEHUNGAYPIZGEIV\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.dynatrace.com/support/help/dynatrace-api",
+          "https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication"
+        ]
+      }
     },
     {
       "id": "np.facebook.1",
-      "name": "Facebook Secret Key"
+      "structural_id": "6dbdce7ed07037d3d640abadb83d72e24934ccee",
+      "name": "Facebook Secret Key",
+      "syntax": {
+        "name": "Facebook Secret Key",
+        "id": "np.facebook.1",
+        "pattern": "(?x)(?i)\n\\b (?: facebook | fb )\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{32}) \\b\n",
+        "examples": [
+          "   # config.facebook.key = \"34cebc81c056a21bc66e212f947d73ec\"",
+          "    var fbApiKey = '0278fc1adf6dc1d82a156f306ce2c5cc';",
+          "     fbApiKey:            \"171e84fd57f430fc59afa8fad3dbda2a\","
+        ],
+        "negative_examples": [
+          "\\\"fbconnectkey\\\";s:32:\\\"8f52d1586bd18a18e152289b00ed7d29\\\";"
+        ],
+        "references": [
+          "https://developers.facebook.com/docs/facebook-login/access-tokens/"
+        ]
+      }
     },
     {
       "id": "np.facebook.2",
-      "name": "Facebook Access Token"
+      "structural_id": "3d854415deb5b6e163b290546558054d1b8eefb2",
+      "name": "Facebook Access Token",
+      "syntax": {
+        "name": "Facebook Access Token",
+        "id": "np.facebook.2",
+        "pattern": "\\b(EAACEdEose0cBA[a-zA-Z0-9]+)\\b",
+        "examples": [
+          "url = 'https://graph.facebook.com/me/friends?access_token=EAACEdEose0cBAD5XZCz5JXYvqyeJzcSvFZC42toHiWyfjhcZCMZBZCpE3uRJnEBsrhUEMRK1wWs6SsdiDCaCI1mYwyoNuMix2XZCpvsKbZB9TumtZBlcLeIpl4pa931Ce9rTinEAhtyVVZAAZAX4NmfpBUqWtzCRC0fX5GZBn7ZC28mPKAZDZD'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developers.facebook.com/docs/facebook-login/access-tokens/"
+        ]
+      }
     },
     {
       "id": "np.figma.1",
-      "name": "Figma Personal Access Token"
+      "structural_id": "b6af64451e53eff08941b7afdd049ba79b642643",
+      "name": "Figma Personal Access Token",
+      "syntax": {
+        "name": "Figma Personal Access Token",
+        "id": "np.figma.1",
+        "pattern": "(?x)(?i)\nfigma.{0,20}\n\\b\n(\n  [0-9a-f]{4}-\n  [0-9a-f]{8}-\n  [0-9a-f]{4}-\n  [0-9a-f]{4}-\n  [0-9a-f]{4}-\n  [0-9a-f]{12}\n)\n\\b\n",
+        "examples": [
+          "--header='X-Figma-Token: 1394-0ca7a5be-8e22-40ee-8c40-778d41ab2313'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.figma.com/developers/api",
+          "https://www.figma.com/developers/api#access-tokens"
+        ]
+      }
     },
     {
       "id": "np.gcs.1",
-      "name": "Google Cloud Storage Bucket (subdomain style)"
+      "structural_id": "5eddb5305d1dd0c6b3dbe21c1967adce9d49242a",
+      "name": "Google Cloud Storage Bucket (subdomain style)",
+      "syntax": {
+        "name": "Google Cloud Storage Bucket (subdomain style)",
+        "id": "np.gcs.1",
+        "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+    (?# bucket name as subdomain )\nstorage\\.googleapis\\.com\n)\n\\b\n",
+        "examples": [
+          "c.storage.googleapis.com",
+          "some-bucket.example.com.storage.googleapis.com"
+        ],
+        "negative_examples": [
+          "https://storage.googleapis.com"
+        ],
+        "references": [
+          "https://cloud.google.com/storage/docs/request-endpoints"
+        ]
+      }
     },
     {
       "id": "np.gcs.2",
-      "name": "Google Cloud Storage Bucket (path style)"
+      "structural_id": "e035689e0938e952f158d50f4e060a44c7a5df9d",
+      "name": "Google Cloud Storage Bucket (path style)",
+      "syntax": {
+        "name": "Google Cloud Storage Bucket (path style)",
+        "id": "np.gcs.2",
+        "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\nstorage\\.googleapis\\.com\n/\n[a-zA-Z0-9_-]+ (?: \\. [a-zA-Z0-9_-]+ )*    (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                   (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "examples": [
+          "https://storage.googleapis.com/bucket_name/object_name"
+        ],
+        "negative_examples": [
+          "c.storage.googleapis.com/some_object",
+          "some-bucket.example.com.storage.googleapis.com/some_object"
+        ],
+        "references": [
+          "https://cloud.google.com/storage/docs/request-endpoints"
+        ]
+      }
     },
     {
       "id": "np.generic.1",
-      "name": "Generic Secret"
+      "structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
+      "name": "Generic Secret",
+      "syntax": {
+        "name": "Generic Secret",
+        "id": "np.generic.1",
+        "pattern": "(?x)(?i)\nsecret\n.{0,20}\n\\b\n([0-9a-z]{32,64})\n\\b\n",
+        "examples": [
+          "    private static String CLIENT_SECRET = \"6fb1cff7690db9ac066cadbbde8e3c078efdabcf\";"
+        ],
+        "negative_examples": [
+          "    client_credential='5pX8Q~MmTI8OMBJFVqMlFR4DE3Spz6Qm.xO.Gbf-'",
+          "    secret_access_key = 'abcdefg12346+FJQCK'",
+          "    Ldap password               ----   H7IKC85R#@4$"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.generic.2",
-      "name": "Generic API Key"
+      "structural_id": "ac1028729d342a4d0cf282377532d882a48795c6",
+      "name": "Generic API Key",
+      "syntax": {
+        "name": "Generic API Key",
+        "id": "np.generic.2",
+        "pattern": "(?x)(?i)\n(?: api_key | apikey | access_key | accesskey )\n.{0,3}\n[\\ \\t]* (?: : | = | := | => | , | ' | \" ) [\\ \\t]*\n.{0,3}\n\\b\n([0-9a-z][0-9a-z\\-._/+]{30,62}[0-9a-z])\n\\b\n",
+        "examples": [
+          "API_KEY = \"951bc382db9abad29c68634761dd6e19\"",
+          "buildConfigField 'String' , 'API_KEY' , '\"951bc382db9cfee29c68634761dd6e19\"'\tAPI_KEY\t"
+        ],
+        "negative_examples": [
+          "name=\"ws_plugin__s2member_amazon_s3_comp_files_access_key\" id=\"ws-plugin--s2member-amazon-s3-comp-files-access-key\""
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.generic.3",
-      "name": "Generic Username and Password (quoted)"
+      "structural_id": "8cca3a4a548b00450bae08c40f5f33f06173b21f",
+      "name": "Generic Username and Password (quoted)",
+      "syntax": {
+        "name": "Generic Username and Password (quoted)",
+        "id": "np.generic.3",
+        "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([a-zA-Z0-9.@_\\-+]{3,30}) [\"']          (?# quoted username )\n\\s* [,;]? \\s*                                (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([^\"']{5,30}) [\"']                      (?# quoted password )\n",
+        "examples": [
+          "credential = UsernamePasswordCredential(\n    client_id='da34859b-2ae4-48c3-bfe0-1b28b7cf2eed',\n    username='donjuandemarco',\n    password='1qay@WXS????',\n    tenant_id='bc877b20-f135-4c13-a266-8ed26b8f0f4b')\n",
+          "hostname = '10.11.12.13'\nusername = 'donjuandemarco@example.com'\npassword = '`123QWERasdf'\n",
+          "hostname = '10.11.12.13'\nUSERNAME = 'donjuandemarco@example.com'\n# some comment\n# some other comment\nPASS = '`123QWERasdf'\n",
+          "user = 'abuser'  # some comment\npassword = 'abuser123456'  # some other comment\n",
+          "user = 'Aladdin'\npassword = 'open sesame'\n"
+        ],
+        "negative_examples": [
+          "USERNAME=donjuan\nPASSWORD=$($(dirname $0)/../bin/get-django-setting LOCAL_DATABASE_PASSWORD)\n",
+          ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',",
+          "#if DEBUG\n          string backend_host = \"amazon-subdomain-for-database.string.us-east-1.rds.amazonaws.com\";\n          string backend_user = \"root\";\n          string backend_pass = \"XXXXXXXXXXXXX\";\n          string backend_db = \"database_db\";\n          string backend_port = \"1234\";\n"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.generic.4",
-      "name": "Generic Username and Password (unquoted)"
+      "structural_id": "858195023faa03c3aad1d8534cba1bf332439bee",
+      "name": "Generic Username and Password (unquoted)",
+      "syntax": {
+        "name": "Generic Username and Password (unquoted)",
+        "id": "np.generic.4",
+        "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n([a-zA-Z0-9.@_\\-+]{3,30})                    (?# unquoted username )\n\\s* ;? \\s*                                   (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n(\\S{5,30})                                   (?# unquoted password )\n(?: \\s | $ )                                 (?# end-of-password anchor )\n",
+        "examples": [
+          "user = Aladdin\npassword = open_sesame\n",
+          "user = Aladdin\n// some comment\n// some other comment\npassword = open_sesame\n",
+          ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
+        ],
+        "negative_examples": [
+          "user = 'Aladdin'\npassword = 'open_sesame'\n"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.generic.5",
-      "name": "Generic Password (double quoted)"
+      "structural_id": "4742a7e5266ce68dd5633ca6c2c634a4fa706673",
+      "name": "Generic Password (double quoted)",
+      "syntax": {
+        "name": "Generic Password (double quoted)",
+        "id": "np.generic.5",
+        "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n\"\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n\"\n",
+        "examples": [
+          "password = \"super$ecret\"\n",
+          "password=\"super$ecret\"\n",
+          "String usernamePassword = \"application:\" + appKey + \":\" + appSecret;\n",
+          "my_password: \"super$ecret\"\n",
+          "\"password\": \"super$ecret\",\n",
+          "my_password := \"super$ecret\"\n",
+          "password   =>   \"super$ecret\"\n",
+          "\"ApplicationServicesConnection\" : {\n    \"ServiceAddress\" : \"https://services-dev.examples.com\",\n    \"AdminPassword\" : \"thisismypassword\"\n}\n",
+          "private const string DevFolkoosComPfxPassword = \"thisismypassword\";\n",
+          "\"password\": \"YOURPASSWROD\"\n",
+          "create_random_name('sfrp-cli-cert2', 24),\n            'cluster_name': self.create_random_name('sfrp-cli-', 24),\n            'vm_password': \"Pass123!@#\",\n            'policy_path': os.path.join(TEST_DIR, 'policy.json')\n        })\n"
+        ],
+        "negative_examples": [
+          "password = \"123\"\n",
+          "password = super$ecret\n",
+          "password = 'super$ecret'\n",
+          "\"password\": \"$super$ecret\",\n",
+          "sb.append(\"MasterUserPassword: \" + getMasterUserPassword() + \",\");\n",
+          "\"//localhost:1337/:_password = \"+new Buffer(\"feast\").toString(\"base64\")\n",
+          "export PGPASSWORD=\"$gdcapi_db_password\"\n",
+          "define wget::authfetch($source,$destination,$user,$password=\"\",$timeout=\"0\",$verbose=false) {\n",
+          "- echo 'export DATABASE_PASSWORD=\"'$PRECOMPILE_PASSWORD'\"' >> .env\n",
+          "\"/en/enterprise/3.0/authentication/keeping-your-account-and-data-secure/creating-a-strong-password\":\"/en/enterprise-server@3.0/auth\"\n",
+          "\"password\": \"&lt;YOURPASSWROD&gt;\"\n",
+          "as: 'cms_user_password'\n  get '/passwords/:id/edit' => \"cms/sites/passwords#edit\", as: 'edit_password'\n  put '/forgot-password' => \"cms/sites/passwords#update\", as: 'update_password'\nend\n",
+          "IAMUserChangePassword = \"arn:aws:iam::aws:policy/IAMUserChangePassword\"\n",
+          "this.addPassword = \"#add-password\";\n"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.generic.6",
-      "name": "Generic Password (single quoted)"
+      "structural_id": "623947cab165b1d6c786a051107b4555e41719d5",
+      "name": "Generic Password (single quoted)",
+      "syntax": {
+        "name": "Generic Password (single quoted)",
+        "id": "np.generic.6",
+        "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n'\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n'\n",
+        "examples": [
+          ":password       => '4ian1234',\n",
+          "common.then_log_in({username: 'geronimo', password: '52VeZqtHDCdAr5yM'});\n",
+          "beta => {\n  host            => 'foo.example.com',\n  user            => 'joe',\n  password        => 'thisismypassword',\n}\n"
+        ],
+        "negative_examples": [
+          "echo 'password = '.$p['config']['daemon_password'].\"\\n\";\n",
+          "usernameLabel:\"Username or email:\",passwordLabel:\"Password:\",rememberMeLabel:\"Remember me:\"\n",
+          "this.addPassword = '#add-password';\n"
+        ],
+        "references": []
+      }
     },
     {
       "id": "np.github.1",
-      "name": "GitHub Personal Access Token"
+      "structural_id": "f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
+      "name": "GitHub Personal Access Token",
+      "syntax": {
+        "name": "GitHub Personal Access Token",
+        "id": "np.github.1",
+        "pattern": "\\b(ghp_[a-zA-Z0-9]{36})\\b",
+        "examples": [
+          "GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
+          "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'",
+          "## git devaloper settings\n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\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token",
+          "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ]
+      }
     },
     {
       "id": "np.github.2",
-      "name": "GitHub OAuth Access Token"
+      "structural_id": "2d76a219d8a6661a59e3742b508749338db05943",
+      "name": "GitHub OAuth Access Token",
+      "syntax": {
+        "name": "GitHub OAuth Access Token",
+        "id": "np.github.2",
+        "pattern": "\\b(gho_[a-zA-Z0-9]{36})\\b",
+        "examples": [
+          "    \"url\": \"git+https://FelipeMestre:gho_psT9pqNFsehnc4se0ZzzR0HBxapxZD35hNHi@github.com/gontarz/PW_2021_Website-FelipeMestre.git\"",
+          "    oauth_token: gho_fq75OMU7UVbS9pTZmoCCzJT6TM5d1w099FgG"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
+          "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ]
+      }
     },
     {
       "id": "np.github.3",
-      "name": "GitHub App Token"
+      "structural_id": "c5378428d519054db6ff9e698907b68cdc334a49",
+      "name": "GitHub App Token",
+      "syntax": {
+        "name": "GitHub App Token",
+        "id": "np.github.3",
+        "pattern": "\\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\\b",
+        "examples": [
+          "            \"token\": \"ghu_16C7e42F292c69C2E7C10c838347Ae178B4a\",",
+          "Example usage:\ngit clone http://ghs_RguXIkihJjwHAP6eXEYxaPNvywurTr5IOAbg@github.com/username/repo.git\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
+          "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ]
+      }
     },
     {
       "id": "np.github.4",
-      "name": "GitHub Refresh Token"
+      "structural_id": "7d3e264b8b979d6e4b881484d4d9c9684fb2ee37",
+      "name": "GitHub Refresh Token",
+      "syntax": {
+        "name": "GitHub Refresh Token",
+        "id": "np.github.4",
+        "pattern": "\\b(ghr_[a-zA-Z0-9]{76})\\b",
+        "examples": [
+          "    \"refresh_token\": \"ghr_1B4a2e77838347a7E420ce178F2E7c6912E169246c3CE1ccbF66C46812d16D5B1A9Dc86A1498\","
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
+          "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ]
+      }
     },
     {
       "id": "np.github.5",
-      "name": "GitHub Client ID"
+      "structural_id": "88b0db716a038c821da722183e70b157ce8ac020",
+      "name": "GitHub Client ID",
+      "syntax": {
+        "name": "GitHub Client ID",
+        "id": "np.github.5",
+        "pattern": "(?x)(?i)\n(?:github)\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{20}) \\b\n",
+        "examples": [
+          "GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7\nGITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps"
+        ]
+      }
     },
     {
       "id": "np.github.6",
-      "name": "GitHub Secret Key"
+      "structural_id": "841061de83a432c3d7127e544223237d9faba4ed",
+      "name": "GitHub Secret Key",
+      "syntax": {
+        "name": "GitHub Secret Key",
+        "id": "np.github.6",
+        "pattern": "(?x)(?i)\ngithub\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{40}) \\b\n",
+        "examples": [
+          "GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7\nGITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps"
+        ]
+      }
     },
     {
       "id": "np.github.7",
-      "name": "GitHub Personal Access Token (fine-grained permissions)"
+      "structural_id": "8a8de711c438d48576508a096971b13135fb73cb",
+      "name": "GitHub Personal Access Token (fine-grained permissions)",
+      "syntax": {
+        "name": "GitHub Personal Access Token (fine-grained permissions)",
+        "id": "np.github.7",
+        "pattern": "(?x)\n\\b\n(github_pat_[0-9a-zA-Z_]{82})\n\\b\n",
+        "examples": [
+          "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"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
+          "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+        ]
+      }
     },
     {
       "id": "np.gitlab.1",
-      "name": "GitLab Runner Registration Token"
+      "structural_id": "00aff84f132e61a62c8ab62b2439d72c5497af7b",
+      "name": "GitLab Runner Registration Token",
+      "syntax": {
+        "name": "GitLab Runner Registration Token",
+        "id": "np.gitlab.1",
+        "pattern": "\\b(GR1348941[0-9a-zA-Z_-]{20})(?:\\b|$)",
+        "examples": [
+          "sudo gitlab-runner register \\\n--non-interactive \\\n--url \"https://gitlab.com/\" \\\n--registration-token \"GR1348941_iAgdMy7a3NhZaa5oNoH\" \\\n--executor \"docker\" \\\n--docker-image ubuntu:latest \\\n--description \"docker-runner\" \\\n--tag-list \"docker, CICD, App\" \\\n--run-untagged=\"true\" \\\n--locked=\"false\" \\\n--access-level=\"not_protected\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.gitlab.com/runner/security/",
+          "https://docs.gitlab.com/ee/security/token_overview.html#runner-registration-tokens-deprecated",
+          "https://docs.gitlab.com/ee/security/token_overview.html#security-considerations"
+        ]
+      }
     },
     {
       "id": "np.gitlab.2",
-      "name": "GitLab Personal Access Token"
+      "structural_id": "c9d156209ee37a65c39b8845464831ca8936ff79",
+      "name": "GitLab Personal Access Token",
+      "syntax": {
+        "name": "GitLab Personal Access Token",
+        "id": "np.gitlab.2",
+        "pattern": "\\b(glpat-[0-9a-zA-Z_-]{20})(?:\\b|$)",
+        "examples": [
+          "docker build -t tweedledee \\\n-f Dockerfile \\\n--build-arg 'GO_REPO_TOKEN=glpat-tFrjFXD7soVU2fqxuDMh' \\\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html"
+        ]
+      }
     },
     {
       "id": "np.gitlab.3",
-      "name": "GitLab Pipeline Trigger Token"
+      "structural_id": "d9bf935cb9f023e91b5ca8ca9874b991443359f4",
+      "name": "GitLab Pipeline Trigger Token",
+      "syntax": {
+        "name": "GitLab Pipeline Trigger Token",
+        "id": "np.gitlab.3",
+        "pattern": "\\b(glptt-[0-9a-f]{40})\\b",
+        "examples": [
+          "curl    \\\n-X POST \\\n--fail  \\\n--no-progress-meter \\\n-F token=glptt-0d66598d696a02da33fb65e2a041f607c68ea50d \\\n-F ref=main\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.gitlab.com/ee/ci/triggers/",
+          "https://gitlab.com/gitlab-org/gitlab/-/issues/371396",
+          "https://gitlab.com/gitlab-org/gitlab/-/issues/388379"
+        ]
+      }
     },
     {
       "id": "np.google.1",
-      "name": "Google Client ID"
+      "structural_id": "71c48e0c05f5f0ab132110274532e15702c7fb84",
+      "name": "Google Client ID",
+      "syntax": {
+        "name": "Google Client ID",
+        "id": "np.google.1",
+        "pattern": "(?i)\\b([0-9]+-[a-z0-9_]{32})\\.apps\\.googleusercontent\\.com",
+        "examples": [
+          "                 'clientID' : '231545488769-4d1mcev9vifvlncrern52id2pqqf5u5l.apps.googleusercontent.com',",
+          "                //$google_client_id     = '244082345999-o6m8f1pmb1e76tjfj9v7b96j31e53ps5.apps.googleusercontent.com';",
+          "      GOOGLE_OAUTH2_CLIENT_ID = '607830223128-4qgthc7ofdqce232dk690t5jgkm1ce33.apps.googleusercontent.com'",
+          "          $cordovaOauth.google(\"653512027492-5u9blotr1521fa0lo1172nhv4pmqgttq.apps.googleusercontent.com\", [\"email\"]).then(function(result) {"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.google.2",
-      "name": "Google OAuth Client Secret (prefixed)"
+      "structural_id": "71b59face72a259d5cf2950bb281d1f84ac82d41",
+      "name": "Google OAuth Client Secret (prefixed)",
+      "syntax": {
+        "name": "Google OAuth Client Secret (prefixed)",
+        "id": "np.google.2",
+        "pattern": "(?x)\n\\b\n(GOCSPX-[a-zA-Z0-9_-]{28})\n(?:[^a-zA-Z0-9_-] | $)\n",
+        "examples": [
+          "const CLIENTSECRET = \"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\""
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.google.3",
-      "name": "Google OAuth Client Secret"
+      "structural_id": "9d4957111a8dc46f4cb7b05fb7d3a9ce411507a6",
+      "name": "Google OAuth Client Secret",
+      "syntax": {
+        "name": "Google OAuth Client Secret",
+        "id": "np.google.3",
+        "pattern": "(?x)(?i)\nclient.?secret .{0,10}\n\\b\n([a-z0-9_-]{24})\n(?: [^a-z0-9_-] |$)\n",
+        "examples": [
+          "\"client_secret\":\"aaaaaaaaaaaaaaaaaaaaaaa-\"",
+          "                 //$google_client_secret = 'fnhqAakzWrX-mtFQ4PRdMoy0';",
+          "                'clientSecret' : 'Ufvuj-d6alhwGKvvLh_8Nq0K'"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.google.4",
-      "name": "Google OAuth Access Token"
+      "structural_id": "6e6e495ed5ba4f4a8ac082e5951fb06c05bdb5ec",
+      "name": "Google OAuth Access Token",
+      "syntax": {
+        "name": "Google OAuth Access Token",
+        "id": "np.google.4",
+        "pattern": "(?x)\n\\b\n(ya29\\.[0-9A-Za-z_-]{20,1024})\n(?: [^0-9A-Za-z_-]|$)  (?# Used instead of `\\b` because that doesn't play well with trailing `-` )\n",
+        "examples": [
+          "const setupCredentials = () => {\nconst { encryptedData, iv } = encrypt({\n  expiry_date: 1642441058842,\n  access_token:\n    'ya29.A0ARrdaM--PV_87ebjywDJpXKb77NBFJl16meVUapYdfNv6W6ZzCu947fNaPaRjbDbOIIcp6f49cMaX5ndK9TAFnKwlVqz3nrK9nLKqgyDIhYsIq47smcAIZkK56SWPx3X3DwAFqRu2UPojpd2upWwo-3uJrod',\n  // This token is linked to a test Google account (typebot.test.user@gmail.com)\n  refresh_token:\n    '1//039xWRt8YaYa3CgYIARAAGAMSNwF-L9Iru9FyuTrDSa7lkSceggPho83kJt2J29Ga91EhT1C6XV1vmo6bQS9puL_R2t8FIwR3gek',\n})\n",
+          "-- Clear login if it's a new connection.\n--propertyTable.access_token = 'ya29.Ci_UA7aEsvT6-oVI8f96kvB6i8oO13WgdZUviLaCVtpEPYZqhQcQycR-u2X9xtmYGA'\n"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.google.5",
-      "name": "Google API Key"
+      "structural_id": "2574397bc0dd4560b0f59cbe1018bc33016e819b",
+      "name": "Google API Key",
+      "syntax": {
+        "name": "Google API Key",
+        "id": "np.google.5",
+        "pattern": "(?x)\n\\b\n(AIza[0-9A-Za-z_-]{35})\n(?: [^0-9A-Za-z_-] | $ )\n",
+        "examples": [
+          "  var DEVELOPER_KEY = 'AIzaSyB4sU8lU15bR_87qNb7eUVQN72_vv8mpbU';",
+          "value=\"AIzaSyBnAoO3VNVUco4MXf4enYCVBg6ZnpY49N-"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://cloud.google.com/docs/authentication/api-keys#securing",
+          "https://support.google.com/googleapi/answer/6310037"
+        ]
+      }
     },
     {
       "id": "np.gradle.1",
-      "name": "Hardcoded Gradle Credentials"
+      "structural_id": "a12f90a50f965526bfcf34016b914665483c389d",
+      "name": "Hardcoded Gradle Credentials",
+      "syntax": {
+        "name": "Hardcoded Gradle Credentials",
+        "id": "np.gradle.1",
+        "pattern": "(?x)\n(?i)\ncredentials \\s* \\{\n  (?:\\s*//.*)*        (?# skip line comments)\n  \\s* (?:username|password) \\s+ ['\"]([^'\"]{1,60})['\"]\n  (?:\\s*//.*)*        (?# skip line comments)\n  \\s* (?:username|password) \\s+ ['\"]([^'\"]{1,60})['\"]\n",
+        "examples": [
+          "credentials {\n    username 'user'\n    password 'password'\n}\n",
+          "publishing {\n  repositories {\n      maven {\n          url \"http://us01cmsysart01.example.com:8081/artifactory/Mobile-Libs-Internal\"\n          credentials {\n              // your password here\n\n              username \"SOME_USERNAME\"\n              password \"SOME_PASSWORD\"\n          }\n      }\n  }\n",
+          "credentials {\n  username 'user'\n  password 'password'\n}",
+          "credentials {\n  username \"user\"\n  password \"password\"\n}"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.grafana.1",
-      "name": "Grafana API Token"
+      "structural_id": "e75f3e13cae0f15cff6633a00c3c52bd47894a4a",
+      "name": "Grafana API Token",
+      "syntax": {
+        "name": "Grafana API Token",
+        "id": "np.grafana.1",
+        "pattern": "(?x)\n\\b\n(eyJrIjoi [A-Za-z0-9]{60,100})\n\\b\n",
+        "examples": [
+          "Authorization: Bearer eyJrIjoiWHZiSWd5NzdCYUZnNUtibE8obUpESmE2bzJYNDRIc1UiLCJuIjoibXlrZXkiLCJpZCI7MX1",
+          "admin_client = GrafanaClient(\"eyJrIjoiY21sM1JRYjB6RnVYSTNLenRWQkFEaWN2bXI2V202U2IiLCJuIjoiYWRtaW5rZXkiLCJpZCI6MX0=\", host=grafana_host, port=3000, protocol=\"http\")"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://grafana.com/docs/grafana/latest/developers/http_api/auth/"
+        ]
+      }
     },
     {
       "id": "np.grafana.2",
-      "name": "Grafana Cloud API Token"
+      "structural_id": "61105d3c1897c3b11eaec7c9e99470f653acb0a1",
+      "name": "Grafana Cloud API Token",
+      "syntax": {
+        "name": "Grafana Cloud API Token",
+        "id": "np.grafana.2",
+        "pattern": "(?x)\n\\b\n(glc_eyJrIjoi [A-Za-z0-9]{60,100})\n\\b\n",
+        "examples": [
+          "  \"token\": \"glc_eyJrIjoiZjI0YzZkNGEwZDBmZmZjMmUzNTU3ODcxMmY0ZWZlNTQ1NTljMDFjOCIsIm6iOiJteXRva3VuIiwiaWQiOjF8\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://grafana.com/docs/grafana-cloud/api-reference/cloud-api/"
+        ]
+      }
     },
     {
       "id": "np.grafana.3",
-      "name": "Grafana Service Account Token"
+      "structural_id": "f0204df32d59a990435de3e45aa79f8147b5088e",
+      "name": "Grafana Service Account Token",
+      "syntax": {
+        "name": "Grafana Service Account Token",
+        "id": "np.grafana.3",
+        "pattern": "(?x)\n\\b\n(glsa_[a-zA-Z0-9]{32}_[a-fA-F0-9]{8})\n\\b\n",
+        "examples": [
+          "curl -H \"Authorization: Bearer glsa_HOruNAb7SOiCdshU7algkrq7FDsNSLAa_55e2f8be\" -X GET '<grafana_url>/api/access-control/user/permissions' | jq\n",
+          "// getData()\n// {\n//  let url=\"http://localhost:4200/api/search\"\n//  const headers = new HttpHeaders({\n//    'Content-Type': 'application/json',\n//    'Authorization': `Bearer glsa_Sof0HKi3agxrQP9qm5r2G98VacBNwV5P_9b638c45`\n//  })\n//  return this.http.get(url, {headers: headers});\n// }\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://grafana.com/docs/grafana/latest/administration/service-accounts/"
+        ]
+      }
     },
     {
       "id": "np.heroku.1",
-      "name": "Heroku API Key"
+      "structural_id": "5f46a2e3fa26e1f50f8ac4073fb67bd07700bd29",
+      "name": "Heroku API Key",
+      "syntax": {
+        "name": "Heroku API Key",
+        "id": "np.heroku.1",
+        "pattern": "(?i)heroku.{0,20}key.{0,20}\\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\b",
+        "examples": [
+          "  HEROKU_API_KEY: c55dbac4-e0e8-4a06-b892-75cac2387ce5"
+        ],
+        "negative_examples": [
+          "curl https://kolkrabbi.heroku.com/apps/98fc74a8-ff56-4a21-85f6-7a1fcac895c9/github/push \\"
+        ],
+        "references": [
+          "https://devcenter.heroku.com/articles/authentication"
+        ]
+      }
     },
     {
       "id": "np.huggingface.1",
-      "name": "HuggingFace User Access Token"
+      "structural_id": "81e7972fbf1522594ebfca0de8219aa319a234cb",
+      "name": "HuggingFace User Access Token",
+      "syntax": {
+        "name": "HuggingFace User Access Token",
+        "id": "np.huggingface.1",
+        "pattern": "\\b(hf_[a-zA-Z]{34})\\b",
+        "examples": [
+          "HF_TOKEN:\"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\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://huggingface.co/docs/hub/security-tokens"
+        ]
+      }
     },
     {
       "id": "np.jenkins.1",
-      "name": "Jenkins Token or Crumb"
+      "structural_id": "aa43b5efaf8c5a50caa4af166bbec9606aa2f12a",
+      "name": "Jenkins Token or Crumb",
+      "syntax": {
+        "name": "Jenkins Token or Crumb",
+        "id": "np.jenkins.1",
+        "pattern": "(?i)jenkins.{0,10}(?:crumb)?.{0,10}\\b([0-9a-f]{32,36})\\b",
+        "examples": [
+          "jenkins_user = 'root'\n# jenkins_passwd = '116365fd86d63bf507aba962606a5c8956'  Pre token\njenkins_passwd = '11811f784531053132519844d047186074'   # Dev Token\njenkins_url = 'http://10.1.188.121'\n",
+          "export JENKINS_USER=justin-admin-edit-view\nexport JENKINS_TOKEN=11f4274ec59be12eace9a08b08ee13d54b\nexport JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net\n",
+          "sh \"curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'\"\n"
+        ],
+        "negative_examples": [
+          "1. ~~Does not play well with [Build Token Root Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin) URL formats.~~ (added with [this commit](https://github.com/morficus/Parameterized-Remote-Trigger-Plugin/commit/f687dbe75d1c4f39f7e14b68220890384d7c5674)  )"
+        ],
+        "references": [
+          "https://www.jenkins.io/blog/2018/07/02/new-api-token-system/",
+          "https://www.jenkins.io/doc/book/security/csrf-protection/"
+        ]
+      }
     },
     {
       "id": "np.jwt.1",
-      "name": "JSON Web Token (base64url-encoded)"
+      "structural_id": "6e2b42f8571e4534c13a22f26a39c78b0596edb7",
+      "name": "JSON Web Token (base64url-encoded)",
+      "syntax": {
+        "name": "JSON Web Token (base64url-encoded)",
+        "id": "np.jwt.1",
+        "pattern": "(?x)\n\\b\n(\n  ey[a-zA-Z0-9_-]{12,}  (?# header )\n  \\.\n  ey[a-zA-Z0-9_-]{12,}  (?# payload )\n  \\.\n  [a-zA-Z0-9_-]{12,}    (?# signature )\n)\n(?:[^a-zA-Z0-9_-]|$)   (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "examples": [
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dnZWRJbkFzIjoiYWRtaW4iLCJpYXQiOjE0MjI3Nzk2Mzh9.gzSraSYS8EXBxLN_oWnFSRgCzcmEmMjLiuyu5CSpyHI",
+          "NUCLEAR_SERVICES_ANON_KEY=eyJhbGciOiJIUzI1NiIsEnR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqcnVqc2lzY2Nzdnl2am5xdG5xIiwicm9sZSI6ImEub24iLCJpYXQiOjE2NTY1OTY0NjEsImV4cCI6MTk3MjE3MjQ2MX0.WQWcwBAQFNE259f2o8ruFln_UMLTFEnEaUD7KHrs9Aw"
+        ],
+        "negative_examples": [
+          "it \"sets the relation to nil\" do\n  eye.eyeable.should be_nill\nend\n"
+        ],
+        "references": [
+          "https://en.wikipedia.org/wiki/JSON_Web_Token",
+          "https://datatracker.ietf.org/doc/html/rfc7519",
+          "https://en.wikipedia.org/wiki/Base64#URL_applications",
+          "https://datatracker.ietf.org/doc/html/rfc4648",
+          "https://developer.okta.com/blog/2018/06/20/what-happens-if-your-jwt-is-stolen"
+        ]
+      }
     },
     {
       "id": "np.linkedin.1",
-      "name": "LinkedIn Client ID"
+      "structural_id": "2fb4e1caf47a02501461f43476d779dc3c867f0f",
+      "name": "LinkedIn Client ID",
+      "syntax": {
+        "name": "LinkedIn Client ID",
+        "id": "np.linkedin.1",
+        "pattern": "(?x)(?i)\nlinkedin\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{12,14}) \\b\n",
+        "examples": [
+          "Email IDÂ Last 5 Digits of your SSNÂ LinkedIn IDÂ Availability",
+          "LINKEDIN_KEY = \"77yg7tx91p4lag\"\nLINKEDIN_SECRET = \"zt7GeN6IH911xvRj\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications"
+        ]
+      }
     },
     {
       "id": "np.linkedin.2",
-      "name": "LinkedIn Secret Key"
+      "structural_id": "25765ae9d44c72ebfe23776ea17f4bb4eabdb768",
+      "name": "LinkedIn Secret Key",
+      "syntax": {
+        "name": "LinkedIn Secret Key",
+        "id": "np.linkedin.2",
+        "pattern": "(?x)(?i)\nlinkedin\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{16}) \\b\n",
+        "examples": [
+          "LINKEDIN_KEY = \"77yg7tx91p4lag\"\nLINKEDIN_SECRET = \"zt7GeN6IH911xvRj\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications"
+        ]
+      }
     },
     {
       "id": "np.mailchimp.1",
-      "name": "MailChimp API Key"
+      "structural_id": "23c185307e8f833a60227007f1561c2af951981a",
+      "name": "MailChimp API Key",
+      "syntax": {
+        "name": "MailChimp API Key",
+        "id": "np.mailchimp.1",
+        "pattern": "(?x)(?i)\n(?:mailchimp|mc).{0,20}\n\\b\n([a-f0-9]{32}-us[0-9]{1,3})\n\\b\n",
+        "examples": [
+          "MAILCHIMP_API='bd3777708aecfee66c5335f62a6246a4-us13'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://mailchimp.com/help/about-api-keys/",
+          "https://mailchimp.com/help/about-api-keys/#API_key_security"
+        ]
+      }
     },
     {
       "id": "np.mailgun.1",
-      "name": "Mailgun API Key"
+      "structural_id": "1dc4ed53d5c1d3a8659bcadd8fba0731061d9630",
+      "name": "Mailgun API Key",
+      "syntax": {
+        "name": "Mailgun API Key",
+        "id": "np.mailgun.1",
+        "pattern": "(?i)(?:mailgun|mg).{0,20}key-([a-z0-9]{32})\\b",
+        "examples": [
+          "var apiKey = process.env.MAILGUN_API || 'key-46cebd38c59ac222e6cf991581411eaf'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://documentation.mailgun.com/en/latest/api-intro.html#authentication-1"
+        ]
+      }
     },
     {
       "id": "np.mapbox.1",
-      "name": "Mapbox Public Access Token"
+      "structural_id": "9bdf81bc1bc1e238495d88fa226ea2e126dcd68e",
+      "name": "Mapbox Public Access Token",
+      "syntax": {
+        "name": "Mapbox Public Access Token",
+        "id": "np.mapbox.1",
+        "pattern": "(?i)(?s)mapbox.{0,30}(pk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "examples": [
+          "mapboxApiKey:\n  'pk.eyJ1Ijoia3Jpc3R3IiwiYSI6ImNqbGg1N242NTFlczczdnBcf99iMjgzZ2sifQ.lUneM-o3NucXN189EYyXxQ',\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.mapbox.com/api/accounts/tokens/#token-format",
+          "https://docs.mapbox.com/help/getting-started/access-tokens/",
+          "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ]
+      }
     },
     {
       "id": "np.mapbox.2",
-      "name": "Mapbox Secret Access Token"
+      "structural_id": "fb946d77be0ee031e8cf04a1fd0c1b74585abebb",
+      "name": "Mapbox Secret Access Token",
+      "syntax": {
+        "name": "Mapbox Secret Access Token",
+        "id": "np.mapbox.2",
+        "pattern": "(?i)(?s)mapbox.{0,30}(sk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "examples": [
+          "  //mapboxgl.accessToken = 'sk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';",
+          "export MAPBOX_SECRET_TOKEN=sk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.mapbox.com/api/accounts/tokens/#token-format",
+          "https://docs.mapbox.com/help/getting-started/access-tokens/",
+          "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ]
+      }
     },
     {
       "id": "np.mapbox.3",
-      "name": "Mapbox Temporary Access Token"
+      "structural_id": "9032d44c25db61b6fa8b4aff1e441b53fb2e10c6",
+      "name": "Mapbox Temporary Access Token",
+      "syntax": {
+        "name": "Mapbox Temporary Access Token",
+        "id": "np.mapbox.3",
+        "pattern": "(?i)(?s)mapbox.{0,30}(tk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "examples": [
+          "  //mapboxgl.accessToken = 'tk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';",
+          "export MAPBOX_SECRET_TOKEN=tk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.mapbox.com/api/accounts/tokens/#token-format",
+          "https://docs.mapbox.com/help/getting-started/access-tokens/",
+          "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ]
+      }
     },
     {
       "id": "np.msteams.1",
-      "name": "Microsoft Teams Webhook"
+      "structural_id": "ffeb4e52ea44a01f3e630ae45cc92f7b39558446",
+      "name": "Microsoft Teams Webhook",
+      "syntax": {
+        "name": "Microsoft Teams Webhook",
+        "id": "np.msteams.1",
+        "pattern": "(?x)(?i)\n(\n  https://\n  outlook\\.office\\.com/webhook/\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n  @\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n  /IncomingWebhook/\n  [a-f0-9]{32}\n  /\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n)\n",
+        "examples": [
+          "//test //url = 'https://outlook.office.com/webhook/9da5da9c-4218-4c22-aed6-b5c8baebfff5@2f2b54b7-0141-4ba7-8fcd-ab7d17a60547/IncomingWebhook/1bf66ccbb8e745e791fa6e6de0cf465b/4361420b-8fde-48eb-b62a-0e34fec63f5c';",
+          "    [T2`https://outlook.office.com/webhook/fa4983ab-49ea-4c1b-9297-2658ea56164c@f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16113d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd`](https://outlook.office.com/webhook/fe4183ab-49ea-4c1b-9297-2658ea56164c%2540f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16003d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd)",
+          "curl -H \"Content-Type: application/json\" -d \"{\\\"text\\\": \\\"Debut du script deploy.sh \\\"}\" https://outlook.office.com/webhook/555aa7fc-ea71-4fb7-ae9e-755caa4404ed@72f988bf-86f1-41af-91ab-2d7cd011db47/IncomingWebhook/16085df23e564bb9076842605ede3af2/51dab674-ad95-4f0a-8964-8bdefc25b6d9",
+          "  webhooks: https://outlook.office.com/webhook/2f92c502-7feb-4a6c-86f1-477271ae576f@990414fa-d0a3-42f5-b740-21d865a44a28/IncomingWebhook/54e43eb586f14aa9984d5c0bec3d5050/539ce6fa-e9aa-413f-a79b-fb7e8998fcac"
+        ],
+        "negative_examples": [
+          "\t\t\toffice365ConnectorSend message: 'Execucao Concluida.', status: 'End', webhookUrl: 'https://outlook.office.com/webhook/82fc2788-c6f4-4507-a657-36c91eccfd87@93f33571-550f-43cf-b09f-cd33c338d086/JenkinsCI/4f3bbf41e81a4f36887a1a4d7cbfb2c6/82fa2788-c6f4-45c7-a657-36f91eccfd87'"
+        ],
+        "references": [
+          "https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/what-are-webhooks-and-connectors",
+          "https://github.com/praetorian-inc/nuclei-templates/blob/main/exposures/tokens/microsoft/microsoft-teams-webhook.yaml"
+        ]
+      }
     },
     {
       "id": "np.netrc.1",
-      "name": "netrc Credentials"
+      "structural_id": "6cf5346e5563c0c4a41a3acb83f3ba90ee0c3941",
+      "name": "netrc Credentials",
+      "syntax": {
+        "name": "netrc Credentials",
+        "id": "np.netrc.1",
+        "pattern": "(?x)\n( machine \\s+ [^\\s]+ | default )\n\\s+\nlogin \\s+ ([^\\s]+)\n\\s+\npassword \\s+ ([^\\s]+)\n",
+        "examples": [
+          "machine api.github.com login ziggy^stardust password 012345abcdef",
+          "```\nmachine raw.github.com\n  login visionmedia\n  password pass123\n```\n",
+          "\"\"\"\nmachine api.wandb.ai\n  login user\n  password 7cc938e45e63e9014f88f811be240ba0395c02dd\n\"\"\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://everything.curl.dev/usingcurl/netrc",
+          "https://devcenter.heroku.com/articles/authentication#api-token-storage"
+        ]
+      }
     },
     {
       "id": "np.newrelic.1",
-      "name": "New Relic License Key"
+      "structural_id": "9efcb3467cbe2a01f556cf25d6c4374614678728",
+      "name": "New Relic License Key",
+      "syntax": {
+        "name": "New Relic License Key",
+        "id": "np.newrelic.1",
+        "pattern": "(?x)(?i)\n\\b\n([a-z0-9]{6}[a-f0-9]{30}nral)\n\\b\n",
+        "examples": [
+          "# Required license key associated with your New Relic account.\nlicense_key: 033f2f2072ca3f2cb2ec39024fa9e49cd640NRAL\n\n# Your application name. Renaming here affects where data displays in New\n",
+          "    license_key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaNRAL",
+          "        license: eu01xxaa7460e1ea3abdfbbbd36e85c10cd0NRAL"
+        ],
+        "negative_examples": [
+          "    license_key: xxxxxxxxxxxxxxx",
+          " --set global.licenseKey=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8NRAL `"
+        ],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.2",
-      "name": "New Relic License Key (non-suffixed)"
+      "structural_id": "31b76b526a104da292cd848c22b36e1156a77323",
+      "name": "New Relic License Key (non-suffixed)",
+      "syntax": {
+        "name": "New Relic License Key (non-suffixed)",
+        "id": "np.newrelic.2",
+        "pattern": "(?x)(?i)\nassociated\\ with\\ your\\ New\\ Relic\\ account\\.\\s+\nlicense_key:\\s*\n([a-f0-9]{40})\n\\b\n",
+        "examples": [
+          "# Required license key associated with your New Relic account.\nlicense_key: 0a14254db7a1e9d29c3370dacc798cb65d25c9af\n\n# Your application name. Renaming here affects where data displays in New\n"
+        ],
+        "negative_examples": [
+          "# Required license key associated with your New Relic account.\nlicense_key: 033f2f2072ca3f2cb2ec39019fa9e49cd640NRAL\n",
+          "license_key: '<%= ENV[\"NEW_RELIC_LICENSE_KEY\"] %>'\n"
+        ],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.3",
-      "name": "New Relic API Service Key"
+      "structural_id": "51b56f387b8354deaf6c453864f4dcfecd80fef3",
+      "name": "New Relic API Service Key",
+      "syntax": {
+        "name": "New Relic API Service Key",
+        "id": "np.newrelic.3",
+        "pattern": "(?x)(?i)\n\\b\n(nrak-[a-z0-9]{27})\n\\b\n",
+        "examples": [
+          "  PS> Get-NR1Catalog -PersonalAPIKey 'NRAK-123456788ABCDEFGHIJKLMNOPQR'",
+          "                placeholder=\"e.g: NRAK-CIH1YVYWKA9ZP6E49WP5XYJH1G9\">",
+          "ENV NODE_ENV \"production\"\nENV PORT 8079\n#ENV NEW_RELIC_LICENSE_KEY=NRAK-7JCF597RJ492YP6MZWST3HWRNY2\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.4",
-      "name": "New Relic Admin API Key"
+      "structural_id": "3f2b83f58cbddd9851a7e317fd63d4e663d0c3da",
+      "name": "New Relic Admin API Key",
+      "syntax": {
+        "name": "New Relic Admin API Key",
+        "id": "np.newrelic.4",
+        "pattern": "(?x)(?i)\n\\b\n(nraa-[a-f0-9]{27})\n\\b\n",
+        "examples": [
+          "admin_access:NRAA-4780f48c47df5882dbec3fd82c7"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#admin-keys"
+        ]
+      }
     },
     {
       "id": "np.newrelic.5",
-      "name": "New Relic Insights Insert Key"
+      "structural_id": "acc8108dcac6e7890f924ce70e16d2d4bbebd609",
+      "name": "New Relic Insights Insert Key",
+      "syntax": {
+        "name": "New Relic Insights Insert Key",
+        "id": "np.newrelic.5",
+        "pattern": "(?x)(?i)\n\\b\n(nrii-[a-z0-9_-]{32})\n(?: [^a-z0-9_-] | $)\n",
+        "examples": [
+          "                    insertKey: \"NRII-3nbcrMjHHs0RrT3GhRNqpd16YVMFHdcI\")",
+          " \"Api-Key\": \"NRII-7a6SL_Pau5Dz923jEuBEylu3clzXzfby\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-insert-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.6",
-      "name": "New Relic Insights Query Key"
+      "structural_id": "8adcd3cbc68a3151cbf78851185be70de647ac9c",
+      "name": "New Relic Insights Query Key",
+      "syntax": {
+        "name": "New Relic Insights Query Key",
+        "id": "np.newrelic.6",
+        "pattern": "(?x)(?i)\n\\b\n(nriq-[a-z0-9_-]{32})\n(?: [^a-z0-9_-] | $)\n",
+        "examples": [
+          "  \"querykey\": \"NRIQ-pD-yUGl9Z3ACIJ89V-zGkhMxFJE5O121\","
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-query-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.7",
-      "name": "New Relic REST API Key"
+      "structural_id": "d1e793cb997525f7be86c89021fd316ce41ef729",
+      "name": "New Relic REST API Key",
+      "syntax": {
+        "name": "New Relic REST API Key",
+        "id": "np.newrelic.7",
+        "pattern": "(?x)(?i)\n\\b\n(nrra-[a-f0-9]{42})\n\\b\n",
+        "examples": [
+          "curl -X POST \"https://api.newrelic.com/v2/applications/380836898/deployments.json\" \\\n     -H \"X-Api-Key:NRRA-e270623d47659ff6a48ac5bde6bba223bef47c8c26\" \\\n     -i \\\n     -H \"Content-Type: application/json\" \\\n     -d \"{ \\\"deployment\\\": { \\\"revision\\\": \\\"${rev}\\\" }}\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
+          "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#rest-api-key"
+        ]
+      }
     },
     {
       "id": "np.newrelic.8",
-      "name": "New Relic Pixie API Key"
+      "structural_id": "17824d6731d8fba165b955d1d92073611bc1c29a",
+      "name": "New Relic Pixie API Key",
+      "syntax": {
+        "name": "New Relic Pixie API Key",
+        "id": "np.newrelic.8",
+        "pattern": "(?x)(?i)\n\\b\n(px-api-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\n\\b\n",
+        "examples": [
+          "MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a3cba-d3c9-45c1-a557-8864040b8f79"
+        ],
+        "negative_examples": [
+          " --set newrelic-pixie.apiKey=px-api-a1b2c3d4-e5f6-g7h8-i8j0-k0l3m3n4o0p5 `"
+        ],
+        "references": [
+          "https://docs.px.dev/reference/admin/api-keys/"
+        ]
+      }
     },
     {
       "id": "np.newrelic.9",
-      "name": "New Relic Pixie Deploy Key"
+      "structural_id": "eebb2b6c7d37b6584f94afb613e0bb1a4f57449a",
+      "name": "New Relic Pixie Deploy Key",
+      "syntax": {
+        "name": "New Relic Pixie Deploy Key",
+        "id": "np.newrelic.9",
+        "pattern": "(?x)(?i)\n\\b\n(px-dep-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\n\\b\n",
+        "examples": [
+          "MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a2cba-d3c9-45c1-a556-8864040b8f79"
+        ],
+        "negative_examples": [
+          " --set pixie-chart.deployKey=px-dep-d4c3b2a1-f6e5-h8g7-j1i8-p5o0n5m3l2k1 `"
+        ],
+        "references": [
+          "https://docs.px.dev/reference/admin/deploy-keys/"
+        ]
+      }
     },
     {
       "id": "np.npm.1",
-      "name": "NPM Access Token (fine-grained)"
+      "structural_id": "c258434ef9c0e22197c4c18f712c23389d381f6c",
+      "name": "NPM Access Token (fine-grained)",
+      "syntax": {
+        "name": "NPM Access Token (fine-grained)",
+        "id": "np.npm.1",
+        "pattern": "(?x)\n\\b\n(npm_[A-Za-z0-9]{36})\n\\b\n",
+        "examples": [
+          "npm_TCllNwh2WLQlMWVhybM1iQrsTj6rMQ0BOh6d"
+        ],
+        "negative_examples": [
+          "-export NPM_TOKEN=\"007e65c7-635d-4d54-8294-f360cb8e2e3f\""
+        ],
+        "references": [
+          "https://docs.npmjs.com/about-access-tokens",
+          "https://github.com/github/roadmap/issues/557",
+          "https://github.blog/changelog/2022-12-06-limit-scope-of-npm-tokens-with-the-new-granular-access-tokens/"
+        ]
+      }
     },
     {
       "id": "np.nuget.1",
-      "name": "NuGet API Key"
+      "structural_id": "a5c969d3471ce2da4086d3f587a313dfc172e6a1",
+      "name": "NuGet API Key",
+      "syntax": {
+        "name": "NuGet API Key",
+        "id": "np.nuget.1",
+        "pattern": "\\b(oy2[a-z0-9]{43})\\b",
+        "examples": [
+          "nuget push %filename% oy2dgb333j35kjjybcf99yzxo7hjyloera4anxn4ivcvle -Source https://api.nuget.org/v3/index.json",
+          "find . -name \"*.nupkg\"|xargs -I {} dotnet nuget push \"{}\"  --api-key  oy2l53fxd7xcf99dnyrqewssedgopshuticofclpespbyi  -s https://api.nuget.org/v3/index.json --skip-duplicate"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys"
+        ]
+      }
     },
     {
       "id": "np.odbc.1",
-      "name": "Credentials in ODBC Connection String"
+      "structural_id": "630c1001441e63d74fea2a730a5196ee38ac818b",
+      "name": "Credentials in ODBC Connection String",
+      "syntax": {
+        "name": "Credentials in ODBC Connection String",
+        "id": "np.odbc.1",
+        "pattern": "(?x)(?i)\n(?: User | User\\ Id | UserId | Uid) \\s*=\\s* ([^\\s;]{3,100}) \\s* ;\n[\\ \\t]* .{0,10} [\\ \\t]*  (?# possible extra stuff, e.g., string concatenation)\n(?: Password | Pwd) \\s*=\\s* ([^\\t\\ ;]{3,100}) \\s* (?: [;] | $)\n",
+        "examples": [
+          "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = \\\"goodspec\\\";",
+          "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = goodspec;",
+          "Server=host;Port=5432;User Id=username;Password=secret;Database=databasename;",
+          "Server=host;Port=5432;SomeOtherKey=SomeOtherValue;User Id=username;Password=secret;Database=databasename;",
+          "Data Source=190.190.200.100,1433;Network Library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;",
+          "Data Source=190.190.200.100,1433;Network_library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;",
+          "Provider=SQLNCLI;Server=myServerName,myPortNumber;Database=myDataBase;Uid=myUsername;Pwd=myPassword;",
+          "    adoConn.Open(\"Provider=SQLOLEDB.1;User ID=specialbill_user; \" & \"Password =specialbill_user;Initial Catalog=SpecialBill_PROD;Data Source=uszdba01;\")",
+          "\"driver={SQL Server};server=(#{datastore['DBHOST']});database=#{datastore['DBNAME']};uid=#{datastore['DBUID']};pwd=#{datastore['DBPASSWORD']}\"\n"
+        ],
+        "negative_examples": [
+          "def login(self, user = '', password = '', domain = ''):",
+          "if datastore['VERBOSE']\n      text  = ''\n      text << \"User=#{username}, \"\n      text << \"Password=#{password}, \"\n      text << \"Domain=#{domain}, \"\n      text << \"Full Name=#{full_name}, \"\n      text << \"E-mail=#{e_mail}\"\n      print_good(text)\n",
+          "if (len < ulen + wlen + 2)\n  break;\nuser = (char *) (p + 1);\npwd = (char *) (p + ulen + 2);\np += ulen + wlen + 2;\n",
+          "/* Set default values */\nserver = xmalloc(sizeof(*server));\nserver->user = \"anonymous\";\nserver->password = \"busybox@\";\n",
+          "System.out.println(\"Here we go...\");\n          String url = \"jdbc:msf:sql://127.0.0.1:8080/sample\";\n          String userid = \"userid\";\n          String password = \"password\";\n",
+          "char *domain = NULL;\nchar *user = NULL;\nchar *password = NULL;\n",
+          "<?php\n        \\$user = \\$_POST[\\\"username\\\"];\n        \\$pwd = \\$_POST[\\\"password\\\"];\n        \\$otherdata = \\$_POST[\\\"otherdata\\\"];\n?>\n"
+        ],
+        "references": [
+          "https://docs.aws.amazon.com/redshift/latest/mgmt/configure-odbc-connection.html",
+          "https://docs.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto",
+          "https://docs.microsoft.com/en-us/azure/mariadb/howto-connection-string",
+          "https://docs.microsoft.com/en-us/azure/mysql/single-server/how-to-connection-string",
+          "https://www.connectionstrings.com/"
+        ]
+      }
     },
     {
       "id": "np.okta.1",
-      "name": "Okta API Token"
+      "structural_id": "7f624f79adc97d45d47522b1aa2a4399e4dfaa09",
+      "name": "Okta API Token",
+      "syntax": {
+        "name": "Okta API Token",
+        "id": "np.okta.1",
+        "pattern": "(?i)(?s)(?:okta|ssws).{0,40}\\b(00[a-z0-9_-]{39}[a-z0-9_])\\b",
+        "examples": [
+          "okta_api_token = 00aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "OKTA_API_KEY = \"00-aaaaaaaaaaaaa-aaaaaaaaaaaaaaaaaaaaaaaaa\"",
+          "okta_secret:  00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGua",
+          "Authorization: SSWS 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGua",
+          "variable \"corp_okta_api_token\" {\n  default = \"004EWTpRQT_HJtG_nL-agxacgzYHjxPcF99kJsFzWg\"\n}\n"
+        ],
+        "negative_examples": [
+          "000000000000000000000000000000000000000000",
+          "okta_api_token: 000000000000000000000000000000000000000000aa",
+          "okta: 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGu--",
+          "okta_api_key: 00QCjAl4MlV-WPXM-ABCDEFGHIJKL-0HmjFx-vbGu-"
+        ],
+        "references": [
+          "https://devforum.okta.com/t/api-token-length/5519",
+          "https://developer.okta.com/docs/guides/create-an-api-token/main/"
+        ]
+      }
     },
     {
       "id": "np.openai.1",
-      "name": "OpenAI API Key"
+      "structural_id": "05d3faa8848738935b693f0bd1de3be9612e8b84",
+      "name": "OpenAI API Key",
+      "syntax": {
+        "name": "OpenAI API Key",
+        "id": "np.openai.1",
+        "pattern": "(?x)\n\\b\n(sk-[a-zA-Z0-9]{48})\n\\b\n",
+        "examples": [
+          "curl https://api.openai.com/v1/images/generations  -H 'Content-Type: application/json'  -H \"Authorization: Bearer sk-mxIt5s1tyfCJyIKHwrqOT4BlbkFJT3VVmv6VdSwB7XXIq1TO\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://platform.openai.com/docs/api-reference",
+          "https://platform.openai.com/docs/api-reference/authentication"
+        ]
+      }
     },
     {
       "id": "np.particleio.1",
-      "name": "particle.io Access Token (URL first)"
+      "structural_id": "8ab26f61a067886b886641bd883f453b2355f85d",
+      "name": "particle.io Access Token (URL first)",
+      "syntax": {
+        "name": "particle.io Access Token (URL first)",
+        "id": "np.particleio.1",
+        "pattern": "(?x)\nhttps://api\\.particle\\.io/v1/[a-zA-Z0-9_\\-\\s/\"\\\\?]*\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n",
+        "examples": [
+          "curl https://api.particle.io/v1/devices \\\n-H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\"\n",
+          "curl https://api.particle.io/v1/devices \\\n-d access_token=38bb7b318cc6898c80317decb34525844bc9db55\n",
+          "curl https://api.particle.io/v1/devices -H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\"",
+          "curl https://api.particle.io/v1/devices -d access_token=38bb7b318cc6898c80317decb34525844bc9db55",
+          "curl \"https://api.particle.io/v1/devices/events?access_token=38bb7b318cc6898c80317decb34525844bc9db55\"",
+          "curl \"https://api.particle.io/v1/access_tokens/current?access_token=38bb7b318cc6898c80317decb34525844bc9db55\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.particle.io/reference/cloud-apis/api/"
+        ]
+      }
     },
     {
       "id": "np.particleio.2",
-      "name": "particle.io Access Token (URL last)"
+      "structural_id": "ac8cc071bc177e360ac7f4ae4f03832475e359ad",
+      "name": "particle.io Access Token (URL last)",
+      "syntax": {
+        "name": "particle.io Access Token (URL last)",
+        "id": "np.particleio.2",
+        "pattern": "(?x)\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n[\\s\"\\\\]*https://api\\.particle\\.io/v1\n",
+        "examples": [
+          "curl -H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\" \\\nhttps://api.particle.io/v1/devices\n",
+          "curl -d access_token=38bb7b318cc6898c80317decb34525844bc9db55 \\\nhttps://api.particle.io/v1/devices\n",
+          "curl -H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\" https://api.particle.io/v1/devices",
+          "curl -d access_token=38bb7b318cc6898c80317decb34525844bc9db55 https://api.particle.io/v1/devices"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.particle.io/reference/cloud-apis/api/"
+        ]
+      }
     },
     {
       "id": "np.pem.1",
-      "name": "PEM-Encoded Private Key"
+      "structural_id": "046a96dd5272aa399275afb853a54884611769c0",
+      "name": "PEM-Encoded Private Key",
+      "syntax": {
+        "name": "PEM-Encoded Private Key",
+        "id": "np.pem.1",
+        "pattern": "(?x)\n-----BEGIN\\ .{0,20}\\ ?PRIVATE\\ KEY\\ ?.{0,20}-----\n\\s*\n( (?: [a-zA-Z0-9+/=\\s\"',] | \\\\r | \\\\n ) {50,} )\n\\s*\n-----END\\ .{0,20}\\ ?PRIVATE\\ KEY\\ ?.{0,20}-----\n",
+        "examples": [
+          "-----BEGIN RSA PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\nNhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\nqjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\nqyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\nc3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\nQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\njScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\nVSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\nSs3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\nZcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\nGhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\ndW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\nQQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\n1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\n-----END RSA PRIVATE KEY-----\n",
+          "\"-----BEGIN RSA PRIVATE KEY-----\" +\n\"b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\" +\n\"NhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\" +\n\"qjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\" +\n\"qyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\" +\n\"c3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\" +\n\"QiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\" +\n\"jScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\" +\n\"VSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\" +\n\"Ss3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\" +\n\"Zcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\" +\n\"GhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\" +\n\"dW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\" +\n\"QQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\" +\n\"1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\" +\n\"-----END RSA PRIVATE KEY-----\"\n",
+          "\"-----BEGIN RSA PRIVATE KEY-----\\r\\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\\r\\nNhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\\r\\nqjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\\r\\nqyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\\r\\nc3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\\r\\nQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\\r\\njScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\\r\\nVSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\\r\\nSs3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\\r\\nZcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\\r\\nGhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\\r\\ndW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\\r\\nQQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\\r\\n1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\\r\\n-----END RSA PRIVATE KEY-----\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail",
+          "https://datatracker.ietf.org/doc/html/rfc7468"
+        ]
+      }
     },
     {
       "id": "np.postman.1",
-      "name": "Postman API Key"
+      "structural_id": "92b0a519b4ad321547051c203e58ed828d2480e1",
+      "name": "Postman API Key",
+      "syntax": {
+        "name": "Postman API Key",
+        "id": "np.postman.1",
+        "pattern": "(?x)\n\\b\n(PMAK-[a-zA-Z0-9]{24}-[a-zA-Z0-9]{34})\n\\b\n",
+        "examples": [
+          "// ('x-api-key', 'PMAK-629c73facbc064567cbf6970-f56e8b4cd0bb14d00962f17afc158dc2a2')"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learning.postman.com/docs/developer/intro-api/",
+          "https://learning.postman.com/docs/developer/postman-api/authentication/",
+          "https://learning.postman.com/docs/administration/managing-your-team/managing-api-keys/"
+        ]
+      }
     },
     {
       "id": "np.psexec.1",
-      "name": "Credentials in PsExec"
+      "structural_id": "eb6bb9dbb032eebac8af247d96ebe4071484baf1",
+      "name": "Credentials in PsExec",
+      "syntax": {
+        "name": "Credentials in PsExec",
+        "id": "np.psexec.1",
+        "pattern": "(?x)\n(?i)\npsexec .{0,100}\n-u \\s* (\\S+) \\s+    (?# username )\n-p \\s* (\\S+)        (?# password )\n",
+        "examples": [
+          "cmd.exe /C PSEXEC \\\\10.0.94.120 -u Administrator -p dev_admin CMD /C ECHO",
+          "PSEXEC.EXE \\\\LocalComputerIPAddress -u DOMAIN\\my-user -p mypass CMD",
+          "psExec \\\\OAIJCTDU8024272 -u User -p $Password -i -d calc.exe",
+          ":: satmodel2\n%RUNTIMEDIR%\\PsExec.exe \\\\satmodel2 -u SATMODEL2\\MTCPB -p %nothing% -i 2 -c -f %TEMP%\\psexec_helper.bat %RUNTIMEDIR% .\\JavaOnly_runNode2.cmd\n%RUNTIMEDIR%\\pslist.exe \\\\satmodel2 java\nif %ERRORLEVEL% NEQ 0 goto done\n",
+          "ASSEMBLE THE BATCH FILE TO COPY THE FILE ACROSS THE DOMAIN\nstart PsExec.exe /accepteula @C:\\share$\\comps1.txt -u DOMAIN\\ADMINISTRATOR -p PASSWORD cmd /c COPY \"\\PRIMARY DOMAIN CONTROLLER\\share$\\fx166.exe\" \"C:\\windows\\temp\\\"\nSAVE IT AS \"COPY.BAT\"\n",
+          "system(\"psexec \\\\\\\\192.168.3.77 -u Administrator -p braksha shutdown -r -f -t 0\");"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/sysinternals/downloads/psexec"
+        ]
+      }
     },
     {
       "id": "np.pwhash.1",
-      "name": "Password Hash (md5crypt)"
+      "structural_id": "66df3425efb42da21cae61665658b1c0d73805a3",
+      "name": "Password Hash (md5crypt)",
+      "syntax": {
+        "name": "Password Hash (md5crypt)",
+        "id": "np.pwhash.1",
+        "pattern": "(\\$1\\$[./A-Za-z0-9]{8}\\$[./A-Za-z0-9]{22})",
+        "examples": [
+          "$1$OKgLCmVl$d02jECa4DXn/oXX0R.MoQ/",
+          "$1$28772684$iEwNOgGugqO9.bIz5sk8k/"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Crypt_(C)#MD5-based_scheme",
+          "https://unix.stackexchange.com/a/511017",
+          "https://hashcat.net/wiki/doku.php?id=example_hashes",
+          "https://passwordvillage.org/salted.html#md5crypt"
+        ]
+      }
     },
     {
       "id": "np.pwhash.2",
-      "name": "Password Hash (bcrypt)"
+      "structural_id": "ff5bcf4c297499e59d985e9c3655792c6373d075",
+      "name": "Password Hash (bcrypt)",
+      "syntax": {
+        "name": "Password Hash (bcrypt)",
+        "id": "np.pwhash.2",
+        "pattern": "(\\$2[abxy]\\$\\d+\\$[./A-Za-z0-9]{53})",
+        "examples": [
+          "$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+          "$2a$05$/VT2Xs2dMd8GJKfrXhjYP.DkTjOVrY12yDN7/6I8ZV0q/1lEohLru",
+          "$2a$05$Uo385Fa0g86uUXHwZxB90.qMMdRFExaXePGka4WGFv.86I45AEjmO",
+          "$2a$05$LhayLxezLhK1LhWvKxCyLOj0j1u.Kj0jZ0pEmm134uzrQlFvQJLF6",
+          "$2y$12$atWJ1Nx6ep65tNx0YIJ4I.jzgI86znQbNRI3lF0qIt/XCYnEPxSc2"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Bcrypt",
+          "https://hashcat.net/wiki/doku.php?id=example_hashes"
+        ]
+      }
     },
     {
       "id": "np.pwhash.3",
-      "name": "Password Hash (sha256crypt)"
+      "structural_id": "e686e7202972924e0e69db0c6988ed4d394d09f3",
+      "name": "Password Hash (sha256crypt)",
+      "syntax": {
+        "name": "Password Hash (sha256crypt)",
+        "id": "np.pwhash.3",
+        "pattern": "(?x)\n(\n\\$ 5                    (?# magic )\n(?: \\$ rounds=\\d+ )?    (?# optional rounds )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{43}    (?# hash )\n)\n",
+        "examples": [
+          "$5$rounds=5000$GX7BopJZJxPc/KEK$le16UF8I2Anb.rOrn22AUPWvzUETDGefUmAV8AZkGcD",
+          "$5$9ks3nNEqv31FX.F$gdEoLFsCRsn/WRN3wxUnzfeZLoooVlzeF4WjLomTRFD",
+          "$5$KAlz5SULZNybHwil$3UgmS1pmo2r5HG.tjbjzoVxISBh8IH81d.bJh4MCC19"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
+          "https://hashcat.net/wiki/doku.php?id=example_hashes",
+          "https://passwordvillage.org/salted.html#sha256crypt"
+        ]
+      }
     },
     {
       "id": "np.pwhash.4",
-      "name": "Password Hash (sha512crypt)"
+      "structural_id": "c4ae636c191bb908e0b18059a24d15300d3b63f3",
+      "name": "Password Hash (sha512crypt)",
+      "syntax": {
+        "name": "Password Hash (sha512crypt)",
+        "id": "np.pwhash.4",
+        "pattern": "(?x)\n(\n\\$ 6                    (?# magic )\n(?: \\$ rounds=\\d+ )?    (?# optional rounds )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{86}    (?# hash )\n)\n",
+        "examples": [
+          "$6$52450745$k5ka2p8bFuSmoVT1tzOyyuaREkkKBcCNqoDKzYiJL9RaE8yMnPgh2XzzF0NDrUhgrcLwg78xs1w5pJiypEdFX/",
+          "$6$qoE2letU$wWPRl.PVczjzeMVgjiA8LLy2nOyZbf7Amj3qLIL978o18gbMySdKZ7uepq9tmMQXxyTIrS12Pln.2Q/6Xscao0"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
+          "https://hashcat.net/wiki/doku.php?id=example_hashes",
+          "https://passwordvillage.org/salted.html#sha512crypt"
+        ]
+      }
     },
     {
       "id": "np.pwhash.5",
-      "name": "Password Hash (Cisco IOS PBKDF2 with SHA256)"
+      "structural_id": "ce010911b59dec6f216ac01498b829411bbb7e73",
+      "name": "Password Hash (Cisco IOS PBKDF2 with SHA256)",
+      "syntax": {
+        "name": "Password Hash (Cisco IOS PBKDF2 with SHA256)",
+        "id": "np.pwhash.5",
+        "pattern": "(?x)\n(\n\\$ 8                    (?# magic )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{43}    (?# hash )\n)\n",
+        "examples": [
+          "$8$TnGX/fE4KGHOVU$pEhnEvxrvaynpi8j4f.EMHr6M.FzU8xnZnBr/tJdFWk",
+          "$8$mTj4RZG8N9ZDOk$elY/asfm8kD3iDmkBe3hD2r4xcA/0oWS5V3os.O91u."
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
+          "https://hashcat.net/wiki/doku.php?id=example_hashes"
+        ]
+      }
     },
     {
       "id": "np.pypi.1",
-      "name": "PyPI Upload Token"
+      "structural_id": "086e483e74dd4cfc04a60a5a2983416b09c5d295",
+      "name": "PyPI Upload Token",
+      "syntax": {
+        "name": "PyPI Upload Token",
+        "id": "np.pypi.1",
+        "pattern": "(?x)\n\\b\n(pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,})\n(?:[^a-zA-Z0-9_-]|$)\n",
+        "examples": [
+          "# password = pypi-AgEIcHlwaS5vcmcCJDkwNzYwNzU1LWMwOTUtNGNkOC1iYjQzLTU3OWNhZjI1NDQ1MwACJXsicGVybWCf99lvbnMiOiAidXNlciIsICJ2ZXJzaW9uIjogMX0AAAYgSpW5PAywXvchMUQnkF5H6-SolJysfUvIWopMsxE4hCM",
+          "- name: Publish package\nuses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29\nwith:\n  user: santoshp\n  password: ${{ secrets.pypi-AgEIcHlwaS5vcmcCJDA1NTdiYzI2LTQ3N2QtNDAyYy04YzBjLTVmODU4ZTFkMjACf99COXsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJlbXB5cmlhbCJdfSwgInZlcnNpb24iOiAxfQAABiAx85KUjr83dNyI9uO0RVMmH7DKqoXNH4_rMkO5SQYItA}}\n",
+          "password: pypi-AgEIcHlwaS5vcmcCJGExMDIxZjRhLTFhZDMtNDc4YS1iOWNmLWQwCf99OTIwZjFjNwACSHsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJkamFuZ28tY2hhbm5lbHMtanNvbnJwYyJdfSwgInZlcnNpb24iOiAxfQAABiBZg48cIBQt7HckwM4G3q-462xphsLbm7IZvjqMS4jvQw"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://github.com/pypa/warehouse/issues/6051",
+          "https://pypi.org/project/pypitoken/",
+          "https://github.com/ecordell/pymacaroons",
+          "https://en.wikipedia.org/wiki/Macaroons_(computer_science)",
+          "https://github.com/pypa/warehouse/blob/82815b06d9f98deed5f205c66e054de59d22a10d/docs/development/token-scanning.rst",
+          "https://research.google/pubs/pub41892/"
+        ]
+      }
     },
     {
       "id": "np.reactapp.1",
-      "name": "React App Username"
+      "structural_id": "db4cbf67c4557d667466eab47b1f5e3a1f42b721",
+      "name": "React App Username",
+      "syntax": {
+        "name": "React App Username",
+        "id": "np.reactapp.1",
+        "pattern": "(?x)(?i)\n\\b\nREACT_APP (?: _[A-Z0-9]+)* _USER (?: NAME)?          (?# variable name )\n\\s* = \\s*\n['\"]?\n( [^\\s'\"$]{3,} )                                     (?# value )\n(?: [\\s'\"$] | $ )\n",
+        "examples": [
+          "# REACT_APP_GUEST_USERNAME=guest",
+          "# REACT_APP_USER=postgres",
+          "REACT_APP_AUTH_USER=postgres",
+          "REACT_APP_AUTH_USERNAME=bowie",
+          "    REACT_APP_AUTH_USERNAME=bowie    # some comment",
+          "REACT_APP_MAILER_USERNAME=smtp_username # Enter your SMTP email username"
+        ],
+        "negative_examples": [
+          "REACT_APP_FRONTEND_LOGIN_FORGOT_USERNAME=$REACT_APP_MATRIX_BASE_URL/classroom/#/forgot_username"
+        ],
+        "references": [
+          "https://create-react-app.dev/docs/adding-custom-environment-variables/",
+          "https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app"
+        ]
+      }
     },
     {
       "id": "np.reactapp.2",
-      "name": "React App Password"
+      "structural_id": "f9c70a7ab3c95d01772549a96683807eedf62611",
+      "name": "React App Password",
+      "syntax": {
+        "name": "React App Password",
+        "id": "np.reactapp.2",
+        "pattern": "(?x)(?i)\n\\b\nREACT_APP (?: _[A-Z0-9]+)* _PASS (?: WORD)?          (?# variable name )\n\\s* = \\s*\n['\"]?\n( [^\\s'\"$]{6,} )                                     (?# value )\n(?: [\\s'\"$] | $ )\n",
+        "examples": [
+          "# REACT_APP_GUEST_PASSWORD=mycoin!1",
+          "# REACT_APP_PASS=whiteduke",
+          "REACT_APP_AUTH_PASS=whiteduke",
+          "REACT_APP_AUTH_PASSWORD=whiteduke",
+          "    REACT_APP_AUTH_PASSWORD=whiteduke    # some comment",
+          "REACT_APP_MAILER_PASSWORD=smtp_password # Enter your SMTP email password"
+        ],
+        "negative_examples": [
+          "  const password = process.env.REACT_APP_FIREBASE_DEV_PASSWORD || \"not-set\"",
+          "REACT_APP_FRONTEND_LOGIN_FORGOT_PASSWORD=$REACT_APP_MATRIX_BASE_URL/classroom/#/forgot_password"
+        ],
+        "references": [
+          "https://create-react-app.dev/docs/adding-custom-environment-variables/",
+          "https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app"
+        ]
+      }
     },
     {
       "id": "np.rubygems.1",
-      "name": "RubyGems API Key"
+      "structural_id": "466dc3c5894f5dd4e968434533b4e4d6322d3652",
+      "name": "RubyGems API Key",
+      "syntax": {
+        "name": "RubyGems API Key",
+        "id": "np.rubygems.1",
+        "pattern": "(?x)(?i)\n\\b\n(rubygems_[a-f0-9]{48})\n\\b\n",
+        "examples": [
+          "$ curl -H 'Authorization:rubygems_b9ce70c306b3a2e248679fbbbd66723d408d3c8c5f00566c' \\\n       https://rubygems.org/api/v1/web_hooks.json\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://guides.rubygems.org/rubygems-org-api/",
+          "https://guides.rubygems.org/api-key-scopes/"
+        ]
+      }
     },
     {
       "id": "np.s3.1",
-      "name": "AWS S3 Bucket (subdomain style)"
+      "structural_id": "37410bb76d1873a99f9023d7409a3f300ea46958",
+      "name": "AWS S3 Bucket (subdomain style)",
+      "syntax": {
+        "name": "AWS S3 Bucket (subdomain style)",
+        "id": "np.s3.1",
+        "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+   (?# bucket name as subdomain )\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n) \\b\n",
+        "examples": [
+          "example-bucket.s3.amazonaws.com",
+          "http://bucket.s3-us-east-2.amazonaws.com",
+          "http%2F%2Fsome-bucket.s3.amazonaws.com"
+        ],
+        "negative_examples": [
+          ".s3.amazonaws.com",
+          "s3.amazonaws.com"
+        ],
+        "references": [
+          "https://docs.aws.amazon.com/general/latest/gr/rande.html"
+        ]
+      }
     },
     {
       "id": "np.s3.2",
-      "name": "AWS S3 Bucket (path style)"
+      "structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
+      "name": "AWS S3 Bucket (path style)",
+      "syntax": {
+        "name": "AWS S3 Bucket (path style)",
+        "id": "np.s3.2",
+        "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n/\n[a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \\. [a-zA-Z0-9_-]+)*   (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                             (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "examples": [
+          "s3.amazonaws.com/example-bucket",
+          "http://s3-us-east-2.amazonaws.com/example-bucket"
+        ],
+        "negative_examples": [
+          ".s3.amazonaws.com",
+          "s3.amazonaws.com",
+          "s3.amazonaws.com/",
+          "some-bucket-name.s3.amazonaws.com/171ea24dd241f8a2178b0374-username-Reponame-3-0",
+          "some-bucket.s3.amazonaws.com/some-object-here"
+        ],
+        "references": [
+          "https://docs.aws.amazon.com/general/latest/gr/rande.html"
+        ]
+      }
     },
     {
       "id": "np.salesforce.1",
-      "name": "Salesforce Access Token"
+      "structural_id": "c6c78b262b20f5ddb8ce2f5b84aad501c50b9e02",
+      "name": "Salesforce Access Token",
+      "syntax": {
+        "name": "Salesforce Access Token",
+        "id": "np.salesforce.1",
+        "pattern": "(?x)\n\\b\n(\n  00[a-zA-Z0-9]{13}             (?# organization ID )\n  !\n  [a-zA-Z0-9._]{96}             (?# opaque token )\n)\n(?: \\b | $ | [^a-zA-Z0-9._] )\n",
+        "examples": [
+          "00DE0X0A0M0PeLE!CJoAQOx1GCLf1UIt4UU9y0VOPLUZAYN6I8DsdGEDyHh5cO02egObcAhIDHYiGCfi94c53oFbr4HB.xZfuYRGhvNuxobAAXRe",
+          "=== Org Description\nKEY               VALUE\n────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────\nAccess Token      00DE0X0A0M0PeLE!AQcAQH0dMHEXAMPLEzmpkb58urFRkgeBGsxL_QJWwYMfAbUeeG7c1EXAMPLEDUkWe6H34r1AAwOR8B8fLEz6nEXAMPLEAAAA\nClient Id         PlatformCLI\nConnected Status  Connected\nId                00D5fORGIDEXAMPLE\nInstance Url      https://MyDomainName.my.salesforce.com\nUsername          juliet.capulet@empathetic-wolf-g5qddtr.com\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://help.salesforce.com/s/articleView?id=sf.remoteaccess_access_tokens.htm&type=5",
+          "https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart_oauth.htm"
+        ]
+      }
     },
     {
       "id": "np.sauce.1",
-      "name": "Sauce Token"
+      "structural_id": "9267f82feefce951244919da6dcaace4fe14061c",
+      "name": "Sauce Token",
+      "syntax": {
+        "name": "Sauce Token",
+        "id": "np.sauce.1",
+        "pattern": "(?x)(?i)\nsauce .{0,50}\n\\b\n([a-f0-9-]{36})\n(?: [^a-f0-9-] | $ )\n",
+        "examples": [
+          "- SAUCE_USERNAME=vitess\n- SAUCE_ACCESS_KEY=2397f603-c2c4-4897-a8ca-587ace5dc8dd\n- SAUCE_ACCESS_KEY=2397f603-c2c4-4897-a8ca-587ace5dc8d-\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.saucelabs.com/dev/api/",
+          "https://docs.saucelabs.com/dev/api/#authentication"
+        ]
+      }
     },
     {
       "id": "np.segment.1",
-      "name": "Segment Public API Token"
+      "structural_id": "68877d629cb5b20e53ef659e0c6e8bbac31058d7",
+      "name": "Segment Public API Token",
+      "syntax": {
+        "name": "Segment Public API Token",
+        "id": "np.segment.1",
+        "pattern": "(?x)\n\\b\n(sgp_[a-zA-Z0-9]{64})\n\\b\n",
+        "examples": [
+          "\"token\": \"sgp_b8eaD5d9Ae59a15a407bb7C88350bc85dc959EBE8277883d50Bc84dc960eE826\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://segment.com/docs/api/public-api/",
+          "https://segment.com/blog/how-segment-proactively-protects-customer-api-tokens/"
+        ]
+      }
     },
     {
       "id": "np.sendgrid.1",
-      "name": "SendGrid API Key"
+      "structural_id": "f2474f6648342795dbcb56efb642c9b7d6b05079",
+      "name": "SendGrid API Key",
+      "syntax": {
+        "name": "SendGrid API Key",
+        "id": "np.sendgrid.1",
+        "pattern": "\\b(SG\\.[0-9A-Za-z_-]{22}\\.[0-9A-Za-z_-]{43})\\b",
+        "examples": [
+          "      'SENDGRID_API_KEYSID': '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'",
+          "var sendgrid = require('sendgrid')('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');"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.sendgrid.com/ui/account-and-settings/api-keys"
+        ]
+      }
     },
     {
       "id": "np.shopify.1",
-      "name": "Shopify Domain"
+      "structural_id": "dcb49f8a2cbd0c347c266a99e8b82539a06680d6",
+      "name": "Shopify Domain",
+      "syntax": {
+        "name": "Shopify Domain",
+        "id": "np.shopify.1",
+        "pattern": "(?x)\n\\b\n(\n  (?:[a-zA-Z0-9-]+\\.)* [a-zA-Z0-9-]+ \\.myshopify\\.com\n)\n\\b\n",
+        "examples": [
+          "handsomestranger.myshopify.com",
+          "store.handsomestranger.myshopify.com"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://help.shopify.com/en/manual/domains"
+        ]
+      }
     },
     {
       "id": "np.shopify.2",
-      "name": "Shopify App Secret"
+      "structural_id": "f595f4be0b289609caa7c5738cb45518e53843ac",
+      "name": "Shopify App Secret",
+      "syntax": {
+        "name": "Shopify App Secret",
+        "id": "np.shopify.2",
+        "pattern": "\\b(shpss_[a-fA-F0-9]{32})\\b",
+        "examples": [
+          "SHOPIFY_API_KEY='66eaacb546afcad32162d40acb6bd2b0'\nSHOPIFY_API_SECRET_KEY='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'\n",
+          "SHOPIFY_API_KEY: 38d5b9a8b6c0a3d3ad3f2c422c77db80\nSHOPIFY_API_SECRET: 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\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://shopify.dev/apps/auth",
+          "https://shopify.dev/changelog/app-secret-key-length-has-increased"
+        ]
+      }
     },
     {
       "id": "np.shopify.3",
-      "name": "Shopify Access Token (Public App)"
+      "structural_id": "d388c0a3dec4e59b2a08659f5b284906e37c194d",
+      "name": "Shopify Access Token (Public App)",
+      "syntax": {
+        "name": "Shopify Access Token (Public App)",
+        "id": "np.shopify.3",
+        "pattern": "\\b(shpat_[a-fA-F0-9]{32})\\b",
+        "examples": [
+          "include('layouts/header.php');\n$shop = $_GET['shop'];\n$token = \"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\";\n$query = array(\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://shopify.dev/apps/auth",
+          "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ]
+      }
     },
     {
       "id": "np.shopify.4",
-      "name": "Shopify Access Token (Custom App)"
+      "structural_id": "a1116337e048e7d56fa18d1b6fb4b93463ff18b6",
+      "name": "Shopify Access Token (Custom App)",
+      "syntax": {
+        "name": "Shopify Access Token (Custom App)",
+        "id": "np.shopify.4",
+        "pattern": "\\b(shpca_[a-fA-F0-9]{32})\\b",
+        "examples": [
+          "const TEMP_CONTENT = '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 handsomestranger.myshopify.com'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://shopify.dev/apps/auth",
+          "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ]
+      }
     },
     {
       "id": "np.shopify.5",
-      "name": "Shopify Access Token (Legacy Private App)"
+      "structural_id": "953cb16a79781c62534a53899f69959de39295ad",
+      "name": "Shopify Access Token (Legacy Private App)",
+      "syntax": {
+        "name": "Shopify Access Token (Legacy Private App)",
+        "id": "np.shopify.5",
+        "pattern": "\\b(shppa_[a-fA-F0-9]{32})\\b",
+        "examples": [
+          "SHOP_PASSWORD=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"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://shopify.dev/apps/auth",
+          "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ]
+      }
     },
     {
       "id": "np.slack.2",
-      "name": "Slack Bot Token"
+      "structural_id": "0ea5b5cda83ab3b0c33554d7f0d85314bfa9fe5c",
+      "name": "Slack Bot Token",
+      "syntax": {
+        "name": "Slack Bot Token",
+        "id": "np.slack.2",
+        "pattern": "\\b(xoxb-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24})\\b",
+        "examples": [
+          "SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D"
+        ],
+        "negative_examples": [
+          "python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 \"This is a test run. Ignore\"",
+          "this is the api token to connect to the bot user\n\nxoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K\n",
+          "def send_slack_notification(message):\n    token = \"xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1\"\n"
+        ],
+        "references": [
+          "https://api.slack.com/authentication",
+          "https://api.slack.com/authentication/best-practices",
+          "https://api.slack.com/authentication/token-types"
+        ]
+      }
     },
     {
       "id": "np.slack.3",
-      "name": "Slack Webhook"
+      "structural_id": "05ed2105125034f509474d7ee7689a11e1fdded7",
+      "name": "Slack Webhook",
+      "syntax": {
+        "name": "Slack Webhook",
+        "id": "np.slack.3",
+        "pattern": "(?i)(https://hooks.slack.com/services/T[a-z0-9_]{8}/B[a-z0-9_]{8,12}/[a-z0-9_]{24})",
+        "examples": [
+          "#notifications_marcus: https://hooks.slack.com/services/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",
+          "// Import and Configure Console.Slack (Thanks David <3)\n// const slack = require('console-slack');\n// slack.options = {\n//   webhook : \"https://hooks.slack.com/services/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\",\n//   username: \"console.slack.bot\",\n//   emoji : \":trollface:\",\n//   channel : \"#payx-logs\"\n// };\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://api.slack.com/messaging/webhooks"
+        ]
+      }
     },
     {
       "id": "np.slack.4",
-      "name": "Slack User Token"
+      "structural_id": "1153af7a56a51f93ae0ae75c8d4ba81c011f7f08",
+      "name": "Slack User Token",
+      "syntax": {
+        "name": "Slack User Token",
+        "id": "np.slack.4",
+        "pattern": "\\b(xoxp-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-f0-9]{32})\\b",
+        "examples": [
+          "python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 \"This is a test run. Ignore\"",
+          "curl -X POST -H \"Content-type: application/json\" -H \"Authorization: Bearer xoxp-283316862324-298911817009-298923149681-44f585044dace54f5701618e97cd1c0b\" --data @data.json https://wirecard-issuing.slack.com/api/chat.postMessage",
+          "\turl := \"https://slack.com/api/channels.history?token=xoxp-113726990690-113803571044-155105854433-53ffb9d16ace50aa79aa1c425a68b131&channel=C4D8D3XMX&count=1&pretty=1\""
+        ],
+        "negative_examples": [
+          "this is the api token to connect to the bot user\n\nxoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K\n",
+          "SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D",
+          "def send_slack_notification(message):\n    token = \"xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1\"\n"
+        ],
+        "references": [
+          "https://api.slack.com/authentication",
+          "https://api.slack.com/authentication/best-practices",
+          "https://api.slack.com/authentication/token-types"
+        ]
+      }
     },
     {
       "id": "np.slack.5",
-      "name": "Slack App Token"
+      "structural_id": "613fa5e762871ab7b776a6a85b7051a8a26d27f0",
+      "name": "Slack App Token",
+      "syntax": {
+        "name": "Slack App Token",
+        "id": "np.slack.5",
+        "pattern": "\\b(xapp-[0-9]{12}-[a-zA-Z0-9/+]{24})\\b",
+        "examples": [
+          "ENV SLACK_TOKEN=\"xapp-083452001657-ShAYwge/87H4lC3j7lZ48pAL\" \\"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://api.slack.com/authentication",
+          "https://api.slack.com/authentication/best-practices",
+          "https://api.slack.com/authentication/token-types"
+        ]
+      }
     },
     {
       "id": "np.slack.6",
-      "name": "Slack Legacy Bot Token"
+      "structural_id": "02a0d095219ff81c71b0b89423987ab5a036a1a0",
+      "name": "Slack Legacy Bot Token",
+      "syntax": {
+        "name": "Slack Legacy Bot Token",
+        "id": "np.slack.6",
+        "pattern": "\\b(xoxb-[0-9]{10,13}-[a-zA-Z0-9]{24})\\b",
+        "examples": [
+          "this is the api token to connect to the bot user\n\nxoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K\n",
+          "def send_slack_notification(message):\n    token = \"xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1\"\n"
+        ],
+        "negative_examples": [
+          "SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D",
+          "python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 \"This is a test run. Ignore\"",
+          "curl -X POST -H \"Content-type: application/json\" -H \"Authorization: Bearer xoxp-283316862324-298911817009-298923149681-44f585044dace54f5701618e97cd1c0b\" --data @data.json https://wirecard-issuing.slack.com/api/chat.postMessage",
+          "\turl := \"https://slack.com/api/channels.history?token=xoxp-113726990690-113803571044-155105854433-53ffb9d16ace50aa79aa1c425a68b131&channel=C4D8D3XMX&count=1&pretty=1\""
+        ],
+        "references": [
+          "https://api.slack.com/authentication",
+          "https://api.slack.com/authentication/best-practices",
+          "https://api.slack.com/authentication/token-types",
+          "https://api.slack.com/legacy/custom-integrations/legacy-tokens"
+        ]
+      }
     },
     {
       "id": "np.sonarqube.1",
-      "name": "SonarQube Token"
+      "structural_id": "6ac3e4879dc769122fa1e6e8bd718c3a338dfc65",
+      "name": "SonarQube Token",
+      "syntax": {
+        "name": "SonarQube Token",
+        "id": "np.sonarqube.1",
+        "pattern": "(?i)sonar.{0,5}login.{0,5}\\s*\\b([a-f0-9]{40})\\b",
+        "examples": [
+          "sonar.host.url=https://sonarcloud.io -Dsonar.login=5524bf449ca45fcace54698371466398321f3a82",
+          "sonar.login', '826de5590c75919a8317fdface58206eebe7ebbc",
+          "$sonarLogin = \"4924be8f51f3e738c97db2c4ace51db7e938f28b\""
+        ],
+        "negative_examples": [
+          "sonarqube-reporter-1.2.4.tgz#3b335d612137949d2f21fcc6c8c8164db7603227",
+          "sonarqube-reporter-1.4.0.tgz#eb9e15deb83e4ca532989df12b40fedd434ef89a",
+          "sonarqube-scanner/-/sonarqube-scanner-2.5.0.tgz#ff704cbddf355d38a52c5e9479d6bb5c1ff28eac",
+          "/d:sonar.host.url=$(SONAR_HOST) /d:sonar.login=$(SONAR_LOGIN) \\\n/d:sonar.coverage.exclusions=\"**Tests*.cs\"\n"
+        ],
+        "references": [
+          "https://docs.sonarqube.org/latest/user-guide/user-token/"
+        ]
+      }
     },
     {
       "id": "np.square.1",
-      "name": "Square Access Token"
+      "structural_id": "3f8708418bfa64b2123fac51d9e640838af45cbf",
+      "name": "Square Access Token",
+      "syntax": {
+        "name": "Square Access Token",
+        "id": "np.square.1",
+        "pattern": "(?i)\\b(sq0atp-[a-z0-9_-]{22})\\b",
+        "examples": [
+          "  personal access token sq0atp-qUlZzae8wVMc5P5NZdf5DA<br/>",
+          "var applicationId = 'sq0idp-r34HdSnJVWaCesH3dnJrGA';\nvar accessToken = 'sq0atp-RdSPeJa5qDMaCesxHOjeRQ';\n"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.square.2",
-      "name": "Square OAuth Secret"
+      "structural_id": "6d7617a9d54920cb17d86ce86ee5685bec95062c",
+      "name": "Square OAuth Secret",
+      "syntax": {
+        "name": "Square OAuth Secret",
+        "id": "np.square.2",
+        "pattern": "(?i)\\b(sq0csp-[a-z0-9_-]{43})\\b",
+        "examples": [
+          "app_secret: sq0csp-VQgEphNJFVxfoEtJ1M_2KaCesfzP2_ugNWnlMPwZaZk\nsandbox_app_id: sandbox-sq0idp-wWAaCesVx0PhRbXkdUUg9Q\nsandbox_access_token: sandbox-sq0atb-KVmmWPaCesnJkFsvje76sQ\nproduction_app_id: sq0idp-wWACO1oVx0aCesXkdUUg9Q\n",
+          "private String accessTokenEndpoint = \"https://connect.squareup.com/oauth2/token\";\nprivate String baseURL = \"https://connect.squareup.com\";\nprivate String clientId = \"sq0idp-Ux0S-9iMfaCeszTkDpSjDw\";\nprivate String clientSecret = \"sq0csp-lBGGHNQmcaCesLfa3x6W7jJj8SQ-Fx5Y0yQiCrUWM40\";\n"
+        ],
+        "negative_examples": [],
+        "references": []
+      }
     },
     {
       "id": "np.stackhawk.1",
-      "name": "StackHawk API Key"
+      "structural_id": "22d1f5a9dabaab008d09788842064f53ae2e2c8a",
+      "name": "StackHawk API Key",
+      "syntax": {
+        "name": "StackHawk API Key",
+        "id": "np.stackhawk.1",
+        "pattern": "\\b(hawk\\.[0-9A-Za-z_-]{20}\\.[0-9A-Za-z_-]{20})\\b",
+        "examples": [
+          "HAWK_API_KEY=\"hawk.nHAOHdJjXoNyzAcTDC5M.R2gqQh2aCesrh0yCGB7q\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.stackhawk.com/web-app/"
+        ]
+      }
     },
     {
       "id": "np.stripe.1",
-      "name": "Stripe API Key"
+      "structural_id": "8296f48c0492983fd07802f7c2907531bb7448bd",
+      "name": "Stripe API Key",
+      "syntax": {
+        "name": "Stripe API Key",
+        "id": "np.stripe.1",
+        "pattern": "(?i)\\b((?:sk|rk)_live_[a-z0-9]{24})\\b",
+        "examples": [
+          "Stripe.api_key = \"sk_live_dhhfUUyfrAace5dBAZ10JrAD\"",
+          "var stripe = require(\"stripe\")(\"sk_live_qdyFazIVmace52bThiOzbEVT\");"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://stripe.com/docs/keys"
+        ]
+      }
     },
     {
       "id": "np.stripe.2",
-      "name": "Stripe API Test Key"
+      "structural_id": "85e7be0fca86215872d1d1f474079d8d9643ca2d",
+      "name": "Stripe API Test Key",
+      "syntax": {
+        "name": "Stripe API Test Key",
+        "id": "np.stripe.2",
+        "pattern": "(?i)\\b((?:sk|rk)_test_[a-z0-9]{24})\\b",
+        "examples": [
+          "//var stripe = require(\"stripe\")(\"sk_test_nxOdTTuEace5Ajbh3svpG32m\");"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://stripe.com/docs/keys"
+        ]
+      }
     },
     {
       "id": "np.telegram.1",
-      "name": "Telegram Bot Token"
+      "structural_id": "ee0a6f62cff7ae26886389e9a542f673c0cfdc00",
+      "name": "Telegram Bot Token",
+      "syntax": {
+        "name": "Telegram Bot Token",
+        "id": "np.telegram.1",
+        "pattern": "(?x)\n\\b\n(\\d+:AA[a-zA-Z0-9_-]{32,33})\n(?: [^a-zA-Z0-9_-] | $)\n",
+        "examples": [
+          "4839574813:AAFD39kkdpWt3ywyRZergyOLMaJhac61qc",
+          "4839574813:AAE4A6Rz0CSnIGzeu897OjQnjzsMEG2_uso"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://core.telegram.org/bots/api",
+          "https://core.telegram.org/bots/features#botfather"
+        ]
+      }
     },
     {
       "id": "np.thingsboard.1",
-      "name": "ThingsBoard Access Token"
+      "structural_id": "4c4e871118ca8f0c149274cb6b5bb37bc19d7ee6",
+      "name": "ThingsBoard Access Token",
+      "syntax": {
+        "name": "ThingsBoard Access Token",
+        "id": "np.thingsboard.1",
+        "pattern": "(?x)\nthingsboard\\.cloud/api/v1/\n([a-z0-9]{20})\n",
+        "examples": [
+          "http://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry",
+          "https://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry",
+          "coap://coap.thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://thingsboard.io/docs/paas/reference/http-api/",
+          "https://thingsboard.io/docs/paas/reference/coap-api/"
+        ]
+      }
     },
     {
       "id": "np.thingsboard.2",
-      "name": "ThingsBoard Provision Device Key"
+      "structural_id": "d969510234eb2a6c1187a6021783055fa334d3ad",
+      "name": "ThingsBoard Provision Device Key",
+      "syntax": {
+        "name": "ThingsBoard Provision Device Key",
+        "id": "np.thingsboard.2",
+        "pattern": "(?x)\n\"provisionDeviceKey\"\\s*:\\s*\"\n([a-z0-9]{20})\n\"\n",
+        "examples": [
+          "\"{\"deviceName\": \"DEVICE_NAME\", \"provisionDeviceKey\": \"s2s1gfcuatgbi61n8h5s\", \"provisionDeviceSecret\": \"xbzsovaw9ix4qfhi14an\"}\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://thingsboard.io/docs/paas/reference/http-api/",
+          "https://thingsboard.io/docs/paas/user-guide/device-provisioning/"
+        ]
+      }
     },
     {
       "id": "np.thingsboard.3",
-      "name": "ThingsBoard Provision Device Secret"
+      "structural_id": "799163454f22c0ec67ae65d39cd2ab816e6609f7",
+      "name": "ThingsBoard Provision Device Secret",
+      "syntax": {
+        "name": "ThingsBoard Provision Device Secret",
+        "id": "np.thingsboard.3",
+        "pattern": "(?x)\n\"provisionDeviceSecret\"\\s*:\\s*\"\n([a-z0-9]{20})\n\"\n",
+        "examples": [
+          "\"{\"deviceName\": \"DEVICE_NAME\", \"provisionDeviceKey\": \"s2s1gfcuatgbi61n8h5s\", \"provisionDeviceSecret\": \"xbzsovaw9ix4qfhi14an\"}\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://thingsboard.io/docs/paas/reference/http-api/",
+          "https://thingsboard.io/docs/paas/user-guide/device-provisioning/"
+        ]
+      }
     },
     {
       "id": "np.truenas.1",
-      "name": "TrueNAS API Key (WebSocket)"
+      "structural_id": "aa80145dc95562ba0dfc5567c3a1fad5e2d7e5c7",
+      "name": "TrueNAS API Key (WebSocket)",
+      "syntax": {
+        "name": "TrueNAS API Key (WebSocket)",
+        "id": "np.truenas.1",
+        "pattern": "(?x)\n\"params\"\\s*:\\s*\\[\\s*\"\n(\\d+-[a-zA-Z0-9]{64})\n\"\\s*\\]\n",
+        "examples": [
+          "{\"id\":\"3286a508-a6ca-278a-c078-85b2b515d8d2\", \"msg\":\"method\", \"method\":\"auth.login_with_api_key\", \"params\":[\"8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu\"]}",
+          "{\"id\":\"677d9914-f598-f497-e77e-2a3aadbb822e\", \"msg\":\"method\", \"method\":\"auth.login_with_api_key\", \"params\" : [\"9-hTSZDBPyg0PjRZvWb8omoxJ7X2gAjRGmiPKql9ENGIUP9OPtEAzz5f6g9YIMVbZT\"]}",
+          "{\"id\":\"2755dad4-cc12-94bb-a894-ba0f85c3fdbf\", \"msg\":\"method\", \"method\":\"auth.login_with_api_key\", \"params\" : [ \"10-6LZBVhNq8zze0rzXJptfSWDBoskWuThnQb3fUVw4sVNgJ7GKT3ITVIovhwPf34oL\" ]}",
+          "{\n  \"id\": \"2755dad4-cc12-94bb-a894-ba0f85c3fdbf\",\n  \"msg\": \"method\",\n  \"method\": \"auth.login_with_api_key\",\n  \"params\": [\n    \"10-6LZBVhNq8zze0rzXJptfSWDBoskWuThnQb3fUVw4sVNgJ7GKT3ITVIovhwPf34oL\"\n  ]\n}\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.truenas.com/docs/api/core_websocket_api.html",
+          "https://www.truenas.com/docs/api/scale_rest_api.html",
+          "https://www.truenas.com/docs/scale/scaletutorials/toptoolbar/managingapikeys/",
+          "https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/",
+          "https://www.truenas.com/docs/scale/api/",
+          "https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/"
+        ]
+      }
     },
     {
       "id": "np.truenas.2",
-      "name": "TrueNAS API Key (REST API)"
+      "structural_id": "f08980b72381badfcdbd19c944a1ff5aa4595a7f",
+      "name": "TrueNAS API Key (REST API)",
+      "syntax": {
+        "name": "TrueNAS API Key (REST API)",
+        "id": "np.truenas.2",
+        "pattern": "(?x)\nBearer\\s*\n(\\d+-[a-zA-Z0-9]{64})\n\\b\n",
+        "examples": [
+          "curl -X POST \"http://192.168.0.30/api/v2.0/device/get_info\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer 8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu\" -d \"\\\"SERIAL\\\"\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.truenas.com/docs/api/core_websocket_api.html",
+          "https://www.truenas.com/docs/api/scale_rest_api.html",
+          "https://www.truenas.com/docs/scale/scaletutorials/toptoolbar/managingapikeys/",
+          "https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/",
+          "https://www.truenas.com/docs/scale/api/",
+          "https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/"
+        ]
+      }
     },
     {
       "id": "np.twilio.1",
-      "name": "Twilio API Key"
+      "structural_id": "180d348e963da615280c966b09c80a842008d462",
+      "name": "Twilio API Key",
+      "syntax": {
+        "name": "Twilio API Key",
+        "id": "np.twilio.1",
+        "pattern": "(?i)twilio.{0,20}\\b(sk[a-f0-9]{32})\\b",
+        "examples": [
+          "const twilioAccountSid = 'AC712594f590c0d8ace55c04858f7398f9' // Your Account SID from www.twilio.com/console\nconst twilioApiKeySID = 'SK9b4cc552783500ace5414a1ed3e9fd1a'\nconst twilioApiKeySecret = 'l6LUelKF2BUtMLace5oShZSmRppadYqI'\n",
+          "// https://www.twilio.com/console/video/dev-tools/api-keys\n'API'              => env('TWILIO_API','SK6e84981d07ace5c9df33e1ab043a2fb2'),\n'API_KEY'          => env('TWILIO_API_KEY', 'wbTs1SUt6Aace5eKeNCxuYvJa6PhaRd0')\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.twilio.com/docs/usage/api",
+          "https://www.twilio.com/docs/usage/api#authenticate-with-http",
+          "https://www.twilio.com/docs/usage/api#authenticate-using-the-twilio-sdks"
+        ]
+      }
     },
     {
       "id": "np.twitter.1",
-      "name": "Twitter Client ID"
+      "structural_id": "1e0cb253c7c5f1244b5a37b74b8a6a5199ce4432",
+      "name": "Twitter Client ID",
+      "syntax": {
+        "name": "Twitter Client ID",
+        "id": "np.twitter.1",
+        "pattern": "(?x)(?i)\n\\b twitter\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{18,25}) \\b\n",
+        "examples": [
+          "     TWITTER_ID:               \"DkWLqcP3ace3wHuJ7fiw\",",
+          "# TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'\n# TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developer.twitter.com/en/docs/authentication/overview"
+        ]
+      }
     },
     {
       "id": "np.twitter.2",
-      "name": "Twitter Secret Key"
+      "structural_id": "d97b9bc081a3758427422f921788a64a1f9e1580",
+      "name": "Twitter Secret Key",
+      "syntax": {
+        "name": "Twitter Secret Key",
+        "id": "np.twitter.2",
+        "pattern": "(?x)(?i)\ntwitter\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{35,44}) \\b\n",
+        "examples": [
+          "# TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'\n# TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'\n"
+        ],
+        "negative_examples": [
+          "Twitter(auth=OAuth('MjuHWoGbzYmJv3ZuHaBvSENfyevu00NQuBc40VM',\n                   'anJLBCOALCXl7aXeybmNA5oae9E03Cm23cKNMLaScuXwk',\n                   'kl3E14NQx84qxO1dy247V0b2W',\n                   '5VFVXVMq9bDJzFAKPfWOiYmJZin2F7YLhSfoyLBXf6Bc9ngX3g'))\n"
+        ],
+        "references": [
+          "https://developer.twitter.com/en/docs/authentication/overview"
+        ]
+      }
     },
     {
       "id": "np.wireguard.1",
-      "name": "WireGuard Private Key"
+      "structural_id": "c4defd244686e5be662bc73970771a1f4f0083be",
+      "name": "WireGuard Private Key",
+      "syntax": {
+        "name": "WireGuard Private Key",
+        "id": "np.wireguard.1",
+        "pattern": "PrivateKey\\s*=\\s*([A-Za-z0-9+/]{43}=)",
+        "examples": [
+          "[Interface]\nAddress = 10.200.200.3/32\nPrivateKey = AsaFot43bfs1fEWjvtty+rGcjh3rP1H6sug1l3u19ix=\nDNS = 8.8.8.8\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.wireguard.com/quickstart/",
+          "https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html",
+          "https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6"
+        ]
+      }
     },
     {
       "id": "np.wireguard.2",
-      "name": "WireGuard Preshared Key"
+      "structural_id": "64f783f60748f573f611b21b29976ad8c623d3bb",
+      "name": "WireGuard Preshared Key",
+      "syntax": {
+        "name": "WireGuard Preshared Key",
+        "id": "np.wireguard.2",
+        "pattern": "PresharedKey\\s*=\\s*([A-Za-z0-9+/]{43}=)",
+        "examples": [
+          "[Peer]\nPublicKey = [Server's public key]\nPresharedKey = uRsfsZ2Ts1rach4Zv3hhwcx6wa5fuIo2u3w7sa+7j81=\nAllowedIPs = 0.0.0.0/0, ::/0\nEndpoint = [Server Addr:Server Port]\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.wireguard.com/quickstart/",
+          "https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html",
+          "https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6"
+        ]
+      }
     }
   ],
   "rulesets": [

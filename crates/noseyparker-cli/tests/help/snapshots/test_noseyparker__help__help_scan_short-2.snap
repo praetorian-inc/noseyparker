@@ -12,8 +12,11 @@ Options:
   -h, --help              Print help (see more with '--help')
 
 Rule Selection Options:
-      --rules <PATH>  Load additional rules and rulesets from the specified file or directory
-      --ruleset <ID>  Enable the ruleset with the specified ID [default: default]
+      --rules-path <PATH>     Load additional rules and rulesets from the specified file or
+                              directory
+      --ruleset <ID>          Enable the ruleset with the specified ID [default: default]
+      --load-builtins <BOOL>  Control whether built-in rules and rulesets are loaded [default: true]
+                              [possible values: true, false]
 
 Input Specifier Options:
   [INPUT]...                    Scan the specified file, directory, or local Git repository
@@ -40,7 +43,6 @@ Metadata Collection Options:
                                     matching] [possible values: all, matching, none]
       --git-blob-provenance <MODE>  Specify which Git commit provenance metadata will be collected
                                     [default: first-seen] [possible values: first-seen, minimal]
-      --ignore-certs                Ignore validation of TLS certificates
 
 Data Collection Options:
       --snippet-length <BYTES>  Include up to the specified number of bytes before and after each
@@ -55,4 +57,3 @@ Global Options:
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
                          never, always]
-

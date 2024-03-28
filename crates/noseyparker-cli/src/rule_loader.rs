@@ -26,6 +26,11 @@ impl RuleLoader {
         }
     }
 
+    pub fn load_builtins(mut self, load_builtins: bool) -> Self {
+        self.load_builtins = load_builtins;
+        self
+    }
+
     /// Add additional file or directory paths to load rules and rulesets from.
     pub fn additional_rule_load_paths<P: AsRef<Path>, I: IntoIterator<Item = P>>(
         mut self,
@@ -85,7 +90,8 @@ impl RuleLoader {
 
     pub fn from_rule_specifiers(specs: &RuleSpecifierArgs) -> Self {
         Self::new()
-            .additional_rule_load_paths(specs.rules.as_slice())
+            .load_builtins(specs.load_builtins)
+            .additional_rule_load_paths(specs.rules_path.as_slice())
             .enable_ruleset_ids(specs.ruleset.iter())
     }
 }

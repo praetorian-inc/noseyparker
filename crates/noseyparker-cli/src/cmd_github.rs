@@ -14,7 +14,7 @@ pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
     }
 }
 
-fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Url) -> Result<()> {
+fn list_repos(global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Url) -> Result<()> {
     if args.repo_specifiers.is_empty() {
         bail!("No repositories specified");
     }
@@ -26,7 +26,7 @@ fn list_repos(_global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Ur
             all_organizations: args.repo_specifiers.all_organizations,
         },
         api_url,
-        args.ignore_certs,
+        global_args.ignore_certs,
         None,
     )
     .context("Failed to enumerate GitHub repositories")?;

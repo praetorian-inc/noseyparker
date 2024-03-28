@@ -55,7 +55,7 @@ Options:
           Print help (see a summary with '-h')
 
 Rule Selection Options:
-      --rules <PATH>
+      --rules-path <PATH>
           Load additional rules and rulesets from the specified file or directory
           
           The paths can be either files or directories. Directories are recursively walked and all
@@ -78,6 +78,12 @@ Rule Selection Options:
           --ruleset CUSTOM_ID`.
           
           [default: default]
+
+      --load-builtins <BOOL>
+          Control whether built-in rules and rulesets are loaded
+          
+          [default: true]
+          [possible values: true, false]
 
 Input Specifier Options:
   [INPUT]...
@@ -185,9 +191,6 @@ Metadata Collection Options:
             blob is first seen
           - minimal:    Only the Git repository in which a blob is seen
 
-      --ignore-certs
-          Ignore validation of TLS certificates
-
 Data Collection Options:
       --snippet-length <BYTES>
           Include up to the specified number of bytes before and after each match
@@ -271,4 +274,3 @@ Advanced Global Options:
           
           [default: true]
           [possible values: true, false]
-

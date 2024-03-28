@@ -250,6 +250,10 @@ pub struct GlobalArgs {
     #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
     pub progress: Mode,
 
+    /// Ignore validation of TLS certificates
+    #[arg(long)]
+    pub ignore_certs: bool,
+
     #[command(flatten)]
     pub advanced: AdvancedArgs,
 }
@@ -363,13 +367,10 @@ pub struct GitHubReposListArgs {
 
     #[command(flatten)]
     pub output_args: OutputArgs<GitHubOutputFormat>,
-
-    /// Ignore validation of TLS certificates
-    #[arg(long)]
-    pub ignore_certs: bool,
 }
 
 #[derive(Args, Debug, Clone)]
+#[command(next_help_heading = "Input Specifier Options")]
 pub struct GitHubRepoSpecifiers {
     /// Select repositories belonging to the specified user
     ///
@@ -557,10 +558,6 @@ pub struct ScanArgs {
         help_heading="Data Collection Options",
     )]
     pub copy_blobs: CopyBlobsMode,
-
-    /// Ignore validation of TLS certificates
-    #[arg(long)]
-    pub ignore_certs: bool,
 }
 
 #[derive(Args, Debug)]
@@ -572,8 +569,10 @@ pub struct RuleSpecifierArgs {
     /// Directories are recursively walked and all discovered YAML files of rules and rulesets will be loaded.
     ///
     /// This option can be repeated.
-    #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath)]
-    pub rules: Vec<PathBuf>,
+
+    // FIXME: remove deprecated `rules` alias in v0.19
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath, alias="rules")]
+    pub rules_path: Vec<PathBuf>,
 
     /// Enable the ruleset with the specified ID
     ///
@@ -588,6 +587,10 @@ pub struct RuleSpecifierArgs {
     /// If you want to use a custom ruleset in addition to the default ruleset, specify this option twice, e.g., `--ruleset default --ruleset CUSTOM_ID`.
     #[arg(long, value_name = "ID", default_values_t=["default".to_string()])]
     pub ruleset: Vec<String>,
+
+    /// Control whether built-in rules and rulesets are loaded.
+    #[arg(long, default_value_t=true, action=ArgAction::Set, value_name="BOOL")]
+    pub load_builtins: bool,
 }
 
 /// The mode to use for cloning a Git repository

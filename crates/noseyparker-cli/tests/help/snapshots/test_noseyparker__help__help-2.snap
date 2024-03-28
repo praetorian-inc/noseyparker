@@ -55,6 +55,9 @@ Global Options:
           [default: auto]
           [possible values: auto, never, always]
 
+      --ignore-certs
+          Ignore validation of TLS certificates
+
 Advanced Global Options:
       --rlimit-nofile <LIMIT>
           Set the rlimit for number of open files to LIMIT
@@ -80,4 +83,3 @@ Advanced Global Options:
           
           [default: true]
           [possible values: true, false]
-
