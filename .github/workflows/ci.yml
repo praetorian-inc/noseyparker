@@ -126,7 +126,7 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         prefix-key: 'ci-tests'
-        key: ${{ matrix.os }}-${{ matrix.profile }}-${{ matrix.features }}
+        key: ${{ matrix.build }}
         cache-all-crates: true
 
     - name: Build tests
