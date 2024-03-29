@@ -45,7 +45,7 @@ env:
   #
   # https://stackoverflow.com/a/70174212
   # https://doc.crates.io/contrib/implementation/debugging.html#logging
-  CARGO_LOG: 'cargo::core::compiler::fingerprint=info'
+  # CARGO_LOG: 'cargo::core::compiler::fingerprint=info'
 
 jobs:
   tests:
@@ -127,7 +127,6 @@ jobs:
       with:
         prefix-key: 'ci-tests'
         key: ${{ matrix.build }}
-        cache-all-crates: true
 
     - name: Build tests
       if: ${{ matrix.run_tests }}
