@@ -127,7 +127,7 @@ jobs:
       with:
         prefix-key: 'ci-tests'
         key: ${{ matrix.os }}-${{ matrix.profile }}-${{ matrix.features }}
-        # cache-all-crates: true
+        cache-all-crates: true
 
     - name: Build tests
       if: ${{ matrix.run_tests }}
