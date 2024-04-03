@@ -3,6 +3,7 @@
 mod common;
 use common::*;
 
+mod datastore;
 mod github;
 mod help;
 mod report;

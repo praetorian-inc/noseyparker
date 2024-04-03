@@ -7,8 +7,9 @@ Manage datastores
 Usage: noseyparker datastore [OPTIONS] <COMMAND>
 
 Commands:
-  init  Initialize a new datastore
-  help  Print this message or the help of the given subcommand(s)
+  init    Initialize a new datastore
+  export  Export a datastore
+  help    Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help
@@ -70,4 +71,3 @@ Advanced Global Options:
           
           [default: true]
           [possible values: true, false]
-

@@ -1,0 +1,6 @@
+---
+source: crates/noseyparker-cli/tests/datastore/mod.rs
+expression: stdout
+---
+ Rule   Total Findings   Total Matches 
+───────────────────────────────────────

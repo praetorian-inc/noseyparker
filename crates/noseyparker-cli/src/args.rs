@@ -12,6 +12,9 @@ use url::Url;
 
 use noseyparker::git_url::GitUrl;
 
+// -----------------------------------------------------------------------------
+// utilities
+// -----------------------------------------------------------------------------
 #[rustfmt::skip]
 fn get_long_version() -> &'static str {
     concat!(
@@ -70,6 +73,13 @@ pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: b
             );
             err.exit();
         }
+    }
+}
+
+fn get_parallelism() -> usize {
+    match std::thread::available_parallelism() {
+        Err(_e) => 1,
+        Ok(v) => v.into(),
     }
 }
 
@@ -473,6 +483,9 @@ pub struct DatastoreArgs {
 pub enum DatastoreCommand {
     /// Initialize a new datastore
     Init(DatastoreInitArgs),
+
+    /// Export a datastore
+    Export(DatastoreExportArgs),
 }
 
 #[derive(Args, Debug)]
@@ -489,11 +502,36 @@ pub struct DatastoreInitArgs {
     pub datastore: PathBuf,
 }
 
-fn get_parallelism() -> usize {
-    match std::thread::available_parallelism() {
-        Err(_e) => 1,
-        Ok(v) => v.into(),
-    }
+#[derive(Args, Debug)]
+pub struct DatastoreExportArgs {
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::DirPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
+    /// Datastore to export
+    pub datastore: PathBuf,
+
+    /// Write output to the specified path
+    #[arg(long, short, value_name = "PATH", value_hint = ValueHint::FilePath)]
+    pub output: PathBuf,
+
+    /// Write output in the specified format
+    #[arg(long, short, value_name = "FORMAT", default_value = "tgz")]
+    pub format: DatastoreExportOutputFormat,
+}
+
+// -----------------------------------------------------------------------------
+// datastore export output format
+// -----------------------------------------------------------------------------
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all = "kebab-case")]
+pub enum DatastoreExportOutputFormat {
+    /// gzipped tarball
+    Tgz,
 }
 
 // -----------------------------------------------------------------------------
