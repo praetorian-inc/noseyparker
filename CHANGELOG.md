@@ -10,17 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Additions
 
 - The README now includes several animated GIFs that demonstrate simple example use cases ([#154](https://github.com/praetorian-inc/noseyparker/pull/154)).
+
 - The `report` command now offers a new `--finding-status=STATUS` filtering option, which causes only the findings with the requested status to be reported ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
+
+- A new `datastore export` command has been added ([#166](https://github.com/praetorian-inc/noseyparker/pull/166)).
+  This command exports the essential content from a Nosey Parker datastore as a .tgz file that can be extracted wherever it is needed.
 
 ### Changes
 
 - The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the system-provided Boost ([#150](https://github.com/praetorian-inc/noseyparker/pull/150) from @seqre).
   This change is only relevant to building Nosey Parker from source.
+
 - The vendored copy of the Vectorscan regular expression library included in the internal `vectorscan-sys` crate has been removed ([#151](https://github.com/praetorian-inc/noseyparker/pull/151) from @seqre).
   Instead, a copy of the Vectorscan 5.4.11 source tarball is included in this repository, and is extracted and patched during the build phase.
+
 - SARIF reporting format is now listed as experimental.
+
 - In the `scan` and `rules` command, the command-line option to load additional rules and rulesets from files has been renamed from `--rules` to `--rules-path`.
   The old `--rules` option is still supported as an alias, but this is deprecated and will be removed in the v0.19 release.
+
 - The `rules list` command now includes additional fields when using JSON format ([#161](https://github.com/praetorian-inc/noseyparker/pull/161)).
 
 
