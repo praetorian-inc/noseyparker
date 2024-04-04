@@ -71,7 +71,6 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
 
           check_docs: false
-          check_rules: false
           run_tests: true
 
         - build: ubuntu-22.04.x86_64.stable.test
@@ -83,7 +82,6 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
 
           check_docs: true
-          check_rules: true
           run_tests: true
 
         - build: macos-12.x86_64.stable.test
@@ -95,7 +93,6 @@ jobs:
             brew install coreutils boost
 
           check_docs: false
-          check_rules: false
           run_tests: true
 
         - build: macos-13.arm64.stable.test
@@ -107,7 +104,6 @@ jobs:
             brew install coreutils boost
 
           check_docs: false
-          check_rules: false
           run_tests: true
 
     steps:
@@ -140,12 +136,6 @@ jobs:
         # enumeration capabilities.
         NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: cargo test --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
-
-    - name: Build
-      # We only `cargo build` separately if we are running the rule checker.
-      # Otherwise this seems to just be wasted compute time!
-      if: ${{ matrix.check_rules }}
-      run: cargo build --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}
