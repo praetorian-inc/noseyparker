@@ -33,11 +33,11 @@ disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug
 
 # Specialize the build of Vectorscan for the microarchitecture of the build system's CPU.
 # This will result in binary that is not portable to other CPUs.
-vectorscan_cpu_native = ["vectorscan/cpu_native"]
+vectorscan_cpu_native = ["vectorscan-rs/cpu_native"]
 
 # Specialize the build of Vectorscan to use available SIMD instructions on the build system's CPU.
 # This will result in binary that is not portable to other CPUs.
-vectorscan_simd_specialization = ["vectorscan/simd_specialization"]
+vectorscan_simd_specialization = ["vectorscan-rs/simd_specialization"]
 
 # Enable all Vectorscan features that can improve speed but break binary portability.
 vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
@@ -90,7 +90,7 @@ tracing = "0.1"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default_features = false }
 url = "2.3"
-vectorscan = { path = "../vectorscan" }
+vectorscan-rs = { version = "0.0.1" }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

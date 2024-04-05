@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 use regex::Regex;
 use std::collections::HashSet;
 use tracing::{debug_span, error, error_span, info, warn};
-use vectorscan::{BlockDatabase, Flag, Pattern, Scan};
+use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
 use noseyparker::rules_database::RulesDatabase;
 use noseyparker_rules::{Rule, RulesetSyntax};
@@ -189,7 +189,7 @@ fn hs_compile_pattern(pat: &str) -> Result<BlockDatabase> {
 // fn hs_compile_pattern_streaming(pat: &str) -> Result<StreamingDatabase> {
 //     let pattern = pattern!{pat};
 //     let mut pattern = pattern.left_most();
-//     pattern.som = Some(vectorscan::SomHorizon::Large);
+//     pattern.som = Some(vectorscan_rs::SomHorizon::Large);
 //     let db: StreamingDatabase = pattern.build()?;
 //     Ok(db)
 // }
@@ -270,7 +270,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             num_errors += 1;
         }
         Ok(db) => {
-            let mut scanner = vectorscan::BlockScanner::new(&db)?;
+            let mut scanner = vectorscan_rs::BlockScanner::new(&db)?;
 
             let mut num_succeeded = 0;
             let mut num_failed = 0;
