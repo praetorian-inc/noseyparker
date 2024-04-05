@@ -65,7 +65,7 @@ struct UserData {
 /// If doing multi-threaded scanning, use a separate `Matcher` for each thread.
 pub struct Matcher<'a> {
     /// A scratch buffer for Vectorscan
-    vs_scanner: vectorscan::BlockScanner<'a>,
+    vs_scanner: vectorscan_rs::BlockScanner<'a>,
 
     /// The rules database used for matching
     rules_db: &'a RulesDatabase,
@@ -114,7 +114,7 @@ impl<'a> Matcher<'a> {
             raw_matches_scratch,
             input_len: 0,
         };
-        let vs_scanner = vectorscan::BlockScanner::new(&rules_db.vsdb)?;
+        let vs_scanner = vectorscan_rs::BlockScanner::new(&rules_db.vsdb)?;
         Ok(Matcher {
             vs_scanner,
             rules_db,
@@ -141,7 +141,7 @@ impl<'a> Matcher<'a> {
                     start_idx,
                     end_idx: to,
                 });
-                vectorscan::Scan::Continue
+                vectorscan_rs::Scan::Continue
             })?;
         Ok(())
     }
