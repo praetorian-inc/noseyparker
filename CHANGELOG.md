@@ -5,6 +5,7 @@ All notable changes to the project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## Unreleased
 
 ### Additions
@@ -30,6 +31,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   The old `--rules` option is still supported as an alias, but this is deprecated and will be removed in the v0.19 release.
 
 - The `rules list` command now includes additional fields when using JSON format ([#161](https://github.com/praetorian-inc/noseyparker/pull/161)).
+
+- The `vectorscan` and `vectorscan-sys` crates have been split off into a [separate project](https://github.com/bradlarsen/vectorscan-rs) with crates published on crates.io ([#168](https://github.com/praetorian-inc/noseyparker/pull/168)).
 
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
