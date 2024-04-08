@@ -41,8 +41,8 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
-        cache-from: type=gha,scope=${{ matrix.dockerfile}}
-        cache-to: type=gha,scope=${{ matrix.dockerfile}},mode=min,compression=zstd
+        # cache-from: type=gha,scope=${{ matrix.dockerfile}}
+        # cache-to: type=gha,scope=${{ matrix.dockerfile}},mode=min,compression=zstd
 
         context: .
         file: ${{ matrix.dockerfile }}
