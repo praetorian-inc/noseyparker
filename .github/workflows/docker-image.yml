@@ -41,8 +41,14 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
-        # cache-from: type=gha,scope=${{ matrix.dockerfile}}
-        # cache-to: type=gha,scope=${{ matrix.dockerfile}},mode=min,compression=zstd
+        # Note: Caching of Docker builds within GitHub Actions is complicated to get working well.
+        # It seems like the best mechanism is to use `type=registry` and use GHCR as the cache,
+        # rather than trying to use `type=gha` and use GitHub Actions' cache as the cache.
+        #
+        # For more:
+        # https://blacksmith.sh/blog/cache-is-king-a-guide-for-docker-layer-caching-in-github-actions
+        cache-from: type=registry,scope=${{ matrix.dockerfile }},ref=ghcr.io/${{ github.repository }}:buildcache
+        cache-to: type=registry,scope=${{ matrix.dockerfile }},mode=max,ref=ghcr.io/${{ github.repository }}:buildcache,compression=zstd
 
         context: .
         file: ${{ matrix.dockerfile }}
