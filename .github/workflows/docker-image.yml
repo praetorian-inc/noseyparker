@@ -10,10 +10,6 @@ jobs:
   build:
     strategy:
       matrix:
-        build:
-        - debian
-        - alpine
-
         include:
         - build: debian
           dockerfile: Dockerfile
