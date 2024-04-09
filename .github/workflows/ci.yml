@@ -122,6 +122,9 @@ jobs:
       if: ${{ matrix.run_tests }}
       run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
+    - name: Nosey Parker version
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} -- --version
+
     - name: Run tests
       if: ${{ matrix.run_tests }}
       env:
