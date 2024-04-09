@@ -11,15 +11,15 @@ jobs:
     strategy:
       matrix:
         include:
-        - build: debian
+        - name: debian
           dockerfile: Dockerfile
           image: ghcr.io/${{ github.repository }}
 
-        - build: alpine
+        - name: alpine
           dockerfile: Dockerfile.alpine
           image: ghcr.io/${{ github.repository }}-alpine
 
-    name: Docker
+    name: Docker (${{ matrix.name }})
     runs-on: ubuntu-22.04
 
     steps:
