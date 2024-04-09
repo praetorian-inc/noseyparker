@@ -57,8 +57,8 @@ jobs:
         #
         # For more:
         # https://blacksmith.sh/blog/cache-is-king-a-guide-for-docker-layer-caching-in-github-actions
-        cache-from: type=registry,scope=${{ matrix.dockerfile }},ref=ghcr.io/${{ github.repository }}:buildcache
-        cache-to: type=registry,scope=${{ matrix.dockerfile }},mode=max,ref=ghcr.io/${{ github.repository }}:buildcache,compression=zstd
+        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+        cache-to: type=registry,mode=max,ref=ghcr.io/${{ github.repository }}:buildcache,compression=zstd
 
         context: .
         file: ${{ matrix.dockerfile }}
