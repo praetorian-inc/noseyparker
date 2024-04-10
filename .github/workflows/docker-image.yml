@@ -37,6 +37,9 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
+        cache-from: type=gha,scope=${{ matrix.dockerfile }}
+        cache-to: type=gha,scope=${{ matrix.dockerfile }},mode=min
+
         context: .
         file: ${{ matrix.dockerfile }}
         tags: ${{ matrix.image }}:edge
