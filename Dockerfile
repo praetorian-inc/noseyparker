@@ -9,10 +9,10 @@
 #
 # See https://github.com/praetorian-inc/noseyparker/issues/58.
 ################################################################################
-FROM rust:1.76-bullseye AS chef 
-# We only pay the installation cost once, 
+FROM rust:1.76-bullseye AS chef
+# We only pay the installation cost once,
 # it will be cached from the second build onwards
-RUN cargo install cargo-chef 
+RUN cargo install cargo-chef
 
 WORKDIR "/noseyparker"
 
@@ -24,7 +24,7 @@ FROM chef AS planner
 
 COPY . .
 
-RUN cargo chef prepare  --recipe-path recipe.json
+RUN cargo chef prepare --recipe-path recipe.json
 
 ################################################################################
 # Build `noseyparker`
@@ -32,14 +32,12 @@ RUN cargo chef prepare  --recipe-path recipe.json
 FROM chef AS builder
 
 # Install dependencies
-#
-# Note: clang is needed for `bindgen`, used by `vectorscan-sys`.
-RUN apt-get update &&\
+RUN apt-get update && \
     apt-get install -y \
         cmake \
-        zsh \
         libboost-all-dev \
-        &&\
+        zsh \
+        && \
     apt-get clean
 
 COPY --from=planner /noseyparker/recipe.json recipe.json
@@ -58,8 +56,8 @@ RUN ./scripts/create-release.zsh && cp -r release /release
 FROM debian:11-slim as runner
 
 # Add `git` so that noseyparker's git and github integration works
-RUN apt-get update &&\
-    apt-get install -y git &&\
+RUN apt-get update && \
+    apt-get install -y git && \
     apt-get clean
 
 COPY --from=builder /release /usr/local/

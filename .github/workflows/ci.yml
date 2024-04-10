@@ -49,20 +49,14 @@ env:
 
 jobs:
   tests:
-    name: CI
+    name: CI (${{ matrix.name }})
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        build:
-        - macos-13.arm64.stable.test
-        - macos-12.x86_64.stable.test
-        - ubuntu-20.04.x86_64.stable.release
-        - ubuntu-22.04.x86_64.stable.test
-
         include:
-        - build: ubuntu-20.04.x86_64.stable.release
+        - name: ubuntu-20.04.x86_64.stable.release
           os: ubuntu-20.04
           rust: stable
           profile: release
@@ -73,7 +67,7 @@ jobs:
           check_docs: false
           run_tests: true
 
-        - build: ubuntu-22.04.x86_64.stable.test
+        - name: ubuntu-22.04.x86_64.stable.test
           os: ubuntu-22.04
           rust: stable
           profile: test
@@ -84,7 +78,7 @@ jobs:
           check_docs: true
           run_tests: true
 
-        - build: macos-12.x86_64.stable.test
+        - name: macos-12.x86_64.stable.test
           os: macos-12
           rust: stable
           profile: test
@@ -95,7 +89,7 @@ jobs:
           check_docs: false
           run_tests: true
 
-        - build: macos-13.arm64.stable.test
+        - name: macos-13.arm64.stable.test
           os: macos-13-xlarge  # m1-based macos
           rust: stable
           profile: test
@@ -122,11 +116,14 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         prefix-key: 'ci-tests'
-        key: ${{ matrix.build }}
+        key: ${{ matrix.name }}
 
     - name: Build tests
       if: ${{ matrix.run_tests }}
       run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+
+    - name: Nosey Parker version
+      run: cargo run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} -- --version
 
     - name: Run tests
       if: ${{ matrix.run_tests }}
@@ -147,6 +144,6 @@ jobs:
     - name: Upload build timings
       uses: actions/upload-artifact@v4
       with:
-        name: build-timings.${{ matrix.build }}
+        name: build-timings.${{ matrix.name }}
         path: target/cargo-timings
         if-no-files-found: error
