@@ -3,7 +3,7 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 
 use anyhow::{Context, Result};
-use tracing::debug;
+use tracing::{debug, warn};
 
 mod args;
 mod cmd_datastore;
@@ -94,7 +94,10 @@ fn try_main(args: &CommandLineArgs) -> Result<()> {
     configure_backtraces(global_args);
     configure_color(global_args);
     configure_tracing(global_args).context("Failed to initialize logging")?;
-    configure_rlimits(global_args).context("Failed to initialize resource limits")?;
+
+    if let Err(e) = configure_rlimits(global_args) {
+        warn!("Failed to initialize resource limits: {e}");
+    }
 
     match &args.command {
         args::Command::Datastore(args) => cmd_datastore::run(global_args, args),

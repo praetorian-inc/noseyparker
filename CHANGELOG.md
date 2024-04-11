@@ -34,6 +34,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The `vectorscan` and `vectorscan-sys` crates have been split off into a [separate project](https://github.com/bradlarsen/vectorscan-rs) with crates published on crates.io ([#168](https://github.com/praetorian-inc/noseyparker/pull/168)).
 
+### Fixes
+
+- Upon `noseyparker` startup, if resource limits cannot be adjusted, instead of crashing, a warning is printed and the process attempts to continue ([#170](https://github.com/praetorian-inc/noseyparker/issues/170)).
+
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
 

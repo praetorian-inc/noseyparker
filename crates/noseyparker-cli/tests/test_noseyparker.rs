@@ -26,3 +26,4 @@ mod scan;
 // TODO(test): add tests for enumerating GitHub Enterprise with the `--ignore-certs` optino
 // TODO(test): add tests for `scan --git-url=URL --ignore-certs`
 // TODO(test): add test case that validates `report -f json` output against the JSON schema (see the `jsonschema` crate)
+// TODO(test) add test that failing to set rlimits at startup doesn't crash, but outputs a warning
