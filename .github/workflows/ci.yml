@@ -63,6 +63,7 @@ jobs:
           features: release
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
+          cpu_info_cmd: 'cat /proc/cpuinfo'
 
           check_docs: false
           run_tests: true
@@ -74,6 +75,7 @@ jobs:
           features:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
+          cpu_info_cmd: 'cat /proc/cpuinfo'
 
           check_docs: true
           run_tests: true
@@ -85,6 +87,7 @@ jobs:
           features:
           install_dependencies: |
             brew install coreutils boost
+          cpu_info_cmd: 'sysctl -a | grep machdep.cpu'
 
           check_docs: false
           run_tests: true
@@ -96,6 +99,7 @@ jobs:
           features:
           install_dependencies: |
             brew install coreutils boost
+          cpu_info_cmd: 'sysctl -a | grep machdep.cpu'
 
           check_docs: false
           run_tests: true
@@ -111,6 +115,9 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Print CPU info
+      run: ${{ matrix.cpu_info_cmd }}
 
     - name: Cache
       uses: Swatinem/rust-cache@v2
