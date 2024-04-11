@@ -899,7 +899,6 @@ impl std::fmt::Display for FindingSummary {
 // -------------------------------------------------------------------------------------------------
 // FindingMetadata
 // -------------------------------------------------------------------------------------------------
-
 /// Metadata for a group of matches that have identical rule name and match content.
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 pub struct FindingMetadata {

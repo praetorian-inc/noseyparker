@@ -216,14 +216,20 @@ pub enum Command {
     #[command(display_order = 30)]
     Datastore(DatastoreArgs),
 
-    /// Manage rules
+    /// Manage rules and rulesets
     #[command(display_order = 30)]
     Rules(RulesArgs),
+
+    /// Manage annotations
+    ///
+    /// Annotations include assigned status (`accept` or `reject`) and freeform comments.
+    #[command(display_order = 40)]
+    Annotations(AnnotationsArgs),
 
     /// Generate Nosey Parker release assets
     ///
     /// This command is used primarily for generation of artifacts to be included in releases.
-    #[command(display_order = 40)]
+    #[command(display_order = 50)]
     Generate(GenerateArgs),
 }
 
@@ -251,7 +257,7 @@ pub struct GlobalArgs {
     /// When this is "auto", colors are enabled for stdout and stderr when they are terminals.
     ///
     /// If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `--color=never`.
-    #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
+    #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE", alias="colour")]
     pub color: Mode,
 
     /// Enable or disable progress bars
@@ -490,6 +496,7 @@ pub enum DatastoreCommand {
 
 #[derive(Args, Debug)]
 pub struct DatastoreInitArgs {
+    /// Initialize the datastore at specified path
     #[arg(
         long,
         short,
@@ -498,12 +505,12 @@ pub struct DatastoreInitArgs {
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
-    /// Initialize the datastore at specified path
     pub datastore: PathBuf,
 }
 
 #[derive(Args, Debug)]
 pub struct DatastoreExportArgs {
+    /// Datastore to export
     #[arg(
         long,
         short,
@@ -512,7 +519,6 @@ pub struct DatastoreExportArgs {
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
-    /// Datastore to export
     pub datastore: PathBuf,
 
     /// Write output to the specified path
@@ -905,6 +911,74 @@ pub enum FindingStatus {
     Mixed,
     /// Findings without any `accept` or `reject` matches
     Null,
+}
+
+// -----------------------------------------------------------------------------
+// `annotations` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct AnnotationsArgs {
+    #[command(subcommand)]
+    pub command: AnnotationsCommand,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum AnnotationsCommand {
+    /// Export annotations from a datastore
+    Export(AnnotationsExportArgs),
+
+    /// Import annotations into a datastore
+    Import(AnnotationsImportArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct AnnotationsExportArgs {
+    /// Use the specified datastore
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::DirPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
+    pub datastore: PathBuf,
+
+    /// Write annotations to the specified path
+    ///
+    /// If this argument is not provided, stdout will be used.
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    pub output: Option<PathBuf>,
+}
+
+#[derive(Args, Debug)]
+pub struct AnnotationsImportArgs {
+    /// Use the specified datastore
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::DirPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
+    pub datastore: PathBuf,
+
+    /// Read annotations from the specified path
+    ///
+    /// If this argument is not provided, stdin will be used.
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    pub input: Option<PathBuf>,
 }
 
 // -----------------------------------------------------------------------------
