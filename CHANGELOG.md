@@ -34,6 +34,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The `vectorscan` and `vectorscan-sys` crates have been split off into a [separate project](https://github.com/bradlarsen/vectorscan-rs) with crates published on crates.io ([#168](https://github.com/praetorian-inc/noseyparker/pull/168)).
 
+- The `scan` command is now more conservative in its default degree of parallelism ([#174](https://github.com/praetorian-inc/noseyparker/pull/174)).
+  Previously the default value was determined only by the number of available vCPUs.
+  Now the default value is additionally limited to ensure at least 4 GiB of system RAM per job.
+
 ### Fixes
 
 - Upon `noseyparker` startup, if resource limits cannot be adjusted, instead of crashing, a warning is printed and the process attempts to continue ([#170](https://github.com/praetorian-inc/noseyparker/issues/170)).
