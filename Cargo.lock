@@ -4054,9 +4054,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vectorscan-rs"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbc246668d15a81d69e283b959a5eecdd96ace9c24473b61f5b3f9bcd54bd1c3"
+checksum = "077f7330215aebade732a3bb3368a216b2dd51026dd4d0e6fb2164a7e6124e61"
 dependencies = [
  "bitflags 2.5.0",
  "foreign-types 0.5.0",
@@ -4066,9 +4066,9 @@ dependencies = [
 
 [[package]]
 name = "vectorscan-rs-sys"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4885613f45f2d088584d199159a7cdcf3190e84e21b0cca70b477a933c3a80bc"
+checksum = "1373a5cd584a1ac79045d9399b550cdb539769e0f328f19723260628905b7de2"
 dependencies = [
  "cmake",
  "flate2",

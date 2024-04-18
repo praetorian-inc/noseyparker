@@ -91,7 +91,7 @@ tracing = "0.1"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default_features = false }
 url = "2.3"
-vectorscan-rs = { version = "0.0.1" }
+vectorscan-rs = { version = "0.0.2" }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

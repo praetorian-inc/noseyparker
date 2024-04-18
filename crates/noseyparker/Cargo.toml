@@ -49,7 +49,7 @@ thiserror = "1"
 tokio = "1.23"
 tracing = "0.1"
 url = "2.3"
-vectorscan-rs = { version = "0.0.1" }
+vectorscan-rs = { version = "0.0.2" }
 
 [dev-dependencies]
 pretty_assertions = "1.3"
