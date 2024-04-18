@@ -242,7 +242,7 @@ pub enum Command {
     Datastore(DatastoreArgs),
 
     /// Manage rules
-    #[command(display_order = 30)]
+    #[command(display_order = 30, alias = "rule")]
     Rules(RulesArgs),
 
     /// Generate Nosey Parker release assets
