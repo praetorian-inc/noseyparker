@@ -27,7 +27,11 @@ fn scan_workflow_from_git_url() {
         "--git-url=https://github.com/mozilla-appmaker/appmaker",
         "--ruleset=all"
     )
-    .stdout(is_match(r"(?m)^Scanned 550.05 MiB from 7,928 blobs in .*; 23/23 new matches$"));
+    // The alternatives in the regex here are to account for different behavior from `git clone
+    // --bare` between version 2.39 and 2.44: the newer version pulls additional content??
+    .stdout(is_match(
+        r"(?m)^Scanned (549.97|550.05) MiB from 7,92[68] blobs in .*; 23/23 new matches$",
+    ));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", datastore_arg));
 
