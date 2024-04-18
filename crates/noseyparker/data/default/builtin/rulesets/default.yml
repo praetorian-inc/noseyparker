@@ -19,6 +19,7 @@ rulesets:
   - np.adobe.1        # Adobe OAuth Client Secret
   - np.age.2          # Age Identity (X22519 secret key)
   - np.artifactory.1  # Artifactory API Key
+  - np.appsync.1      # AWS AppSync API Key
   - np.aws.2          # AWS Secret Access Key
   - np.aws.4          # AWS Session Token
   - np.aws.5          # Amazon MWS Auth Token

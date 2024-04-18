@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `datastore export` command has been added ([#166](https://github.com/praetorian-inc/noseyparker/pull/166)).
   This command exports the essential content from a Nosey Parker datastore as a .tgz file that can be extracted wherever it is needed.
 
+- New rules have been added:
+
+  - AWS AppSync API Key
+
 ### Changes
 
 - The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the system-provided Boost ([#150](https://github.com/praetorian-inc/noseyparker/pull/150) from @seqre).

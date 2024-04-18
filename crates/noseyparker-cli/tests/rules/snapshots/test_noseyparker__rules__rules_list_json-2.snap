@@ -82,6 +82,23 @@ expression: stdout
       }
     },
     {
+      "id": "np.appsync.1",
+      "structural_id": "1a653a8d9b81fd1ef03814630e219dfcd01d847b",
+      "name": "AWS AppSync API Key",
+      "syntax": {
+        "name": "AWS AppSync API Key",
+        "id": "np.appsync.1",
+        "pattern": "(?x)\n\\b\n(da2-[a-z0-9]{26})\n\\b\n",
+        "examples": [
+          "  aws_appsync_apiKey: 'da2-nmaqhbb63zabjactesiydcfuvu',"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#api-key-authorization"
+        ]
+      }
+    },
+    {
       "id": "np.arn.1",
       "structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
       "name": "Amazon Resource Name",
@@ -2784,7 +2801,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 119
+      "num_rules": 120
     },
     {
       "id": "np.assets",

@@ -2,13 +2,13 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
-
  Rule ID             Rule Name 
 ─────────────────────────────────────────────────────────────────────────────
  np.adafruit.1       Adafruit IO Key 
  np.adobe.1          Adobe OAuth Client Secret 
  np.age.1            Age Recipient (X25519 public key) 
  np.age.2            Age Identity (X22519 secret key) 
+ np.appsync.1        AWS AppSync API Key 
  np.arn.1            Amazon Resource Name 
  np.artifactory.1    Artifactory API Key 
  np.aws.1            AWS API Key 
@@ -147,7 +147,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             119 
+ default      Nosey Parker default rules             120 
  np.assets    Nosey Parker asset detection rules      15 
- np.hashes    Nosey Parker password hash rules         5 
-
+ np.hashes    Nosey Parker password hash rules         5
