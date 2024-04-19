@@ -162,7 +162,7 @@ struct SnippetIdInt(i64);
 
 /// A datastore-specific ID of a match; simply a newtype-like wrapper around an i64.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MatchId(i64);
+pub struct MatchIdInt(i64);
 
 type BatchEntry = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>);
 
@@ -662,7 +662,7 @@ impl Datastore {
                     mime_essence,
                     charset,
                 };
-                let id = MatchId(row.get(14)?);
+                let id = MatchIdInt(row.get(14)?);
                 let m_score = row.get(15)?;
                 let m_comment = row.get(16)?;
                 let m_status = row.get(17)?;
