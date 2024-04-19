@@ -310,3 +310,33 @@ rules:
   - '"aws-kms://arn:aws:kms:us-east-1:003084325827:key/84a66985-f968-4bac-82c2-365518adf157";'
   - 'return f"arn:aws:s3:::{bucket_name}"'
   - 'return f"arn:aws:s3:::${bucket_name}"'
+
+
+# "AWS AppSync is an enterprise-level, fully managed GraphQL service with real-time data synchronization and offline programming features."
+- name: AWS AppSync API Key
+  id: np.appsync.1
+  pattern: |
+    (?x)
+    \b
+    (da2-[a-z0-9]{26})
+    \b
+
+  # Note: AWS AppSync provides several authorization mechanisms.
+  # This API Key mechanism is but one.
+  # It is also not clear that an AWS AppKey is _always_ secret:
+  #
+  #     An API key is a hard-coded value in your application that is generated
+  #     by the AWS AppSync service when you create an unauthenticated GraphQL
+  #     endpoint.
+  #
+  #     ...
+  #
+  #     API keys are configurable for up to 365 days, and you can extend an
+  #     existing expiration date for up to another 365 days from that day. API
+  #     Keys are recommended for development purposes or use cases where it’s
+  #     safe to expose a public API.
+  references:
+  - https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#api-key-authorization
+
+  examples:
+  - "  aws_appsync_apiKey: 'da2-nmaqhbb63zabjactesiydcfuvu',"
