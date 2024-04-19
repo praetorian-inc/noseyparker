@@ -18,10 +18,16 @@ pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
 }
 
 fn cmd_annotations_import(global_args: &GlobalArgs, args: &AnnotationsImportArgs) -> Result<()> {
+    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
+        .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
+
     todo!();
 }
 
 fn cmd_annotations_export(global_args: &GlobalArgs, args: &AnnotationsExportArgs) -> Result<()> {
+    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
+        .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
+
     todo!();
 }
 
