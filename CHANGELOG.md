@@ -19,7 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
-  - AWS AppSync API Key
+  - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
+  - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
 
 ### Changes
 
