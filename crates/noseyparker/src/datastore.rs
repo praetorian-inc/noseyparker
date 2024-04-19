@@ -278,7 +278,9 @@ impl<'a> Transaction<'a> {
     }
 
     /// Record a contextual snippet, returning an integer ID for it
-    fn mk_record_snippet(&'a self) -> Result<impl FnMut(&'a [u8]) -> rusqlite::Result<i64>> {
+    fn mk_record_snippet(
+        &'a self,
+    ) -> Result<impl FnMut(&'a [u8]) -> rusqlite::Result<SnippetIdInt>> {
         let mut get = self.inner.prepare_cached(indoc! {r#"
             select id from snippet where snippet = ?
         "#})?;
@@ -289,7 +291,10 @@ impl<'a> Transaction<'a> {
             returning id
         "#})?;
 
-        Ok(move |blob| add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,)))
+        Ok(move |blob| {
+            let id = add_if_missing_simple(&mut get, &mut set, val_from_row, (blob,))?;
+            Ok(SnippetIdInt(id))
+        })
     }
 
     /// Record a match, returning whether it was new or not
@@ -409,9 +414,9 @@ impl<'a> Transaction<'a> {
             };
 
             let snippet = &m.snippet;
-            let before_snippet_id = record_snippet(snippet.before.as_slice())?;
-            let matching_snippet_id = record_snippet(snippet.matching.as_slice())?;
-            let after_snippet_id = record_snippet(snippet.after.as_slice())?;
+            let SnippetIdInt(before_snippet_id) = record_snippet(snippet.before.as_slice())?;
+            let SnippetIdInt(matching_snippet_id) = record_snippet(snippet.matching.as_slice())?;
+            let SnippetIdInt(after_snippet_id) = record_snippet(snippet.after.as_slice())?;
 
             let (match_id, new) = if let Some(match_id) = get_match_id
                 .query_map((blob_id, start_byte, end_byte, finding_id), val_from_row)?
