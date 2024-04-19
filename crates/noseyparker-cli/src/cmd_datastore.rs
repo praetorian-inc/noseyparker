@@ -55,7 +55,7 @@ fn cmd_datastore_export(global_args: &GlobalArgs, args: &DatastoreExportArgs) ->
                 Ok(())
             };
 
-            write_tar(&output_path).context("Failed to write tarfile")?;
+            write_tar(output_path).context("Failed to write tarfile")?;
 
             info!(
                 "Exported datastore at {} to {}",

@@ -67,14 +67,14 @@ impl DetailsReporter {
     fn include_finding(&self, metadata: &FindingMetadata) -> bool {
         match self.finding_status {
             None => true,
-            Some(status) => match (status, metadata.statuses.0.as_slice()) {
-                (FindingStatus::Accept, &[Status::Accept]) => true,
-                (FindingStatus::Reject, &[Status::Reject]) => true,
-                (FindingStatus::Null, &[]) => true,
-                (FindingStatus::Mixed, &[Status::Accept, Status::Reject]) => true,
-                (FindingStatus::Mixed, &[Status::Reject, Status::Accept]) => true,
-                _ => false,
-            },
+            Some(status) => matches!(
+                (status, metadata.statuses.0.as_slice()),
+                (FindingStatus::Accept, &[Status::Accept])
+                    | (FindingStatus::Reject, &[Status::Reject])
+                    | (FindingStatus::Null, &[])
+                    | (FindingStatus::Mixed, &[Status::Accept, Status::Reject])
+                    | (FindingStatus::Mixed, &[Status::Reject, Status::Accept])
+            ),
         }
     }
 
@@ -84,7 +84,7 @@ impl DetailsReporter {
             .get_finding_metadata()
             .context("Failed to get match group metadata from datastore")?;
 
-        group_metadata.retain(|md| self.include_finding(&md));
+        group_metadata.retain(|md| self.include_finding(md));
 
         Ok(group_metadata)
     }
