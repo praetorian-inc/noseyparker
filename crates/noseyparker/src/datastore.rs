@@ -3,21 +3,28 @@ use bstr::BString;
 use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span};
 
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
 use crate::location::{Location, OffsetSpan, SourcePoint, SourceSpan};
-use crate::match_type::{Groups, Match};
+use crate::match_type::Match;
 use crate::provenance::Provenance;
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
 const SCHEMA_60: &str = include_str!("datastore/schema_60.sql");
+
+pub mod finding_data;
+pub mod finding_metadata;
+pub mod finding_summary;
+pub mod status;
+
+pub use finding_data::{FindingData, FindingDataEntry};
+pub use finding_metadata::FindingMetadata;
+pub use finding_summary::{FindingSummary, FindingSummaryEntry};
+pub use status::{Status, Statuses};
 
 // -------------------------------------------------------------------------------------------------
 // Datastore
@@ -509,7 +516,7 @@ impl Datastore {
             order by total_findings desc, rule_name, total_matches desc
         "#})?;
         let entries = stmt.query_map((), |row| {
-            Ok(MatchSummaryEntry {
+            Ok(FindingSummaryEntry {
                 rule_name: row.get(0)?,
                 distinct_count: row.get(1)?,
                 total_count: row.get(2)?,
@@ -566,7 +573,7 @@ impl Datastore {
         &self,
         metadata: &FindingMetadata,
         limit: Option<usize>,
-    ) -> Result<Vec<FindingDataEntry>> {
+    ) -> Result<FindingData> {
         let _span =
             debug_span!("Datastore::get_finding_data", "{}", self.root_dir.display()).entered();
 
@@ -869,151 +876,5 @@ mod test {
     clone_destination_success_tests! {
         https_01: ("rel_root", "https://example.com/testrepo.git") => "rel_root/https/example.com/testrepo.git",
         https_02: ("/abs_root", "https://example.com/testrepo.git") => "/abs_root/https/example.com/testrepo.git",
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// FindingSummary
-// -------------------------------------------------------------------------------------------------
-
-/// A summary of matches in a `Datastore`.
-#[derive(Serialize)]
-pub struct FindingSummary(pub Vec<MatchSummaryEntry>);
-
-#[derive(Serialize)]
-pub struct MatchSummaryEntry {
-    pub rule_name: String,
-    pub distinct_count: usize,
-    pub total_count: usize,
-}
-
-impl std::fmt::Display for FindingSummary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for entry in self.0.iter() {
-            writeln!(f, "{}: {} ({})", entry.rule_name, entry.distinct_count, entry.total_count)?;
-        }
-        Ok(())
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// FindingMetadata
-// -------------------------------------------------------------------------------------------------
-/// Metadata for a group of matches that have identical rule name and match content.
-#[derive(Debug, Deserialize, Serialize, JsonSchema)]
-pub struct FindingMetadata {
-    /// The content-based finding identifier for this group of matches
-    pub finding_id: String,
-
-    /// The name of the rule that detected each match
-    pub rule_name: String,
-
-    /// The textual identifier of the rule that detected each match
-    pub rule_text_id: String,
-
-    /// The structural identifier of the rule that detected each match
-    pub rule_structural_id: String,
-
-    /// The matched content of all the matches in the group
-    pub groups: Groups,
-
-    /// The number of matches in the group
-    pub num_matches: usize,
-
-    /// The unique statuses assigned to matches in the group
-    pub statuses: Statuses,
-
-    /// A comment assigned to this finding
-    pub comment: Option<String>,
-
-    /// The mean score in this group of matches
-    pub mean_score: Option<f64>,
-}
-
-// -------------------------------------------------------------------------------------------------
-// FindingDataEntry
-// -------------------------------------------------------------------------------------------------
-#[derive(Debug)]
-pub struct FindingDataEntry {
-    pub provenance: ProvenanceSet,
-    pub blob_metadata: BlobMetadata,
-    pub match_id: MatchId,
-    pub match_val: Match,
-    pub match_comment: Option<String>,
-    pub match_score: Option<f64>,
-    pub match_status: Option<Status>,
-}
-
-// -------------------------------------------------------------------------------------------------
-// Status
-// -------------------------------------------------------------------------------------------------
-
-/// A status assigned to a match group
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-// FIXME(overhaul): use an integer representation for serialization and db
-pub enum Status {
-    Accept,
-    Reject,
-}
-
-// -------------------------------------------------------------------------------------------------
-// Statuses
-// -------------------------------------------------------------------------------------------------
-/// A collection of statuses
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-// FIXME(overhaul): use a bitflag representation here?
-pub struct Statuses(pub SmallVec<[Status; 16]>);
-
-// -------------------------------------------------------------------------------------------------
-// sql
-// -------------------------------------------------------------------------------------------------
-mod sql {
-    use super::*;
-
-    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
-    use rusqlite::Error::ToSqlConversionFailure;
-
-    impl ToSql for Status {
-        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
-            match self {
-                Status::Accept => Ok("accept".into()),
-                Status::Reject => Ok("reject".into()),
-            }
-        }
-    }
-
-    impl FromSql for Status {
-        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-            match value.as_str()? {
-                "accept" => Ok(Status::Accept),
-                "reject" => Ok(Status::Reject),
-                _ => Err(FromSqlError::InvalidType),
-            }
-        }
-    }
-
-    impl ToSql for Statuses {
-        fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
-            match serde_json::to_string(self) {
-                Err(e) => Err(ToSqlConversionFailure(e.into())),
-                Ok(s) => Ok(s.into()),
-            }
-        }
-    }
-
-    impl FromSql for Statuses {
-        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-            match value {
-                ValueRef::Text(s) => {
-                    serde_json::from_slice(s).map_err(|e| FromSqlError::Other(e.into()))
-                }
-                ValueRef::Blob(b) => {
-                    serde_json::from_slice(b).map_err(|e| FromSqlError::Other(e.into()))
-                }
-                _ => Err(FromSqlError::InvalidType),
-            }
-        }
     }
 }
