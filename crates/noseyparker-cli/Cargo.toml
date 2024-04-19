@@ -83,6 +83,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-sarif = "0.4"
 strum = { version = "0.26", features = ["derive"] }
+sysinfo = { version =  "0.30" }
 tar = "0.4"
 tempfile = "3.1"
 time = "0.3"
@@ -90,7 +91,7 @@ tracing = "0.1"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default_features = false }
 url = "2.3"
-vectorscan-rs = { version = "0.0.1" }
+vectorscan-rs = { version = "0.0.2" }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

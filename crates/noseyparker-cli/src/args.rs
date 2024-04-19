@@ -5,12 +5,29 @@
 use clap::{
     crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
 };
+use lazy_static::lazy_static;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use strum::Display;
 use url::Url;
 
 use noseyparker::git_url::GitUrl;
+
+// -----------------------------------------------------------------------------
+// system information
+// -----------------------------------------------------------------------------
+lazy_static! {
+    /// How much RAM is installed in the system?
+    static ref RAM_GB: Option<f64> = {
+        if sysinfo::IS_SUPPORTED_SYSTEM {
+            use sysinfo::{System,RefreshKind,MemoryRefreshKind};
+            let s = System::new_with_specifics(RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()));
+            Some(s.total_memory() as f64 / 1024.0 / 1024.0 / 1024.0)
+        } else {
+            None
+        }
+    };
+}
 
 // -----------------------------------------------------------------------------
 // utilities
@@ -76,10 +93,18 @@ pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: b
     }
 }
 
-fn get_parallelism() -> usize {
-    match std::thread::available_parallelism() {
-        Err(_e) => 1,
-        Ok(v) => v.into(),
+/// How many parallel scan jobs should be used by default?
+///
+/// This is based on the number of available vCPUs, and also takes into account the amount of
+/// memory per core.
+fn default_scan_jobs() -> usize {
+    match (std::thread::available_parallelism(), *RAM_GB) {
+        (Ok(v), Some(ram_gb)) => {
+            let n: usize = v.into();
+            n.clamp(1, (ram_gb / 4.0).floor() as usize)
+        }
+        (Ok(v), None) => v.into(),
+        (Err(_e), _) => 1,
     }
 }
 
@@ -217,7 +242,7 @@ pub enum Command {
     Datastore(DatastoreArgs),
 
     /// Manage rules and rulesets
-    #[command(display_order = 30)]
+    #[command(display_order = 30, alias = "rule")]
     Rules(RulesArgs),
 
     /// Manage annotations
@@ -291,7 +316,7 @@ pub struct AdvancedArgs {
     )]
     pub rlimit_nofile: u64,
 
-    /// Set the cache size for sqlite connections to SIZE
+    /// Set the cache size for SQLite connections to SIZE
     ///
     /// This has the effect of setting SQLite's `pragma cache_size=SIZE`.
     /// The default value is set to use a maximum of 1GiB for database cache.
@@ -560,7 +585,7 @@ pub struct ScanArgs {
     pub datastore: PathBuf,
 
     /// Use N parallel scanning threads
-    #[arg(long("jobs"), short('j'), value_name="N", default_value_t=get_parallelism())]
+    #[arg(long("jobs"), short('j'), value_name="N", default_value_t=default_scan_jobs())]
     pub num_jobs: usize,
 
     #[command(flatten)]
