@@ -1,13 +1,12 @@
 use anyhow::{Context, Result};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use tracing::info;
+// use tracing::info;
 
-use crate::args::{AnnotationsArgs, AnnotationsExportArgs, AnnotationsImportArgs, GlobalArgs};
+use crate::args::{
+    get_writer_for_file_or_stdout, AnnotationsArgs, AnnotationsExportArgs, AnnotationsImportArgs,
+    GlobalArgs,
+};
 
-use noseyparker::blob_id::BlobId;
-use noseyparker::datastore::{Datastore, Status};
-use noseyparker::match_type::Groups;
+use noseyparker::datastore::Datastore;
 
 pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
     use crate::args::AnnotationsCommand::*;
@@ -18,7 +17,7 @@ pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
 }
 
 fn cmd_annotations_import(global_args: &GlobalArgs, args: &AnnotationsImportArgs) -> Result<()> {
-    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
+    let _datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
 
     todo!();
@@ -28,58 +27,16 @@ fn cmd_annotations_export(global_args: &GlobalArgs, args: &AnnotationsExportArgs
     let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
 
-    todo!();
-}
+    let output = get_writer_for_file_or_stdout(args.output.as_ref())
+        .context("Failed to open output for writing")?;
 
-// -------------------------------------------------------------------------------------------------
-// Annotation
-// -------------------------------------------------------------------------------------------------
-/// Represents an user-assigned annotation: a status and/or a comment
-#[derive(Debug, Deserialize, Serialize, JsonSchema)]
-pub struct Annotation {
-    /// The content-based finding identifier for this group of matches
-    pub finding_id: String,
+    let annotations = datastore
+        .get_annotations()
+        .context("Failed to get annotations")?;
 
-    /// The name of the rule that detected each match
-    pub rule_name: String,
+    serde_json::to_writer(output, &annotations).context("Failed to write JSON output")?;
 
-    /// The textual identifier of the rule that detected each match
-    pub rule_text_id: String,
-
-    /// The structural identifier of the rule that detected the match
-    pub rule_structural_id: String,
-
-    /// The structural identifier of the match the annotations are associated with
-    pub match_id: String,
-
-    /// The blob where the match occurs
-    pub blob_id: BlobId,
-
-    pub start_byte: usize,
-
-    pub end_byte: usize,
-
-    /// The matched content of all the matches in the group
-    pub groups: Groups,
-
-    /// The assigned status
-    pub status: Option<Status>,
-
-    /// The assigned comment
-    pub comment: Option<String>,
-}
-
-impl Annotation {
-    pub fn check_valid(&self) -> Result<()> {
-        // TODO: check that the given finding ID matches the computed one
-        // TODO: check that the given match ID matches the computed one
-        // TODO: check that start_byte < end_byte
-        // TODO: check that at least one of status and comment are given
-        // TODO: check that groups is nonempty
-        // TODO: check that rule_structural_id has the correct format (40-character hex string)
-
-        todo!();
-    }
+    Ok(())
 }
 
 // Annotation matching.

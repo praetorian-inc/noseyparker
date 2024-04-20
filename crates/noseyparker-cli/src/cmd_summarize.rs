@@ -53,7 +53,7 @@ pub fn run(global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
         .output_args
         .get_writer()
         .context("Failed to get output writer")?;
-    FindingSummaryReporter(datastore.summarize()?).report(args.output_args.format, output)
+    FindingSummaryReporter(datastore.get_summary()?).report(args.output_args.format, output)
 }
 
 pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
