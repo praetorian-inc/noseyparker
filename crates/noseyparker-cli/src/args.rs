@@ -245,7 +245,7 @@ pub enum Command {
     #[command(display_order = 30, alias = "rule")]
     Rules(RulesArgs),
 
-    /// Manage annotations
+    /// Manage annotations (experimental)
     ///
     /// Annotations include assigned status (`accept` or `reject`) and freeform comments.
     #[command(display_order = 40)]
@@ -949,10 +949,10 @@ pub struct AnnotationsArgs {
 
 #[derive(Subcommand, Debug)]
 pub enum AnnotationsCommand {
-    /// Export annotations from a datastore
+    /// Export annotations from a datastore (experimental)
     Export(AnnotationsExportArgs),
 
-    /// Import annotations into a datastore
+    /// Import annotations into a datastore (experimental)
     Import(AnnotationsImportArgs),
 }
 

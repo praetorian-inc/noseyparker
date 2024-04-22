@@ -23,7 +23,7 @@ pub mod finding_metadata;
 pub mod finding_summary;
 pub mod status;
 
-pub use annotation::Annotation;
+pub use annotation::{Annotations, FindingAnnotation, MatchAnnotation};
 pub use finding_data::{FindingData, FindingDataEntry};
 pub use finding_metadata::FindingMetadata;
 pub use finding_summary::{FindingSummary, FindingSummaryEntry};
@@ -536,7 +536,7 @@ impl Datastore {
     }
 
     /// Get annotations from this datastore.
-    pub fn get_annotations(&self) -> Result<Vec<Annotation>> {
+    pub fn get_annotations(&self) -> Result<Annotations> {
         let _span =
             debug_span!("Datastore::get_annotations", "{}", self.root_dir.display()).entered();
 
@@ -557,7 +557,7 @@ impl Datastore {
             where md.status is not null or md.comment is not null
         "#})?;
         let entries = stmt.query_map((), |row| {
-            Ok(Annotation {
+            Ok(MatchAnnotation {
                 finding_id: row.get(0)?,
                 rule_name: row.get(1)?,
                 rule_text_id: row.get(2)?,
@@ -571,7 +571,35 @@ impl Datastore {
                 comment: row.get(10)?,
             })
         })?;
-        collect(entries)
+        let match_annotations = collect(entries)?;
+
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
+            select
+                md.finding_id,
+                md.rule_name,
+                md.rule_text_id,
+                md.rule_structural_id,
+                md.groups,
+                md.comment
+            from finding_denorm md
+            where md.comment is not null
+        "#})?;
+        let entries = stmt.query_map((), |row| {
+            Ok(FindingAnnotation {
+                finding_id: row.get(0)?,
+                rule_name: row.get(1)?,
+                rule_text_id: row.get(2)?,
+                rule_structural_id: row.get(3)?,
+                groups: row.get(4)?,
+                comment: row.get(5)?,
+            })
+        })?;
+        let finding_annotations = collect(entries)?;
+
+        Ok(Annotations {
+            match_annotations,
+            finding_annotations,
+        })
     }
 
     /// Get metadata for all groups of identical matches recorded within this datastore.
