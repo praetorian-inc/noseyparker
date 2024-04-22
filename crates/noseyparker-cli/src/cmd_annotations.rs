@@ -15,7 +15,7 @@ pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
 }
 
 fn cmd_annotations_import(global_args: &GlobalArgs, args: &AnnotationsImportArgs) -> Result<()> {
-    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
+    let mut datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
 
     let input = get_reader_for_file_or_stdin(args.input.as_ref())?;
@@ -41,25 +41,3 @@ fn cmd_annotations_export(global_args: &GlobalArgs, args: &AnnotationsExportArgs
 
     Ok(())
 }
-
-// Annotation matching.
-// ====================
-//
-// How do you know when an annotation applies to a match?
-//
-// Given: an annotation A and a match M
-// Output: 1 if A applies to M, and 0 otherwise
-//
-// There are many possible ways to conclude that the annotation A applies to match M, some more
-// certain than others:
-//
-// - Exact match: A.match_id = M.id
-// - Nearly exact match, but accounting for changing rule: Equal values of (rule_text_id, groups, blob_id, start_byte, end_byte)
-// - Finding-based match:
-//   a. Equal values of (rule_structural_id, groups, snippet)
-//   b. Equal values of (rule_text_id, groups, snippet)
-//   c. Equal values of (rule name, groups, snippet)
-// - Fuzzy matching:
-//   - Equal values of (rule_text_id, groups, blob_id) and overlapping (start_byte, end_byte)
-//   - Equal values of (blob_id, groups, start_byte, end_byte)
-//   - Equal values of (blob_id, groups) and overlapping (start_byte, end_byte)

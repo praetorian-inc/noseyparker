@@ -602,8 +602,36 @@ impl Datastore {
         })
     }
 
-    pub fn import_annotations(&self, annotations: &Annotations) -> Result<()> {
+    pub fn import_annotations(&mut self, annotations: &Annotations) -> Result<()> {
+        // Annotation matching.
+        // ====================
+        //
+        // How do you know when an annotation applies to a match?
+        //
+        // Given: an annotation A and a match M
+        // Output: 1 if A applies to M, and 0 otherwise
+        //
+        // There are many possible ways to conclude that the annotation A applies to match M, some more
+        // certain than others:
+        //
+        // - Exact match: A.match_id = M.id
+        // - Nearly exact match, but accounting for changing rule: Equal values of (rule_text_id, groups, blob_id, start_byte, end_byte)
+        // - Finding-based match:
+        //   a. Equal values of (rule_structural_id, groups, snippet)
+        //   b. Equal values of (rule_text_id, groups, snippet)
+        //   c. Equal values of (rule name, groups, snippet)
+        // - Fuzzy matching:
+        //   - Equal values of (rule_text_id, groups, blob_id) and overlapping (start_byte, end_byte)
+        //   - Equal values of (blob_id, groups, start_byte, end_byte)
+        //   - Equal values of (blob_id, groups) and overlapping (start_byte, end_byte)
+
+        let tx = self
+            .conn
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         todo!();
+        tx.commit()?;
+
+        Ok(())
     }
 
     /// Get metadata for all groups of identical matches recorded within this datastore.

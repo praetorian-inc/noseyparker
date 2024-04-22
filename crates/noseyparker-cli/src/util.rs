@@ -9,6 +9,7 @@ pub enum Counted<'a> {
         singular: &'a str,
         count: usize,
     },
+    #[allow(dead_code)]
     Explicit {
         singular: &'a str,
         count: usize,
@@ -18,6 +19,7 @@ pub enum Counted<'a> {
 
 impl<'a> Counted<'a> {
     /// Create a new `Counted` value with the given count, singular, and plural values.
+    #[allow(dead_code)]
     pub fn new(count: usize, singular: &'a str, plural: &'a str) -> Self {
         Counted::Explicit {
             singular,
