@@ -1,10 +1,8 @@
 use anyhow::{Context, Result};
 // use tracing::info;
 
-use crate::args::{
-    get_writer_for_file_or_stdout, AnnotationsArgs, AnnotationsExportArgs, AnnotationsImportArgs,
-    GlobalArgs,
-};
+use crate::args::{AnnotationsArgs, AnnotationsExportArgs, AnnotationsImportArgs, GlobalArgs};
+use crate::util::{get_reader_for_file_or_stdin, get_writer_for_file_or_stdout};
 
 use noseyparker::datastore::Datastore;
 
@@ -17,10 +15,15 @@ pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
 }
 
 fn cmd_annotations_import(global_args: &GlobalArgs, args: &AnnotationsImportArgs) -> Result<()> {
-    let _datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
+    let datastore = Datastore::open(&args.datastore, global_args.advanced.sqlite_cache_size)
         .with_context(|| format!("Failed to open datastore at {}", args.datastore.display()))?;
 
-    todo!();
+    let input = get_reader_for_file_or_stdin(args.input.as_ref())?;
+
+    let annotations = serde_json::from_reader(input).context("Failed to read JSON input")?;
+    datastore.import_annotations(&annotations)?;
+
+    Ok(())
 }
 
 fn cmd_annotations_export(global_args: &GlobalArgs, args: &AnnotationsExportArgs) -> Result<()> {

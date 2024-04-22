@@ -7,11 +7,13 @@ use clap::{
 };
 use lazy_static::lazy_static;
 use std::io::IsTerminal;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use strum::Display;
 use url::Url;
 
 use noseyparker::git_url::GitUrl;
+
+use crate::util::get_writer_for_file_or_stdout;
 
 // -----------------------------------------------------------------------------
 // system information
@@ -1092,22 +1094,6 @@ impl<Format: ValueEnum + Send + Sync> OutputArgs<Format> {
     /// Get a writer for the specified output destination.
     pub fn get_writer(&self) -> std::io::Result<Box<dyn std::io::Write>> {
         get_writer_for_file_or_stdout(self.output.as_ref())
-    }
-}
-
-/// Get a writer for the file at the specified output destination, or stdout if not specified.
-pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(
-    path: Option<P>,
-) -> std::io::Result<Box<dyn std::io::Write>> {
-    use std::fs::File;
-    use std::io::BufWriter;
-
-    match path.as_ref() {
-        None => Ok(Box::new(BufWriter::new(std::io::stdout()))),
-        Some(p) => {
-            let f = File::create(p)?;
-            Ok(Box::new(BufWriter::new(f)))
-        }
     }
 }
 

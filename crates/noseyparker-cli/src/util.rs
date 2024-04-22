@@ -1,4 +1,6 @@
-#![allow(dead_code)]
+use std::fs::File;
+use std::io::{stdin, stdout, BufReader, BufWriter};
+use std::path::Path;
 
 /// A utility type to generate properly pluralized count expressions in log messages,
 /// e.g., "1 rule" or "7 rules", without copying data.
@@ -53,6 +55,32 @@ impl<'a> std::fmt::Display for Counted<'a> {
                     write!(f, "{} {}s", count, singular)
                 }
             }
+        }
+    }
+}
+
+/// Get a buffered writer for the file at the specified output destination, or stdout if not specified.
+pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(
+    path: Option<P>,
+) -> std::io::Result<Box<dyn std::io::Write>> {
+    match path.as_ref() {
+        None => Ok(Box::new(BufWriter::new(stdout()))),
+        Some(p) => {
+            let f = File::create(p)?;
+            Ok(Box::new(BufWriter::new(f)))
+        }
+    }
+}
+
+/// Get a buffered reader for the file at the specified input source, or stdin if not specified.
+pub fn get_reader_for_file_or_stdin<P: AsRef<Path>>(
+    path: Option<P>,
+) -> std::io::Result<Box<dyn std::io::Read>> {
+    match path.as_ref() {
+        None => Ok(Box::new(BufReader::new(stdin()))),
+        Some(p) => {
+            let f = File::open(p)?;
+            Ok(Box::new(BufReader::new(f)))
         }
     }
 }

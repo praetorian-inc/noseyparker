@@ -602,6 +602,10 @@ impl Datastore {
         })
     }
 
+    pub fn import_annotations(&self, annotations: &Annotations) -> Result<()> {
+        todo!();
+    }
+
     /// Get metadata for all groups of identical matches recorded within this datastore.
     pub fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
         let _span =
