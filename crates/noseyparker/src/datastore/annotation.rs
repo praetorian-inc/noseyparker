@@ -83,7 +83,7 @@ pub struct FindingAnnotation {
     pub groups: Groups,
 
     /// The assigned comment
-    pub comment: Option<String>,
+    pub comment: String,
 }
 
 impl FindingAnnotation {

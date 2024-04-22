@@ -628,8 +628,71 @@ impl Datastore {
         let tx = self
             .conn
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-        todo!();
+
+        let mut num_finding_annotations_imported = 0;
+        let mut num_match_annotations_imported = 0;
+
+        // Import finding comments
+        {
+            let mut add_finding_comment = tx.prepare_cached(indoc! {r#"
+                insert or ignore into finding_comment (finding_id, comment)
+                select f.id, ?2
+                from
+                    finding f
+                where
+                    f.finding_id = ?1
+            "#})?;
+
+            for fa in annotations.finding_annotations.iter() {
+                debug!("attempting to import comment: {fa:#?}");
+                num_finding_annotations_imported +=
+                    add_finding_comment.execute((&fa.finding_id, &fa.comment))?;
+            }
+        }
+
+        // Import match comments
+        {
+            let mut add_match_comment = tx.prepare_cached(indoc! {r#"
+                insert or ignore into match_comment (match_id, comment)
+                select m.id, ?2
+                from
+                    match m
+                where
+                    m.structural_id = ?1
+            "#})?;
+
+            for ma in annotations.match_annotations.iter() {
+                if let Some(comment) = &ma.comment {
+                    debug!("attempting to import comment: {ma:#?}");
+                    num_match_annotations_imported +=
+                        add_match_comment.execute((&ma.match_id, comment))?;
+                }
+            }
+        }
+
+        // Import match statuses
+        {
+            let mut add_match_status = tx.prepare_cached(indoc! {r#"
+                insert or ignore into match_status (match_id, status)
+                select m.id, ?2
+                from
+                    match m
+                where
+                    m.structural_id = ?1
+            "#})?;
+
+            for ma in annotations.match_annotations.iter() {
+                if let Some(status) = &ma.status {
+                    debug!("attempting to import status: {ma:#?}");
+                    num_match_annotations_imported +=
+                        add_match_status.execute((&ma.match_id, status))?;
+                }
+            }
+        }
+
         tx.commit()?;
+        debug!("{num_finding_annotations_imported} finding annotations imported");
+        debug!("{num_match_annotations_imported} match annotations imported");
 
         Ok(())
     }
