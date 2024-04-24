@@ -4,7 +4,7 @@ use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
 use std::path::{Path, PathBuf};
-use tracing::{debug, debug_span};
+use tracing::{debug, debug_span, trace};
 
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
@@ -644,7 +644,7 @@ impl Datastore {
             "#})?;
 
             for fa in annotations.finding_annotations.iter() {
-                debug!("attempting to import comment: {fa:#?}");
+                trace!("attempting to import comment: {fa:#?}");
                 num_finding_annotations_imported +=
                     add_finding_comment.execute((&fa.finding_id, &fa.comment))?;
             }
@@ -663,7 +663,7 @@ impl Datastore {
 
             for ma in annotations.match_annotations.iter() {
                 if let Some(comment) = &ma.comment {
-                    debug!("attempting to import comment: {ma:#?}");
+                    trace!("attempting to import comment: {ma:#?}");
                     num_match_annotations_imported +=
                         add_match_comment.execute((&ma.match_id, comment))?;
                 }
@@ -683,7 +683,7 @@ impl Datastore {
 
             for ma in annotations.match_annotations.iter() {
                 if let Some(status) = &ma.status {
-                    debug!("attempting to import status: {ma:#?}");
+                    trace!("attempting to import status: {ma:#?}");
                     num_match_annotations_imported +=
                         add_match_status.execute((&ma.match_id, status))?;
                 }
