@@ -603,96 +603,190 @@ impl Datastore {
     }
 
     pub fn import_annotations(&mut self, annotations: &Annotations) -> Result<()> {
-        // Annotation matching.
-        // ====================
-        //
-        // How do you know when an annotation applies to a match?
-        //
-        // Given: an annotation A and a match M
-        // Output: 1 if A applies to M, and 0 otherwise
-        //
-        // There are many possible ways to conclude that the annotation A applies to match M, some more
-        // certain than others:
-        //
-        // - Exact match: A.match_id = M.id
-        // - Nearly exact match, but accounting for changing rule: Equal values of (rule_text_id, groups, blob_id, start_byte, end_byte)
-        // - Finding-based match:
-        //   a. Equal values of (rule_structural_id, groups, snippet)
-        //   b. Equal values of (rule_text_id, groups, snippet)
-        //   c. Equal values of (rule name, groups, snippet)
-        // - Fuzzy matching:
-        //   - Equal values of (rule_text_id, groups, blob_id) and overlapping (start_byte, end_byte)
-        //   - Equal values of (blob_id, groups, start_byte, end_byte)
-        //   - Equal values of (blob_id, groups) and overlapping (start_byte, end_byte)
-
         let tx = self
             .conn
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
 
-        let mut num_finding_annotations_imported = 0;
-        let mut num_match_annotations_imported = 0;
+        #[derive(Default, Debug)]
+        struct Stats {
+            n_imported: usize,
+            n_conflicting: usize,
+            n_existing: usize,
+            n_missing: usize,
+        }
+
+        impl std::fmt::Display for Stats {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(
+                    f,
+                    "{} existing; {} missing; {} conflicting; {} imported",
+                    self.n_existing, self.n_missing, self.n_conflicting, self.n_imported
+                )
+            }
+        }
+
+        use rusqlite::{types::FromSql, CachedStatement, ToSql};
+
+        /// This complicated helper function factors out some common "import a single annotation"
+        /// logic that is common to finding comments, match comments, and match statuses.
+        /// Better than repeating the code verbatim three times...?
+        fn do_import<Ann, Id, Val>(
+            annotation_type: &str,
+            stats: &mut Stats,
+            getter: &mut CachedStatement,
+            setter: &mut CachedStatement,
+            ann: &Ann,
+            ann_id: &Id,
+            ann_val: &Val,
+        ) -> Result<()>
+        where
+            Ann: std::fmt::Debug,
+            Id: ToSql,
+            Val: FromSql + ToSql + Eq + std::fmt::Debug,
+        {
+            use rusqlite::OptionalExtension; // for .optional()
+
+            let existing: Option<(u64, Val)> = getter
+                .query_row((ann_id,), |r| {
+                    let id: u64 = r.get(0)?;
+                    let val: Val = r.get(1)?;
+                    Ok((id, val))
+                })
+                .optional()?;
+            match existing {
+                Some((_id, val)) if &val == ann_val => {
+                    stats.n_existing += 1;
+                    trace!("did not import {annotation_type}: already present: {ann:#?}");
+                }
+                Some((_id, val)) => {
+                    stats.n_conflicting += 1;
+                    debug!("did not import {annotation_type}: conflict: {val:?} {ann:#?}");
+                }
+                None => {
+                    let n_set = setter.execute((ann_id, ann_val))?;
+                    if n_set == 1 {
+                        stats.n_imported += 1;
+                        trace!("imported {annotation_type}: new: {ann:#?}");
+                    } else {
+                        assert_eq!(n_set, 0);
+                        stats.n_missing += 1;
+                        trace!("did not import {annotation_type}: not found: {ann:#?}");
+                    }
+                }
+            }
+
+            Ok(())
+        }
+
+        let mut finding_comment_stats = Stats::default();
+        let mut match_comment_stats = Stats::default();
+        let mut match_status_stats = Stats::default();
 
         // Import finding comments
         {
-            let mut add_finding_comment = tx.prepare_cached(indoc! {r#"
-                insert or ignore into finding_comment (finding_id, comment)
-                select f.id, ?2
+            let mut getter = tx.prepare_cached(indoc! {r#"
+                select f.id, fc.comment
                 from
                     finding f
-                where
-                    f.finding_id = ?1
+                    inner join finding_comment fc on (fc.finding_id = f.id)
+                where f.finding_id = ?
+            "#})?;
+
+            let mut setter = tx.prepare_cached(indoc! {r#"
+                insert or replace into finding_comment (finding_id, comment)
+                select f.id, ?2
+                from finding f
+                where f.finding_id = ?1
             "#})?;
 
             for fa in annotations.finding_annotations.iter() {
-                trace!("attempting to import comment: {fa:#?}");
-                num_finding_annotations_imported +=
-                    add_finding_comment.execute((&fa.finding_id, &fa.comment))?;
+                do_import(
+                    "finding comment",
+                    &mut finding_comment_stats,
+                    &mut getter,
+                    &mut setter,
+                    &fa,
+                    &fa.finding_id,
+                    &fa.comment,
+                )?;
             }
         }
 
         // Import match comments
         {
-            let mut add_match_comment = tx.prepare_cached(indoc! {r#"
-                insert or ignore into match_comment (match_id, comment)
-                select m.id, ?2
+            let mut getter = tx.prepare_cached(indoc! {r#"
+                select m.id, mc.comment
                 from
                     match m
-                where
-                    m.structural_id = ?1
+                    inner join match_comment mc on (mc.match_id = m.id)
+                where m.structural_id = ?
+            "#})?;
+
+            let mut setter = tx.prepare_cached(indoc! {r#"
+                insert or replace into match_comment (match_id, comment)
+                select m.id, ?2
+                from match m
+                where m.structural_id = ?1
             "#})?;
 
             for ma in annotations.match_annotations.iter() {
-                if let Some(comment) = &ma.comment {
-                    trace!("attempting to import comment: {ma:#?}");
-                    num_match_annotations_imported +=
-                        add_match_comment.execute((&ma.match_id, comment))?;
-                }
+                let ma_comment = match &ma.comment {
+                    Some(comment) => comment,
+                    None => continue,
+                };
+
+                do_import(
+                    "match comment",
+                    &mut match_comment_stats,
+                    &mut getter,
+                    &mut setter,
+                    &ma,
+                    &ma.match_id,
+                    ma_comment,
+                )?;
             }
         }
 
         // Import match statuses
         {
-            let mut add_match_status = tx.prepare_cached(indoc! {r#"
-                insert or ignore into match_status (match_id, status)
-                select m.id, ?2
+            let mut getter = tx.prepare_cached(indoc! {r#"
+                select m.id, ms.status
                 from
                     match m
-                where
-                    m.structural_id = ?1
+                    inner join match_status ms on (ms.match_id = m.id)
+                where m.structural_id = ?
+            "#})?;
+
+            let mut setter = tx.prepare_cached(indoc! {r#"
+                insert or replace into match_status (match_id, status)
+                select m.id, ?2
+                from match m
+                where m.structural_id = ?1
             "#})?;
 
             for ma in annotations.match_annotations.iter() {
-                if let Some(status) = &ma.status {
-                    trace!("attempting to import status: {ma:#?}");
-                    num_match_annotations_imported +=
-                        add_match_status.execute((&ma.match_id, status))?;
-                }
+                let ma_status = match ma.status {
+                    Some(status) => status,
+                    None => continue,
+                };
+
+                do_import(
+                    "match status",
+                    &mut match_status_stats,
+                    &mut getter,
+                    &mut setter,
+                    &ma,
+                    &ma.match_id,
+                    &ma_status,
+                )?;
             }
         }
 
         tx.commit()?;
-        debug!("{num_finding_annotations_imported} finding annotations imported");
-        debug!("{num_match_annotations_imported} match annotations imported");
+
+        debug!("Finding comments: {finding_comment_stats}");
+        debug!("Match comments: {match_comment_stats}");
+        debug!("Match statuses: {match_status_stats}");
 
         Ok(())
     }
