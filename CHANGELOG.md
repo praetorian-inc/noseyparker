@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - A new `datastore export` command has been added ([#166](https://github.com/praetorian-inc/noseyparker/pull/166)).
   This command exports the essential content from a Nosey Parker datastore as a .tgz file that can be extracted wherever it is needed.
 
+- New experimental `annotations export` and `annotations import` commands have been added ([#171](https://github.com/praetorian-inc/noseyparker/pull/171)).
+  These commands allow annotations (finding comments, match comments, and match statuses) to be converted between JSON and datastore representations.
+
 - New rules have been added:
 
   - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))

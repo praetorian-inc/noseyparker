@@ -7,11 +7,13 @@ use clap::{
 };
 use lazy_static::lazy_static;
 use std::io::IsTerminal;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use strum::Display;
 use url::Url;
 
 use noseyparker::git_url::GitUrl;
+
+use crate::util::get_writer_for_file_or_stdout;
 
 // -----------------------------------------------------------------------------
 // system information
@@ -241,14 +243,20 @@ pub enum Command {
     #[command(display_order = 30)]
     Datastore(DatastoreArgs),
 
-    /// Manage rules
+    /// Manage rules and rulesets
     #[command(display_order = 30, alias = "rule")]
     Rules(RulesArgs),
+
+    /// Manage annotations (experimental)
+    ///
+    /// Annotations include assigned status (`accept` or `reject`) and freeform comments.
+    #[command(display_order = 40)]
+    Annotations(AnnotationsArgs),
 
     /// Generate Nosey Parker release assets
     ///
     /// This command is used primarily for generation of artifacts to be included in releases.
-    #[command(display_order = 40)]
+    #[command(display_order = 50)]
     Generate(GenerateArgs),
 }
 
@@ -276,7 +284,7 @@ pub struct GlobalArgs {
     /// When this is "auto", colors are enabled for stdout and stderr when they are terminals.
     ///
     /// If the `NO_COLOR` environment variable is set, it takes precedence and is equivalent to `--color=never`.
-    #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE")]
+    #[arg(global=true, long, default_value_t=Mode::Auto, value_name="MODE", alias="colour")]
     pub color: Mode,
 
     /// Enable or disable progress bars
@@ -515,6 +523,7 @@ pub enum DatastoreCommand {
 
 #[derive(Args, Debug)]
 pub struct DatastoreInitArgs {
+    /// Initialize the datastore at specified path
     #[arg(
         long,
         short,
@@ -523,12 +532,12 @@ pub struct DatastoreInitArgs {
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
-    /// Initialize the datastore at specified path
     pub datastore: PathBuf,
 }
 
 #[derive(Args, Debug)]
 pub struct DatastoreExportArgs {
+    /// Datastore to export
     #[arg(
         long,
         short,
@@ -537,7 +546,6 @@ pub struct DatastoreExportArgs {
         env("NP_DATASTORE"),
         default_value=DEFAULT_DATASTORE,
     )]
-    /// Datastore to export
     pub datastore: PathBuf,
 
     /// Write output to the specified path
@@ -933,6 +941,74 @@ pub enum FindingStatus {
 }
 
 // -----------------------------------------------------------------------------
+// `annotations` command
+// -----------------------------------------------------------------------------
+#[derive(Args, Debug)]
+pub struct AnnotationsArgs {
+    #[command(subcommand)]
+    pub command: AnnotationsCommand,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum AnnotationsCommand {
+    /// Export annotations from a datastore (experimental)
+    Export(AnnotationsExportArgs),
+
+    /// Import annotations into a datastore (experimental)
+    Import(AnnotationsImportArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct AnnotationsExportArgs {
+    /// Use the specified datastore
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::DirPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
+    pub datastore: PathBuf,
+
+    /// Write annotations to the specified path
+    ///
+    /// If this argument is not provided, stdout will be used.
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    pub output: Option<PathBuf>,
+}
+
+#[derive(Args, Debug)]
+pub struct AnnotationsImportArgs {
+    /// Use the specified datastore
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::DirPath,
+        env("NP_DATASTORE"),
+        default_value=DEFAULT_DATASTORE,
+    )]
+    pub datastore: PathBuf,
+
+    /// Read annotations from the specified path
+    ///
+    /// If this argument is not provided, stdin will be used.
+    #[arg(
+        long,
+        short,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    pub input: Option<PathBuf>,
+}
+
+// -----------------------------------------------------------------------------
 // `generate` command
 // -----------------------------------------------------------------------------
 #[derive(Args, Debug)]
@@ -1018,22 +1094,6 @@ impl<Format: ValueEnum + Send + Sync> OutputArgs<Format> {
     /// Get a writer for the specified output destination.
     pub fn get_writer(&self) -> std::io::Result<Box<dyn std::io::Write>> {
         get_writer_for_file_or_stdout(self.output.as_ref())
-    }
-}
-
-/// Get a writer for the file at the specified output destination, or stdout if not specified.
-pub fn get_writer_for_file_or_stdout<P: AsRef<Path>>(
-    path: Option<P>,
-) -> std::io::Result<Box<dyn std::io::Write>> {
-    use std::fs::File;
-    use std::io::BufWriter;
-
-    match path.as_ref() {
-        None => Ok(Box::new(BufWriter::new(std::io::stdout()))),
-        Some(p) => {
-            let f = File::create(p)?;
-            Ok(Box::new(BufWriter::new(f)))
-        }
     }
 }
 

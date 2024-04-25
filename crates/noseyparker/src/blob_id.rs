@@ -4,9 +4,27 @@ use serde::{Deserialize, Serialize};
 // -------------------------------------------------------------------------------------------------
 // BlobId
 // -------------------------------------------------------------------------------------------------
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Deserialize, Serialize)]
-#[serde(into = "String", try_from = "&str")]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Serialize)]
+#[serde(into = "String")]
 pub struct BlobId([u8; 20]);
+
+impl<'de> Deserialize<'de> for BlobId {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct Vis;
+        impl serde::de::Visitor<'_> for Vis {
+            type Value = BlobId;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a string")
+            }
+
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                BlobId::from_hex(v).map_err(|e| serde::de::Error::custom(e))
+            }
+        }
+        d.deserialize_str(Vis)
+    }
+}
 
 impl std::fmt::Debug for BlobId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

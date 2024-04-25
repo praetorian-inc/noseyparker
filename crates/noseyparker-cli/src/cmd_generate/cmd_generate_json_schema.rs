@@ -1,8 +1,9 @@
 use anyhow::Result;
 use tracing::info;
 
-use crate::args::{get_writer_for_file_or_stdout, GlobalArgs, JsonSchemaArgs};
+use crate::args::{GlobalArgs, JsonSchemaArgs};
 use crate::cmd_report::Finding;
+use crate::util::get_writer_for_file_or_stdout;
 
 pub fn run(_global_args: &GlobalArgs, args: &JsonSchemaArgs) -> Result<()> {
     let schema = schemars::schema_for!(Vec<Finding>);

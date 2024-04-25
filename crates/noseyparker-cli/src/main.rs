@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use tracing::{debug, warn};
 
 mod args;
+mod cmd_annotations;
 mod cmd_datastore;
 mod cmd_generate;
 mod cmd_github;
@@ -106,6 +107,7 @@ fn try_main(args: &CommandLineArgs) -> Result<()> {
         args::Command::Scan(args) => cmd_scan::run(global_args, args),
         args::Command::Summarize(args) => cmd_summarize::run(global_args, args),
         args::Command::Report(args) => cmd_report::run(global_args, args),
+        args::Command::Annotations(args) => cmd_annotations::run(global_args, args),
         args::Command::Generate(args) => cmd_generate::run(global_args, args),
     }
 }
