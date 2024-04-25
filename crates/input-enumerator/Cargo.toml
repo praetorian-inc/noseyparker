@@ -16,7 +16,7 @@ anyhow = { version = "1.0" }
 bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
 fixedbitset = "0.5"
-gix = { version = "0.61", features = ["max-performance", "serde"] }
+gix = { version = "0.62", features = ["max-performance", "serde"] }
 ignore = "0.4"
 petgraph = "0.6"
 roaring = "0.10"
