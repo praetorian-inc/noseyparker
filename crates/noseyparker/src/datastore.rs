@@ -603,10 +603,6 @@ impl Datastore {
     }
 
     pub fn import_annotations(&mut self, annotations: &Annotations) -> Result<()> {
-        let tx = self
-            .conn
-            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-
         #[derive(Default, Debug)]
         struct Stats {
             n_imported: usize,
@@ -631,13 +627,13 @@ impl Datastore {
         /// logic that is common to finding comments, match comments, and match statuses.
         /// Better than repeating the code verbatim three times...?
         fn do_import<Ann, Id, Val>(
-            annotation_type: &str,
-            stats: &mut Stats,
-            getter: &mut CachedStatement,
-            setter: &mut CachedStatement,
-            ann: &Ann,
-            ann_id: &Id,
-            ann_val: &Val,
+            annotation_type: &str,        // human-readable name of annotation type
+            stats: &mut Stats,            // stats object to update
+            getter: &mut CachedStatement, // sql getter query, takes a single `&Id` parameter
+            setter: &mut CachedStatement, // sql setter query, takes an `&Id` and a `&Val` parameter
+            ann: &Ann,                    // the annotation being imported
+            ann_id: &Id,                  // the id from the annotation
+            ann_val: &Val,                // the value from the annotation (comment, status, etc)
         ) -> Result<()>
         where
             Ann: std::fmt::Debug,
@@ -677,6 +673,12 @@ impl Datastore {
 
             Ok(())
         }
+
+        // Ok, now with that preamble out of the way, let's actually import the annotations
+
+        let tx = self
+            .conn
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
 
         let mut finding_comment_stats = Stats::default();
         let mut match_comment_stats = Stats::default();
