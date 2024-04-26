@@ -44,7 +44,9 @@ vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_special
 
 
 # Enable features that are desirable in a release build
-release = ["disable_trace"]
+release = ["disable_trace", "mimalloc"]
+
+default = ["mimalloc"]
 
 
 [build-dependencies]
@@ -68,7 +70,7 @@ indoc = "2.0"
 input-enumerator = { path = "../input-enumerator" }
 lazy_static = "1.4"
 log = { version = "0.4", optional = true }
-mimalloc = "0.1.39"
+mimalloc = { version = "=0.1.39", optional = true }
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 noseyparker-digest = { path = "../noseyparker-digest" }
