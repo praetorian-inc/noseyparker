@@ -42,6 +42,7 @@ vectorscan_simd_specialization = ["vectorscan-rs/simd_specialization"]
 # Enable all Vectorscan features that can improve speed but break binary portability.
 vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
 
+mimalloc = ["dep:mimalloc", "dep:libmimalloc-sys"]
 
 # Enable features that are desirable in a release build
 release = ["disable_trace", "mimalloc"]
@@ -69,6 +70,7 @@ indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
 input-enumerator = { path = "../input-enumerator" }
 lazy_static = "1.4"
+libmimalloc-sys = { version = "=0.1.35", optional = true }
 log = { version = "0.4", optional = true }
 mimalloc = { version = "=0.1.39", optional = true }
 mime = "0.3"
