@@ -767,6 +767,19 @@ pub struct InputSpecifierArgs {
     )]
     pub git_url: Vec<GitUrl>,
 
+    /// Read inputs from an enumerator JSON file
+    ///
+    /// FIXME: document the format of this
+    ///
+    /// This can be used to stream inputs without having to write them to disk.
+    ///
+    /// This option can be repeated.
+    #[arg(
+        long,
+        value_hint = ValueHint::FilePath,
+    )]
+    pub enumerator: Vec<PathBuf>,
+
     /// Clone and scan accessible repositories belonging to the specified GitHub user
     ///
     /// This option can be repeated.
