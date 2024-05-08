@@ -294,7 +294,7 @@ pub struct GlobalArgs {
     pub progress: Mode,
 
     /// Ignore validation of TLS certificates
-    #[arg(long)]
+    #[arg(global = true, long)]
     pub ignore_certs: bool,
 
     #[command(flatten)]

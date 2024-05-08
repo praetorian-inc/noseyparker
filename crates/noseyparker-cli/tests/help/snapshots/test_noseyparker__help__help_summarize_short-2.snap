@@ -22,4 +22,4 @@ Global Options:
                          never, always]
       --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
                          never, always]
-
+      --ignore-certs     Ignore validation of TLS certificates
