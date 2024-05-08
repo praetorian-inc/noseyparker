@@ -53,6 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The prepackaged releases and binaries produced by the default settings of `cargo build` should now be more portable across microarchitectures ([#175](https://github.com/praetorian-inc/noseyparker/pull/175)).
   Previously, the builds would be tied to the microarchitecture of the build system; this would sometimes result in binaries that were not portable across machines, particularly on x86_64.
 
+- The `--ignore-certs` command-line option is now a global option and can be specified anywhere on the command line.
+
 
 ## [v0.17.0](https://github.com/praetorian-inc/noseyparker/releases/v0.17.0) (2024-03-05)
 
