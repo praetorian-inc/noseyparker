@@ -5,7 +5,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Instant;
-use tracing::{debug, debug_span, error, info, trace, trace_span, warn};
+use tracing::{debug, error, error_span, info, trace, warn};
 
 use crate::{args, rule_loader::RuleLoader};
 
@@ -348,7 +348,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let datastore_writer_thread = std::thread::Builder::new()
         .name("datastore".to_string())
         .spawn(move || -> Result<_> {
-            let _span = debug_span!("datastore").entered();
+            let _span = error_span!("datastore", dir = datastore.root_dir().display().to_string())
+                .entered();
             let mut total_recording_time: std::time::Duration = Default::default();
 
             let mut num_matches_added: u64 = 0;
@@ -438,7 +439,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 Ok((matcher, progress.clone()))
             },
             |state: &mut Result<_>, file_result: &FileResult| -> Result<()> {
-                let _span = trace_span!("file-scan", path = file_result.path.display().to_string())
+                let _span = error_span!("file-scan", path = file_result.path.display().to_string())
                     .entered();
 
                 let (matcher, progress) = match state {
@@ -480,7 +481,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             .into_par_iter()
             .try_for_each(|git_repo_result| -> Result<()> {
                 let span =
-                    trace_span!("git-scan", path = git_repo_result.path.display().to_string());
+                    error_span!("git-scan", repo_path = git_repo_result.path.display().to_string());
                 let _span = span.enter();
 
                 let repository = match open_git_repo(&git_repo_result.path) {
@@ -707,7 +708,7 @@ fn run_matcher(
     progress: &Progress,
 ) -> Result<()> {
     let blob_id = blob.id.hex();
-    let _span = trace_span!("matcher", blob_id = blob_id).entered();
+    let _span = error_span!("matcher", blob_id).entered();
 
     let (matcher, guesser) = matcher_guesser;
 
