@@ -88,8 +88,16 @@ fn configure_backtraces(global_args: &GlobalArgs) {
     if global_args.advanced.enable_backtraces {
         // Print a stack trace in case of panic.
         // This should have no overhead in normal execution.
-        std::env::set_var("RUST_BACKTRACE", "1");
+        let val = if cfg!(feature = "color_backtrace") {
+            "full"
+        } else {
+            "1"
+        };
+        std::env::set_var("RUST_BACKTRACE", val);
     }
+
+    #[cfg(feature = "color_backtrace")]
+    color_backtrace::install();
 }
 
 fn try_main(args: &CommandLineArgs) -> Result<()> {

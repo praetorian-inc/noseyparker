@@ -44,10 +44,12 @@ vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_special
 
 mimalloc = ["dep:mimalloc", "dep:libmimalloc-sys"]
 
+color_backtrace = ["dep:color-backtrace"]
+
 # Enable features that are desirable in a release build
 release = ["disable_trace", "mimalloc"]
 
-default = ["mimalloc"]
+default = ["mimalloc", "color_backtrace"]
 
 
 [build-dependencies]
@@ -61,6 +63,7 @@ bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 clap_complete = "4.4"
 clap_mangen = "0.2"
+color-backtrace = { version = "0.6", optional = true }
 console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
