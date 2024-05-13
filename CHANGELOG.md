@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `report` command now offers a new `--finding-status=STATUS` filtering option ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
   This option causes findings with an assigned status that does not match `STATUS` to be suppressed from the report.
 
-- The `report` command now offers a new `--min-score=SCORE` filtering option.
+- The `report` command now offers a new `--min-score=SCORE` filtering option ([#184](https://github.com/praetorian-inc/noseyparker/pull/184)).
   This option causes findings that have a mean score less than `SCORE` to be suppressed from the report.
   This option is set by default with a value of 0.05.
 
