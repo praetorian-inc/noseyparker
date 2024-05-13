@@ -24,7 +24,17 @@ Filtering Options:
           
           [default: 3]
 
-      --finding-status <FINDING_STATUS>
+      --min-score <SCORE>
+          Only report findings that have a mean score of at least N.
+          
+          Scores are floating point numbers in the range [0, 1]. Use the value `0` to disable this
+          filtering.
+          
+          Findings that do not have a score computed will be included regardless of this setting.
+          
+          [default: 0.05]
+
+      --finding-status <STATUS>
           Include only findings with the assigned status
 
           Possible values:

@@ -921,8 +921,17 @@ pub struct ReportFilterArgs {
     )]
     pub max_matches: i64,
 
+    /// Only report findings that have a mean score of at least N.
+    ///
+    /// Scores are floating point numbers in the range [0, 1].
+    /// Use the value `0` to disable this filtering.
+    ///
+    /// Findings that do not have a score computed will be included regardless of this setting.
+    #[arg(long, default_value_t = 0.05, value_name = "SCORE")]
+    pub min_score: f64,
+
     /// Include only findings with the assigned status
-    #[arg(long)]
+    #[arg(long, value_name = "STATUS")]
     pub finding_status: Option<FindingStatus>,
 }
 
