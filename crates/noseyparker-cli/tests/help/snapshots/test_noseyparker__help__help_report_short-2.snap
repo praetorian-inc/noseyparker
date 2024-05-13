@@ -11,11 +11,11 @@ Options:
   -h, --help              Print help (see more with '--help')
 
 Filtering Options:
-      --max-matches <N>
-          Limit the number of matches per finding to at most N [default: 3]
-      --finding-status <FINDING_STATUS>
-          Include only findings with the assigned status [possible values: accept, reject, mixed,
-          null]
+      --max-matches <N>          Limit the number of matches per finding to at most N [default: 3]
+      --min-score <SCORE>        Only report findings that have a mean score of at least N [default:
+                                 0.05]
+      --finding-status <STATUS>  Include only findings with the assigned status [possible values:
+                                 accept, reject, mixed, null]
 
 Output Options:
   -o, --output <PATH>    Write output to the specified path

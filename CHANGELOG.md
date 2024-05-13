@@ -12,7 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The README now includes several animated GIFs that demonstrate simple example use cases ([#154](https://github.com/praetorian-inc/noseyparker/pull/154)).
 
-- The `report` command now offers a new `--finding-status=STATUS` filtering option, which causes only the findings with the requested status to be reported ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
+- The `report` command now offers a new `--finding-status=STATUS` filtering option ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
+  This option causes findings with an assigned status that does not match `STATUS` to be suppressed from the report.
+
+- The `report` command now offers a new `--min-score=SCORE` filtering option ([#184](https://github.com/praetorian-inc/noseyparker/pull/184)).
+  This option causes findings that have a mean score less than `SCORE` to be suppressed from the report.
+  This option is set by default with a value of 0.05.
 
 - A new `datastore export` command has been added ([#166](https://github.com/praetorian-inc/noseyparker/pull/166)).
   This command exports the essential content from a Nosey Parker datastore as a .tgz file that can be extracted wherever it is needed.
