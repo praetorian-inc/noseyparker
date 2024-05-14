@@ -53,6 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixes
 
+- A rare crash when parsing malformed Git commit timestamps has been fixed by updating the `gix-date` dependency ([#185](https://github.com/praetorian-inc/noseyparker/pull/185)).
+
 - Upon `noseyparker` startup, if resource limits cannot be adjusted, instead of crashing, a warning is printed and the process attempts to continue ([#170](https://github.com/praetorian-inc/noseyparker/issues/170)).
 
 - The prepackaged releases and binaries produced by the default settings of `cargo build` should now be more portable across microarchitectures ([#175](https://github.com/praetorian-inc/noseyparker/pull/175)).
