@@ -479,6 +479,24 @@ expression: stdout
       }
     },
     {
+      "id": "np.databricks.1",
+      "structural_id": "e4b5256bd60d4d5e84d87cc4288a37354c41ec38",
+      "name": "Databricks Personal Access Token",
+      "syntax": {
+        "name": "Databricks Personal Access Token",
+        "id": "np.databricks.1",
+        "pattern": "\\b(dapi[a-zA-Z0-9\\-]{32})\\b",
+        "examples": [
+          "DATABRICKS_TOKEN: 'dapicd295a7be286969133e18a58e4afe7bd-3'",
+          "dapif21ee53d2b3648c2a1ed38953312a203"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.databricks.com/en/dev-tools/auth/pat.html"
+        ]
+      }
+    },
+    {
       "id": "np.digitalocean.1",
       "structural_id": "f43e1590624961d1a9984818101cb6a91ca00081",
       "name": "DigitalOcean Application Access Token",
@@ -2822,7 +2840,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 120
+      "num_rules": 121
     },
     {
       "id": "np.assets",
