@@ -2,7 +2,14 @@ rules:
 
 - name: Databricks Personal Access Token
   id: np.databricks.1
-  pattern: '\b(dapi[a-zA-Z0-9\-]{32})\b'
+  pattern: |
+    (?x)
+    \b
+    (
+      dapi[a-f0-9]{32}
+      (?: -[0-9]+ )?      (?# optional -NUM suffix )
+    )
+    \b
 
   references:
   - https://docs.databricks.com/en/dev-tools/auth/pat.html
@@ -10,3 +17,6 @@ rules:
   examples:
   - "DATABRICKS_TOKEN: 'dapicd295a7be286969133e18a58e4afe7bd-3'"
   - "dapif21ee53d2b3648c2a1ed38953312a203"
+
+  negative_examples:
+  - "    dapiDataGetTopLongShortPositionRatio (params?: {}): Promise<implicitReturnType>;"

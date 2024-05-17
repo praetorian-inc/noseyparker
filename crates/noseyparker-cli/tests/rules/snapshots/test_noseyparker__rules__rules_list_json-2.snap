@@ -480,17 +480,19 @@ expression: stdout
     },
     {
       "id": "np.databricks.1",
-      "structural_id": "e4b5256bd60d4d5e84d87cc4288a37354c41ec38",
+      "structural_id": "652e0e0655c34bb2f8cb9252540f7305f0aaa006",
       "name": "Databricks Personal Access Token",
       "syntax": {
         "name": "Databricks Personal Access Token",
         "id": "np.databricks.1",
-        "pattern": "\\b(dapi[a-zA-Z0-9\\-]{32})\\b",
+        "pattern": "(?x)\n\\b\n(\n  dapi[a-f0-9]{32}\n  (?: -[0-9]+ )?      (?# optional -NUM suffix )\n)\n\\b\n",
         "examples": [
           "DATABRICKS_TOKEN: 'dapicd295a7be286969133e18a58e4afe7bd-3'",
           "dapif21ee53d2b3648c2a1ed38953312a203"
         ],
-        "negative_examples": [],
+        "negative_examples": [
+          "    dapiDataGetTopLongShortPositionRatio (params?: {}): Promise<implicitReturnType>;"
+        ],
         "references": [
           "https://docs.databricks.com/en/dev-tools/auth/pat.html"
         ]
