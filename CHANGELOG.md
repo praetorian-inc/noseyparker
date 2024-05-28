@@ -52,6 +52,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Previously the default value was determined only by the number of available vCPUs.
   Now the default value is additionally limited to ensure at least 4 GiB of system RAM per job.
 
+- The `scan` command now records its results incrementally to the datastore instead of in one enormous transaction.
+  Now, results are recorded in transactions about every second.
+  This helps avoid complete loss of scan results in the rare event of a crash.
+
 ### Fixes
 
 - A rare crash when parsing malformed Git commit timestamps has been fixed by updating the `gix-date` dependency ([#185](https://github.com/praetorian-inc/noseyparker/pull/185)).
