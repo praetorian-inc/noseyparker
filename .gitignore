@@ -16,6 +16,3 @@
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
-
-# Ignore downloaded Vectorscan sources
-crates/vectorscan-sys/vectorscan/
