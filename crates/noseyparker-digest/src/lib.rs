@@ -1,5 +1,5 @@
 #[derive(Default)]
-pub struct Sha1(gix::features::hash::Sha1);
+pub struct Sha1(gix_features::hash::Sha1);
 
 pub type Sha1Digest = [u8; 20];
 
