@@ -5,6 +5,82 @@ expression: read_json(report_json.path()).unwrap()
 [
   {
     "comment": null,
+    "finding_id": "43ee76ab13531cf63b65f88804fd30dffba01b54",
+    "groups": [
+      "QUtJQUpVWlBMVE5NWTJKU1hMWUE=",
+      "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
+    ],
+    "matches": [
+      {
+        "blob_id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+        "blob_metadata": {
+          "charset": null,
+          "id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
+          "mime_essence": null,
+          "num_bytes": 523
+        },
+        "comment": null,
+        "groups": [
+          "QUtJQUpVWlBMVE5NWTJKU1hMWUE=",
+          "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
+        ],
+        "location": {
+          "offset_span": {
+            "end": 455,
+            "start": 357
+          },
+          "source_span": {
+            "end": {
+              "column": 0,
+              "line": 12
+            },
+            "start": {
+              "column": 8,
+              "line": 9
+            }
+          }
+        },
+        "provenance": [
+          {
+            "first_commit": {
+              "blob_path": "my.env",
+              "commit_metadata": {
+                "author_email": "david.ascher@gmail.com",
+                "author_name": "David Ascher",
+                "author_timestamp": "1378126038 +0100",
+                "commit_id": "9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a",
+                "committer_email": "david.ascher@gmail.com",
+                "committer_name": "David Ascher",
+                "committer_timestamp": "1378126038 +0100",
+                "message": "fix both 254 and 257\n"
+              }
+            },
+            "kind": "git_repo",
+            "repo_path": "<REPO>"
+          }
+        ],
+        "rule_name": "AWS API Credentials",
+        "rule_structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+        "rule_text_id": "np.aws.6",
+        "score": null,
+        "snippet": {
+          "after": "SHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
+          "before": " a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=",
+          "matching": "AKIAJUZPLTNMY2JSXLYA\nS3_OBJECT_PREFIX=flathead\nS3_SECRET=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\n"
+        },
+        "status": null,
+        "structural_id": "3826a0168ec2553f84592b57baa55218b004e1cb"
+      }
+    ],
+    "mean_score": null,
+    "num_matches": 1,
+    "rule_name": "AWS API Credentials",
+    "rule_structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+    "rule_text_id": "np.aws.6",
+    "statuses": []
+  },
+  {
+    "comment": null,
     "finding_id": "384ff44ebe6409d664f0d31189828b2e5ffbf45b",
     "groups": [
       "QUtJQUpFRVVPU0pYWUIyQktMTUE="

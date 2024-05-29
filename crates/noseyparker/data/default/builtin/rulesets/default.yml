@@ -23,6 +23,7 @@ rulesets:
   - np.aws.2          # AWS Secret Access Key
   - np.aws.4          # AWS Session Token
   - np.aws.5          # Amazon MWS Auth Token
+  - np.aws.6          # Amazon API Credentials
   - np.azure.1        # Azure Connection String
   - np.azure.2        # Azure App Configuration Connection String
   - np.blynk.1        # Blynk Device Access Token

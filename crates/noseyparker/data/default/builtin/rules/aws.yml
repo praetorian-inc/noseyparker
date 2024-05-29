@@ -340,3 +340,32 @@ rules:
 
   examples:
   - "  aws_appsync_apiKey: 'da2-nmaqhbb63zabjactesiydcfuvu',"
+
+
+# This matches an API key followed closely by a secret access key
+- name: AWS API Credentials
+  id: np.aws.6
+
+  pattern: |
+    (?x)
+    (?m)
+    \b
+    ((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )
+    \b
+    (?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff )
+    \b
+    ([A-Za-z0-9/+=]{40})                                                      (?# secret )
+    (?: [^A-Za-z0-9/+=] | $ )
+
+  references:
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
+  - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
+
+  examples:
+  - |
+      export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP'
+      export AWS_SECRET_ACCESS_KEY='ded7db27a4558eea9bbf0bf36e0e8521618f366c'
+
+  - export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP''ded7db27a4558eea9bbf0bf36e0e8521618f366c'

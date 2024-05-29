@@ -255,6 +255,27 @@ expression: stdout
       }
     },
     {
+      "id": "np.aws.6",
+      "structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+      "name": "AWS API Credentials",
+      "syntax": {
+        "name": "AWS API Credentials",
+        "id": "np.aws.6",
+        "pattern": "(?x)\n(?m)\n\\b\n((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )\n\\b\n(?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff )\n\\b\n([A-Za-z0-9/+=]{40})                                                      (?# secret )\n(?: [^A-Za-z0-9/+=] | $ )\n",
+        "examples": [
+          "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP'\nexport AWS_SECRET_ACCESS_KEY='ded7db27a4558eea9bbf0bf36e0e8521618f366c'\n",
+          "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP''ded7db27a4558eea9bbf0bf36e0e8521618f366c'"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+          "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
+          "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ]
+      }
+    },
+    {
       "id": "np.azure.1",
       "structural_id": "8d2b8482f72be3b33030ff0f584e4f26bfef2656",
       "name": "Azure Connection String",
@@ -2842,7 +2863,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 121
+      "num_rules": 122
     },
     {
       "id": "np.assets",

@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - AWS API Credentials
   - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
   - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from @@tobiasgyoerfi)
   - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))

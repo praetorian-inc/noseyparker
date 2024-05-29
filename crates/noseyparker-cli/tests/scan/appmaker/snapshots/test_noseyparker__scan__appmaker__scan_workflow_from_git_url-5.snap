@@ -2,7 +2,37 @@
 source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
 expression: "std::fs::read_to_string(report_txt.path()).unwrap()"
 ---
-Finding 1/13
+Finding 1/14
+Rule: AWS API Credentials
+Group 1: AKIAJUZPLTNMY2JSXLYA
+Group 2: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
+
+    Occurrence 1/1
+    Git repo:  <REPO>
+    Commit: first seen in 9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a
+
+        Author:     David Ascher <david.ascher@gmail.com>
+        Date:       2013-09-02
+        Summary:    fix both 254 and 257
+        Path:       my.env
+
+    Blob:  <BLOB>
+    Lines: 9:8-12:0
+
+         a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush
+        PATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin
+        PORT=5002
+        PUBLISH_HOST=appalot.me
+        PUBLISH_HOST_PREFIX=http://
+        S3_BUCKET=com.mozillalabs.appmaker
+        S3_KEY=AKIAJUZPLTNMY2JSXLYA
+        S3_OBJECT_PREFIX=flathead
+        S3_SECRET=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
+        SHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/
+
+
+
+Finding 2/14
 Rule: AWS API Key
 Group: AKIAJEEUOSJXYB2BKLMA
 
@@ -21,7 +51,7 @@ Group: AKIAJEEUOSJXYB2BKLMA
         {"TERM_PROGRAM":"Apple_Terminal","TERM":"xterm-256color","SHELL":"/usr/local/bin/fish","CLICOLOR":"1","TMPDIR":"/var/folders/xj/5v3cc4y9039fx_fhk67bvg8w0000gn/T/","AWS_ID":"AKIAJEEUOSJXYB2BKLMA","Apple_PubSub_Socket_Render":"/tmp/launch-rHzB0S/Render","TERM_PROGRAM_VERSION":"326","TERM_SESSION_ID":"C99AE63D-8AC8-40EC-9A43-7C14ACEBE413","ANT_HOME":"/usr/local/etc/ant","CMD_DURATION":"1m 22.1s","USER":"davida","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/L
 
 
-Finding 2/13
+Finding 3/14
 Rule: AWS API Key
 Group: AKIAJQNF3BIPEDR6MXEA
 
@@ -40,7 +70,7 @@ Group: AKIAJQNF3BIPEDR6MXEA
         S3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ","S3_OBJECT_PREFIX":"flathead","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/Listeners","__CF_USER_TEXT_ENCODING":"0x1F5:0:0","PATH":"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin","__CHECKFIX1436934":"1","ASSET_HOST":"","S3_KEY":"AKIAJQNF3BIPEDR6MXEA","PWD":"/Users/davida/src/appmaker","LANG":"en_CA.UTF-8","PUBLISH_URL_PREFIX":"XXX","HOME":"/Users/davida","SHLVL":"2","LOGNAME":"davida","S3_BUCKET":"com.mozillalabs.appmaker","COOKIE_SECRET":"I hate working as a janitor for arrogant rich people; so I cl
 
 
-Finding 3/13
+Finding 4/14
 Rule: AWS API Key
 Group: AKIAJUZPLTNMY2JSXLYA
 
@@ -69,7 +99,7 @@ Group: AKIAJUZPLTNMY2JSXLYA
 
 
 
-Finding 4/13
+Finding 5/14
 Rule: AWS S3 Bucket (path style)
 Group: s3-us-west-2.amazonaws.com/makerstrap
 
@@ -105,7 +135,7 @@ Group: s3-us-west-2.amazonaws.com/makerstrap
           aria-labelledby=
 
 
-Finding 5/13
+Finding 6/14
 Rule: AWS S3 Bucket (path style)
 Group: s3.amazonaws.com/com.mozillalabs.appmaker
 Showing 3/11 occurrences:
@@ -171,7 +201,7 @@ Showing 3/11 occurrences:
                   <div class="links"><a href="http://enchant
 
 
-Finding 6/13
+Finding 7/14
 Rule: AWS S3 Bucket (path style)
 Group: s3.amazonaws.com/listjs
 
@@ -206,7 +236,7 @@ Group: s3.amazonaws.com/listjs
         - Work
 
 
-Finding 7/13
+Finding 8/14
 Rule: AWS Secret Access Key
 Group: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
 
@@ -225,7 +255,7 @@ Group: D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
         Frameworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
 
 
-Finding 8/13
+Finding 9/14
 Rule: Amazon Resource Name
 Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 
@@ -267,7 +297,7 @@ Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
         12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Proper
 
 
-Finding 9/13
+Finding 10/14
 Rule: Amazon Resource Name
 Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
 
@@ -307,7 +337,7 @@ Group: arn:aws:s3:::XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/*
         12. If you want deletion from the cache to be done automatically based on age (like Bootstrap does): In the bucket's Properties pane, in the "Lifecycle" section, add a rule to expire/delete files ba
 
 
-Finding 10/13
+Finding 11/14
 Rule: Amazon Resource Name
 Group: arn:aws:s3:::the-bucket-name-goes-here`
 
@@ -342,7 +372,7 @@ Group: arn:aws:s3:::the-bucket-name-goes-here`
         11. Input and submit an IAM Policy that grants the user at least read+write rights to the bucket. AWS has a policy generator and some examples to help
 
 
-Finding 11/13
+Finding 12/14
 Rule: Generic Secret
 Group: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
 
@@ -371,7 +401,7 @@ Group: DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1
 
 
 
-Finding 12/13
+Finding 13/14
 Rule: Generic Secret
 Group: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
 
@@ -390,7 +420,7 @@ Group: aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom
         eworks/JavaVM.framework/Versions/1.6/Home","LANG":"en_CA.UTF-8","BING_APP_ID":"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=","SHLVL":"2","HOME":"/Users/davida","PYTHONPATH":"/Users/davida/lib/python2.6/site-packages:","LOGNAME":"davida","PORT":"1234","AWS_SECRET":"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom","DISPLAY":"/tmp/launch-xo2Dks/org.macosforge.xquartz:0","SECURITYSESSIONID":"186a4","_":"/usr/local/bin/node"}
 
 
-Finding 13/13
+Finding 14/14
 Rule: Generic Secret
 Group: qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ
 
@@ -407,6 +437,3 @@ Group: qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ
     Lines: 1:392-1:440
 
         8w0000gn/T/","Apple_PubSub_Socket_Render":"/tmp/launch-rHzB0S/Render","TERM_PROGRAM_VERSION":"326","OLDPWD":"/Users/davida/src/appmaker","TERM_SESSION_ID":"5600EB0F-9A8F-4DF7-BB34-CD3E7CB7408D","COMPONENTS_BASE_URL":"//localhost:5000/","USER":"davida","S3_SECRET":"gQUSS3U+qflQBzMNZ3TqlsXsrqBfA12wcidr5jLQ","S3_OBJECT_PREFIX":"flathead","SSH_AUTH_SOCK":"/tmp/launch-W9AsCX/Listeners","__CF_USER_TEXT_ENCODING":"0x1F5:0:0","PATH":"/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin","__CHECKFIX1436934":"1","ASSET_HOST":"","S3_KEY":"AKIAJQNF3BIPEDR6MXEA","PWD":"/Users/
-
-
-
