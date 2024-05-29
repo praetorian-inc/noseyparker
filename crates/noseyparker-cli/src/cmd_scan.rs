@@ -774,6 +774,9 @@ fn run_matcher(
                 })?;
             }
 
+            // If there are no matches, we can bail out here and avoid recording anything.
+            // UNLESS the `--blob-metadata=all` mode was specified; then we need to record the
+            // provenance for _all_ seen blobs.
             if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty() {
                 return Ok(());
             }
