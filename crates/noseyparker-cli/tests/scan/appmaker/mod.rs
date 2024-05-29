@@ -30,7 +30,7 @@ fn scan_workflow_from_git_url() {
     // The alternatives in the regex here are to account for different behavior from `git clone
     // --bare` between version 2.39 and 2.44: the newer version pulls additional content??
     .stdout(is_match(
-        r"(?m)^Scanned (549.97|550.05) MiB from 7,92[68] blobs in .*; 23/23 new matches$",
+        r"(?m)^Scanned (549.97|550.05) MiB from 7,92[68] blobs in .*; 24/24 new matches$",
     ));
 
     assert_cmd_snapshot!(noseyparker_success!("summarize", datastore_arg));

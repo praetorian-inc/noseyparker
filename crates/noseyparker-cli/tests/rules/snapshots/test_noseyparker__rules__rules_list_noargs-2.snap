@@ -16,6 +16,7 @@ expression: stdout
  np.aws.3             AWS Account ID 
  np.aws.4             AWS Session Token 
  np.aws.5             Amazon MWS Auth Token 
+ np.aws.6             AWS API Credentials 
  np.azure.1           Azure Connection String 
  np.azure.2           Azure App Configuration Connection String 
  np.blynk.1           Blynk Device Access Token 
@@ -149,6 +150,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             121 
+ default      Nosey Parker default rules             122 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
