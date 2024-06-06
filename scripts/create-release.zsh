@@ -22,16 +22,16 @@ ensure_has_program() {
 # The directory containing this script
 HERE=${0:a:h}
 
-# To strip or not strip the final binary?
-DO_STRIP=0
+# To include debug symbols in the release?
+INCLUDE_DEBUG=1
 
 ################################################################################
 # Parse arguments
 ################################################################################
 while (( $# > 0 )); do
     case $1 in
-        --strip)
-            DO_STRIP=1
+        --no-debug)
+            INCLUDE_DEBUG=0
             shift
         ;;
 
@@ -41,6 +41,7 @@ while (( $# > 0 )); do
     esac
 done
 
+
 ################################################################################
 # Determine build configuration
 ################################################################################
@@ -49,13 +50,11 @@ case $(uname) in
     Darwin*)
         PLATFORM="macos"
         CARGO_FEATURES="release"
-        STRIP_COMMAND=(strip)
     ;;
 
     Linux*)
         PLATFORM="linux"
         CARGO_FEATURES="release"
-        STRIP_COMMAND=(strip --strip-all)
     ;;
 
     *)
@@ -83,6 +82,7 @@ echo "uname -p: $(uname -p)"
 echo "arch: $(arch)"
 echo "PLATFORM: $PLATFORM"
 echo "CARGO_FEATURES: $CARGO_FEATURES"
+echo "INCLUDE_DEBUG: $INCLUDE_DEBUG"
 
 
 ################################################################################
@@ -121,12 +121,14 @@ cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP" || fatal "failed to copy ${NOSEYP
 # Copy CHANGELOG.md, LICENSE, and README.md
 cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/" || fatal "failed to copy assets"
 
-################################################################################
-# Strip release binary if requested
-################################################################################
-if (( $DO_STRIP )); then
-    banner "Stripping release binary"
-    $STRIP_COMMAND "$NP"
+if (( $INCLUDE_DEBUG )); then
+    if [[ $PLATFORM == 'linux' ]]; then
+        cp -rp "$CARGO_BUILD_DIR/noseyparker-cli.dwp" "$NP.dwp" || fatal "failed to copy ${NOSEYPARKER}.dwp"
+    elif [[ $PLATFORM == 'macos' ]]; then
+        cp -rp "$CARGO_BUILD_DIR/noseyparker-cli.dSYM" "$NP.dSYM" || fatal "failed to copy ${NOSEYPARKER}.dSYM"
+    else
+        fatal "unknown platform $PLATFORM"
+    fi
 fi
 
 ################################################################################

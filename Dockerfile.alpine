@@ -24,7 +24,8 @@ WORKDIR "/noseyparker"
 
 COPY . .
 
-RUN ./scripts/create-release.zsh --strip && cp -r release /release
+RUN ./scripts/create-release.zsh --no-debug && \
+    cp -r release /release
 
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
