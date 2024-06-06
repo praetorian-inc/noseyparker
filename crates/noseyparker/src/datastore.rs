@@ -4,7 +4,7 @@ use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
 use std::path::{Path, PathBuf};
-use tracing::{debug, debug_span, trace};
+use tracing::{debug, debug_span, info, trace};
 
 use crate::blob_metadata::BlobMetadata;
 use crate::git_url::GitUrl;
@@ -786,9 +786,9 @@ impl Datastore {
 
         tx.commit()?;
 
-        debug!("Finding comments: {finding_comment_stats}");
-        debug!("Match comments: {match_comment_stats}");
-        debug!("Match statuses: {match_status_stats}");
+        info!("Finding comments: {finding_comment_stats}");
+        info!("Match comments: {match_comment_stats}");
+        info!("Match statuses: {match_status_stats}");
 
         Ok(())
     }
@@ -829,6 +829,8 @@ impl Datastore {
     }
 
     /// Get up to `limit` matches that belong to the finding with the given finding metadata.
+    ///
+    /// A value of `None` means "no limit".
     pub fn get_finding_data(
         &self,
         metadata: &FindingMetadata,
