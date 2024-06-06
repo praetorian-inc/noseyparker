@@ -121,6 +121,14 @@ cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP" || fatal "failed to copy ${NOSEYP
 # Copy CHANGELOG.md, LICENSE, and README.md
 cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/" || fatal "failed to copy assets"
 
+if [[ $PLATFORM == 'linux' ]]; then
+    cp -rp "$CARGO_BUILD_DIR/noseyparker-cli.dwp" "$NP.dSYM" || fatal "failed to copy ${NOSEYPARKER}.dwp"
+elif [[ $PLATFORM == 'macos' ]]; then
+    cp -rp "$CARGO_BUILD_DIR/noseyparker-cli.dSYM" "$NP.dSYM" || fatal "failed to copy ${NOSEYPARKER}.dSYM"
+else
+    fatal "unknown platform $PLATFORM"
+fi
+
 ################################################################################
 # Strip release binary if requested
 ################################################################################
