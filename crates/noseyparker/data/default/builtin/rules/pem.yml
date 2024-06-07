@@ -71,11 +71,11 @@ rules:
   pattern: |
     (?x)
     (
-    (?: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN RSA PRIVATE KEY-----` )
-      | LS0tLS1CRUdJTiBEU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN DSA PRIVATE KEY-----` )
-      | LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0t             (?# prefix of base64 encoding of `-----BEGIN EC PRIVATE KEY-----` )
-      )
-    (?: [a-zA-Z0-9+/=\s"',] | \\r | \\n ) {50,}
+      (?: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN RSA PRIVATE KEY-----` )
+        | LS0tLS1CRUdJTiBEU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN DSA PRIVATE KEY-----` )
+        | LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0t             (?# prefix of base64 encoding of `-----BEGIN EC PRIVATE KEY-----` )
+        )
+      [a-zA-Z0-9+/=]{50,}
     )
 
   references:
