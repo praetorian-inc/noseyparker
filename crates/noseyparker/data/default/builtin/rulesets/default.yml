@@ -103,6 +103,7 @@ rulesets:
   - np.particleio.1   # particle.io Access Token (URL first)
   - np.particleio.2   # particle.io Access Token (URL last)
   - np.pem.1          # PEM-Encoded Private Key
+  - np.pem.2          # Base64-PEM-Encoded Private Key
   - np.postman.1      # Postman API Key
   - np.psexec.1       # Credentials in PsExec
   - np.pypi.1         # PyPI Upload Token
