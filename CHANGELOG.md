@@ -33,6 +33,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from @@tobiasgyoerfi)
   - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
 
+- Prebuilt releases now included separate debug symbols (.dSYM or .dwp files) ([#191](https://github.com/praetorian-inc/noseyparker/pull/191)).
+  Having the debug symbols available makes stack traces more useful in the rare event of a crash.
+  The Alpine-based Docker image does not include these debug symbols, as its point of existing is to provide a small distribution.
+
+
 ### Changes
 
 - The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the system-provided Boost ([#150](https://github.com/praetorian-inc/noseyparker/pull/150) from @seqre).
