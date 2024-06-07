@@ -386,7 +386,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     batch.clear();
                     matches_in_batch = 0;
                     let elapsed = t1.elapsed();
-                    debug!(
+                    trace!(
                         "Recorded {num_added} matches from {batch_len} messages in {:.6}s",
                         elapsed.as_secs_f64()
                     );
@@ -408,7 +408,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 // matches_in_batch = 0;
 
                 let elapsed = t1.elapsed();
-                debug!(
+                trace!(
                     "Recorded {num_added} matches from {batch_len} messages in {:.6}s",
                     elapsed.as_secs_f64()
                 );
