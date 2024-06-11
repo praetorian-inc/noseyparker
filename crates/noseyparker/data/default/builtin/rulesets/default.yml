@@ -26,6 +26,7 @@ rulesets:
   - np.aws.6          # Amazon API Credentials
   - np.azure.1        # Azure Connection String
   - np.azure.2        # Azure App Configuration Connection String
+  - np.azure.3        # Azure Personal Access Token
   - np.blynk.1        # Blynk Device Access Token
   - np.blynk.2        # Blynk Organization Access Token (URL first)
   - np.blynk.3        # Blynk Organization Access Token (URL last)

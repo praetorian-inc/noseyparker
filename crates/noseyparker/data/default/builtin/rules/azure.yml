@@ -75,3 +75,28 @@ rules:
   - https://docs.microsoft.com/en-us/azure/azure-app-configuration/
   - https://docs.microsoft.com/en-us/azure/azure-app-configuration/howto-best-practices
   - https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/appconfiguration/azure-appconfiguration/azure/appconfiguration/_utils.py
+
+
+# This detects various hardcoded PATs that come from Microsoft example documentation
+- name: Azure Personal Access Token
+  id: np.azure.3
+
+  pattern: |
+    (?x)
+    (?i: ADO_PAT | pat_token | personal_?access_?token | \$token )
+    \s* = \s*
+    ["']
+    ([a-z0-9]{52})
+    ["']
+
+  examples:
+  - |
+      var personalAccessToken = "zpczok4kqgnw5prpfy3ehiylbqvgbjfkdiqkejsxqamy7qbkep7q";  // Provide a value or retrieve it from configuration
+  - |
+      $token = "58oo4mvqr2tpw7b4w3loeckwfu5o6nw3sihfckvlwoxgqimlddza"
+  - |
+      if __name__ == "__main__":
+          ado_pat =  "iyfmob6xjrfmit67anxbot64umfx2clwx7dz5ynxi4q2z3uqegvq"
+
+  references:
+  - https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate

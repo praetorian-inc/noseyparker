@@ -325,6 +325,25 @@ expression: stdout
       }
     },
     {
+      "id": "np.azure.3",
+      "structural_id": "357a7fb1c99c1d3ab0a7489443a564cd80cf6d67",
+      "name": "Azure Personal Access Token",
+      "syntax": {
+        "name": "Azure Personal Access Token",
+        "id": "np.azure.3",
+        "pattern": "(?x)\n(?i: ADO_PAT | pat_token | personal_?access_?token | \\$token )\n\\s* = \\s*\n[\"']\n([a-z0-9]{52})\n[\"']\n",
+        "examples": [
+          "var personalAccessToken = \"zpczok4kqgnw5prpfy3ehiylbqvgbjfkdiqkejsxqamy7qbkep7q\";  // Provide a value or retrieve it from configuration\n",
+          "$token = \"58oo4mvqr2tpw7b4w3loeckwfu5o6nw3sihfckvlwoxgqimlddza\"\n",
+          "if __name__ == \"__main__\":\n    ado_pat =  \"iyfmob6xjrfmit67anxbot64umfx2clwx7dz5ynxi4q2z3uqegvq\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate"
+        ]
+      }
+    },
+    {
       "id": "np.blynk.1",
       "structural_id": "7d7b4a3c990889ccbda6d47ec656719c22f9413c",
       "name": "Blynk Device Access Token",
@@ -2898,7 +2917,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 124
+      "num_rules": 125
     },
     {
       "id": "np.assets",
