@@ -71,6 +71,7 @@ rulesets:
   - np.google.3       # Google OAuth Client Secret
   - np.google.4       # Google OAuth Access Token
   - np.google.5       # Google API Key
+  - np.google.6       # Google OAuth Credentials
   - np.gradle.1       # Hardcoded Gradle Credentials
   - np.grafana.1      # Grafana API Token
   - np.grafana.2      # Grafana Cloud API Token

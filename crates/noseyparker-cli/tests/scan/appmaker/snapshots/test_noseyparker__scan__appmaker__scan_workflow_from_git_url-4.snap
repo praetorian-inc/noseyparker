@@ -5,7 +5,7 @@ expression: read_json(report_json.path()).unwrap()
 [
   {
     "comment": null,
-    "finding_id": "43ee76ab13531cf63b65f88804fd30dffba01b54",
+    "finding_id": "4b68f1a2eebf34b00aee81bd944e3403921b8cce",
     "groups": [
       "QUtJQUpVWlBMVE5NWTJKU1hMWUE=",
       "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
@@ -60,7 +60,7 @@ expression: read_json(report_json.path()).unwrap()
           }
         ],
         "rule_name": "AWS API Credentials",
-        "rule_structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+        "rule_structural_id": "39d60c56d8a84ca6ab5999de8fea93657e3cae99",
         "rule_text_id": "np.aws.6",
         "score": null,
         "snippet": {
@@ -69,13 +69,13 @@ expression: read_json(report_json.path()).unwrap()
           "matching": "AKIAJUZPLTNMY2JSXLYA\nS3_OBJECT_PREFIX=flathead\nS3_SECRET=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\n"
         },
         "status": null,
-        "structural_id": "3826a0168ec2553f84592b57baa55218b004e1cb"
+        "structural_id": "4514a0252fd7c1d2b57d1e2c8ca9e38cded33685"
       }
     ],
     "mean_score": null,
     "num_matches": 1,
     "rule_name": "AWS API Credentials",
-    "rule_structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+    "rule_structural_id": "39d60c56d8a84ca6ab5999de8fea93657e3cae99",
     "rule_text_id": "np.aws.6",
     "statuses": []
   },
