@@ -256,12 +256,12 @@ expression: stdout
     },
     {
       "id": "np.aws.6",
-      "structural_id": "6081f1aa6f664739d2ca79e7aa1952b862dd32e9",
+      "structural_id": "39d60c56d8a84ca6ab5999de8fea93657e3cae99",
       "name": "AWS API Credentials",
       "syntax": {
         "name": "AWS API Credentials",
         "id": "np.aws.6",
-        "pattern": "(?x)\n(?m)\n\\b\n((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )\n\\b\n(?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff )\n\\b\n([A-Za-z0-9/+=]{40})                                                      (?# secret )\n(?: [^A-Za-z0-9/+=] | $ )\n",
+        "pattern": "(?x)\n\\b\n((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )\n\\b\n(?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n([A-Za-z0-9/+=]{40})                                                      (?# secret )\n(?: [^A-Za-z0-9/+=] | $ )\n",
         "examples": [
           "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP'\nexport AWS_SECRET_ACCESS_KEY='ded7db27a4558eea9bbf0bf36e0e8521618f366c'\n",
           "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP''ded7db27a4558eea9bbf0bf36e0e8521618f366c'"
@@ -321,6 +321,25 @@ expression: stdout
           "https://docs.microsoft.com/en-us/azure/azure-app-configuration/",
           "https://docs.microsoft.com/en-us/azure/azure-app-configuration/howto-best-practices",
           "https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/appconfiguration/azure-appconfiguration/azure/appconfiguration/_utils.py"
+        ]
+      }
+    },
+    {
+      "id": "np.azure.3",
+      "structural_id": "357a7fb1c99c1d3ab0a7489443a564cd80cf6d67",
+      "name": "Azure Personal Access Token",
+      "syntax": {
+        "name": "Azure Personal Access Token",
+        "id": "np.azure.3",
+        "pattern": "(?x)\n(?i: ADO_PAT | pat_token | personal_?access_?token | \\$token )\n\\s* = \\s*\n[\"']\n([a-z0-9]{52})\n[\"']\n",
+        "examples": [
+          "var personalAccessToken = \"zpczok4kqgnw5prpfy3ehiylbqvgbjfkdiqkejsxqamy7qbkep7q\";  // Provide a value or retrieve it from configuration\n",
+          "$token = \"58oo4mvqr2tpw7b4w3loeckwfu5o6nw3sihfckvlwoxgqimlddza\"\n",
+          "if __name__ == \"__main__\":\n    ado_pat =  \"iyfmob6xjrfmit67anxbot64umfx2clwx7dz5ynxi4q2z3uqegvq\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate"
         ]
       }
     },
@@ -1269,6 +1288,22 @@ expression: stdout
           "https://cloud.google.com/docs/authentication/api-keys#securing",
           "https://support.google.com/googleapi/answer/6310037"
         ]
+      }
+    },
+    {
+      "id": "np.google.6",
+      "structural_id": "4e3b74e85c70254144b1d2d08289f4d04af98f35",
+      "name": "Google OAuth Credentials",
+      "syntax": {
+        "name": "Google OAuth Credentials",
+        "id": "np.google.6",
+        "pattern": "(?x)\n\\b\n([0-9]+-[a-z0-9_]{32}\\.apps\\.googleusercontent\\.com)            (?# client ID )\n(?: (?s) .{0,40} )                                              (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n\n(?: (GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )\n  | (?: (?i) client.?secret .{0,10} \\b ([a-zA-Z0-9_-]{24}) )    (?# non-prefixed client secret )\n)\n\n(?:[^a-zA-Z0-9_-] | $)\n",
+        "examples": [
+          "const CLIENT_ID = '304167046824-45h8no7j0s38akv998nivvb7i17ckqeh.apps.googleusercontent.com';\nconst CLIENT_SECRET = '1QcFpNjHoAf4_XczYwhYicTl';\n",
+          "public static GAPIS_CREDENTIALS = {\n  // 1. Generate credentials: https://console.cloud.google.com/apis/\n  // 2. Create OAuth page and set spreadsheets and drive.metadata.readonly scopes\n  client_id: '132261435625-69ubohrvppjr9hcc5t9uighsb7j2cqhv.apps.googleusercontent.com',\n  client_secret: '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',\n  redirect_uri: `http://localhost:${Config.OAUTH_HTTP_PORT}/oauth2callback`\n};\n"
+        ],
+        "negative_examples": [],
+        "references": []
       }
     },
     {
@@ -2882,7 +2917,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 123
+      "num_rules": 125
     },
     {
       "id": "np.assets",

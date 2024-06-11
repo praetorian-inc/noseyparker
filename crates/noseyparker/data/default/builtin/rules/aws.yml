@@ -348,11 +348,10 @@ rules:
 
   pattern: |
     (?x)
-    (?m)
     \b
     ((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )
     \b
-    (?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff )
+    (?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff; ?s causes . to match newlines )
     \b
     ([A-Za-z0-9/+=]{40})                                                      (?# secret )
     (?: [^A-Za-z0-9/+=] | $ )

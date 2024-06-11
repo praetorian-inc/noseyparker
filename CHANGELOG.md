@@ -29,8 +29,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - AWS API Credentials ([#190](https://github.com/praetorian-inc/noseyparker/pull/190))
   - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
+  - Azure Personal Access Token ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
   - Base64-PEM-Encoded Private Key ([#192](https://github.com/praetorian-inc/noseyparker/pull/192))
-  - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from @@tobiasgyoerfi)
+  - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from (@tobiasgyoerfi)
+  - Google OAuth Credentials ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
   - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
 
 - Prebuilt releases now included separate debug symbols (.dSYM or .dwp files) ([#191](https://github.com/praetorian-inc/noseyparker/pull/191)).
