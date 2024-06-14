@@ -32,7 +32,7 @@ impl Git {
                 "-c",
                 r#"credential.helper="#,
                 "-c",
-                r#"credential.helper=!_ghcreds() { echo username="$NP_GITHUB_TOKEN"; echo password=; }; _ghcreds"#,
+                r#"credential.helper=!_ghcreds() { echo username="noseyparker"; echo password="$NP_GITHUB_TOKEN"; }; _ghcreds"#,
             ].iter().map(|s| s.to_string()).collect()
         // } else {
         //     vec![]
