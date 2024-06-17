@@ -519,16 +519,68 @@ impl Datastore {
     pub fn get_summary(&self) -> Result<FindingSummary> {
         let _span = debug_span!("Datastore::get_summary", "{}", self.root_dir.display()).entered();
 
+        // XXX this should be moved into a view in the datastore (probably should replace
+        // `finding_summary`), but it is inlined here instead to avoid a schema migration for now
         let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select rule_name, total_findings, total_matches
-            from finding_summary
-            order by total_findings desc, rule_name, total_matches desc
+            with
+                -- table of relevant per-match information
+                m as (
+                    select
+                        f.finding_id finding_id,
+                        r.name rule_name,
+                        r.structural_id rule_structural_id,
+                        ms.status match_status
+                    from
+                        finding f
+                        inner join match m on (m.finding_id = f.id)
+                        inner join rule r on (f.rule_id = r.id)
+                        left outer join match_status ms on (m.id = ms.match_id)
+                ),
+                -- summarize per-match information by finding
+                f as (
+                    select
+                        finding_id,
+                        rule_name,
+                        rule_structural_id,
+                        case group_concat(distinct match_status)
+                            when 'accept' then 'accept'
+                            when 'reject' then 'reject'
+                            when 'accept,reject' then 'mixed'
+                            when 'reject,accept' then 'mixed'
+                        end finding_status,
+                        count(*) num_matches,
+                        sum(case when match_status = 'accept' then 1 else 0 end) num_accept_matches,
+                        sum(case when match_status = 'reject' then 1 else 0 end) num_reject_matches,
+                        sum(case when match_status is null then 1 else 0 end) num_unlabeled_matches
+                    from m
+                    group by finding_id
+                )
+            select
+                rule_name,
+                -- rule_structural_id,
+                count(distinct finding_id) total_findings,
+                sum(num_matches) total_matches,
+                sum(case when finding_status = 'accept' then 1 else 0 end) accept_findings,
+                sum(case when finding_status = 'reject' then 1 else 0 end) reject_findings,
+                sum(case when finding_status = 'mixed' then 1 else 0 end) mixed_findings,
+                sum(case when finding_status is null then 1 else 0 end) unlabeled_findings
+                -- ,
+                -- sum(num_accept_matches) accept_matches,
+                -- sum(num_reject_matches) reject_matches,
+                -- sum(num_unlabeled_matches) unlabeled_matches
+            from
+                f
+            group by rule_name, rule_structural_id
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingSummaryEntry {
                 rule_name: row.get(0)?,
                 distinct_count: row.get(1)?,
                 total_count: row.get(2)?,
+                accept_count: row.get(3)?,
+                reject_count: row.get(4)?,
+                mixed_count: row.get(5)?,
+                unlabeled_count: row.get(6)?,
             })
         })?;
         let es = collect(entries)?;

@@ -53,7 +53,11 @@ pub fn run(global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
         .output_args
         .get_writer()
         .context("Failed to get output writer")?;
-    FindingSummaryReporter(datastore.get_summary()?).report(args.output_args.format, output)
+    let summary = datastore
+        .get_summary()
+        .context("Failed to get finding summary")
+        .unwrap();
+    FindingSummaryReporter(summary).report(args.output_args.format, output)
 }
 
 pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
@@ -73,11 +77,23 @@ pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
             row![
                  l -> &e.rule_name,
                  r -> HumanCount(e.distinct_count.try_into().unwrap()),
-                 r -> HumanCount(e.total_count.try_into().unwrap())
+                 r -> HumanCount(e.total_count.try_into().unwrap()),
+                 r -> HumanCount(e.accept_count.try_into().unwrap()),
+                 r -> HumanCount(e.reject_count.try_into().unwrap()),
+                 r -> HumanCount(e.mixed_count.try_into().unwrap()),
+                 r -> HumanCount(e.unlabeled_count.try_into().unwrap()),
             ]
         })
         .collect();
     table.set_format(f);
-    table.set_titles(row![lb -> "Rule", cb -> "Total Findings", cb -> "Total Matches"]);
+    table.set_titles(row![
+        lb -> "Rule",
+        cb -> "Findings",
+        cb -> "Matches",
+        cb -> "Accepted",
+        cb -> "Rejected",
+        cb -> "Mixed",
+        cb -> "Unlabeled",
+    ]);
     table
 }

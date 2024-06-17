@@ -2,5 +2,5 @@
 source: crates/noseyparker-cli/tests/datastore/mod.rs
 expression: stdout
 ---
- Rule   Total Findings   Total Matches 
-───────────────────────────────────────
+ Rule   Findings   Matches   Accepted   Rejected   Mixed   Unlabeled 
+─────────────────────────────────────────────────────────────────────
