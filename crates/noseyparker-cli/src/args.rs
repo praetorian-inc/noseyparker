@@ -224,6 +224,24 @@ pub enum Command {
     Scan(ScanArgs),
 
     /// Summarize scan findings
+    ///
+    /// Findings are summarized in tabular form.
+    /// The default `human` format prints a table of findings with one row for each rule that produced findings.
+    /// The table has several columns:
+    ///
+    /// - Rule: the name of the rule
+    ///
+    /// - Findings: the number of findings, i.e., the number of distinct match group values produced by the rule
+    ///
+    /// - Matches: the number of individual matches
+    ///
+    /// - Accepted: the number of findings whose matches have `accept` status
+    ///
+    /// - Rejected: the number of findings whose matches have `reject` status
+    ///
+    /// - Mixed: the number of findings whose matches have a mix of `accept` and `reject` status
+    ///
+    /// - Unlabeled: the number of findings whose matches have no status at all
     #[command(display_order = 2, alias = "summarise")]
     Summarize(SummarizeArgs),
 

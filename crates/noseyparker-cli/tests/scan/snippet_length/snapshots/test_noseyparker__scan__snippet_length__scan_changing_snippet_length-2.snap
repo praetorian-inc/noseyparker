@@ -2,8 +2,6 @@
 source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
 expression: stdout
 ---
-
- Rule                           Total Findings   Total Matches 
-───────────────────────────────────────────────────────────────
- GitHub Personal Access Token                1               1 
-
+ Rule                           Findings   Matches   Accepted   Rejected   Mixed   Unlabeled 
+─────────────────────────────────────────────────────────────────────────────────────────────
+ GitHub Personal Access Token          1         1          0          0       0           1

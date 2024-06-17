@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Having the debug symbols available makes stack traces more useful in the rare event of a crash.
   The Alpine-based Docker image does not include these debug symbols, as its point of existing is to provide a small distribution.
 
+- The `summarize` command now includes additional columns for the assigned finding status ([#196](https://github.com/praetorian-inc/noseyparker/pull/196)).
 
 ### Changes
 

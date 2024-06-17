@@ -657,10 +657,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         }
 
         if num_matches > 0 {
-            let matches_summary = datastore.get_summary()?;
-            let matches_table = crate::cmd_summarize::summary_table(&matches_summary);
+            let summary = datastore
+                .get_summary()
+                .context("Failed to get finding summary")
+                .unwrap();
+            let table = crate::cmd_summarize::summary_table(&summary);
             println!();
-            matches_table.print_tty(global_args.use_color(std::io::stdout()))?;
+            table.print_tty(global_args.use_color(std::io::stdout()))?;
         }
 
         println!("\nRun the `report` command next to show finding details.");

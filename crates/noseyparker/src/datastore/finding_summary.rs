@@ -10,16 +10,25 @@ pub struct FindingSummary(pub Vec<FindingSummaryEntry>);
 
 #[derive(Serialize)]
 pub struct FindingSummaryEntry {
+    /// The rule name of this entry
     pub rule_name: String,
-    pub distinct_count: usize,
-    pub total_count: usize,
-}
 
-impl std::fmt::Display for FindingSummary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for entry in self.0.iter() {
-            writeln!(f, "{}: {} ({})", entry.rule_name, entry.distinct_count, entry.total_count)?;
-        }
-        Ok(())
-    }
+    /// The number of findings with this rule
+    pub distinct_count: usize,
+
+    /// The number of matches with this rule
+    pub total_count: usize,
+
+    /// The number of findings with this rule with the `accept` status
+    pub accept_count: usize,
+
+    /// The number of findings with this rule with the `reject` status
+    pub reject_count: usize,
+
+    /// The number of findings with this rule with a mixed status, i.e., both `reject` and `accept`
+    /// status
+    pub mixed_count: usize,
+
+    /// The number of findings with this rule that have no assigned status
+    pub unlabeled_count: usize,
 }

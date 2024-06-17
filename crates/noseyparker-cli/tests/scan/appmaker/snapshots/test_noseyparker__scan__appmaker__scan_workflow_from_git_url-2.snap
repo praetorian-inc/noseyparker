@@ -2,11 +2,11 @@
 source: crates/noseyparker-cli/tests/scan/appmaker/mod.rs
 expression: stdout
 ---
- Rule                         Total Findings   Total Matches 
-─────────────────────────────────────────────────────────────
- AWS API Key                               3               3 
- AWS S3 Bucket (path style)                3              13 
- Amazon Resource Name                      3               3 
- Generic Secret                            3               3 
- AWS API Credentials                       1               1 
- AWS Secret Access Key                     1               1
+ Rule                         Findings   Matches   Accepted   Rejected   Mixed   Unlabeled 
+───────────────────────────────────────────────────────────────────────────────────────────
+ AWS API Credentials                 1         1          0          0       0           1 
+ AWS API Key                         3         3          0          0       0           3 
+ AWS S3 Bucket (path style)          3        13          0          0       0           3 
+ AWS Secret Access Key               1         1          0          0       0           1 
+ Amazon Resource Name                3         3          0          0       0           3 
+ Generic Secret                      3         3          0          0       0           3
