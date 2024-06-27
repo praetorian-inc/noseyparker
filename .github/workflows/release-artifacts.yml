@@ -119,6 +119,12 @@ jobs:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
 
+        - build: ubuntu-22.04.arm64
+          os: ubuntu-22.04-arm64-8-core
+          rust: stable
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+
         - build: macos-13.x86_64
           os: macos-13
           rust: stable

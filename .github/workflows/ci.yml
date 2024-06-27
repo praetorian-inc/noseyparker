@@ -80,6 +80,30 @@ jobs:
           check_docs: true
           run_tests: true
 
+        - name: ubuntu-22.04.arm64.stable.release
+          os: ubuntu-22.04-arm64-8-core
+          rust: stable
+          profile: release
+          features: release
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+          cpu_info_cmd: 'cat /proc/cpuinfo'
+
+          check_docs: false
+          run_tests: true
+
+        - name: ubuntu-24.04.arm64.stable.test
+          os: ubuntu-24.04-arm64-8-core
+          rust: stable
+          profile: test
+          features:
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+          cpu_info_cmd: 'cat /proc/cpuinfo'
+
+          check_docs: true
+          run_tests: true
+
         - name: macos-12.x86_64.stable.test
           os: macos-12
           rust: stable
