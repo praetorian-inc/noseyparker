@@ -103,7 +103,8 @@ fn default_scan_jobs() -> usize {
     match (std::thread::available_parallelism(), *RAM_GB) {
         (Ok(v), Some(ram_gb)) => {
             let n: usize = v.into();
-            n.clamp(1, (ram_gb / 4.0).floor() as usize)
+            let max_n = (ram_gb / 4.0).ceil().max(1.0) as usize;
+            n.clamp(1, max_n)
         }
         (Ok(v), None) => v.into(),
         (Err(_e), _) => 1,
