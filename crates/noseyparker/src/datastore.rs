@@ -515,6 +515,15 @@ impl Datastore {
         Ok(num_matches)
     }
 
+    /// How many findings are there, total, in the datastore?
+    pub fn get_num_findings(&self) -> Result<u64> {
+        let mut stmt = self.conn.prepare_cached(indoc! {r#"
+            select count(*) from finding
+        "#})?;
+        let num_findings: u64 = stmt.query_row((), val_from_row)?;
+        Ok(num_findings)
+    }
+
     /// Get a summary of all recorded findings.
     pub fn get_summary(&self) -> Result<FindingSummary> {
         let _span = debug_span!("Datastore::get_summary", "{}", self.root_dir.display()).entered();
@@ -718,7 +727,7 @@ impl Datastore {
                     } else {
                         assert_eq!(n_set, 0);
                         stats.n_missing += 1;
-                        trace!("did not import {annotation_type}: not found: {ann:#?}");
+                        debug!("did not import {annotation_type}: not found: {ann:#?}");
                     }
                 }
             }
@@ -838,9 +847,15 @@ impl Datastore {
 
         tx.commit()?;
 
-        info!("Finding comments: {finding_comment_stats}");
-        info!("Match comments: {match_comment_stats}");
-        info!("Match statuses: {match_status_stats}");
+        info!(
+            "{} findings and {} matches in datastore at {}",
+            self.get_num_findings()?,
+            self.get_num_matches()?,
+            self.root_dir.display()
+        );
+        info!("Finding comment annotations: {finding_comment_stats}");
+        info!("Match comment annotations: {match_comment_stats}");
+        info!("Match status annotations: {match_status_stats}");
 
         Ok(())
     }
