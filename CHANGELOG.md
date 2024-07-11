@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixes
 
-- Nosey Parker no longer crashes upon startup when running in environments with less than 4 GiB of RAM.
+- Nosey Parker no longer crashes upon startup when running in environments with less than 4 GiB of RAM ([#202](https://github.com/praetorian-inc/noseyparker/pull/202)).
 
 
 ## [v0.18.0](https://github.com/praetorian-inc/noseyparker/releases/v0.18.0) (2024-06-27)
