@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Nosey Parker no longer crashes upon startup when running in environments with less than 4 GiB of RAM ([#202](https://github.com/praetorian-inc/noseyparker/pull/202)).
 
+- The `Base64-PEM-Encoded Private Key` rule has been refined to reduce false positives and avoid a rare performance pitfall.
 
 ## [v0.18.0](https://github.com/praetorian-inc/noseyparker/releases/v0.18.0) (2024-06-27)
 
