@@ -6,13 +6,14 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)
 
 ### Fixes
 
 - Nosey Parker no longer crashes upon startup when running in environments with less than 4 GiB of RAM ([#202](https://github.com/praetorian-inc/noseyparker/pull/202)).
 
 - The `Base64-PEM-Encoded Private Key` rule has been refined to reduce false positives and avoid a rare performance pitfall.
+
 
 ## [v0.18.0](https://github.com/praetorian-inc/noseyparker/releases/v0.18.0) (2024-06-27)
 
