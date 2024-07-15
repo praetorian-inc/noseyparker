@@ -24,7 +24,7 @@ anyhow = { version = "1.0" }
 atoi = "2.0"
 bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
-chrono = { version = "0.4", default_features = false, features = ["std"] }
+chrono = { version = "0.4", default-features = false, features = ["std"] }
 console = "0.15"
 fixedbitset = "0.5"
 gix = { version = "0.63", features = ["max-performance", "serde"] }
