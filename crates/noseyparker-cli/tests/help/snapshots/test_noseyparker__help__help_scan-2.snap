@@ -97,6 +97,16 @@ Input Specifier Options:
           
           This option can be repeated.
 
+      --github-repo-type <TYPE>
+          Clone and scan GitHub repos only of the given type
+          
+          [default: source]
+
+          Possible values:
+          - all:    Select both source repositories and fork repositories
+          - source: Only source repositories, i.e., ones that are not forks
+          - fork:   Only fork repositories
+
       --github-organization <NAME>
           Clone and scan accessible repositories belonging to the specified GitHub organization
           

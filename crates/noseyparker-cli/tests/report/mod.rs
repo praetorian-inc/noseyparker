@@ -5,14 +5,14 @@ pub use pretty_assertions::{assert_eq, assert_ne};
 fn report_nonexistent_default_datastore() {
     let scan_env = ScanEnv::new();
     let ds = scan_env.root.child("datastore.np");
-    ds.assert(predicates::path::missing());
+    ds.assert(predicate::path::missing());
 
     assert_cmd_snapshot!(noseyparker!("report")
         .current_dir(scan_env.root.path())
         .assert()
         .failure());
 
-    ds.assert(predicates::path::missing());
+    ds.assert(predicate::path::missing());
 }
 
 /// Test that the `report` command's `--max-matches` can be given a negative value (which means "no

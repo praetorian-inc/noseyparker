@@ -12,7 +12,7 @@ pub use auth::Auth;
 pub use client::Client;
 pub use client_builder::ClientBuilder;
 pub use error::Error;
-pub use repo_enumerator::{RepoEnumerator, RepoSpecifiers};
+pub use repo_enumerator::{RepoEnumerator, RepoSpecifiers, RepoType};
 pub use result::Result;
 
 use progress::Progress;

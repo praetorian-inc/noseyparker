@@ -44,7 +44,8 @@ impl<'c> RepoEnumerator<'c> {
         let mut repo_urls = Vec::new();
 
         for username in &repo_specifiers.user {
-            let to_add = self.enumerate_user_repos(username).await?;
+            let mut to_add = self.enumerate_user_repos(username).await?;
+            to_add.retain(|r| repo_specifiers.repo_filter.filter(r));
             if let Some(progress) = progress.as_mut() {
                 progress.inc(to_add.len() as u64);
             }
@@ -67,7 +68,8 @@ impl<'c> RepoEnumerator<'c> {
             .collect();
 
         for orgname in orgs {
-            let to_add = self.enumerate_org_repos(orgname).await?;
+            let mut to_add = self.enumerate_org_repos(orgname).await?;
+            to_add.retain(|r| repo_specifiers.repo_filter.filter(r));
             if let Some(progress) = progress.as_mut() {
                 progress.inc(to_add.len() as u64);
             }
@@ -81,12 +83,36 @@ impl<'c> RepoEnumerator<'c> {
     }
 }
 
+/// Specifies which GitHub repositories to select.
+#[derive(Debug)]
+pub enum RepoType {
+    /// Select both source repositories and fork repositories
+    All,
+
+    /// Only source repositories, i.e., ones that are forks
+    Source,
+
+    /// Only fork repositories
+    Fork,
+}
+
+impl RepoType {
+    fn filter(&self, repo: &Repository) -> bool {
+        match self {
+            RepoType::All => true,
+            RepoType::Source => !repo.fork,
+            RepoType::Fork => repo.fork,
+        }
+    }
+}
+
 /// Specifies a set of GitHub usernames and/or organization names.
 #[derive(Debug)]
 pub struct RepoSpecifiers {
     pub user: Vec<String>,
     pub organization: Vec<String>,
     pub all_organizations: bool,
+    pub repo_filter: RepoType,
 }
 
 impl RepoSpecifiers {

@@ -462,6 +462,15 @@ pub struct GitHubRepoSpecifiers {
         visible_alias = "all-github-orgs"
     )]
     pub all_organizations: bool,
+
+    /// Select only GitHub repos of the given type
+    #[arg(
+        long,
+        visible_alias = "github-repo-type",
+        value_name="TYPE",
+        default_value_t = GitHubRepoType::Source,
+    )]
+    pub repo_type: GitHubRepoType,
 }
 
 impl GitHubRepoSpecifiers {
@@ -697,6 +706,31 @@ pub enum GitCloneMode {
     Mirror,
 }
 
+/// Which GitHub repositories to select
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all = "kebab-case")]
+pub enum GitHubRepoType {
+    /// Select both source repositories and fork repositories
+    All,
+
+    /// Only source repositories, i.e., ones that are not forks
+    Source,
+
+    /// Only fork repositories
+    #[value(alias = "forks")]
+    Fork,
+}
+
+impl From<GitHubRepoType> for noseyparker::github::RepoType {
+    fn from(val: GitHubRepoType) -> Self {
+        match val {
+            GitHubRepoType::All => noseyparker::github::RepoType::All,
+            GitHubRepoType::Source => noseyparker::github::RepoType::Source,
+            GitHubRepoType::Fork => noseyparker::github::RepoType::Fork,
+        }
+    }
+}
+
 /// The method of handling history in discovered Git repositories
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[strum(serialize_all = "kebab-case")]
@@ -828,6 +862,14 @@ pub struct InputSpecifierArgs {
         display_order = 30
     )]
     pub github_api_url: Url,
+
+    /// Clone and scan GitHub repos only of the given type
+    #[arg(
+        long,
+        value_name = "TYPE",
+        default_value_t = GitHubRepoType::Source,
+    )]
+    pub github_repo_type: GitHubRepoType,
 
     /// Use the specified method for cloning Git repositories
     #[arg(long, value_name = "MODE", display_order = 40, default_value_t=GitCloneMode::Bare, alias="git-clone-mode")]
