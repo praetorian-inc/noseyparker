@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `scan` and `github repos list` commands now only consider non-forked repositories by default ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
   This behavior can be reverted to the previous behavior using the `--github-repo-type=all` option.
 
+- The Alpine-based Docker image has been updated to use the `alpine:latest` base image instead of `alpine:3.18` ([#201](https://github.com/praetorian-inc/noseyparker/issues/201)).
+
 
 ## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)
 
