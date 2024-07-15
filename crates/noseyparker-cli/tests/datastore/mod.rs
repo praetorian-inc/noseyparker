@@ -17,7 +17,7 @@ fn export_empty() {
     // export it
     let tgz = scan_env.root.child("export.tgz");
     noseyparker_success!("datastore", "export", "-d", scan_env.dspath(), "-o", tgz.path());
-    tgz.assert(predicates::path::is_file());
+    tgz.assert(predicate::path::is_file());
 
     // extract the archive
     let extract_dir = scan_env.root.child("export.np");

@@ -157,7 +157,7 @@ fn scan_default_datastore() {
     let input = scan_env.input_file("input.txt");
 
     let ds = scan_env.root.child("datastore.np");
-    ds.assert(predicates::path::missing());
+    ds.assert(predicate::path::missing());
 
     // first scan with the default datastore
     noseyparker!("scan", input.path())
@@ -166,8 +166,8 @@ fn scan_default_datastore() {
         .success()
         .stdout(match_scan_stats("0 B", 1, 0, 0));
 
-    ds.assert(predicates::path::is_dir());
-    input.assert(predicates::path::is_file());
+    ds.assert(predicate::path::is_dir());
+    input.assert(predicate::path::is_file());
 
     // Make sure that summarization and reporting works without an explicit datastore
     let cmd = noseyparker!("report", "--format=json")
@@ -202,12 +202,12 @@ fn scan_default_datastore() {
 fn summarize_nonexistent_default_datastore() {
     let scan_env = ScanEnv::new();
     let ds = scan_env.root.child("datastore.np");
-    ds.assert(predicates::path::missing());
+    ds.assert(predicate::path::missing());
 
     assert_cmd_snapshot!(noseyparker!("summarize")
         .current_dir(scan_env.root.path())
         .assert()
         .failure());
 
-    ds.assert(predicates::path::missing());
+    ds.assert(predicate::path::missing());
 }

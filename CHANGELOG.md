@@ -6,6 +6,18 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Additions
+
+- The `scan` and `github repos list` commands offer a new `--github-repo-type={all,source,fork}` option to select a subset of repositories.
+
+### Changes
+
+- The `scan` and `github repos list` commands now only consider non-forked repositories by default.
+  This behavior can be reverted to the previous behavior using the `--github-repo-type=all` option.
+
+
 ## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)
 
 ### Fixes

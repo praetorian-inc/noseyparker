@@ -9,7 +9,8 @@ pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
 pub use assert_fs::{fixture::ChildPath, TempDir};
 pub use insta::{assert_json_snapshot, assert_snapshot, internals::Redaction, with_settings};
-pub use predicates::str::{is_empty, RegexPredicate};
+pub use predicates::prelude::*;
+pub use predicates::str::RegexPredicate;
 pub use std::path::Path;
 pub use std::process::Command;
 
@@ -108,7 +109,7 @@ pub fn noseyparker_cmd() -> Command {
 
 /// Create a `RegexPredicate` from the given pattern.
 pub fn is_match(pat: &str) -> RegexPredicate {
-    predicates::str::is_match(pat).expect("pattern should compile")
+    predicate::str::is_match(pat).expect("pattern should compile")
 }
 
 /// Create a `RegexPredicate` for matching a scan stats output message from Nosey Parker.
@@ -282,8 +283,8 @@ pub fn create_empty_git_repo(destination: &Path) {
         .arg(destination)
         .assert()
         .success()
-        .stdout(is_empty())
-        .stderr(is_empty());
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::is_empty());
 }
 
 pub fn get_report_stdout_filters() -> Vec<(&'static str, &'static str)> {

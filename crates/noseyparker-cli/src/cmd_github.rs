@@ -24,6 +24,7 @@ fn list_repos(global_args: &GlobalArgs, args: &GitHubReposListArgs, api_url: Url
             user: args.repo_specifiers.user.clone(),
             organization: args.repo_specifiers.organization.clone(),
             all_organizations: args.repo_specifiers.all_organizations,
+            repo_filter: args.repo_specifiers.repo_type.into(),
         },
         api_url,
         global_args.ignore_certs,
