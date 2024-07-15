@@ -10,11 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Additions
 
-- The `scan` and `github repos list` commands offer a new `--github-repo-type={all,source,fork}` option to select a subset of repositories.
+- The `scan` and `github repos list` commands offer a new `--github-repo-type={all,source,fork}` option to select a subset of repositories ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
 
 ### Changes
 
-- The `scan` and `github repos list` commands now only consider non-forked repositories by default.
+- The `scan` and `github repos list` commands now only consider non-forked repositories by default ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
   This behavior can be reverted to the previous behavior using the `--github-repo-type=all` option.
 
 
