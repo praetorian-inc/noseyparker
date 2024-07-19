@@ -12,7 +12,7 @@ authors = ["Brad Larsen <bradford.larsen@praetorian.com>"]
 homepage = "https://github.com/praetorian-inc/noseyparker"
 repository = "https://github.com/praetorian-inc/noseyparker"
 
-version = "0.18.1"
+version = "0.18.2-dev"
 
 publish = false
 
