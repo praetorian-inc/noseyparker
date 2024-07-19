@@ -73,9 +73,9 @@ indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
 input-enumerator = { path = "../input-enumerator" }
 lazy_static = "1.4"
-libmimalloc-sys = { version = "=0.1.35", optional = true }
+libmimalloc-sys = { version = "0.1.39", optional = true }
 log = { version = "0.4", optional = true }
-mimalloc = { version = "=0.1.39", optional = true }
+mimalloc = { version = "0.1.43", optional = true }
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
 noseyparker-digest = { path = "../noseyparker-digest" }
