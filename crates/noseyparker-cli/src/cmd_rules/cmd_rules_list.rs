@@ -128,10 +128,15 @@ impl<'r> Entries<'r> {
         let mut table: prettytable::Table = self
             .rules
             .iter()
-            .map(|r| row![l -> &r.id, l -> &r.name])
+            .map(|r| {
+                let mut cats = r.syntax.categories.clone();
+                cats.sort();
+                let cats: String = cats.join(", ");
+                row![l -> &r.id, l -> &r.name, l -> cats]
+            })
             .collect();
         table.set_format(f);
-        table.set_titles(row![lb -> "Rule ID", lb -> "Rule Name"]);
+        table.set_titles(row![lb -> "Rule ID", lb -> "Rule Name", lb -> "Categories"]);
         table
     }
 

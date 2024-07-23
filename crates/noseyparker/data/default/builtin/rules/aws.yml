@@ -154,7 +154,7 @@ rules:
   - https://docs.developer.amazonservices.com/en_US/dev_guide/index.html
 
 
-- name: AWS S3 Bucket (subdomain style)
+- name: AWS S3 Bucket
   id: np.s3.1
 
   pattern: |
@@ -213,7 +213,7 @@ rules:
   - 's3.amazonaws.com'
 
 
-- name: AWS S3 Bucket (path style)
+- name: AWS S3 Bucket
   id: np.s3.2
 
   pattern: |

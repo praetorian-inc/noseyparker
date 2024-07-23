@@ -3,7 +3,7 @@ rules:
 - name: Shopify Domain
   id: np.shopify.1
 
-  catgegories:
+  categories:
   - identifier
 
   pattern: |
@@ -25,7 +25,7 @@ rules:
 - name: Shopify App Secret
   id: np.shopify.2
 
-  catgegories:
+  categories:
   - api
   - secret
 
