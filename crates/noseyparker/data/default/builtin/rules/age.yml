@@ -12,6 +12,8 @@ rules:
   - https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html
   - https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type
 
+  categories:
+
 
 - name: Age Identity (X22519 secret key)
   id: np.age.2
@@ -28,3 +30,6 @@ rules:
   - https://age-encryption.org
   - https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html
   - https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type
+
+  categories:
+  - secret

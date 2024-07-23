@@ -9,6 +9,8 @@ rules:
     (doo_v1_[a-f0-9]{64})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.digitalocean.com/reference/api/
 
@@ -25,6 +27,8 @@ rules:
     (dop_v1_[a-f0-9]{64})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.digitalocean.com/reference/api/
 
@@ -40,6 +44,8 @@ rules:
     \b
     (dor_v1_[a-f0-9]{64})
     \b
+
+  categories: [api, secret]
 
   references:
   - https://docs.digitalocean.com/reference/api/

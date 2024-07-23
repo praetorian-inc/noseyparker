@@ -5,6 +5,8 @@ rules:
 
   pattern: '(?i)\b([0-9]+-[a-z0-9_]{32})\.apps\.googleusercontent\.com'
 
+  categories: [api, identifier]
+
   examples:
   - "                 'clientID' : '231545488769-4d1mcev9vifvlncrern52id2pqqf5u5l.apps.googleusercontent.com',"
   - "                //$google_client_id     = '244082345999-o6m8f1pmb1e76tjfj9v7b96j31e53ps5.apps.googleusercontent.com';"
@@ -12,7 +14,7 @@ rules:
   - '          $cordovaOauth.google("653512027492-5u9blotr1521fa0lo1172nhv4pmqgttq.apps.googleusercontent.com", ["email"]).then(function(result) {'
 
 
-- name: Google OAuth Client Secret (prefixed)
+- name: Google OAuth Client Secret
   id: np.google.2
 
   pattern: |
@@ -21,8 +23,11 @@ rules:
     (GOCSPX-[a-zA-Z0-9_-]{28})
     (?:[^a-zA-Z0-9_-] | $)
 
+  categories: [api, secret]
+
   examples:
   - 'const CLIENTSECRET = "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"'
+
 
 - name: Google OAuth Client Secret
   id: np.google.3
@@ -33,6 +38,8 @@ rules:
     \b
     ([a-z0-9_-]{24})
     (?: [^a-z0-9_-] |$)
+
+  categories: [api, fuzzy, secret]
 
   examples:
   - '"client_secret":"aaaaaaaaaaaaaaaaaaaaaaa-"'
@@ -48,6 +55,8 @@ rules:
     \b
     (ya29\.[0-9A-Za-z_-]{20,1024})
     (?: [^0-9A-Za-z_-]|$)  (?# Used instead of `\b` because that doesn't play well with trailing `-` )
+
+  categories: [api, secret]
 
   examples:
   - |
@@ -74,6 +83,8 @@ rules:
     (AIza[0-9A-Za-z_-]{35})
     (?: [^0-9A-Za-z_-] | $ )
 
+  categories: [api, secret]
+
   references:
   - https://cloud.google.com/docs/authentication/api-keys#securing
   - https://support.google.com/googleapi/answer/6310037
@@ -83,7 +94,7 @@ rules:
   - 'value="AIzaSyBnAoO3VNVUco4MXf4enYCVBg6ZnpY49N-'
 
 
-- name: Google Cloud Storage Bucket (subdomain style)
+- name: Google Cloud Storage Bucket
   id: np.gcs.1
 
   pattern: |
@@ -94,6 +105,8 @@ rules:
     storage\.googleapis\.com
     )
     \b
+
+  categories: [api, identifier]
 
   references:
   - https://cloud.google.com/storage/docs/request-endpoints
@@ -106,7 +119,7 @@ rules:
   - 'https://storage.googleapis.com'
 
 
-- name: Google Cloud Storage Bucket (path style)
+- name: Google Cloud Storage Bucket
   id: np.gcs.2
 
   pattern: |
@@ -118,6 +131,8 @@ rules:
     [a-zA-Z0-9_-]+ (?: \. [a-zA-Z0-9_-]+ )*    (?# bucket name as path )
     )
     (?: [^a-zA-Z0-9_-] | $ )                   (?# this instead of a \b anchor because that doesn't play nicely with `-` )
+
+  categories: [api, identifier]
 
   references:
   - https://cloud.google.com/storage/docs/request-endpoints
@@ -146,6 +161,8 @@ rules:
     )
 
     (?:[^a-zA-Z0-9_-] | $)
+
+  categories: [api, fuzzy, secret]
 
   examples:
   - |

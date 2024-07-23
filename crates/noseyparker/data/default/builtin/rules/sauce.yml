@@ -10,6 +10,8 @@ rules:
     ([a-f0-9-]{36})
     (?: [^a-f0-9-] | $ )
 
+  categories: [api, fuzzy, secret]
+
   examples:
   - |
       - SAUCE_USERNAME=vitess

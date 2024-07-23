@@ -16,3 +16,7 @@ rules:
 
   references:
   - https://io.adafruit.com/api/docs
+
+  categories:
+  - api
+  - secret

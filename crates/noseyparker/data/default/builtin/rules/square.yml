@@ -2,7 +2,13 @@ rules:
 
 - name: Square Access Token
   id: np.square.1
+
   pattern: '(?i)\b(sq0atp-[a-z0-9_-]{22})\b'
+
+  categories:
+  - api
+  - secret
+
   examples:
   - '  personal access token sq0atp-qUlZzae8wVMc5P5NZdf5DA<br/>'
   - |
@@ -12,7 +18,13 @@ rules:
 
 - name: Square OAuth Secret
   id: np.square.2
+
   pattern: '(?i)\b(sq0csp-[a-z0-9_-]{43})\b'
+
+  categories:
+  - api
+  - secret
+
   examples:
   - |
       app_secret: sq0csp-VQgEphNJFVxfoEtJ1M_2KaCesfzP2_ugNWnlMPwZaZk

@@ -15,6 +15,11 @@ rules:
     \s* [:=] \s*
     ([a-f0-9]{64})\b
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   references:
   # Old reporters use `CODECLIMATE_REPO_TOKEN`
   - https://github.com/codeclimate/javascript-test-reporter

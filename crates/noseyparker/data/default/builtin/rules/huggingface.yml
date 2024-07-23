@@ -5,6 +5,8 @@ rules:
 
   pattern: '\b(hf_[a-zA-Z]{34})\b'
 
+  categories: [api, secret]
+
   references:
   - https://huggingface.co/docs/hub/security-tokens
 

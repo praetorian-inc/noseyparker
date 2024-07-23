@@ -4,6 +4,8 @@ rules:
   id: np.heroku.1
   pattern: '(?i)heroku.{0,20}key.{0,20}\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b'
 
+  categories: [api, fuzzy, secret]
+
   references:
   - https://devcenter.heroku.com/articles/authentication
 

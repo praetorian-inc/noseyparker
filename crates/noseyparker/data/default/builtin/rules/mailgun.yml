@@ -5,6 +5,8 @@ rules:
 
   pattern: '(?i)(?:mailgun|mg).{0,20}key-([a-z0-9]{32})\b'
 
+  categories: [api, fuzzy, secret]
+
   examples:
   - "var apiKey = process.env.MAILGUN_API || 'key-46cebd38c59ac222e6cf991581411eaf'"
 

@@ -13,6 +13,8 @@ rules:
       (?:\s*//.*)*        (?# skip line comments)
       \s* (?:username|password) \s+ ['"]([^'"]{1,60})['"]
 
+  categories: [fuzzy, secret]
+
   examples:
   - |
       credentials {

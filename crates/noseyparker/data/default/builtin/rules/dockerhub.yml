@@ -9,6 +9,8 @@ rules:
     (dckr_pat_[a-zA-Z0-9_-]{27})
     (?: $ | [^a-zA-Z0-9_-] )
 
+  categories: [api, secret]
+
   examples:
   - docker login -u gemesa -p dckr_pat_hc8VxYclixyTr2rDFsa2rqzkP3Y
   - docker login -u gemesa -p dckr_pat_tkzBYxjNNC3R_Yg6jd_O-G8FbrJ

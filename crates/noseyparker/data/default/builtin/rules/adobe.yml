@@ -21,3 +21,7 @@ rules:
         "client_id": "a65b0146769d433a835f36660881db50",
         "client_secret": "p8e-ibndcvsmAp9ZgPBZ606FSlYIZVlsZ-g5"
       },
+
+  categories:
+  - api
+  - secret

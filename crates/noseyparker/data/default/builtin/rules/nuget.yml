@@ -5,6 +5,8 @@ rules:
 
   pattern: '\b(oy2[a-z0-9]{43})\b'
 
+  categories: [api, secret]
+
   references:
   - https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys
 

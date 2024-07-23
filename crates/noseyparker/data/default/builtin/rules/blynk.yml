@@ -9,6 +9,10 @@ rules:
     ([a-zA-Z0-9_\-]{32})
     &
 
+  categories:
+  - api
+  - secret
+
   examples:
   - curl "https://blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1"
   # region can be: fra1/lon1/ny3/sgp1/blr1, see https://docs.blynk.io/en/blynk.cloud/device-https-api/troubleshooting
@@ -23,7 +27,7 @@ rules:
   - https://docs.blynk.io/en/blynk.cloud/device-https-api/troubleshooting
   - https://docs.blynk.io/en/getting-started/activating-devices/manual-device-activation#step-3-getting-auth-token
 
-- name: Blynk Organization Access Token (URL first)
+- name: Blynk Organization Access Token
   id: np.blynk.2
 
   pattern: |
@@ -32,6 +36,10 @@ rules:
     -H\s*"Authorization:\s*Bearer\s*
     ([a-zA-Z0-9_\-]{40})
     "
+
+  categories:
+  - api
+  - secret
 
   examples:
   - 'curl https://fra1.blynk.cloud/api/organization/profile -H "Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS"'
@@ -42,7 +50,7 @@ rules:
   references:
   - https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info
 
-- name: Blynk Organization Access Token (URL last)
+- name: Blynk Organization Access Token
   id: np.blynk.3
 
   pattern: |
@@ -50,6 +58,10 @@ rules:
     -H\s*"Authorization:\s*Bearer\s*
     ([a-zA-Z0-9_\-]{40})
     "[\s\\]*https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/api
+
+  categories:
+  - api
+  - secret
 
   examples:
   - 'curl -H "Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS" https://fra1.blynk.cloud/api/organization/profile'
@@ -60,55 +72,21 @@ rules:
   references:
   - https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info
 
-- name: Blynk Organization Client ID (URL first)
-  id: np.blynk.4
+
+- name: Blynk Organization Client Credentials
+  id: np.blynk.8
 
   pattern: |
     (?x)
     https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2/[a-zA-Z0-9_\-\s/\\?=&]*
     (oa2-client-id_[a-zA-Z0-9_\-]{32})
-    (?::|&client_secret=)
-    (?:[a-zA-Z0-9_\-]{40})
-
-  examples:
-  - 'curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp'
-  - |
-    curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \
-    -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp
-  - 'curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials&client_id=oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-&client_secret=5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp'
-
-  references:
-  - https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication
-
-- name: Blynk Organization Client ID (URL last)
-  id: np.blynk.5
-
-  pattern: |
-    (?x)
-    \b
-    (oa2-client-id_[a-zA-Z0-9_\-]{32})
-    :(?:[a-zA-Z0-9_\-]{40})
-    [\s\\]*https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2
-
-  examples:
-  - 'curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials'
-  - |
-    curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \
-    https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials
-
-  references:
-  - https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication
-
-- name: Blynk Organization Client Secret (URL first)
-  id: np.blynk.6
-
-  pattern: |
-    (?x)
-    https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2/[a-zA-Z0-9_\-\s/\\?=&]*
-    (?:oa2-client-id_[a-zA-Z0-9_\-]{32})
-    (?::|&client_secret=)
+    (?: : | &client_secret= )
     ([a-zA-Z0-9_\-]{40})
 
+  categories:
+  - api
+  - secret
+
   examples:
   - 'curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp'
   - |
@@ -119,15 +97,19 @@ rules:
   references:
   - https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication
 
-- name: Blynk Organization Client Secret (URL last)
-  id: np.blynk.7
+- name: Blynk Organization Client Credentials
+  id: np.blynk.9
 
   pattern: |
     (?x)
     \b
-    (?:oa2-client-id_[a-zA-Z0-9_\-]{32})
+    (oa2-client-id_[a-zA-Z0-9_\-]{32})
     :([a-zA-Z0-9_\-]{40})
-    [\s\\]*https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2
+    [\s\\]*https://(fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2
+
+  categories:
+  - api
+  - secret
 
   examples:
   - 'curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials'

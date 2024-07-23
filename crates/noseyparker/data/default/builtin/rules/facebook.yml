@@ -16,6 +16,8 @@ rules:
   references:
   - https://developers.facebook.com/docs/facebook-login/access-tokens/
 
+  categories: [api, fuzzy, secret]
+
   examples:
   - '   # config.facebook.key = "34cebc81c056a21bc66e212f947d73ec"'
   - "    var fbApiKey = '0278fc1adf6dc1d82a156f306ce2c5cc';"
@@ -30,6 +32,8 @@ rules:
   id: np.facebook.2
 
   pattern: '\b(EAACEdEose0cBA[a-zA-Z0-9]+)\b'
+
+  categories: [api, secret]
 
   references:
   - https://developers.facebook.com/docs/facebook-login/access-tokens/

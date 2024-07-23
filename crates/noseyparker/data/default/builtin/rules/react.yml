@@ -25,6 +25,7 @@ rules:
     ( [^\s'"$]{3,} )                                     (?# value )
     (?: [\s'"$] | $ )
 
+  categories: [fuzzy, identifier]
 
   references:
   - https://create-react-app.dev/docs/adding-custom-environment-variables/
@@ -54,6 +55,7 @@ rules:
     ( [^\s'"$]{6,} )                                     (?# value )
     (?: [\s'"$] | $ )
 
+  categories: [fuzzy, secret]
 
   references:
   - https://create-react-app.dev/docs/adding-custom-environment-variables/

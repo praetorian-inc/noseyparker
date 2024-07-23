@@ -6,6 +6,8 @@ rules:
   # It's a 32-character alphanumeric identifier prefixed by `cio`
   pattern: '\b(cio[a-zA-Z0-9]{32})\b'
 
+  categories: [api, secret]
+
   references:
   - https://crates.io/data-access
   - https://github.com/rust-lang/crates.io/blob/master/src/util/token.rs

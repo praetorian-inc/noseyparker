@@ -10,6 +10,8 @@ rules:
     (pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,})
     (?:[^a-zA-Z0-9_-]|$)
 
+  categories: [api, secret]
+
   references:
   # GitHub Secrets Scanning implementation issue and discussion
   - https://github.com/pypa/warehouse/issues/6051

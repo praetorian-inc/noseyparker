@@ -5,6 +5,11 @@ rules:
 
   pattern: '(?i)sonar.{0,5}login.{0,5}\s*\b([a-f0-9]{40})\b'
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   references:
   - https://docs.sonarqube.org/latest/user-guide/user-token/
 

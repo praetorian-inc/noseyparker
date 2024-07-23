@@ -5,6 +5,8 @@ rules:
 
   pattern: '(?i)jenkins.{0,10}(?:crumb)?.{0,10}\b([0-9a-f]{32,36})\b'
 
+  categories: [api, fuzzy, secret]
+
   examples:
   - |
       jenkins_user = 'root'

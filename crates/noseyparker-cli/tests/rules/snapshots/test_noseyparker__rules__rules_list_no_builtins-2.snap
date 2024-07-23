@@ -2,8 +2,8 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
- Rule ID   Rule Name 
-─────────────────────
+ Rule ID   Rule Name   Categories 
+──────────────────────────────────
 
  Ruleset ID   Ruleset Name   Rules 
 ───────────────────────────────────

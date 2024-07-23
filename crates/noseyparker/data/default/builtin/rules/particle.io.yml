@@ -1,6 +1,7 @@
 rules:
 
-- name: particle.io Access Token (URL first)
+
+- name: particle.io Access Token
   id: np.particleio.1
 
   pattern: |
@@ -10,6 +11,8 @@ rules:
     \b
     ([a-zA-Z0-9]{40})
     \b
+
+  categories: [api, secret]
 
   examples:
   - |
@@ -26,7 +29,8 @@ rules:
   references:
   - https://docs.particle.io/reference/cloud-apis/api/
 
-- name: particle.io Access Token (URL last)
+
+- name: particle.io Access Token
   id: np.particleio.2
 
   pattern: |
@@ -36,6 +40,8 @@ rules:
     ([a-zA-Z0-9]{40})
     \b
     [\s"\\]*https://api\.particle\.io/v1
+
+  categories: [api, secret]
 
   examples:
   - |

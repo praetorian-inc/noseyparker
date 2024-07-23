@@ -15,8 +15,8 @@ rulesets:
   - np.arn.1          # Amazon Resource Name
   - np.aws.1          # AWS API Key
   - np.aws.3          # AWS Account ID
-  - np.gcs.1          # Google Cloud Storage Bucket (subdomain style)
-  - np.gcs.2          # Google Cloud Storage Bucket (path style)
+  - np.gcs.1          # Google Cloud Storage Bucket
+  - np.gcs.2          # Google Cloud Storage Bucket
   - np.github.5       # GitHub Client ID
   - np.google.1       # Google Client ID
   # - np.jwt.1          # JSON Web Token (base64url-encoded)

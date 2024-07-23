@@ -22,6 +22,10 @@ rules:
     thingsboard\.cloud/api/v1/
     ([a-z0-9]{20})
 
+  categories:
+  - api
+  - identifier
+
   examples:
   - http://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
   - https://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
@@ -40,6 +44,10 @@ rules:
     ([a-z0-9]{20})
     "
 
+  categories:
+  - api
+  - secret
+
   examples:
   - '"{"deviceName": "DEVICE_NAME", "provisionDeviceKey": "s2s1gfcuatgbi61n8h5s", "provisionDeviceSecret": "xbzsovaw9ix4qfhi14an"}"'
 
@@ -55,6 +63,8 @@ rules:
     "provisionDeviceSecret"\s*:\s*"
     ([a-z0-9]{20})
     "
+
+  categories: [api, fuzzy, secret]
 
   examples:
   - '"{"deviceName": "DEVICE_NAME", "provisionDeviceKey": "s2s1gfcuatgbi61n8h5s", "provisionDeviceSecret": "xbzsovaw9ix4qfhi14an"}"'

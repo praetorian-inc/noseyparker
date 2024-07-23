@@ -4,6 +4,8 @@ rules:
   id: np.pwhash.1
   pattern: '(\$1\$[./A-Za-z0-9]{8}\$[./A-Za-z0-9]{22})'
 
+  categories: [hashed, secret]
+
   references:
   - https://en.wikipedia.org/wiki/Crypt_(C)#MD5-based_scheme
   - https://unix.stackexchange.com/a/511017
@@ -21,6 +23,8 @@ rules:
   # Format from Wikipedia:
   #   $2<a/b/x/y>$[cost]$[22 character salt][31 character hash]
   pattern: '(\$2[abxy]\$\d+\$[./A-Za-z0-9]{53})'
+
+  categories: [hashed, secret]
 
   references:
   - https://en.wikipedia.org/wiki/Bcrypt
@@ -45,6 +49,8 @@ rules:
     \$ [./A-Za-z0-9]{43}    (?# hash )
     )
 
+  categories: [hashed, secret]
+
   references:
   - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
   - https://hashcat.net/wiki/doku.php?id=example_hashes
@@ -67,6 +73,8 @@ rules:
     \$ [./A-Za-z0-9]{86}    (?# hash )
     )
 
+  categories: [hashed, secret]
+
   references:
   - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
   - https://hashcat.net/wiki/doku.php?id=example_hashes
@@ -86,6 +94,8 @@ rules:
     \$ [./A-Za-z0-9]{8,16}  (?# salt )
     \$ [./A-Za-z0-9]{43}    (?# hash )
     )
+
+  categories: [hashed, secret]
 
   references:
   - https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt
@@ -109,6 +119,8 @@ rules:
     \$ [0-9a-f]{64,}                      (?# hash )
     )
     \b
+
+  categories: [hashed, secret]
 
   references:
   - https://hashcat.net/wiki/doku.php?id=example_hashes

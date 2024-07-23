@@ -8,6 +8,9 @@ rules:
   # the word boundary `\b` zero-width assertion, and also requiring "okta" or
   # "ssws" out front.
   pattern: '(?i)(?s)(?:okta|ssws).{0,40}\b(00[a-z0-9_-]{39}[a-z0-9_])\b'
+
+  categories: [api, secret]
+
   references:
   - https://devforum.okta.com/t/api-token-length/5519
   - https://developer.okta.com/docs/guides/create-an-api-token/main/
