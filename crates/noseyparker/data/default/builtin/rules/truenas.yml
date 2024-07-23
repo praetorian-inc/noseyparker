@@ -9,6 +9,11 @@ rules:
     (\d+-[a-zA-Z0-9]{64})
     "\s*\]
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   examples:
   - '{"id":"3286a508-a6ca-278a-c078-85b2b515d8d2", "msg":"method", "method":"auth.login_with_api_key", "params":["8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu"]}'
   - '{"id":"677d9914-f598-f497-e77e-2a3aadbb822e", "msg":"method", "method":"auth.login_with_api_key", "params" : ["9-hTSZDBPyg0PjRZvWb8omoxJ7X2gAjRGmiPKql9ENGIUP9OPtEAzz5f6g9YIMVbZT"]}'
@@ -39,6 +44,11 @@ rules:
     Bearer\s*
     (\d+-[a-zA-Z0-9]{64})
     \b
+
+  categories:
+  - api
+  - fuzzy
+  - secret
 
   examples:
   # only "Bearer" is accepted by TrueNAS API (no "bearer" etc.)

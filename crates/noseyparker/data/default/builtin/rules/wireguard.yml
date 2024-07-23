@@ -20,6 +20,8 @@ rules:
   - https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html
   - https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6
 
+  categories: [fuzzy, secret]
+
 - name: WireGuard Preshared Key
   id: np.wireguard.2
 
@@ -37,3 +39,5 @@ rules:
   - https://www.wireguard.com/quickstart/
   - https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html
   - https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6
+
+  categories: [fuzzy, secret]

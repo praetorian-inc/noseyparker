@@ -12,6 +12,8 @@ rules:
     )
     (?: \b | $ | [^a-zA-Z0-9._] )
 
+  categories: [api, secret]
+
   references:
   - https://help.salesforce.com/s/articleView?id=sf.remoteaccess_access_tokens.htm&type=5
   - https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart_oauth.htm

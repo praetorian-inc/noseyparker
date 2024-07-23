@@ -9,6 +9,8 @@ rules:
     (npm_[A-Za-z0-9]{36})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.npmjs.com/about-access-tokens
   - https://github.com/github/roadmap/issues/557

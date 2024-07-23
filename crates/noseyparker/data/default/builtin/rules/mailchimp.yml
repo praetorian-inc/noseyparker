@@ -10,6 +10,8 @@ rules:
     ([a-f0-9]{32}-us[0-9]{1,3})
     \b
 
+  categories: [api, fuzzy, secret]
+
   references:
   - https://mailchimp.com/help/about-api-keys/
   - https://mailchimp.com/help/about-api-keys/#API_key_security

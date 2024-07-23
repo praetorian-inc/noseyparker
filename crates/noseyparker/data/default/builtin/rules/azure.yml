@@ -24,6 +24,11 @@ rules:
   - https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string
   - https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#best-practices-when-using-sas
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   examples:
   - |
       # Azure Storage Connection String
@@ -59,6 +64,11 @@ rules:
     (https://[a-zA-Z0-9-]+\.azconfig\.io);
     Id=(.{4}-.{2}-.{2}:[a-zA-Z0-9+/]{18,22});
     Secret=([a-zA-Z0-9+/]{36,50}=)
+
+  categories:
+  - api
+  - fuzzy
+  - secret
 
   examples:
   - 'Endpoint=https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOPqRSa53VWX05zaBCdE/fg9hi4k='
@@ -100,3 +110,8 @@ rules:
 
   references:
   - https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+
+  categories:
+  - api
+  - fuzzy
+  - secret

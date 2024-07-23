@@ -14,6 +14,9 @@ rules:
     \s*
     -----END\ .{0,20}\ ?PRIVATE\ KEY\ ?.{0,20}-----
 
+  categories:
+  - secret
+
   references:
   - https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail
   - https://datatracker.ietf.org/doc/html/rfc7468
@@ -78,6 +81,9 @@ rules:
       [a-zA-Z0-9+/=]{50,}
     )
     (?: [^a-zA-Z0-9+/=] | $ )
+
+  categories:
+  - secret
 
   references:
   - https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail

@@ -9,6 +9,10 @@ rules:
     (\d+:AA[a-zA-Z0-9_-]{32,33})
     (?: [^a-zA-Z0-9_-] | $)
 
+  categories:
+  - api
+  - secret
+
   examples:
   - '4839574813:AAFD39kkdpWt3ywyRZergyOLMaJhac61qc'
   - '4839574813:AAE4A6Rz0CSnIGzeu897OjQnjzsMEG2_uso'

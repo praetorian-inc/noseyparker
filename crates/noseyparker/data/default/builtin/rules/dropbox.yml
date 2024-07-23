@@ -9,6 +9,8 @@ rules:
     (sl\.[a-zA-Z0-9_-]{130,152})
     (?: $ | [^a-zA-Z0-9_-] )
 
+  categories: [api, secret]
+
   examples:
   - 'curl -X POST https://api.dropboxapi.com/2/users/get_current_account --header "Authorization: Bearer sl.hAi61Jx1hs3XlhrnsCxnctrEmxK2Q-UK29hbdxxHyAykldSeHmipBAauxTzuBEIqt2jdyyUZw8kgY3t_ars-PNIPS27ySa1ab22132U3sUuqYTXHzf2XlvMxSesUhkzx2G11_9W1f-eo"'
   # this one comes from dropbox example documentation; ends with a `-`

@@ -9,6 +9,8 @@ rules:
     (PMAK-[a-zA-Z0-9]{24}-[a-zA-Z0-9]{34})
     \b
 
+  categories: [api, secret]
+
   examples:
   - "// ('x-api-key', 'PMAK-629c73facbc064567cbf6970-f56e8b4cd0bb14d00962f17afc158dc2a2')"
 

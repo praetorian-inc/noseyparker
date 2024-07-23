@@ -9,6 +9,8 @@ rules:
     [\ \t]* .{0,10} [\ \t]*  (?# possible extra stuff, e.g., string concatenation)
     (?: Password | Pwd) \s*=\s* ([^\t\ ;]{3,100}) \s* (?: [;] | $)
 
+  categories: [fuzzy, secret]
+
   examples:
   - '//Database Info\r\n\t\t\t\t\t$host = \"localhost\";\r\n\t\t\t\t\t$database = \"NHOHVA\";\r\n\t\t\t\t\t$user = \"mg1021\";              $password = \"goodspec\";'
   - '//Database Info\r\n\t\t\t\t\t$host = \"localhost\";\r\n\t\t\t\t\t$database = \"NHOHVA\";\r\n\t\t\t\t\t$user = \"mg1021\";              $password = goodspec;'

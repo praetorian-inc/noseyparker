@@ -5,13 +5,10 @@ rulesets:
   name: Nosey Parker default rules
 
   description: |
-    This ruleset includes rules that detect secrets, such as API tokens and
-    user-selected passwords. Rules that detect other things, such as public
-    identifiers, public keys, and asset identifiers, are not included in this
-    set.
+    This ruleset includes rules that detect secrets, such as API tokens and user-selected passwords.
+    Rules that detect other things, such as public identifiers, public keys, and asset identifiers, are not included in this set.
 
-    The rules included in this set typically have high precision, or in other
-    words, few false positives.
+    The rules included in this set typically have high precision, or in other words, few false positives.
 
 
   include_rule_ids:
@@ -28,12 +25,10 @@ rulesets:
   - np.azure.2        # Azure App Configuration Connection String
   - np.azure.3        # Azure Personal Access Token
   - np.blynk.1        # Blynk Device Access Token
-  - np.blynk.2        # Blynk Organization Access Token (URL first)
-  - np.blynk.3        # Blynk Organization Access Token (URL last)
-  - np.blynk.4        # Blynk Organization Client ID (URL first)
-  - np.blynk.5        # Blynk Organization Client ID (URL last)
-  - np.blynk.6        # Blynk Organization Client Secret (URL first)
-  - np.blynk.7        # Blynk Organization Client Secret (URL last)
+  - np.blynk.2        # Blynk Organization Access Token
+  - np.blynk.3        # Blynk Organization Access Token
+  - np.blynk.8        # Blynk Organization Client Credentials
+  - np.blynk.9        # Blynk Organization Client Credentials
   - np.codeclimate.1  # CodeClimate
   - np.cratesio.1     # crates.io API Key
   - np.databricks.1   # Databricks Personal Access Token
@@ -55,16 +50,16 @@ rulesets:
   - np.figma.1        # Figma Personal Access Token
   - np.generic.1      # Generic Secret
   - np.generic.2      # Generic API Key
-  - np.generic.3      # Generic Username and Password (quoted)
-  - np.generic.4      # Generic Username and Password (unquoted)
-  - np.generic.5      # Generic Password (double quoted)
-  - np.generic.6      # Generic Password (single quoted)
+  - np.generic.3      # Generic Username and Password
+  - np.generic.4      # Generic Username and Password
+  - np.generic.5      # Generic Password
+  - np.generic.6      # Generic Password
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token
   - np.github.4       # GitHub Refresh Token
   - np.github.6       # GitHub Secret Key
-  - np.github.7       # GitHub Personal Access Token (fine-grained permissions)
+  - np.github.7       # GitHub Personal Access Token
   - np.gitlab.1       # GitLab Runner Registration Token
   - np.gitlab.2       # GitLab Personal Access Token
   - np.gitlab.3       # GitLab Pipeline Trigger Token
@@ -102,8 +97,8 @@ rulesets:
   - np.odbc.1         # Credentials in ODBC Connection String
   - np.okta.1         # Okta API Token
   - np.openai.1       # OpenAI API Key
-  - np.particleio.1   # particle.io Access Token (URL first)
-  - np.particleio.2   # particle.io Access Token (URL last)
+  - np.particleio.1   # particle.io Access Token
+  - np.particleio.2   # particle.io Access Token
   - np.pem.1          # PEM-Encoded Private Key
   - np.pem.2          # Base64-PEM-Encoded Private Key
   - np.postman.1      # Postman API Key

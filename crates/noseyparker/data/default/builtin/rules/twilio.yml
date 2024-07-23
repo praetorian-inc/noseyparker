@@ -5,6 +5,8 @@ rules:
 
   pattern: '(?i)twilio.{0,20}\b(sk[a-f0-9]{32})\b'
 
+  categories: [api, fuzzy, secret]
+
   examples:
   - |
       const twilioAccountSid = 'AC712594f590c0d8ace55c04858f7398f9' // Your Account SID from www.twilio.com/console

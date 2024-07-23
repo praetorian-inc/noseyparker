@@ -4,6 +4,8 @@ rules:
   id: np.github.1
   pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
 
+  categories: [api, secret]
+
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
@@ -21,6 +23,8 @@ rules:
   id: np.github.2
   pattern: '\b(gho_[a-zA-Z0-9]{36})\b'
 
+  categories: [api, secret]
+
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
@@ -35,6 +39,8 @@ rules:
   id: np.github.3
   # Note: `ghu_` prefix is for user-to-server tokens; `ghs_` is for server-to-server tokens
   pattern: '\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\b'
+
+  categories: [api, secret]
 
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
@@ -51,6 +57,9 @@ rules:
 - name: GitHub Refresh Token
   id: np.github.4
   pattern: '\b(ghr_[a-zA-Z0-9]{76})\b'
+
+  categories: [api, secret]
+
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
@@ -71,6 +80,8 @@ rules:
     (?: id | identifier | key )
     .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
     \b ([a-z0-9]{20}) \b
+
+  categories: [api, fuzzy, identifier]
 
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
@@ -94,6 +105,8 @@ rules:
     .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
     \b ([a-z0-9]{40}) \b
 
+  categories: [api, fuzzy, secret]
+
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
   - https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
@@ -111,6 +124,8 @@ rules:
     \b
     (github_pat_[0-9a-zA-Z_]{82})
     \b
+
+  categories: [api, secret]
 
   references:
   - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github

@@ -9,6 +9,8 @@ rules:
     (eyJrIjoi [A-Za-z0-9]{60,100})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://grafana.com/docs/grafana/latest/developers/http_api/auth/
 
@@ -29,6 +31,8 @@ rules:
     (glc_eyJrIjoi [A-Za-z0-9]{60,100})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://grafana.com/docs/grafana-cloud/api-reference/cloud-api/
 
@@ -44,6 +48,8 @@ rules:
     \b
     (glsa_[a-zA-Z0-9]{32}_[a-fA-F0-9]{8})
     \b
+
+  categories: [api, secret]
 
   references:
   - https://grafana.com/docs/grafana/latest/administration/service-accounts/

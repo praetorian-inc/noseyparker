@@ -9,6 +9,8 @@ rules:
     (dp\.ct\.[a-zA-Z0-9]{40,44})
     \b
 
+  categories: [api, secret]
+
   examples:
   - dp.ct.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
 
@@ -24,6 +26,8 @@ rules:
     \b
     (dp\.pt\.[a-zA-Z0-9]{40,44})
     \b
+
+  categories: [api, secret]
 
   examples:
   - dp.pt.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
@@ -41,6 +45,8 @@ rules:
     (dp\.st\.(?:[a-z0-9\-_]{2,35}\.)?[a-zA-Z0-9]{40,44})
     \b
 
+  categories: [api, secret]
+
   examples:
   - dp.st.dev.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
 
@@ -56,6 +62,8 @@ rules:
     \b
     (dp\.sa\.[a-zA-Z0-9]{40,44})
     \b
+
+  categories: [api, secret]
 
   examples:
   - dp.sa.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
@@ -73,6 +81,8 @@ rules:
     (dp\.scim\.[a-zA-Z0-9]{40,44})
     \b
 
+  categories: [api, secret]
+
   examples:
   - dp.scim.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi
 
@@ -88,6 +98,8 @@ rules:
     \b
     (dp\.audit\.[a-zA-Z0-9]{40,44})
     \b
+
+  categories: [api, secret]
 
   examples:
   - dp.audit.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi

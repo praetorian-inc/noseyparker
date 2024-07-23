@@ -21,12 +21,10 @@ expression: stdout
  np.azure.2           Azure App Configuration Connection String 
  np.azure.3           Azure Personal Access Token 
  np.blynk.1           Blynk Device Access Token 
- np.blynk.2           Blynk Organization Access Token (URL first) 
- np.blynk.3           Blynk Organization Access Token (URL last) 
- np.blynk.4           Blynk Organization Client ID (URL first) 
- np.blynk.5           Blynk Organization Client ID (URL last) 
- np.blynk.6           Blynk Organization Client Secret (URL first) 
- np.blynk.7           Blynk Organization Client Secret (URL last) 
+ np.blynk.2           Blynk Organization Access Token 
+ np.blynk.3           Blynk Organization Access Token 
+ np.blynk.8           Blynk Organization Client Credentials 
+ np.blynk.9           Blynk Organization Client Credentials 
  np.codeclimate.1     CodeClimate Reporter ID 
  np.cratesio.1        crates.io API Key 
  np.databricks.1      Databricks Personal Access Token 
@@ -46,14 +44,14 @@ expression: stdout
  np.facebook.1        Facebook Secret Key 
  np.facebook.2        Facebook Access Token 
  np.figma.1           Figma Personal Access Token 
- np.gcs.1             Google Cloud Storage Bucket (subdomain style) 
- np.gcs.2             Google Cloud Storage Bucket (path style) 
+ np.gcs.1             Google Cloud Storage Bucket 
+ np.gcs.2             Google Cloud Storage Bucket 
  np.generic.1         Generic Secret 
  np.generic.2         Generic API Key 
- np.generic.3         Generic Username and Password (quoted) 
- np.generic.4         Generic Username and Password (unquoted) 
- np.generic.5         Generic Password (double quoted) 
- np.generic.6         Generic Password (single quoted) 
+ np.generic.3         Generic Username and Password 
+ np.generic.4         Generic Username and Password 
+ np.generic.5         Generic Password 
+ np.generic.6         Generic Password 
  np.github.1          GitHub Personal Access Token 
  np.github.2          GitHub OAuth Access Token 
  np.github.3          GitHub App Token 
@@ -65,7 +63,7 @@ expression: stdout
  np.gitlab.2          GitLab Personal Access Token 
  np.gitlab.3          GitLab Pipeline Trigger Token 
  np.google.1          Google Client ID 
- np.google.2          Google OAuth Client Secret (prefixed) 
+ np.google.2          Google OAuth Client Secret 
  np.google.3          Google OAuth Client Secret 
  np.google.4          Google OAuth Access Token 
  np.google.5          Google API Key 
@@ -102,8 +100,8 @@ expression: stdout
  np.odbc.1            Credentials in ODBC Connection String 
  np.okta.1            Okta API Token 
  np.openai.1          OpenAI API Key 
- np.particleio.1      particle.io Access Token (URL first) 
- np.particleio.2      particle.io Access Token (URL last) 
+ np.particleio.1      particle.io Access Token 
+ np.particleio.2      particle.io Access Token 
  np.pem.1             PEM-Encoded Private Key 
  np.pem.2             Base64-PEM-Encoded Private Key 
  np.postman.1         Postman API Key 
@@ -153,6 +151,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             125 
+ default      Nosey Parker default rules             123 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

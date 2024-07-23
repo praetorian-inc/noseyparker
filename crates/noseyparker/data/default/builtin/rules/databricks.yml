@@ -11,6 +11,8 @@ rules:
     )
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.databricks.com/en/dev-tools/auth/pat.html
 

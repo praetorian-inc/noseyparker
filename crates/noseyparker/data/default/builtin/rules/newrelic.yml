@@ -9,6 +9,8 @@ rules:
     ([a-z0-9]{6}[a-f0-9]{30}nral)
     \b
 
+  categories: [secret]
+
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key
@@ -36,6 +38,8 @@ rules:
     license_key:\s*
     ([a-f0-9]{40})
     \b
+
+  categories: [secret]
 
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
@@ -65,6 +69,8 @@ rules:
     (nrak-[a-z0-9]{27})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key
@@ -86,6 +92,8 @@ rules:
     (nraa-[a-f0-9]{27})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#admin-keys
@@ -101,6 +109,8 @@ rules:
     \b
     (nrii-[a-z0-9_-]{32})
     (?: [^a-z0-9_-] | $)
+
+  categories: [api, secret]
 
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
@@ -119,6 +129,8 @@ rules:
     (nriq-[a-z0-9_-]{32})
     (?: [^a-z0-9_-] | $)
 
+  categories: [api, secret]
+
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-query-key
@@ -134,6 +146,8 @@ rules:
     \b
     (nrra-[a-f0-9]{42})
     \b
+
+  categories: [api, secret]
 
   references:
   - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys
@@ -156,6 +170,8 @@ rules:
     (px-api-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
     \b
 
+  categories: [api, secret]
+
   references:
   - https://docs.px.dev/reference/admin/api-keys/
 
@@ -173,6 +189,8 @@ rules:
     \b
     (px-dep-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
     \b
+
+  categories: [api, secret]
 
   references:
   - https://docs.px.dev/reference/admin/deploy-keys/

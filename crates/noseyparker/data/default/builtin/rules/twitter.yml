@@ -22,6 +22,11 @@ rules:
       # TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'
       # TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'
 
+  categories:
+  - api
+  - fuzzy
+  - identifier
+
 
 - name: Twitter Secret Key
   id: np.twitter.2
@@ -38,6 +43,11 @@ rules:
 
   references:
   - https://developer.twitter.com/en/docs/authentication/overview
+
+  categories:
+  - api
+  - fuzzy
+  - secret
 
   examples:
   - |

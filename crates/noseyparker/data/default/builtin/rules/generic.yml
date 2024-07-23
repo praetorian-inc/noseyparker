@@ -19,6 +19,8 @@ rules:
     ([0-9a-z]{32,64})
     \b
 
+  categories: [fuzzy, generic, secret]
+
   examples:
   - '    private static String CLIENT_SECRET = "6fb1cff7690db9ac066cadbbde8e3c078efdabcf";'
 
@@ -42,6 +44,8 @@ rules:
     ([0-9a-z][0-9a-z\-._/+]{30,62}[0-9a-z])
     \b
 
+  categories: [fuzzy, generic, secret]
+
   examples:
   - 'API_KEY = "951bc382db9abad29c68634761dd6e19"'
   - 'buildConfigField ''String'' , ''API_KEY'' , ''"951bc382db9cfee29c68634761dd6e19"''	API_KEY	'
@@ -50,7 +54,7 @@ rules:
   - 'name="ws_plugin__s2member_amazon_s3_comp_files_access_key" id="ws-plugin--s2member-amazon-s3-comp-files-access-key"'
 
 
-- name: Generic Username and Password (quoted)
+- name: Generic Username and Password
   id: np.generic.3
 
   pattern: |
@@ -63,6 +67,8 @@ rules:
     (?: password | pass | PASSWORD | PASS)       (?# password context keyword )
     [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
     ["'] ([^"']{5,30}) ["']                      (?# quoted password )
+
+  categories: [fuzzy, generic, secret]
 
   examples:
   - |
@@ -110,7 +116,7 @@ rules:
 
 
 
-- name: Generic Username and Password (unquoted)
+- name: Generic Username and Password
   id: np.generic.4
   pattern: |
     (?x)
@@ -123,6 +129,8 @@ rules:
     [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
     (\S{5,30})                                   (?# unquoted password )
     (?: \s | $ )                                 (?# end-of-password anchor )
+
+  categories: [fuzzy, generic, secret]
 
   examples:
   - |
@@ -143,7 +151,7 @@ rules:
       password = 'open_sesame'
 
 
-- name: Generic Password (double quoted)
+- name: Generic Password
   id: np.generic.5
 
   pattern: |
@@ -153,6 +161,8 @@ rules:
     "
     ([^$<%@.,\s+'"(){}&/\#\-][^\s+'"(){}/]{4,})  (?# password )
     "
+
+  categories: [fuzzy, generic, secret]
 
   examples:
   - |
@@ -220,7 +230,7 @@ rules:
 
 
 
-- name: Generic Password (single quoted)
+- name: Generic Password
   id: np.generic.6
 
   pattern: |
@@ -230,6 +240,8 @@ rules:
     '
     ([^$<%@.,\s+'"(){}&/\#\-][^\s+'"(){}/]{4,})  (?# password )
     '
+
+  categories: [fuzzy, generic, secret]
 
   examples:
   - |

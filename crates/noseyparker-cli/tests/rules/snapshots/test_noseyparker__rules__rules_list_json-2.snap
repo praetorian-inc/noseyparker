@@ -20,6 +20,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://io.adafruit.com/api/docs"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -39,6 +43,10 @@ expression: stdout
           "https://developer.adobe.com/developer-console/docs/guides/authentication/",
           "https://developer.adobe.com/developer-console/docs/guides/authentication/OAuthIntegration/",
           "https://developer.adobe.com/developer-console/docs/guides/authentication/OAuth/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -58,7 +66,8 @@ expression: stdout
           "https://age-encryption.org",
           "https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html",
           "https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type"
-        ]
+        ],
+        "categories": []
       }
     },
     {
@@ -78,6 +87,9 @@ expression: stdout
           "https://age-encryption.org",
           "https://htmlpreview.github.io/?https://github.com/FiloSottile/age/blob/main/doc/age.1.html",
           "https://github.com/C2SP/C2SP/blob/8b6a842e0360d35111c46be2a8019b2276295914/age.md#the-x25519-recipient-type"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -95,6 +107,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#api-key-authorization"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -120,6 +136,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -138,6 +158,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://jfrog.com/help/r/jfrog-rest-apis/introduction-to-the-artifactory-rest-apis"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -165,6 +190,10 @@ expression: stdout
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
           "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -195,6 +224,11 @@ expression: stdout
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
           "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -215,7 +249,12 @@ expression: stdout
           "//////////////////////",
           "++++++++++++++++++++++"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "fuzzy",
+          "identifier"
+        ]
       }
     },
     {
@@ -234,7 +273,12 @@ expression: stdout
           "//////////////////////",
           "++++++++++++++++++++++"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
+        ]
       }
     },
     {
@@ -251,6 +295,9 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.developer.amazonservices.com/en_US/dev_guide/index.html"
+        ],
+        "categories": [
+          "api"
         ]
       }
     },
@@ -272,6 +319,11 @@ expression: stdout
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
           "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html",
           "https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -297,6 +349,11 @@ expression: stdout
           "https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/",
           "https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string",
           "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas#best-practices-when-using-sas"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -321,6 +378,11 @@ expression: stdout
           "https://docs.microsoft.com/en-us/azure/azure-app-configuration/",
           "https://docs.microsoft.com/en-us/azure/azure-app-configuration/howto-best-practices",
           "https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/appconfiguration/azure-appconfiguration/azure/appconfiguration/_utils.py"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -340,6 +402,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -364,15 +431,19 @@ expression: stdout
           "https://docs.blynk.io/en/blynk.cloud/device-https-api/get-datastream-value",
           "https://docs.blynk.io/en/blynk.cloud/device-https-api/troubleshooting",
           "https://docs.blynk.io/en/getting-started/activating-devices/manual-device-activation#step-3-getting-auth-token"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
       "id": "np.blynk.2",
       "structural_id": "30262e4c789ab867b395736820fbe957b113c67e",
-      "name": "Blynk Organization Access Token (URL first)",
+      "name": "Blynk Organization Access Token",
       "syntax": {
-        "name": "Blynk Organization Access Token (URL first)",
+        "name": "Blynk Organization Access Token",
         "id": "np.blynk.2",
         "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api/[a-zA-Z0-9_\\-\\s/\\\\]*\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"\n",
         "examples": [
@@ -382,15 +453,19 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
       "id": "np.blynk.3",
       "structural_id": "33c505fcd1d36eb537769fb4e39d880ae55bed94",
-      "name": "Blynk Organization Access Token (URL last)",
+      "name": "Blynk Organization Access Token",
       "syntax": {
-        "name": "Blynk Organization Access Token (URL last)",
+        "name": "Blynk Organization Access Token",
         "id": "np.blynk.3",
         "pattern": "(?x)\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api\n",
         "examples": [
@@ -400,17 +475,21 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.blynk.io/en/blynk.cloud/organization-https-api/get-organization-info"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
-      "id": "np.blynk.4",
-      "structural_id": "db24fc0cd5595b6b4b366ea3c7e7c9693da139d2",
-      "name": "Blynk Organization Client ID (URL first)",
+      "id": "np.blynk.8",
+      "structural_id": "08a902b93a146a64c157429463951706bdc5d60e",
+      "name": "Blynk Organization Client Credentials",
       "syntax": {
-        "name": "Blynk Organization Client ID (URL first)",
-        "id": "np.blynk.4",
-        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?::|&client_secret=)\n(?:[a-zA-Z0-9_\\-]{40})\n",
+        "name": "Blynk Organization Client Credentials",
+        "id": "np.blynk.8",
+        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?: : | &client_secret= )\n([a-zA-Z0-9_\\-]{40})\n",
         "examples": [
           "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp",
           "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \\\n-u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp\n",
@@ -419,17 +498,21 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
-      "id": "np.blynk.5",
-      "structural_id": "0fcc835ce5095d3df35317fcbd9ae268bd937921",
-      "name": "Blynk Organization Client ID (URL last)",
+      "id": "np.blynk.9",
+      "structural_id": "61027ac6a0bd9260330393485339d3012565b1b0",
+      "name": "Blynk Organization Client Credentials",
       "syntax": {
-        "name": "Blynk Organization Client ID (URL last)",
-        "id": "np.blynk.5",
-        "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:(?:[a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
+        "name": "Blynk Organization Client Credentials",
+        "id": "np.blynk.9",
+        "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
         "examples": [
           "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",
           "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \\\nhttps://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials\n"
@@ -437,43 +520,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
-        ]
-      }
-    },
-    {
-      "id": "np.blynk.6",
-      "structural_id": "4e0a588ff73dd061b8b19c19adf029de5cf7b8c0",
-      "name": "Blynk Organization Client Secret (URL first)",
-      "syntax": {
-        "name": "Blynk Organization Client Secret (URL first)",
-        "id": "np.blynk.6",
-        "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(?:oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?::|&client_secret=)\n([a-zA-Z0-9_\\-]{40})\n",
-        "examples": [
-          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp",
-          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \\\n-u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp\n",
-          "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials&client_id=oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-&client_secret=5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp"
         ],
-        "negative_examples": [],
-        "references": [
-          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
-        ]
-      }
-    },
-    {
-      "id": "np.blynk.7",
-      "structural_id": "df489c15f4f568f54106d6ec719e17b5c2cfb479",
-      "name": "Blynk Organization Client Secret (URL last)",
-      "syntax": {
-        "name": "Blynk Organization Client Secret (URL last)",
-        "id": "np.blynk.7",
-        "pattern": "(?x)\n\\b\n(?:oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
-        "examples": [
-          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",
-          "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \\\nhttps://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials\n"
-        ],
-        "negative_examples": [],
-        "references": [
-          "https://docs.blynk.io/en/blynk.cloud/organization-https-api/authentication"
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -497,6 +547,11 @@ expression: stdout
           "https://github.com/codeclimate/ruby-test-reporter",
           "https://github.com/codeclimate/ruby-test-reporter/issues/34",
           "https://docs.codeclimate.com/docs/finding-your-test-coverage-token#should-i-keep-my-test-reporter-id-secret"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -515,6 +570,10 @@ expression: stdout
         "references": [
           "https://crates.io/data-access",
           "https://github.com/rust-lang/crates.io/blob/master/src/util/token.rs"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -535,6 +594,10 @@ expression: stdout
         ],
         "references": [
           "https://docs.databricks.com/en/dev-tools/auth/pat.html"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -552,6 +615,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.digitalocean.com/reference/api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -569,6 +636,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.digitalocean.com/reference/api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -586,6 +657,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.digitalocean.com/reference/api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -605,6 +680,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.docker.com/security/for-developers/access-tokens/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -623,6 +702,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -641,6 +724,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -659,6 +746,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -677,6 +768,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -695,6 +790,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -713,6 +812,10 @@ expression: stdout
         "references": [
           "https://docs.doppler.com/reference/api",
           "https://docs.doppler.com/reference/auth-token-formats"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -733,6 +836,10 @@ expression: stdout
           "https://developers.dropbox.com/oauth-guide",
           "https://www.dropbox.com/developers/",
           "https://www.dropbox.com/developers/documentation/http/documentation"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -759,6 +866,10 @@ expression: stdout
           "https://docs.dependencytrack.org/getting-started/configuration/",
           "https://github.com/stevespringett/Alpine/blob/92fdb7de7e5623b8c986de08997480036af5f472/alpine-model/src/main/java/alpine/model/ApiKey.java",
           "https://github.com/DependencyTrack/dependency-track/pull/3047"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -777,6 +888,10 @@ expression: stdout
         "references": [
           "https://www.dynatrace.com/support/help/dynatrace-api",
           "https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -798,6 +913,11 @@ expression: stdout
         ],
         "references": [
           "https://developers.facebook.com/docs/facebook-login/access-tokens/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -815,6 +935,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://developers.facebook.com/docs/facebook-login/access-tokens/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -833,15 +957,20 @@ expression: stdout
         "references": [
           "https://www.figma.com/developers/api",
           "https://www.figma.com/developers/api#access-tokens"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
     {
       "id": "np.gcs.1",
       "structural_id": "5eddb5305d1dd0c6b3dbe21c1967adce9d49242a",
-      "name": "Google Cloud Storage Bucket (subdomain style)",
+      "name": "Google Cloud Storage Bucket",
       "syntax": {
-        "name": "Google Cloud Storage Bucket (subdomain style)",
+        "name": "Google Cloud Storage Bucket",
         "id": "np.gcs.1",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+    (?# bucket name as subdomain )\nstorage\\.googleapis\\.com\n)\n\\b\n",
         "examples": [
@@ -853,15 +982,19 @@ expression: stdout
         ],
         "references": [
           "https://cloud.google.com/storage/docs/request-endpoints"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
     {
       "id": "np.gcs.2",
       "structural_id": "e035689e0938e952f158d50f4e060a44c7a5df9d",
-      "name": "Google Cloud Storage Bucket (path style)",
+      "name": "Google Cloud Storage Bucket",
       "syntax": {
-        "name": "Google Cloud Storage Bucket (path style)",
+        "name": "Google Cloud Storage Bucket",
         "id": "np.gcs.2",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\nstorage\\.googleapis\\.com\n/\n[a-zA-Z0-9_-]+ (?: \\. [a-zA-Z0-9_-]+ )*    (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                   (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
         "examples": [
@@ -873,6 +1006,10 @@ expression: stdout
         ],
         "references": [
           "https://cloud.google.com/storage/docs/request-endpoints"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -892,7 +1029,12 @@ expression: stdout
           "    secret_access_key = 'abcdefg12346+FJQCK'",
           "    Ldap password               ----   H7IKC85R#@4$"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
@@ -910,15 +1052,20 @@ expression: stdout
         "negative_examples": [
           "name=\"ws_plugin__s2member_amazon_s3_comp_files_access_key\" id=\"ws-plugin--s2member-amazon-s3-comp-files-access-key\""
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
       "id": "np.generic.3",
       "structural_id": "8cca3a4a548b00450bae08c40f5f33f06173b21f",
-      "name": "Generic Username and Password (quoted)",
+      "name": "Generic Username and Password",
       "syntax": {
-        "name": "Generic Username and Password (quoted)",
+        "name": "Generic Username and Password",
         "id": "np.generic.3",
         "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([a-zA-Z0-9.@_\\-+]{3,30}) [\"']          (?# quoted username )\n\\s* [,;]? \\s*                                (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([^\"']{5,30}) [\"']                      (?# quoted password )\n",
         "examples": [
@@ -933,15 +1080,20 @@ expression: stdout
           ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',",
           "#if DEBUG\n          string backend_host = \"amazon-subdomain-for-database.string.us-east-1.rds.amazonaws.com\";\n          string backend_user = \"root\";\n          string backend_pass = \"XXXXXXXXXXXXX\";\n          string backend_db = \"database_db\";\n          string backend_port = \"1234\";\n"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
       "id": "np.generic.4",
       "structural_id": "858195023faa03c3aad1d8534cba1bf332439bee",
-      "name": "Generic Username and Password (unquoted)",
+      "name": "Generic Username and Password",
       "syntax": {
-        "name": "Generic Username and Password (unquoted)",
+        "name": "Generic Username and Password",
         "id": "np.generic.4",
         "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n([a-zA-Z0-9.@_\\-+]{3,30})                    (?# unquoted username )\n\\s* ;? \\s*                                   (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n(\\S{5,30})                                   (?# unquoted password )\n(?: \\s | $ )                                 (?# end-of-password anchor )\n",
         "examples": [
@@ -952,15 +1104,20 @@ expression: stdout
         "negative_examples": [
           "user = 'Aladdin'\npassword = 'open_sesame'\n"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
       "id": "np.generic.5",
       "structural_id": "4742a7e5266ce68dd5633ca6c2c634a4fa706673",
-      "name": "Generic Password (double quoted)",
+      "name": "Generic Password",
       "syntax": {
-        "name": "Generic Password (double quoted)",
+        "name": "Generic Password",
         "id": "np.generic.5",
         "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n\"\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n\"\n",
         "examples": [
@@ -992,15 +1149,20 @@ expression: stdout
           "IAMUserChangePassword = \"arn:aws:iam::aws:policy/IAMUserChangePassword\"\n",
           "this.addPassword = \"#add-password\";\n"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
       "id": "np.generic.6",
       "structural_id": "623947cab165b1d6c786a051107b4555e41719d5",
-      "name": "Generic Password (single quoted)",
+      "name": "Generic Password",
       "syntax": {
-        "name": "Generic Password (single quoted)",
+        "name": "Generic Password",
         "id": "np.generic.6",
         "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n'\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n'\n",
         "examples": [
@@ -1013,7 +1175,12 @@ expression: stdout
           "usernameLabel:\"Username or email:\",passwordLabel:\"Password:\",rememberMeLabel:\"Remember me:\"\n",
           "this.addPassword = '#add-password';\n"
         ],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
       }
     },
     {
@@ -1034,6 +1201,10 @@ expression: stdout
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token",
           "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1054,6 +1225,10 @@ expression: stdout
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
           "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1074,6 +1249,10 @@ expression: stdout
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
           "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1093,6 +1272,10 @@ expression: stdout
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps",
           "https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1111,6 +1294,11 @@ expression: stdout
         "references": [
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "identifier"
         ]
       }
     },
@@ -1129,6 +1317,11 @@ expression: stdout
         "references": [
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1147,6 +1340,10 @@ expression: stdout
         "references": [
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github",
           "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1166,6 +1363,10 @@ expression: stdout
           "https://docs.gitlab.com/runner/security/",
           "https://docs.gitlab.com/ee/security/token_overview.html#runner-registration-tokens-deprecated",
           "https://docs.gitlab.com/ee/security/token_overview.html#security-considerations"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1183,6 +1384,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1202,6 +1407,10 @@ expression: stdout
           "https://docs.gitlab.com/ee/ci/triggers/",
           "https://gitlab.com/gitlab-org/gitlab/-/issues/371396",
           "https://gitlab.com/gitlab-org/gitlab/-/issues/388379"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1220,22 +1429,30 @@ expression: stdout
           "          $cordovaOauth.google(\"653512027492-5u9blotr1521fa0lo1172nhv4pmqgttq.apps.googleusercontent.com\", [\"email\"]).then(function(result) {"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "identifier"
+        ]
       }
     },
     {
       "id": "np.google.2",
       "structural_id": "71b59face72a259d5cf2950bb281d1f84ac82d41",
-      "name": "Google OAuth Client Secret (prefixed)",
+      "name": "Google OAuth Client Secret",
       "syntax": {
-        "name": "Google OAuth Client Secret (prefixed)",
+        "name": "Google OAuth Client Secret",
         "id": "np.google.2",
         "pattern": "(?x)\n\\b\n(GOCSPX-[a-zA-Z0-9_-]{28})\n(?:[^a-zA-Z0-9_-] | $)\n",
         "examples": [
           "const CLIENTSECRET = \"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\""
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "secret"
+        ]
       }
     },
     {
@@ -1252,7 +1469,12 @@ expression: stdout
           "                'clientSecret' : 'Ufvuj-d6alhwGKvvLh_8Nq0K'"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
+        ]
       }
     },
     {
@@ -1268,7 +1490,11 @@ expression: stdout
           "-- Clear login if it's a new connection.\n--propertyTable.access_token = 'ya29.Ci_UA7aEsvT6-oVI8f96kvB6i8oO13WgdZUviLaCVtpEPYZqhQcQycR-u2X9xtmYGA'\n"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "secret"
+        ]
       }
     },
     {
@@ -1287,6 +1513,10 @@ expression: stdout
         "references": [
           "https://cloud.google.com/docs/authentication/api-keys#securing",
           "https://support.google.com/googleapi/answer/6310037"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1303,7 +1533,12 @@ expression: stdout
           "public static GAPIS_CREDENTIALS = {\n  // 1. Generate credentials: https://console.cloud.google.com/apis/\n  // 2. Create OAuth page and set spreadsheets and drive.metadata.readonly scopes\n  client_id: '132261435625-69ubohrvppjr9hcc5t9uighsb7j2cqhv.apps.googleusercontent.com',\n  client_secret: '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',\n  redirect_uri: `http://localhost:${Config.OAUTH_HTTP_PORT}/oauth2callback`\n};\n"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
+        ]
       }
     },
     {
@@ -1321,7 +1556,11 @@ expression: stdout
           "credentials {\n  username \"user\"\n  password \"password\"\n}"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
       }
     },
     {
@@ -1339,6 +1578,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://grafana.com/docs/grafana/latest/developers/http_api/auth/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1356,6 +1599,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://grafana.com/docs/grafana-cloud/api-reference/cloud-api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1374,6 +1621,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://grafana.com/docs/grafana/latest/administration/service-accounts/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1393,6 +1644,11 @@ expression: stdout
         ],
         "references": [
           "https://devcenter.heroku.com/articles/authentication"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1410,6 +1666,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://huggingface.co/docs/hub/security-tokens"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1432,6 +1692,11 @@ expression: stdout
         "references": [
           "https://www.jenkins.io/blog/2018/07/02/new-api-token-system/",
           "https://www.jenkins.io/doc/book/security/csrf-protection/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1456,6 +1721,9 @@ expression: stdout
           "https://en.wikipedia.org/wiki/Base64#URL_applications",
           "https://datatracker.ietf.org/doc/html/rfc4648",
           "https://developer.okta.com/blog/2018/06/20/what-happens-if-your-jwt-is-stolen"
+        ],
+        "categories": [
+          "api"
         ]
       }
     },
@@ -1477,6 +1745,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://hashcat.net/wiki/doku.php?id=example_hashes"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -1495,6 +1767,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "identifier"
         ]
       }
     },
@@ -1512,6 +1789,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1530,6 +1812,11 @@ expression: stdout
         "references": [
           "https://mailchimp.com/help/about-api-keys/",
           "https://mailchimp.com/help/about-api-keys/#API_key_security"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1547,6 +1834,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://documentation.mailgun.com/en/latest/api-intro.html#authentication-1"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1566,6 +1858,10 @@ expression: stdout
           "https://docs.mapbox.com/api/accounts/tokens/#token-format",
           "https://docs.mapbox.com/help/getting-started/access-tokens/",
           "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ],
+        "categories": [
+          "api",
+          "fuzzy"
         ]
       }
     },
@@ -1586,6 +1882,11 @@ expression: stdout
           "https://docs.mapbox.com/api/accounts/tokens/#token-format",
           "https://docs.mapbox.com/help/getting-started/access-tokens/",
           "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1606,6 +1907,11 @@ expression: stdout
           "https://docs.mapbox.com/api/accounts/tokens/#token-format",
           "https://docs.mapbox.com/help/getting-started/access-tokens/",
           "https://docs.mapbox.com/help/troubleshooting/how-to-use-mapbox-securely"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1629,6 +1935,10 @@ expression: stdout
         "references": [
           "https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/what-are-webhooks-and-connectors",
           "https://github.com/praetorian-inc/nuclei-templates/blob/main/exposures/tokens/microsoft/microsoft-teams-webhook.yaml"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1649,6 +1959,9 @@ expression: stdout
         "references": [
           "https://everything.curl.dev/usingcurl/netrc",
           "https://devcenter.heroku.com/articles/authentication#api-token-storage"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -1672,6 +1985,9 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -1693,6 +2009,9 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -1713,6 +2032,10 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1731,6 +2054,10 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#admin-keys"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1750,6 +2077,10 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-insert-key"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1768,6 +2099,10 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#insights-query-key"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1786,6 +2121,10 @@ expression: stdout
         "references": [
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys",
           "https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#rest-api-key"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1805,6 +2144,10 @@ expression: stdout
         ],
         "references": [
           "https://docs.px.dev/reference/admin/api-keys/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1824,6 +2167,10 @@ expression: stdout
         ],
         "references": [
           "https://docs.px.dev/reference/admin/deploy-keys/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1845,6 +2192,10 @@ expression: stdout
           "https://docs.npmjs.com/about-access-tokens",
           "https://github.com/github/roadmap/issues/557",
           "https://github.blog/changelog/2022-12-06-limit-scope-of-npm-tokens-with-the-new-granular-access-tokens/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1863,6 +2214,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.microsoft.com/en-us/nuget/nuget-org/publish-a-package#create-api-keys"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1900,6 +2255,10 @@ expression: stdout
           "https://docs.microsoft.com/en-us/azure/mariadb/howto-connection-string",
           "https://docs.microsoft.com/en-us/azure/mysql/single-server/how-to-connection-string",
           "https://www.connectionstrings.com/"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -1927,6 +2286,10 @@ expression: stdout
         "references": [
           "https://devforum.okta.com/t/api-token-length/5519",
           "https://developer.okta.com/docs/guides/create-an-api-token/main/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -1945,15 +2308,19 @@ expression: stdout
         "references": [
           "https://platform.openai.com/docs/api-reference",
           "https://platform.openai.com/docs/api-reference/authentication"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
       "id": "np.particleio.1",
       "structural_id": "8ab26f61a067886b886641bd883f453b2355f85d",
-      "name": "particle.io Access Token (URL first)",
+      "name": "particle.io Access Token",
       "syntax": {
-        "name": "particle.io Access Token (URL first)",
+        "name": "particle.io Access Token",
         "id": "np.particleio.1",
         "pattern": "(?x)\nhttps://api\\.particle\\.io/v1/[a-zA-Z0-9_\\-\\s/\"\\\\?]*\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n",
         "examples": [
@@ -1967,15 +2334,19 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.particle.io/reference/cloud-apis/api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
     {
       "id": "np.particleio.2",
       "structural_id": "ac8cc071bc177e360ac7f4ae4f03832475e359ad",
-      "name": "particle.io Access Token (URL last)",
+      "name": "particle.io Access Token",
       "syntax": {
-        "name": "particle.io Access Token (URL last)",
+        "name": "particle.io Access Token",
         "id": "np.particleio.2",
         "pattern": "(?x)\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n[\\s\"\\\\]*https://api\\.particle\\.io/v1\n",
         "examples": [
@@ -1987,6 +2358,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.particle.io/reference/cloud-apis/api/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2007,6 +2382,9 @@ expression: stdout
         "references": [
           "https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail",
           "https://datatracker.ietf.org/doc/html/rfc7468"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -2026,6 +2404,9 @@ expression: stdout
         "references": [
           "https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail",
           "https://datatracker.ietf.org/doc/html/rfc7468"
+        ],
+        "categories": [
+          "secret"
         ]
       }
     },
@@ -2045,6 +2426,10 @@ expression: stdout
           "https://learning.postman.com/docs/developer/intro-api/",
           "https://learning.postman.com/docs/developer/postman-api/authentication/",
           "https://learning.postman.com/docs/administration/managing-your-team/managing-api-keys/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2067,6 +2452,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://learn.microsoft.com/en-us/sysinternals/downloads/psexec"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2088,6 +2477,10 @@ expression: stdout
           "https://unix.stackexchange.com/a/511017",
           "https://hashcat.net/wiki/doku.php?id=example_hashes",
           "https://passwordvillage.org/salted.html#md5crypt"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -2110,6 +2503,10 @@ expression: stdout
         "references": [
           "https://en.wikipedia.org/wiki/Bcrypt",
           "https://hashcat.net/wiki/doku.php?id=example_hashes"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -2131,6 +2528,10 @@ expression: stdout
           "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
           "https://hashcat.net/wiki/doku.php?id=example_hashes",
           "https://passwordvillage.org/salted.html#sha256crypt"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -2151,6 +2552,10 @@ expression: stdout
           "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
           "https://hashcat.net/wiki/doku.php?id=example_hashes",
           "https://passwordvillage.org/salted.html#sha512crypt"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -2170,6 +2575,10 @@ expression: stdout
         "references": [
           "https://en.wikipedia.org/wiki/Crypt_(C)#Key_derivation_functions_supported_by_crypt",
           "https://hashcat.net/wiki/doku.php?id=example_hashes"
+        ],
+        "categories": [
+          "hashed",
+          "secret"
         ]
       }
     },
@@ -2194,6 +2603,10 @@ expression: stdout
           "https://en.wikipedia.org/wiki/Macaroons_(computer_science)",
           "https://github.com/pypa/warehouse/blob/82815b06d9f98deed5f205c66e054de59d22a10d/docs/development/token-scanning.rst",
           "https://research.google/pubs/pub41892/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2219,6 +2632,10 @@ expression: stdout
         "references": [
           "https://create-react-app.dev/docs/adding-custom-environment-variables/",
           "https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app"
+        ],
+        "categories": [
+          "fuzzy",
+          "identifier"
         ]
       }
     },
@@ -2245,6 +2662,10 @@ expression: stdout
         "references": [
           "https://create-react-app.dev/docs/adding-custom-environment-variables/",
           "https://stackoverflow.com/questions/48699820/how-do-i-hide-an-api-key-in-create-react-app"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2263,6 +2684,10 @@ expression: stdout
         "references": [
           "https://guides.rubygems.org/rubygems-org-api/",
           "https://guides.rubygems.org/api-key-scopes/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2285,6 +2710,10 @@ expression: stdout
         ],
         "references": [
           "https://docs.aws.amazon.com/general/latest/gr/rande.html"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -2309,6 +2738,10 @@ expression: stdout
         ],
         "references": [
           "https://docs.aws.amazon.com/general/latest/gr/rande.html"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -2328,6 +2761,10 @@ expression: stdout
         "references": [
           "https://help.salesforce.com/s/articleView?id=sf.remoteaccess_access_tokens.htm&type=5",
           "https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/quickstart_oauth.htm"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2346,6 +2783,11 @@ expression: stdout
         "references": [
           "https://docs.saucelabs.com/dev/api/",
           "https://docs.saucelabs.com/dev/api/#authentication"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2364,6 +2806,10 @@ expression: stdout
         "references": [
           "https://segment.com/docs/api/public-api/",
           "https://segment.com/blog/how-segment-proactively-protects-customer-api-tokens/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2382,6 +2828,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.sendgrid.com/ui/account-and-settings/api-keys"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2400,7 +2850,8 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://help.shopify.com/en/manual/domains"
-        ]
+        ],
+        "categories": []
       }
     },
     {
@@ -2419,7 +2870,8 @@ expression: stdout
         "references": [
           "https://shopify.dev/apps/auth",
           "https://shopify.dev/changelog/app-secret-key-length-has-increased"
-        ]
+        ],
+        "categories": []
       }
     },
     {
@@ -2437,6 +2889,10 @@ expression: stdout
         "references": [
           "https://shopify.dev/apps/auth",
           "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2455,6 +2911,10 @@ expression: stdout
         "references": [
           "https://shopify.dev/apps/auth",
           "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2473,6 +2933,10 @@ expression: stdout
         "references": [
           "https://shopify.dev/apps/auth",
           "https://shopify.dev/changelog/length-of-the-shopify-access-token-is-increasing"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2496,6 +2960,10 @@ expression: stdout
           "https://api.slack.com/authentication",
           "https://api.slack.com/authentication/best-practices",
           "https://api.slack.com/authentication/token-types"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2514,6 +2982,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://api.slack.com/messaging/webhooks"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2539,6 +3011,10 @@ expression: stdout
           "https://api.slack.com/authentication",
           "https://api.slack.com/authentication/best-practices",
           "https://api.slack.com/authentication/token-types"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2558,6 +3034,10 @@ expression: stdout
           "https://api.slack.com/authentication",
           "https://api.slack.com/authentication/best-practices",
           "https://api.slack.com/authentication/token-types"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2584,6 +3064,10 @@ expression: stdout
           "https://api.slack.com/authentication/best-practices",
           "https://api.slack.com/authentication/token-types",
           "https://api.slack.com/legacy/custom-integrations/legacy-tokens"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2608,6 +3092,11 @@ expression: stdout
         ],
         "references": [
           "https://docs.sonarqube.org/latest/user-guide/user-token/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2624,7 +3113,11 @@ expression: stdout
           "var applicationId = 'sq0idp-r34HdSnJVWaCesH3dnJrGA';\nvar accessToken = 'sq0atp-RdSPeJa5qDMaCesxHOjeRQ';\n"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "secret"
+        ]
       }
     },
     {
@@ -2640,7 +3133,11 @@ expression: stdout
           "private String accessTokenEndpoint = \"https://connect.squareup.com/oauth2/token\";\nprivate String baseURL = \"https://connect.squareup.com\";\nprivate String clientId = \"sq0idp-Ux0S-9iMfaCeszTkDpSjDw\";\nprivate String clientSecret = \"sq0csp-lBGGHNQmcaCesLfa3x6W7jJj8SQ-Fx5Y0yQiCrUWM40\";\n"
         ],
         "negative_examples": [],
-        "references": []
+        "references": [],
+        "categories": [
+          "api",
+          "secret"
+        ]
       }
     },
     {
@@ -2657,6 +3154,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://docs.stackhawk.com/web-app/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2675,6 +3176,10 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://stripe.com/docs/keys"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2692,6 +3197,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://stripe.com/docs/keys"
+        ],
+        "categories": [
+          "api",
+          "secret",
+          "test"
         ]
       }
     },
@@ -2711,6 +3221,10 @@ expression: stdout
         "references": [
           "https://core.telegram.org/bots/api",
           "https://core.telegram.org/bots/features#botfather"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2731,6 +3245,10 @@ expression: stdout
         "references": [
           "https://thingsboard.io/docs/paas/reference/http-api/",
           "https://thingsboard.io/docs/paas/reference/coap-api/"
+        ],
+        "categories": [
+          "api",
+          "identifier"
         ]
       }
     },
@@ -2749,6 +3267,10 @@ expression: stdout
         "references": [
           "https://thingsboard.io/docs/paas/reference/http-api/",
           "https://thingsboard.io/docs/paas/user-guide/device-provisioning/"
+        ],
+        "categories": [
+          "api",
+          "secret"
         ]
       }
     },
@@ -2767,6 +3289,11 @@ expression: stdout
         "references": [
           "https://thingsboard.io/docs/paas/reference/http-api/",
           "https://thingsboard.io/docs/paas/user-guide/device-provisioning/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2792,6 +3319,11 @@ expression: stdout
           "https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/",
           "https://www.truenas.com/docs/scale/api/",
           "https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2814,6 +3346,11 @@ expression: stdout
           "https://www.truenas.com/docs/scale/scaleclireference/auth/cliapikey/",
           "https://www.truenas.com/docs/scale/api/",
           "https://www.truenas.com/community/threads/api-examples-in-perl-python.108053/"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2834,6 +3371,11 @@ expression: stdout
           "https://www.twilio.com/docs/usage/api",
           "https://www.twilio.com/docs/usage/api#authenticate-with-http",
           "https://www.twilio.com/docs/usage/api#authenticate-using-the-twilio-sdks"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2852,6 +3394,11 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://developer.twitter.com/en/docs/authentication/overview"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "identifier"
         ]
       }
     },
@@ -2871,6 +3418,11 @@ expression: stdout
         ],
         "references": [
           "https://developer.twitter.com/en/docs/authentication/overview"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2890,6 +3442,10 @@ expression: stdout
           "https://www.wireguard.com/quickstart/",
           "https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html",
           "https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2909,6 +3465,10 @@ expression: stdout
           "https://www.wireguard.com/quickstart/",
           "https://manpages.debian.org/testing/wireguard-tools/wg.8.en.html",
           "https://gist.github.com/lanceliao/5d2977f417f34dda0e3d63ac7e217fd6"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     }
@@ -2917,7 +3477,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 125
+      "num_rules": 123
     },
     {
       "id": "np.assets",

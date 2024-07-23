@@ -8,6 +8,10 @@ rules:
 
   pattern: '(?i)\b((?:sk|rk)_live_[a-z0-9]{24})\b'
 
+  categories:
+  - api
+  - secret
+
   references:
   - https://stripe.com/docs/keys
 
@@ -19,6 +23,11 @@ rules:
   id: np.stripe.2
 
   pattern: '(?i)\b((?:sk|rk)_test_[a-z0-9]{24})\b'
+
+  categories:
+  - api
+  - secret
+  - test
 
   references:
   - https://stripe.com/docs/keys

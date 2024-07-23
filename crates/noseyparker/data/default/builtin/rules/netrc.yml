@@ -11,6 +11,8 @@ rules:
     \s+
     password \s+ ([^\s]+)
 
+  categories: [secret]
+
   references:
   - https://everything.curl.dev/usingcurl/netrc
   - https://devcenter.heroku.com/articles/authentication#api-token-storage

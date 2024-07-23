@@ -7,6 +7,8 @@ rules:
   id: np.dtrack.1
   pattern: '\b(odt_[A-Za-z0-9]{32,255})\b'
 
+  categories: [api, secret]
+
   examples:
   - 'odt_KTJlDq2AGGGlqG4riKdT7p980AW8RlU5'
   - 'odt_ABCDDq2AGxGlrF4ribBT7p98AOM9TlU8'

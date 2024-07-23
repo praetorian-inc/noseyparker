@@ -29,6 +29,10 @@ pub struct RuleSyntax {
     /// Freeform references for the rule; usually URLs
     #[serde(default)]
     pub references: Vec<String>,
+
+    /// A list of string categories for the rule
+    #[serde(default)]
+    pub categories: Vec<String>,
 }
 
 lazy_static! {
@@ -76,6 +80,7 @@ impl RuleSyntax {
     ///     examples: vec![],
     ///     negative_examples: vec![],
     ///     references: vec![],
+    ///     categories: vec![],
     /// };
     /// assert_eq!(r.as_anchored_regex().unwrap().as_str(), r"hello\s*world$");
     /// ```

@@ -13,6 +13,8 @@ rules:
     .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
     \b ([a-z0-9]{12,14}) \b
 
+  categories: [api, fuzzy, identifier]
+
   references:
   - https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications
 
@@ -36,6 +38,8 @@ rules:
     (?: key | oauth | sec | secret )?
     .{0,2} \s{0,20} .{0,2} \s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )
     \b ([a-z0-9]{16}) \b
+
+  categories: [api, fuzzy, secret]
 
   references:
   - https://docs.microsoft.com/en-us/linkedin/shared/api-guide/best-practices/secure-applications

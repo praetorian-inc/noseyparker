@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The `scan` and `github repos list` commands offer a new `--github-repo-type={all,source,fork}` option to select a subset of repositories ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
 
+- A category mechanism is now provided for rules.
+  Each rule can have zero or more freeform text categories assigned to it.
+  The existing rules have been updated with category information with the following meanings:
+
+  - `secret`: the rule detects things that are in fact secrets
+  - `identifier`: the rule detects things that are not secrets but could be used to enumerate additional resources (e.g., S3 bucket names)
+  - `hashed`: the rule detects hashed payloads (e.g., bcrypt hashes)
+  - `test`: the rule detects test deployment-specific payloads (e.g., stripe test keys)
+  - `api`: the rule detects payloads used for API access
+  - `generic`: the rule is a "generic" one rather than one that detects a specific type of payload (e.g., username/password pairs)
+  - `fuzzy`: the rule pattern requires matching of non-payload surrounding context
+
 ### Changes
 
 - The `scan` and `github repos list` commands now only consider non-forked repositories by default ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
@@ -19,6 +31,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Alpine-based Docker image has been updated to use the `alpine:latest` base image instead of `alpine:3.18` ([#201](https://github.com/praetorian-inc/noseyparker/issues/201)).
 
+- The "Blynk Organization" rules have been refined.
+  `Blynk Organization Access Token (URL first)` and `Blynk Organization Access Token (URL last)` have been renamed to simply `Blynk Organization Access Token`.
+  The 2 `Blynk Organization Client ID` and 2 `Blynk Organization Client Secret` variations have been subsumed by two new `Blynk Organization Client Credential` rules.
+  These new rules combine the client ID and client secret into single findings instead of reporting them as two separate findings as previous.
+
+- Several rules have been renamed:
+
+  - `Generic Password (double quoted)` -> `Generic Password`
+  - `Generic Password (single quoted)` -> `Generic Password`
+  - `Generic Username and Password (quoted)` -> `Generic Username and Password`
+  - `Generic Username and Password (unquoted)` -> `Generic Username and Password`
+  - `Google Cloud Storage Bucket (path style)` -> `Google Cloud Storage Bucket`
+  - `Google Cloud Storage Bucket (subdomain style)` -> `Google Cloud Storage Bucket`
+  - `Google OAuth Client Secret (prefixed)` -> `Google OAuth Client Secret`
+  - `particle.io Access Token (URL first)` -> `particle.io Access Token`
+  - `particle.io Access Token (URL last)` -> `particle.io Access Token`
+
+  Note that although several rules share the same name now, they all still have distinct IDs.
 
 ## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)
 

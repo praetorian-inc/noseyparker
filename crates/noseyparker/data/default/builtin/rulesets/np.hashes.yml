@@ -7,8 +7,7 @@ rulesets:
   description: |
     This ruleset includes rules that detect various types of password hashes.
 
-    The rules included in this set typically have high precision, or in other
-    words, few false positives.
+    The rules included in this set typically have high precision, or in other words, few false positives.
 
   include_rule_ids:
   - np.pwhash.1         # Password Hash (bcrypt)

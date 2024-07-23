@@ -18,6 +18,8 @@ rules:
     )
     \b
 
+  categories: [api, fuzzy, secret]
+
   references:
   - https://www.figma.com/developers/api
   - https://www.figma.com/developers/api#access-tokens

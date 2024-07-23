@@ -13,3 +13,8 @@ rules:
 
   references:
   - https://jfrog.com/help/r/jfrog-rest-apis/introduction-to-the-artifactory-rest-apis
+
+  categories:
+  - api
+  - fuzzy
+  - secret

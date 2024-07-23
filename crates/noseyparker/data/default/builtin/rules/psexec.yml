@@ -10,6 +10,8 @@ rules:
     -u \s* (\S+) \s+    (?# username )
     -p \s* (\S+)        (?# password )
 
+  categories: [fuzzy, secret]
+
   examples:
   - 'cmd.exe /C PSEXEC \\10.0.94.120 -u Administrator -p dev_admin CMD /C ECHO'
   - 'PSEXEC.EXE \\LocalComputerIPAddress -u DOMAIN\my-user -p mypass CMD'

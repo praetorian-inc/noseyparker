@@ -11,6 +11,10 @@ rules:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
   - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
 
+  categories:
+  - api
+  - identifier
+
   examples:
   - 'A3T0ABCDEFGHIJKLMNOP'
   - 'AKIADEADBEEFDEADBEEF'
@@ -44,6 +48,11 @@ rules:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
   - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   examples:
   - 'aws_secret_access_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   - 'aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
@@ -64,6 +73,11 @@ rules:
   id: np.aws.3
 
   pattern: '(?i)aws_?(?:account)_?(?:id)?["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([0-9]{4}-?[0-9]{4}-?[0-9]{4})'
+
+  categories:
+  - api
+  - fuzzy
+  - identifier
 
   examples:
   - |
@@ -105,6 +119,11 @@ rules:
   id: np.aws.4
   pattern: '(?i)(?:aws.?session|aws.?session.?token|aws.?token)["''`]?\s{0,30}(?::|=>|=)\s{0,30}["''`]?([a-z0-9/+=]{16,200})[^a-z0-9/+=]'
 
+  categories:
+  - api
+  - fuzzy
+  - secret
+
   negative_examples:
   - '======================'
   - '//////////////////////'
@@ -121,6 +140,9 @@ rules:
 - name: Amazon MWS Auth Token
   id: np.aws.5
   pattern: '(?i)(amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+
+  categories:
+  - api
 
   examples:
   - |
@@ -176,6 +198,10 @@ rules:
 
   references:
   - https://docs.aws.amazon.com/general/latest/gr/rande.html
+
+  categories:
+  - api
+  - identifier
 
   examples:
   - 'example-bucket.s3.amazonaws.com'
@@ -233,6 +259,10 @@ rules:
 
   references:
   - https://docs.aws.amazon.com/general/latest/gr/rande.html
+
+  categories:
+  - api
+  - identifier
 
   examples:
   - 's3.amazonaws.com/example-bucket'
@@ -300,6 +330,10 @@ rules:
   references:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
 
+  categories:
+  - api
+  - identifier
+
   examples:
   - 'arn:aws:s3:::my_corporate_bucket/*'
   - 'arn:aws:s3:::my_corporate_bucket/Development/*'
@@ -338,6 +372,10 @@ rules:
   references:
   - https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#api-key-authorization
 
+  categories:
+  - api
+  - secret
+
   examples:
   - "  aws_appsync_apiKey: 'da2-nmaqhbb63zabjactesiydcfuvu',"
 
@@ -361,6 +399,11 @@ rules:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html
   - https://docs.aws.amazon.com/accounts/latest/reference/credentials-access-keys-best-practices.html
+
+  categories:
+  - api
+  - fuzzy
+  - secret
 
   examples:
   - |
