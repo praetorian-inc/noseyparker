@@ -1994,9 +1994,9 @@ expression: stdout
     {
       "id": "np.newrelic.2",
       "structural_id": "31b76b526a104da292cd848c22b36e1156a77323",
-      "name": "New Relic License Key (non-suffixed)",
+      "name": "New Relic License Key",
       "syntax": {
-        "name": "New Relic License Key (non-suffixed)",
+        "name": "New Relic License Key",
         "id": "np.newrelic.2",
         "pattern": "(?x)(?i)\nassociated\\ with\\ your\\ New\\ Relic\\ account\\.\\s+\nlicense_key:\\s*\n([a-f0-9]{40})\n\\b\n",
         "examples": [
@@ -2694,9 +2694,9 @@ expression: stdout
     {
       "id": "np.s3.1",
       "structural_id": "37410bb76d1873a99f9023d7409a3f300ea46958",
-      "name": "AWS S3 Bucket (subdomain style)",
+      "name": "AWS S3 Bucket",
       "syntax": {
-        "name": "AWS S3 Bucket (subdomain style)",
+        "name": "AWS S3 Bucket",
         "id": "np.s3.1",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+   (?# bucket name as subdomain )\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n) \\b\n",
         "examples": [
@@ -2720,9 +2720,9 @@ expression: stdout
     {
       "id": "np.s3.2",
       "structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
-      "name": "AWS S3 Bucket (path style)",
+      "name": "AWS S3 Bucket",
       "syntax": {
-        "name": "AWS S3 Bucket (path style)",
+        "name": "AWS S3 Bucket",
         "id": "np.s3.2",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n/\n[a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \\. [a-zA-Z0-9_-]+)*   (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                             (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
         "examples": [
@@ -2851,7 +2851,9 @@ expression: stdout
         "references": [
           "https://help.shopify.com/en/manual/domains"
         ],
-        "categories": []
+        "categories": [
+          "identifier"
+        ]
       }
     },
     {
@@ -2871,7 +2873,10 @@ expression: stdout
           "https://shopify.dev/apps/auth",
           "https://shopify.dev/changelog/app-secret-key-length-has-increased"
         ],
-        "categories": []
+        "categories": [
+          "api",
+          "secret"
+        ]
       }
     },
     {

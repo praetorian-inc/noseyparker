@@ -100,7 +100,7 @@ Group: AKIAJUZPLTNMY2JSXLYA
 
 
 Finding 5/14
-Rule: AWS S3 Bucket (path style)
+Rule: AWS S3 Bucket
 Group: s3-us-west-2.amazonaws.com/makerstrap
 
     Occurrence 1/1
@@ -136,7 +136,7 @@ Group: s3-us-west-2.amazonaws.com/makerstrap
 
 
 Finding 6/14
-Rule: AWS S3 Bucket (path style)
+Rule: AWS S3 Bucket
 Group: s3.amazonaws.com/com.mozillalabs.appmaker
 Showing 3/11 occurrences:
 
@@ -202,7 +202,7 @@ Showing 3/11 occurrences:
 
 
 Finding 7/14
-Rule: AWS S3 Bucket (path style)
+Rule: AWS S3 Bucket
 Group: s3.amazonaws.com/listjs
 
     Occurrence 1/1
