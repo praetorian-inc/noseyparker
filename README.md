@@ -61,6 +61,12 @@ $ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
 Nosey Parker is available in the [Arch User Repository](https://aur.archlinux.org/packages/noseyparker).
 
 
+### Windows
+
+Nosey Parker does not currently provide native binaries for Windows ([#121](https://github.com/praetorian-inc/noseyparker/issues/121)).
+It _is_ possible to run on Windows using [WSL1](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) and the native Linux release.
+
+
 ### Building from source
 
 <details>
