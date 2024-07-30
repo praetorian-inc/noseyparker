@@ -57,7 +57,6 @@ default = ["mimalloc", "color_backtrace"]
 vergen = { version = "8.3", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
 
 [dependencies]
-
 anyhow = { version = "1.0" }
 bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
@@ -88,7 +87,7 @@ rlimit = "0.10.0"
 schemars = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde-sarif = "0.4"
+serde-sarif = "0.5"
 strum = { version = "0.26", features = ["derive"] }
 sysinfo = { version =  "0.30" }
 tar = "0.4"

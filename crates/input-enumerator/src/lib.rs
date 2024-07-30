@@ -4,7 +4,10 @@ pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 
 use anyhow::Result;
-use ignore::{DirEntry, WalkBuilder, WalkState};
+use ignore::{
+    gitignore::{Gitignore, GitignoreBuilder},
+    DirEntry, WalkBuilder, WalkState,
+};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::{debug, error, warn};
@@ -43,6 +46,8 @@ struct VisitorBuilder<'t> {
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
 
+    gitignore: &'t Gitignore,
+
     progress: &'t Progress,
 }
 
@@ -59,6 +64,7 @@ where
             local_git_repos: Vec::new(),
             global_files: self.global_files,
             global_git_repos: self.global_git_repos,
+            gitignore: self.gitignore,
             progress: self.progress.clone(),
         })
     }
@@ -77,6 +83,8 @@ struct Visitor<'t> {
 
     global_files: &'t Mutex<Vec<FileResult>>,
     global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
+
+    gitignore: &'t Gitignore,
 
     progress: Progress,
 }
@@ -149,7 +157,11 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                         debug!("Found Git repo at {}", path.display());
 
                         if self.collect_git_metadata {
-                            let enumerator = GitRepoWithMetadataEnumerator::new(path, &repository);
+                            let enumerator = GitRepoWithMetadataEnumerator::new(
+                                path,
+                                &repository,
+                                &self.gitignore,
+                            );
                             match enumerator.run(&mut self.progress) {
                                 Err(e) => {
                                     error!(
@@ -197,14 +209,25 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
 /// - Enumeration of blobs found in Git repositories
 /// - Support for ignoring files based on size or using path-based gitignore-style rules
 pub struct FilesystemEnumerator {
+    /// The inner filesystem walker builder
     walk_builder: WalkBuilder,
 
-    // We store the max file size here in addition to inside the `walk_builder` to work around a
-    // bug in `ignore` where max filesize is not applied to top-level file inputs, only inputs that
-    // appear under a directory.
+    /// A gitignore builder, used for propagating path-based ignore rules into git history enumeration
+    ///
+    /// Note that this is a duplicate representation of the gitignore rules stored within
+    /// `walk_builder`. There seems to be no avoiding that with the APIs exposed by the
+    /// `WalkBuilder` type today.
+    gitignore_builder: GitignoreBuilder,
+
+    /// We store the max file size here in addition to inside the `walk_builder` to work around a
+    /// bug in `ignore` where max filesize is not applied to top-level file inputs, only inputs that
+    /// appear under a directory.
     max_file_size: Option<u64>,
 
+    /// Should git metadata (commit and path information) be collected?
     collect_git_metadata: bool,
+
+    /// Should git history be scanned at all?
     enumerate_git_history: bool,
 }
 
@@ -230,11 +253,14 @@ impl FilesystemEnumerator {
         builder.max_filesize(max_file_size);
         builder.standard_filters(false);
 
+        let gitignore_builder = GitignoreBuilder::new("");
+
         Ok(FilesystemEnumerator {
             walk_builder: builder,
             max_file_size,
             collect_git_metadata: Self::DEFAULT_COLLECT_GIT_METADATA,
             enumerate_git_history: Self::DEFAULT_ENUMERATE_GIT_HISTORY,
+            gitignore_builder,
         })
     }
 
@@ -246,6 +272,12 @@ impl FilesystemEnumerator {
 
     /// Add a set of gitignore-style rules from the given ignore file.
     pub fn add_ignore<T: AsRef<Path>>(&mut self, path: T) -> Result<&mut Self> {
+        let path = path.as_ref();
+
+        if let Some(e) = self.gitignore_builder.add(path) {
+            Err(e)?;
+        }
+
         match self.walk_builder.add_ignore(path) {
             Some(e) => Err(e)?,
             None => Ok(self),
@@ -294,12 +326,15 @@ impl FilesystemEnumerator {
         let files = Mutex::new(Vec::new());
         let git_repos = Mutex::new(Vec::new());
 
+        let gitignore = self.gitignore_builder.build()?;
+
         let mut visitor_builder = VisitorBuilder {
             collect_git_metadata: self.collect_git_metadata,
             enumerate_git_history: self.enumerate_git_history,
             max_file_size: self.max_file_size,
             global_files: &files,
             global_git_repos: &git_repos,
+            gitignore: &gitignore,
             progress,
         };
 

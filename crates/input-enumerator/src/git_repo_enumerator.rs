@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use gix::{hashtable::HashMap, ObjectId, OdbHandle, Repository};
+use ignore::gitignore::Gitignore;
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 // use std::time::Instant;
@@ -116,11 +117,16 @@ pub struct BlobMetadata {
 pub struct GitRepoWithMetadataEnumerator<'a> {
     path: &'a Path,
     repo: &'a Repository,
+    gitignore: &'a Gitignore,
 }
 
 impl<'a> GitRepoWithMetadataEnumerator<'a> {
-    pub fn new(path: &'a Path, repo: &'a Repository) -> Self {
-        Self { path, repo }
+    pub fn new(path: &'a Path, repo: &'a Repository, gitignore: &'a Gitignore) -> Self {
+        Self {
+            path,
+            repo,
+            gitignore,
+        }
     }
 
     pub fn run(&self, progress: &mut Progress) -> Result<GitRepoResult> {
@@ -241,7 +247,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         let path = self.path.to_owned();
         match metadata_graph.repo_metadata(progress) {
             Err(e) => {
-                warn!("failed to compute reachable blobs: {e}");
+                warn!("Failed to compute reachable blobs; ignoring metadata: {e}");
                 let blobs = blobs
                     .into_iter()
                     .map(|(blob_oid, num_bytes)| BlobMetadata {
@@ -257,7 +263,6 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                 })
             }
             Ok(md) => {
-                // FIXME: apply path-based ignore rules to blobs here, like the filesystem enumerator
                 let mut inverted =
                     HashMap::<ObjectId, SmallVec<[BlobAppearance; 1]>>::with_capacity_and_hasher(
                         num_blobs,
@@ -273,19 +278,80 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                     }
                 }
 
-                let blobs = blobs
+                // Build blobs result set.
+                //
+                // Apply any path-based ignore rules to blobs here, like the filesystem enumerator,
+                // filtering out blobs that have paths to ignore.
+                //
+                // Note that the behavior of ignoring blobs from Git repositories may be
+                // surprising.
+                //
+                // A blob may appear within a Git repository under many different paths.
+                // Nosey Parker doesn't compute the *entire* set of paths that each blob
+                // appears with. Instead, Nosey Parker computes the set of paths that each blob was
+                // *first introduced* with.
+                //
+                // It is also possible to instruct Nosey Parker to compute *no* path information
+                // for Git history.
+                //
+                // It's also possible (though rare) that a blob appears in a Git repository with
+                // _no_ path whatsoever.
+                //
+                // Anyway, when Nosey Parker is determining whether a blob should be gitignored or
+                // not, the logic is this:
+                //
+                // - If the set of pathnames for a blob is empty, *do not* ignore the blob.
+                //
+                // - If the set of pathnames for a blob is *not* empty, if *all* of the pathnames
+                //   match the gitignore rules, ignore the blob.
+
+                let blobs: Vec<_> = blobs
                     .into_iter()
-                    .map(|(blob_oid, num_bytes)| {
-                        let first_seen = inverted
-                            .get(&blob_oid)
-                            .map_or(SmallVec::new(), |v| v.clone());
-                        BlobMetadata {
+                    .filter_map(|(blob_oid, num_bytes)| match inverted.get(&blob_oid) {
+                        None => Some(BlobMetadata {
                             blob_oid,
                             num_bytes,
-                            first_seen,
+                            first_seen: SmallVec::new(),
+                        }),
+
+                        Some(first_seen) => {
+                            let first_seen: SmallVec<_> = first_seen
+                                .iter()
+                                .filter(|entry| {
+                                    use bstr::ByteSlice;
+                                    match entry.path.to_path() {
+                                        Ok(path) => {
+                                            let is_dir = false;
+                                            let m = self.gitignore.matched(path, is_dir);
+                                            let is_ignore = m.is_ignore();
+                                            // if is_ignore {
+                                            //     debug!("ignoring path {}: {m:?}", path.display());
+                                            // }
+                                            !is_ignore
+                                        }
+                                        Err(_e) => {
+                                            // debug!("error converting to path: {e}");
+                                            true
+                                        }
+                                    }
+                                })
+                                .cloned()
+                                .collect();
+
+                            if first_seen.is_empty() {
+                                // warn!("ignoring blob {blob_oid}");
+                                None
+                            } else {
+                                Some(BlobMetadata {
+                                    blob_oid,
+                                    num_bytes,
+                                    first_seen,
+                                })
+                            }
                         }
                     })
                     .collect();
+
                 Ok(GitRepoResult {
                     path,
                     blobs,
