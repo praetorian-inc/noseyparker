@@ -6,7 +6,7 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
 
 ### Additions
 
@@ -61,6 +61,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The gitignore-style path-based exclusion patterns (`scan --ignore=GITIGNORE_FILE`) now also apply to content found within Git history, and not just paths on the filesystem ([#209](https://github.com/praetorian-inc/noseyparker/pull/209)).
   When a blob is found in Git history with at least 1 associated pathname, if all of the associated pathnames match the ignore rules, the blob is not scanned.
+
+- The Rust version required to build has been bumped from 1.76 to 1.77.
+  This is necessary to support C-string literals in the `rusqlite` crate.
 
 
 ## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)

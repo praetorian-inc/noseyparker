@@ -2,7 +2,7 @@
 source: crates/noseyparker-cli/tests/help/mod.rs
 expression: stdout
 ---
-noseyparker 0.18.2-dev
+noseyparker 0.19.0
 
 Build Configuration:
 

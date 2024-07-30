@@ -30,7 +30,7 @@ RUN ./scripts/create-release.zsh --no-debug && \
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
 ################################################################################
-FROM alpine:latest as runner
+FROM alpine:latest AS runner
 
 # Add `git` so that noseyparker's git and github integration works
 RUN apk add --no-cache --no-interactive git
