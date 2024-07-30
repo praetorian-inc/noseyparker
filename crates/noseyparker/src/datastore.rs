@@ -579,7 +579,7 @@ impl Datastore {
                 -- sum(num_unlabeled_matches) unlabeled_matches
             from
                 f
-            group by rule_name, rule_structural_id
+            group by rule_name
         "#})?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingSummaryEntry {
