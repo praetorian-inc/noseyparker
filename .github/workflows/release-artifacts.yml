@@ -28,15 +28,8 @@ jobs:
           dockerfile: Dockerfile.alpine
           image: ghcr.io/${{ github.repository }}-alpine
 
-    # To avoid running out of disk space or CPU time, use an "extra large
-    # runner" that has more cores and disk than the default.
-    #
-    # See https://docs.github.com/en/actions/using-github-hosted-runners/about-larger-runners/about-larger-runners#machine-sizes-for-larger-runners.
-    #
-    # See "settings -> actions -> runners" on the repo's GitHub page to
-    # determine which runners are enabled.
     name: Docker
-    runs-on: ubuntu-22.04-arm64-8-core
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
