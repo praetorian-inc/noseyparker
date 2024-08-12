@@ -1030,7 +1030,7 @@ impl Datastore {
     fn open_impl(root_dir: &Path, cache_size: i64) -> Result<Self> {
         let db_path = root_dir.join("datastore.db");
         let conn = Self::new_connection(&db_path, cache_size)?;
-        let root_dir = root_dir.canonicalize()?;
+        let root_dir = root_dir.to_path_buf();
         let ds = Self { root_dir, conn };
         Ok(ds)
     }
