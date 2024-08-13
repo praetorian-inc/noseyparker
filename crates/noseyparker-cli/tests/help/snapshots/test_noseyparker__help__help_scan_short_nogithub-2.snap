@@ -1,0 +1,52 @@
+---
+source: crates/noseyparker-cli/tests/help/mod.rs
+expression: stdout
+---
+Scan content for secrets
+
+Usage: noseyparker scan [OPTIONS] [INPUT]...
+
+Options:
+  -d, --datastore <PATH>  Use the specified datastore [env: NP_DATASTORE=] [default: datastore.np]
+  -j, --jobs <N>          Use N parallel scanning threads [default: DEFAULT]
+  -h, --help              Print help (see more with '--help')
+
+Rule Selection Options:
+      --rules-path <PATH>     Load additional rules and rulesets from the specified file or
+                              directory
+      --ruleset <ID>          Enable the ruleset with the specified ID [default: default]
+      --load-builtins <BOOL>  Control whether built-in rules and rulesets are loaded [default: true]
+                              [possible values: true, false]
+
+Input Specifier Options:
+  [INPUT]...            Scan the specified file, directory, or local Git repository
+      --git-url <URL>       Clone and scan the Git repository at the specified URL
+      --git-clone <MODE>    Use the specified method for cloning Git repositories [default: bare]
+                            [possible values: bare, mirror]
+      --git-history <MODE>  Use the specified mode for handling Git history [default: full]
+                            [possible values: full, none]
+
+Content Filtering Options:
+      --max-file-size <MEGABYTES>  Do not scan files larger than the specified size [default: 100]
+  -i, --ignore <FILE>              Use custom path-based ignore rules from the specified file
+
+Metadata Collection Options:
+      --blob-metadata <MODE>        Specify which blobs will have metadata recorded [default:
+                                    matching] [possible values: all, matching, none]
+      --git-blob-provenance <MODE>  Specify which Git commit provenance metadata will be collected
+                                    [default: first-seen] [possible values: first-seen, minimal]
+
+Data Collection Options:
+      --snippet-length <BYTES>  Include up to the specified number of bytes before and after each
+                                match [default: 256]
+      --copy-blobs <MODE>       Specify which blobs will be copied in entirety to the datastore
+                                [default: none] [possible values: all, matching, none]
+
+Global Options:
+  -v, --verbose...       Enable verbose output
+  -q, --quiet            Suppress non-error feedback messages
+      --color <MODE>     Enable or disable colored output [default: auto] [possible values: auto,
+                         never, always]
+      --progress <MODE>  Enable or disable progress bars [default: auto] [possible values: auto,
+                         never, always]
+      --ignore-certs     Ignore validation of TLS certificates

@@ -4,6 +4,7 @@ use super::*;
 mod appmaker;
 mod basic;
 mod git_url;
+#[cfg(feature = "github")]
 mod github;
 mod snippet_length;
 mod with_ignore;

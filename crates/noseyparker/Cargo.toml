@@ -16,7 +16,13 @@ name = "noseyparker"
 path = "src/lib.rs"
 
 [features]
+# Enable per-rule runtime profiling, causing profile data to be dumped in a
+# table to stdout after scanning.
 rule_profiling = []
+
+# Provide functionality for enumerating and interacting with GitHub.
+# If this is not enabled, no GitHub functionality will be available.
+github = ["dep:reqwest", "dep:tokio", "dep:secrecy", "dep:chrono"]
 
 
 [dependencies]
@@ -24,7 +30,7 @@ anyhow = { version = "1.0" }
 atoi = "2.0"
 bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
-chrono = { version = "0.4", default-features = false, features = ["std"] }
+chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 console = "0.15"
 fixedbitset = "0.5"
 gix = { version = "0.64", features = ["max-performance", "serde"] }
@@ -38,15 +44,15 @@ noseyparker-digest = { path = "../noseyparker-digest" }
 noseyparker-rules = { path = "../noseyparker-rules" }
 progress = { path = "../progress" }
 regex = "1.7"
-reqwest = { version = "0.12", features = ["json", "native-tls-vendored"] }
+reqwest = { version = "0.12", features = ["json", "native-tls-vendored"], optional = true }
 rusqlite = { version = "0.32", features = ["bundled", "backup", "serde_json"] }
 schemars = { version = "0.8", features = ["smallvec"] }
-secrecy = "0.8.0"
+secrecy = { version = "0.8.0", optional = true }
 smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 thiserror = "1"
-tokio = "1.23"
+tokio = { version = "1.23", optional = true }
 tracing = "0.1"
 url = "2.3"
 vectorscan-rs = { version = "0.0.2" }

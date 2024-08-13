@@ -1,0 +1,5 @@
+---
+source: crates/noseyparker-cli/tests/help/mod.rs
+expression: stderr
+---
+

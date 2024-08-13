@@ -6,12 +6,12 @@ use clap::{
     crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
 };
 use lazy_static::lazy_static;
+use noseyparker::git_url::GitUrl;
 use std::io::IsTerminal;
 use std::path::PathBuf;
 use strum::Display;
+#[cfg(feature = "github")]
 use url::Url;
-
-use noseyparker::git_url::GitUrl;
 
 use crate::util::get_writer_for_file_or_stdout;
 
@@ -77,6 +77,7 @@ fn get_short_version() -> &'static str {
 
 const DEFAULT_DATASTORE: &str = "datastore.np";
 
+#[cfg(feature = "github")]
 pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: bool) {
     use clap::error::ErrorKind;
     use clap::CommandFactory;
@@ -193,6 +194,7 @@ impl CommandLineArgs {
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
+    #[cfg(feature = "github")]
     /// Scan content for secrets
     ///
     /// This command uses regex-based rules to identify hardcoded secrets and other potentially sensitive information in textual content (or in inputs that can have textual content extracted from them).
@@ -224,6 +226,28 @@ pub enum Command {
     #[command(display_order = 1)]
     Scan(ScanArgs),
 
+    #[cfg(not(feature = "github"))]
+    /// Scan content for secrets
+    ///
+    /// This command uses regex-based rules to identify hardcoded secrets and other potentially sensitive information in textual content (or in inputs that can have textual content extracted from them).
+    ///
+    /// The findings from scanning are recorded into a datastore. The recorded findings can later
+    /// be reported in several formats using the `summarize` and `report` commands.
+    ///
+    /// Several types of inputs can be specified:
+    ///
+    /// - Positional input arguments can be either files or directories.
+    ///   Files are scanned directly; directories are recursively enumerated and scanned.
+    ///   Any directories encountered that are Git repositories will have their entire history scanned.
+    ///
+    /// - A Git repository URL can be specified with the `--git-repo=URL` argument.
+    ///   This will cause Nosey Parker to clone that repository to its datastore and scan its history.
+    ///
+    /// The `git` binary on the PATH is used to clone any required Git repositories.
+    /// It is careful invoked to avoid using any system-wide or user-specific configuration.
+    #[command(display_order = 1)]
+    Scan(ScanArgs),
+
     /// Summarize scan findings
     ///
     /// Findings are summarized in tabular form.
@@ -250,6 +274,7 @@ pub enum Command {
     #[command(display_order = 3)]
     Report(ReportArgs),
 
+    #[cfg(feature = "github")]
     /// Interact with GitHub
     ///
     /// By default, unauthenticated access is used.
@@ -389,6 +414,7 @@ pub enum Mode {
 // -----------------------------------------------------------------------------
 // `github` command
 // -----------------------------------------------------------------------------
+#[cfg(feature = "github")]
 #[derive(Args, Debug)]
 pub struct GitHubArgs {
     #[command(subcommand)]
@@ -409,6 +435,7 @@ pub struct GitHubArgs {
     pub github_api_url: Url,
 }
 
+#[cfg(feature = "github")]
 #[derive(Subcommand, Debug)]
 pub enum GitHubCommand {
     /// Interact with GitHub repositories
@@ -416,12 +443,14 @@ pub enum GitHubCommand {
     Repos(GitHubReposCommand),
 }
 
+#[cfg(feature = "github")]
 #[derive(Subcommand, Debug)]
 pub enum GitHubReposCommand {
     /// List repositories belonging to a specific user or organization
     List(GitHubReposListArgs),
 }
 
+#[cfg(feature = "github")]
 #[derive(Args, Debug)]
 pub struct GitHubReposListArgs {
     #[command(flatten)]
@@ -431,6 +460,7 @@ pub struct GitHubReposListArgs {
     pub output_args: OutputArgs<GitHubOutputFormat>,
 }
 
+#[cfg(feature = "github")]
 #[derive(Args, Debug, Clone)]
 #[command(next_help_heading = "Input Specifier Options")]
 pub struct GitHubRepoSpecifiers {
@@ -473,6 +503,7 @@ pub struct GitHubRepoSpecifiers {
     pub repo_type: GitHubRepoType,
 }
 
+#[cfg(feature = "github")]
 impl GitHubRepoSpecifiers {
     pub fn is_empty(&self) -> bool {
         self.user.is_empty() && self.organization.is_empty() && !self.all_organizations
@@ -705,6 +736,7 @@ pub enum GitCloneMode {
     Mirror,
 }
 
+#[cfg(feature = "github")]
 /// Which GitHub repositories to select
 #[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[strum(serialize_all = "kebab-case")]
@@ -720,6 +752,7 @@ pub enum GitHubRepoType {
     Fork,
 }
 
+#[cfg(feature = "github")]
 impl From<GitHubRepoType> for noseyparker::github::RepoType {
     fn from(val: GitHubRepoType) -> Self {
         match val {
@@ -797,11 +830,21 @@ pub enum GitBlobProvenanceMode {
 #[derive(Args, Debug)]
 #[command(next_help_heading = "Input Specifier Options")]
 pub struct InputSpecifierArgs {
+    #[cfg(feature = "github")]
     /// Scan the specified file, directory, or local Git repository
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
         required_unless_present_any(["github_user", "github_organization", "git_url", "all_github_organizations"]),
+        display_order=1,
+    )]
+    pub path_inputs: Vec<PathBuf>,
+
+    #[cfg(not(feature = "github"))]
+    /// Scan the specified file, directory, or local Git repository
+    #[arg(
+        value_name="INPUT",
+        value_hint=ValueHint::AnyPath,
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -819,12 +862,14 @@ pub struct InputSpecifierArgs {
     )]
     pub git_url: Vec<GitUrl>,
 
+    #[cfg(feature = "github")]
     /// Clone and scan accessible repositories belonging to the specified GitHub user
     ///
     /// This option can be repeated.
     #[arg(long, value_name = "NAME", display_order = 20)]
     pub github_user: Vec<String>,
 
+    #[cfg(feature = "github")]
     /// Clone and scan accessible repositories belonging to the specified GitHub organization
     ///
     /// This option can be repeated.
@@ -836,6 +881,7 @@ pub struct InputSpecifierArgs {
     )]
     pub github_organization: Vec<String>,
 
+    #[cfg(feature = "github")]
     /// Clone and scan accessible repositories from all accessible GitHub organizations
     ///
     /// This only works with a GitHub Enterprise Server instance.
@@ -848,6 +894,7 @@ pub struct InputSpecifierArgs {
     )]
     pub all_github_organizations: bool,
 
+    #[cfg(feature = "github")]
     /// Use the specified URL for GitHub API access
     ///
     /// If accessing a GitHub Enterprise Server instance, this value should be the entire base URL
@@ -862,6 +909,7 @@ pub struct InputSpecifierArgs {
     )]
     pub github_api_url: Url,
 
+    #[cfg(feature = "github")]
     /// Clone and scan GitHub repos only of the given type
     #[arg(
         long,
@@ -1211,6 +1259,7 @@ pub enum SummarizeOutputFormat {
     Jsonl,
 }
 
+#[cfg(feature = "github")]
 // -----------------------------------------------------------------------------
 // github output format
 // -----------------------------------------------------------------------------
