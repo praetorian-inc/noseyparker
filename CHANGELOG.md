@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The deprecated `--rules=PATH` alias for `--rules-path=PATH` has been removed from the `scan` and `rules` commands.
 
+- The built-in support for enumerating and interacting with GitHub is now a compile time-selectable feature that is enabled by default ([#213](https://github.com/praetorian-inc/noseyparker/pull/213)).
+  This makes it possible to build a slimmer release for environments where GitHub functionality is unused.
+
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
 
