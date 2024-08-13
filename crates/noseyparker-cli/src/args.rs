@@ -669,8 +669,7 @@ pub struct RuleSpecifierArgs {
     ///
     /// This option can be repeated.
 
-    // FIXME: remove deprecated `rules` alias in v0.19
-    #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath, alias="rules")]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::AnyPath)]
     pub rules_path: Vec<PathBuf>,
 
     /// Enable the ruleset with the specified ID
