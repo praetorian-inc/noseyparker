@@ -6,6 +6,16 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Changes
+
+- When scanning, the progress bar for cloning Git repositories now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
+
+- When scanning, automatically cloned Git repositories are now recorded with the path given on the command line instead of the canonicalized path ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
+  This makes datastores slightly more portable across different environments, such as within a Docker container and on the host machine, as relative paths can now be recorded.
+
+
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
 
 ### Additions

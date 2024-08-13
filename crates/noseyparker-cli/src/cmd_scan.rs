@@ -167,6 +167,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             Progress::new_bar(repo_urls.len() as u64, "Fetching Git repos", progress_enabled);
 
         for repo_url in repo_urls {
+            progress.set_message(format!("Fetching Git repos ({repo_url})"));
+
             let output_dir = match datastore.clone_destination(&repo_url) {
                 Err(e) => {
                     progress.suspend(|| {
@@ -221,7 +223,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             progress.inc(1);
         }
 
-        progress.finish();
+        progress.finish_with_message("Fetching Git repos");
     }
 
     if input_roots.is_empty() {
