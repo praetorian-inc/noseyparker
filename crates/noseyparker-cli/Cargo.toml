@@ -42,14 +42,20 @@ vectorscan_simd_specialization = ["vectorscan-rs/simd_specialization"]
 # Enable all Vectorscan features that can improve speed but break binary portability.
 vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
 
+# Use the mimalloc global allocator
 mimalloc = ["dep:mimalloc", "dep:libmimalloc-sys"]
 
+# Use color backtraces
 color_backtrace = ["dep:color-backtrace"]
+
+# Provide functionality for enumerating and interacting with GitHub.
+# If this is not enabled, no GitHub functionality will be available.
+github = ["noseyparker/github"]
 
 # Enable features that are desirable in a release build
 release = ["disable_trace", "mimalloc"]
 
-default = ["mimalloc", "color_backtrace"]
+default = ["mimalloc", "color_backtrace", "github"]
 
 
 [build-dependencies]

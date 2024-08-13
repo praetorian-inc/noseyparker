@@ -4,7 +4,12 @@ mod common;
 use common::*;
 
 mod datastore;
+
+// XXX We'd like to actually run these tests when the `github` feature is disabled, but use
+// different snapshot files in that case. But that's not easy to do.
+#[cfg(feature = "github")]
 mod github;
+
 mod help;
 mod report;
 mod rules;

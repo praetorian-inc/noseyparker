@@ -12,6 +12,7 @@ mod args;
 mod cmd_annotations;
 mod cmd_datastore;
 mod cmd_generate;
+#[cfg(feature = "github")]
 mod cmd_github;
 mod cmd_report;
 mod cmd_rules;
@@ -113,6 +114,7 @@ fn try_main(args: &CommandLineArgs) -> Result<()> {
 
     match &args.command {
         args::Command::Datastore(args) => cmd_datastore::run(global_args, args),
+        #[cfg(feature = "github")]
         args::Command::GitHub(args) => cmd_github::run(global_args, args),
         args::Command::Rules(args) => cmd_rules::run(global_args, args),
         args::Command::Scan(args) => cmd_scan::run(global_args, args),

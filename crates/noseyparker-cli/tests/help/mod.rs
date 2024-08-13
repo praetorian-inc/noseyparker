@@ -2,21 +2,43 @@
 
 use super::*;
 
+#[cfg(feature = "github")]
 #[test]
 fn no_args() {
     assert_cmd_snapshot!(noseyparker!().assert().failure());
 }
 
+#[cfg(not(feature = "github"))]
+#[test]
+fn no_args_nogithub() {
+    assert_cmd_snapshot!(noseyparker!().assert().failure());
+}
+
+#[cfg(feature = "github")]
 #[test]
 fn help() {
     assert_cmd_snapshot!(noseyparker_success!("help"));
 }
 
+#[cfg(not(feature = "github"))]
+#[test]
+fn help_nogithub() {
+    assert_cmd_snapshot!(noseyparker_success!("help"));
+}
+
+#[cfg(feature = "github")]
 #[test]
 fn help_short() {
     assert_cmd_snapshot!(noseyparker_success!("-h"));
 }
 
+#[cfg(not(feature = "github"))]
+#[test]
+fn help_short_nogithub() {
+    assert_cmd_snapshot!(noseyparker_success!("-h"));
+}
+
+#[cfg(feature = "github")]
 #[test]
 fn help_scan() {
     with_settings!({
@@ -28,8 +50,33 @@ fn help_scan() {
     });
 }
 
+#[cfg(not(feature = "github"))]
+#[test]
+fn help_scan_nogithub() {
+    with_settings!({
+        filters => vec![
+            (r"(?m)(scanning threads\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("help", "scan"));
+    });
+}
+
+#[cfg(feature = "github")]
 #[test]
 fn help_scan_short() {
+    with_settings!({
+        filters => vec![
+            (r"(?m)(scanning threads\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
+        ],
+    }, {
+        assert_cmd_snapshot!(noseyparker_success!("scan", "-h"));
+    });
+}
+
+#[cfg(not(feature = "github"))]
+#[test]
+fn help_scan_short_nogithub() {
     with_settings!({
         filters => vec![
             (r"(?m)(scanning threads\s+)\[default: \d+\]", r"$1[default: DEFAULT]"),
@@ -81,21 +128,25 @@ fn help_rules() {
     assert_cmd_snapshot!(noseyparker_success!("help", "rules"));
 }
 
+#[cfg(feature = "github")]
 #[test]
 fn help_github() {
     assert_cmd_snapshot!(noseyparker_success!("help", "github"));
 }
 
+#[cfg(feature = "github")]
 #[test]
 fn help_github_short() {
     assert_cmd_snapshot!(noseyparker_success!("github", "-h"));
 }
 
+#[cfg(feature = "github")]
 #[test]
 fn help_github_repos() {
     assert_cmd_snapshot!(noseyparker_success!("help", "github", "repos"));
 }
 
+#[cfg(feature = "github")]
 #[test]
 fn help_github_repos_short() {
     assert_cmd_snapshot!(noseyparker_success!("github", "repos", "-h"));

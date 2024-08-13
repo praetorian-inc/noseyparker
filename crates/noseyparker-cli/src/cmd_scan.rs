@@ -2,7 +2,6 @@ use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::path::Path;
-use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tracing::{debug, error, error_span, info, trace, warn};
@@ -19,8 +18,6 @@ use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::DEFAULT_IGNORE_RULES;
 use noseyparker::git_binary::{CloneMode, Git};
-use noseyparker::git_url::GitUrl;
-use noseyparker::github;
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
@@ -35,6 +32,7 @@ type DatastoreMessage = (ProvenanceSet, BlobMetadata, Vec<(Option<f64>, Match)>)
 /// The implementation enumerates content in parallel, scans the enumerated content in parallel,
 /// and records found matches to a SQLite database from a single dedicated thread.
 pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> {
+    #[cfg(feature = "github")]
     args::validate_github_api_url(
         &args.input_specifier_args.github_api_url,
         args.input_specifier_args.all_github_organizations,
@@ -98,46 +96,56 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Enumerate any mentioned GitHub repositories; gather list of all repos to clone or update
     // ---------------------------------------------------------------------------------------------
     let repo_urls = {
-        let repo_specifiers = github::RepoSpecifiers {
-            user: args.input_specifier_args.github_user.clone(),
-            organization: args.input_specifier_args.github_organization.clone(),
-            all_organizations: args.input_specifier_args.all_github_organizations,
-            repo_filter: args.input_specifier_args.github_repo_type.into(),
-        };
         let mut repo_urls = args.input_specifier_args.git_url.clone();
-        if !repo_specifiers.is_empty() {
-            let mut progress = Progress::new_countup_spinner(
-                "Enumerating GitHub repositories...",
-                progress_enabled,
-            );
-            let mut num_found: u64 = 0;
-            let api_url = args.input_specifier_args.github_api_url.clone();
 
-            for repo_string in github::enumerate_repo_urls(
-                &repo_specifiers,
-                api_url,
-                global_args.ignore_certs,
-                Some(&mut progress),
-            )
-            .context("Failed to enumerate GitHub repositories")?
-            {
-                match GitUrl::from_str(&repo_string) {
-                    Ok(repo_url) => repo_urls.push(repo_url),
-                    Err(e) => {
-                        progress.suspend(|| {
-                            error!("Failed to parse repo URL from {repo_string}: {e}");
-                        });
-                        continue;
+        #[cfg(feature = "github")]
+        {
+            use noseyparker::github;
+
+            let repo_specifiers = github::RepoSpecifiers {
+                user: args.input_specifier_args.github_user.clone(),
+                organization: args.input_specifier_args.github_organization.clone(),
+                all_organizations: args.input_specifier_args.all_github_organizations,
+                repo_filter: args.input_specifier_args.github_repo_type.into(),
+            };
+
+            if !repo_specifiers.is_empty() {
+                let mut progress = Progress::new_countup_spinner(
+                    "Enumerating GitHub repositories...",
+                    progress_enabled,
+                );
+                let mut num_found: u64 = 0;
+                let api_url = args.input_specifier_args.github_api_url.clone();
+
+                for repo_string in github::enumerate_repo_urls(
+                    &repo_specifiers,
+                    api_url,
+                    global_args.ignore_certs,
+                    Some(&mut progress),
+                )
+                .context("Failed to enumerate GitHub repositories")?
+                {
+                    use noseyparker::git_url::GitUrl;
+                    use std::str::FromStr;
+                    match GitUrl::from_str(&repo_string) {
+                        Ok(repo_url) => repo_urls.push(repo_url),
+                        Err(e) => {
+                            progress.suspend(|| {
+                                error!("Failed to parse repo URL from {repo_string}: {e}");
+                            });
+                            continue;
+                        }
                     }
+                    num_found += 1;
                 }
-                num_found += 1;
-            }
 
-            progress.finish_with_message(format!(
-                "Found {} repositories from GitHub",
-                HumanCount(num_found)
-            ));
+                progress.finish_with_message(format!(
+                    "Found {} repositories from GitHub",
+                    HumanCount(num_found)
+                ));
+            }
         }
+
         repo_urls.sort();
         repo_urls.dedup();
 
