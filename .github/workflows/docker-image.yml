@@ -136,6 +136,14 @@ jobs:
       with:
         images: ${{ matrix.image }}
 
+    # We need to authenticate with GHCR to push
+    - name: Authenticate with GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create manifest list and push
       working-directory: /tmp/digests
       run: |
@@ -148,16 +156,6 @@ jobs:
 
     - name: Test the Docker image
       run: docker run --rm "${{ matrix.image }}:${{ steps.metadata.outputs.version }}" --version
-
-    # We need to authenticate with GHCR both to push the tagged image for the
-    # `main` branch
-    - name: Authenticate with GitHub Container Registry
-      if: github.event_name == 'push' && github.ref_name == 'main'
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Push the image to `edge`
       if: github.event_name == 'push' && github.ref_name == 'main'
