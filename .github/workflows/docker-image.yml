@@ -11,31 +11,31 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: debian
+        - base: debian
           platform: linux/amd64
           dockerfile: Dockerfile
           image: ghcr.io/${{ github.repository }}
           runs-on: ubuntu-22.04
 
-        - name: debian
+        - base: debian
           platform: linux/arm64
           dockerfile: Dockerfile
           image: ghcr.io/${{ github.repository }}
           runs-on: ubuntu-22.04-arm64-8-core
 
-        - name: alpine
+        - base: alpine
           platform: linux/amd64
           dockerfile: Dockerfile.alpine
           image: ghcr.io/${{ github.repository }}-alpine
           runs-on: ubuntu-22.04
 
-        - name: alpine
+        - base: alpine
           platform: linux/arm64
           dockerfile: Dockerfile.alpine
           image: ghcr.io/${{ github.repository }}-alpine
           runs-on: ubuntu-22.04-arm64-8-core
 
-    name: Docker (${{ matrix.platform }} ${{ matrix.name }})
+    name: Docker (${{ matrix.platform }} ${{ matrix.base }})
     runs-on: ${{ matrix.runs-on }}
 
     steps:
@@ -72,17 +72,18 @@ jobs:
 
         context: .
 
-        platforms: ${{ matrix.platform }}
-
         file: ${{ matrix.dockerfile }}
 
-        labels: |
-          org.opencontainers.image.title=${{ github.event.repository.name }}
-          org.opencontainers.image.description=${{ github.event.repository.description }}
-          org.opencontainers.image.url=${{ github.event.repository.html_url }}
-          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+        platforms: ${{ matrix.platform }}
+
+        labels: ${{ steps.meta.outputs.labels }}
+        # labels: |
+        #   org.opencontainers.image.title=${{ github.event.repository.name }}
+        #   org.opencontainers.image.description=${{ github.event.repository.description }}
+        #   org.opencontainers.image.url=${{ github.event.repository.html_url }}
+        #   org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+        #   org.opencontainers.image.revision=${{ github.sha }}
+        #   org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
         outputs: type=image,name=${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
 
@@ -95,7 +96,7 @@ jobs:
     - name: Upload digest
       uses: actions/upload-artifact@v4
       with:
-        name: digests-${{ env.PLATFORM_PAIR }}
+        name: digests-${{ matrix.base }}-${{ env.PLATFORM_PAIR }}
         path: /tmp/digests/*
         if-no-files-found: error
         retention-days: 1
@@ -105,10 +106,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: debian
+        - base: debian
           image: ghcr.io/${{ github.repository }}
 
-        - name: alpine
+        - base: alpine
           image: ghcr.io/${{ github.repository }}-alpine
 
 
@@ -116,14 +117,14 @@ jobs:
     needs:
       - build
 
-    name: Docker (${{ matrix.name }})
+    name: Docker (${{ matrix.base }})
 
     steps:
     - name: Download digests
       uses: actions/download-artifact@v4
       with:
         path: /tmp/digests
-        pattern: digests-*
+        pattern: digests-${{ matrix.base }}-*
         merge-multiple: true
 
     - name: Set up Docker buildx
