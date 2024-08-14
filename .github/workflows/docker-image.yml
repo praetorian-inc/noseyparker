@@ -60,7 +60,6 @@ jobs:
         platforms: ${{ matrix.platform }}
 
         file: ${{ matrix.dockerfile }}
-        tags: ${{ matrix.image }}:edge
 
         labels: |
           org.opencontainers.image.title=${{ github.event.repository.name }}
@@ -71,9 +70,6 @@ jobs:
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
 
         outputs: type=image,name=${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
-
-    - name: Test the Docker image
-      run: docker run --rm "${{ matrix.image }}:edge" --version
 
     - name: Export digest
       run: |
@@ -131,6 +127,9 @@ jobs:
     - name: Inspect image
       run: |
         docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.meta.outputs.version }}
+
+    - name: Test the Docker image
+      run: docker run --rm "${{ matrix.image }}:${{ steps.meta.outputs.version }}" --version
 
     # We need to authenticate with GHCR both to push the tagged image for the
     # `main` branch
