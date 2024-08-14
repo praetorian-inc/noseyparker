@@ -49,6 +49,14 @@ jobs:
         # replace slashes in platform with dashes
         echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
 
+    # We need to authenticate with GHCR both to push the image by digest
+    - name: Authenticate with GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build and push by digest
       uses: docker/build-push-action@v6
       with:
