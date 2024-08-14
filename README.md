@@ -345,7 +345,6 @@ Nosey Parker has a few third-party integrations:
 - A [GitHub Action](https://github.com/bpsizemore/noseyparker-action) that runs Nosey Parker is available
 - [DefectDojo](https://defectdojo.org) includes a [parser for Nosey Parker v0.16 JSON](https://github.com/DefectDojo/django-DefectDojo/blob/c182e9ca9d8f981c15de2018f948fe69c4d1a800/docs/content/en/integrations/parsers/file/noseyparker.md)
 - [Nemesis](https://github.com/SpecterOps/Nemesis) includes support for Nosey Parker
-- [segfault.net root servers include Nosey Parker v0.16.0](https://www.thc.org/segfault/)
 
 If you have an integration you'd like to share that's not listed here, please create a PR.
 
