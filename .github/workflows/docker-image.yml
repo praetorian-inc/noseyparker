@@ -57,8 +57,15 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Docker metadata
+      id: metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ matrix.image }}
+
     - name: Build and push by digest
       uses: docker/build-push-action@v6
+      id: build
       with:
         cache-from: type=gha,scope=${{ matrix.dockerfile }}
         cache-to: type=gha,scope=${{ matrix.dockerfile }},mode=min
@@ -119,11 +126,11 @@ jobs:
         pattern: digests-*
         merge-multiple: true
 
-    - name: Set up Docker Buildx
+    - name: Set up Docker buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Docker meta
-      id: meta
+    - name: Docker metadata
+      id: metadata
       uses: docker/metadata-action@v5
       with:
         images: ${{ matrix.image }}
@@ -136,10 +143,10 @@ jobs:
 
     - name: Inspect image
       run: |
-        docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.meta.outputs.version }}
+        docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.metadata.outputs.version }}
 
     - name: Test the Docker image
-      run: docker run --rm "${{ matrix.image }}:${{ steps.meta.outputs.version }}" --version
+      run: docker run --rm "${{ matrix.image }}:${{ steps.metadata.outputs.version }}" --version
 
     # We need to authenticate with GHCR both to push the tagged image for the
     # `main` branch
