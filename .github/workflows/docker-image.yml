@@ -78,9 +78,6 @@ jobs:
       uses: docker/build-push-action@v6
       id: build
       with:
-        cache-from: type=gha,scope=${{ matrix.dockerfile }}
-        cache-to: type=gha,scope=${{ matrix.dockerfile }},mode=min
-
         context: .
 
         file: ${{ matrix.dockerfile }}
