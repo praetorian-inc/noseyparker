@@ -95,7 +95,10 @@ jobs:
 
     - name: Inspect Docker image
       run: |
-        docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.metadata.outputs.version }}
+        docker buildx imagetools inspect ${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}
+
+    - name: Test Docker image
+      run: docker run --rm "${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}" --version
 
     - name: Export digest
       run: |
@@ -179,9 +182,6 @@ jobs:
     - name: Inspect Docker image
       run: |
         docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.metadata.outputs.version }}
-
-    - name: Test Docker image
-      run: docker run --rm "${{ matrix.image }}:${{ steps.metadata.outputs.version }}" --version
 
     - name: Push the Docker image to `edge`
       if: github.event_name == 'push' && github.ref_name == 'main'
