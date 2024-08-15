@@ -1,3 +1,15 @@
+# This workflow builds multiplatform Nosey Parker Docker images for both the Debian and
+# Alpine varieties.
+#
+# For each variety, it uses a native-hardware runner to build the individual
+# Docker images, and then merges them into a multiplatform image.
+#
+# This approach is taken instead of using QEMU, since a QEMU build of Nosey
+# Parker takes several hours. Using native runners instead takes a few minutes.
+#
+# This was adapted from the Docker documentation site:
+# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+#
 name: Docker
 
 on:
@@ -142,6 +154,22 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # What's going on here?? A few cursed things.
+    #
+    # A merged multiplatform image from the individual single-platform images
+    # is constructed using the `docker buildx imagetools create` command.
+    #
+    # This takes a list of source manifests to combine. That list is
+    # constructed using the `jq -cr '.tags...` command and the `printf`
+    # command.
+    #
+    # The image metadata is propagated via munging the relevant annotations
+    # from $DOCKER_METADATA_OUTPUT_JSON (set by the `metadata` step) into the
+    # appropriate form for the `docker buildx imagetools create` command.
+    #
+    # See here for more details:
+    # https://docs.docker.com/reference/cli/docker/buildx/imagetools/create/
+    #
     - name: Create and push merged image
       working-directory: /tmp/digests
       run: |
