@@ -36,19 +36,24 @@ This is a simple way to get started and will give good performance.
 
 <details>
 
-A prebuilt multiplatform Docker image is available for the latest release for x86_64 and aarch64:
+A multiplatform Docker image is available for the **latest release** for x86_64 and aarch64:
 ```shell
 $ docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-Additionally, A prebuilt Docker image is also available for the most recent commit for x86_64:
+A multiplatform Docker image is available for **the most recent commit** for x86_64 and aarch64:
 ```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker:edge
+$ docker pull ghcr.io/praetorian-inc/noseyparker:main
 ```
 
-Finally, an additional prebuilt [Alpine-based](https://hub.docker.com/_/alpine) Docker image is also available for the most recent commit for x86_64:
+A multiplatform [Alpine-based](https://hub.docker.com/_/alpine) Docker image is available for the **latest release** for x86_64 and aarch64:
 ```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:edge
+$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:latest
+```
+
+A multiplatform [Alpine-based](https://hub.docker.com/_/alpine) Docker image is available for **the most recent commit** for x86_64 and aarch64:
+```shell
+$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:main
 ```
 
 **Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
