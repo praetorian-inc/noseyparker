@@ -1,3 +1,15 @@
+# This workflow builds multiplatform Nosey Parker Docker images for both the Debian and
+# Alpine varieties.
+#
+# For each variety, it uses a native-hardware runner to build the individual
+# Docker images, and then merges them into a multiplatform image.
+#
+# This approach is taken instead of using QEMU, since a QEMU build of Nosey
+# Parker takes several hours. Using native runners instead takes a few minutes.
+#
+# This was adapted from the Docker documentation site:
+# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+#
 name: Docker
 
 on:
@@ -7,70 +19,151 @@ on:
     branches: [ "main" ]
 
 jobs:
+
+  # build single-platform docker images on native runners
   build:
     strategy:
       matrix:
         include:
-        - name: debian
+        - base: debian
+          platform: linux/amd64
+          platform-pair: linux-amd64
           dockerfile: Dockerfile
           image: ghcr.io/${{ github.repository }}
+          runs-on: ubuntu-22.04
 
-        - name: alpine
+        - base: debian
+          platform: linux/arm64
+          platform-pair: linux-arm64
+          dockerfile: Dockerfile
+          image: ghcr.io/${{ github.repository }}
+          runs-on: ubuntu-22.04-arm64-8-core
+
+        - base: alpine
+          platform: linux/amd64
+          platform-pair: linux-amd64
           dockerfile: Dockerfile.alpine
           image: ghcr.io/${{ github.repository }}-alpine
+          runs-on: ubuntu-22.04
 
-    name: Docker (${{ matrix.name }})
-    runs-on: ubuntu-22.04
+        - base: alpine
+          platform: linux/arm64
+          platform-pair: linux-arm64
+          dockerfile: Dockerfile.alpine
+          image: ghcr.io/${{ github.repository }}-alpine
+          runs-on: ubuntu-22.04-arm64-8-core
+
+    name: Docker (${{ matrix.platform }} ${{ matrix.base }})
+    runs-on: ${{ matrix.runs-on }}
 
     steps:
     - uses: actions/checkout@v4
 
-    # The following for multi-platform build; disabled here because it takes so long; see #39.
-    #
-    # The docker image built for noseyparker releases is done in the
-    # `release-artifacts.yml` file.
-    #
-    # - uses: docker/setup-qemu-action@v2
-
     - uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
-      uses: docker/build-push-action@v5
-      with:
-        cache-from: type=gha,scope=${{ matrix.dockerfile }}
-        cache-to: type=gha,scope=${{ matrix.dockerfile }},mode=min
-
-        context: .
-        file: ${{ matrix.dockerfile }}
-        tags: ${{ matrix.image }}:edge
-        push: false
-        # For multi-platform builds
-        # platforms: linux/amd64,linux/arm64
-        load: true
-        pull: true
-
-        labels: |
-          org.opencontainers.image.title=${{ github.event.repository.name }}
-          org.opencontainers.image.description=${{ github.event.repository.description }}
-          org.opencontainers.image.url=${{ github.event.repository.html_url }}
-          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
-
-    - name: Test the Docker image
-      run: docker run --rm "${{ matrix.image }}:edge" --version
-
-    # We need to authenticate with GHCR both to push the tagged image for the
-    # `main` branch
-    - name: Authenticate with GitHub Container Registry
-      if: github.event_name == 'push' && github.ref_name == 'main'
+    - name: Authenticate with Docker registry
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Push the image to `edge`
+    - name: Collect Docker metadata
+      id: metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ matrix.image }}
+
+    - name: Build and push by digest
+      uses: docker/build-push-action@v6
+      id: build
+      with:
+        context: .
+
+        file: ${{ matrix.dockerfile }}
+
+        platforms: ${{ matrix.platform }}
+
+        # don't specify 'tags' here (error "get can't push tagged ref by digest")
+
+        labels: ${{ steps.metadata.outputs.labels }}
+
+        outputs: type=image,name=${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+
+    - name: Inspect Docker image
+      run: |
+        docker buildx imagetools inspect ${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}
+
+    - name: Test Docker image
+      run: docker run --rm "${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}" --version
+
+    - name: Export digest
+      run: |
+        mkdir -p /tmp/digests
+        digest="${{ steps.build.outputs.digest }}"
+        touch "/tmp/digests/${digest#sha256:}"
+
+    - name: Upload digest
+      uses: actions/upload-artifact@v4
+      with:
+        name: digests-${{ matrix.base }}-${{ matrix.platform-pair }}
+        path: /tmp/digests/*
+        if-no-files-found: error
+        retention-days: 1
+
+  # merge single-platform images into multiplatform images
+  merge:
+    strategy:
+      matrix:
+        include:
+        - base: debian
+          image: ghcr.io/${{ github.repository }}
+
+        - base: alpine
+          image: ghcr.io/${{ github.repository }}-alpine
+
+
+    runs-on: ubuntu-latest
+    needs:
+      - build
+
+    name: Docker (${{ matrix.base }})
+
+    steps:
+    - name: Download digests
+      uses: actions/download-artifact@v4
+      with:
+        path: /tmp/digests
+        pattern: digests-${{ matrix.base }}-*
+        merge-multiple: true
+
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Collect Docker metadata
+      id: metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ matrix.image }}
+
+    - name: Authenticate with Docker registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create and push merged image
+      working-directory: /tmp/digests
+      run: |
+        docker buildx imagetools create \
+          $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf '${{ matrix.image }}@sha256:%s ' *)
+
+    - name: Inspect Docker image
+      run: |
+        docker buildx imagetools inspect ${{ matrix.image }}:${{ steps.metadata.outputs.version }}
+
+    - name: Push the Docker image to `edge`
       if: github.event_name == 'push' && github.ref_name == 'main'
       run: |
-        docker push "${{ matrix.image }}:edge"
+        docker buildx imagetools create -t "${{ matrix.image }}:edge" "${{ matrix.image }}:${{ steps.metadata.outputs.version }}"
