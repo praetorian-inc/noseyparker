@@ -155,6 +155,7 @@ jobs:
     - name: Create and push merged image
       working-directory: /tmp/digests
       run: |
+        jq -cr '.annotations | map("--annotation=index:" + (. | sub("^manifest:"; ""))) | join("\u0000")' <<< "$DOCKER_METADATA_OUTPUT_JSON" |
         xargs -0 docker buildx imagetools create \
           $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
           $(printf '${{ matrix.image }}@sha256:%s ' *)
