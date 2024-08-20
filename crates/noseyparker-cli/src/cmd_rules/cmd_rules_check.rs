@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use regex::Regex;
 use std::collections::HashSet;
-use tracing::{debug_span, error, error_span, info, warn};
+use tracing::{debug_span, error, info, warn};
 use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
 use noseyparker::rules_database::RulesDatabase;
@@ -108,7 +108,7 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     // - all referenced rules are unique
     {
         for (ruleset_num, ruleset) in rulesets.iter().enumerate() {
-            let _span = error_span!("ruleset", "{}:{}", ruleset_num + 1, ruleset.name).entered();
+            let _span = debug_span!("ruleset", "{}:{}", ruleset_num + 1, ruleset.name).entered();
             if let Err(e) = loaded.resolve_ruleset_rules(ruleset) {
                 error!("Failed to resolve rules: {e}");
                 num_errors += 1;
@@ -201,7 +201,7 @@ struct CheckStats {
 
 fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
     let syntax = rule.syntax();
-    let _span = error_span!("rule", "{}:{}", rule_num + 1, syntax.name).entered();
+    let _span = debug_span!("rule", "{}:{}", rule_num + 1, syntax.name).entered();
 
     let mut num_warnings = 0;
     let mut num_errors = 0;

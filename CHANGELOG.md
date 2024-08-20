@@ -10,7 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changes
 
-- When scanning, the progress bar for cloning Git repositories now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
+- Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step.
+  This reduces peak memory use and CPU time, particularly in environments with slow disks.
+  A consequence of this change is that the total amount of data to scan is not known until it has actually been scanned, and so the scanning progress bar no longer shows a completion percentage.
+
+- When cloning Git repositories while scanning, the progress bar for now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
 
 - When scanning, automatically cloned Git repositories are now recorded with the path given on the command line instead of the canonicalized path ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
   This makes datastores slightly more portable across different environments, such as within a Docker container and on the host machine, as relative paths can now be recorded.

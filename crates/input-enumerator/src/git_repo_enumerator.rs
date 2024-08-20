@@ -3,14 +3,13 @@ use gix::{hashtable::HashMap, ObjectId, OdbHandle, Repository};
 use ignore::gitignore::Gitignore;
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 // use std::time::Instant;
-use tracing::{error_span, warn};
+use tracing::{debug, debug_span, warn};
 
 use crate::blob_appearance::{BlobAppearance, BlobAppearanceSet};
 use crate::git_commit_metadata::CommitMetadata;
 use crate::git_metadata_graph::GitMetadataGraph;
-
-use progress::Progress;
 
 // -------------------------------------------------------------------------------------------------
 // implementation helpers
@@ -43,8 +42,9 @@ pub struct ObjectCounts {
 }
 
 // TODO: measure how helpful or pointless it is to count the objects in advance
-// FIXME: if keeping the pre-counting step, add some new kind of progress indicator
-fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCounts> {
+fn count_git_objects(odb: &OdbHandle) -> Result<ObjectCounts> {
+    let t1 = Instant::now();
+
     use gix::object::Kind;
     use gix::odb::store::iter::Ordering;
     use gix::prelude::*;
@@ -52,17 +52,17 @@ fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCount
     let mut num_commits = 0;
     let mut num_trees = 0;
     let mut num_blobs = 0;
+    let mut num_objects = 0;
 
     for oid in odb
         .iter()
         .context("Failed to iterate object database")?
         .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
     {
-        let oid = unwrap_or_continue!(oid, |e| {
-            progress.suspend(|| warn!("Failed to read object id: {e}"))
-        });
+        num_objects += 1;
+        let oid = unwrap_or_continue!(oid, |e| { warn!("Failed to read object id: {e}") });
         let hdr = unwrap_or_continue!(odb.header(oid), |e| {
-            progress.suspend(|| warn!("Failed to read object header for {oid}: {e}"))
+            warn!("Failed to read object header for {oid}: {e}")
         });
         match hdr.kind() {
             Kind::Commit => num_commits += 1,
@@ -71,6 +71,9 @@ fn count_git_objects(odb: &OdbHandle, progress: &Progress) -> Result<ObjectCount
             Kind::Tag => {}
         }
     }
+
+    debug!("Counted {num_objects} objects in {:.6}s", t1.elapsed().as_secs_f64());
+
     Ok(ObjectCounts {
         num_commits,
         num_trees,
@@ -129,25 +132,18 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         }
     }
 
-    pub fn run(&self, progress: &mut Progress) -> Result<GitRepoResult> {
+    pub fn run(&self) -> Result<GitRepoResult> {
+        let t1 = Instant::now();
+
         use gix::object::Kind;
         use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
 
-        let _span = error_span!("enumerate_git_with_metadata", "{}", self.path.display()).entered();
-
-        macro_rules! warn {
-            ($($arg:expr),*) => {
-                progress.suspend(|| {
-                    tracing::warn!($($arg),*);
-                })
-            }
-        }
+        let _span = debug_span!("enumerate_git_with_metadata", "{}", self.path.display()).entered();
 
         let odb = &self.repo.objects;
 
         // TODO: measure how helpful or pointless it is to count the objects in advance
-        // FIXME: if keeping the pre-counting step, add some new kind of progress indicator
 
         // First count the objects to figure out how big to allocate data structures.
         // We're assuming that the repository doesn't change in the meantime.
@@ -156,7 +152,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
             num_commits,
             num_trees,
             num_blobs,
-        } = count_git_objects(odb, progress)?;
+        } = count_git_objects(odb)?;
 
         let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(num_blobs);
         let mut metadata_graph = GitMetadataGraph::with_capacity(num_commits, num_trees, num_blobs);
@@ -183,7 +179,6 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                     let obj_size = hdr.size();
                     metadata_graph.get_blob_idx(oid);
                     blobs.push((oid, obj_size));
-                    progress.inc(obj_size);
                 }
 
                 Kind::Commit => {
@@ -244,8 +239,10 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
             }
         }
 
+        debug!("Built metadata graph in {:.6}s", t1.elapsed().as_secs_f64());
+
         let path = self.path.to_owned();
-        match metadata_graph.repo_metadata(progress) {
+        match metadata_graph.get_repo_metadata() {
             Err(e) => {
                 warn!("Failed to compute reachable blobs; ignoring metadata: {e}");
                 let blobs = blobs
@@ -281,10 +278,8 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                 // Build blobs result set.
                 //
                 // Apply any path-based ignore rules to blobs here, like the filesystem enumerator,
-                // filtering out blobs that have paths to ignore.
-                //
-                // Note that the behavior of ignoring blobs from Git repositories may be
-                // surprising.
+                // filtering out blobs that have paths to ignore. Note that the behavior of
+                // ignoring blobs from Git repositories may be surprising:
                 //
                 // A blob may appear within a Git repository under many different paths.
                 // Nosey Parker doesn't compute the *entire* set of paths that each blob
@@ -375,20 +370,12 @@ impl<'a> GitRepoEnumerator<'a> {
         Self { path, repo }
     }
 
-    pub fn run(&self, progress: &mut Progress) -> Result<GitRepoResult> {
+    pub fn run(&self) -> Result<GitRepoResult> {
         use gix::object::Kind;
         use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
 
-        let _span = error_span!("enumerate_git", "{}", self.path.display()).entered();
-
-        macro_rules! warn {
-            ($($arg:expr),*) => {
-                progress.suspend(|| {
-                    tracing::warn!($($arg),*);
-                })
-            }
-        }
+        let _span = debug_span!("enumerate_git", "{}", self.path.display()).entered();
 
         let odb = &self.repo.objects;
 
@@ -406,7 +393,6 @@ impl<'a> GitRepoEnumerator<'a> {
             if hdr.kind() == Kind::Blob {
                 let obj_size = hdr.size();
                 blobs.push((oid, obj_size));
-                progress.inc(obj_size);
             }
         }
 
