@@ -9,8 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Changes
-- Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step.
-  This reduces peak memory use and CPU time, particularly in environments with slow disks.
+- Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step ([#216](https://github.com/praetorian-inc/noseyparker/pull/216)).
+  This reduces peak memory use and CPU time 10-20%, particularly in environments with slow I/O.
   A consequence of this change is that the total amount of data to scan is not known until it has actually been scanned, and so the scanning progress bar no longer shows a completion percentage.
 
 - When cloning Git repositories while scanning, the progress bar for now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
