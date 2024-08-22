@@ -18,7 +18,7 @@ use crate::rules_database::RulesDatabase;
 ///
 /// When matching with Vectorscan, we simply collect all matches into a preallocated `Vec`,
 /// and then go through them all after scanning is complete.
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
 struct RawMatch {
     rule_id: u32,
     start_idx: u64,
@@ -49,6 +49,7 @@ pub struct BlobMatch<'a> {
     pub captures: regex::bytes::Captures<'a>,
 }
 
+#[derive(Clone)]
 struct UserData {
     /// A scratch vector for raw matches from Vectorscan, to minimize allocation
     raw_matches_scratch: Vec<RawMatch>,
@@ -63,6 +64,7 @@ struct UserData {
 /// A `Matcher` is able to scan inputs for matches from rules in a `RulesDatabase`.
 ///
 /// If doing multi-threaded scanning, use a separate `Matcher` for each thread.
+#[derive(Clone)]
 pub struct Matcher<'a> {
     /// A scratch buffer for Vectorscan
     vs_scanner: vectorscan_rs::BlockScanner<'a>,
