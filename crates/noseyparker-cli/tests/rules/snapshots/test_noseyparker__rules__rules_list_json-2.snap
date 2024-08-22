@@ -1522,12 +1522,12 @@ expression: stdout
     },
     {
       "id": "np.google.6",
-      "structural_id": "4e3b74e85c70254144b1d2d08289f4d04af98f35",
+      "structural_id": "a665479683c770faad11645f8f0aa791c651e55f",
       "name": "Google OAuth Credentials",
       "syntax": {
         "name": "Google OAuth Credentials",
         "id": "np.google.6",
-        "pattern": "(?x)\n\\b\n([0-9]+-[a-z0-9_]{32}\\.apps\\.googleusercontent\\.com)            (?# client ID )\n(?: (?s) .{0,40} )                                              (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n\n(?: (GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )\n  | (?: (?i) client.?secret .{0,10} \\b ([a-zA-Z0-9_-]{24}) )    (?# non-prefixed client secret )\n)\n\n(?:[^a-zA-Z0-9_-] | $)\n",
+        "pattern": "(?x)\n\\b\n([0-9]+-[a-z0-9_]{32}\\.apps\\.googleusercontent\\.com)            (?# client ID )\n(?: (?s) .{0,40} )                                              (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n\n(?: (?i) client.?secret .{0,10} )?\n\n( (?:GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )\n| (?:\\b [a-zA-Z0-9_-]{24})                                      (?# non-prefixed client secret )\n)\n\n(?:[^a-zA-Z0-9_-] | $)\n",
         "examples": [
           "const CLIENT_ID = '304167046824-45h8no7j0s38akv998nivvb7i17ckqeh.apps.googleusercontent.com';\nconst CLIENT_SECRET = '1QcFpNjHoAf4_XczYwhYicTl';\n",
           "public static GAPIS_CREDENTIALS = {\n  // 1. Generate credentials: https://console.cloud.google.com/apis/\n  // 2. Create OAuth page and set spreadsheets and drive.metadata.readonly scopes\n  client_id: '132261435625-69ubohrvppjr9hcc5t9uighsb7j2cqhv.apps.googleusercontent.com',\n  client_secret: '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',\n  redirect_uri: `http://localhost:${Config.OAUTH_HTTP_PORT}/oauth2callback`\n};\n"

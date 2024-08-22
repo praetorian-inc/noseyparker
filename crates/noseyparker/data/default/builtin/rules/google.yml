@@ -156,8 +156,10 @@ rules:
     (?: (?s) .{0,40} )                                              (?# Arbitrary intermediate stuff; ?s causes . to match newlines )
     \b
 
-    (?: (GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )
-      | (?: (?i) client.?secret .{0,10} \b ([a-zA-Z0-9_-]{24}) )    (?# non-prefixed client secret )
+    (?: (?i) client.?secret .{0,10} )?
+
+    ( (?:GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )
+    | (?:\b [a-zA-Z0-9_-]{24})                                      (?# non-prefixed client secret )
     )
 
     (?:[^a-zA-Z0-9_-] | $)

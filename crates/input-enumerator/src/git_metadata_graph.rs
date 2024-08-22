@@ -13,7 +13,6 @@ use std::time::Instant;
 use tracing::{debug, error, warn};
 
 use crate::bstring_table::BStringTable;
-use progress::Progress;
 
 type Symbol = crate::bstring_table::Symbol<u32>;
 
@@ -310,7 +309,7 @@ pub struct RepoMetadata {
 }
 
 impl GitMetadataGraph {
-    pub fn repo_metadata(&self, progress: &Progress) -> Result<Vec<RepoMetadata>> {
+    pub fn get_repo_metadata(&self) -> Result<Vec<RepoMetadata>> {
         let t1 = Instant::now();
         let symbols = &self.symbols;
         let cg = &self.commits;
@@ -511,17 +510,15 @@ impl GitMetadataGraph {
         assert_eq!(num_commits_visited, num_commits);
         assert_eq!(visited_commits.len(), num_commits);
 
-        progress.suspend(|| {
-            debug!(
-                "{num_commits_visited} commits visited; \
-                  {max_frontier_size} max entries in frontier; \
-                  {max_live_seen_sets} max live seen sets; \
-                  {num_trees_introduced} trees introduced; \
-                  {num_blobs_introduced} blobs introduced; \
-                  {:.6}s",
-                t1.elapsed().as_secs_f64()
-            );
-        });
+        debug!(
+            "{num_commits_visited} commits visited; \
+              {max_frontier_size} max entries in frontier; \
+              {max_live_seen_sets} max live seen sets; \
+              {num_trees_introduced} trees introduced; \
+              {num_blobs_introduced} blobs introduced; \
+              {:.6}s",
+            t1.elapsed().as_secs_f64()
+        );
 
         // Massage intermediate accumulated results into output format
         let commit_metadata = cg

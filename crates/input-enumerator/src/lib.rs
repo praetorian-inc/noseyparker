@@ -4,36 +4,29 @@ pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 
 use anyhow::Result;
+use crossbeam_channel::Sender;
 use ignore::{
     gitignore::{Gitignore, GitignoreBuilder},
     DirEntry, WalkBuilder, WalkState,
 };
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::time::Instant;
 use tracing::{debug, error, warn};
-
-use progress::Progress;
 
 mod git_repo_enumerator;
 pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetadataEnumerator};
 
-pub struct FilesystemEnumeratorResult {
-    pub files: Vec<FileResult>,
-    pub git_repos: Vec<GitRepoResult>,
-}
-
-impl FilesystemEnumeratorResult {
-    pub fn total_blob_bytes(&self) -> u64 {
-        let git_blob_bytes: u64 = self.git_repos.iter().map(|e| e.total_blob_bytes()).sum();
-        let file_bytes: u64 = self.files.iter().map(|e| e.num_bytes).sum();
-        git_blob_bytes + file_bytes
-    }
+pub enum EnumeratorResult {
+    File(FileResult),
+    GitRepo(GitRepoResult),
 }
 
 pub struct FileResult {
     pub path: PathBuf,
     pub num_bytes: u64,
 }
+
+pub type Output = Sender<EnumeratorResult>;
 
 // -------------------------------------------------------------------------------------------------
 // VisitorBuilder
@@ -42,13 +35,8 @@ struct VisitorBuilder<'t> {
     max_file_size: Option<u64>,
     collect_git_metadata: bool,
     enumerate_git_history: bool,
-
-    global_files: &'t Mutex<Vec<FileResult>>,
-    global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
-
     gitignore: &'t Gitignore,
-
-    progress: &'t Progress,
+    output: &'t Output,
 }
 
 impl<'s, 't> ignore::ParallelVisitorBuilder<'s> for VisitorBuilder<'t>
@@ -60,12 +48,8 @@ where
             max_file_size: self.max_file_size,
             collect_git_metadata: self.collect_git_metadata,
             enumerate_git_history: self.enumerate_git_history,
-            local_files: Vec::new(),
-            local_git_repos: Vec::new(),
-            global_files: self.global_files,
-            global_git_repos: self.global_git_repos,
             gitignore: self.gitignore,
-            progress: self.progress.clone(),
+            output: self.output,
         })
     }
 }
@@ -77,16 +61,8 @@ struct Visitor<'t> {
     collect_git_metadata: bool,
     enumerate_git_history: bool,
     max_file_size: Option<u64>,
-
-    local_files: Vec<FileResult>,
-    local_git_repos: Vec<GitRepoResult>,
-
-    global_files: &'t Mutex<Vec<FileResult>>,
-    global_git_repos: &'t Mutex<Vec<GitRepoResult>>,
-
     gitignore: &'t Gitignore,
-
-    progress: Progress,
+    output: &'t Output,
 }
 
 impl<'t> Visitor<'t> {
@@ -94,18 +70,13 @@ impl<'t> Visitor<'t> {
     fn file_too_big(&self, size: u64) -> bool {
         self.max_file_size.map_or(false, |max_size| size > max_size)
     }
-}
 
-impl<'t> Drop for Visitor<'t> {
-    fn drop(&mut self) {
-        self.global_files
-            .lock()
-            .unwrap()
-            .extend(std::mem::take(&mut self.local_files));
-        self.global_git_repos
-            .lock()
-            .unwrap()
-            .extend(std::mem::take(&mut self.local_git_repos));
+    fn found_file(&mut self, r: FileResult) {
+        self.output.send(EnumeratorResult::File(r)).unwrap();
+    }
+
+    fn found_git_repo(&mut self, r: GitRepoResult) {
+        self.output.send(EnumeratorResult::GitRepo(r)).unwrap();
     }
 }
 
@@ -115,7 +86,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
 
         let entry = match result {
             Err(e) => {
-                error!("Failed to get entry: {}; skipping", e);
+                error!("Failed to get entry: {e}; skipping");
                 return WalkState::Skip;
             }
             Ok(v) => v,
@@ -137,8 +108,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             if self.file_too_big(bytes) {
                 debug!("Skipping {}: size {bytes} exceeds max size", path.display());
             } else {
-                self.progress.inc(bytes);
-                self.local_files.push(FileResult {
+                self.found_file(FileResult {
                     path,
                     num_bytes: bytes,
                 });
@@ -154,7 +124,8 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                         return WalkState::Skip;
                     }
                     Ok(Some(repository)) => {
-                        debug!("Found Git repo at {}", path.display());
+                        let t1 = Instant::now();
+                        debug!("Found Git repository at {}", path.display());
 
                         if self.collect_git_metadata {
                             let enumerator = GitRepoWithMetadataEnumerator::new(
@@ -162,29 +133,34 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                                 &repository,
                                 &self.gitignore,
                             );
-                            match enumerator.run(&mut self.progress) {
+                            match enumerator.run() {
                                 Err(e) => {
                                     error!(
                                         "Failed to enumerate Git repository at {}: {e}; skipping",
-                                        path.display()
+                                        path.display(),
                                     );
                                     return WalkState::Skip;
                                 }
-                                Ok(r) => self.local_git_repos.push(r),
+                                Ok(r) => self.found_git_repo(r),
                             }
                         } else {
                             let enumerator = GitRepoEnumerator::new(path, &repository);
-                            match enumerator.run(&mut self.progress) {
+                            match enumerator.run() {
                                 Err(e) => {
                                     error!(
                                         "Failed to enumerate Git repository at {}: {e}; skipping",
-                                        path.display()
+                                        path.display(),
                                     );
                                     return WalkState::Skip;
                                 }
-                                Ok(r) => self.local_git_repos.push(r),
+                                Ok(r) => self.found_git_repo(r),
                             }
                         }
+                        debug!(
+                            "Enumerated Git repository at {} in {:.6}s",
+                            path.display(),
+                            t1.elapsed().as_secs_f64()
+                        );
                     }
                     Ok(None) => {}
                 }
@@ -322,30 +298,22 @@ impl FilesystemEnumerator {
         self
     }
 
-    pub fn run(&self, progress: &Progress) -> Result<FilesystemEnumeratorResult> {
-        let files = Mutex::new(Vec::new());
-        let git_repos = Mutex::new(Vec::new());
-
+    pub fn run(&self, output: Output) -> Result<()> {
         let gitignore = self.gitignore_builder.build()?;
 
         let mut visitor_builder = VisitorBuilder {
             collect_git_metadata: self.collect_git_metadata,
             enumerate_git_history: self.enumerate_git_history,
             max_file_size: self.max_file_size,
-            global_files: &files,
-            global_git_repos: &git_repos,
             gitignore: &gitignore,
-            progress,
+            output: &output,
         };
 
         self.walk_builder
             .build_parallel()
             .visit(&mut visitor_builder);
 
-        let files = files.into_inner()?;
-        let git_repos = git_repos.into_inner().unwrap();
-
-        Ok(FilesystemEnumeratorResult { files, git_repos })
+        Ok(())
     }
 }
 

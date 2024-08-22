@@ -13,11 +13,11 @@ publish.workspace = true
 anyhow = { version = "1.0" }
 bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
+crossbeam-channel = "0.5"
 fixedbitset = "0.5"
 gix = { version = "0.64", features = ["max-performance", "serde"] }
 ignore = "0.4"
 petgraph = "0.6"
-progress = { path = "../progress" }
 roaring = "0.10"
 schemars = { version = "0.8" }
 serde = { version = "1.0", features = ["derive"] }

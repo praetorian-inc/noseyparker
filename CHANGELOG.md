@@ -9,8 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Changes
+- Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step ([#216](https://github.com/praetorian-inc/noseyparker/pull/216)).
+  This reduces peak memory use and CPU time 10-20%, particularly in environments with slow I/O.
+  A consequence of this change is that the total amount of data to scan is not known until it has actually been scanned, and so the scanning progress bar no longer shows a completion percentage.
 
-- When scanning, the progress bar for cloning Git repositories now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
+- When cloning Git repositories while scanning, the progress bar for now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
 
 - When scanning, automatically cloned Git repositories are now recorded with the path given on the command line instead of the canonicalized path ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
   This makes datastores slightly more portable across different environments, such as within a Docker container and on the host machine, as relative paths can now be recorded.
@@ -20,11 +23,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The built-in support for enumerating and interacting with GitHub is now a compile time-selectable feature that is enabled by default ([#213](https://github.com/praetorian-inc/noseyparker/pull/213)).
   This makes it possible to build a slimmer release for environments where GitHub functionality is unused.
 
+### Fixes
+
+- The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.
+
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
 
 ### Additions
-
 - The `scan` and `github repos list` commands offer a new `--github-repo-type={all,source,fork}` option to select a subset of repositories ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
 
 - A category mechanism is now provided for rules ([#208](https://github.com/praetorian-inc/noseyparker/pull/208)).
@@ -42,7 +48,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   The category information is included in output in the `rules list` command.
 
 ### Changes
-
 - The `scan` and `github repos list` commands now only consider non-forked repositories by default ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
   This behavior can be reverted to the previous behavior using the `--github-repo-type=all` option.
 
@@ -84,7 +89,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [v0.18.1](https://github.com/praetorian-inc/noseyparker/releases/v0.18.1) (2024-07-12)
 
 ### Fixes
-
 - Nosey Parker no longer crashes upon startup when running in environments with less than 4 GiB of RAM ([#202](https://github.com/praetorian-inc/noseyparker/pull/202)).
 
 - The `Base64-PEM-Encoded Private Key` rule has been refined to reduce false positives and avoid a rare performance pitfall.
@@ -93,7 +97,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [v0.18.0](https://github.com/praetorian-inc/noseyparker/releases/v0.18.0) (2024-06-27)
 
 ### Additions
-
 - The README now includes several animated GIFs that demonstrate simple example use cases ([#154](https://github.com/praetorian-inc/noseyparker/pull/154)).
 
 - The `report` command now offers a new `--finding-status=STATUS` filtering option ([#162](https://github.com/praetorian-inc/noseyparker/pull/162)).
@@ -151,7 +154,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   This helps avoid complete loss of scan results in the rare event of a crash.
 
 ### Fixes
-
 - A rare crash when parsing malformed Git commit timestamps has been fixed by updating the `gix-date` dependency ([#185](https://github.com/praetorian-inc/noseyparker/pull/185)).
 
 - Upon `noseyparker` startup, if resource limits cannot be adjusted, instead of crashing, a warning is printed and the process attempts to continue ([#170](https://github.com/praetorian-inc/noseyparker/issues/170)).
