@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 // -------------------------------------------------------------------------------------------------
 // RuleProfile
 // -------------------------------------------------------------------------------------------------
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct RuleProfile {
     raw_match_counts: Vec<u64>,
     stage2_durations: Vec<Duration>,

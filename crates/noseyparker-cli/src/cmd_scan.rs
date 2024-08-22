@@ -313,10 +313,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let seen_blobs = BlobIdMap::new();
 
     let t1 = Instant::now();
+    let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
     let blob_processor_init_time = Mutex::new(t1.elapsed());
     let make_blob_processor = || -> Result<BlobProcessor> {
         let t1 = Instant::now();
-        let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
+        let matcher = matcher.clone();
         *num_blob_processors.lock().unwrap() += 1;
         let guesser = Guesser::new()?;
         {
@@ -634,6 +635,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         );
         debug!("{} items in the blob ID set", seen_blobs.len());
 
+        drop(matcher);
         let matcher_stats = matcher_stats.into_inner()?;
         let scan_duration = scan_start.elapsed();
         let seen_bytes_per_sec =
