@@ -411,6 +411,28 @@ expression: stdout
       }
     },
     {
+      "id": "np.bitbucket.1",
+      "structural_id": "0316294736c698a4549f746b6d7d214dfdf4cff1",
+      "name": "Bitbucket App Password",
+      "syntax": {
+        "name": "Bitbucket App Password",
+        "id": "np.bitbucket.1",
+        "pattern": "(?x)\n\\b\n(ATBB[a-zA-Z0-9]{32})\n\\b\n",
+        "examples": [
+          "git ls-remote https://gemesa:ATBB3g7gLXseCxPjJs1CQNMyEjwf1D12516D@bitbucket.org/***/***"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/",
+          "https://support.atlassian.com/bitbucket-cloud/docs/using-app-passwords/"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.blynk.1",
       "structural_id": "7d7b4a3c990889ccbda6d47ec656719c22f9413c",
       "name": "Blynk Device Access Token",
@@ -3482,7 +3504,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 123
+      "num_rules": 124
     },
     {
       "id": "np.assets",

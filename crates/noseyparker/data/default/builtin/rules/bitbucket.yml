@@ -1,0 +1,21 @@
+rules:
+
+- name: Bitbucket App Password
+  id: np.bitbucket.1
+
+  pattern: |
+    (?x)
+    \b
+    (ATBB[a-zA-Z0-9]{32})
+    \b
+
+  examples:
+  - 'git ls-remote https://gemesa:ATBB3g7gLXseCxPjJs1CQNMyEjwf1D12516D@bitbucket.org/***/***'
+
+  references:
+  - https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
+  - https://support.atlassian.com/bitbucket-cloud/docs/using-app-passwords/
+
+  categories:
+  - api
+  - secret

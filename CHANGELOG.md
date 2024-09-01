@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The built-in support for enumerating and interacting with GitHub is now a compile time-selectable feature that is enabled by default ([#213](https://github.com/praetorian-inc/noseyparker/pull/213)).
   This makes it possible to build a slimmer release for environments where GitHub functionality is unused.
 
+- New rule has been added:
+
+  - Bitbucket App Password ([#219](https://github.com/praetorian-inc/noseyparker/pull/219))
+
 ### Fixes
 
 - The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.

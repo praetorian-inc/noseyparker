@@ -20,6 +20,7 @@ expression: stdout
  np.azure.1           Azure Connection String                                   api, fuzzy, secret 
  np.azure.2           Azure App Configuration Connection String                 api, fuzzy, secret 
  np.azure.3           Azure Personal Access Token                               api, fuzzy, secret 
+ np.bitbucket.1       Bitbucket App Password                                    api, secret 
  np.blynk.1           Blynk Device Access Token                                 api, secret 
  np.blynk.2           Blynk Organization Access Token                           api, secret 
  np.blynk.3           Blynk Organization Access Token                           api, secret 
@@ -151,6 +152,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             123 
+ default      Nosey Parker default rules             124 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
