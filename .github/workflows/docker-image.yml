@@ -15,8 +15,13 @@ name: Docker
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+
+  # Do not run on pull requests; the Docker registry permissions are not set up
+  # to work except for with the canonical `noseyparker` repo. Running from pull
+  # requests from forks will fail.
+  #
+  # pull_request:
+  #   branches: [ "main" ]
 
 jobs:
 
