@@ -48,7 +48,7 @@ impl schemars::JsonSchema for BlobId {
 }
 
 impl BlobId {
-    /// Create a new BlobId computed from the given input.
+    /// Create a new `BlobId` computed from the given input.
     #[inline]
     pub fn compute_from_bytes(input: &[u8]) -> Self {
         use noseyparker_digest::Sha1;
@@ -60,16 +60,19 @@ impl BlobId {
         BlobId(h.digest())
     }
 
+    /// Create new new `BlobId` from a hexadecimal string.
     #[inline]
     pub fn from_hex(v: &str) -> Result<Self> {
         Ok(BlobId(hex::decode(v)?.as_slice().try_into()?))
     }
 
+    /// Render the `BlobId` as a hexadecimal string.
     #[inline]
     pub fn hex(&self) -> String {
         hex::encode(self.0)
     }
 
+    /// View the `BlobId` as bytes.
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         &self.0
