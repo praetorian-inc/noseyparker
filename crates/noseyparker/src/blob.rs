@@ -15,13 +15,13 @@ impl Blob {
     #[inline]
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let bytes = std::fs::read(path)?;
-        let id = BlobId::new(&bytes);
+        let id = BlobId::compute_from_bytes(&bytes);
         Ok(Blob { id, bytes })
     }
 
     #[inline]
     pub fn from_bytes(bytes: Vec<u8>) -> Self {
-        let id = BlobId::new(&bytes);
+        let id = BlobId::compute_from_bytes(&bytes);
         Blob { id, bytes }
     }
 

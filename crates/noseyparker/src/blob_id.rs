@@ -50,7 +50,7 @@ impl schemars::JsonSchema for BlobId {
 impl BlobId {
     /// Create a new BlobId computed from the given input.
     #[inline]
-    pub fn new(input: &[u8]) -> Self {
+    pub fn compute_from_bytes(input: &[u8]) -> Self {
         use noseyparker_digest::Sha1;
         use std::io::Write;
 
@@ -167,7 +167,13 @@ mod test {
 
     #[test]
     fn simple() {
-        assert_eq!(BlobId::new(&vec![0; 0]).hex(), "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
-        assert_eq!(BlobId::new(&vec![0; 1024]).hex(), "06d7405020018ddf3cacee90fd4af10487da3d20");
+        assert_eq!(
+            BlobId::compute_from_bytes(&vec![0; 0]).hex(),
+            "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        );
+        assert_eq!(
+            BlobId::compute_from_bytes(&vec![0; 1024]).hex(),
+            "06d7405020018ddf3cacee90fd4af10487da3d20"
+        );
     }
 }
