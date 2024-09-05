@@ -1023,7 +1023,7 @@ impl Datastore {
         let results = collect(ps)?;
         match ProvenanceSet::try_from_iter(results) {
             Some(ps) => Ok(ps),
-            None => bail!("should have at least 1 provenance entry"),
+            None => bail!("At least 1 provenance entry must be provided"),
         }
     }
 

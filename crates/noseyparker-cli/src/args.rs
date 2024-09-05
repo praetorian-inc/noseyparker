@@ -835,7 +835,13 @@ pub struct InputSpecifierArgs {
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
-        required_unless_present_any(["github_user", "github_organization", "git_url", "all_github_organizations"]),
+        required_unless_present_any([
+            "github_user",
+            "github_organization",
+            "git_url",
+            "all_github_organizations",
+            "enumerators",
+        ]),
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -861,6 +867,23 @@ pub struct InputSpecifierArgs {
         display_order = 10,
     )]
     pub git_url: Vec<GitUrl>,
+
+    /// Read inputs from a JSONL enumerator file
+    ///
+    /// This can be used to stream inputs from other processes without having to write them to disk.
+    ///
+    /// This option can be repeated.
+    ///
+    /// Each line of the enumerator file should be a JSON object with the following form:
+    ///
+    ///     { "content_base64": <base64-encoded contents>, "provenance": <arbitrary object> }
+    #[arg(
+        long("enumerator"),
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        display_order=15,
+    )]
+    pub enumerators: Vec<PathBuf>,
 
     #[cfg(feature = "github")]
     /// Clone and scan accessible repositories belonging to the specified GitHub user

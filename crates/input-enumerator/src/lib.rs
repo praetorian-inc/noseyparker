@@ -3,7 +3,7 @@ pub mod bstring_table;
 pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use crossbeam_channel::Sender;
 use ignore::{
     gitignore::{Gitignore, GitignoreBuilder},
@@ -16,9 +16,10 @@ use tracing::{debug, error, warn};
 mod git_repo_enumerator;
 pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetadataEnumerator};
 
-pub enum EnumeratorResult {
+pub enum FoundInput {
     File(FileResult),
     GitRepo(GitRepoResult),
+    EnumeratorBlob(EnumeratorBlobResult),
 }
 
 pub struct FileResult {
@@ -26,7 +27,12 @@ pub struct FileResult {
     pub num_bytes: u64,
 }
 
-pub type Output = Sender<EnumeratorResult>;
+pub struct EnumeratorBlobResult {
+    pub bytes: Vec<u8>,
+    pub provenance: serde_json::Value,
+}
+
+pub type Output = Sender<FoundInput>;
 
 // -------------------------------------------------------------------------------------------------
 // VisitorBuilder
@@ -72,11 +78,11 @@ impl<'t> Visitor<'t> {
     }
 
     fn found_file(&mut self, r: FileResult) {
-        self.output.send(EnumeratorResult::File(r)).unwrap();
+        self.output.send(FoundInput::File(r)).unwrap();
     }
 
     fn found_git_repo(&mut self, r: GitRepoResult) {
-        self.output.send(EnumeratorResult::GitRepo(r)).unwrap();
+        self.output.send(FoundInput::GitRepo(r)).unwrap();
     }
 }
 
@@ -220,6 +226,10 @@ impl FilesystemEnumerator {
     ///
     /// The default behavior is to not follow symlinks.
     pub fn new<T: AsRef<Path>>(inputs: &[T]) -> Result<Self> {
+        if inputs.is_empty() {
+            bail!("No inputs provided");
+        }
+
         let mut builder = WalkBuilder::new(&inputs[0]);
         for input in &inputs[1..] {
             builder.add(input);
@@ -324,5 +334,41 @@ pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
         Err(gix::open::Error::NotARepository { .. }) => Ok(None),
         Err(err) => Err(err.into()),
         Ok(repo) => Ok(Some(repo)),
+    }
+}
+
+pub struct EnumeratorFileEnumerator {
+    efile: PathBuf,
+}
+
+impl EnumeratorFileEnumerator {
+    pub fn new(efile: PathBuf) -> Self {
+        Self { efile }
+    }
+
+    pub fn run(&self, output: Output) -> Result<()> {
+        let reader = serde_jsonlines::json_lines(&self.efile)?;
+        for entry in reader {
+            let entry: serde_json::Value = match entry {
+                Ok(e) => e,
+                Err(e) => {
+                    error!(
+                        "Failed to read item from enumerator file {}: {e}; skipping",
+                        self.efile.display()
+                    );
+                    continue;
+                }
+            };
+
+            // FIXME: implement this properly
+            let bytes = vec![];
+            // let provenance = serde_json::Value::Null;
+            let provenance = entry;
+
+            let r = EnumeratorBlobResult { bytes, provenance };
+            output.send(FoundInput::EnumeratorBlob(r)).unwrap();
+        }
+
+        Ok(())
     }
 }

@@ -9,7 +9,7 @@ use tracing::{debug, debug_span, error, info, trace, warn};
 use crate::{args, rule_loader::RuleLoader};
 
 use content_guesser::Guesser;
-use input_enumerator::{open_git_repo, EnumeratorResult, FilesystemEnumerator};
+use input_enumerator::{open_git_repo, EnumeratorFileEnumerator, FilesystemEnumerator, FoundInput};
 use progress::Progress;
 
 use noseyparker::blob::{Blob, BlobId};
@@ -155,16 +155,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     // Clone or update all mentioned Git URLs
     // ---------------------------------------------------------------------------------------------
-    if !repo_urls.is_empty() {
-        info!("{} Git URLs to fetch", repo_urls.len());
-    }
-    for repo_url in &repo_urls {
-        debug!("Need to fetch {repo_url}")
-    }
-
     let mut input_roots = args.input_specifier_args.path_inputs.clone();
 
     if !repo_urls.is_empty() {
+        info!("{} Git URLs to fetch", repo_urls.len());
+        for repo_url in &repo_urls {
+            debug!("Need to fetch {repo_url}")
+        }
+
         let clone_mode = match args.input_specifier_args.git_clone {
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
@@ -180,8 +178,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let output_dir = match datastore.clone_destination(&repo_url) {
                 Err(e) => {
                     progress.suspend(|| {
-                        error!("Failed to determine output directory for {repo_url}: {e}");
-                        warn!("Skipping scan of {repo_url}");
+                        error!("Failed to determine output directory for {repo_url}: {e}; skipping scan");
                     });
                     progress.inc(1);
                     continue;
@@ -221,8 +218,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             progress.suspend(|| info!("Cloning {repo_url}..."));
             if let Err(e) = git.create_fresh_clone(&repo_url, &output_dir, clone_mode) {
                 progress.suspend(|| {
-                    error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
-                    warn!("Skipping scan of {repo_url}");
+                    error!(
+                        "Failed to clone {repo_url} to {}: {e}; skipping scan",
+                        output_dir.display()
+                    );
                 });
                 progress.inc(1);
                 continue;
@@ -234,7 +233,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         progress.finish_with_message("Fetching Git repos");
     }
 
-    if input_roots.is_empty() {
+    if input_roots.is_empty() && args.input_specifier_args.enumerators.is_empty() {
         bail!("No inputs to scan");
     }
 
@@ -243,67 +242,97 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     let scan_start = Instant::now();
 
-    let (enum_send, enum_recv) = {
-        let channel_size = std::cmp::max(args.num_jobs * 16, 128);
-        crossbeam_channel::bounded(channel_size)
-    };
-    let input_enumerator = || -> Result<FilesystemEnumerator> {
-        let mut ie = FilesystemEnumerator::new(&input_roots)?;
-        ie.threads(args.num_jobs);
-        ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
-        if args.input_specifier_args.git_history == args::GitHistoryMode::None {
-            ie.enumerate_git_history(false);
-        }
+    // Kick off enumerator in a separate thread, writing results to a channel, so that scanning can
+    // proceed concurrently
+    let (input_enumerator_thread, enum_recv) = {
+        let fs_enumerator = || -> Result<Option<FilesystemEnumerator>> {
+            if input_roots.is_empty() {
+                Ok(None)
+            } else {
+                let mut ie = FilesystemEnumerator::new(&input_roots)?;
 
-        // Load default ignore file. Note that we have to write it to a file first,
-        // because the API for the `ignore` crate doesn't expose something that takes a
-        // string.
-        let ignore_path = datastore.scratch_dir().join("default_ignore_rules.conf");
-        std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
-            format!("Failed to write default ignore rules to {}", ignore_path.display())
-        })?;
-
-        ie.add_ignore(&ignore_path).with_context(|| {
-            format!("Failed to load ignore rules from {}", ignore_path.display())
-        })?;
-
-        // Load any specified ignore files
-        for ignore_path in args.content_filtering_args.ignore.iter() {
-            debug!("Using ignore rules from {}", ignore_path.display());
-            ie.add_ignore(ignore_path).with_context(|| {
-                format!("Failed to load ignore rules from {}", ignore_path.display())
-            })?;
-        }
-
-        // Make sure the datastore itself is not scanned
-        let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
-        ie.filter_entry(move |entry| {
-            let path = match std::fs::canonicalize(entry.path()) {
-                Err(e) => {
-                    warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
-                    return true;
+                ie.threads(args.num_jobs);
+                ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
+                if args.input_specifier_args.git_history == args::GitHistoryMode::None {
+                    ie.enumerate_git_history(false);
                 }
-                Ok(p) => p,
-            };
-            path != datastore_path
-        });
 
-        // Determine whether to collect git metadata or not
-        let collect_git_metadata = match args.metadata_args.git_blob_provenance {
-            args::GitBlobProvenanceMode::FirstSeen => true,
-            args::GitBlobProvenanceMode::Minimal => false,
+                // Load default ignore file. Note that we have to write it to a file first,
+                // because the API for the `ignore` crate doesn't expose something that takes a
+                // string.
+                let ignore_path = datastore.scratch_dir().join("default_ignore_rules.conf");
+                std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
+                    format!("Failed to write default ignore rules to {}", ignore_path.display())
+                })?;
+
+                ie.add_ignore(&ignore_path).with_context(|| {
+                    format!("Failed to load ignore rules from {}", ignore_path.display())
+                })?;
+
+                // Load any specified ignore files
+                for ignore_path in args.content_filtering_args.ignore.iter() {
+                    debug!("Using ignore rules from {}", ignore_path.display());
+                    ie.add_ignore(ignore_path).with_context(|| {
+                        format!("Failed to load ignore rules from {}", ignore_path.display())
+                    })?;
+                }
+
+                // Make sure the datastore itself is not scanned
+                let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
+                ie.filter_entry(move |entry| {
+                    let path = match std::fs::canonicalize(entry.path()) {
+                        Err(e) => {
+                            warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
+                            return true;
+                        }
+                        Ok(p) => p,
+                    };
+                    path != datastore_path
+                });
+
+                // Determine whether to collect git metadata or not
+                let collect_git_metadata = match args.metadata_args.git_blob_provenance {
+                    args::GitBlobProvenanceMode::FirstSeen => true,
+                    args::GitBlobProvenanceMode::Minimal => false,
+                };
+                ie.collect_git_metadata(collect_git_metadata);
+
+                Ok(Some(ie))
+            }
+        }()
+        .context("Failed to initialize filesystem enumerator")?;
+
+        // Create a pair of channels for the input enumeration
+        let (enum_send, enum_recv) = {
+            let channel_size = std::cmp::max(args.num_jobs * 16, 128);
+            crossbeam_channel::bounded(channel_size)
         };
-        ie.collect_git_metadata(collect_git_metadata);
 
-        Ok(ie)
-    }()
-    .context("Failed to initialize filesystem enumerator")?;
+        let enumerators = args.input_specifier_args.enumerators.clone();
 
-    // Kick off enumerator in a separate thread so that scanning can proceed simultaneously
-    let input_enumerator_thread = std::thread::Builder::new()
-        .name("input_enumerator".to_string())
-        .spawn(move || -> Result<_> { input_enumerator.run(enum_send) })
-        .context("Failed to enumerate filesystem inputs")?;
+        let input_enumerator_thread = std::thread::Builder::new()
+            .name("input_enumerator".to_string())
+            .spawn(move || -> Result<_> {
+                // find on-disk inputs first
+                if let Some(fs_enumerator) = fs_enumerator {
+                    fs_enumerator.run(enum_send.clone())?;
+                }
+
+                // find inputs from enumerator files
+                for ef in enumerators {
+                    let ef_enumerator = EnumeratorFileEnumerator::new(ef.clone());
+                    if let Err(e) = ef_enumerator.run(enum_send.clone()) {
+                        error!("Failed to enumerate inputs from {}: {e}", ef.display());
+                        continue;
+                    }
+                }
+
+                Ok(())
+            })
+            .context("Failed to enumerate filesystem inputs")?;
+
+        (input_enumerator_thread, enum_recv)
+    };
 
     // ---------------------------------------------------------------------------------------------
     // Define some matcher helper code and shared state
@@ -359,7 +388,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             // Big idea: read until all the senders hang up; panic if recording matches fails.
             //
             // Record all messages chunked transactions, trying to commit at least every
-            // COMMIT_ITERVAL.
+            // DATASTORE_COMMIT_INTERVAL.
 
             let mut batch: Vec<DatastoreMessage> = Vec::with_capacity(DATASTORE_BATCH_SIZE);
             let mut matches_in_batch: usize = 0;
@@ -444,14 +473,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let processor = make_blob_processor()?;
                 Ok((processor, progress.clone()))
             },
-            move |state: &mut Result<_>, enum_result: EnumeratorResult| -> Result<()> {
+            move |state: &mut Result<_>, found_input: FoundInput| -> Result<()> {
                 let (processor, progress): &mut (BlobProcessor<'_>, Progress) = match state {
                     Ok(state) => state,
                     Err(e) => bail!("Failed to initialize worker: {e}"),
                 };
-
-                match enum_result {
-                    EnumeratorResult::File(file_result) => {
+                match found_input {
+                    FoundInput::File(file_result) => {
                         let _span = debug_span!("file-scan", "{}", file_result.path.display())
                             .entered();
 
@@ -466,7 +494,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         progress.inc(file_result.num_bytes);
 
                         processor.run(
-                            ProvenanceSet::new(Provenance::from_file(fname.clone()), Vec::new()),
+                            Provenance::from_file(fname.clone()).into(),
                             blob,
                             &send_ds,
                             args.snippet_length,
@@ -479,9 +507,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         Ok(())
                     }
 
-                    EnumeratorResult::GitRepo(git_repo_result) => {
-                        let span =
-                            debug_span!("git-scan", "{}", git_repo_result.path.display());
+                    FoundInput::GitRepo(git_repo_result) => {
+                        let span = debug_span!("git-scan", "{}", git_repo_result.path.display());
                         let _span = span.enter();
 
                         let repository = match open_git_repo(&git_repo_result.path) {
@@ -552,41 +579,21 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                         }
                                     };
 
-                                    let provenance = {
-                                        let mut it = md.first_seen.iter();
-                                        if let Some(e) = it.next() {
-                                            let commit_metadata = git_repo_result
-                                                .commit_metadata
-                                                .get(&e.commit_oid)
-                                                .expect("should have commit metadata");
-                                            let p = Provenance::from_git_repo_with_first_commit(
-                                                repo_path.clone(),
-                                                commit_metadata.clone(),
-                                                e.path.clone(),
-                                            );
-
-                                            let ps = it
-                                                .map(|e| {
-                                                    let commit_metadata = git_repo_result
-                                                        .commit_metadata
-                                                        .get(&e.commit_oid)
-                                                        .expect("should have commit metadata");
-                                                    Provenance::from_git_repo_with_first_commit(
-                                                        repo_path.clone(),
-                                                        commit_metadata.clone(),
-                                                        e.path.clone(),
-                                                    )
-                                                })
-                                                .collect();
-
-                                            ProvenanceSet::new(p, ps)
-                                        } else {
-                                            ProvenanceSet::new(
-                                                Provenance::from_git_repo(repo_path.clone()),
-                                                Vec::new(),
-                                            )
-                                        }
-                                    };
+                                    let provenance = ProvenanceSet::try_from_iter(
+                                        md.first_seen
+                                            .iter()
+                                            .map(|e| {
+                                                let commit_metadata = git_repo_result
+                                                    .commit_metadata
+                                                    .get(&e.commit_oid)
+                                                    .expect("should have commit metadata");
+                                                Provenance::from_git_repo_with_first_commit(
+                                                    repo_path.clone(),
+                                                    commit_metadata.clone(),
+                                                    e.path.clone(),
+                                                )
+                                            }))
+                                        .unwrap_or_else(|| Provenance::from_git_repo(repo_path.clone()).into() );
 
                                     processor.run(
                                         provenance,
@@ -600,6 +607,29 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                     )?;
                                     Ok(())
                                 }
+                        )?;
+
+                        Ok(())
+                    }
+
+                    FoundInput::EnumeratorBlob(enum_result) => {
+                        progress.inc(enum_result.bytes.len().try_into().unwrap());
+                        let blob = Blob::from_bytes(enum_result.bytes);
+
+                        let _span = debug_span!("enum-scan-scan", "{}", blob.id)
+                            .entered();
+
+                        debug!("Got extended: {} bytes: {:?}", blob.len(), enum_result.provenance);
+
+                        processor.run(
+                            Provenance::from_extended(enum_result.provenance).into(),
+                            blob,
+                            &send_ds,
+                            args.snippet_length,
+                            args.metadata_args.blob_metadata,
+                            args.copy_blobs,
+                            &blobs_dir,
+                            progress,
                         )?;
 
                         Ok(())

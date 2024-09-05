@@ -19,6 +19,12 @@ impl Blob {
         Ok(Blob { id, bytes })
     }
 
+    #[inline]
+    pub fn from_bytes(bytes: Vec<u8>) -> Self {
+        let id = BlobId::new(&bytes);
+        Blob { id, bytes }
+    }
+
     /// Create a new `Blob` with the given ID and content.
     ///
     /// It is not checked that the ID matches that of the provided content.
