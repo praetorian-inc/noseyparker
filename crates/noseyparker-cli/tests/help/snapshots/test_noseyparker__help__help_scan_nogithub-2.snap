@@ -84,6 +84,18 @@ Input Specifier Options:
           
           This option can be repeated.
 
+      --enumerator <PATH>
+          Read inputs from a JSONL enumerator file
+          
+          This can be used to stream inputs from other processes without having to write them to
+          disk.
+          
+          This option can be repeated.
+          
+          Each line of the enumerator file should be a JSON object with the following form:
+          
+          { "content_base64": <base64-encoded contents>, "provenance": <arbitrary object> }
+
       --git-clone <MODE>
           Use the specified method for cloning Git repositories
           
