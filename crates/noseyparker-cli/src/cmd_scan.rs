@@ -613,13 +613,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                     }
 
                     FoundInput::EnumeratorBlob(enum_result) => {
-                        progress.inc(enum_result.bytes.len().try_into().unwrap());
-                        let blob = Blob::from_bytes(enum_result.bytes);
+                        progress.inc(enum_result.content.as_bytes().len().try_into().unwrap());
+                        let blob = Blob::from_bytes(enum_result.content.as_bytes().to_owned());
 
                         let _span = debug_span!("enum-scan-scan", "{}", blob.id)
                             .entered();
 
-                        debug!("Got extended: {} bytes: {:?}", blob.len(), enum_result.provenance);
+                        debug!("Got blob from enumerator: {} bytes: {:?}", blob.len(), enum_result.provenance);
 
                         processor.run(
                             Provenance::from_extended(enum_result.provenance).into(),

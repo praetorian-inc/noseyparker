@@ -4,6 +4,7 @@ pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 
 use anyhow::{bail, Result};
+use bstr::BString;
 use crossbeam_channel::Sender;
 use ignore::{
     gitignore::{Gitignore, GitignoreBuilder},
@@ -27,8 +28,29 @@ pub struct FileResult {
     pub num_bytes: u64,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+pub enum Content {
+    #[serde(rename = "content_base64")]
+    Base64(#[serde(with = "bstring_serde::BStringBase64")] BString),
+
+    #[serde(rename = "content")]
+    Utf8(String),
+}
+
+impl Content {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Content::Base64(s) => s.as_slice(),
+            Content::Utf8(s) => s.as_bytes(),
+        }
+    }
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct EnumeratorBlobResult {
-    pub bytes: Vec<u8>,
+    #[serde(flatten)]
+    pub content: Content,
+
     pub provenance: serde_json::Value,
 }
 
@@ -347,26 +369,18 @@ impl EnumeratorFileEnumerator {
     }
 
     pub fn run(&self, output: Output) -> Result<()> {
-        let reader = serde_jsonlines::json_lines(&self.efile)?;
-        for entry in reader {
-            let entry: serde_json::Value = match entry {
-                Ok(e) => e,
+        let reader = serde_jsonlines::json_lines::<EnumeratorBlobResult, &Path>(&self.efile)?;
+        for (entry_num, entry) in reader.into_iter().enumerate() {
+            match entry {
+                Ok(e) => output.send(FoundInput::EnumeratorBlob(e)).unwrap(),
                 Err(e) => {
                     error!(
-                        "Failed to read item from enumerator file {}: {e}; skipping",
-                        self.efile.display()
+                        "Failed to read from enumerator file {}: item {}: {e}; skipping",
+                        self.efile.display(),
+                        entry_num + 1,
                     );
-                    continue;
                 }
-            };
-
-            // FIXME: implement this properly
-            let bytes = vec![];
-            // let provenance = serde_json::Value::Null;
-            let provenance = entry;
-
-            let r = EnumeratorBlobResult { bytes, provenance };
-            output.send(FoundInput::EnumeratorBlob(r)).unwrap();
+            }
         }
 
         Ok(())

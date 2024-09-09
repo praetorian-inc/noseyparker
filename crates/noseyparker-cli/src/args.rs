@@ -126,7 +126,6 @@ fn default_scan_jobs() -> usize {
     version = get_short_version(),
     long_version = get_long_version(),
 
-    // FIXME: add longer comment description (will be shown with `--help`)
     long_about = concat!(
         crate_description!(),
     ),
