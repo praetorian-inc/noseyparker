@@ -40,7 +40,7 @@ rules:
     \s{0,30}
     ["'']?
     ([a-z0-9/+=]{40})
-    \b
+    (?: [^a-z0-9/+=] | $ )
 
   references:
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
@@ -56,6 +56,7 @@ rules:
   examples:
   - 'aws_secret_access_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   - 'aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  - 'aws_access_key_id = FakeValues99ESPW3ALMEZ6U\n  aws_secret_access_key = FakeValues99cl9bqJFVA3iFUm+yqVe08HxhXFE/'
 
   negative_examples:
   - 'export AWS_SECRET_ACCESS_KEY=ded7db27a4558e2ea9bbf0bf36ae0e8521618f366c'

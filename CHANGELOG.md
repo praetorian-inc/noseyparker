@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixes
 
 - The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.
+- The `AWS Secret Access Key` rule has been revised to avoid runtime `Regex failed to match` errors.
 
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
