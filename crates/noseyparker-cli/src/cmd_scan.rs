@@ -304,7 +304,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
         // Create a pair of channels for the input enumeration
         let (enum_send, enum_recv) = {
-            let channel_size = std::cmp::max(args.num_jobs * 16, 128);
+            let channel_size = std::cmp::max(args.num_jobs * 32, 256);
             crossbeam_channel::bounded(channel_size)
         };
 
