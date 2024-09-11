@@ -358,31 +358,3 @@ pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
         Ok(repo) => Ok(Some(repo)),
     }
 }
-
-pub struct EnumeratorFileEnumerator {
-    efile: PathBuf,
-}
-
-impl EnumeratorFileEnumerator {
-    pub fn new(efile: PathBuf) -> Self {
-        Self { efile }
-    }
-
-    pub fn run(&self, output: Output) -> Result<()> {
-        let reader = serde_jsonlines::json_lines::<EnumeratorBlobResult, &Path>(&self.efile)?;
-        for (entry_num, entry) in reader.into_iter().enumerate() {
-            match entry {
-                Ok(e) => output.send(FoundInput::EnumeratorBlob(e)).unwrap(),
-                Err(e) => {
-                    error!(
-                        "Failed to read from enumerator file {}: item {}: {e}; skipping",
-                        self.efile.display(),
-                        entry_num + 1,
-                    );
-                }
-            }
-        }
-
-        Ok(())
-    }
-}
