@@ -543,6 +543,11 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             });
 
     // ---------------------------------------------------------------------------------------------
+    // Close any open channel ends to allow everything to terminate
+    // ---------------------------------------------------------------------------------------------
+    drop(send_ds);
+
+    // ---------------------------------------------------------------------------------------------
     // Wait for all inputs to be enumerated and scanned and the database thread to finish
     // ---------------------------------------------------------------------------------------------
     input_enumerator_thread
@@ -915,7 +920,8 @@ fn make_input_enumerator_thread(
                     |pool| {
                         pool.install(move || {
                             enumerators.into_par_iter().for_each(|ef| {
-                                if let Err(e) = rayon_read_from_enumerator(&ef, &input_send) {
+                                if let Err(e) = rayon_read_from_enumerator(&ef, input_send.clone())
+                                {
                                     error!("Failed to read from enumerator {}: {e}", ef.display());
                                 }
                             })
@@ -933,7 +939,7 @@ fn make_input_enumerator_thread(
 /// Read from a single enumerator file in parallel, sending inputs for scanning to `input_send`.
 fn rayon_read_from_enumerator(
     fname: &Path,
-    input_send: &crossbeam_channel::Sender<FoundInput>,
+    input_send: crossbeam_channel::Sender<FoundInput>,
 ) -> Result<()> {
     use std::io::BufRead;
     let file = std::fs::File::open(fname)?;
