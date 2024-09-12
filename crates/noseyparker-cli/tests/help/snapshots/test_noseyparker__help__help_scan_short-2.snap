@@ -23,7 +23,7 @@ Input Specifier Options:
       --git-url <URL>               Clone and scan the Git repository at the specified URL
       --github-repo-type <TYPE>     Clone and scan GitHub repos only of the given type [default:
                                     source] [possible values: all, source, fork]
-      --enumerator <PATH>           Read inputs from a JSONL enumerator file
+      --enumerator <PATH>           Read inputs from a JSONL enumerator file (experimental)
       --github-organization <NAME>  Clone and scan accessible repositories belonging to the
                                     specified GitHub organization [aliases: github-org]
       --github-user <NAME>          Clone and scan accessible repositories belonging to the

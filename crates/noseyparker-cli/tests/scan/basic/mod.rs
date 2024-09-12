@@ -127,7 +127,7 @@ fn scan_git_emptyrepo() {
 }
 
 #[test]
-fn scan_secrets1() {
+fn scan_fs_1() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file_with_secret("input.txt");
 

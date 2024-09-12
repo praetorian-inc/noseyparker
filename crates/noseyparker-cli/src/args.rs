@@ -867,15 +867,18 @@ pub struct InputSpecifierArgs {
     )]
     pub git_url: Vec<GitUrl>,
 
-    /// Read inputs from a JSONL enumerator file
+    /// Read inputs from a JSONL enumerator file (experimental)
     ///
     /// This can be used to stream inputs from other processes without having to write them to disk.
+    /// Shell process substitution (e.g., `--enumerator=<(my-enumerator-program)`) can make this
+    /// ergonomic.
+    ///
+    /// Each line of the enumerator file should be a JSON object with one of the following forms:
+    ///
+    ///     { "content_base64": "base64-encoded bytestring to scan", "provenance": <arbitrary object> }
+    ///     { "content": "utf8 string to scan", "provenance": <arbitrary object> }
     ///
     /// This option can be repeated.
-    ///
-    /// Each line of the enumerator file should be a JSON object with the following form:
-    ///
-    ///     { "content_base64": <base64-encoded contents>, "provenance": <arbitrary object> }
     #[arg(
         long("enumerator"),
         value_name = "PATH",
