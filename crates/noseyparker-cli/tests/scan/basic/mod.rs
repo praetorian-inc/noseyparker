@@ -151,6 +151,64 @@ fn scan_fs_1() {
     });
 }
 
+// N.B. a macro instead of a function to avoid clobbering snapshot files produced here
+macro_rules! scan_enumerator_common {
+    ($scan_env:expr, $enumerator_input:expr) => {
+        noseyparker_success!("scan", "-d", $scan_env.dspath(), "--enumerator", $enumerator_input.path())
+            .stdout(match_scan_stats("104 B", 1, 1, 1));
+
+        assert_cmd_snapshot!(noseyparker_success!("summarize", "-d", $scan_env.dspath()));
+
+        with_settings!({
+            filters => get_report_stdout_filters(),
+        }, {
+            assert_cmd_snapshot!(noseyparker_success!("report", "-d", $scan_env.dspath()));
+        });
+
+        let cmd = noseyparker_success!("report", "-d", $scan_env.dspath(), "--format=json");
+        let json_output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+        with_settings!({
+            redactions => get_report_json_redactions()
+        }, {
+            assert_json_snapshot!(json_output);
+        });
+    }
+}
+
+#[test]
+fn scan_enumerator_1() {
+    let scan_env = ScanEnv::new();
+
+    let input = scan_env.input_with_secret();
+    let jsonl_input = &serde_json::json!({
+        "content": input,
+        "provenance": {
+            "filename": "input.txt",
+        }
+    })
+    .to_string();
+    let enumerator_input = scan_env.input_file_with_contents("input.txt", jsonl_input);
+    scan_enumerator_common!(&scan_env, enumerator_input);
+}
+
+#[test]
+fn scan_enumerator_base64_1() {
+    use base64::prelude::*;
+
+    let scan_env = ScanEnv::new();
+
+    let input = scan_env.input_with_secret();
+    let jsonl_input = &serde_json::json!({
+        "content_base64": BASE64_STANDARD.encode(input),
+        "provenance": {
+            "filename": "input.txt",
+        }
+    })
+    .to_string();
+    let enumerator_input = scan_env.input_file_with_contents("input.txt", jsonl_input);
+    scan_enumerator_common!(&scan_env, enumerator_input);
+}
+
 #[test]
 fn scan_default_datastore() {
     let scan_env = ScanEnv::new();

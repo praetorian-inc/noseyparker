@@ -172,17 +172,18 @@ impl ScanEnv {
         input
     }
 
-    /// Create a small input file within this mock scanning environment with the given name.
-    /// The created input file will have content containing a fake GitHub PAT that should be detected.
-    pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
-        self.input_file_with_contents(
-            name,
-            indoc! {r#"
+    pub fn input_with_secret(&self) -> &str {
+        indoc! {r#"
             # This is fake configuration data
             USERNAME=the_dude
             GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-        "#},
-        )
+        "#}
+    }
+
+    /// Create a small input file within this mock scanning environment with the given name.
+    /// The created input file will have content containing a fake GitHub PAT that should be detected.
+    pub fn input_file_with_secret(&self, name: &str) -> ChildPath {
+        self.input_file_with_contents(name, self.input_with_secret())
     }
 
     /// Create a larger input file within this mock scanning environment with the given name.
