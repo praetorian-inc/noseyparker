@@ -18,7 +18,7 @@ macro_rules! unwrap_or_continue {
     ($arg:expr) => {
         match $arg {
             Ok(v) => v,
-            Err(e) => {
+            Err(_e) => {
                 continue;
             }
         }

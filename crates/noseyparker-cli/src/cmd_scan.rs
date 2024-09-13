@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tracing::{debug, debug_span, error, info, trace, warn};
@@ -9,7 +9,7 @@ use tracing::{debug, debug_span, error, info, trace, warn};
 use crate::{args, rule_loader::RuleLoader};
 
 use content_guesser::Guesser;
-use input_enumerator::{open_git_repo, EnumeratorResult, FilesystemEnumerator};
+use input_enumerator::{open_git_repo, FilesystemEnumerator, FoundInput};
 use progress::Progress;
 
 use noseyparker::blob::{Blob, BlobId};
@@ -155,16 +155,14 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     // Clone or update all mentioned Git URLs
     // ---------------------------------------------------------------------------------------------
-    if !repo_urls.is_empty() {
-        info!("{} Git URLs to fetch", repo_urls.len());
-    }
-    for repo_url in &repo_urls {
-        debug!("Need to fetch {repo_url}")
-    }
-
     let mut input_roots = args.input_specifier_args.path_inputs.clone();
 
     if !repo_urls.is_empty() {
+        info!("{} Git URLs to fetch", repo_urls.len());
+        for repo_url in &repo_urls {
+            debug!("Need to fetch {repo_url}")
+        }
+
         let clone_mode = match args.input_specifier_args.git_clone {
             args::GitCloneMode::Mirror => CloneMode::Mirror,
             args::GitCloneMode::Bare => CloneMode::Bare,
@@ -180,8 +178,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             let output_dir = match datastore.clone_destination(&repo_url) {
                 Err(e) => {
                     progress.suspend(|| {
-                        error!("Failed to determine output directory for {repo_url}: {e}");
-                        warn!("Skipping scan of {repo_url}");
+                        error!("Failed to determine output directory for {repo_url}: {e}; skipping scan");
                     });
                     progress.inc(1);
                     continue;
@@ -221,8 +218,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             progress.suspend(|| info!("Cloning {repo_url}..."));
             if let Err(e) = git.create_fresh_clone(&repo_url, &output_dir, clone_mode) {
                 progress.suspend(|| {
-                    error!("Failed to clone {repo_url} to {}: {e}", output_dir.display());
-                    warn!("Skipping scan of {repo_url}");
+                    error!(
+                        "Failed to clone {repo_url} to {}: {e}; skipping scan",
+                        output_dir.display()
+                    );
                 });
                 progress.inc(1);
                 continue;
@@ -234,7 +233,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         progress.finish_with_message("Fetching Git repos");
     }
 
-    if input_roots.is_empty() {
+    if input_roots.is_empty() && args.input_specifier_args.enumerators.is_empty() {
         bail!("No inputs to scan");
     }
 
@@ -243,67 +242,10 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     let scan_start = Instant::now();
 
-    let (enum_send, enum_recv) = {
-        let channel_size = std::cmp::max(args.num_jobs * 16, 128);
-        crossbeam_channel::bounded(channel_size)
-    };
-    let input_enumerator = || -> Result<FilesystemEnumerator> {
-        let mut ie = FilesystemEnumerator::new(&input_roots)?;
-        ie.threads(args.num_jobs);
-        ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
-        if args.input_specifier_args.git_history == args::GitHistoryMode::None {
-            ie.enumerate_git_history(false);
-        }
-
-        // Load default ignore file. Note that we have to write it to a file first,
-        // because the API for the `ignore` crate doesn't expose something that takes a
-        // string.
-        let ignore_path = datastore.scratch_dir().join("default_ignore_rules.conf");
-        std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
-            format!("Failed to write default ignore rules to {}", ignore_path.display())
-        })?;
-
-        ie.add_ignore(&ignore_path).with_context(|| {
-            format!("Failed to load ignore rules from {}", ignore_path.display())
-        })?;
-
-        // Load any specified ignore files
-        for ignore_path in args.content_filtering_args.ignore.iter() {
-            debug!("Using ignore rules from {}", ignore_path.display());
-            ie.add_ignore(ignore_path).with_context(|| {
-                format!("Failed to load ignore rules from {}", ignore_path.display())
-            })?;
-        }
-
-        // Make sure the datastore itself is not scanned
-        let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
-        ie.filter_entry(move |entry| {
-            let path = match std::fs::canonicalize(entry.path()) {
-                Err(e) => {
-                    warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
-                    return true;
-                }
-                Ok(p) => p,
-            };
-            path != datastore_path
-        });
-
-        // Determine whether to collect git metadata or not
-        let collect_git_metadata = match args.metadata_args.git_blob_provenance {
-            args::GitBlobProvenanceMode::FirstSeen => true,
-            args::GitBlobProvenanceMode::Minimal => false,
-        };
-        ie.collect_git_metadata(collect_git_metadata);
-
-        Ok(ie)
-    }()
-    .context("Failed to initialize filesystem enumerator")?;
-
-    // Kick off enumerator in a separate thread so that scanning can proceed simultaneously
-    let input_enumerator_thread = std::thread::Builder::new()
-        .name("input_enumerator".to_string())
-        .spawn(move || -> Result<_> { input_enumerator.run(enum_send) })
-        .context("Failed to enumerate filesystem inputs")?;
+    // Kick off enumerator in a separate thread, writing results to a channel, so that scanning can
+    // proceed concurrently
+    let (input_enumerator_thread, input_recv) =
+        make_input_enumerator_thread(&args, &datastore, input_roots)?;
 
     // ---------------------------------------------------------------------------------------------
     // Define some matcher helper code and shared state
@@ -311,21 +253,6 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let num_blob_processors = Mutex::new(0u64); // how many blob processors have been initialized?
     let matcher_stats = Mutex::new(MatcherStats::default());
     let seen_blobs = BlobIdMap::new();
-
-    let t1 = Instant::now();
-    let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
-    let blob_processor_init_time = Mutex::new(t1.elapsed());
-    let make_blob_processor = || -> Result<BlobProcessor> {
-        let t1 = Instant::now();
-        let matcher = matcher.clone();
-        *num_blob_processors.lock().unwrap() += 1;
-        let guesser = Guesser::new()?;
-        {
-            let mut init_time = blob_processor_init_time.lock().unwrap();
-            *init_time = *init_time + t1.elapsed();
-        }
-        Ok(BlobProcessor { matcher, guesser })
-    };
 
     // FIXME: have this print out aggregate rate at finish
     let mut progress = Progress::new_bytes_spinner("Scanning content", progress_enabled);
@@ -343,6 +270,31 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
     let blobs_dir = datastore.blobs_dir();
 
+    let t1 = Instant::now();
+    let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
+    let blob_processor_init_time = Mutex::new(t1.elapsed());
+    let make_blob_processor = || -> Result<BlobProcessor> {
+        let t1 = Instant::now();
+        let matcher = matcher.clone();
+        *num_blob_processors.lock().unwrap() += 1;
+        let guesser = Guesser::new()?;
+        {
+            let mut init_time = blob_processor_init_time.lock().unwrap();
+            *init_time = *init_time + t1.elapsed();
+        }
+
+        Ok(BlobProcessor {
+            matcher,
+            guesser,
+            progress: &progress,
+            blobs_dir: &blobs_dir,
+            snippet_length: args.snippet_length,
+            blob_metadata_recording_mode: args.metadata_args.blob_metadata,
+            copy_blobs: args.copy_blobs,
+            send_ds: &send_ds,
+        })
+    };
+
     // ---------------------------------------------------------------------------------------------
     // Create datastore writer thread.
     // The datastore uses SQLite, which does best with a single writer.
@@ -359,7 +311,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             // Big idea: read until all the senders hang up; panic if recording matches fails.
             //
             // Record all messages chunked transactions, trying to commit at least every
-            // COMMIT_ITERVAL.
+            // DATASTORE_COMMIT_INTERVAL.
 
             let mut batch: Vec<DatastoreMessage> = Vec::with_capacity(DATASTORE_BATCH_SIZE);
             let mut matches_in_batch: usize = 0;
@@ -436,7 +388,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // Kick off scanner threads, but for better error messages, don't check its result until after
     // checking the datastore writer thread.
     // ---------------------------------------------------------------------------------------------
-    let scan_res: Result<()> = enum_recv
+    let scan_res: Result<()> = input_recv
         .into_iter()
         .par_bridge()
         .try_for_each_init(
@@ -444,14 +396,13 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 let processor = make_blob_processor()?;
                 Ok((processor, progress.clone()))
             },
-            move |state: &mut Result<_>, enum_result: EnumeratorResult| -> Result<()> {
+            move |state: &mut Result<_>, found_input: FoundInput| -> Result<()> {
                 let (processor, progress): &mut (BlobProcessor<'_>, Progress) = match state {
                     Ok(state) => state,
                     Err(e) => bail!("Failed to initialize worker: {e}"),
                 };
-
-                match enum_result {
-                    EnumeratorResult::File(file_result) => {
+                match found_input {
+                    FoundInput::File(file_result) => {
                         let _span = debug_span!("file-scan", "{}", file_result.path.display())
                             .entered();
 
@@ -466,22 +417,15 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                         progress.inc(file_result.num_bytes);
 
                         processor.run(
-                            ProvenanceSet::new(Provenance::from_file(fname.clone()), Vec::new()),
+                            Provenance::from_file(fname.clone()).into(),
                             blob,
-                            &send_ds,
-                            args.snippet_length,
-                            args.metadata_args.blob_metadata,
-                            args.copy_blobs,
-                            &blobs_dir,
-                            progress,
                         )?;
 
                         Ok(())
                     }
 
-                    EnumeratorResult::GitRepo(git_repo_result) => {
-                        let span =
-                            debug_span!("git-scan", "{}", git_repo_result.path.display());
+                    FoundInput::GitRepo(git_repo_result) => {
+                        let span = debug_span!("git-scan", "{}", git_repo_result.path.display());
                         let _span = span.enter();
 
                         let repository = match open_git_repo(&git_repo_result.path) {
@@ -552,51 +496,25 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                                         }
                                     };
 
-                                    let provenance = {
-                                        let mut it = md.first_seen.iter();
-                                        if let Some(e) = it.next() {
-                                            let commit_metadata = git_repo_result
-                                                .commit_metadata
-                                                .get(&e.commit_oid)
-                                                .expect("should have commit metadata");
-                                            let p = Provenance::from_git_repo_with_first_commit(
-                                                repo_path.clone(),
-                                                commit_metadata.clone(),
-                                                e.path.clone(),
-                                            );
-
-                                            let ps = it
-                                                .map(|e| {
-                                                    let commit_metadata = git_repo_result
-                                                        .commit_metadata
-                                                        .get(&e.commit_oid)
-                                                        .expect("should have commit metadata");
-                                                    Provenance::from_git_repo_with_first_commit(
-                                                        repo_path.clone(),
-                                                        commit_metadata.clone(),
-                                                        e.path.clone(),
-                                                    )
-                                                })
-                                                .collect();
-
-                                            ProvenanceSet::new(p, ps)
-                                        } else {
-                                            ProvenanceSet::new(
-                                                Provenance::from_git_repo(repo_path.clone()),
-                                                Vec::new(),
-                                            )
-                                        }
-                                    };
+                                    let provenance = ProvenanceSet::try_from_iter(
+                                        md.first_seen
+                                            .iter()
+                                            .map(|e| {
+                                                let commit_metadata = git_repo_result
+                                                    .commit_metadata
+                                                    .get(&e.commit_oid)
+                                                    .expect("should have commit metadata");
+                                                Provenance::from_git_repo_with_first_commit(
+                                                    repo_path.clone(),
+                                                    commit_metadata.clone(),
+                                                    e.path.clone(),
+                                                )
+                                            }))
+                                        .unwrap_or_else(|| Provenance::from_git_repo(repo_path.clone()).into() );
 
                                     processor.run(
                                         provenance,
                                         blob,
-                                        &send_ds,
-                                        args.snippet_length,
-                                        args.metadata_args.blob_metadata,
-                                        args.copy_blobs,
-                                        &blobs_dir,
-                                        progress,
                                     )?;
                                     Ok(())
                                 }
@@ -604,8 +522,30 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
 
                         Ok(())
                     }
+
+                    FoundInput::EnumeratorBlob(enum_result) => {
+                        progress.inc(enum_result.content.as_bytes().len().try_into().unwrap());
+                        let blob = Blob::from_bytes(enum_result.content.as_bytes().to_owned());
+
+                        let _span = debug_span!("enum-scan-scan", "{}", blob.id)
+                            .entered();
+
+                        debug!("Got blob from enumerator: {} bytes: {:?}", blob.len(), enum_result.provenance);
+
+                        processor.run(
+                            Provenance::from_extended(enum_result.provenance).into(),
+                            blob,
+                        )?;
+
+                        Ok(())
+                    }
                 }
             });
+
+    // ---------------------------------------------------------------------------------------------
+    // Close any open channel ends to allow everything to terminate
+    // ---------------------------------------------------------------------------------------------
+    drop(send_ds);
 
     // ---------------------------------------------------------------------------------------------
     // Wait for all inputs to be enumerated and scanned and the database thread to finish
@@ -717,25 +657,23 @@ impl MetadataResult {
     }
 }
 
-/// A combined matcher and content type guesser
+/// A combined matcher, content type guesser, and a number of parameters that don't change within
+/// one `scan` run
 struct BlobProcessor<'a> {
     matcher: Matcher<'a>,
     guesser: Guesser,
+
+    send_ds: &'a crossbeam_channel::Sender<DatastoreMessage>,
+    snippet_length: usize,
+    blob_metadata_recording_mode: args::BlobMetadataMode,
+    copy_blobs: args::CopyBlobsMode,
+    blobs_dir: &'a Path,
+    progress: &'a Progress,
 }
 
 impl<'a> BlobProcessor<'a> {
     #[allow(clippy::too_many_arguments)]
-    fn run(
-        &mut self,
-        provenance: ProvenanceSet,
-        blob: Blob,
-        send_ds: &crossbeam_channel::Sender<DatastoreMessage>,
-        snippet_length: usize,
-        blob_metadata_recording_mode: args::BlobMetadataMode,
-        copy_blobs: args::CopyBlobsMode,
-        blobs_dir: &Path,
-        progress: &Progress,
-    ) -> Result<()> {
+    fn run(&mut self, provenance: ProvenanceSet, blob: Blob) -> Result<()> {
         let blob_id = blob.id.hex();
         let _span = debug_span!("matcher", blob_id).entered();
 
@@ -746,7 +684,7 @@ impl<'a> BlobProcessor<'a> {
 
         match res {
             Err(e) => {
-                progress.suspend(|| {
+                self.progress.suspend(|| {
                     error!("Failed to scan blob {} from {}: {e}", blob.id, provenance.first())
                 });
                 Ok(())
@@ -767,7 +705,7 @@ impl<'a> BlobProcessor<'a> {
                     mime_essence: None,
                     charset: None,
                 };
-                send_ds
+                self.send_ds
                     .send((provenance, metadata, Vec::new()))
                     .context("Failed to save blob scan results")?;
                 Ok(())
@@ -777,13 +715,13 @@ impl<'a> BlobProcessor<'a> {
             Ok(ScanResult::New(matches)) => {
                 trace!("({scan_us}us) blob newly scanned; {} matches", matches.len());
 
-                let do_copy_blob = match copy_blobs {
+                let do_copy_blob = match self.copy_blobs {
                     args::CopyBlobsMode::All => true,
                     args::CopyBlobsMode::Matching => !matches.is_empty(),
                     args::CopyBlobsMode::None => false,
                 };
                 if do_copy_blob {
-                    let output_dir = blobs_dir.join(&blob_id[..2]);
+                    let output_dir = self.blobs_dir.join(&blob_id[..2]);
                     let output_path = output_dir.join(&blob_id[2..]);
                     trace!("saving blob to {}", output_path.display());
                     match std::fs::create_dir(&output_dir) {
@@ -805,12 +743,13 @@ impl<'a> BlobProcessor<'a> {
                 // If there are no matches, we can bail out here and avoid recording anything.
                 // UNLESS the `--blob-metadata=all` mode was specified; then we need to record the
                 // provenance for _all_ seen blobs.
-                if blob_metadata_recording_mode != args::BlobMetadataMode::All && matches.is_empty()
+                if self.blob_metadata_recording_mode != args::BlobMetadataMode::All
+                    && matches.is_empty()
                 {
                     return Ok(());
                 }
 
-                let metadata = match blob_metadata_recording_mode {
+                let metadata = match self.blob_metadata_recording_mode {
                     args::BlobMetadataMode::None => BlobMetadata {
                         id: blob.id,
                         num_bytes: blob.len(),
@@ -845,9 +784,9 @@ impl<'a> BlobProcessor<'a> {
                         let capacity: usize = matches.iter().map(|m| m.captures.len() - 1).sum();
                         let mut new_matches = Vec::with_capacity(capacity);
                         new_matches.extend(
-                            matches
-                                .iter()
-                                .map(|m| (None, Match::convert(&loc_mapping, m, snippet_length))),
+                            matches.iter().map(|m| {
+                                (None, Match::convert(&loc_mapping, m, self.snippet_length))
+                            }),
                         );
                         new_matches
                     }
@@ -857,11 +796,165 @@ impl<'a> BlobProcessor<'a> {
                     }
                 };
 
-                send_ds
+                self.send_ds
                     .send((provenance, metadata, matches))
                     .context("Failed to save results")?;
                 Ok(())
             }
         }
     }
+}
+
+/// Initialize a `FilesystemEnumerator` based on the command-line arguments and datastore.
+fn make_fs_enumerator(
+    args: &args::ScanArgs,
+    datastore: &Datastore,
+    input_roots: Vec<PathBuf>,
+) -> Result<Option<FilesystemEnumerator>> {
+    if input_roots.is_empty() {
+        Ok(None)
+    } else {
+        let mut ie = FilesystemEnumerator::new(&input_roots)?;
+
+        ie.threads(args.num_jobs);
+        ie.max_filesize(args.content_filtering_args.max_file_size_bytes());
+        if args.input_specifier_args.git_history == args::GitHistoryMode::None {
+            ie.enumerate_git_history(false);
+        }
+
+        // Load default ignore file. Note that we have to write it to a file first,
+        // because the API for the `ignore` crate doesn't expose something that takes a
+        // string.
+        let ignore_path = datastore.scratch_dir().join("default_ignore_rules.conf");
+        std::fs::write(&ignore_path, DEFAULT_IGNORE_RULES).with_context(|| {
+            format!("Failed to write default ignore rules to {}", ignore_path.display())
+        })?;
+
+        ie.add_ignore(&ignore_path).with_context(|| {
+            format!("Failed to load ignore rules from {}", ignore_path.display())
+        })?;
+
+        // Load any specified ignore files
+        for ignore_path in args.content_filtering_args.ignore.iter() {
+            debug!("Using ignore rules from {}", ignore_path.display());
+            ie.add_ignore(ignore_path).with_context(|| {
+                format!("Failed to load ignore rules from {}", ignore_path.display())
+            })?;
+        }
+
+        // Make sure the datastore itself is not scanned
+        let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
+        ie.filter_entry(move |entry| {
+            let path = match std::fs::canonicalize(entry.path()) {
+                Err(e) => {
+                    warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
+                    return true;
+                }
+                Ok(p) => p,
+            };
+            path != datastore_path
+        });
+
+        // Determine whether to collect git metadata or not
+        let collect_git_metadata = match args.metadata_args.git_blob_provenance {
+            args::GitBlobProvenanceMode::FirstSeen => true,
+            args::GitBlobProvenanceMode::Minimal => false,
+        };
+        ie.collect_git_metadata(collect_git_metadata);
+
+        Ok(Some(ie))
+    }
+}
+
+/// Create a separate thread for enumerating the inputs specified by command-line arguments and
+/// datastore.
+fn make_input_enumerator_thread(
+    args: &args::ScanArgs,
+    datastore: &Datastore,
+    input_roots: Vec<PathBuf>,
+) -> Result<(std::thread::JoinHandle<Result<()>>, crossbeam_channel::Receiver<FoundInput>)> {
+    let fs_enumerator = make_fs_enumerator(args, datastore, input_roots)
+        .context("Failed to initialize filesystem enumerator")?;
+
+    let num_jobs = args.num_jobs;
+
+    // Create a pair of channels for the input enumeration
+    let (input_send, input_recv) = {
+        let channel_size = std::cmp::max(num_jobs * 32, 256);
+        crossbeam_channel::bounded(channel_size)
+    };
+
+    let enumerators = args.input_specifier_args.enumerators.clone();
+
+    let input_enumerator_thread = std::thread::Builder::new()
+        .name("input_enumerator".to_string())
+        .spawn(move || -> Result<_> {
+            // Find inputs from disk first. This is parallelized internally in the `.run()` method.
+            if let Some(fs_enumerator) = fs_enumerator {
+                fs_enumerator.run(input_send.clone())?;
+            }
+
+            // Find inputs from enumerator files in parallel.
+            //
+            // The parallelism approach:
+            //
+            // - Parallelize across all enumerators
+            //
+            // - For a single enumerator:
+            //   - Split into lines sequentially
+            //   - Parallelize JSON deserialization (JSON is an expensive serialization format, but
+            //     easy to sling around, hence used here -- another format like Arrow or msgpack
+            //     would be much more efficient)
+            //   - Send deserialized items on the `input_send` channel
+            //
+            // - Do all the parallel work in a separate Rayon threadpool to avoid deadlocks from
+            //   the `input_send` channel
+            //
+            // An alternative would be to read each file's lines in parallel, but this is difficult
+            // to implement efficiently in a way that gets parallel speedup.
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(num_jobs)
+                .use_current_thread()
+                .build_scoped(
+                    |thread| thread.run(),
+                    |pool| {
+                        pool.install(move || {
+                            enumerators.into_par_iter().for_each(|ef| {
+                                if let Err(e) = rayon_read_from_enumerator(&ef, input_send.clone())
+                                {
+                                    error!("Failed to read from enumerator {}: {e}", ef.display());
+                                }
+                            })
+                        })
+                    },
+                )?;
+
+            Ok(())
+        })
+        .context("Failed to enumerate filesystem inputs")?;
+
+    Ok((input_enumerator_thread, input_recv))
+}
+
+/// Read from a single enumerator file in parallel, sending inputs for scanning to `input_send`.
+fn rayon_read_from_enumerator(
+    fname: &Path,
+    input_send: crossbeam_channel::Sender<FoundInput>,
+) -> Result<()> {
+    use std::io::BufRead;
+    let file = std::fs::File::open(fname)?;
+    let reader = std::io::BufReader::new(file);
+    reader
+        .lines()
+        .zip(1usize..)
+        .into_iter()
+        .par_bridge()
+        .filter_map(|(line, line_num)| line.map(|line| (line, line_num)).ok())
+        .for_each(|(line, line_num)| match serde_json::from_str(&line) {
+            Ok(e) => input_send.send(FoundInput::EnumeratorBlob(e)).unwrap(),
+            Err(e) => {
+                error!("Error on enumerator {}:{line_num}: {e}", fname.display());
+            }
+        });
+    Ok(())
 }

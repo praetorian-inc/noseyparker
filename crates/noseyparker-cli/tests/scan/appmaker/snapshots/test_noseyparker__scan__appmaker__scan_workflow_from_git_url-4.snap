@@ -643,7 +643,7 @@ expression: read_json(report_json.path()).unwrap()
   },
   {
     "comment": null,
-    "finding_id": "76fc011ffeff23c94cbfc3642b5fa19b8cbef757",
+    "finding_id": "fe4b0e621a687a00659f6f69fc5f85a5b38bc177",
     "groups": [
       "RCthTGNjY0xySGJkV3RDbk43NU1LSTdObWI5TlpRSFo1Y1N4d09vbQ=="
     ],
@@ -662,12 +662,12 @@ expression: read_json(report_json.path()).unwrap()
         ],
         "location": {
           "offset_span": {
-            "end": 1187,
+            "end": 1188,
             "start": 1134
           },
           "source_span": {
             "end": {
-              "column": 1187,
+              "column": 1188,
               "line": 1
             },
             "start": {
@@ -696,22 +696,22 @@ expression: read_json(report_json.path()).unwrap()
           }
         ],
         "rule_name": "AWS Secret Access Key",
-        "rule_structural_id": "d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+        "rule_structural_id": "faaf86b6ca922630c4bf6425ee7fb688410c490b",
         "rule_text_id": "np.aws.2",
         "score": null,
         "snippet": {
-          "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
+          "after": ",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
           "before": "Frameworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"",
-          "matching": "AWS_SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
+          "matching": "AWS_SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom\""
         },
         "status": null,
-        "structural_id": "5b042c412cff050642808a5775fb8c71083d746d"
+        "structural_id": "e1a3b707cde4fc2e1c0a6347711b4ca3031a9dbe"
       }
     ],
     "mean_score": null,
     "num_matches": 1,
     "rule_name": "AWS Secret Access Key",
-    "rule_structural_id": "d648dfa0ed2adb632fbce6f28fdff1543e36cea0",
+    "rule_structural_id": "faaf86b6ca922630c4bf6425ee7fb688410c490b",
     "rule_text_id": "np.aws.2",
     "statuses": []
   },

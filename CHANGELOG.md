@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Additions
+- An experimental "extensible enumerator mechanism" has been added to the `scan` command ([#220](https://github.com/praetorian-inc/noseyparker/pull/220)).
+  This allows Nosey Parker to scan inputs produced by any program that can emit JSON objects to stdout, without having to first write the inputs to the filesystem.
+  It is invoked with the new `--enumerator=FILE` option, where `FILE` is a JSON Lines file.
+  Each line of the enumerator file should be a JSON object with one of the following forms:
+
+      { "content_base64": "base64-encoded bytestring to scan", "provenance": <arbitrary object> }
+      { "content": "utf8 string to scan", "provenance": <arbitrary object> }
+
+  Shell process substitution can make _streaming_ invocation ergonomic, e.g., `scan --enumerator=<(my-enumerator-program)`.
+
 ### Changes
 - Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step ([#216](https://github.com/praetorian-inc/noseyparker/pull/216)).
   This reduces peak memory use and CPU time 10-20%, particularly in environments with slow I/O.
@@ -23,13 +34,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The built-in support for enumerating and interacting with GitHub is now a compile time-selectable feature that is enabled by default ([#213](https://github.com/praetorian-inc/noseyparker/pull/213)).
   This makes it possible to build a slimmer release for environments where GitHub functionality is unused.
 
-- New rule has been added:
+- A new rule has been added:
 
-  - Bitbucket App Password ([#219](https://github.com/praetorian-inc/noseyparker/pull/219))
+  - Bitbucket App Password ([#219](https://github.com/praetorian-inc/noseyparker/pull/219) from @gemesa)
 
 ### Fixes
 
 - The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.
+- The `AWS Secret Access Key` rule has been revised to avoid runtime `Regex failed to match` errors.
 
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)

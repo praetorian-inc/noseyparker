@@ -107,6 +107,20 @@ Input Specifier Options:
           - source: Only source repositories, i.e., ones that are not forks
           - fork:   Only fork repositories
 
+      --enumerator <PATH>
+          Read inputs from a JSONL enumerator file (experimental)
+          
+          This can be used to stream inputs from other processes without having to write them to
+          disk. Shell process substitution (e.g., `--enumerator=<(my-enumerator-program)`) can make
+          this ergonomic.
+          
+          Each line of the enumerator file should be a JSON object with one of the following forms:
+          
+          { "content_base64": "base64-encoded bytestring to scan", "provenance": <arbitrary object>
+          } { "content": "utf8 string to scan", "provenance": <arbitrary object> }
+          
+          This option can be repeated.
+
       --github-organization <NAME>
           Clone and scan accessible repositories belonging to the specified GitHub organization
           

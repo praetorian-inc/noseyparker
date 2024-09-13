@@ -126,7 +126,6 @@ fn default_scan_jobs() -> usize {
     version = get_short_version(),
     long_version = get_long_version(),
 
-    // FIXME: add longer comment description (will be shown with `--help`)
     long_about = concat!(
         crate_description!(),
     ),
@@ -835,7 +834,13 @@ pub struct InputSpecifierArgs {
     #[arg(
         value_name="INPUT",
         value_hint=ValueHint::AnyPath,
-        required_unless_present_any(["github_user", "github_organization", "git_url", "all_github_organizations"]),
+        required_unless_present_any([
+            "github_user",
+            "github_organization",
+            "git_url",
+            "all_github_organizations",
+            "enumerators",
+        ]),
         display_order=1,
     )]
     pub path_inputs: Vec<PathBuf>,
@@ -861,6 +866,26 @@ pub struct InputSpecifierArgs {
         display_order = 10,
     )]
     pub git_url: Vec<GitUrl>,
+
+    /// Read inputs from a JSONL enumerator file (experimental)
+    ///
+    /// This can be used to stream inputs from other processes without having to write them to disk.
+    /// Shell process substitution (e.g., `--enumerator=<(my-enumerator-program)`) can make this
+    /// ergonomic.
+    ///
+    /// Each line of the enumerator file should be a JSON object with one of the following forms:
+    ///
+    ///     { "content_base64": "base64-encoded bytestring to scan", "provenance": <arbitrary object> }
+    ///     { "content": "utf8 string to scan", "provenance": <arbitrary object> }
+    ///
+    /// This option can be repeated.
+    #[arg(
+        long("enumerator"),
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        display_order=15,
+    )]
+    pub enumerators: Vec<PathBuf>,
 
     #[cfg(feature = "github")]
     /// Clone and scan accessible repositories belonging to the specified GitHub user

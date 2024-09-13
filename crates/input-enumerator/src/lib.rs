@@ -3,7 +3,8 @@ pub mod bstring_table;
 pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+use bstr::BString;
 use crossbeam_channel::Sender;
 use ignore::{
     gitignore::{Gitignore, GitignoreBuilder},
@@ -16,9 +17,10 @@ use tracing::{debug, error, warn};
 mod git_repo_enumerator;
 pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetadataEnumerator};
 
-pub enum EnumeratorResult {
+pub enum FoundInput {
     File(FileResult),
     GitRepo(GitRepoResult),
+    EnumeratorBlob(EnumeratorBlobResult),
 }
 
 pub struct FileResult {
@@ -26,7 +28,33 @@ pub struct FileResult {
     pub num_bytes: u64,
 }
 
-pub type Output = Sender<EnumeratorResult>;
+#[derive(serde::Deserialize, serde::Serialize)]
+pub enum Content {
+    #[serde(rename = "content_base64")]
+    Base64(#[serde(with = "bstring_serde::BStringBase64")] BString),
+
+    #[serde(rename = "content")]
+    Utf8(String),
+}
+
+impl Content {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Content::Base64(s) => s.as_slice(),
+            Content::Utf8(s) => s.as_bytes(),
+        }
+    }
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct EnumeratorBlobResult {
+    #[serde(flatten)]
+    pub content: Content,
+
+    pub provenance: serde_json::Value,
+}
+
+pub type Output = Sender<FoundInput>;
 
 // -------------------------------------------------------------------------------------------------
 // VisitorBuilder
@@ -72,11 +100,11 @@ impl<'t> Visitor<'t> {
     }
 
     fn found_file(&mut self, r: FileResult) {
-        self.output.send(EnumeratorResult::File(r)).unwrap();
+        self.output.send(FoundInput::File(r)).unwrap();
     }
 
     fn found_git_repo(&mut self, r: GitRepoResult) {
-        self.output.send(EnumeratorResult::GitRepo(r)).unwrap();
+        self.output.send(FoundInput::GitRepo(r)).unwrap();
     }
 }
 
@@ -220,6 +248,10 @@ impl FilesystemEnumerator {
     ///
     /// The default behavior is to not follow symlinks.
     pub fn new<T: AsRef<Path>>(inputs: &[T]) -> Result<Self> {
+        if inputs.is_empty() {
+            bail!("No inputs provided");
+        }
+
         let mut builder = WalkBuilder::new(&inputs[0]);
         for input in &inputs[1..] {
             builder.add(input);

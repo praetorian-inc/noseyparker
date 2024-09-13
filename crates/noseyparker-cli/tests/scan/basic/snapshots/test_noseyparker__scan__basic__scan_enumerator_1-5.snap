@@ -1,0 +1,16 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stdout
+---
+Finding 1/1
+Rule: GitHub Personal Access Token
+Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
+
+    Occurrence 1/1
+    Extended Provenance: {"filename":"input.txt"}
+    Blob:  <BLOB>
+    Lines: 3:12-3:51
+
+        # This is fake configuration data
+        USERNAME=the_dude
+        GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg

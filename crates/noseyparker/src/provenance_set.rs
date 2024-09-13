@@ -41,6 +41,14 @@ impl JsonSchema for ProvenanceSet {
 }
 
 impl ProvenanceSet {
+    #[inline]
+    pub fn single(provenance: Provenance) -> Self {
+        Self {
+            provenance,
+            more_provenance: vec![],
+        }
+    }
+
     /// Create a new `ProvenanceSet` from the given items, filtering out redundant less-specific
     /// `Provenance` records.
     pub fn new(provenance: Provenance, more_provenance: Vec<Provenance>) -> Self {
@@ -106,5 +114,11 @@ impl IntoIterator for ProvenanceSet {
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         std::iter::once(self.provenance).chain(self.more_provenance)
+    }
+}
+
+impl From<Provenance> for ProvenanceSet {
+    fn from(p: Provenance) -> Self {
+        Self::single(p)
     }
 }

@@ -2173,6 +2173,7 @@ dependencies = [
  "roaring",
  "schemars",
  "serde",
+ "serde_json",
  "smallvec",
  "tracing",
 ]
@@ -2527,6 +2528,7 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "assert_fs",
+ "base64",
  "bstr",
  "clap",
  "clap_complete",
