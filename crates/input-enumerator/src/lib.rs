@@ -2,16 +2,13 @@ pub mod blob_appearance;
 pub mod bstring_table;
 pub mod git_commit_metadata;
 pub mod git_metadata_graph;
+pub use gix::{Repository, ThreadSafeRepository};
 
 use anyhow::{bail, Result};
-use bstr::BString;
 use crossbeam_channel::Sender;
-use ignore::{
-    gitignore::{Gitignore, GitignoreBuilder},
-    DirEntry, WalkBuilder, WalkState,
-};
+pub use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
-use std::time::Instant;
 use tracing::{debug, error, warn};
 
 mod git_repo_enumerator;
@@ -19,8 +16,8 @@ pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetad
 
 pub enum FoundInput {
     File(FileResult),
-    GitRepo(GitRepoResult),
-    EnumeratorBlob(EnumeratorBlobResult),
+    Directory(DirectoryResult),
+    EnumeratorFile(EnumeratorFileResult),
 }
 
 pub struct FileResult {
@@ -28,30 +25,12 @@ pub struct FileResult {
     pub num_bytes: u64,
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
-pub enum Content {
-    #[serde(rename = "content_base64")]
-    Base64(#[serde(with = "bstring_serde::BStringBase64")] BString),
-
-    #[serde(rename = "content")]
-    Utf8(String),
+pub struct EnumeratorFileResult {
+    pub path: PathBuf,
 }
 
-impl Content {
-    pub fn as_bytes(&self) -> &[u8] {
-        match self {
-            Content::Base64(s) => s.as_slice(),
-            Content::Utf8(s) => s.as_bytes(),
-        }
-    }
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct EnumeratorBlobResult {
-    #[serde(flatten)]
-    pub content: Content,
-
-    pub provenance: serde_json::Value,
+pub struct DirectoryResult {
+    pub path: PathBuf,
 }
 
 pub type Output = Sender<FoundInput>;
@@ -61,9 +40,6 @@ pub type Output = Sender<FoundInput>;
 // -------------------------------------------------------------------------------------------------
 struct VisitorBuilder<'t> {
     max_file_size: Option<u64>,
-    collect_git_metadata: bool,
-    enumerate_git_history: bool,
-    gitignore: &'t Gitignore,
     output: &'t Output,
 }
 
@@ -74,9 +50,6 @@ where
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(Visitor {
             max_file_size: self.max_file_size,
-            collect_git_metadata: self.collect_git_metadata,
-            enumerate_git_history: self.enumerate_git_history,
-            gitignore: self.gitignore,
             output: self.output,
         })
     }
@@ -86,10 +59,7 @@ where
 // Visitor
 // -------------------------------------------------------------------------------------------------
 struct Visitor<'t> {
-    collect_git_metadata: bool,
-    enumerate_git_history: bool,
     max_file_size: Option<u64>,
-    gitignore: &'t Gitignore,
     output: &'t Output,
 }
 
@@ -103,8 +73,8 @@ impl<'t> Visitor<'t> {
         self.output.send(FoundInput::File(r)).unwrap();
     }
 
-    fn found_git_repo(&mut self, r: GitRepoResult) {
-        self.output.send(FoundInput::GitRepo(r)).unwrap();
+    fn found_directory(&mut self, r: DirectoryResult) {
+        self.output.send(FoundInput::Directory(r)).unwrap();
     }
 }
 
@@ -131,68 +101,17 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         let is_dir = metadata.is_dir();
 
         if metadata.is_file() {
-            let bytes = metadata.len();
-            let path = path.to_owned();
-            if self.file_too_big(bytes) {
-                debug!("Skipping {}: size {bytes} exceeds max size", path.display());
+            let num_bytes = metadata.len();
+            if self.file_too_big(num_bytes) {
+                debug!("Skipping {}: size {num_bytes} exceeds max size", path.display());
             } else {
-                self.found_file(FileResult {
-                    path,
-                    num_bytes: bytes,
-                });
+                let path = path.to_owned();
+                self.found_file(FileResult { path, num_bytes });
             }
         } else if is_dir {
-            if self.enumerate_git_history {
-                match open_git_repo(path) {
-                    Err(e) => {
-                        error!(
-                            "Failed to open Git repository at {}: {e}; skipping",
-                            path.display()
-                        );
-                        return WalkState::Skip;
-                    }
-                    Ok(Some(repository)) => {
-                        let t1 = Instant::now();
-                        debug!("Found Git repository at {}", path.display());
-
-                        if self.collect_git_metadata {
-                            let enumerator = GitRepoWithMetadataEnumerator::new(
-                                path,
-                                &repository,
-                                &self.gitignore,
-                            );
-                            match enumerator.run() {
-                                Err(e) => {
-                                    error!(
-                                        "Failed to enumerate Git repository at {}: {e}; skipping",
-                                        path.display(),
-                                    );
-                                    return WalkState::Skip;
-                                }
-                                Ok(r) => self.found_git_repo(r),
-                            }
-                        } else {
-                            let enumerator = GitRepoEnumerator::new(path, &repository);
-                            match enumerator.run() {
-                                Err(e) => {
-                                    error!(
-                                        "Failed to enumerate Git repository at {}: {e}; skipping",
-                                        path.display(),
-                                    );
-                                    return WalkState::Skip;
-                                }
-                                Ok(r) => self.found_git_repo(r),
-                            }
-                        }
-                        debug!(
-                            "Enumerated Git repository at {} in {:.6}s",
-                            path.display(),
-                            t1.elapsed().as_secs_f64()
-                        );
-                    }
-                    Ok(None) => {}
-                }
-            }
+            self.found_directory(DirectoryResult {
+                path: path.to_owned(),
+            });
         } else if metadata.is_symlink() {
             // No problem; just ignore it
             //
@@ -261,14 +180,12 @@ impl FilesystemEnumerator {
         builder.max_filesize(max_file_size);
         builder.standard_filters(false);
 
-        let gitignore_builder = GitignoreBuilder::new("");
-
         Ok(FilesystemEnumerator {
             walk_builder: builder,
             max_file_size,
             collect_git_metadata: Self::DEFAULT_COLLECT_GIT_METADATA,
             enumerate_git_history: Self::DEFAULT_ENUMERATE_GIT_HISTORY,
-            gitignore_builder,
+            gitignore_builder: GitignoreBuilder::new(""),
         })
     }
 
@@ -330,14 +247,14 @@ impl FilesystemEnumerator {
         self
     }
 
-    pub fn run(&self, output: Output) -> Result<()> {
-        let gitignore = self.gitignore_builder.build()?;
+    /// Get the configured Gitignore for this enumerator.
+    pub fn gitignore(&self) -> Result<Gitignore> {
+        Ok(self.gitignore_builder.build()?)
+    }
 
+    pub fn run(&self, output: Output) -> Result<()> {
         let mut visitor_builder = VisitorBuilder {
-            collect_git_metadata: self.collect_git_metadata,
-            enumerate_git_history: self.enumerate_git_history,
             max_file_size: self.max_file_size,
-            gitignore: &gitignore,
             output: &output,
         };
 
@@ -350,7 +267,7 @@ impl FilesystemEnumerator {
 }
 
 /// Opens the given Git repository if it exists, returning None otherwise.
-pub fn open_git_repo(path: &Path) -> Result<Option<gix::Repository>> {
+pub fn open_git_repo(path: &Path) -> Result<Option<Repository>> {
     let opts = gix::open::Options::isolated().open_path_as_is(true);
     match gix::open_opts(path, opts) {
         Err(gix::open::Error::NotARepository { .. }) => Ok(None),

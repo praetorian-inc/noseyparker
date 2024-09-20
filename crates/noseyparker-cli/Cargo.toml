@@ -64,6 +64,7 @@ vergen = { version = "8.3", features = ["build", "cargo", "git", "gitcl", "rustc
 
 [dependencies]
 anyhow = { version = "1.0" }
+bstring-serde = { path = "../bstring-serde" }
 bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 clap_complete = "4.4"
