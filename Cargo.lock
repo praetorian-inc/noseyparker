@@ -2530,6 +2530,7 @@ dependencies = [
  "assert_fs",
  "base64",
  "bstr",
+ "bstring-serde",
  "clap",
  "clap_complete",
  "clap_mangen",

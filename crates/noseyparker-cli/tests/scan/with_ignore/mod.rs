@@ -11,8 +11,8 @@ fn root_input_noignore_01() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        input.dat
-    "#},
+            input.dat
+        "#},
     );
 
     let input = scan_env.input_file_with_secret("input.dat");
@@ -37,8 +37,8 @@ fn root_input_noignore_02() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        input
-    "#},
+            input
+        "#},
     );
 
     let input = scan_env.input_dir("input");
@@ -61,8 +61,8 @@ fn literal_match_01() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        input.dat
-    "#},
+            input.dat
+        "#},
     );
 
     let input = scan_env.input_dir("input");
@@ -78,8 +78,8 @@ fn literal_match_02() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        whoohaw/input.dat
-    "#},
+            whoohaw/input.dat
+        "#},
     );
 
     let input = scan_env.input_dir("input");
@@ -102,8 +102,8 @@ fn literal_match_03() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        subdir1/
-    "#},
+            subdir1/
+        "#},
     );
 
     let input = scan_env.input_dir("input");
@@ -126,10 +126,13 @@ fn glob_01() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        # here is a comment
-        *.dat
-    "#},
+            # here is a comment
+            *.dat
+        "#},
     );
+    assert!(ignore_file.is_file());
+    let contents = std::fs::read_to_string(ignore_file.path()).unwrap();
+    println!("ignore file at {}:\n#####\n{}\n#####", ignore_file.display(), contents);
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/input.dat");
@@ -153,8 +156,8 @@ fn path_glob_01() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        **/test
-    "#},
+            **/test
+        "#},
     );
 
     let input = scan_env.input_dir("input");
@@ -179,9 +182,9 @@ fn negation_01() {
     let ignore_file = scan_env.input_file_with_contents(
         "npignore",
         indoc! {r#"
-        *.dat
-        !**/subdir1/**
-    "#},
+            *.dat
+            !**/subdir1/**
+        "#},
     );
 
     let input = scan_env.input_dir("input");

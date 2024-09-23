@@ -88,6 +88,9 @@ pub struct GitRepoResult {
     /// Path to the repository clone
     pub path: PathBuf,
 
+    /// The opened Git repository
+    pub repository: Repository,
+
     /// The blobs to be scanned
     pub blobs: Vec<BlobMetadata>,
 
@@ -119,12 +122,12 @@ pub struct BlobMetadata {
 // -------------------------------------------------------------------------------------------------
 pub struct GitRepoWithMetadataEnumerator<'a> {
     path: &'a Path,
-    repo: &'a Repository,
+    repo: Repository,
     gitignore: &'a Gitignore,
 }
 
 impl<'a> GitRepoWithMetadataEnumerator<'a> {
-    pub fn new(path: &'a Path, repo: &'a Repository, gitignore: &'a Gitignore) -> Self {
+    pub fn new(path: &'a Path, repo: Repository, gitignore: &'a Gitignore) -> Self {
         Self {
             path,
             repo,
@@ -132,7 +135,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
         }
     }
 
-    pub fn run(&self) -> Result<GitRepoResult> {
+    pub fn run(self) -> Result<GitRepoResult> {
         let t1 = Instant::now();
 
         use gix::object::Kind;
@@ -254,6 +257,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                     })
                     .collect();
                 Ok(GitRepoResult {
+                    repository: self.repo,
                     path,
                     blobs,
                     commit_metadata,
@@ -348,6 +352,7 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                     .collect();
 
                 Ok(GitRepoResult {
+                    repository: self.repo,
                     path,
                     blobs,
                     commit_metadata,
@@ -362,15 +367,15 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 // -------------------------------------------------------------------------------------------------
 pub struct GitRepoEnumerator<'a> {
     path: &'a Path,
-    repo: &'a Repository,
+    repo: Repository,
 }
 
 impl<'a> GitRepoEnumerator<'a> {
-    pub fn new(path: &'a Path, repo: &'a Repository) -> Self {
+    pub fn new(path: &'a Path, repo: Repository) -> Self {
         Self { path, repo }
     }
 
-    pub fn run(&self) -> Result<GitRepoResult> {
+    pub fn run(self) -> Result<GitRepoResult> {
         use gix::object::Kind;
         use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
@@ -406,6 +411,7 @@ impl<'a> GitRepoEnumerator<'a> {
             })
             .collect();
         Ok(GitRepoResult {
+            repository: self.repo,
             path,
             blobs,
             commit_metadata: Default::default(),
