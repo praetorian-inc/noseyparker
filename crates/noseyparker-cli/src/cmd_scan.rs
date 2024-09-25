@@ -191,17 +191,17 @@ impl ParallelIterator for GitRepoResultIter {
                     let blob_id = md.blob_oid;
                     let repo_path = &self.inner.path;
 
-                    let blob = {
-                        let mut blob = repo.find_object(blob_id).with_context(|| {
-                            format!(
-                                "Failed to read blob {blob_id} from Git repository at {}",
-                                repo_path.display(),
-                            )
-                        })?;
-
+                    let blob = || -> Result<Blob> {
+                        let mut blob = repo.find_object(blob_id)?.try_into_blob()?;
                         let data = std::mem::take(&mut blob.data); // avoid a copy
-                        Blob::new(BlobId::from(&blob_id), data)
-                    };
+                        Ok(Blob::new(BlobId::from(&blob_id), data))
+                    }()
+                    .with_context(|| {
+                        format!(
+                            "Failed to read blob {blob_id} from Git repository at {}",
+                            repo_path.display(),
+                        )
+                    })?;
 
                     let provenance = ProvenanceSet::try_from_iter(md.first_seen.iter().map(|e| {
                         let commit_metadata = self

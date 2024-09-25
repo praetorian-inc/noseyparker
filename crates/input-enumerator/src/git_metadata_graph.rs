@@ -2,7 +2,9 @@ use anyhow::{bail, Context, Result};
 use bstr::BString;
 use fixedbitset::FixedBitSet;
 use gix::hashtable::{hash_map, HashMap};
-use gix::ObjectId;
+use gix::objs::tree::EntryKind;
+use gix::prelude::*;
+use gix::{object::Kind, ObjectId, OdbHandle};
 use petgraph::graph::{DiGraph, EdgeIndex, IndexType, NodeIndex};
 use petgraph::prelude::*;
 use petgraph::visit::Visitable;
@@ -10,9 +12,10 @@ use roaring::RoaringBitmap;
 use smallvec::SmallVec;
 use std::collections::BinaryHeap;
 use std::time::Instant;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, error_span, warn};
 
 use crate::bstring_table::BStringTable;
+use crate::{unwrap_ok_or_continue, unwrap_some_or_continue};
 
 type Symbol = crate::bstring_table::Symbol<u32>;
 
@@ -62,20 +65,10 @@ unsafe impl IndexType for TreeBlobGraphIdx {
 pub type TreeBlobNodeIdx = NodeIndex<TreeBlobGraphIdx>;
 pub type TreeBlobEdgeIdx = EdgeIndex<TreeBlobGraphIdx>;
 
+#[derive(Clone, Copy)]
 pub struct CommitMetadata {
     pub oid: ObjectId,
     pub tree_idx: Option<TreeBlobNodeIdx>,
-}
-
-#[derive(PartialEq, Eq, Debug)]
-enum TreeBlobKind {
-    Tree,
-    Blob,
-}
-
-pub struct TreeBlobMetadata {
-    kind: TreeBlobKind,
-    oid: ObjectId,
 }
 
 #[derive(Clone, Debug)]
@@ -118,6 +111,113 @@ impl Default for SeenTreeBlobSet {
     }
 }
 
+#[derive(Default)]
+pub struct ObjectIndex {
+    /// maps oid to index in `idx_to_oid_and_md`
+    pub oid_to_idx: HashMap<ObjectId, usize>,
+
+    /// maps index to oid and object kind; each oid has an associated entry in `oid_to_idx`
+    pub idx_to_oid_and_md: Vec<(ObjectId, Kind)>,
+
+    /// number of commit objects
+    pub num_commits: usize,
+    /// number of blob objects
+    pub num_blobs: usize,
+    /// number of objects of all types
+    pub num_objects: usize,
+}
+
+impl ObjectIndex {
+    pub fn new(odb: &OdbHandle) -> Result<Self> {
+        use gix::odb::store::iter::Ordering;
+        use gix::prelude::*;
+
+        // first get object count to allow for exact index allocation size
+        let mut num_objects = odb
+            .iter()
+            .context("Failed to iterate object database")?
+            .with_ordering(Ordering::PackLexicographicalThenLooseLexicographical)
+            .count();
+
+        let mut index = ObjectIndex::with_capacity(num_objects);
+
+        num_objects = 0;
+        // Now count object types and build in-memory index.
+        for oid in odb
+            .iter()
+            .context("Failed to iterate object database")?
+            // .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
+            .with_ordering(Ordering::PackLexicographicalThenLooseLexicographical)
+        {
+            num_objects += 1;
+            let oid = unwrap_ok_or_continue!(oid, |e| { error!("Failed to read object id: {e}") });
+            let hdr = unwrap_ok_or_continue!(odb.header(oid), |e| {
+                error!("Failed to read object header for {oid}: {e}")
+            });
+            index.record(oid, hdr.kind());
+        }
+
+        Ok(index)
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            oid_to_idx: HashMap::with_capacity_and_hasher(capacity, Default::default()),
+            idx_to_oid_and_md: Vec::with_capacity(capacity),
+            num_commits: 0,
+            num_blobs: 0,
+            num_objects: 0,
+        }
+    }
+
+    pub fn record(&mut self, oid: ObjectId, kind: Kind) {
+        assert_eq!(self.idx_to_oid_and_md.len(), self.oid_to_idx.len());
+        match self.oid_to_idx.entry(oid) {
+            gix::hashtable::hash_map::Entry::Occupied(e) => {
+                warn!("object {} seen multiple times", e.key());
+            }
+            gix::hashtable::hash_map::Entry::Vacant(e) => {
+                let idx = self.idx_to_oid_and_md.len();
+                self.idx_to_oid_and_md.push((*e.key(), kind));
+                e.insert(idx);
+
+                self.num_objects += 1;
+
+                match kind {
+                    Kind::Commit => self.num_commits += 1,
+                    Kind::Blob => self.num_blobs += 1,
+                    _ => {}
+                }
+            }
+        }
+        assert_eq!(self.idx_to_oid_and_md.len(), self.oid_to_idx.len());
+    }
+
+    pub fn len(&self) -> usize {
+        self.idx_to_oid_and_md.len()
+    }
+
+    pub fn num_commits(&self) -> usize {
+        self.num_commits
+    }
+
+    pub fn num_blobs(&self) -> usize {
+        self.num_blobs
+    }
+
+    pub fn num_objects(&self) -> usize {
+        self.num_objects
+    }
+
+    pub fn get_index(&self, oid: &gix::oid) -> Option<TreeBlobNodeIdx> {
+        self.oid_to_idx.get(oid).map(|v| TreeBlobNodeIdx::new(*v))
+    }
+
+    fn get_oid_and_md(&self, index: TreeBlobNodeIdx) -> Option<&(ObjectId, Kind)> {
+        self.idx_to_oid_and_md.get(index.index())
+    }
+}
+
 /// A graph of metadata in a Git repository
 ///
 /// This is an in-memory graph of the inverted Git commit graph, i.e., each commit node has an
@@ -128,53 +228,23 @@ impl Default for SeenTreeBlobSet {
 /// Each tree object is a node that has an outgoing edge to each of its immediate children, labeled
 /// with the name of that child.
 pub struct GitMetadataGraph {
-    symbols: BStringTable,
-
     commit_oid_to_node_idx: HashMap<ObjectId, CommitNodeIdx>,
     commits: DiGraph<CommitMetadata, (), CommitGraphIdx>,
-
-    tree_blob_oid_to_node_idx: HashMap<ObjectId, TreeBlobNodeIdx>,
-    trees_and_blobs: DiGraph<TreeBlobMetadata, Symbol, TreeBlobGraphIdx>,
 }
 
 impl GitMetadataGraph {
     /// Create a new commit graph with the given capacity.
-    pub fn with_capacity(num_commits: usize, num_trees: usize, num_blobs: usize) -> Self {
-        let num_trees_and_blobs = num_trees + num_blobs;
-
+    pub fn with_capacity(num_commits: usize) -> Self {
         // use 2x the number of commits, assuming that most commits have a single parent commit,
         // except merges, which usually have 2
         let commit_edges_capacity = num_commits * 2;
 
-        let tree_blob_edges_capacity = {
-            // this is an estimate of how many trees+blobs change in a typical commit
-            let avg_increase = (num_trees_and_blobs as f64 / num_commits as f64).max(1.0);
-
-            // guess at how many trees+blobs do we expect to see total in a typical commit
-            // assume that 6% of a tree's contents change at each commit
-            //
-            // XXX: this is magic, but chosen empirically from looking at a few test repos.
-            //      it would be better if we could sample some commits
-            let baseline = avg_increase / 0.06;
-
-            (num_commits as f64 * (baseline + avg_increase)) as usize
-        }
-        .min(1024 * 1024 * 1024);
-        // info!("tree blob edges capacity: {tree_blob_edges_capacity}");
-
         Self {
-            symbols: BStringTable::new(),
-
             commit_oid_to_node_idx: HashMap::with_capacity_and_hasher(
                 num_commits,
                 Default::default(),
             ),
             commits: DiGraph::with_capacity(num_commits, commit_edges_capacity),
-            trees_and_blobs: DiGraph::with_capacity(num_trees_and_blobs, tree_blob_edges_capacity),
-            tree_blob_oid_to_node_idx: HashMap::with_capacity_and_hasher(
-                num_trees_and_blobs,
-                Default::default(),
-            ),
         }
     }
 
@@ -186,16 +256,6 @@ impl GitMetadataGraph {
         self.commits
             .node_weight(idx)
             .expect("commit graph node index should be valid")
-    }
-
-    /// Get the tree/blob metadata for the given graph node index.
-    ///
-    /// Panics if the given graph node index is not valid for this graph.
-    #[inline]
-    pub fn get_tree_blob_metadata(&self, idx: TreeBlobNodeIdx) -> &TreeBlobMetadata {
-        self.trees_and_blobs
-            .node_weight(idx)
-            .expect("tree/blob graph node index should be valid")
     }
 
     /// Get the index of the graph node for the given commit, creating it if needed.
@@ -238,82 +298,32 @@ impl GitMetadataGraph {
         self.commits.add_edge(parent_idx, child_idx, ())
     }
 
-    /// Add a new graph node for the given blob object, returning its index.
-    pub fn get_blob_idx(&mut self, blob_oid: ObjectId) -> TreeBlobNodeIdx {
-        *self
-            .tree_blob_oid_to_node_idx
-            .entry(blob_oid)
-            .or_insert_with(|| {
-                self.trees_and_blobs.add_node(TreeBlobMetadata {
-                    kind: TreeBlobKind::Blob,
-                    oid: blob_oid,
-                })
-            })
-    }
-
-    /// Add a new graph node for the given tree object, returning its index.
-    pub fn get_tree_idx(&mut self, tree_oid: ObjectId) -> TreeBlobNodeIdx {
-        *self
-            .tree_blob_oid_to_node_idx
-            .entry(tree_oid)
-            .or_insert_with(|| {
-                self.trees_and_blobs.add_node(TreeBlobMetadata {
-                    kind: TreeBlobKind::Tree,
-                    oid: tree_oid,
-                })
-            })
-    }
-
-    /// Add a new edge for a tree and another tree or blob.
-    ///
-    /// NOTE: If such an edge already exists, a parallel edge is added.
-    pub fn add_tree_edge(
-        &mut self,
-        parent_idx: TreeBlobNodeIdx,
-        child_idx: TreeBlobNodeIdx,
-        name: BString,
-    ) -> TreeBlobEdgeIdx {
-        // NOTE: this will allow parallel (i.e., duplicate) edges from `from_idx` to `to_idx`.
-        //
-        // For alternative behavior that doesn't add parallel edges, use
-        // `self.commits.update_edge(from_idx, to_idx, ())`.
-        let sym = self.symbols.get_or_intern(name);
-        self.trees_and_blobs.add_edge(parent_idx, child_idx, sym)
-    }
-
     pub fn num_commits(&self) -> usize {
         self.commits.node_count()
     }
-
-    pub fn num_trees(&self) -> usize {
-        self.trees_and_blobs
-            .node_weights()
-            .filter(|md| md.kind == TreeBlobKind::Tree)
-            .count()
-    }
-
-    pub fn num_blobs(&self) -> usize {
-        self.trees_and_blobs
-            .node_weights()
-            .filter(|md| md.kind == TreeBlobKind::Blob)
-            .count()
-    }
 }
 
-pub struct RepoMetadata {
-    /// index of the commit this is for; indexes into the commits graph
+pub type IntroducedBlobs = SmallVec<[(ObjectId, BString); 4]>;
+
+pub struct CommitBlobMetadata {
+    /// index of the commit this entry applies to
     pub commit_oid: ObjectId,
 
     /// set of introduced blobs and path names
-    pub introduced_blobs: Vec<(ObjectId, BString)>,
+    pub introduced_blobs: IntroducedBlobs,
 }
 
 impl GitMetadataGraph {
-    pub fn get_repo_metadata(&self) -> Result<Vec<RepoMetadata>> {
+    pub fn get_repo_metadata(
+        &mut self,
+        object_index: &ObjectIndex,
+        repo: &gix::Repository,
+    ) -> Result<Vec<CommitBlobMetadata>> {
+        let _span = error_span!("enumerate", path = repo.path().display().to_string()).entered();
+
         let t1 = Instant::now();
-        let symbols = &self.symbols;
         let cg = &self.commits;
-        let tbg = &self.trees_and_blobs;
+        // let tbg = &self.trees_and_blobs;
         let num_commits = cg.node_count();
 
         // The set of seen trees and blobs. This has an entry for _each_ commit, though at runtime,
@@ -322,7 +332,8 @@ impl GitMetadataGraph {
         // FIXME: merge this data structure with the `worklist` priority queue; See https://docs.rs/priority-queue; this allows O(1) updates of items in the queue
         let mut seen_sets: Vec<Option<SeenTreeBlobSet>> = vec![None; num_commits];
 
-        let mut blobs_introduced: Vec<Vec<(ObjectId, BString)>> = vec![Vec::new(); num_commits];
+        // A mapping of graph index of a commit to the set of blobs introduced by that commit
+        let mut blobs_introduced: Vec<IntroducedBlobs> = vec![IntroducedBlobs::new(); num_commits];
 
         // An adapatation of Kahn's topological sorting algorithm, to visit the commit nodes in
         // topological order: <https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm>
@@ -364,9 +375,12 @@ impl GitMetadataGraph {
             Ok(std::cmp::Reverse(count))
         };
 
+        // A table for interned bytestrings; used to represent filename path fragments, drastically
+        // reducing peak memory use
+        let mut symbols = BStringTable::with_capacity(32 * 1024, 1024 * 1024);
+
         // A queue of commit graph node indexes, ordered by minimum out-degree
-        let mut worklist =
-            BinaryHeap::<(OutDegree, CommitNodeIdx)>::with_capacity(1024.max(num_commits / 2));
+        let mut worklist = BinaryHeap::<(OutDegree, CommitNodeIdx)>::with_capacity(num_commits);
 
         // Initialize with commit nodes that have no parents
         for root_idx in cg
@@ -378,8 +392,10 @@ impl GitMetadataGraph {
             seen_sets[root_idx.index()] = Some(SeenTreeBlobSet::new());
         }
 
-        let mut tree_worklist: Vec<(TreeBlobNodeIdx, SmallVec<[Symbol; 2]>)> =
-            Vec::with_capacity(32 * 1024);
+        type Symbols = SmallVec<[Symbol; 6]>;
+        type TreeWorklistItem = (Symbols, TreeBlobNodeIdx);
+        let mut tree_worklist: Vec<TreeWorklistItem> = Vec::with_capacity(32 * 1024);
+        let mut tree_buf = Vec::with_capacity(64 * 1024);
 
         // various counters for statistics
         let mut max_frontier_size = 0; // max value of size of `worklist`
@@ -397,8 +413,6 @@ impl GitMetadataGraph {
                 continue;
             }
 
-            // info!("{commit_index}: {out_degree:?} {:?}", worklist.iter().map(|e| e.0).max());
-
             let mut seen = seen_sets[commit_index]
                 .take()
                 .expect("should have a seen set");
@@ -411,50 +425,73 @@ impl GitMetadataGraph {
 
             // Update `seen` with the tree and blob IDs reachable from this commit
             let commit_md = self.get_commit_metadata(commit_idx);
-            // FIXME: improve this type to avoid a runtime check here
-            match commit_md.tree_idx {
-                None => {
-                    warn!(
-                        "commit metadata missing for {}; blob metadata may be incomplete or wrong",
-                        commit_md.oid
-                    );
-                    // NOTE: if we reach this point, we still need to enumerate child nodes, even
-                    // though we can't traverse the commit's tree.
-                    // Otherwise, we spuriously fail later, incorrectly reporting a cycle detected.
+            if let Some(tree_idx) = commit_md.tree_idx {
+                assert!(tree_worklist.is_empty());
+                if !seen.contains(tree_idx)? {
+                    tree_worklist.push((SmallVec::new(), tree_idx));
                 }
-                Some(tree_idx) => {
-                    assert!(tree_worklist.is_empty());
-                    if !seen.contains(tree_idx)? {
-                        tree_worklist.push((tree_idx, SmallVec::new()));
-                    }
+            } else {
+                warn!(
+                    "commit metadata missing for {}; blob metadata may be incomplete or wrong",
+                    commit_md.oid
+                );
+                // NOTE: if we reach this point, we still need to enumerate child nodes, even
+                // though we can't traverse the commit's tree.
+                // Otherwise, we spuriously fail later, incorrectly reporting a cycle detected.
+            }
 
-                    //while let Some((name_path, idx)) = tree_worklist.pop() {
-                    while let Some((idx, name_path)) = tree_worklist.pop() {
-                        let metadata = self.get_tree_blob_metadata(idx);
-                        match metadata.kind {
-                            TreeBlobKind::Tree => num_trees_introduced += 1,
-                            TreeBlobKind::Blob => {
-                                num_blobs_introduced += 1;
+            while let Some((name_path, idx)) = tree_worklist.pop() {
+                // convert idx to object id; lookup object header from repo
+                let (oid, kind) = unwrap_some_or_continue!(
+                    object_index.get_oid_and_md(idx),
+                    || error!("Failed to find object id for tree index {idx:?}"),
+                );
 
-                                let name_path: Vec<u8> =
-                                    bstr::join("/", name_path.iter().map(|s| symbols.resolve(*s)));
-                                blobs_introduced[commit_index]
-                                    .push((metadata.oid, BString::from(name_path)));
-                                // info!("{}: {}: {name_path:?}", commit_md.oid, metadata.oid);
+                match kind {
+                    Kind::Tree => {
+                        num_trees_introduced += 1;
+
+                        // read the tree object from the repo,
+                        // enumerate its child entries, and extend the worklist with the unseen children
+                        let tree_iter = unwrap_ok_or_continue!(
+                            repo.objects.find_tree_iter(oid, &mut tree_buf),
+                            |e| error!("Failed to find tree {oid}: {e}"),
+                        );
+                        for entry in tree_iter {
+                            let entry = unwrap_ok_or_continue!(entry, |e| {
+                                error!("Failed to read tree entry from {oid}: {e}")
+                            });
+                            // skip non-tree / non-blob tree entries
+                            match entry.mode.kind() {
+                                EntryKind::Tree | EntryKind::Blob | EntryKind::BlobExecutable => {}
+                                EntryKind::Link | EntryKind::Commit => continue,
                             }
-                        }
-
-                        for edge in tbg.edges_directed(idx, Outgoing) {
-                            let child_idx = edge.target();
+                            let child_idx = unwrap_some_or_continue!(
+                                object_index.get_index(&entry.oid),
+                                || error!("Failed to find index for {}: {entry:?}", entry.oid),
+                            );
                             if !seen.insert(child_idx)? {
                                 continue;
                             }
 
+                            let fname = symbols.get_or_intern(entry.filename);
+
                             let mut child_name_path = name_path.clone();
-                            child_name_path.push(*edge.weight());
-                            tree_worklist.push((child_idx, child_name_path));
+                            child_name_path.push(fname);
+                            tree_worklist.push((child_name_path, child_idx));
                         }
                     }
+
+                    Kind::Blob => {
+                        num_blobs_introduced += 1;
+
+                        let name_path =
+                            bstr::join("/", name_path.iter().map(|s| symbols.resolve(*s)));
+                        blobs_introduced[commit_index].push((*oid, BString::from(name_path)));
+                        // info!("{}: {}: {name_path:?}", commit_md.oid, metadata.oid);
+                    }
+
+                    Kind::Tag | Kind::Commit => {}
                 }
             }
 
@@ -463,9 +500,7 @@ impl GitMetadataGraph {
             while let Some(edge) = edges.next() {
                 let edge_index = edge.id().index();
                 if visited_edges.put(edge_index) {
-                    error!(
-                        "Edge {edge_index} already visited -- this was supposed to be impossible!"
-                    );
+                    error!("Edge {edge_index} already visited -- supposed to be impossible!");
                     continue;
                 }
                 let child_idx = edge.target();
@@ -521,14 +556,15 @@ impl GitMetadataGraph {
         );
 
         // Massage intermediate accumulated results into output format
-        let commit_metadata = cg
+        let commit_metadata: Vec<CommitBlobMetadata> = cg
             .node_weights()
             .zip(blobs_introduced)
-            .map(|(md, intro)| RepoMetadata {
+            .map(|(md, introduced_blobs)| CommitBlobMetadata {
                 commit_oid: md.oid,
-                introduced_blobs: intro,
+                introduced_blobs,
             })
             .collect();
+
         Ok(commit_metadata)
     }
 }

@@ -38,10 +38,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - Bitbucket App Password ([#219](https://github.com/praetorian-inc/noseyparker/pull/219) from @gemesa)
 
+- The default number of parallel scanning jobs, which is determined in part by system RAM capacity, has been increased slightly in response to several improvements in memory use during scanning.
+
 ### Fixes
 
 - The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.
+
 - The `AWS Secret Access Key` rule has been revised to avoid runtime `Regex failed to match` errors.
+
+- The code that determines first-commit provenance information for blobs from Git repositories has been reworked to improve memory use.
+  In typical cases of scanning Git repositories, this reduces both peak memory use and CPU use by 20-50%.
+  In certain pathological cases, such as [Homebrew](https://github.com/homebrew/homebrew-core) or [nixpkgs](https://github.com/NixOS/nixpkgs), the new implementation uses 10-20x less peak memory and 3-6x less CPU.
 
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)

@@ -1,5 +1,5 @@
 use bstr::{BStr, BString};
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::HashMap;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Symbol<T> {
@@ -49,7 +49,10 @@ pub struct BStringTable<S = Symbol<u32>> {
 
 impl<S: SymbolType> BStringTable<S> {
     pub fn new() -> Self {
-        Self::with_capacity(32 * 1024, 1024 * 1024)
+        Self {
+            storage: Default::default(),
+            mapping: Default::default(),
+        }
     }
 
     pub fn with_capacity(num_symbols: usize, total_bytes: usize) -> Self {
@@ -60,15 +63,17 @@ impl<S: SymbolType> BStringTable<S> {
     }
 
     #[inline]
-    pub fn get_or_intern(&mut self, s: BString) -> S {
-        match self.mapping.entry(s) {
-            Entry::Occupied(e) => *e.get(),
-            Entry::Vacant(e) => {
-                let s = e.key();
+    pub fn get_or_intern(&mut self, s: &BStr) -> S {
+        match self.mapping.get(s) {
+            Some(s) => *s,
+            None => {
+                let s = s.to_owned();
                 let i = self.storage.len();
                 let j = i + s.len();
                 self.storage.extend(s.as_slice());
-                *e.insert(S::from_range(i..j))
+                let k = S::from_range(i..j);
+                self.mapping.insert(s, k);
+                k
             }
         }
     }
@@ -91,12 +96,12 @@ mod tests {
         let s1 = BStr::new("Hello");
         let s2 = BStr::new("World");
 
-        let sym1 = t.get_or_intern(s1.to_owned());
-        let sym1a = t.get_or_intern(s1.to_owned());
+        let sym1 = t.get_or_intern(s1);
+        let sym1a = t.get_or_intern(s1);
         assert_eq!(sym1, sym1a);
 
-        let sym2 = t.get_or_intern(s2.to_owned());
-        let sym2a = t.get_or_intern(s2.to_owned());
+        let sym2 = t.get_or_intern(s2);
+        let sym2a = t.get_or_intern(s2);
         assert_eq!(sym2, sym2a);
 
         assert_ne!(sym1, sym2);
@@ -104,7 +109,7 @@ mod tests {
         assert_eq!(s1, t.resolve(sym1));
         assert_eq!(s2, t.resolve(sym2));
 
-        let sym1b = t.get_or_intern(s1.to_owned());
+        let sym1b = t.get_or_intern(s1);
         assert_eq!(sym1, sym1b);
     }
 }

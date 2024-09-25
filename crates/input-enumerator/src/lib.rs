@@ -11,6 +11,40 @@ use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
 use tracing::{debug, error, warn};
 
+// -------------------------------------------------------------------------------------------------
+// helper macros
+// -------------------------------------------------------------------------------------------------
+macro_rules! unwrap_some_or_continue {
+    ($arg:expr, $on_error:expr $(,)?) => {
+        match $arg {
+            Some(v) => v,
+            None => {
+                #[allow(clippy::redundant_closure_call)]
+                $on_error();
+                continue;
+            }
+        }
+    };
+}
+
+pub(crate) use unwrap_some_or_continue;
+
+macro_rules! unwrap_ok_or_continue {
+    ($arg:expr, $on_error:expr $(,)?) => {
+        match $arg {
+            Ok(v) => v,
+            Err(e) => {
+                #[allow(clippy::redundant_closure_call)]
+                $on_error(e);
+                continue;
+            }
+        }
+    };
+}
+
+pub(crate) use unwrap_ok_or_continue;
+
+// -------------------------------------------------------------------------------------------------
 mod git_repo_enumerator;
 pub use git_repo_enumerator::{GitRepoEnumerator, GitRepoResult, GitRepoWithMetadataEnumerator};
 
