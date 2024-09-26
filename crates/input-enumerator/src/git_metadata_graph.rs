@@ -14,14 +14,14 @@ use std::collections::BinaryHeap;
 use std::time::Instant;
 use tracing::{debug, error, error_span, warn};
 
-use crate::bstring_table::BStringTable;
+use crate::bstring_table::{BStringTable, SymbolType};
 use crate::{unwrap_ok_or_continue, unwrap_some_or_continue};
 
 type Symbol = crate::bstring_table::Symbol<u32>;
 
 /// A newtype for commit graph indexes, to prevent mixing up indexes from different types of graphs
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Default, Debug)]
-pub struct CommitGraphIdx(NodeIndex);
+pub(crate) struct CommitGraphIdx(NodeIndex);
 
 /// Boilerplate instance for the index newtype
 unsafe impl IndexType for CommitGraphIdx {
@@ -42,179 +42,223 @@ unsafe impl IndexType for CommitGraphIdx {
 type CommitNodeIdx = NodeIndex<CommitGraphIdx>;
 type CommitEdgeIdx = EdgeIndex<CommitGraphIdx>;
 
-/// A newtype for tree and blob graph indexes, to prevent mixing up indexes from different types of graphs
+/// A newtype wrapper for a u32, to map to gix::ObjectId to use as an index in other array-based
+/// data structures.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Default, Debug)]
-pub struct TreeBlobGraphIdx(NodeIndex);
+pub(crate) struct ObjectIdx(u32);
 
-/// Boilerplate instance for the index newtype
-unsafe impl IndexType for TreeBlobGraphIdx {
-    #[inline(always)]
-    fn new(x: usize) -> Self {
-        Self(NodeIndex::new(x))
+impl ObjectIdx {
+    pub(crate) fn new(x: usize) -> Self {
+        Self(x.try_into().unwrap())
     }
-    #[inline(always)]
-    fn index(&self) -> usize {
-        self.0.index()
-    }
-    #[inline(always)]
-    fn max() -> Self {
-        Self(<NodeIndex as IndexType>::max())
+
+    pub(crate) fn as_usize(&self) -> usize {
+        self.0 as usize
     }
 }
-
-pub type TreeBlobNodeIdx = NodeIndex<TreeBlobGraphIdx>;
-pub type TreeBlobEdgeIdx = EdgeIndex<TreeBlobGraphIdx>;
 
 #[derive(Clone, Copy)]
-pub struct CommitMetadata {
-    pub oid: ObjectId,
-    pub tree_idx: Option<TreeBlobNodeIdx>,
+pub(crate) struct CommitMetadata {
+    pub(crate) oid: ObjectId,
+    pub(crate) tree_idx: Option<ObjectIdx>,
 }
 
-#[derive(Clone, Debug)]
-struct SeenTreeBlobSet(RoaringBitmap);
-
-impl SeenTreeBlobSet {
-    #[inline]
-    pub fn new() -> Self {
-        SeenTreeBlobSet(RoaringBitmap::new())
-    }
-
-    #[inline]
-    pub fn contains(&self, idx: TreeBlobNodeIdx) -> Result<bool> {
-        let idx = idx
-            .index()
-            .try_into()
-            .context("index should be representable with a u32")?;
-        Ok(self.0.contains(idx))
-    }
-
-    #[inline]
-    pub fn insert(&mut self, idx: TreeBlobNodeIdx) -> Result<bool> {
-        let idx = idx
-            .index()
-            .try_into()
-            .context("index should be representable with a u32")?;
-        Ok(self.0.insert(idx))
-    }
-
-    #[inline]
-    pub fn union_update(&mut self, other: &Self) {
-        self.0 |= &other.0;
-    }
+/// A compact set of git objects, denoted via `ObjectIdx`
+#[derive(Clone, Debug, Default)]
+struct SeenObjectSet {
+    seen_trees: RoaringBitmap,
+    seen_blobs: RoaringBitmap,
 }
 
-impl Default for SeenTreeBlobSet {
-    #[inline]
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-#[derive(Default)]
-pub struct ObjectIndex {
-    /// maps oid to index in `idx_to_oid_and_md`
-    pub oid_to_idx: HashMap<ObjectId, usize>,
-
-    /// maps index to oid and object kind; each oid has an associated entry in `oid_to_idx`
-    pub idx_to_oid_and_md: Vec<(ObjectId, Kind)>,
-
-    /// number of commit objects
-    pub num_commits: usize,
-    /// number of blob objects
-    pub num_blobs: usize,
-    /// number of objects of all types
-    pub num_objects: usize,
-}
-
-impl ObjectIndex {
-    pub fn new(odb: &OdbHandle) -> Result<Self> {
-        use gix::odb::store::iter::Ordering;
-        use gix::prelude::*;
-
-        // first get object count to allow for exact index allocation size
-        let mut num_objects = odb
-            .iter()
-            .context("Failed to iterate object database")?
-            .with_ordering(Ordering::PackLexicographicalThenLooseLexicographical)
-            .count();
-
-        let mut index = ObjectIndex::with_capacity(num_objects);
-
-        num_objects = 0;
-        // Now count object types and build in-memory index.
-        for oid in odb
-            .iter()
-            .context("Failed to iterate object database")?
-            // .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
-            .with_ordering(Ordering::PackLexicographicalThenLooseLexicographical)
-        {
-            num_objects += 1;
-            let oid = unwrap_ok_or_continue!(oid, |e| { error!("Failed to read object id: {e}") });
-            let hdr = unwrap_ok_or_continue!(odb.header(oid), |e| {
-                error!("Failed to read object header for {oid}: {e}")
-            });
-            index.record(oid, hdr.kind());
+impl SeenObjectSet {
+    pub(crate) fn new() -> Self {
+        SeenObjectSet {
+            seen_trees: RoaringBitmap::new(),
+            seen_blobs: RoaringBitmap::new(),
         }
-
-        Ok(index)
     }
 
-    pub fn with_capacity(capacity: usize) -> Self {
+    /// Returns whether the value was absent from the set
+    fn insert(set: &mut RoaringBitmap, idx: ObjectIdx) -> Result<bool> {
+        let idx = idx
+            .as_usize()
+            .try_into()
+            .context("index should be representable with a u32")?;
+        Ok(set.insert(idx))
+    }
+
+    /// Returns whether the value was absent from the set
+    pub(crate) fn insert_tree(&mut self, idx: ObjectIdx) -> Result<bool> {
+        Self::insert(&mut self.seen_trees, idx)
+    }
+
+    /// Returns whether the value was absent from the set
+    pub(crate) fn insert_blob(&mut self, idx: ObjectIdx) -> Result<bool> {
+        Self::insert(&mut self.seen_blobs, idx)
+    }
+
+    pub(crate) fn union_update(&mut self, other: &Self) {
+        self.seen_blobs |= &other.seen_blobs;
+        self.seen_trees |= &other.seen_trees;
+    }
+}
+
+struct ObjectIdBimap {
+    oid_to_idx: HashMap<ObjectId, ObjectIdx>,
+    idx_to_oid: Vec<ObjectId>,
+}
+
+impl ObjectIdBimap {
+    fn with_capacity(capacity: usize) -> Self {
         Self {
             oid_to_idx: HashMap::with_capacity_and_hasher(capacity, Default::default()),
-            idx_to_oid_and_md: Vec::with_capacity(capacity),
-            num_commits: 0,
-            num_blobs: 0,
-            num_objects: 0,
+            idx_to_oid: Vec::with_capacity(capacity),
         }
     }
 
-    pub fn record(&mut self, oid: ObjectId, kind: Kind) {
-        assert_eq!(self.idx_to_oid_and_md.len(), self.oid_to_idx.len());
+    fn insert(&mut self, oid: ObjectId) {
         match self.oid_to_idx.entry(oid) {
             gix::hashtable::hash_map::Entry::Occupied(e) => {
                 warn!("object {} seen multiple times", e.key());
             }
             gix::hashtable::hash_map::Entry::Vacant(e) => {
-                let idx = self.idx_to_oid_and_md.len();
-                self.idx_to_oid_and_md.push((*e.key(), kind));
+                let idx = ObjectIdx::new(self.idx_to_oid.len());
+                self.idx_to_oid.push(*e.key());
                 e.insert(idx);
-
-                self.num_objects += 1;
-
-                match kind {
-                    Kind::Commit => self.num_commits += 1,
-                    Kind::Blob => self.num_blobs += 1,
-                    _ => {}
-                }
             }
         }
-        assert_eq!(self.idx_to_oid_and_md.len(), self.oid_to_idx.len());
     }
 
-    pub fn len(&self) -> usize {
-        self.idx_to_oid_and_md.len()
+    fn get_oid(&self, idx: ObjectIdx) -> Option<&gix::oid> {
+        self.idx_to_oid.get(idx.as_usize()).map(|v| v.as_ref())
     }
 
-    pub fn num_commits(&self) -> usize {
-        self.num_commits
+    fn get_idx(&self, oid: &gix::oid) -> Option<ObjectIdx> {
+        self.oid_to_idx.get(oid).copied()
     }
 
-    pub fn num_blobs(&self) -> usize {
-        self.num_blobs
+    fn len(&self) -> usize {
+        self.idx_to_oid.len()
+    }
+}
+
+// Some types and data structures for recursively enumerating tree objects
+type Symbols = SmallVec<[Symbol; 6]>;
+type TreeWorklistItem = (Symbols, ObjectId);
+type TreeWorklist = Vec<TreeWorklistItem>;
+
+/// An in-memory index that organizes various objects within a Git repository.
+///
+/// - It associates a u32-based ID with each object
+/// - It partitions object IDs according to object type (commit, blob, tree, tag)
+pub(crate) struct RepositoryIndex {
+    trees: ObjectIdBimap,
+    commits: ObjectIdBimap,
+    blobs: ObjectIdBimap,
+    tags: ObjectIdBimap,
+}
+
+impl RepositoryIndex {
+    pub(crate) fn new(odb: &OdbHandle) -> Result<Self> {
+        use gix::odb::store::iter::Ordering;
+        use gix::prelude::*;
+
+        // Get object count to allow for exact index allocation size
+        // Use fastest gix ordering mode
+        let mut num_tags = 0;
+        let mut num_trees = 0;
+        let mut num_blobs = 0;
+        let mut num_commits = 0;
+
+        for oid in odb
+            .iter()
+            .context("Failed to iterate object database")?
+            .with_ordering(Ordering::PackLexicographicalThenLooseLexicographical)
+        {
+            let oid = unwrap_ok_or_continue!(oid, |e| { error!("Failed to read object id: {e}") });
+            let hdr = unwrap_ok_or_continue!(odb.header(oid), |e| {
+                error!("Failed to read object header for {oid}: {e}")
+            });
+            match hdr.kind() {
+                Kind::Tree => num_trees += 1,
+                Kind::Blob => num_blobs += 1,
+                Kind::Commit => num_commits += 1,
+                Kind::Tag => num_tags += 1,
+            }
+        }
+
+        // Allocate indexes exactly to the size needed
+        let mut trees = ObjectIdBimap::with_capacity(num_trees);
+        let mut commits = ObjectIdBimap::with_capacity(num_commits);
+        let mut blobs = ObjectIdBimap::with_capacity(num_blobs);
+        let mut tags = ObjectIdBimap::with_capacity(num_tags);
+
+        // Now build in-memory index
+        // Use slower gix ordering mode, but one that puts objects in a possibly more efficient
+        // order for reading
+        for oid in odb
+            .iter()
+            .context("Failed to iterate object database")?
+            .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
+        {
+            let oid = unwrap_ok_or_continue!(oid, |e| { error!("Failed to read object id: {e}") });
+            let hdr = unwrap_ok_or_continue!(odb.header(oid), |e| {
+                error!("Failed to read object header for {oid}: {e}")
+            });
+            match hdr.kind() {
+                Kind::Tree => trees.insert(oid),
+                Kind::Blob => blobs.insert(oid),
+                Kind::Commit => commits.insert(oid),
+                Kind::Tag => tags.insert(oid),
+            }
+        }
+
+        Ok(Self {
+            trees,
+            commits,
+            blobs,
+            tags,
+        })
     }
 
-    pub fn num_objects(&self) -> usize {
-        self.num_objects
+    pub(crate) fn num_commits(&self) -> usize {
+        self.commits.len()
     }
 
-    pub fn get_index(&self, oid: &gix::oid) -> Option<TreeBlobNodeIdx> {
-        self.oid_to_idx.get(oid).map(|v| TreeBlobNodeIdx::new(*v))
+    pub(crate) fn num_blobs(&self) -> usize {
+        self.blobs.len()
     }
 
-    fn get_oid_and_md(&self, index: TreeBlobNodeIdx) -> Option<&(ObjectId, Kind)> {
-        self.idx_to_oid_and_md.get(index.index())
+    pub(crate) fn num_trees(&self) -> usize {
+        self.trees.len()
+    }
+
+    pub(crate) fn num_tags(&self) -> usize {
+        self.tags.len()
+    }
+
+    pub(crate) fn num_objects(&self) -> usize {
+        self.num_commits() + self.num_blobs() + self.num_tags() + self.num_trees()
+    }
+
+    pub(crate) fn get_tree_oid(&self, idx: ObjectIdx) -> Option<&gix::oid> {
+        self.trees.get_oid(idx)
+    }
+
+    pub(crate) fn get_tree_index(&self, oid: &gix::oid) -> Option<ObjectIdx> {
+        self.trees.get_idx(oid)
+    }
+
+    pub(crate) fn get_blob_index(&self, oid: &gix::oid) -> Option<ObjectIdx> {
+        self.blobs.get_idx(oid)
+    }
+
+    pub(crate) fn into_blobs(self) -> Vec<ObjectId> {
+        self.blobs.idx_to_oid
+    }
+
+    pub(crate) fn commits(&self) -> &[ObjectId] {
+        self.commits.idx_to_oid.as_slice()
     }
 }
 
@@ -227,14 +271,14 @@ impl ObjectIndex {
 /// This is also an in-memory graph of the trees and blobs in Git.
 /// Each tree object is a node that has an outgoing edge to each of its immediate children, labeled
 /// with the name of that child.
-pub struct GitMetadataGraph {
+pub(crate) struct GitMetadataGraph {
     commit_oid_to_node_idx: HashMap<ObjectId, CommitNodeIdx>,
     commits: DiGraph<CommitMetadata, (), CommitGraphIdx>,
 }
 
 impl GitMetadataGraph {
     /// Create a new commit graph with the given capacity.
-    pub fn with_capacity(num_commits: usize) -> Self {
+    pub(crate) fn with_capacity(num_commits: usize) -> Self {
         // use 2x the number of commits, assuming that most commits have a single parent commit,
         // except merges, which usually have 2
         let commit_edges_capacity = num_commits * 2;
@@ -252,7 +296,7 @@ impl GitMetadataGraph {
     ///
     /// Panics if the given graph node index is not valid for this graph.
     #[inline]
-    pub fn get_commit_metadata(&self, idx: CommitNodeIdx) -> &CommitMetadata {
+    pub(crate) fn get_commit_metadata(&self, idx: CommitNodeIdx) -> &CommitMetadata {
         self.commits
             .node_weight(idx)
             .expect("commit graph node index should be valid")
@@ -262,10 +306,10 @@ impl GitMetadataGraph {
     ///
     /// If a node already exists for the given commit and `tree_idx` is given, the node's metadata
     /// is updated with the given value.
-    pub fn get_commit_idx(
+    pub(crate) fn get_commit_idx(
         &mut self,
         oid: ObjectId,
-        tree_idx: Option<TreeBlobNodeIdx>,
+        tree_idx: Option<ObjectIdx>,
     ) -> CommitNodeIdx {
         match self.commit_oid_to_node_idx.entry(oid) {
             hash_map::Entry::Occupied(e) => {
@@ -288,7 +332,7 @@ impl GitMetadataGraph {
     /// Add a new edge between two commits, returning its index.
     ///
     /// NOTE: If an edge already exists between the two commits, a parallel edge is added.
-    pub fn add_commit_edge(
+    pub(crate) fn add_commit_edge(
         &mut self,
         parent_idx: CommitNodeIdx,
         child_idx: CommitNodeIdx,
@@ -297,57 +341,56 @@ impl GitMetadataGraph {
         // `self.commits.update_edge(parent_idx, child_idx, ())`.
         self.commits.add_edge(parent_idx, child_idx, ())
     }
-
-    pub fn num_commits(&self) -> usize {
-        self.commits.node_count()
-    }
 }
 
-pub type IntroducedBlobs = SmallVec<[(ObjectId, BString); 4]>;
+pub(crate) type IntroducedBlobs = SmallVec<[(ObjectId, BString); 4]>;
 
-pub struct CommitBlobMetadata {
+pub(crate) struct CommitBlobMetadata {
     /// index of the commit this entry applies to
-    pub commit_oid: ObjectId,
+    pub(crate) commit_oid: ObjectId,
 
     /// set of introduced blobs and path names
-    pub introduced_blobs: IntroducedBlobs,
+    pub(crate) introduced_blobs: IntroducedBlobs,
 }
 
 impl GitMetadataGraph {
-    pub fn get_repo_metadata(
-        &mut self,
-        object_index: &ObjectIndex,
+    pub(crate) fn get_repo_metadata(
+        self,
+        repo_index: &RepositoryIndex,
         repo: &gix::Repository,
     ) -> Result<Vec<CommitBlobMetadata>> {
-        let _span = error_span!("enumerate", path = repo.path().display().to_string()).entered();
+        let _span =
+            error_span!("get_repo_metadata", path = repo.path().display().to_string()).entered();
 
         let t1 = Instant::now();
         let cg = &self.commits;
-        // let tbg = &self.trees_and_blobs;
         let num_commits = cg.node_count();
-
-        // The set of seen trees and blobs. This has an entry for _each_ commit, though at runtime,
-        // not all of these seen sets will be "live".
-        //
-        // FIXME: merge this data structure with the `worklist` priority queue; See https://docs.rs/priority-queue; this allows O(1) updates of items in the queue
-        let mut seen_sets: Vec<Option<SeenTreeBlobSet>> = vec![None; num_commits];
-
-        // A mapping of graph index of a commit to the set of blobs introduced by that commit
-        let mut blobs_introduced: Vec<IntroducedBlobs> = vec![IntroducedBlobs::new(); num_commits];
 
         // An adapatation of Kahn's topological sorting algorithm, to visit the commit nodes in
         // topological order: <https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm>
         // This algorithm naturally mantains a frontier of still-to-expand nodes.
         //
-        // We attach to each node in the frontier a set of seen blobs and seen trees in the traversal
-        // up to that point.
+        // We attach to each node in the frontier a set of seen blobs and seen trees in the
+        // traversal up to that point.
+
+        // A mapping of graph index of a commit to the set of seen trees and blobs.
+        //
+        // There is one such set for _each_ commit, though at runtime, not all of these seen sets
+        // will be "live" (those will have `None` values).
+        //
+        // XXX: this could be merged with the `commit_worklist` priority queue with a suitable data
+        // structure (one allowing O(1) updates of items in the queue)
+        let mut seen_sets: Vec<Option<SeenObjectSet>> = vec![None; num_commits];
+
+        // A mapping of graph index of a commit to the set of blobs introduced by that commit
+        let mut blobs_introduced: Vec<IntroducedBlobs> = vec![IntroducedBlobs::new(); num_commits];
 
         // NOTE: petgraph comes with a pre-built data type for keeping track of visited nodes,
         // but has no such thing for keeping track of visited edges, so we make our own.
-        let mut visited_edges = FixedBitSet::with_capacity(cg.edge_count());
+        let mut visited_commit_edges = FixedBitSet::with_capacity(cg.edge_count());
 
-        // Keep track of which commit nodes we have seen: needed to avoid re-visiting nodes in the rare
-        // present of parallel (i.e., multiple) edges between two commits.
+        // Keep track of which commit nodes we have seen: needed to avoid re-visiting nodes in the
+        // rare present of parallel (i.e., multiple) edges between two commits.
         let mut visited_commits = cg.visit_map();
 
         // We use an ordered queue for the worklist instead of a deque or simple vector.
@@ -379,8 +422,10 @@ impl GitMetadataGraph {
         // reducing peak memory use
         let mut symbols = BStringTable::with_capacity(32 * 1024, 1024 * 1024);
 
-        // A queue of commit graph node indexes, ordered by minimum out-degree
-        let mut worklist = BinaryHeap::<(OutDegree, CommitNodeIdx)>::with_capacity(num_commits);
+        // A queue of commit graph node indexes, ordered by minimum out-degree.
+        // Invariant: each entry commit has no unprocessed parent commits
+        let mut commit_worklist =
+            BinaryHeap::<(OutDegree, CommitNodeIdx)>::with_capacity(num_commits);
 
         // Initialize with commit nodes that have no parents
         for root_idx in cg
@@ -388,30 +433,35 @@ impl GitMetadataGraph {
             .filter(|idx| cg.neighbors_directed(*idx, Incoming).count() == 0)
         {
             let out_degree = commit_out_degree(root_idx)?;
-            worklist.push((out_degree, root_idx));
-            seen_sets[root_idx.index()] = Some(SeenTreeBlobSet::new());
+            commit_worklist.push((out_degree, root_idx));
+            seen_sets[root_idx.index()] = Some(SeenObjectSet::new());
         }
 
-        type Symbols = SmallVec<[Symbol; 6]>;
-        type TreeWorklistItem = (Symbols, TreeBlobNodeIdx);
-        let mut tree_worklist: Vec<TreeWorklistItem> = Vec::with_capacity(32 * 1024);
-        let mut tree_buf = Vec::with_capacity(64 * 1024);
+        // A worklist of tree objects (and no other type) to be traversed
+        const INITIAL_TREE_WORKLIST_CAPACITY: usize = 32 * 1024;
+        let mut tree_worklist = TreeWorklist::with_capacity(INITIAL_TREE_WORKLIST_CAPACITY);
+        let mut warned_tree_worklist = false;
+        const INITAL_TREE_BUF_CAPACITY: usize = 1024 * 1024;
+        let mut tree_buf = Vec::with_capacity(INITAL_TREE_BUF_CAPACITY);
+        let mut warned_tree_buf = false;
 
         // various counters for statistics
-        let mut max_frontier_size = 0; // max value of size of `worklist`
+        let mut max_frontier_size = 0; // max value of size of `commit_worklist`
         let mut num_blobs_introduced = 0; // total number of blobs introduced in commits
         let mut num_trees_introduced = 0; // total number of trees introduced in commits
         let mut num_commits_visited = 0; // total number of commits visited
 
-        let mut num_live_seen_sets = worklist.len();
-        let mut max_live_seen_sets = 0; // max value of `num_live_seen_sets`
+        let mut num_live_seen_sets = commit_worklist.len(); // current number of live seen sets
+        let mut max_live_seen_sets = num_live_seen_sets; // max value of `num_live_seen_sets`
 
-        while let Some((_out_degree, commit_idx)) = worklist.pop() {
+        while let Some((_out_degree, commit_idx)) = commit_worklist.pop() {
             let commit_index = commit_idx.index();
             if visited_commits.put(commit_index) {
                 warn!("found duplicate commit node {commit_index}");
                 continue;
             }
+
+            let mut introduced = &mut blobs_introduced[commit_index];
 
             let mut seen = seen_sets[commit_index]
                 .take()
@@ -419,127 +469,97 @@ impl GitMetadataGraph {
             assert!(num_live_seen_sets > 0);
             num_live_seen_sets -= 1;
 
+            // Update stats
             num_commits_visited += 1;
-            max_frontier_size = max_frontier_size.max(worklist.len() + 1);
+            max_frontier_size = max_frontier_size.max(commit_worklist.len() + 1);
             max_live_seen_sets = max_live_seen_sets.max(num_live_seen_sets);
 
             // Update `seen` with the tree and blob IDs reachable from this commit
             let commit_md = self.get_commit_metadata(commit_idx);
             if let Some(tree_idx) = commit_md.tree_idx {
                 assert!(tree_worklist.is_empty());
-                if !seen.contains(tree_idx)? {
-                    tree_worklist.push((SmallVec::new(), tree_idx));
+                if seen.insert_tree(tree_idx)? {
+                    tree_worklist.push((
+                        SmallVec::new(),
+                        repo_index.get_tree_oid(tree_idx).unwrap().to_owned(),
+                    ));
+
+                    visit_tree(
+                        repo,
+                        &mut symbols,
+                        &repo_index,
+                        &mut num_trees_introduced,
+                        &mut num_blobs_introduced,
+                        &mut seen,
+                        &mut introduced,
+                        &mut tree_buf,
+                        &mut tree_worklist,
+                    )?;
+
+                    if !warned_tree_buf && tree_buf.capacity() != INITAL_TREE_BUF_CAPACITY {
+                        warn!("tree buf capacity had to be resized to {}", tree_buf.capacity());
+                        warned_tree_buf = true;
+                    }
+                    if !warned_tree_worklist
+                        && tree_worklist.capacity() != INITIAL_TREE_WORKLIST_CAPACITY
+                    {
+                        warn!(
+                            "tree worklist capacity had to be resized to {}",
+                            tree_worklist.capacity()
+                        );
+                        warned_tree_worklist = true;
+                    }
                 }
             } else {
                 warn!(
-                    "commit metadata missing for {}; blob metadata may be incomplete or wrong",
+                    "Failed to find commit metadata for {}; blob metadata may be incomplete or wrong",
                     commit_md.oid
                 );
-                // NOTE: if we reach this point, we still need to enumerate child nodes, even
-                // though we can't traverse the commit's tree.
+                // NOTE: if we reach this point, we still need to process the child commits, even
+                // though we can't traverse this commit's tree.
                 // Otherwise, we spuriously fail later, incorrectly reporting a cycle detected.
             }
 
-            while let Some((name_path, idx)) = tree_worklist.pop() {
-                // convert idx to object id; lookup object header from repo
-                let (oid, kind) = unwrap_some_or_continue!(
-                    object_index.get_oid_and_md(idx),
-                    || error!("Failed to find object id for tree index {idx:?}"),
-                );
-
-                match kind {
-                    Kind::Tree => {
-                        num_trees_introduced += 1;
-
-                        // read the tree object from the repo,
-                        // enumerate its child entries, and extend the worklist with the unseen children
-                        let tree_iter = unwrap_ok_or_continue!(
-                            repo.objects.find_tree_iter(oid, &mut tree_buf),
-                            |e| error!("Failed to find tree {oid}: {e}"),
-                        );
-                        for entry in tree_iter {
-                            let entry = unwrap_ok_or_continue!(entry, |e| {
-                                error!("Failed to read tree entry from {oid}: {e}")
-                            });
-                            // skip non-tree / non-blob tree entries
-                            match entry.mode.kind() {
-                                EntryKind::Tree | EntryKind::Blob | EntryKind::BlobExecutable => {}
-                                EntryKind::Link | EntryKind::Commit => continue,
-                            }
-                            let child_idx = unwrap_some_or_continue!(
-                                object_index.get_index(&entry.oid),
-                                || error!("Failed to find index for {}: {entry:?}", entry.oid),
-                            );
-                            if !seen.insert(child_idx)? {
-                                continue;
-                            }
-
-                            let fname = symbols.get_or_intern(entry.filename);
-
-                            let mut child_name_path = name_path.clone();
-                            child_name_path.push(fname);
-                            tree_worklist.push((child_name_path, child_idx));
-                        }
-                    }
-
-                    Kind::Blob => {
-                        num_blobs_introduced += 1;
-
-                        let name_path =
-                            bstr::join("/", name_path.iter().map(|s| symbols.resolve(*s)));
-                        blobs_introduced[commit_index].push((*oid, BString::from(name_path)));
-                        // info!("{}: {}: {name_path:?}", commit_md.oid, metadata.oid);
-                    }
-
-                    Kind::Tag | Kind::Commit => {}
-                }
-            }
-
             // Propagate this commit's seen set into each of its immediate child commit's seen set.
+            // Handle the last child commit specially: it inherits this commit node's seen set,
+            // as it will no longer be needed. This optimization reduces memory traffic, especially
+            // in the common case of a single commit parent.
             let mut edges = cg.edges_directed(commit_idx, Outgoing).peekable();
             while let Some(edge) = edges.next() {
                 let edge_index = edge.id().index();
-                if visited_edges.put(edge_index) {
+                if visited_commit_edges.put(edge_index) {
                     error!("Edge {edge_index} already visited -- supposed to be impossible!");
                     continue;
                 }
+
                 let child_idx = edge.target();
-
                 let child_seen = &mut seen_sets[child_idx.index()];
-                match child_seen.as_mut() {
-                    Some(child_seen) => {
-                        // Already have a seen set allocated for this child commit. Update it.
-                        child_seen.union_update(&seen);
-                    }
-                    None => {
-                        // No seen set allocated yet for this child commit; make a new one,
-                        // recycling the current parent commit's seen set if possible. We can do
-                        // this on the last loop iteration (i.e., when we are working on the last
-                        // child commit), because at that point, the parent's seen set will no
-                        // longer be needed. This optimization reduces memory traffic, especially
-                        // in the common case of a single commit parent.
-
-                        num_live_seen_sets += 1;
-                        if edges.peek().is_none() {
-                            *child_seen = Some(std::mem::take(&mut seen));
-                        } else {
-                            *child_seen = Some(seen.clone());
-                        }
+                if let Some(child_seen) = child_seen.as_mut() {
+                    // Already have a seen set allocated for this child commit. Update it.
+                    child_seen.union_update(&seen);
+                } else {
+                    // No seen set allocated yet for this child commit.
+                    // Make one, recycling the current parent commit's seen set if possible.
+                    num_live_seen_sets += 1;
+                    if edges.peek().is_none() {
+                        *child_seen = Some(std::mem::take(&mut seen));
+                    } else {
+                        *child_seen = Some(seen.clone());
                     }
                 }
 
                 // If the child commit node has no unvisited parent commits, add it to the worklist
                 if !cg
                     .edges_directed(child_idx, Incoming)
-                    .any(|edge| !visited_edges.contains(edge.id().index()))
+                    .any(|edge| !visited_commit_edges.contains(edge.id().index()))
                 {
-                    worklist.push((commit_out_degree(child_idx)?, child_idx));
+                    commit_worklist.push((commit_out_degree(child_idx)?, child_idx));
                 }
             }
         }
 
-        if visited_edges.count_ones(..) != visited_edges.len() {
-            bail!("topological traversal of commits failed: a commit cycle!?");
+        if visited_commit_edges.count_ones(..) != visited_commit_edges.len() {
+            bail!("Topological traversal of commits failed: a commit cycle!?");
         }
 
         assert_eq!(num_commits_visited, num_commits);
@@ -567,4 +587,95 @@ impl GitMetadataGraph {
 
         Ok(commit_metadata)
     }
+}
+
+fn visit_tree(
+    repo: &gix::Repository,
+    symbols: &mut BStringTable,
+    repo_index: &RepositoryIndex,
+    num_trees_introduced: &mut usize,
+    num_blobs_introduced: &mut usize,
+    seen: &mut SeenObjectSet,
+    introduced: &mut IntroducedBlobs,
+    tree_buf: &mut Vec<u8>,
+    tree_worklist: &mut TreeWorklist,
+) -> Result<()> {
+    while let Some((name_path, tree_oid)) = tree_worklist.pop() {
+        // read the tree object from the repo,
+        // enumerate its child entries, and extend the worklist with the unseen child trees
+        let tree_iter = unwrap_ok_or_continue!(
+            repo.objects.find_tree_iter(&tree_oid, tree_buf),
+            |e| error!("Failed to find tree {tree_oid}: {e}"),
+        );
+
+        *num_trees_introduced = *num_trees_introduced + 1;
+
+        for child in tree_iter {
+            let child = unwrap_ok_or_continue!(child, |e| {
+                error!("Failed to read tree entry from {tree_oid}: {e}")
+            });
+            // skip non-tree / non-blob tree entries
+            match child.mode.kind() {
+                EntryKind::Link | EntryKind::Commit => continue,
+
+                EntryKind::Tree => {
+                    let child_idx =
+                        unwrap_some_or_continue!(repo_index.get_tree_index(child.oid), || error!(
+                            "Failed to find tree index for {} from tree {tree_oid}",
+                            child.oid
+                        ),);
+                    if !seen.insert_tree(child_idx)? {
+                        continue;
+                    }
+                    let mut child_name_path = name_path.clone();
+                    child_name_path.push(symbols.get_or_intern(child.filename));
+                    tree_worklist.push((child_name_path, child.oid.to_owned()));
+                }
+
+                EntryKind::Blob | EntryKind::BlobExecutable => {
+                    let child_idx =
+                        unwrap_some_or_continue!(repo_index.get_blob_index(child.oid), || error!(
+                            "Failed to find blob index for {} from tree {tree_oid}",
+                            child.oid
+                        ),);
+                    if !seen.insert_blob(child_idx)? {
+                        continue;
+                    }
+
+                    *num_blobs_introduced = *num_blobs_introduced + 1;
+
+                    // Compute full path to blob as a bytestring.
+                    // Instead of using `bstr::join`, manually construct the string to
+                    // avoid intermediate allocations.
+                    let name_path = {
+                        use bstr::ByteVec;
+
+                        let fname = symbols.get_or_intern(child.filename);
+
+                        let needed_len = name_path.iter().map(|s| s.len()).sum::<usize>()
+                            + child.filename.len()
+                            + name_path.len();
+                        let mut it = name_path
+                            .iter()
+                            .copied()
+                            .chain(std::iter::once(fname))
+                            .map(|s| symbols.resolve(s));
+                        let mut buf = Vec::with_capacity(needed_len);
+                        if let Some(p) = it.next() {
+                            buf.push_str(p);
+                            for p in it {
+                                buf.push_char('/');
+                                buf.push_str(p);
+                            }
+                        }
+                        debug_assert_eq!(needed_len, buf.capacity());
+                        debug_assert_eq!(needed_len, buf.len());
+                        BString::from(buf)
+                    };
+                    introduced.push((child.oid.to_owned(), name_path));
+                }
+            }
+        }
+    }
+    Ok(())
 }

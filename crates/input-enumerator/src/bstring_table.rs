@@ -10,6 +10,10 @@ pub struct Symbol<T> {
 pub trait SymbolType: Copy + PartialEq + Eq + std::hash::Hash {
     fn to_range(self) -> std::ops::Range<usize>;
     fn from_range(r: std::ops::Range<usize>) -> Self;
+
+    fn len(&self) -> usize {
+        self.to_range().len()
+    }
 }
 
 impl SymbolType for Symbol<usize> {

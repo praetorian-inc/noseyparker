@@ -2,6 +2,7 @@ use schemars::JsonSchema;
 use serde::ser::SerializeSeq;
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use crate::provenance::Provenance;
 
@@ -52,7 +53,7 @@ impl ProvenanceSet {
     /// Create a new `ProvenanceSet` from the given items, filtering out redundant less-specific
     /// `Provenance` records.
     pub fn new(provenance: Provenance, more_provenance: Vec<Provenance>) -> Self {
-        let mut git_repos_with_detailed: HashSet<PathBuf> = HashSet::new();
+        let mut git_repos_with_detailed: HashSet<Arc<PathBuf>> = HashSet::new();
 
         for p in std::iter::once(&provenance).chain(&more_provenance) {
             if let Provenance::GitRepo(e) = p {
