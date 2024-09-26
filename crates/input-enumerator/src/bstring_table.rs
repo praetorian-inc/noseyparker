@@ -7,6 +7,7 @@ pub struct Symbol<T> {
     j: T,
 }
 
+#[allow(clippy::len_without_is_empty)]
 pub trait SymbolType: Copy + PartialEq + Eq + std::hash::Hash {
     fn to_range(self) -> std::ops::Range<usize>;
     fn from_range(r: std::ops::Range<usize>) -> Self;

@@ -461,7 +461,7 @@ impl GitMetadataGraph {
                 continue;
             }
 
-            let mut introduced = &mut blobs_introduced[commit_index];
+            let introduced = &mut blobs_introduced[commit_index];
 
             let mut seen = seen_sets[commit_index]
                 .take()
@@ -487,11 +487,11 @@ impl GitMetadataGraph {
                     visit_tree(
                         repo,
                         &mut symbols,
-                        &repo_index,
+                        repo_index,
                         &mut num_trees_introduced,
                         &mut num_blobs_introduced,
                         &mut seen,
-                        &mut introduced,
+                        introduced,
                         &mut tree_buf,
                         &mut tree_worklist,
                     )?;
@@ -589,6 +589,7 @@ impl GitMetadataGraph {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn visit_tree(
     repo: &gix::Repository,
     symbols: &mut BStringTable,
@@ -608,7 +609,7 @@ fn visit_tree(
             |e| error!("Failed to find tree {tree_oid}: {e}"),
         );
 
-        *num_trees_introduced = *num_trees_introduced + 1;
+        *num_trees_introduced += 1;
 
         for child in tree_iter {
             let child = unwrap_ok_or_continue!(child, |e| {
@@ -642,7 +643,7 @@ fn visit_tree(
                         continue;
                     }
 
-                    *num_blobs_introduced = *num_blobs_introduced + 1;
+                    *num_blobs_introduced += 1;
 
                     // Compute full path to blob as a bytestring.
                     // Instead of using `bstr::join`, manually construct the string to

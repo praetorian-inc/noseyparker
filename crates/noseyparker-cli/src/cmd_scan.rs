@@ -101,7 +101,6 @@ impl ParallelIterator for EnumeratorFileIter {
         use std::io::BufRead;
         (1usize..)
             .zip(self.reader.lines())
-            .into_iter()
             .filter_map(|(line_num, line)| line.map(|line| (line_num, line)).ok())
             .par_bridge()
             .map(|(line_num, line)| {
@@ -371,7 +370,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     let repo_urls = {
         let mut repo_urls = args.input_specifier_args.git_url.clone();
-        repo_urls.extend(enumerate_github_repos(&global_args, &args)?);
+        repo_urls.extend(enumerate_github_repos(global_args, args)?);
         repo_urls.sort();
         repo_urls.dedup();
         repo_urls
@@ -383,7 +382,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let input_roots = {
         let mut input_roots = args.input_specifier_args.path_inputs.clone();
         if !repo_urls.is_empty() {
-            input_roots.extend(clone_git_repo_urls(&global_args, &args, &datastore, repo_urls)?);
+            input_roots.extend(clone_git_repo_urls(global_args, args, &datastore, repo_urls)?);
         }
         input_roots.sort();
         input_roots.dedup();
@@ -480,7 +479,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let guesser = Guesser::new().expect("should be able to create filetype guessser");
         {
             let mut init_time = blob_processor_init_time.lock().unwrap();
-            *init_time = *init_time + t1.elapsed();
+            *init_time += t1.elapsed();
         }
 
         BlobProcessor {
