@@ -438,12 +438,8 @@ impl GitMetadataGraph {
         }
 
         // A worklist of tree objects (and no other type) to be traversed
-        const INITIAL_TREE_WORKLIST_CAPACITY: usize = 32 * 1024;
-        let mut tree_worklist = TreeWorklist::with_capacity(INITIAL_TREE_WORKLIST_CAPACITY);
-        let mut warned_tree_worklist = false;
-        const INITAL_TREE_BUF_CAPACITY: usize = 1024 * 1024;
-        let mut tree_buf = Vec::with_capacity(INITAL_TREE_BUF_CAPACITY);
-        let mut warned_tree_buf = false;
+        let mut tree_worklist = TreeWorklist::with_capacity(32 * 1024);
+        let mut tree_buf = Vec::with_capacity(1024 * 1024);
 
         // various counters for statistics
         let mut max_frontier_size = 0; // max value of size of `commit_worklist`
@@ -495,20 +491,6 @@ impl GitMetadataGraph {
                         &mut tree_buf,
                         &mut tree_worklist,
                     )?;
-
-                    if !warned_tree_buf && tree_buf.capacity() != INITAL_TREE_BUF_CAPACITY {
-                        warn!("tree buf capacity had to be resized to {}", tree_buf.capacity());
-                        warned_tree_buf = true;
-                    }
-                    if !warned_tree_worklist
-                        && tree_worklist.capacity() != INITIAL_TREE_WORKLIST_CAPACITY
-                    {
-                        warn!(
-                            "tree worklist capacity had to be resized to {}",
-                            tree_worklist.capacity()
-                        );
-                        warned_tree_worklist = true;
-                    }
                 }
             } else {
                 warn!(
