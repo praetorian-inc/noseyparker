@@ -1,13 +1,13 @@
+use crate::git_commit_metadata::CommitMetadata;
 use bstr::{BString, ByteSlice};
-use gix::ObjectId;
 use smallvec::SmallVec;
 use std::path::Path;
+use std::sync::Arc;
 
 /// Where was a particular blob seen?
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct BlobAppearance {
-    /// The commit ID
-    pub commit_oid: ObjectId,
+    pub commit_metadata: Arc<CommitMetadata>,
 
     /// The path given to the blob
     pub path: BString,
@@ -21,4 +21,4 @@ impl BlobAppearance {
 }
 
 /// A set of `BlobAppearance` entries
-pub type BlobAppearanceSet = SmallVec<[BlobAppearance; 1]>;
+pub type BlobAppearanceSet = SmallVec<[BlobAppearance; 2]>;

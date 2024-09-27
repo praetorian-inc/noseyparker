@@ -143,7 +143,7 @@ fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
         .iter_rules()
         .map(|rule| {
             let help = sarif::MultiformatMessageStringBuilder::default()
-                .text(&rule.references.join("\n"))
+                .text(rule.references.join("\n"))
                 .build()?;
 
             // FIXME: add better descriptions to Nosey Parker rules

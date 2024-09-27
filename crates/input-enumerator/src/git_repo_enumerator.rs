@@ -1,85 +1,17 @@
 use anyhow::{Context, Result};
-use gix::{hashtable::HashMap, ObjectId, OdbHandle, Repository};
+use gix::{hashtable::HashMap, ObjectId, Repository};
 use ignore::gitignore::Gitignore;
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Instant;
 // use std::time::Instant;
-use tracing::{debug, debug_span, warn};
+use tracing::{debug, debug_span, error};
 
 use crate::blob_appearance::{BlobAppearance, BlobAppearanceSet};
 use crate::git_commit_metadata::CommitMetadata;
-use crate::git_metadata_graph::GitMetadataGraph;
-
-// -------------------------------------------------------------------------------------------------
-// implementation helpers
-// -------------------------------------------------------------------------------------------------
-macro_rules! unwrap_or_continue {
-    ($arg:expr) => {
-        match $arg {
-            Ok(v) => v,
-            Err(_e) => {
-                continue;
-            }
-        }
-    };
-    ($arg:expr, $on_error:expr) => {
-        match $arg {
-            Ok(v) => v,
-            Err(e) => {
-                #[allow(clippy::redundant_closure_call)]
-                $on_error(e);
-                continue;
-            }
-        }
-    };
-}
-
-pub struct ObjectCounts {
-    num_commits: usize,
-    num_trees: usize,
-    num_blobs: usize,
-}
-
-// TODO: measure how helpful or pointless it is to count the objects in advance
-fn count_git_objects(odb: &OdbHandle) -> Result<ObjectCounts> {
-    let t1 = Instant::now();
-
-    use gix::object::Kind;
-    use gix::odb::store::iter::Ordering;
-    use gix::prelude::*;
-
-    let mut num_commits = 0;
-    let mut num_trees = 0;
-    let mut num_blobs = 0;
-    let mut num_objects = 0;
-
-    for oid in odb
-        .iter()
-        .context("Failed to iterate object database")?
-        .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
-    {
-        num_objects += 1;
-        let oid = unwrap_or_continue!(oid, |e| { warn!("Failed to read object id: {e}") });
-        let hdr = unwrap_or_continue!(odb.header(oid), |e| {
-            warn!("Failed to read object header for {oid}: {e}")
-        });
-        match hdr.kind() {
-            Kind::Commit => num_commits += 1,
-            Kind::Tree => num_trees += 1,
-            Kind::Blob => num_blobs += 1,
-            Kind::Tag => {}
-        }
-    }
-
-    debug!("Counted {num_objects} objects in {:.6}s", t1.elapsed().as_secs_f64());
-
-    Ok(ObjectCounts {
-        num_commits,
-        num_trees,
-        num_blobs,
-    })
-}
+use crate::git_metadata_graph::{GitMetadataGraph, RepositoryIndex};
+use crate::{unwrap_ok_or_continue, unwrap_some_or_continue};
 
 // -------------------------------------------------------------------------------------------------
 // enumeration return types
@@ -93,27 +25,11 @@ pub struct GitRepoResult {
 
     /// The blobs to be scanned
     pub blobs: Vec<BlobMetadata>,
-
-    /// Finite map from commit ID to metadata
-    ///
-    /// NOTE: this may be incomplete, missing entries for some commits
-    pub commit_metadata: HashMap<ObjectId, CommitMetadata>,
-}
-
-impl GitRepoResult {
-    pub fn total_blob_bytes(&self) -> u64 {
-        self.blobs.iter().map(|t| t.num_bytes).sum()
-    }
-
-    pub fn num_blobs(&self) -> u64 {
-        self.blobs.len() as u64
-    }
 }
 
 #[derive(Clone)]
 pub struct BlobMetadata {
     pub blob_oid: ObjectId,
-    pub num_bytes: u64,
     pub first_seen: BlobAppearanceSet,
 }
 
@@ -138,142 +54,101 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
     pub fn run(self) -> Result<GitRepoResult> {
         let t1 = Instant::now();
 
-        use gix::object::Kind;
-        use gix::odb::store::iter::Ordering;
         use gix::prelude::*;
 
         let _span = debug_span!("enumerate_git_with_metadata", "{}", self.path.display()).entered();
 
         let odb = &self.repo.objects;
 
-        // TODO: measure how helpful or pointless it is to count the objects in advance
-
         // First count the objects to figure out how big to allocate data structures.
         // We're assuming that the repository doesn't change in the meantime.
         // If it does, our allocation estimates won't be right. Too bad!
-        let ObjectCounts {
-            num_commits,
-            num_trees,
-            num_blobs,
-        } = count_git_objects(odb)?;
+        let object_index = RepositoryIndex::new(odb)?;
+        debug!(
+            "Indexed {} objects in {:.6}s; {} blobs; {} commits",
+            object_index.num_objects(),
+            t1.elapsed().as_secs_f64(),
+            object_index.num_blobs(),
+            object_index.num_commits(),
+        );
 
-        let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(num_blobs);
-        let mut metadata_graph = GitMetadataGraph::with_capacity(num_commits, num_trees, num_blobs);
+        let mut metadata_graph = GitMetadataGraph::with_capacity(object_index.num_commits());
 
-        // scratch buffer used for decoding commits and trees.
-        // size chosen here based on experimentation: biggest commit/tree in cpython is 250k
-        let orig_scratch_capacity = 1024 * 1024;
-        let mut scratch: Vec<u8> = Vec::with_capacity(orig_scratch_capacity);
+        // scratch buffer used for decoding commits.
+        // size chosen here based on experimentation: biggest commit/tree in cpython is ~250KiB
+        // choose a big enough size to avoid resizing in almost all cases
+        let mut scratch: Vec<u8> = Vec::with_capacity(4 * 1024 * 1024);
 
         let mut commit_metadata =
-            HashMap::with_capacity_and_hasher(num_commits, Default::default());
+            HashMap::with_capacity_and_hasher(object_index.num_commits(), Default::default());
 
-        for oid in odb
-            .iter()
-            .context("Failed to iterate object database")?
-            .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
-        {
-            let oid = unwrap_or_continue!(oid, |e| warn!("Failed to read object id: {e}"));
-            let hdr = unwrap_or_continue!(odb.header(oid), |e| warn!(
-                "Failed to read object header for {oid}: {e}"
-            ));
-            match hdr.kind() {
-                Kind::Blob => {
-                    let obj_size = hdr.size();
-                    metadata_graph.get_blob_idx(oid);
-                    blobs.push((oid, obj_size));
-                }
+        for commit_oid in object_index.commits() {
+            let commit = unwrap_ok_or_continue!(odb.find_commit(commit_oid, &mut scratch), |e| {
+                error!("Failed to find commit {commit_oid}: {e}");
+            });
 
-                Kind::Commit => {
-                    let commit = unwrap_or_continue!(odb.find_commit(&oid, &mut scratch), |e| {
-                        warn!("Failed to find commit {oid}: {e}");
-                    });
-
-                    let tree_idx = metadata_graph.get_tree_idx(commit.tree());
-                    let commit_idx = metadata_graph.get_commit_idx(oid, Some(tree_idx));
-                    for parent_oid in commit.parents() {
-                        let parent_idx = metadata_graph.get_commit_idx(parent_oid, None);
-                        metadata_graph.add_commit_edge(parent_idx, commit_idx);
-                    }
-
-                    let committer = &commit.committer;
-                    let author = &commit.author;
-                    let md = CommitMetadata {
-                        commit_id: oid,
-                        committer_name: committer.name.to_owned(),
-                        committer_timestamp: committer.time,
-                        committer_email: committer.email.to_owned(),
-                        author_name: author.name.to_owned(),
-                        author_timestamp: author.time,
-                        author_email: author.email.to_owned(),
-                        message: commit.message.to_owned(),
-                    };
-                    commit_metadata.insert(oid, md);
-                }
-
-                Kind::Tree => {
-                    let tree_idx = metadata_graph.get_tree_idx(oid);
-                    let tree_ref_iter =
-                        unwrap_or_continue!(odb.find_tree_iter(&oid, &mut scratch), |e| {
-                            warn!("Failed to find tree {oid}: {e}");
-                        });
-                    for child in tree_ref_iter {
-                        let child = unwrap_or_continue!(child, |e| {
-                            warn!("Failed to decode entry in tree {oid}: {e}");
-                        });
-                        use gix::objs::tree::EntryKind;
-                        let child_idx = match child.mode.kind() {
-                            EntryKind::Tree => metadata_graph.get_tree_idx(child.oid.into()),
-                            EntryKind::Blob | EntryKind::BlobExecutable => {
-                                metadata_graph.get_blob_idx(child.oid.into())
-                            }
-                            _ => continue,
-                        };
-
-                        metadata_graph.add_tree_edge(
-                            tree_idx,
-                            child_idx,
-                            child.filename.to_owned(),
-                        );
-                    }
-                }
-
-                _ => {}
+            let tree_oid = commit.tree();
+            let tree_idx = unwrap_some_or_continue!(object_index.get_tree_index(&tree_oid), || {
+                error!("Failed to find tree {tree_oid} for commit {commit_oid}");
+            });
+            let commit_idx = metadata_graph.get_commit_idx(*commit_oid, Some(tree_idx));
+            for parent_oid in commit.parents() {
+                let parent_idx = metadata_graph.get_commit_idx(parent_oid, None);
+                metadata_graph.add_commit_edge(parent_idx, commit_idx);
             }
+
+            let committer = &commit.committer;
+            let author = &commit.author;
+            let md = CommitMetadata {
+                commit_id: *commit_oid,
+                committer_name: committer.name.to_owned(),
+                committer_timestamp: committer.time,
+                committer_email: committer.email.to_owned(),
+                author_name: author.name.to_owned(),
+                author_timestamp: author.time,
+                author_email: author.email.to_owned(),
+                message: commit.message.to_owned(),
+            };
+            commit_metadata.insert(*commit_oid, Arc::new(md));
         }
 
         debug!("Built metadata graph in {:.6}s", t1.elapsed().as_secs_f64());
 
-        let path = self.path.to_owned();
-        match metadata_graph.get_repo_metadata() {
+        match metadata_graph.get_repo_metadata(&object_index, &self.repo) {
             Err(e) => {
-                warn!("Failed to compute reachable blobs; ignoring metadata: {e}");
-                let blobs = blobs
+                error!("Failed to compute reachable blobs; ignoring metadata: {e}");
+                let blobs = object_index
+                    .into_blobs()
                     .into_iter()
-                    .map(|(blob_oid, num_bytes)| BlobMetadata {
+                    .map(|blob_oid| BlobMetadata {
                         blob_oid,
-                        num_bytes,
                         first_seen: Default::default(),
                     })
                     .collect();
                 Ok(GitRepoResult {
                     repository: self.repo,
-                    path,
+                    path: self.path.to_owned(),
                     blobs,
-                    commit_metadata,
                 })
             }
             Ok(md) => {
-                let mut inverted =
-                    HashMap::<ObjectId, SmallVec<[BlobAppearance; 1]>>::with_capacity_and_hasher(
-                        num_blobs,
-                        Default::default(),
-                    );
+                let mut blob_to_appearance: HashMap<ObjectId, BlobAppearanceSet> = object_index
+                    .into_blobs()
+                    .into_iter()
+                    .map(|b| (b, SmallVec::new()))
+                    .collect();
+
                 for e in md.into_iter() {
+                    let commit_metadata =
+                        unwrap_some_or_continue!(commit_metadata.get(&e.commit_oid), || {
+                            error!("Failed to find commit metadata for {}", e.commit_oid);
+                        });
                     for (blob_oid, path) in e.introduced_blobs.into_iter() {
-                        let vals = inverted.entry(blob_oid).or_insert(SmallVec::new());
+                        let vals = blob_to_appearance
+                            .entry(blob_oid)
+                            .or_insert(SmallVec::new());
                         vals.push(BlobAppearance {
-                            commit_oid: e.commit_oid,
+                            commit_metadata: commit_metadata.clone(),
                             path,
                         });
                     }
@@ -295,27 +170,20 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                 //
                 // It's also possible (though rare) that a blob appears in a Git repository with
                 // _no_ path whatsoever.
-                //
-                // Anyway, when Nosey Parker is determining whether a blob should be gitignored or
-                // not, the logic is this:
-                //
-                // - If the set of pathnames for a blob is empty, *do not* ignore the blob.
-                //
-                // - If the set of pathnames for a blob is *not* empty, if *all* of the pathnames
-                //   match the gitignore rules, ignore the blob.
-
-                let blobs: Vec<_> = blobs
+                let blobs: Vec<BlobMetadata> = blob_to_appearance
                     .into_iter()
-                    .filter_map(|(blob_oid, num_bytes)| match inverted.get(&blob_oid) {
-                        None => Some(BlobMetadata {
-                            blob_oid,
-                            num_bytes,
-                            first_seen: SmallVec::new(),
-                        }),
-
-                        Some(first_seen) => {
-                            let first_seen: SmallVec<_> = first_seen
-                                .iter()
+                    .filter_map(|(blob_oid, first_seen)| {
+                        if first_seen.is_empty() {
+                            // no commit metadata at all for blob
+                            Some(BlobMetadata {
+                                blob_oid,
+                                first_seen,
+                            })
+                        } else {
+                            // filter out path-ignored provenance entries; suppress blob if all
+                            // provenance entries get filtered
+                            let first_seen: BlobAppearanceSet = first_seen
+                                .into_iter()
                                 .filter(|entry| {
                                     use bstr::ByteSlice;
                                     match entry.path.to_path() {
@@ -334,7 +202,6 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                                         }
                                     }
                                 })
-                                .cloned()
                                 .collect();
 
                             if first_seen.is_empty() {
@@ -343,7 +210,6 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
                             } else {
                                 Some(BlobMetadata {
                                     blob_oid,
-                                    num_bytes,
                                     first_seen,
                                 })
                             }
@@ -353,9 +219,8 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
                 Ok(GitRepoResult {
                     repository: self.repo,
-                    path,
+                    path: self.path.to_owned(),
                     blobs,
-                    commit_metadata,
                 })
             }
         }
@@ -384,37 +249,33 @@ impl<'a> GitRepoEnumerator<'a> {
 
         let odb = &self.repo.objects;
 
-        let mut blobs: Vec<(ObjectId, u64)> = Vec::with_capacity(64 * 1024);
+        let mut blobs: Vec<ObjectId> = Vec::with_capacity(64 * 1024);
 
         for oid in odb
             .iter()
             .context("Failed to iterate object database")?
             .with_ordering(Ordering::PackAscendingOffsetThenLooseLexicographical)
         {
-            let oid = unwrap_or_continue!(oid, |e| warn!("Failed to read object id: {e}"));
-            let hdr = unwrap_or_continue!(odb.header(oid), |e| warn!(
+            let oid = unwrap_ok_or_continue!(oid, |e| error!("Failed to read object id: {e}"));
+            let hdr = unwrap_ok_or_continue!(odb.header(oid), |e| error!(
                 "Failed to read object header for {oid}: {e}"
             ));
             if hdr.kind() == Kind::Blob {
-                let obj_size = hdr.size();
-                blobs.push((oid, obj_size));
+                blobs.push(oid);
             }
         }
 
-        let path = self.path.to_owned();
         let blobs = blobs
             .into_iter()
-            .map(|(blob_oid, num_bytes)| BlobMetadata {
+            .map(|blob_oid| BlobMetadata {
                 blob_oid,
-                num_bytes,
                 first_seen: Default::default(),
             })
             .collect();
         Ok(GitRepoResult {
             repository: self.repo,
-            path,
+            path: self.path.to_owned(),
             blobs,
-            commit_metadata: Default::default(),
         })
     }
 }

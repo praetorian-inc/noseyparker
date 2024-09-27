@@ -2,6 +2,7 @@ use anyhow::{bail, Context, Result};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tracing::{debug, debug_span, error, info, trace, warn};
@@ -100,7 +101,6 @@ impl ParallelIterator for EnumeratorFileIter {
         use std::io::BufRead;
         (1usize..)
             .zip(self.reader.lines())
-            .into_iter()
             .filter_map(|(line_num, line)| line.map(|line| (line_num, line)).ok())
             .par_bridge()
             .map(|(line_num, line)| {
@@ -168,6 +168,7 @@ impl ParallelIterator for GitRepoResultIter {
         C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
     {
         let repo = self.inner.repository.into_sync();
+        let repo_path = Arc::new(self.inner.path.clone());
         self.inner
             .blobs
             .into_par_iter()
@@ -189,33 +190,28 @@ impl ParallelIterator for GitRepoResultIter {
                 || repo.to_thread_local(),
                 |repo, md| -> Result<(ProvenanceSet, Blob)> {
                     let blob_id = md.blob_oid;
-                    let repo_path = &self.inner.path;
 
-                    let blob = {
-                        let mut blob = repo.find_object(blob_id).with_context(|| {
-                            format!(
-                                "Failed to read blob {blob_id} from Git repository at {}",
-                                repo_path.display(),
-                            )
-                        })?;
-
+                    let blob = || -> Result<Blob> {
+                        let mut blob = repo.find_object(blob_id)?.try_into_blob()?;
                         let data = std::mem::take(&mut blob.data); // avoid a copy
-                        Blob::new(BlobId::from(&blob_id), data)
-                    };
-
-                    let provenance = ProvenanceSet::try_from_iter(md.first_seen.iter().map(|e| {
-                        let commit_metadata = self
-                            .inner
-                            .commit_metadata
-                            .get(&e.commit_oid)
-                            .expect("should have commit metadata");
-                        Provenance::from_git_repo_with_first_commit(
-                            repo_path.clone(),
-                            commit_metadata.clone(),
-                            e.path.clone(),
+                        Ok(Blob::new(BlobId::from(&blob_id), data))
+                    }()
+                    .with_context(|| {
+                        format!(
+                            "Failed to read blob {blob_id} from Git repository at {}",
+                            repo_path.display(),
                         )
-                    }))
-                    .unwrap_or_else(|| Provenance::from_git_repo(repo_path.clone()).into());
+                    })?;
+
+                    let provenance =
+                        ProvenanceSet::try_from_iter(md.first_seen.into_iter().map(|e| {
+                            Provenance::from_git_repo_with_first_commit(
+                                repo_path.clone(),
+                                e.commit_metadata,
+                                e.path,
+                            )
+                        }))
+                        .unwrap_or_else(|| Provenance::from_git_repo(repo_path.clone()).into());
 
                     Ok((provenance, blob))
                 },
@@ -374,7 +370,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     let repo_urls = {
         let mut repo_urls = args.input_specifier_args.git_url.clone();
-        repo_urls.extend(enumerate_github_repos(&global_args, &args)?);
+        repo_urls.extend(enumerate_github_repos(global_args, args)?);
         repo_urls.sort();
         repo_urls.dedup();
         repo_urls
@@ -386,7 +382,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let input_roots = {
         let mut input_roots = args.input_specifier_args.path_inputs.clone();
         if !repo_urls.is_empty() {
-            input_roots.extend(clone_git_repo_urls(&global_args, &args, &datastore, repo_urls)?);
+            input_roots.extend(clone_git_repo_urls(global_args, args, &datastore, repo_urls)?);
         }
         input_roots.sort();
         input_roots.dedup();
@@ -483,7 +479,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let guesser = Guesser::new().expect("should be able to create filetype guessser");
         {
             let mut init_time = blob_processor_init_time.lock().unwrap();
-            *init_time = *init_time + t1.elapsed();
+            *init_time += t1.elapsed();
         }
 
         BlobProcessor {

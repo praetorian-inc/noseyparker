@@ -4,6 +4,7 @@ use input_enumerator::git_commit_metadata::CommitMetadata;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 // -------------------------------------------------------------------------------------------------
 // Provenance
@@ -28,7 +29,7 @@ impl Provenance {
     /// commit provenance.
     ///
     /// See also `from_git_repo_with_first_commit`.
-    pub fn from_git_repo(repo_path: PathBuf) -> Self {
+    pub fn from_git_repo(repo_path: Arc<PathBuf>) -> Self {
         Provenance::GitRepo(GitRepoProvenance {
             repo_path,
             first_commit: None,
@@ -40,8 +41,8 @@ impl Provenance {
     ///
     /// See also `from_git_repo`.
     pub fn from_git_repo_with_first_commit(
-        repo_path: PathBuf,
-        commit_metadata: CommitMetadata,
+        repo_path: Arc<PathBuf>,
+        commit_metadata: Arc<CommitMetadata>,
         blob_path: BString,
     ) -> Self {
         let first_commit = Some(CommitProvenance {
@@ -109,7 +110,7 @@ pub struct FileProvenance {
 /// Indicates that a blob was seen in a Git repo, optionally with particular commit provenance info
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct GitRepoProvenance {
-    pub repo_path: PathBuf,
+    pub repo_path: Arc<PathBuf>,
     pub first_commit: Option<CommitProvenance>,
 }
 
@@ -119,7 +120,7 @@ pub struct GitRepoProvenance {
 /// How was a particular Git commit encountered?
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CommitProvenance {
-    pub commit_metadata: CommitMetadata,
+    pub commit_metadata: Arc<CommitMetadata>,
 
     #[serde(with = "BStringLossyUtf8")]
     pub blob_path: BString,

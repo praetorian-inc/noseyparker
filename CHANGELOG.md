@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changes
 - Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step ([#216](https://github.com/praetorian-inc/noseyparker/pull/216)).
-  This reduces peak memory use and CPU time 10-20%, particularly in environments with slow I/O.
+  This reduces peak memory use and wall clock time 10-20%, particularly in environments with slow I/O.
   A consequence of this change is that the total amount of data to scan is not known until it has actually been scanned, and so the scanning progress bar no longer shows a completion percentage.
 
 - When cloning Git repositories while scanning, the progress bar for now includes the current repository URL ([#212](https://github.com/praetorian-inc/noseyparker/pull/212)).
@@ -38,10 +38,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - Bitbucket App Password ([#219](https://github.com/praetorian-inc/noseyparker/pull/219) from @gemesa)
 
-### Fixes
+- The default number of parallel scanner jobs is now higher on many systems ([#222](https://github.com/praetorian-inc/noseyparker/pull/222)).
+  This value is determined in part by the amount of system RAM;
+  due to several memory use improvements, the required minim RAM per job has been reduced, allowing for more parallelism.
 
+### Fixes
 - The `Google OAuth Credentials` rule has been revised to avoid runtime errors about an empty capture group.
+
 - The `AWS Secret Access Key` rule has been revised to avoid runtime `Regex failed to match` errors.
+
+- The code that determines first-commit provenance information for blobs from Git repositories has been reworked to improve memory use ([#222](https://github.com/praetorian-inc/noseyparker/pull/222)).
+  In typical cases of scanning Git repositories, this reduces both peak memory use and wall clock time by 20-50%.
+  In certain pathological cases, such as [Homebrew](https://github.com/homebrew/homebrew-core) or [nixpkgs](https://github.com/NixOS/nixpkgs), the new implementation uses up to 20x less peak memory and up to 5x less wall clock time.
+
+- When determining blob provenance informatino from Git repositories, blobs that first appear multiple times within a single commit will now be reported with _all_ names they appear with ([#222](https://github.com/praetorian-inc/noseyparker/pull/222)).
+  Previously, one of the pathnames would be arbitrarily selected.
 
 
 ## [v0.19.0](https://github.com/praetorian-inc/noseyparker/releases/v0.19.0) (2024-07-30)
