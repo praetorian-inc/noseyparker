@@ -87,6 +87,14 @@ impl SeenObjectSet {
         Ok(set.insert(idx))
     }
 
+    fn contains(set: &RoaringBitmap, idx: ObjectIdx) -> Result<bool> {
+        let idx = idx
+            .as_usize()
+            .try_into()
+            .context("index should be representable with a u32")?;
+        Ok(set.contains(idx))
+    }
+
     /// Returns whether the value was absent from the set
     pub(crate) fn insert_tree(&mut self, idx: ObjectIdx) -> Result<bool> {
         Self::insert(&mut self.seen_trees, idx)
@@ -95,6 +103,10 @@ impl SeenObjectSet {
     /// Returns whether the value was absent from the set
     pub(crate) fn insert_blob(&mut self, idx: ObjectIdx) -> Result<bool> {
         Self::insert(&mut self.seen_blobs, idx)
+    }
+
+    pub(crate) fn contains_blob(&self, idx: ObjectIdx) -> Result<bool> {
+        Self::contains(&self.seen_blobs, idx)
     }
 
     pub(crate) fn union_update(&mut self, other: &Self) {
@@ -440,6 +452,8 @@ impl GitMetadataGraph {
         // A worklist of tree objects (and no other type) to be traversed
         let mut tree_worklist = TreeWorklist::with_capacity(32 * 1024);
         let mut tree_buf = Vec::with_capacity(1024 * 1024);
+        // A scratch buffer for new blobs encountered while traversing a tree
+        let mut blobs_encountered = Vec::with_capacity(16 * 1024);
 
         // various counters for statistics
         let mut max_frontier_size = 0; // max value of size of `commit_worklist`
@@ -490,6 +504,7 @@ impl GitMetadataGraph {
                         introduced,
                         &mut tree_buf,
                         &mut tree_worklist,
+                        &mut blobs_encountered,
                     )?;
                 }
             } else {
@@ -582,7 +597,9 @@ fn visit_tree(
     introduced: &mut IntroducedBlobs,
     tree_buf: &mut Vec<u8>,
     tree_worklist: &mut TreeWorklist,
+    blobs_encountered: &mut Vec<ObjectIdx>,
 ) -> Result<()> {
+    blobs_encountered.clear();
     while let Some((name_path, tree_oid)) = tree_worklist.pop() {
         // read the tree object from the repo,
         // enumerate its child entries, and extend the worklist with the unseen child trees
@@ -620,10 +637,11 @@ fn visit_tree(
                         unwrap_some_or_continue!(repo_index.get_blob_index(child.oid), || error!(
                             "Failed to find blob index for {} from tree {tree_oid}",
                             child.oid
-                        ),);
-                    if !seen.insert_blob(child_idx)? {
+                        ));
+                    if seen.contains_blob(child_idx)? {
                         continue;
                     }
+                    blobs_encountered.push(child_idx);
 
                     *num_blobs_introduced += 1;
 
@@ -660,5 +678,11 @@ fn visit_tree(
             }
         }
     }
+
+    for blob_idx in blobs_encountered.iter() {
+        seen.insert_blob(*blob_idx)?;
+    }
+    blobs_encountered.clear();
+
     Ok(())
 }
