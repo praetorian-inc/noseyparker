@@ -131,7 +131,7 @@ impl ObjectIdBimap {
     fn insert(&mut self, oid: ObjectId) {
         match self.oid_to_idx.entry(oid) {
             gix::hashtable::hash_map::Entry::Occupied(e) => {
-                warn!("object {} seen multiple times", e.key());
+                // warn!("object {} seen multiple times", e.key());
             }
             gix::hashtable::hash_map::Entry::Vacant(e) => {
                 let idx = ObjectIdx::new(self.idx_to_oid.len());
