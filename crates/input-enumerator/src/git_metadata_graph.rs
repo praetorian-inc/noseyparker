@@ -130,7 +130,7 @@ impl ObjectIdBimap {
 
     fn insert(&mut self, oid: ObjectId) {
         match self.oid_to_idx.entry(oid) {
-            gix::hashtable::hash_map::Entry::Occupied(e) => {
+            gix::hashtable::hash_map::Entry::Occupied(_e) => {
                 // warn!("object {} seen multiple times", e.key());
             }
             gix::hashtable::hash_map::Entry::Vacant(e) => {
