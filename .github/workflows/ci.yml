@@ -116,18 +116,6 @@ jobs:
           check_docs: true
           run_tests: true
 
-        - name: macos-12.x86_64.stable.test
-          os: macos-12
-          rust: stable
-          profile: test
-          features:
-          install_dependencies: |
-            brew install coreutils boost
-          cpu_info_cmd: 'sysctl -a | grep machdep.cpu'
-
-          check_docs: false
-          run_tests: true
-
         - name: macos-13.x86_64.stable.test
           os: macos-13
           rust: stable
