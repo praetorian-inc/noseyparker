@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)
 
+### Overview
+The most significant feature addition to this release is a new "extensible enumerator" mechanism, which makes it possible to scan content from arbitrary sources with Nosey Parker without having to write it to the filesystem.
+
+This release also includes several changes that speed up and slim down the scanning process.
+A 10-30% reduction in wall clock time and a 10-50% reduction in memory use are typical, but in some unusual cases, wall clock and memory use are reduced 10-20x.
+
+Happy secret hunting!
+
 ### Additions
 - An experimental "extensible enumerator mechanism" has been added to the `scan` command ([#220](https://github.com/praetorian-inc/noseyparker/pull/220)).
   This allows Nosey Parker to scan inputs produced by any program that can emit JSON objects to stdout, without having to first write the inputs to the filesystem.
