@@ -853,61 +853,68 @@ fn make_fs_enumerator(
 
 // -------------------------------------------------------------------------------------------------
 /// Enumerate mentioned GitHub repositories via the GitHub REST API, returning vector of repo urls
+#[cfg(feature = "github")]
 fn enumerate_github_repos(
     global_args: &args::GlobalArgs,
     args: &args::ScanArgs,
 ) -> Result<Vec<GitUrl>> {
     let mut repo_urls = vec![];
 
-    #[cfg(feature = "github")]
-    {
-        use noseyparker::github;
+    use noseyparker::github;
 
-        let repo_specifiers = github::RepoSpecifiers {
-            user: args.input_specifier_args.github_user.clone(),
-            organization: args.input_specifier_args.github_organization.clone(),
-            all_organizations: args.input_specifier_args.all_github_organizations,
-            repo_filter: args.input_specifier_args.github_repo_type.into(),
-        };
+    let repo_specifiers = github::RepoSpecifiers {
+        user: args.input_specifier_args.github_user.clone(),
+        organization: args.input_specifier_args.github_organization.clone(),
+        all_organizations: args.input_specifier_args.all_github_organizations,
+        repo_filter: args.input_specifier_args.github_repo_type.into(),
+    };
 
-        if !repo_specifiers.is_empty() {
-            let mut progress = Progress::new_countup_spinner(
-                "Enumerating GitHub repositories...",
-                global_args.use_progress(),
-            );
-            let mut num_found: u64 = 0;
-            let api_url = args.input_specifier_args.github_api_url.clone();
+    if !repo_specifiers.is_empty() {
+        let mut progress = Progress::new_countup_spinner(
+            "Enumerating GitHub repositories...",
+            global_args.use_progress(),
+        );
+        let mut num_found: u64 = 0;
+        let api_url = args.input_specifier_args.github_api_url.clone();
 
-            for repo_string in github::enumerate_repo_urls(
-                &repo_specifiers,
-                api_url,
-                global_args.ignore_certs,
-                Some(&mut progress),
-            )
-            .context("Failed to enumerate GitHub repositories")?
-            {
-                use noseyparker::git_url::GitUrl;
-                use std::str::FromStr;
-                match GitUrl::from_str(&repo_string) {
-                    Ok(repo_url) => repo_urls.push(repo_url),
-                    Err(e) => {
-                        progress.suspend(|| {
-                            error!("Failed to parse repo URL from {repo_string}: {e}");
-                        });
-                        continue;
-                    }
+        for repo_string in github::enumerate_repo_urls(
+            &repo_specifiers,
+            api_url,
+            global_args.ignore_certs,
+            Some(&mut progress),
+        )
+        .context("Failed to enumerate GitHub repositories")?
+        {
+            use noseyparker::git_url::GitUrl;
+            use std::str::FromStr;
+            match GitUrl::from_str(&repo_string) {
+                Ok(repo_url) => repo_urls.push(repo_url),
+                Err(e) => {
+                    progress.suspend(|| {
+                        error!("Failed to parse repo URL from {repo_string}: {e}");
+                    });
+                    continue;
                 }
-                num_found += 1;
             }
-
-            progress.finish_with_message(format!(
-                "Found {} repositories from GitHub",
-                HumanCount(num_found)
-            ));
+            num_found += 1;
         }
+
+        progress.finish_with_message(format!(
+            "Found {} repositories from GitHub",
+            HumanCount(num_found)
+        ));
     }
 
     Ok(repo_urls)
+}
+
+/// Enumerate mentioned GitHub repositories via the GitHub REST API, returning vector of repo urls
+#[cfg(not(feature = "github"))]
+fn enumerate_github_repos(
+    _global_args: &args::GlobalArgs,
+    _args: &args::ScanArgs,
+) -> Result<Vec<GitUrl>> {
+    Ok(vec![])
 }
 
 // -------------------------------------------------------------------------------------------------
