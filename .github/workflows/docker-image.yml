@@ -16,6 +16,9 @@ on:
   push:
     branches: [ "main" ]
 
+    # Run when release tags are created
+    tags: [ "v*.*.*" ]
+
   # Do not run on pull requests; the Docker registry permissions are not set up
   # to work except for with the canonical `noseyparker` repo. Running from pull
   # requests from forks will fail.
