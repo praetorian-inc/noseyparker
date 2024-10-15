@@ -6,6 +6,12 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Changes
+- Directories that appear to be Nosey Parker datastore directories are now skipped from scanning.
+
+
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)
 
 ### Overview

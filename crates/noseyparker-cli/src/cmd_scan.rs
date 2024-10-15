@@ -827,19 +827,6 @@ fn make_fs_enumerator(
             })?;
         }
 
-        // Make sure the datastore itself is not scanned
-        let datastore_path = std::fs::canonicalize(datastore.root_dir())?;
-        ie.filter_entry(move |entry| {
-            let path = match std::fs::canonicalize(entry.path()) {
-                Err(e) => {
-                    warn!("Failed to canonicalize path {}: {}", entry.path().display(), e);
-                    return true;
-                }
-                Ok(p) => p,
-            };
-            path != datastore_path
-        });
-
         // Determine whether to collect git metadata or not
         let collect_git_metadata = match args.metadata_args.git_blob_provenance {
             args::GitBlobProvenanceMode::FirstSeen => true,
