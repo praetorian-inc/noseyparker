@@ -124,14 +124,14 @@ jobs:
 
     - name: Inspect Docker image
       run: |
-        docker buildx imagetools inspect "noseyparker:sha256@${{ steps.build.outputs.digest }}"
+        docker buildx imagetools inspect "noseyparker@${{ steps.build.outputs.digest }}"
 
     - name: Test Docker image
-      run: docker run --rm "noseyparker:sha256@${{ steps.build.outputs.digest }}" --version
+      run: docker run --rm "noseyparker@${{ steps.build.outputs.digest }}" --version
 
     - name: Copy release build from Docker container
       run: |
-        docker cp $(docker run --name np "noseyparker:sha256@${{ steps.build.outputs.digest }}"):/usr/local release
+        docker cp $(docker run --name np "noseyparker@${{ steps.build.outputs.digest }}"):/usr/local release
         docker rm np
 
     - name: Run integration tests on release
