@@ -872,7 +872,6 @@ fn enumerate_github_repos(
         )
         .context("Failed to enumerate GitHub repositories")?
         {
-            use noseyparker::git_url::GitUrl;
             use std::str::FromStr;
             match GitUrl::from_str(&repo_string) {
                 Ok(repo_url) => repo_urls.push(repo_url),
