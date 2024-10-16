@@ -100,7 +100,7 @@ jobs:
           platform-pair: linux-arm64
           runs-on: ubuntu-22.04-arm64-8-core
 
-    name: Linux (${{ matrix.platform }} musl
+    name: ${{ matrix.platform }} musl
     runs-on: ${{ matrix.runs-on }}
 
     steps:
