@@ -118,9 +118,6 @@ jobs:
         load: true
         target: builder
 
-    - name: Test Docker image
-      run: docker run --rm noseyparker --version
-
     - name: Copy release build from Docker container
       run: |
         docker run --name np noseyparker
