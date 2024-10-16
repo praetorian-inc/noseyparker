@@ -100,7 +100,7 @@ jobs:
 
     - name: Inspect Docker image
       run: |
-        docker buildx imagetools inspect ${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}
+        docker buildx imagetools inspect "${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}"
 
     - name: Test Docker image
       run: docker run --rm "${{ matrix.image }}:sha256@${{ steps.build.outputs.digest }}" --version
