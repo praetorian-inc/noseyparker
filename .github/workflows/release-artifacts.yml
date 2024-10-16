@@ -118,10 +118,6 @@ jobs:
         load: true
         target: builder
 
-    - name: Inspect Docker image
-      run: |
-        docker buildx imagetools inspect noseyparker
-
     - name: Test Docker image
       run: docker run --rm noseyparker --version
 
