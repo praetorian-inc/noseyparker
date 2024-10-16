@@ -143,9 +143,19 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 self.found_file(FileResult { path, num_bytes });
             }
         } else if is_dir {
-            self.found_directory(DirectoryResult {
-                path: path.to_owned(),
-            });
+            // Skip things that look like Nosey Parker datastores
+            if path.join("datastore.db").is_file()
+                && path.join("scratch").is_dir()
+                && path.join("clones").is_dir()
+                && path.join("blobs").is_dir()
+            {
+                debug!("Skipping {}: looks like a Nosey Parker datastore", path.display());
+                return WalkState::Skip;
+            } else {
+                self.found_directory(DirectoryResult {
+                    path: path.to_owned(),
+                });
+            }
         } else if metadata.is_symlink() {
             // No problem; just ignore it
             //
@@ -271,6 +281,7 @@ impl FilesystemEnumerator {
     }
 
     /// Specify an ad-hoc filtering function to control which entries are enumerated.
+    /// Only entries that satisfy the predicate will be enumerated.
     ///
     /// This can be used to skip entire directories.
     pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
