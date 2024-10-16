@@ -131,7 +131,8 @@ jobs:
 
     - name: Copy release build from Docker container
       run: |
-        docker cp $(docker run --rm "noseyparker:sha256@${{ steps.build.outputs.digest }}"):/usr/local release
+        docker cp $(docker run --name np "noseyparker:sha256@${{ steps.build.outputs.digest }}"):/usr/local release
+        docker rm np
 
     - name: Run integration tests on release
       run: |
