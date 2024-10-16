@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changes
 - Directories that appear to be Nosey Parker datastore directories are now skipped from scanning ([#224](https://github.com/praetorian-inc/noseyparker/pull/224)).
 
+- The `/proc` and `/sys` paths (special filesystems on Linux) are now ignored by default.
+  This suppresses many innocuous errors that would previously be seen when scanning the root filesystem of a Linux system.
+
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)
 

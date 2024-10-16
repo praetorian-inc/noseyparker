@@ -9,7 +9,7 @@ use crossbeam_channel::Sender;
 pub use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use ignore::{DirEntry, WalkBuilder, WalkState};
 use std::path::{Path, PathBuf};
-use tracing::{debug, error, warn};
+use tracing::{debug, warn};
 
 // -------------------------------------------------------------------------------------------------
 // helper macros
@@ -118,7 +118,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
 
         let entry = match result {
             Err(e) => {
-                error!("Failed to get entry: {e}; skipping");
+                warn!("Skipping entry: {e}");
                 return WalkState::Skip;
             }
             Ok(v) => v,
@@ -127,12 +127,11 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
         let path = entry.path();
         let metadata = match entry.metadata() {
             Err(e) => {
-                error!("Failed to get metadata for {}: {e}; skipping", path.display());
+                warn!("Skipping {}: failed to get metadata: {e}", path.display());
                 return WalkState::Skip;
             }
             Ok(v) => v,
         };
-        let is_dir = metadata.is_dir();
 
         if metadata.is_file() {
             let num_bytes = metadata.len();
@@ -142,7 +141,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
                 let path = path.to_owned();
                 self.found_file(FileResult { path, num_bytes });
             }
-        } else if is_dir {
+        } else if metadata.is_dir() {
             // Skip things that look like Nosey Parker datastores
             if path.join("datastore.db").is_file()
                 && path.join("scratch").is_dir()
@@ -162,7 +161,7 @@ impl<'t> ignore::ParallelVisitor for Visitor<'t> {
             // Had follow_symlinks been enabled, the pointed-to entry would have been yielded
             // instead.
         } else {
-            warn!("Unhandled path type: {}: {:?}", path.display(), entry.file_type());
+            debug!("Skipping {}: unhandled path type: {:?}", path.display(), entry.file_type());
         }
         WalkState::Continue
     }
