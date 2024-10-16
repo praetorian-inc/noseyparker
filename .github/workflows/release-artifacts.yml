@@ -122,18 +122,18 @@ jobs:
 
         target: builder
 
-        outputs: type=image
+        outputs: type=image,name=noseyparker,push=false
 
     - name: Inspect Docker image
       run: |
-        docker buildx imagetools inspect "noseyparker@${{ steps.build.outputs.digest }}"
+        docker buildx imagetools inspect noseyparker
 
     - name: Test Docker image
-      run: docker run --rm "noseyparker@${{ steps.build.outputs.digest }}" --version
+      run: docker run --rm noseyparker --version
 
     - name: Copy release build from Docker container
       run: |
-        docker run --name np "noseyparker@${{ steps.build.outputs.digest }}"
+        docker run --name np noseyparker
         docker cp np:/release release
         docker rm np
 
