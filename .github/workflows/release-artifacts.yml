@@ -120,6 +120,8 @@ jobs:
 
         tags: noseyparker
 
+        target: builder
+
         outputs: type=image
 
     - name: Inspect Docker image
@@ -131,7 +133,8 @@ jobs:
 
     - name: Copy release build from Docker container
       run: |
-        docker cp $(docker run --name np "noseyparker@${{ steps.build.outputs.digest }}"):/usr/local release
+        docker run --name np "noseyparker@${{ steps.build.outputs.digest }}"
+        docker cp np:/release release
         docker rm np
 
     - name: Run integration tests on release
