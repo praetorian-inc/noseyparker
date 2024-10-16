@@ -110,19 +110,13 @@ jobs:
 
     - name: Build Docker image
       uses: docker/build-push-action@v6
-      id: build
       with:
         context: .
-
         file: Dockerfile.alpine
-
         platforms: ${{ matrix.platform }}
-
         tags: noseyparker
-
+        load: true
         target: builder
-
-        outputs: type=image,name=noseyparker,push=false
 
     - name: Inspect Docker image
       run: |
