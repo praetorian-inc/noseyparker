@@ -82,3 +82,72 @@ jobs:
         path: ${{ steps.release-archive.outputs.filename }}
         compression-level: 0
         if-no-files-found: error
+
+
+  # Build the Alpine-based Docker image, then copy it out of there to create a
+  # standalone release from that
+  linux-musl:
+    strategy:
+      matrix:
+        include:
+        - base: alpine
+          platform: linux/amd64
+          platform-pair: linux-amd64
+          runs-on: ubuntu-22.04
+
+        - base: alpine
+          platform: linux/arm64
+          platform-pair: linux-arm64
+          runs-on: ubuntu-22.04-arm64-8-core
+
+    name: ${{ matrix.platform }} musl
+    runs-on: ${{ matrix.runs-on }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install zsh libboost-all-dev
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: Dockerfile.alpine
+        platforms: ${{ matrix.platform }}
+        tags: noseyparker
+        load: true
+        target: builder
+
+    - name: Copy release build from Docker container
+      run: |
+        docker run --name np noseyparker
+        docker cp np:/release release
+        docker rm np
+
+    - name: Run integration tests on release
+      run: |
+        NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
+      env:
+        # We use the GitHub Actions automatic token when running tests, to avoid
+        # spurious failures from rate limiting when testing Nosey Parker's github
+        # enumeration capabilities.
+        NP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create release archive
+      id: release-archive
+      run: |
+        FILENAME="$(./release/bin/noseyparker -V | tr ' ' '-').tar.gz"
+        tar -C release -c -z -f "$FILENAME" .
+        echo "filename=$FILENAME" >> "$GITHUB_OUTPUT"
+
+    - name: Upload release files
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.release-archive.outputs.filename }}
+        path: ${{ steps.release-archive.outputs.filename }}
+        compression-level: 0
+        if-no-files-found: error
