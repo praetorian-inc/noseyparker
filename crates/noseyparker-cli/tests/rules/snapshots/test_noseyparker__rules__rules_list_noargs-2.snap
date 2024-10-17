@@ -3,10 +3,10 @@ source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
  Rule ID              Rule Name                                                 Categories 
-───────────────────────────────────────────────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────────────────────────────────────────────────
  np.adafruit.1        Adafruit IO Key                                           api, secret 
  np.adobe.1           Adobe OAuth Client Secret                                 api, secret 
- np.age.1             Age Recipient (X25519 public key)                          
+ np.age.1             Age Recipient (X25519 public key)                         identifier 
  np.age.2             Age Identity (X22519 secret key)                          secret 
  np.appsync.1         AWS AppSync API Key                                       api, secret 
  np.arn.1             Amazon Resource Name                                      api, identifier 
@@ -139,7 +139,7 @@ expression: stdout
  np.stripe.1          Stripe API Key                                            api, secret 
  np.stripe.2          Stripe API Test Key                                       api, secret, test 
  np.telegram.1        Telegram Bot Token                                        api, secret 
- np.thingsboard.1     ThingsBoard Access Token                                  api, identifier 
+ np.thingsboard.1     ThingsBoard Access Token                                  api, identifier, secret 
  np.thingsboard.2     ThingsBoard Provision Device Key                          api, secret 
  np.thingsboard.3     ThingsBoard Provision Device Secret                       api, fuzzy, secret 
  np.truenas.1         TrueNAS API Key (WebSocket)                               api, fuzzy, secret 

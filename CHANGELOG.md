@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `/proc`, `/sys`, and `/dev` paths (special filesystems on Linux) are now ignored by default ([#225](https://github.com/praetorian-inc/noseyparker/pull/225)).
   This suppresses many innocuous errors that would previously be seen when scanning the root filesystem of a Linux system.
 
+- The category metadata for `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` has been expanded.
+
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)
 

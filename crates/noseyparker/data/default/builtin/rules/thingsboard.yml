@@ -25,6 +25,7 @@ rules:
   categories:
   - api
   - identifier
+  - secret
 
   examples:
   - http://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry
