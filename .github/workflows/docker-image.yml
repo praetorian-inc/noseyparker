@@ -100,16 +100,16 @@ jobs:
 
     - name: Inspect Docker image
       run: |
-        docker buildx imagetools inspect "${{ matrix.image }}@sha256:${{ steps.build.outputs.digest }}"
+        docker buildx imagetools inspect "${{ matrix.image }}@${{ steps.build.outputs.digest }}"
 
     - name: Test Docker image
-      run: docker run --rm "${{ matrix.image }}@sha256:${{ steps.build.outputs.digest }}" --version
+      run: docker run --rm "${{ matrix.image }}@${{ steps.build.outputs.digest }}" --version
 
     - name: Export digest
       run: |
         mkdir -p /tmp/digests
         digest="${{ steps.build.outputs.digest }}"
-        touch "/tmp/digests/${digest#sha256:}"
+        touch "/tmp/digests/$digest"
 
     - name: Upload digest
       uses: actions/upload-artifact@v4
@@ -165,7 +165,7 @@ jobs:
       run: |
         docker buildx imagetools create \
           $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-          $(printf '${{ matrix.image }}@sha256:%s ' *)
+          $(printf '${{ matrix.image }}@%s ' *)
 
     - name: Inspect Docker image
       run: |
