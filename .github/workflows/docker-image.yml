@@ -109,7 +109,7 @@ jobs:
       run: |
         mkdir -p /tmp/digests
         digest="${{ steps.build.outputs.digest }}"
-        touch "/tmp/digests/$digest"
+        touch "/tmp/digests/${digest#sha256:}"
 
     - name: Upload digest
       uses: actions/upload-artifact@v4
@@ -165,7 +165,7 @@ jobs:
       run: |
         docker buildx imagetools create \
           $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-          $(printf '${{ matrix.image }}@%s ' *)
+          $(printf '${{ matrix.image }}sha256:@%s ' *)
 
     - name: Inspect Docker image
       run: |
