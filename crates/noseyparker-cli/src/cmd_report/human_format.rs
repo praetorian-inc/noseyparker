@@ -166,9 +166,7 @@ impl<'a> Display for PrettyFinding<'a> {
                         if let Some(cs) = &e.first_commit {
                             let cmd = &cs.commit_metadata;
                             let msg = BStr::new(cmd.message.lines().next().unwrap_or(&[]));
-                            let atime = cmd
-                                .author_timestamp
-                                .format(time::macros::format_description!("[year]-[month]-[day]"));
+                            let atime = cmd.author_timestamp.format(gix::date::time::format::SHORT);
                             writeln!(
                                 f,
                                 "{} first seen in {}",

@@ -74,6 +74,7 @@ console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 flate2 = "1.0"
+gix = { version = "0.66", features = ["max-performance", "serde"] }
 indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
@@ -99,7 +100,6 @@ strum = { version = "0.26", features = ["derive"] }
 sysinfo = { version =  "0.30" }
 tar = "0.4"
 tempfile = "3.1"
-time = "0.3"
 tracing = "0.1"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-filter", "smallvec", "fmt"], default-features = false }
