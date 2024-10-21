@@ -11,7 +11,7 @@ impl DetailsReporter {
             Some(entry) => entry.m.blob_id.to_string(),
             None => bail!("Failed to get group match data for group {metadata:?}"),
         };
-        let message = sarif::MessageBuilder::default()
+        let message = sarif::Message::builder()
             .text(format!(
                 "Rule {:?} found {} {}.\nFirst blob id matched: {}",
                 metadata.rule_name,
@@ -23,7 +23,7 @@ impl DetailsReporter {
                 },
                 first_match_blob_id,
             ))
-            .build()?;
+            .build();
 
         // Will store every match location for the runs.results.location array property
         let locations: Vec<sarif::Location> = matches
@@ -42,25 +42,27 @@ impl DetailsReporter {
                     let additional_properties =
                         vec![(String::from("blob_metadata"), serde_json::json!(blob_metadata))];
 
-                    let mut artifact_location = sarif::ArtifactLocationBuilder::default();
-                    if let Some(path) = p.blob_path() {
-                        artifact_location.uri(path.to_string_lossy());
-                    }
-                    let artifact_location = artifact_location.build()?;
+                    let artifact_location = if let Some(path) = p.blob_path() {
+                        sarif::ArtifactLocation::builder()
+                            .uri(path.to_string_lossy())
+                            .build()
+                    } else {
+                        sarif::ArtifactLocation::builder().build()
+                    };
 
                     let additional_properties =
                         std::collections::BTreeMap::from_iter(additional_properties);
-                    let properties = sarif::PropertyBagBuilder::default()
+                    let properties = sarif::PropertyBag::builder()
                         .additional_properties(additional_properties)
-                        .build()?;
+                        .build();
 
-                    let location = sarif::LocationBuilder::default()
+                    let location = sarif::Location::builder()
                         .physical_location(
-                            sarif::PhysicalLocationBuilder::default()
+                            sarif::PhysicalLocation::builder()
                                 .artifact_location(artifact_location)
                                 // .context_region() FIXME: fill this in with location info of surrounding context
                                 .region(
-                                    sarif::RegionBuilder::default()
+                                    sarif::Region::builder()
                                         .start_line(source_span.start.line as i64)
                                         .start_column(source_span.start.column as i64)
                                         .end_line(source_span.end.line as i64)
@@ -71,20 +73,20 @@ impl DetailsReporter {
                                         .byte_length(offset_span.len() as i64)
                                         */
                                         .snippet(
-                                            sarif::ArtifactContentBuilder::default()
+                                            sarif::ArtifactContent::builder()
                                                 .text(m.snippet.matching.to_string())
-                                                .build()?,
+                                                .build(),
                                         )
-                                        .build()?,
+                                        .build(),
                                 )
-                                .build()?,
+                                .build(),
                         )
-                        .logical_locations([sarif::LogicalLocationBuilder::default()
+                        .logical_locations([sarif::LogicalLocation::builder()
                             .kind("blob")
                             .name(m.blob_id.to_string())
                             .properties(properties)
-                            .build()?])
-                        .build()?;
+                            .build()])
+                        .build();
                     Ok(location)
                 })
             })
@@ -94,7 +96,7 @@ impl DetailsReporter {
         let fingerprint = metadata.finding_id.clone();
 
         // Build the result for the match
-        let result = sarif::ResultBuilder::default()
+        let result = sarif::Result::builder()
             .rule_id(&metadata.rule_name)
             // .occurrence_count(locations.len() as i64)  // FIXME: enable?
             .message(message)
@@ -102,7 +104,7 @@ impl DetailsReporter {
             .locations(locations)
             .level(sarif::ResultLevel::Warning.to_string())
             .partial_fingerprints([(fingerprint_name, fingerprint)])
-            .build()?;
+            .build();
         Ok(result)
     }
 
@@ -116,17 +118,17 @@ impl DetailsReporter {
             findings.push(self.make_sarif_result(&finding)?);
         }
 
-        let run = sarif::RunBuilder::default()
+        let run = sarif::Run::builder()
             .tool(noseyparker_sarif_tool()?)
             .results(findings)
-            .build()?;
+            .build();
 
-        let sarif = sarif::SarifBuilder::default()
+        let sarif = sarif::Sarif::builder()
             .version(sarif::Version::V2_1_0.to_string())
             // .schema("https://docs.oasis-open.org/sarif/sarif/v2.1.0/cos02/schemas/sarif-schema-2.1.0.json")
             .schema(sarif::SCHEMA_URL)
             .runs([run])
-            .build()?;
+            .build();
 
         serde_json::to_writer(&mut writer, &sarif)?;
         writeln!(writer)?;
@@ -142,32 +144,32 @@ fn noseyparker_sarif_rules() -> Result<Vec<sarif::ReportingDescriptor>> {
         .context("Failed to load builtin rules")?
         .iter_rules()
         .map(|rule| {
-            let help = sarif::MultiformatMessageStringBuilder::default()
+            let help = sarif::MultiformatMessageString::builder()
                 .text(rule.references.join("\n"))
-                .build()?;
+                .build();
 
             // FIXME: add better descriptions to Nosey Parker rules
-            let description = sarif::MultiformatMessageStringBuilder::default()
+            let description = sarif::MultiformatMessageString::builder()
                 .text(&rule.pattern)
-                .build()?;
+                .build();
 
-            let rule = sarif::ReportingDescriptorBuilder::default()
+            let rule = sarif::ReportingDescriptor::builder()
                 .id(&rule.name) // FIXME: nosey parker rules need to have stable, unique IDs, preferably without spaces
                 // .name(&rule.name)  // FIXME: populate this once we have proper IDs
                 .short_description(description)
                 // .full_description(description)  // FIXME: populate this
                 .help(help) // FIXME: provide better help messages for NP rules that we can include here
                 // .help_uri() // FIXME: populate this
-                .build()?;
+                .build();
             Ok(rule)
         })
         .collect::<Result<Vec<_>>>()
 }
 
 fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
-    sarif::ToolBuilder::default()
+    let tool = sarif::Tool::builder()
         .driver(
-            sarif::ToolComponentBuilder::default()
+            sarif::ToolComponent::builder()
                 .name(env!("CARGO_PKG_NAME").to_string())
                 .semantic_version(env!("CARGO_PKG_VERSION").to_string())
                 .full_name(concat!("Nosey Parker ", env!("CARGO_PKG_VERSION"))) // FIXME: move into cargo.toml metadata, extract here; see https://docs.rs/cargo_metadata/latest/cargo_metadata/
@@ -176,13 +178,13 @@ fn noseyparker_sarif_tool() -> Result<sarif::Tool> {
                 .download_uri(env!("CARGO_PKG_REPOSITORY").to_string())
                 // .full_description() // FIXME: populate with some long description, like the text from the README.md
                 .short_description(
-                    sarif::MultiformatMessageStringBuilder::default()
+                    sarif::MultiformatMessageString::builder()
                         .text(env!("CARGO_PKG_DESCRIPTION"))
-                        .build()?,
+                        .build(),
                 )
                 .rules(noseyparker_sarif_rules()?)
-                .build()?,
+                .build(),
         )
-        .build()
-        .map_err(|e| e.into())
+        .build();
+    Ok(tool)
 }
