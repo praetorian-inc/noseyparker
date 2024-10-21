@@ -184,19 +184,17 @@ impl Progress {
 
     pub fn finish_with_message<T: Into<Cow<'static, str>>>(&mut self, message: T) {
         self.sync();
-        match &self.finish_style {
-            Some(style) => self.inner.set_style(style.clone()),
-            None => {}
-        };
+        if let Some(style) = &self.finish_style {
+            self.inner.set_style(style.clone());
+        }
         self.inner.finish_with_message(message);
     }
 
     pub fn finish(&mut self) {
         self.sync();
-        match &self.finish_style {
-            Some(style) => self.inner.set_style(style.clone()),
-            None => {}
-        };
+        if let Some(style) = &self.finish_style {
+            self.inner.set_style(style.clone());
+        }
         self.inner.finish();
     }
 
