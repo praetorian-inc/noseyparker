@@ -74,7 +74,7 @@ console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 flate2 = "1.0"
-gix = { version = "0.66", features = ["max-performance", "serde"] }
+gix = { version = "0.67", features = ["max-performance", "serde"] }
 indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
