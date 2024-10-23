@@ -74,6 +74,8 @@ rulesets:
   - np.grafana.2      # Grafana Cloud API Token
   - np.grafana.3      # Grafana Service Account Token
   - np.heroku.1       # Heroku API Key
+  - np.http.1         # HTTP Basic Authentication
+  - np.http.2         # HTTP Bearer Token
   - np.huggingface.1  # HuggingFace User Access Token
   - np.jenkins.1      # Jenkins Token or Crumb
   - np.jwt.1          # JSON Web Token (base64url-encoded)

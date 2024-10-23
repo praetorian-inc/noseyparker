@@ -1678,6 +1678,50 @@ expression: stdout
       }
     },
     {
+      "id": "np.http.1",
+      "structural_id": "250eb9efa54a4a3328c98963de788aa0c771d731",
+      "name": "HTTP Basic Authentication",
+      "syntax": {
+        "name": "HTTP Basic Authentication",
+        "id": "np.http.1",
+        "pattern": "(?x)(?i)\nAuthorization (?: :\\s+ | .{1, 5}) Basic \\s+\n( [A-Za-z0-9+/]{6,} ={0,2} )\n(?: [^A-Za-z0-9+/=] | $ )\n",
+        "examples": [
+          "Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://datatracker.ietf.org/doc/html/rfc7617",
+          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication"
+        ],
+        "categories": [
+          "secret",
+          "generic"
+        ]
+      }
+    },
+    {
+      "id": "np.http.2",
+      "structural_id": "ff27a5a20fb2d4890505f33f8a7da07e306b5046",
+      "name": "HTTP Bearer Token",
+      "syntax": {
+        "name": "HTTP Bearer Token",
+        "id": "np.http.2",
+        "pattern": "(?x)(?i)\nAuthorization (?: :\\s+ | .{1, 5}) Bearer \\s+\n([a-zA-z0-9._~+/-]{6,} =*)\n(?: [^a-zA-z0-9._~+/=-] | $ )\n",
+        "examples": [
+          "GET /resource HTTP/1.1\nHost: server.example.com\nAuthorization: Bearer mF_9.B5f-4.1JqM\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://datatracker.ietf.org/doc/html/rfc6750",
+          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication"
+        ],
+        "categories": [
+          "secret",
+          "generic"
+        ]
+      }
+    },
+    {
       "id": "np.huggingface.1",
       "structural_id": "81e7972fbf1522594ebfca0de8219aa319a234cb",
       "name": "HuggingFace User Access Token",
@@ -3508,7 +3552,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 124
+      "num_rules": 126
     },
     {
       "id": "np.assets",

@@ -74,6 +74,8 @@ expression: stdout
  np.grafana.2         Grafana Cloud API Token                                   api, secret 
  np.grafana.3         Grafana Service Account Token                             api, secret 
  np.heroku.1          Heroku API Key                                            api, fuzzy, secret 
+ np.http.1            HTTP Basic Authentication                                 generic, secret 
+ np.http.2            HTTP Bearer Token                                         generic, secret 
  np.huggingface.1     HuggingFace User Access Token                             api, secret 
  np.jenkins.1         Jenkins Token or Crumb                                    api, fuzzy, secret 
  np.jwt.1             JSON Web Token (base64url-encoded)                        api 
@@ -152,6 +154,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             124 
+ default      Nosey Parker default rules             126 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
