@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use regex::Regex;
 use std::collections::HashSet;
-use tracing::{debug_span, error, info, warn};
+use tracing::{error, error_span, info, warn};
 use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
 use noseyparker::rules_database::RulesDatabase;
@@ -12,7 +12,7 @@ use crate::rule_loader::RuleLoader;
 use crate::util::Counted;
 
 pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
-    let _span = debug_span!("cmd_rules_check").entered();
+    let _span = error_span!("cmd_rules_check").entered();
 
     let loaded = RuleLoader::from_rule_specifiers(&args.rules)
         .load()
@@ -107,8 +107,8 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     // - all referenced rules resolve
     // - all referenced rules are unique
     {
-        for (ruleset_num, ruleset) in rulesets.iter().enumerate() {
-            let _span = debug_span!("ruleset", "{}:{}", ruleset_num + 1, ruleset.name).entered();
+        for ruleset in rulesets.iter() {
+            let _span = error_span!("ruleset", "{}", ruleset.id).entered();
             if let Err(e) = loaded.resolve_ruleset_rules(ruleset) {
                 error!("Failed to resolve rules: {e}");
                 num_errors += 1;
@@ -125,8 +125,8 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     }
 
     // check the rules individually
-    for (rule_num, rule) in rules.iter().enumerate() {
-        let stats = check_rule(rule_num, rule)?;
+    for rule in rules.iter() {
+        let stats = check_rule(rule)?;
         num_errors += stats.num_errors;
         num_warnings += stats.num_warnings;
     }
@@ -199,9 +199,9 @@ struct CheckStats {
     num_errors: usize,
 }
 
-fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
+fn check_rule(rule: &Rule) -> Result<CheckStats> {
     let syntax = rule.syntax();
-    let _span = debug_span!("rule", "{}:{}", rule_num + 1, syntax.name).entered();
+    let _span = error_span!("rule", "{}", syntax.id).entered();
 
     let mut num_warnings = 0;
     let mut num_errors = 0;
@@ -230,7 +230,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             // Check positive examples
             for (example_num, example) in syntax.examples.iter().enumerate() {
                 if pat.find(example.as_bytes()).is_none() {
-                    error!("Regex: failed to match example {example_num}");
+                    error!("Regex: failed to match example {example_num}: {example:?}");
                     num_failed += 1;
                     num_errors += 1;
                 } else {
@@ -241,7 +241,9 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
             // Check negative examples
             for (example_num, example) in syntax.negative_examples.iter().enumerate() {
                 if pat.find(example.as_bytes()).is_some() {
-                    error!("Regex: incorrectly matched negative example {example_num}");
+                    error!(
+                        "Regex: incorrectly matched negative example {example_num}: {example:?}"
+                    );
                     num_failed += 1;
                     num_errors += 1;
                 } else {
@@ -283,7 +285,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
                     Scan::Continue
                 })?;
                 if !matched {
-                    error!("Vectorscan: failed to match example {example_num}");
+                    error!("Vectorscan: failed to match example {example_num}: {example:?}");
                     num_failed += 1;
                     num_errors += 1;
                 } else {
@@ -299,7 +301,7 @@ fn check_rule(rule_num: usize, rule: &Rule) -> Result<CheckStats> {
                     Scan::Continue
                 })?;
                 if matched {
-                    error!("Vectorscan: incorrectly matched negative example {example_num}");
+                    error!("Vectorscan: incorrectly matched negative example {example_num}: {example:?}");
                     num_failed += 1;
                     num_errors += 1;
                 } else {
