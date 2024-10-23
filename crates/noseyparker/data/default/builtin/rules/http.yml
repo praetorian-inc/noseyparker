@@ -1,0 +1,42 @@
+rules:
+
+
+- name: HTTP Basic Authentication
+  id: np.http.1
+
+  pattern: |
+    (?x)(?i)
+    Authorization (?: :\s+ | .{1, 5}) Basic \s+
+    ( [A-Za-z0-9+/]{6,} ={0,2} )
+    (?: [^A-Za-z0-9+/=] | $ )
+
+  examples:
+  - 'Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
+
+  references:
+  - https://datatracker.ietf.org/doc/html/rfc7617
+  - https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+
+  categories: [secret, generic]
+
+
+- name: HTTP Bearer Token
+  id: np.http.2
+
+  pattern: |
+    (?x)(?i)
+    Authorization (?: :\s+ | .{1, 5}) Bearer \s+
+    ([a-zA-z0-9._~+/-]{6,} =*)
+    (?: [^a-zA-z0-9._~+/=-] | $ )
+
+  examples:
+  - |
+      GET /resource HTTP/1.1
+      Host: server.example.com
+      Authorization: Bearer mF_9.B5f-4.1JqM
+
+  references:
+  - https://datatracker.ietf.org/doc/html/rfc6750
+  - https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+
+  categories: [secret, generic]
