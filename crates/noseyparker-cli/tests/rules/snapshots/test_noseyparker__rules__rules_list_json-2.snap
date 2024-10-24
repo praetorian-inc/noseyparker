@@ -1695,6 +1695,7 @@ expression: stdout
         ],
         "categories": [
           "secret",
+          "fuzzy",
           "generic"
         ]
       }
@@ -1717,6 +1718,7 @@ expression: stdout
         ],
         "categories": [
           "secret",
+          "fuzzy",
           "generic"
         ]
       }
@@ -2473,6 +2475,32 @@ expression: stdout
         "references": [
           "https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail",
           "https://datatracker.ietf.org/doc/html/rfc7468"
+        ],
+        "categories": [
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.postgres.1",
+      "structural_id": "300f740ecacef15f3e529f976f3db2e60a5cc6d8",
+      "name": "Credentials in PostgreSQL Connection URI",
+      "syntax": {
+        "name": "Credentials in PostgreSQL Connection URI",
+        "id": "np.postgres.1",
+        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9.-~]{3,32})                                (?# username)\n: ([a-zA-Z0-9.-~]{3,32})                                (?# password)\n@ ([^:/]{3,64} (?: :\\d{1,5})?)                          (?# hostname)\n(/[^/?]{2,64})                                          (?# database)\n(?: [/?] | $ )\n",
+        "examples": [
+          "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
+          "postgresql://user:secret@localhost/database",
+          "postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp"
+        ],
+        "negative_examples": [
+          "postgresql://user:secret@[2001:db8::1234]/database",
+          "postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp",
+          "postgresql:///mydb?host=localhost&port=5433&user=user&password=secret"
+        ],
+        "references": [
+          "https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING"
         ],
         "categories": [
           "secret"
@@ -3552,7 +3580,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 126
+      "num_rules": 127
     },
     {
       "id": "np.assets",

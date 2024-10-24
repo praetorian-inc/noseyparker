@@ -17,7 +17,7 @@ rules:
   - https://datatracker.ietf.org/doc/html/rfc7617
   - https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 
-  categories: [secret, generic]
+  categories: [secret, fuzzy, generic]
 
 
 - name: HTTP Bearer Token
@@ -39,4 +39,4 @@ rules:
   - https://datatracker.ietf.org/doc/html/rfc6750
   - https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 
-  categories: [secret, generic]
+  categories: [secret, fuzzy, generic]
