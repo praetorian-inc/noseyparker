@@ -22,9 +22,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
-  - `Credentials in PostgreSQL Connection URI`
+  - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `HTTP Basic Authentication`
   - `HTTP Bearer Token`
+  - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
 
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)

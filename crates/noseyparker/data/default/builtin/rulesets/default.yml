@@ -104,6 +104,7 @@ rulesets:
   - np.particleio.2   # particle.io Access Token
   - np.pem.1          # PEM-Encoded Private Key
   - np.pem.2          # Base64-PEM-Encoded Private Key
+  - np.phpmailer.1    # PHPMailer Credentials
   - np.postgres.1     # Credentials in PostgreSQL Connection URI
   - np.postman.1      # Postman API Key
   - np.psexec.1       # Credentials in PsExec

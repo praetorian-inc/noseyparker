@@ -241,6 +241,7 @@ impl<'a> Matcher<'a> {
                 let end_idx: usize = end_idx.try_into().unwrap();
                 let rule = &rules[rule_id];
                 let re = &anchored_regexes[rule_id];
+
                 // second-stage regex match
                 let captures = match re.captures(&blob.bytes[start_idx..end_idx]) {
                     None => {

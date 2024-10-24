@@ -2482,13 +2482,34 @@ expression: stdout
       }
     },
     {
+      "id": "np.phpmailer.1",
+      "structural_id": "afcb1b528dcec338f828917ea4678ff321c701d8",
+      "name": "PHPMailer Credentials",
+      "syntax": {
+        "name": "PHPMailer Credentials",
+        "id": "np.phpmailer.1",
+        "pattern": "(?x)\n\\$mail->Host     \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n\\s* .* \\s*\n\\$mail->Username \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n\\s* .* \\s*\n\\$mail->Password \\s* = \\s* '([^'\\n]{5,})';\n",
+        "examples": [
+          "//Server settings\n$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output\n$mail->isSMTP();                                            //Send using SMTP\n$mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through\n$mail->SMTPAuth   = true;                                   //Enable SMTP authentication\n$mail->Username   = 'user@example.com';                     //SMTP username\n$mail->Password   = 'secret';                               //SMTP password\n$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption\n$mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://github.com/PHPMailer/PHPMailer"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.postgres.1",
-      "structural_id": "300f740ecacef15f3e529f976f3db2e60a5cc6d8",
+      "structural_id": "d1b558227cf1fa521f2db96bac75c1914554d667",
       "name": "Credentials in PostgreSQL Connection URI",
       "syntax": {
         "name": "Credentials in PostgreSQL Connection URI",
         "id": "np.postgres.1",
-        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9.-~]{3,32})                                (?# username)\n: ([a-zA-Z0-9.-~]{3,32})                                (?# password)\n@ ([^:/]{3,64} (?: :\\d{1,5})?)                          (?# hostname)\n(/[^/?]{2,64})                                          (?# database)\n(?: [/?] | $ )\n",
+        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9.-~]{3,})                                  (?# username)\n: ([a-zA-Z0-9.-~]{3,})                                  (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(/[a-zA-Z0-9_.-]{2,})                                   (?# database)\n(?: \\? [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+\n       (?: & [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+ )* )?    (?# query params )\n(?: [^a-zA-Z0-9.-~] | $ )\n",
         "examples": [
           "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
           "postgresql://user:secret@localhost/database",
@@ -3580,7 +3601,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 127
+      "num_rules": 128
     },
     {
       "id": "np.assets",

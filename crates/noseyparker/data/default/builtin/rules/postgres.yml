@@ -7,11 +7,13 @@ rules:
   pattern: |
     (?x)
     (?: postgres | postgresql ) ://                         (?# URI scheme )
-      ([a-zA-Z0-9.-~]{3,32})                                (?# username)
-    : ([a-zA-Z0-9.-~]{3,32})                                (?# password)
-    @ ([^:/]{3,64} (?: :\d{1,5})?)                          (?# hostname)
-    (/[^/?]{2,64})                                          (?# database)
-    (?: [/?] | $ )
+      ([a-zA-Z0-9.-~]{3,})                                  (?# username)
+    : ([a-zA-Z0-9.-~]{3,})                                  (?# password)
+    @ ([a-zA-Z0-9_.-]{3,} (?: :\d{1,5})?)                   (?# hostname and port)
+    (/[a-zA-Z0-9_.-]{2,})                                   (?# database)
+    (?: \? [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+
+           (?: & [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+ )* )?    (?# query params )
+    (?: [^a-zA-Z0-9.-~] | $ )
 
   categories: [secret]
 
