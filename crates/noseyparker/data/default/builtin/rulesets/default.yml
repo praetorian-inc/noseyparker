@@ -33,6 +33,7 @@ rulesets:
   - np.codeclimate.1  # CodeClimate
   - np.cratesio.1     # crates.io API Key
   - np.databricks.1   # Databricks Personal Access Token
+  - np.django.1       # Django Secret Key
   - np.dtrack.1       # Dependency-Track API Key
   - np.digitalocean.1 # DigitalOcean Application Access Token
   - np.digitalocean.2 # DigitalOcean Personal Access Token
