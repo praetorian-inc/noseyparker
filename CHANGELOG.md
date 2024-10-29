@@ -16,7 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Lockfiles from a few languages (e.g., `Cargo.lock`, `Pipfile.lock`) are now ignored by default.
 
-- The category metadata for `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` has been expanded.
+- Rules have been modified:
+  - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` have expanded category metdata.
+  - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
 
 ### Additions
 

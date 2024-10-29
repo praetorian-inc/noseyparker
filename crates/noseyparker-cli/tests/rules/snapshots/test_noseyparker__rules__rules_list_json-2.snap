@@ -691,12 +691,12 @@ expression: stdout
     },
     {
       "id": "np.django.1",
-      "structural_id": "76c4e8b87de3995c092f43d2bba1e3d672f69a86",
+      "structural_id": "da64b83c14b6ed50fb3f644c8f4243e1c2e5d9f6",
       "name": "Django Secret Key",
       "syntax": {
         "name": "Django Secret Key",
         "id": "np.django.1",
-        "pattern": "(?x)\n#\\ SECURITY\\ WARNING:\\ keep\\ the\\ secret\\ key\\ used\\ in\\ production\\ secret! \\s*\n.{0,5} SECRET_KEY \\s* = \\s* r?[\"'] ([^\"'\\n]{5,100}) [\"']\n",
+        "pattern": "(?x)\n\\#\\ SECURITY\\ WARNING:\\ keep\\ the\\ secret\\ key\\ used\\ in\\ production\\ secret! \\s*\n.{0,5} SECRET_KEY \\s* = \\s* r?[\"'] ([^\"'\\n]{5,100}) [\"']\n",
         "examples": [
           "# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_du9e^cmago!%(^+=gr@cu@v9-v7ulhbk2s3!w&39w4+n3*k*$'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n",
           "# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\n# SECRET_KEY = 'django-insecure-_du9e^cmago!%(^+=gr@cu@v9-v7ulhbk2s3!w&39w4+n3*k*$'\nSECRET_KEY = 'hmm'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n"
@@ -2317,12 +2317,12 @@ expression: stdout
     },
     {
       "id": "np.odbc.1",
-      "structural_id": "630c1001441e63d74fea2a730a5196ee38ac818b",
+      "structural_id": "6acf132b0cc66853bd5da65ce86f680e7147c003",
       "name": "Credentials in ODBC Connection String",
       "syntax": {
         "name": "Credentials in ODBC Connection String",
         "id": "np.odbc.1",
-        "pattern": "(?x)(?i)\n(?: User | User\\ Id | UserId | Uid) \\s*=\\s* ([^\\s;]{3,100}) \\s* ;\n[\\ \\t]* .{0,10} [\\ \\t]*  (?# possible extra stuff, e.g., string concatenation)\n(?: Password | Pwd) \\s*=\\s* ([^\\t\\ ;]{3,100}) \\s* (?: [;] | $)\n",
+        "pattern": "(?x)(?i)\n(?: User | User\\ Id | UserId | Uid) \\s*=\\s* ([^\\s;]{3,100}) \\s* ;\n[\\ \\t]* .{0,10} [\\ \\t]*  (?# possible extra stuff, e.g., string concatenation)\n(?: Password | Pwd) \\s*=\\s* ([^\\t\\ ;]{3,100})\n\\s* (?: [;\"'] | $)\n",
         "examples": [
           "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = \\\"goodspec\\\";",
           "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = goodspec;",
@@ -2332,7 +2332,8 @@ expression: stdout
           "Data Source=190.190.200.100,1433;Network_library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;",
           "Provider=SQLNCLI;Server=myServerName,myPortNumber;Database=myDataBase;Uid=myUsername;Pwd=myPassword;",
           "    adoConn.Open(\"Provider=SQLOLEDB.1;User ID=specialbill_user; \" & \"Password =specialbill_user;Initial Catalog=SpecialBill_PROD;Data Source=uszdba01;\")",
-          "\"driver={SQL Server};server=(#{datastore['DBHOST']});database=#{datastore['DBNAME']};uid=#{datastore['DBUID']};pwd=#{datastore['DBPASSWORD']}\"\n"
+          "\"driver={SQL Server};server=(#{datastore['DBHOST']});database=#{datastore['DBNAME']};uid=#{datastore['DBUID']};pwd=#{datastore['DBPASSWORD']}\"\n",
+          "<add name=\"DevQATrucks\" connectionString=\"Server=hookupsqlqa1\\gpkqa; Database=YogurtDelay: User Id=kmwulfliq; password= sK!g2Ex_=jJ6Gx5v\" providerName=\"System.Data.SqlClient\" />"
         ],
         "negative_examples": [
           "def login(self, user = '', password = '', domain = ''):",
@@ -2506,14 +2507,15 @@ expression: stdout
     },
     {
       "id": "np.phpmailer.1",
-      "structural_id": "afcb1b528dcec338f828917ea4678ff321c701d8",
+      "structural_id": "d6cefbc0eb75afeabb5915dd45dcbf8697380120",
       "name": "PHPMailer Credentials",
       "syntax": {
         "name": "PHPMailer Credentials",
         "id": "np.phpmailer.1",
-        "pattern": "(?x)\n\\$mail->Host     \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n\\s* .* \\s*\n\\$mail->Username \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n\\s* .* \\s*\n\\$mail->Password \\s* = \\s* '([^'\\n]{5,})';\n",
+        "pattern": "(?x)\n\\$mail->Host     \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n(?: \\s* .* \\s* ){0,3}\n\\$mail->Username \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n(?: \\s* .* \\s* ){0,3}\n\\$mail->Password \\s* = \\s* '([^'\\n]{5,})';\n",
         "examples": [
-          "//Server settings\n$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output\n$mail->isSMTP();                                            //Send using SMTP\n$mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through\n$mail->SMTPAuth   = true;                                   //Enable SMTP authentication\n$mail->Username   = 'user@example.com';                     //SMTP username\n$mail->Password   = 'secret';                               //SMTP password\n$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption\n$mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`\n"
+          "//Server settings\n$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output\n$mail->isSMTP();                                            //Send using SMTP\n$mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through\n$mail->SMTPAuth   = true;                                   //Enable SMTP authentication\n$mail->Username   = 'user@example.com';                     //SMTP username\n$mail->Password   = 'secret';                               //SMTP password\n$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption\n$mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`\n",
+          "require 'PHPMailerAutoload.php';\n\nfunction SendMail($sub,$to,$msg)\n{\n    $mail = new PHPMailer;\n    $mail->isSMTP();                                      // Set mailer to use SMTP\n    $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers\n    $mail->SMTPAuth = true;                               // Enable SMTP authentication\n    $mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted\n    $mail->Username = 'ersatz.technologies@example.com';                 // SMTP username\n\n\n\n    $mail->Password = 'un!techwhooah';                           // SMTP password\n    $mail->From = 'from@example.com';\n    $mail->FromName = 'Admin';\n"
         ],
         "negative_examples": [],
         "references": [
