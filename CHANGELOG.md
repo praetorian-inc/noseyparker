@@ -14,16 +14,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `/proc`, `/sys`, and `/dev` paths (special filesystems on Linux) are now ignored by default ([#225](https://github.com/praetorian-inc/noseyparker/pull/225)).
   This suppresses many innocuous errors that would previously be seen when scanning the root filesystem of a Linux system.
 
-- Lockfiles from a few languages (e.g., `Cargo.lock`, `Pipfile.lock`) are now ignored by default.
+- Lockfiles from a few languages (e.g., `Cargo.lock`, `Pipfile.lock`, `go.sum`) are now ignored by default.
 
-- The category metadata for `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` has been expanded.
+- Rules have been modified:
+  - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` have expanded category metdata.
+  - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
 
 ### Additions
 
 - New rules have been added:
 
+  - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+  - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `HTTP Basic Authentication`
   - `HTTP Bearer Token`
+  - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
 
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)

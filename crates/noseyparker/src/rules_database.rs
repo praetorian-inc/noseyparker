@@ -27,6 +27,10 @@ impl RulesDatabase {
             .enumerate()
             .map(|(id, r)| {
                 let id = id.try_into().unwrap();
+                // We *can* enable SOM_LEFTMOST if rules are carefully written. But it seems to
+                // reduce scan performance and increase memory use notably. So skip it!
+                //
+                // Pattern::new(r.syntax().pattern.clone().into_bytes(), Flag::default() | Flag::SOM_LEFTMOST, Some(id))
                 Pattern::new(r.syntax().pattern.clone().into_bytes(), Flag::default(), Some(id))
             })
             .collect::<Vec<Pattern>>();
@@ -50,19 +54,10 @@ impl RulesDatabase {
         })
     }
 
-    // pub fn serialize(&self) -> Result<()> {
-    //     let bytes = self.vsdb.serialize()?;
-    //     debug!("{} bytes for serialized database", bytes.len());
-    //     panic!("unimplemented!");
-    //     // Ok(())
-    // }
-
-    #[inline]
     pub fn num_rules(&self) -> usize {
         self.rules.len()
     }
 
-    #[inline]
     pub fn get_rule(&self, index: usize) -> Option<&Rule> {
         self.rules.get(index)
     }

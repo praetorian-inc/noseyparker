@@ -7,7 +7,8 @@ rules:
     (?x)(?i)
     (?: User | User\ Id | UserId | Uid) \s*=\s* ([^\s;]{3,100}) \s* ;
     [\ \t]* .{0,10} [\ \t]*  (?# possible extra stuff, e.g., string concatenation)
-    (?: Password | Pwd) \s*=\s* ([^\t\ ;]{3,100}) \s* (?: [;] | $)
+    (?: Password | Pwd) \s*=\s* ([^\t\ ;]{3,100})
+    \s* (?: [;"'] | $)
 
   categories: [fuzzy, secret]
 
@@ -22,6 +23,8 @@ rules:
   - '    adoConn.Open("Provider=SQLOLEDB.1;User ID=specialbill_user; " & "Password =specialbill_user;Initial Catalog=SpecialBill_PROD;Data Source=uszdba01;")'
   - |
       "driver={SQL Server};server=(#{datastore['DBHOST']});database=#{datastore['DBNAME']};uid=#{datastore['DBUID']};pwd=#{datastore['DBPASSWORD']}"
+
+  - '<add name="DevQATrucks" connectionString="Server=hookupsqlqa1\gpkqa; Database=YogurtDelay: User Id=kmwulfliq; password= sK!g2Ex_=jJ6Gx5v" providerName="System.Data.SqlClient" />'
 
   negative_examples:
   - "def login(self, user = '', password = '', domain = ''):"

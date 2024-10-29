@@ -1,0 +1,50 @@
+rules:
+
+- name: PHPMailer Credentials
+  id: np.phpmailer.1
+
+  pattern: |
+    (?x)
+    \$mail->Host     \s* = \s* '([^'\n]{5,})'; \s* (?: //.* )?
+    (?: \s* .* \s* ){0,3}
+    \$mail->Username \s* = \s* '([^'\n]{5,})'; \s* (?: //.* )?
+    (?: \s* .* \s* ){0,3}
+    \$mail->Password \s* = \s* '([^'\n]{5,})';
+
+  categories: [fuzzy, secret]
+
+  examples:
+  - |
+      //Server settings
+      $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+      $mail->isSMTP();                                            //Send using SMTP
+      $mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through
+      $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+      $mail->Username   = 'user@example.com';                     //SMTP username
+      $mail->Password   = 'secret';                               //SMTP password
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+      $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+  - |
+      require 'PHPMailerAutoload.php';
+
+      function SendMail($sub,$to,$msg)
+      {
+          $mail = new PHPMailer;
+          $mail->isSMTP();                                      // Set mailer to use SMTP
+          $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
+          $mail->SMTPAuth = true;                               // Enable SMTP authentication
+          $mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted
+          $mail->Username = 'ersatz.technologies@example.com';                 // SMTP username
+
+
+
+          $mail->Password = 'un!techwhooah';                           // SMTP password
+          $mail->From = 'from@example.com';
+          $mail->FromName = 'Admin';
+
+
+  negative_examples:
+
+  references:
+  - https://github.com/PHPMailer/PHPMailer

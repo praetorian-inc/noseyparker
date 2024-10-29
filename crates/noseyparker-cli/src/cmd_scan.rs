@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-use tracing::{debug, debug_span, error, info, trace, warn};
+use tracing::{debug, error, error_span, info, trace, warn};
 
 use crate::{args, rule_loader::RuleLoader};
 
@@ -658,22 +658,28 @@ struct BlobProcessor<'a> {
 impl<'a> BlobProcessor<'a> {
     fn run(&mut self, provenance: ProvenanceSet, blob: Blob) -> Result<Option<DatastoreMessage>> {
         let blob_id = blob.id.hex();
-        let _span = debug_span!("matcher", blob_id).entered();
+        let _span = error_span!("matcher", blob_id, bytes = blob.len()).entered();
 
-        let t1 = Instant::now();
-        let res = self.matcher.scan_blob(&blob, &provenance)?;
-        let scan_us = t1.elapsed().as_micros();
+        let (res, scan_us, scan_mbps) = if tracing::enabled!(tracing::Level::TRACE) {
+            let t1 = Instant::now();
+            let res = self.matcher.scan_blob(&blob, &provenance)?;
+            let t1e = t1.elapsed();
+            (res, t1e.as_micros(), blob.len() as f64 / 1024.0 / 1024.0 / t1e.as_secs_f64())
+        } else {
+            let res = self.matcher.scan_blob(&blob, &provenance)?;
+            (res, Default::default(), Default::default())
+        };
 
         match res {
             // blob already seen, but with no matches; nothing to do!
             ScanResult::SeenSansMatches => {
-                trace!("({scan_us}us) blob already scanned with no matches");
+                trace!(us = scan_us, mbps = scan_mbps, status = "seen_nomatch");
                 Ok(None)
             }
 
             // blob already seen; all we need to do is record its provenance
             ScanResult::SeenWithMatches => {
-                trace!("({scan_us}us) blob already scanned with matches");
+                trace!(us = scan_us, mbps = scan_mbps, status = "seen_match");
                 let metadata = BlobMetadata {
                     id: blob.id,
                     num_bytes: blob.len(),
@@ -685,7 +691,7 @@ impl<'a> BlobProcessor<'a> {
 
             // blob has not been seen; need to record blob metadata, provenance, and matches
             ScanResult::New(matches) => {
-                trace!("({scan_us}us) blob newly scanned; {} matches", matches.len());
+                trace!(us = scan_us, mbps = scan_mbps, status = "new", matches = matches.len());
 
                 let do_copy_blob = match self.copy_blobs {
                     args::CopyBlobsMode::All => true,
@@ -921,7 +927,7 @@ fn datastore_writer(
     mut datastore: Datastore,
     recv_ds: crossbeam_channel::Receiver<DatastoreMessage>,
 ) -> Result<(Datastore, u64, u64)> {
-    let _span = debug_span!("datastore", "{}", datastore.root_dir().display()).entered();
+    let _span = error_span!("datastore", "{}", datastore.root_dir().display()).entered();
     let mut total_recording_time: std::time::Duration = Default::default();
 
     let mut num_matches_added: u64 = 0;
