@@ -535,6 +535,10 @@ pub struct RulesCheckArgs {
     /// Treat warnings as errors
     pub warnings_as_errors: bool,
 
+    #[arg(long)]
+    /// Perform additional nit-picking checks
+    pub pedantic: bool,
+
     #[command(flatten)]
     pub rules: RuleSpecifierArgs,
 }

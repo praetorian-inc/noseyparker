@@ -126,7 +126,7 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
 
     // check the rules individually
     for rule in rules.iter() {
-        let stats = check_rule(rule)?;
+        let stats = check_rule(rule, args)?;
         num_errors += stats.num_errors;
         num_warnings += stats.num_warnings;
     }
@@ -151,6 +151,8 @@ pub fn run(_global_args: &GlobalArgs, args: &RulesCheckArgs) -> Result<()> {
     let rules: Vec<Rule> = rules.into_iter().cloned().collect();
     let _rules_db =
         RulesDatabase::from_rules(rules).context("Failed to compile combined rules database")?;
+
+    // XXX: if args.pedantic, should check that all rules compile together with SOM_LEFTMOST
 
     if num_warnings == 0 && num_errors == 0 {
         println!(
@@ -186,20 +188,22 @@ fn hs_compile_pattern(pat: &str) -> Result<BlockDatabase> {
     Ok(db)
 }
 
-// fn hs_compile_pattern_streaming(pat: &str) -> Result<StreamingDatabase> {
-//     let pattern = pattern!{pat};
-//     let mut pattern = pattern.left_most();
-//     pattern.som = Some(vectorscan_rs::SomHorizon::Large);
-//     let db: StreamingDatabase = pattern.build()?;
-//     Ok(db)
-// }
+fn hs_compile_pattern_som_leftmost(pat: &str) -> Result<BlockDatabase> {
+    let pat = pat.as_bytes().to_vec();
+    let db = BlockDatabase::new(vec![Pattern::new(
+        pat,
+        Flag::default() | Flag::SOM_LEFTMOST,
+        None,
+    )])?;
+    Ok(db)
+}
 
 struct CheckStats {
     num_warnings: usize,
     num_errors: usize,
 }
 
-fn check_rule(rule: &Rule) -> Result<CheckStats> {
+fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
     let syntax = rule.syntax();
     let _span = error_span!("rule", "{}", syntax.id).entered();
 
@@ -258,14 +262,6 @@ fn check_rule(rule: &Rule) -> Result<CheckStats> {
         }
     };
 
-    // match hs_compile_pattern_streaming(&rule.pattern) {
-    //     Err(e) => {
-    //         error!("Vectorscan: failed to compile streaming pattern: {}", e);
-    //         num_errors += 1;
-    //     }
-    //     Ok(_db) => {}
-    // }
-
     match hs_compile_pattern(&syntax.uncommented_pattern()) {
         Err(e) => {
             error!("Vectorscan: failed to compile pattern: {e}");
@@ -313,6 +309,13 @@ fn check_rule(rule: &Rule) -> Result<CheckStats> {
             if num_total > 0 {
                 info!("Vectorscan: {num_succeeded}/{num_total} examples succeeded");
             }
+        }
+    }
+
+    if args.pedantic {
+        if let Err(e) = hs_compile_pattern_som_leftmost(&syntax.uncommented_pattern()) {
+            error!("Vectorscan: failed to compile pattern with start-of-match reporting: {}", e);
+            num_errors += 1;
         }
     }
 
