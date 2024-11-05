@@ -2,7 +2,7 @@ rules:
 
 - name: Artifactory API Key
   id: np.artifactory.1
-  # FIXME: all the real onces start with `AKC`?
+  # FIXME: all the real ones start with `AKC`?
   pattern: '(?i)artifactory.{0,50}\b([a-z0-9]{73})\b'
 
   examples:
