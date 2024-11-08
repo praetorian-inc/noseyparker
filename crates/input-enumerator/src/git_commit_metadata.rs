@@ -45,8 +45,7 @@ mod text_time {
     }
 
     pub fn serialize<S: serde::Serializer>(v: &Time, serializer: S) -> Result<S::Ok, S::Error> {
-        // XXX any way to do this without allocating?
-        serializer.serialize_str(&v.to_bstring().to_string())
+        serializer.collect_str(&v.to_bstring())
     }
 
     pub fn deserialize<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Time, D::Error> {

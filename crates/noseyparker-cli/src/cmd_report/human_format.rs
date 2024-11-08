@@ -193,7 +193,7 @@ impl<'a> Display for PrettyFinding<'a> {
                             writeln!(f)?;
                         }
                     }
-                    // FIXME(overhaul): implement this case properly
+                    // FIXME: implement this case properly
                     Provenance::Extended(e) => {
                         writeln!(
                             f,

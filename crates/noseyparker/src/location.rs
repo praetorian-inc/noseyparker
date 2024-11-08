@@ -148,7 +148,7 @@ impl LocationMapping {
     /// Panics if the given `OffsetSpan` is not valid for this `LocationMapping`.
     pub fn get_source_span(&self, span: &OffsetSpan) -> SourceSpan {
         let start = self.offset_to_source[span.start];
-        let end = self.offset_to_source[span.end.saturating_sub(1)]; // FIXME: is this right?
+        let end = self.offset_to_source[span.end.saturating_sub(1)]; // XXX: is this right?
                                                                      // let end = self.offset_to_source[span.end];
         SourceSpan { start, end }
     }
