@@ -88,6 +88,8 @@ rules:
   references:
   - https://cloud.google.com/docs/authentication/api-keys#securing
   - https://support.google.com/googleapi/answer/6310037
+  # Note: the following reference claims that as far as Google is concerned, API keys that start with `AIza` are public.
+  # Though other Google resources disagree.
   - https://bughunters.google.com/learn/invalid-reports/google-products/5222475159961600/understanding-api-key-leaks
 
   examples:
