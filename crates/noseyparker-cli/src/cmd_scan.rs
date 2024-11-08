@@ -509,7 +509,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         let field_content = Arc::new(field_content);
         let writer_pool = writer_pool.clone();
 
-        move |_provenance: &ProvenanceSet, blob: &Blob| -> Result<()> {
+        move |blob: &Blob| -> Result<()> {
             use arrow_array::{ArrayRef, BinaryArray, RecordBatch, StringArray, StructArray};
 
             let mut writer = writer_pool
@@ -740,7 +740,7 @@ struct BlobProcessor<'a> {
     snippet_length: usize,
     blob_metadata_recording_mode: args::BlobMetadataMode,
     copy_blobs_mode: args::CopyBlobsMode,
-    copy_blob: Box<dyn Fn(&ProvenanceSet, &Blob) -> Result<()>>,
+    copy_blob: Box<dyn Fn(&Blob) -> Result<()>>,
 }
 
 impl<'a> BlobProcessor<'a> {
@@ -787,7 +787,7 @@ impl<'a> BlobProcessor<'a> {
                     args::CopyBlobsMode::None => false,
                 };
                 if do_copy {
-                    (self.copy_blob)(&provenance, &blob).context("Failed to copy blob")?;
+                    (self.copy_blob)(&blob).context("Failed to copy blob")?;
                 }
 
                 // If there are no matches, we can bail out here and avoid recording anything.
