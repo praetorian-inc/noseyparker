@@ -215,6 +215,15 @@ Metadata Collection Options:
             blob is first seen
           - minimal:    Only the Git repository in which a blob is seen
 
+      --copy-blobs-format <FORMAT>
+          Specify the format for blobs copied by the `--copy-blobs` option
+          
+          [default: parquet]
+
+          Possible values:
+          - parquet: Parquet format
+          - files:   Plain files, similar to Git's loose object format
+
 Data Collection Options:
       --snippet-length <BYTES>
           Include up to the specified number of bytes before and after each match

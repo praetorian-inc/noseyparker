@@ -151,7 +151,7 @@ fn scan_fs_1() {
     });
 }
 
-// N.B. a macro instead of a function to avoid clobbering snapshot files produced here
+// N.B. using a macro instead of a function here to avoid clobbering snapshot files
 macro_rules! scan_enumerator_common {
     ($scan_env:expr, $enumerator_input:expr) => {
         noseyparker_success!("scan", "-d", $scan_env.dspath(), "--enumerator", $enumerator_input.path())

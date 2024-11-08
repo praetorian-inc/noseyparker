@@ -2805,6 +2805,7 @@ dependencies = [
  "crossbeam-channel",
  "flate2",
  "gix",
+ "glob",
  "indenter",
  "indicatif",
  "indoc",

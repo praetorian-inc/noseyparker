@@ -46,6 +46,8 @@ Metadata Collection Options:
                                     matching] [possible values: all, matching, none]
       --git-blob-provenance <MODE>  Specify which Git commit provenance metadata will be collected
                                     [default: first-seen] [possible values: first-seen, minimal]
+      --copy-blobs-format <FORMAT>  Specify the format for blobs copied by the `--copy-blobs` option
+                                    [default: parquet] [possible values: parquet, files]
 
 Data Collection Options:
       --snippet-length <BYTES>  Include up to the specified number of bytes before and after each
