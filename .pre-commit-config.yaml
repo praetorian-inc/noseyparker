@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
 
     hooks:
     -   id: check-added-large-files
@@ -25,7 +25,6 @@ repos:
 exclude: |
   (?x)
   ^
-  ( crates/vectorscan-sys/vectorscan.*        (?# vendored sources )
-  | .*\.snap$                                 (?# insta.rs test cases )
+  ( .*\.snap$                                 (?# insta.rs test cases )
   | docs/v0\.17\.0/.*                         (?# manpages for convenience )
   ) $
