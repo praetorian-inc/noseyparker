@@ -11,7 +11,7 @@ pub use assert_fs::{fixture::ChildPath, TempDir};
 pub use insta::{assert_json_snapshot, assert_snapshot, internals::Redaction, with_settings};
 pub use predicates::prelude::*;
 pub use predicates::str::RegexPredicate;
-pub use std::path::Path;
+pub use std::path::{Path, PathBuf};
 pub use std::process::Command;
 
 /// Use `insta` to do snapshot testing against a command's exit code, stdout, and stderr.

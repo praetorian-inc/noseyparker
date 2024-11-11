@@ -691,6 +691,10 @@ pub struct ScanArgs {
         help_heading="Data Collection Options",
     )]
     pub copy_blobs: CopyBlobsMode,
+
+    /// Specify the format for blobs copied by the `--copy-blobs` option
+    #[arg(long, value_name="FORMAT", default_value_t=DEFAULT_COPY_BLOBS_FORMAT)]
+    pub copy_blobs_format: CopyBlobsFormat,
 }
 
 #[derive(Args, Debug)]
@@ -818,6 +822,22 @@ pub enum CopyBlobsMode {
     /// Copy no blobs
     None,
 }
+
+#[derive(Copy, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[strum(serialize_all = "kebab-case")]
+pub enum CopyBlobsFormat {
+    #[cfg(feature = "parquet")]
+    /// Parquet format
+    Parquet,
+
+    /// Plain files, similar to Git's loose object format
+    Files,
+}
+
+#[cfg(feature = "parquet")]
+const DEFAULT_COPY_BLOBS_FORMAT: CopyBlobsFormat = CopyBlobsFormat::Parquet;
+#[cfg(not(feature = "parquet"))]
+const DEFAULT_COPY_BLOBS_FORMAT: CopyBlobsFormat = CopyBlobsFormat::Files;
 
 #[derive(Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 #[strum(serialize_all = "kebab-case")]

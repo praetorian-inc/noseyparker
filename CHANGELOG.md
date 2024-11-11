@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` have expanded category metdata.
   - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
 
+- When using the `--copy-blobs` option, the default output format is now `parquet` (when the `parquet` feature is enabled, which it is unless you build with `--no-default-features`) ([#229](https://github.com/praetorian-inc/noseyparker/pull/229)).
+
 ### Additions
 
 - New rules have been added:
@@ -31,6 +33,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
 
 - The `rules check` command now has an optional `--pedantic` mode that verifies some additional non-material properties.
+
+- The `scan` command now has a new `--copy-blobs-format=FORMAT` option that controls the format used when the `--copy-blobs` option is used ([#229](https://github.com/praetorian-inc/noseyparker/pull/229)).
+  A new `parquet` format is available and is the default when the `parquet` feature is enabled (which it is unless you build with `--no-default-features`).
 
 
 ## [v0.20.0](https://github.com/praetorian-inc/noseyparker/releases/v0.20.0) (2024-10-04)

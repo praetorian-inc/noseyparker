@@ -3,6 +3,7 @@ use super::*;
 
 mod appmaker;
 mod basic;
+mod copy_blobs;
 mod git_url;
 #[cfg(feature = "github")]
 mod github;

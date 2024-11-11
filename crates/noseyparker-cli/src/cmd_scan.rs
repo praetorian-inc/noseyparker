@@ -471,25 +471,36 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     let matcher_stats = Mutex::new(MatcherStats::default());
     let seen_blobs = BlobIdMap::new();
     let matcher = Matcher::new(&rules_db, &seen_blobs, Some(&matcher_stats))?;
+
+    let blob_copier = match args.copy_blobs {
+        args::CopyBlobsMode::All | args::CopyBlobsMode::Matching => match args.copy_blobs_format {
+            #[cfg(feature = "parquet")]
+            args::CopyBlobsFormat::Parquet => {
+                BlobCopier::Parquet(ParquetBlobCopier::new(blobs_dir, args.num_jobs)?)
+            }
+            args::CopyBlobsFormat::Files => BlobCopier::Files(FilesBlobCopier::new(blobs_dir)),
+        },
+        args::CopyBlobsMode::None => BlobCopier::Noop,
+    };
+
     let blob_processor_init_time = Mutex::new(t1.elapsed());
+
     let make_blob_processor = || -> BlobProcessor {
         let t1 = Instant::now();
         let matcher = matcher.clone();
         *num_blob_processors.lock().unwrap() += 1;
         let guesser = Guesser::new().expect("should be able to create filetype guessser");
-        {
-            let mut init_time = blob_processor_init_time.lock().unwrap();
-            *init_time += t1.elapsed();
-        }
-
-        BlobProcessor {
+        let proc = BlobProcessor {
             matcher,
             guesser,
-            blobs_dir: &blobs_dir,
             snippet_length: args.snippet_length,
             blob_metadata_recording_mode: args.metadata_args.blob_metadata,
-            copy_blobs: args.copy_blobs,
-        }
+            blob_copier: blob_copier.clone(),
+            copy_blobs_mode: args.copy_blobs,
+        };
+        *blob_processor_init_time.lock().unwrap() += t1.elapsed();
+
+        proc
     };
 
     let scan_res: Result<()> = input_recv
@@ -543,6 +554,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         .unwrap()
         .context("Failed to save results to the datastore")?;
 
+    blob_copier.close()?;
+
     // now finally check the result of the scanners
     scan_res.context("Failed to scan inputs")?;
 
@@ -553,7 +566,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     // ---------------------------------------------------------------------------------------------
     {
         debug!(
-            "{} blob processors created in {:.1}s during scan",
+            "{} blob processors created in {:.3}s during scan",
             num_blob_processors.into_inner()?,
             blob_processor_init_time.into_inner()?.as_secs_f64()
         );
@@ -612,6 +625,155 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     Ok(())
 }
 
+#[derive(Clone)]
+enum BlobCopier {
+    Noop,
+    Files(FilesBlobCopier),
+    #[cfg(feature = "parquet")]
+    Parquet(ParquetBlobCopier),
+}
+
+impl BlobCopier {
+    fn copy(&self, blob: &Blob) -> Result<()> {
+        match self {
+            BlobCopier::Noop => Ok(()),
+            BlobCopier::Files(c) => c.copy(blob),
+            #[cfg(feature = "parquet")]
+            BlobCopier::Parquet(c) => c.copy(blob),
+        }
+    }
+
+    fn close(self) -> Result<()> {
+        match self {
+            BlobCopier::Noop | BlobCopier::Files(_) => Ok(()),
+            #[cfg(feature = "parquet")]
+            BlobCopier::Parquet(c) => c.close(),
+        }
+    }
+}
+
+#[derive(Clone)]
+struct FilesBlobCopier {
+    blobs_dir: PathBuf,
+}
+
+impl FilesBlobCopier {
+    fn new(blobs_dir: PathBuf) -> Self {
+        Self { blobs_dir }
+    }
+}
+
+impl FilesBlobCopier {
+    fn copy(&self, blob: &Blob) -> Result<()> {
+        let blob_id = blob.id.hex();
+        let output_dir = self.blobs_dir.join(&blob_id[..2]);
+        let output_path = output_dir.join(&blob_id[2..]);
+        trace!("saving blob to {}", output_path.display());
+        match std::fs::create_dir(&output_dir) {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(e) => {
+                bail!("Failed to create blob directory at {}: {e}", output_dir.display(),);
+            }
+        }
+        std::fs::write(&output_path, &blob.bytes).with_context(|| {
+            format!("Failed to write blob contents to {}", output_path.display())
+        })?;
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "parquet")]
+#[derive(Clone)]
+struct ParquetBlobCopier {
+    writer_pool: Arc<object_pool::Pool<parquet::arrow::arrow_writer::ArrowWriter<std::fs::File>>>,
+    field_blob_id: Arc<arrow_schema::Field>,
+    field_content: Arc<arrow_schema::Field>,
+}
+
+#[cfg(feature = "parquet")]
+impl ParquetBlobCopier {
+    fn new(blobs_dir: PathBuf, num_writers: usize) -> Result<Self> {
+        use arrow_schema::{DataType, Field};
+
+        let field_blob_id = Field::new("blob_id", DataType::Utf8, /* nullable= */ false);
+        let field_content = Field::new("content", DataType::Binary, /* nullable= */ false);
+
+        let writer_pool = {
+            use arrow_schema::Schema;
+            use parquet::arrow::arrow_writer::ArrowWriter;
+            use parquet::file::properties::WriterProperties;
+            use std::fs::File;
+
+            let mut writers = Vec::with_capacity(num_writers);
+
+            let schema = Arc::new(Schema::new(vec![field_blob_id.clone(), field_content.clone()]));
+            let props = Some(
+                WriterProperties::builder()
+                    .set_compression(parquet::basic::Compression::ZSTD(Default::default()))
+                    // .set_max_row_group_size(128 * 1024)
+                    .build(),
+            );
+
+            for i in 0..num_writers {
+                let outfile = blobs_dir.join(format!("blobs.{i:02}.parquet"));
+                let outfile = File::create(outfile)?;
+                let writer = ArrowWriter::try_new(outfile, schema.clone(), props.clone())?;
+                writers.push(writer);
+            }
+            Arc::new(object_pool::Pool::from_vec(writers))
+        };
+
+        Ok(Self {
+            writer_pool,
+            field_blob_id: Arc::new(field_blob_id),
+            field_content: Arc::new(field_content),
+        })
+    }
+
+    fn copy(&self, blob: &Blob) -> Result<()> {
+        use arrow_array::{ArrayRef, BinaryArray, RecordBatch, StringArray, StructArray};
+
+        let mut writer = self
+            .writer_pool
+            .try_pull()
+            .expect("should be able to get a parquet writer");
+
+        let blob_ids = Arc::new(StringArray::from(vec![blob.id.hex()]));
+        let contents = Arc::new(BinaryArray::from(vec![blob.bytes.as_slice()]));
+
+        let batch = RecordBatch::from(StructArray::from(vec![
+            (self.field_blob_id.clone(), blob_ids as ArrayRef),
+            (self.field_content.clone(), contents as ArrayRef),
+        ]));
+        writer.write(&batch)?;
+
+        let writer_size_bytes = writer.memory_size();
+        if writer_size_bytes >= 128 * 1024 * 1024 {
+            let num_in_progress = writer.in_progress_rows();
+            let t1 = Instant::now();
+            writer.flush()?;
+            let t1e = t1.elapsed();
+            trace!(
+                "Writer size is {num_in_progress} rows / {:.1} MiB; flushed in {:.3}s",
+                writer_size_bytes as f64 / 1024.0 / 1024.0,
+                t1e.as_secs_f64()
+            );
+        }
+
+        Ok(())
+    }
+
+    fn close(self) -> Result<()> {
+        while let Some(writer) = self.writer_pool.try_pull() {
+            let (_writer_pool, writer) = writer.detach();
+            writer.close()?;
+        }
+        Ok(())
+    }
+}
+
 // -------------------------------------------------------------------------------------------------
 #[derive(Default)]
 struct MetadataResult {
@@ -651,8 +813,8 @@ struct BlobProcessor<'a> {
 
     snippet_length: usize,
     blob_metadata_recording_mode: args::BlobMetadataMode,
-    copy_blobs: args::CopyBlobsMode,
-    blobs_dir: &'a Path,
+    copy_blobs_mode: args::CopyBlobsMode,
+    blob_copier: BlobCopier,
 }
 
 impl<'a> BlobProcessor<'a> {
@@ -693,28 +855,15 @@ impl<'a> BlobProcessor<'a> {
             ScanResult::New(matches) => {
                 trace!(us = scan_us, mbps = scan_mbps, status = "new", matches = matches.len());
 
-                let do_copy_blob = match self.copy_blobs {
+                let do_copy = match self.copy_blobs_mode {
                     args::CopyBlobsMode::All => true,
                     args::CopyBlobsMode::Matching => !matches.is_empty(),
                     args::CopyBlobsMode::None => false,
                 };
-                if do_copy_blob {
-                    let output_dir = self.blobs_dir.join(&blob_id[..2]);
-                    let output_path = output_dir.join(&blob_id[2..]);
-                    trace!("saving blob to {}", output_path.display());
-                    match std::fs::create_dir(&output_dir) {
-                        Ok(()) => {}
-                        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
-                        Err(e) => {
-                            bail!(
-                                "Failed to create blob directory at {}: {e}",
-                                output_dir.display(),
-                            );
-                        }
-                    }
-                    std::fs::write(&output_path, &blob.bytes).with_context(|| {
-                        format!("Failed to write blob contents to {}", output_path.display())
-                    })?;
+                if do_copy {
+                    self.blob_copier
+                        .copy(&blob)
+                        .context("Failed to copy blob")?;
                 }
 
                 // If there are no matches, we can bail out here and avoid recording anything.
