@@ -78,6 +78,7 @@ content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 flate2 = "1.0"
 gix = { version = "0.67", features = ["max-performance", "serde"] }
+glob = "0.3.1"
 indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
@@ -117,7 +118,6 @@ arrow-array = { version = "53.2.0", optional = true }
 assert_cmd = { version = "2.0", features = ["color-auto"] }
 assert_fs = "1.0"
 base64 = "0.22.1"
-glob = "0.3.1"
 # criterion = "0.4"
 # escargot = "0.5"  # NOTE: much more capable but much slower than assert_cmd for `cargo run` tests
 insta = { version = "1.34", features = ["filters", "json", "redactions"] }

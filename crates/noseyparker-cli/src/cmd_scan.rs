@@ -716,7 +716,10 @@ impl ParquetBlobCopier {
                     .build(),
             );
 
-            for i in 0..num_writers {
+            // choose parquet filenames to avoid clobbering existing files
+            let num_existing_files =
+                glob::glob(&format!("{}/blobs.*.parquet", blobs_dir.display()))?.count();
+            for i in num_existing_files..num_writers + num_existing_files {
                 let outfile = blobs_dir.join(format!("blobs.{i:02}.parquet"));
                 let outfile = File::create(outfile)?;
                 let writer = ArrowWriter::try_new(outfile, schema.clone(), props.clone())?;
