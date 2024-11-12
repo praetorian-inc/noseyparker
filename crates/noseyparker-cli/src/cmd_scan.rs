@@ -690,6 +690,7 @@ struct ParquetBlobCopier {
     writer_pool: Arc<object_pool::Pool<parquet::arrow::arrow_writer::ArrowWriter<std::fs::File>>>,
     field_blob_id: Arc<arrow_schema::Field>,
     field_content: Arc<arrow_schema::Field>,
+    field_content_len: Arc<arrow_schema::Field>,
 }
 
 #[cfg(feature = "parquet")]
@@ -699,6 +700,8 @@ impl ParquetBlobCopier {
 
         let field_blob_id = Field::new("blob_id", DataType::Utf8, /* nullable= */ false);
         let field_content = Field::new("content", DataType::Binary, /* nullable= */ false);
+        let field_content_len =
+            Field::new("content_len", DataType::UInt64, /* nullable= */ false);
 
         let writer_pool = {
             use arrow_schema::Schema;
@@ -708,7 +711,11 @@ impl ParquetBlobCopier {
 
             let mut writers = Vec::with_capacity(num_writers);
 
-            let schema = Arc::new(Schema::new(vec![field_blob_id.clone(), field_content.clone()]));
+            let schema = Arc::new(Schema::new(vec![
+                field_blob_id.clone(),
+                field_content.clone(),
+                field_content_len.clone(),
+            ]));
             let props = Some(
                 WriterProperties::builder()
                     .set_compression(parquet::basic::Compression::ZSTD(Default::default()))
@@ -732,11 +739,14 @@ impl ParquetBlobCopier {
             writer_pool,
             field_blob_id: Arc::new(field_blob_id),
             field_content: Arc::new(field_content),
+            field_content_len: Arc::new(field_content_len),
         })
     }
 
     fn copy(&self, blob: &Blob) -> Result<()> {
-        use arrow_array::{ArrayRef, BinaryArray, RecordBatch, StringArray, StructArray};
+        use arrow_array::{
+            ArrayRef, BinaryArray, RecordBatch, StringArray, StructArray, UInt64Array,
+        };
 
         let mut writer = self
             .writer_pool
@@ -745,10 +755,12 @@ impl ParquetBlobCopier {
 
         let blob_ids = Arc::new(StringArray::from(vec![blob.id.hex()]));
         let contents = Arc::new(BinaryArray::from(vec![blob.bytes.as_slice()]));
+        let content_lens = Arc::new(UInt64Array::from(vec![blob.bytes.len() as u64]));
 
         let batch = RecordBatch::from(StructArray::from(vec![
             (self.field_blob_id.clone(), blob_ids as ArrayRef),
             (self.field_content.clone(), contents as ArrayRef),
+            (self.field_content_len.clone(), content_lens as ArrayRef),
         ]));
         writer.write(&batch)?;
 
