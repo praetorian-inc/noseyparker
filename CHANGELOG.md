@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+  - `Jina Search Foundation API Key`
   - `HTTP Basic Authentication`
   - `HTTP Bearer Token`
   - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))

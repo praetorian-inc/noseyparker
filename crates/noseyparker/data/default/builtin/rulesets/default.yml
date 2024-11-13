@@ -79,6 +79,7 @@ rulesets:
   - np.http.2         # HTTP Bearer Token
   - np.huggingface.1  # HuggingFace User Access Token
   - np.jenkins.1      # Jenkins Token or Crumb
+  - np.jina.1         # Jina Search Foundation API Key
   - np.jwt.1          # JSON Web Token (base64url-encoded)
   - np.linkedin.2     # LinkedIn Secret Key
   - np.mailchimp.1    # MailChimp API Key

@@ -79,6 +79,7 @@ expression: stdout
  np.http.2            HTTP Bearer Token                                         fuzzy, generic, secret 
  np.huggingface.1     HuggingFace User Access Token                             api, secret 
  np.jenkins.1         Jenkins Token or Crumb                                    api, fuzzy, secret 
+ np.jina.1            Jina Search Foundation API Key                            api, secret 
  np.jwt.1             JSON Web Token (base64url-encoded)                        api 
  np.krb5.asrep.23.1   Password Hash (Kerberos 5, etype 23, AS-REP)              hashed, secret 
  np.linkedin.1        LinkedIn Client ID                                        api, fuzzy, identifier 
@@ -157,6 +158,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             129 
+ default      Nosey Parker default rules             130 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

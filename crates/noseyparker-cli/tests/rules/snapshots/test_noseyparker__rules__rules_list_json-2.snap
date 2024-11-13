@@ -1796,6 +1796,27 @@ expression: stdout
       }
     },
     {
+      "id": "np.jina.1",
+      "structural_id": "63bcdb8ecf540be4558d57248a668b2e1f642f78",
+      "name": "Jina Search Foundation API Key",
+      "syntax": {
+        "name": "Jina Search Foundation API Key",
+        "id": "np.jina.1",
+        "pattern": "(?x)\n\\b\n(jina_[a-zA-Z0-9]{60})\n\\b\n",
+        "examples": [
+          "JINA_KEY = os.getenv('JINA_KEY','jina_c1758c6f49e14ced990ac7776800dc45ShJNTXBCizzwjE6IMFYJ7LD959cG')"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://jina.ai"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.jwt.1",
       "structural_id": "6e2b42f8571e4534c13a22f26a39c78b0596edb7",
       "name": "JSON Web Token (base64url-encoded)",
@@ -3627,7 +3648,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 129
+      "num_rules": 130
     },
     {
       "id": "np.assets",

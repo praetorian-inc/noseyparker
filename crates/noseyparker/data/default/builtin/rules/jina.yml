@@ -1,0 +1,23 @@
+rules:
+
+- name: Jina Search Foundation API Key
+  id: np.jina.1
+
+  pattern: |
+    (?x)
+    \b
+    (jina_[a-zA-Z0-9]{60})
+    \b
+
+  categories: [api, secret]
+
+  references:
+  - https://jina.ai
+
+  description: |
+    A Jina Search Foundation API Key was found.
+    This allows access to services including Jina Reader, Embeddings, Classifier, and Segmenter.
+    An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.
+
+  examples:
+  - "JINA_KEY = os.getenv('JINA_KEY','jina_c1758c6f49e14ced990ac7776800dc45ShJNTXBCizzwjE6IMFYJ7LD959cG')"
