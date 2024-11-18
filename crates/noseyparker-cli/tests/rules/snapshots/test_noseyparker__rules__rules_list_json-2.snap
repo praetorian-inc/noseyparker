@@ -2032,6 +2032,38 @@ expression: stdout
       }
     },
     {
+      "id": "np.mongodb.1",
+      "structural_id": "ecf98fcec12b82d2941eb83018ad4ab2a71b7362",
+      "name": "Credentials in MongoDB Connection String",
+      "syntax": {
+        "name": "Credentials in MongoDB Connection String",
+        "id": "np.mongodb.1",
+        "pattern": "(?x)\n(?: mongodb\\+srv | mongodb ) ://                        (?# URI scheme )\n  ([a-zA-Z0-9%.-~%]{3,})                                (?# username)\n: ([a-zA-Z0-9%.-~%]{3,})                                (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
+        "examples": [
+          "spring:\n  application:\n    name: Prince\n  data:\n    mongodb:\n      uri: \"mongodb+srv://servicelogin:CPCdZH5k0F6dxQ9V@example-prince.mongodb.net/?retryWrites=true&w=majority\"\n      database: prince\n",
+          "mongodb://myDatabaseUser:D1fficult@localhost",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost/records",
+          "mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/?retryWrites=true&w=majority",
+          "mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com/?authSource=admin&replicaSet=myRepl",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/?authSource=admin&replicaSet=myRepl",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost,localhost:27018,localhost:27019/?replicaSet=test",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&readPreference=secondary",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@router1.example.com:27017,router2.example2.com:27017,router3.example3.com:27017/",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&w=majority&wtimeoutMS=2000"
+        ],
+        "negative_examples": [
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@%2Ftmp%2Fmongodb-27017.sock"
+        ],
+        "references": [
+          "https://www.mongodb.com/docs/manual/reference/connection-string/"
+        ],
+        "categories": [
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.msteams.1",
       "structural_id": "ffeb4e52ea44a01f3e630ae45cc92f7b39558446",
       "name": "Microsoft Teams Webhook",
@@ -3648,7 +3680,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 130
+      "num_rules": 131
     },
     {
       "id": "np.assets",

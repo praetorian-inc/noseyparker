@@ -87,6 +87,7 @@ rulesets:
   - np.mapbox.2       # Mapbox Secret Access Token
   - np.mapbox.3       # Mapbox Temporary Access Token
   - np.msteams.1      # Microsoft Teams Webhook
+  - np.mongodb.1      # Credentials in MongoDB Connection String
   - np.netrc.1        # netrc Credentials
   - np.newrelic.1     # New Relic License Key
   - np.newrelic.2     # New Relic License Key (non-suffixed)
