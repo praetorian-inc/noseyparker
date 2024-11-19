@@ -2080,15 +2080,16 @@ expression: stdout
     },
     {
       "id": "np.mongodb.1",
-      "structural_id": "ecf98fcec12b82d2941eb83018ad4ab2a71b7362",
+      "structural_id": "79fc752031d3098001d928a1246e48cdad695899",
       "name": "Credentials in MongoDB Connection String",
       "syntax": {
         "name": "Credentials in MongoDB Connection String",
         "id": "np.mongodb.1",
-        "pattern": "(?x)\n(?: mongodb\\+srv | mongodb ) ://                        (?# URI scheme )\n  ([a-zA-Z0-9%.-~%]{3,})                                (?# username)\n: ([a-zA-Z0-9%.-~%]{3,})                                (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
+        "pattern": "(?x)\n(?: mongodb\\+srv | mongodb ) ://                        (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
         "examples": [
           "spring:\n  application:\n    name: Prince\n  data:\n    mongodb:\n      uri: \"mongodb+srv://servicelogin:CPCdZH5k0F6dxQ9V@example-prince.mongodb.net/?retryWrites=true&w=majority\"\n      database: prince\n",
           "mongodb://myDatabaseUser:D1fficult@localhost",
+          "mongodb://myDatabaseUser:D1fficult@localhost/database",
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost",
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost/records",
           "mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/?retryWrites=true&w=majority",
@@ -2097,7 +2098,9 @@ expression: stdout
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost,localhost:27018,localhost:27019/?replicaSet=test",
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&readPreference=secondary",
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@router1.example.com:27017,router2.example2.com:27017,router3.example3.com:27017/",
-          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&w=majority&wtimeoutMS=2000"
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&w=majority&wtimeoutMS=2000",
+          "var store = new MongoDBStore({\n  uri: 'mongodb+srv://somethingrotten:Zxcvbnm@12345)@cluster0-cnc84.mongodb.net/e-commerce?retryWrites=true',\n  collection: 'mySessions',\n});\n",
+          "mongodb+srv://hpapp:bria@pass135!@briaserver.7xsu17j.mongodb.net/test"
         ],
         "negative_examples": [
           "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@%2Ftmp%2Fmongodb-27017.sock"
@@ -2630,20 +2633,25 @@ expression: stdout
     },
     {
       "id": "np.postgres.1",
-      "structural_id": "d1b558227cf1fa521f2db96bac75c1914554d667",
+      "structural_id": "937c1841abe7875724f3c4100036e6f2b8e79cb9",
       "name": "Credentials in PostgreSQL Connection URI",
       "syntax": {
         "name": "Credentials in PostgreSQL Connection URI",
         "id": "np.postgres.1",
-        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9.-~]{3,})                                  (?# username)\n: ([a-zA-Z0-9.-~]{3,})                                  (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(/[a-zA-Z0-9_.-]{2,})                                   (?# database)\n(?: \\? [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+\n       (?: & [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+ )* )?    (?# query params )\n(?: [^a-zA-Z0-9.-~] | $ )\n",
+        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
         "examples": [
-          "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
+          "postgresql://user:secret@localhost",
+          "postgresql://user:secret@localhost/",
           "postgresql://user:secret@localhost/database",
-          "postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp"
+          "postgresql://user:secret@localhost:5433",
+          "postgresql://user:secret@localhost:5433/",
+          "postgresql://user:secret@localhost:5433/database",
+          "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
+          "postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp",
+          "postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp"
         ],
         "negative_examples": [
           "postgresql://user:secret@[2001:db8::1234]/database",
-          "postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp",
           "postgresql:///mydb?host=localhost&port=5433&user=user&password=secret"
         ],
         "references": [
