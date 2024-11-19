@@ -81,6 +81,8 @@ rulesets:
   - np.jenkins.1      # Jenkins Token or Crumb
   - np.jina.1         # Jina Search Foundation API Key
   - np.jwt.1          # JSON Web Token (base64url-encoded)
+  - np.jwt.2          # JSON Web Token Secret
+  - np.jwt.3          # JSON Web Token Secret
   - np.linkedin.2     # LinkedIn Secret Key
   - np.mailchimp.1    # MailChimp API Key
   - np.mailgun.1      # Mailgun API Key
