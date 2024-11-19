@@ -7,24 +7,26 @@ rules:
   pattern: |
     (?x)
     (?: postgres | postgresql ) ://                         (?# URI scheme )
-      ([a-zA-Z0-9.-~]{3,})                                  (?# username)
-    : ([a-zA-Z0-9.-~]{3,})                                  (?# password)
+      ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)
+    : ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)
     @ ([a-zA-Z0-9_.-]{3,} (?: :\d{1,5})?)                   (?# hostname and port)
-    (/[a-zA-Z0-9_.-]{2,})                                   (?# database)
-    (?: \? [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+
-           (?: & [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+ )* )?    (?# query params )
-    (?: [^a-zA-Z0-9.-~] | $ )
+    (?: [^a-zA-Z0-9_.-] | $ )
 
   categories: [secret]
 
   examples:
-  - '"REDSHIFT": "postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod",'
+  - 'postgresql://user:secret@localhost'
+  - 'postgresql://user:secret@localhost/'
   - 'postgresql://user:secret@localhost/database'
+  - 'postgresql://user:secret@localhost:5433'
+  - 'postgresql://user:secret@localhost:5433/'
+  - 'postgresql://user:secret@localhost:5433/database'
+  - '"REDSHIFT": "postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod",'
   - 'postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp'
+  - 'postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp'
 
   negative_examples:
   - 'postgresql://user:secret@[2001:db8::1234]/database'
-  - 'postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp'
   - 'postgresql:///mydb?host=localhost&port=5433&user=user&password=secret'
 
   references:

@@ -81,6 +81,8 @@ expression: stdout
  np.jenkins.1         Jenkins Token or Crumb                                    api, fuzzy, secret 
  np.jina.1            Jina Search Foundation API Key                            api, secret 
  np.jwt.1             JSON Web Token (base64url-encoded)                        api 
+ np.jwt.2             JSON Web Token Secret                                     fuzzy, secret 
+ np.jwt.3             JSON Web Token Secret                                     fuzzy, secret 
  np.krb5.asrep.23.1   Password Hash (Kerberos 5, etype 23, AS-REP)              hashed, secret 
  np.linkedin.1        LinkedIn Client ID                                        api, fuzzy, identifier 
  np.linkedin.2        LinkedIn Secret Key                                       api, fuzzy, secret 
@@ -89,6 +91,7 @@ expression: stdout
  np.mapbox.1          Mapbox Public Access Token                                api, fuzzy 
  np.mapbox.2          Mapbox Secret Access Token                                api, fuzzy, secret 
  np.mapbox.3          Mapbox Temporary Access Token                             api, fuzzy, secret 
+ np.mongodb.1         Credentials in MongoDB Connection String                  secret 
  np.msteams.1         Microsoft Teams Webhook                                   api, secret 
  np.netrc.1           netrc Credentials                                         secret 
  np.newrelic.1        New Relic License Key                                     secret 
@@ -158,6 +161,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             130 
+ default      Nosey Parker default rules             133 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

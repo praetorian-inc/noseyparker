@@ -1,0 +1,50 @@
+rules:
+
+# This handles some cases of MongoDB connection strings, but not the full generality of them.
+- name: Credentials in MongoDB Connection String
+  id: np.mongodb.1
+
+  pattern: |
+    (?x)
+    (?: mongodb\+srv | mongodb ) ://                        (?# URI scheme )
+      ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)
+    : ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)
+    @ ([a-zA-Z0-9_.-]{3,} (?: :\d{1,5})?)                   (?# hostname and port)
+    (?: [^a-zA-Z0-9_.-] | $ )
+
+  categories: [secret]
+
+  examples:
+  - |
+      spring:
+        application:
+          name: Prince
+        data:
+          mongodb:
+            uri: "mongodb+srv://servicelogin:CPCdZH5k0F6dxQ9V@example-prince.mongodb.net/?retryWrites=true&w=majority"
+            database: prince
+  - 'mongodb://myDatabaseUser:D1fficult@localhost'
+  - 'mongodb://myDatabaseUser:D1fficult@localhost/database'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost/records'
+  - 'mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/?retryWrites=true&w=majority'
+  - 'mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com/?authSource=admin&replicaSet=myRepl'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/?authSource=admin&replicaSet=myRepl'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost,localhost:27018,localhost:27019/?replicaSet=test'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&readPreference=secondary'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@router1.example.com:27017,router2.example2.com:27017,router3.example3.com:27017/'
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&w=majority&wtimeoutMS=2000'
+
+  - |
+      var store = new MongoDBStore({
+        uri: 'mongodb+srv://somethingrotten:Zxcvbnm@12345)@cluster0-cnc84.mongodb.net/e-commerce?retryWrites=true',
+        collection: 'mySessions',
+      });
+
+  - 'mongodb+srv://hpapp:bria@pass135!@briaserver.7xsu17j.mongodb.net/test'
+
+  negative_examples:
+  - 'mongodb://myDatabaseUser:D1fficultP%40ssw0rd@%2Ftmp%2Fmongodb-27017.sock'
+
+  references:
+  - https://www.mongodb.com/docs/manual/reference/connection-string/

@@ -1770,16 +1770,17 @@ expression: stdout
     },
     {
       "id": "np.jenkins.1",
-      "structural_id": "aa43b5efaf8c5a50caa4af166bbec9606aa2f12a",
+      "structural_id": "2f7fa7fff0e28da2f3138710adec2eb499e656d4",
       "name": "Jenkins Token or Crumb",
       "syntax": {
         "name": "Jenkins Token or Crumb",
         "id": "np.jenkins.1",
-        "pattern": "(?i)jenkins.{0,10}(?:crumb)?.{0,10}\\b([0-9a-f]{32,36})\\b",
+        "pattern": "(?x)\n(?i)\njenkins.{0,12}(?: (?: crumb | token ) .{0,10} )?\n\\b\n( [0-9a-f]{32,36} | [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12} )\n(?: [^0-9a-f-] | $ )\n",
         "examples": [
           "jenkins_user = 'root'\n# jenkins_passwd = '116365fd86d63bf507aba962606a5c8956'  Pre token\njenkins_passwd = '11811f784531053132519844d047186074'   # Dev Token\njenkins_url = 'http://10.1.188.121'\n",
           "export JENKINS_USER=justin-admin-edit-view\nexport JENKINS_TOKEN=11f4274ec59be12eace9a08b08ee13d54b\nexport JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net\n",
-          "sh \"curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'\"\n"
+          "sh \"curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'\"\n",
+          "// Jenkins query token\nreadonly static string jenkinsToken = \"df490bc6-ef6e-4f6a-99a0-b03d26cb56f9\";\n"
         ],
         "negative_examples": [
           "1. ~~Does not play well with [Build Token Root Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin) URL formats.~~ (added with [this commit](https://github.com/morficus/Parameterized-Remote-Trigger-Plugin/commit/f687dbe75d1c4f39f7e14b68220890384d7c5674)  )"
@@ -1840,6 +1841,52 @@ expression: stdout
         ],
         "categories": [
           "api"
+        ]
+      }
+    },
+    {
+      "id": "np.jwt.2",
+      "structural_id": "76dd64b6948d4d3a8324bfcad0a0a3327174bf61",
+      "name": "JSON Web Token Secret",
+      "syntax": {
+        "name": "JSON Web Token Secret",
+        "id": "np.jwt.2",
+        "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n\"( [^\"]{6,200} )\"\n",
+        "examples": [
+          "something_else: true\njwt:\n  secret: \"acb1ca5bc8d7fb2ef9f890f1be16d964\" #some comment\n  ttl: 640000 #\n",
+          "JWT:\n  secret: \"development#product\"\n  exp: \"50m\"\n",
+          "oauthproviders:\n  jwtsecret: \"7`D'}/vYR)T;W\\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/JSON_Web_Token"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.jwt.3",
+      "structural_id": "0c8531cfa969e7834743191e9da4bf911be46e9b",
+      "name": "JSON Web Token Secret",
+      "syntax": {
+        "name": "JSON Web Token Secret",
+        "id": "np.jwt.3",
+        "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n'( [^']{6,200} )'\n",
+        "examples": [
+          "something_else: true\njwt:\n  secret: 'acb1ca5bc8d7fb2ef9f890f1be16d964' #some comment\n  ttl: 640000 #\n",
+          "JWT:\n  Secret: 'development#product'\n  exp: '50m'\n",
+          "oauthproviders:\n  jwtsecret: '7`D\"}/vYR)T;W\\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r'\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/JSON_Web_Token"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -2027,6 +2074,41 @@ expression: stdout
         "categories": [
           "api",
           "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.mongodb.1",
+      "structural_id": "79fc752031d3098001d928a1246e48cdad695899",
+      "name": "Credentials in MongoDB Connection String",
+      "syntax": {
+        "name": "Credentials in MongoDB Connection String",
+        "id": "np.mongodb.1",
+        "pattern": "(?x)\n(?: mongodb\\+srv | mongodb ) ://                        (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
+        "examples": [
+          "spring:\n  application:\n    name: Prince\n  data:\n    mongodb:\n      uri: \"mongodb+srv://servicelogin:CPCdZH5k0F6dxQ9V@example-prince.mongodb.net/?retryWrites=true&w=majority\"\n      database: prince\n",
+          "mongodb://myDatabaseUser:D1fficult@localhost",
+          "mongodb://myDatabaseUser:D1fficult@localhost/database",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost/records",
+          "mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/?retryWrites=true&w=majority",
+          "mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com/?authSource=admin&replicaSet=myRepl",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/?authSource=admin&replicaSet=myRepl",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@localhost,localhost:27018,localhost:27019/?replicaSet=test",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&readPreference=secondary",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@router1.example.com:27017,router2.example2.com:27017,router3.example3.com:27017/",
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@example1.com,example2.com,example3.com/?replicaSet=test&w=majority&wtimeoutMS=2000",
+          "var store = new MongoDBStore({\n  uri: 'mongodb+srv://somethingrotten:Zxcvbnm@12345)@cluster0-cnc84.mongodb.net/e-commerce?retryWrites=true',\n  collection: 'mySessions',\n});\n",
+          "mongodb+srv://hpapp:bria@pass135!@briaserver.7xsu17j.mongodb.net/test"
+        ],
+        "negative_examples": [
+          "mongodb://myDatabaseUser:D1fficultP%40ssw0rd@%2Ftmp%2Fmongodb-27017.sock"
+        ],
+        "references": [
+          "https://www.mongodb.com/docs/manual/reference/connection-string/"
+        ],
+        "categories": [
           "secret"
         ]
       }
@@ -2551,20 +2633,25 @@ expression: stdout
     },
     {
       "id": "np.postgres.1",
-      "structural_id": "d1b558227cf1fa521f2db96bac75c1914554d667",
+      "structural_id": "937c1841abe7875724f3c4100036e6f2b8e79cb9",
       "name": "Credentials in PostgreSQL Connection URI",
       "syntax": {
         "name": "Credentials in PostgreSQL Connection URI",
         "id": "np.postgres.1",
-        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9.-~]{3,})                                  (?# username)\n: ([a-zA-Z0-9.-~]{3,})                                  (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(/[a-zA-Z0-9_.-]{2,})                                   (?# database)\n(?: \\? [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+\n       (?: & [a-zA-Z0-9.-~]+ = [a-zA-Z0-9.-~]+ )* )?    (?# query params )\n(?: [^a-zA-Z0-9.-~] | $ )\n",
+        "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
         "examples": [
-          "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
+          "postgresql://user:secret@localhost",
+          "postgresql://user:secret@localhost/",
           "postgresql://user:secret@localhost/database",
-          "postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp"
+          "postgresql://user:secret@localhost:5433",
+          "postgresql://user:secret@localhost:5433/",
+          "postgresql://user:secret@localhost:5433/database",
+          "\"REDSHIFT\": \"postgres://spot_app:Pseg2020@calling-mr-bones.c0qsadyxbf4k.us-east-1.redshift.amazonaws.com:5439/datalakespotprod\",",
+          "postgresql://user:secret@localhost/otherdb?connect_timeout=10&application_name=myapp",
+          "postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp"
         ],
         "negative_examples": [
           "postgresql://user:secret@[2001:db8::1234]/database",
-          "postgresql://user:secret@host1:123,user:secret@host2:456/somedb?target_session_attrs=any&application_name=myapp",
           "postgresql:///mydb?host=localhost&port=5433&user=user&password=secret"
         ],
         "references": [
@@ -3648,7 +3735,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 130
+      "num_rules": 133
     },
     {
       "id": "np.assets",

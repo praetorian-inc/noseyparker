@@ -36,3 +36,65 @@ rules:
       it "sets the relation to nil" do
         eye.eyeable.should be_nill
       end
+
+
+# This kind of thing is often seen in spring config files and other configs
+- name: JSON Web Token Secret
+  id: np.jwt.2
+
+  pattern: |
+    (?x)(?m)(?i)
+    ^\s*
+    (?: jwt: \s+ secret: | jwtsecret: )
+    \s+
+    "( [^"]{6,200} )"
+
+  categories: [fuzzy, secret]
+
+  examples:
+  - |
+      something_else: true
+      jwt:
+        secret: "acb1ca5bc8d7fb2ef9f890f1be16d964" #some comment
+        ttl: 640000 #
+  - |
+      JWT:
+        secret: "development#product"
+        exp: "50m"
+  - |
+      oauthproviders:
+        jwtsecret: "7`D'}/vYR)T;W\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r"
+
+  references:
+  - https://en.wikipedia.org/wiki/JSON_Web_Token
+
+
+# This kind of thing is often seen in spring config files and other configs
+- name: JSON Web Token Secret
+  id: np.jwt.3
+
+  pattern: |
+    (?x)(?m)(?i)
+    ^\s*
+    (?: jwt: \s+ secret: | jwtsecret: )
+    \s+
+    '( [^']{6,200} )'
+
+  categories: [fuzzy, secret]
+
+  examples:
+  - |
+      something_else: true
+      jwt:
+        secret: 'acb1ca5bc8d7fb2ef9f890f1be16d964' #some comment
+        ttl: 640000 #
+  - |
+      JWT:
+        Secret: 'development#product'
+        exp: '50m'
+  - |
+      oauthproviders:
+        jwtsecret: '7`D"}/vYR)T;W\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r'
+
+  references:
+  - https://en.wikipedia.org/wiki/JSON_Web_Token
