@@ -3,7 +3,13 @@ rules:
 - name: Jenkins Token or Crumb
   id: np.jenkins.1
 
-  pattern: '(?i)jenkins.{0,10}(?:crumb)?.{0,10}\b([0-9a-f]{32,36})\b'
+  pattern: |
+    (?x)
+    (?i)
+    jenkins.{0,10}(?:crumb|token)?.{0,10}
+    \b
+    ( [0-9a-f-]{32,36} )
+    \b
 
   categories: [api, fuzzy, secret]
 
@@ -19,6 +25,9 @@ rules:
       export JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net
   - |
       sh "curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'"
+  - |
+      // Jenkins query token
+      readonly static string jenkinsToken = "df490bc6-ef6e-4f6a-99a0-b03d26cb56f9";
 
   negative_examples:
   - '1. ~~Does not play well with [Build Token Root Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin) URL formats.~~ (added with [this commit](https://github.com/morficus/Parameterized-Remote-Trigger-Plugin/commit/f687dbe75d1c4f39f7e14b68220890384d7c5674)  )'
