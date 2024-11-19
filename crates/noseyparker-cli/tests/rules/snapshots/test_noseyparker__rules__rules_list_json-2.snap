@@ -1770,16 +1770,17 @@ expression: stdout
     },
     {
       "id": "np.jenkins.1",
-      "structural_id": "aa43b5efaf8c5a50caa4af166bbec9606aa2f12a",
+      "structural_id": "1c89d7d879d8ee7c9a661fa742ff6a9368694588",
       "name": "Jenkins Token or Crumb",
       "syntax": {
         "name": "Jenkins Token or Crumb",
         "id": "np.jenkins.1",
-        "pattern": "(?i)jenkins.{0,10}(?:crumb)?.{0,10}\\b([0-9a-f]{32,36})\\b",
+        "pattern": "(?x)\n(?i)\njenkins.{0,10}(?:crumb|token)?.{0,10}\n\\b\n( [0-9a-f-]{32,36} )\n\\b\n",
         "examples": [
           "jenkins_user = 'root'\n# jenkins_passwd = '116365fd86d63bf507aba962606a5c8956'  Pre token\njenkins_passwd = '11811f784531053132519844d047186074'   # Dev Token\njenkins_url = 'http://10.1.188.121'\n",
           "export JENKINS_USER=justin-admin-edit-view\nexport JENKINS_TOKEN=11f4274ec59be12eace9a08b08ee13d54b\nexport JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net\n",
-          "sh \"curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'\"\n"
+          "sh \"curl -X POST 'http://jenkins.lsfusion.luxsoft.by/job/${Paths.updateParentVersionsJob}/build' --user ${USERPASS} -H 'Jenkins-Crumb:440561953171ba44ace9740562d172bb'\"\n",
+          "// Jenkins query token\nreadonly static string jenkinsToken = \"df490bc6-ef6e-4f6a-99a0-b03d26cb56f9\";\n"
         ],
         "negative_examples": [
           "1. ~~Does not play well with [Build Token Root Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin) URL formats.~~ (added with [this commit](https://github.com/morficus/Parameterized-Remote-Trigger-Plugin/commit/f687dbe75d1c4f39f7e14b68220890384d7c5674)  )"
@@ -1840,6 +1841,52 @@ expression: stdout
         ],
         "categories": [
           "api"
+        ]
+      }
+    },
+    {
+      "id": "np.jwt.2",
+      "structural_id": "76dd64b6948d4d3a8324bfcad0a0a3327174bf61",
+      "name": "JSON Web Token Secret",
+      "syntax": {
+        "name": "JSON Web Token Secret",
+        "id": "np.jwt.2",
+        "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n\"( [^\"]{6,200} )\"\n",
+        "examples": [
+          "something_else: true\njwt:\n  secret: \"acb1ca5bc8d7fb2ef9f890f1be16d964\" #some comment\n  ttl: 640000 #\n",
+          "JWT:\n  secret: \"development#product\"\n  exp: \"50m\"\n",
+          "oauthproviders:\n  jwtsecret: \"7`D'}/vYR)T;W\\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/JSON_Web_Token"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.jwt.3",
+      "structural_id": "0c8531cfa969e7834743191e9da4bf911be46e9b",
+      "name": "JSON Web Token Secret",
+      "syntax": {
+        "name": "JSON Web Token Secret",
+        "id": "np.jwt.3",
+        "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n'( [^']{6,200} )'\n",
+        "examples": [
+          "something_else: true\njwt:\n  secret: 'acb1ca5bc8d7fb2ef9f890f1be16d964' #some comment\n  ttl: 640000 #\n",
+          "JWT:\n  Secret: 'development#product'\n  exp: '50m'\n",
+          "oauthproviders:\n  jwtsecret: '7`D\"}/vYR)T;W\\5]EBrf;_&k>qX??]G&3CF=;@vyrVBp[$_hK4^?{qT/EglJe[FYjp:IPgl_t$%r'\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://en.wikipedia.org/wiki/JSON_Web_Token"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
         ]
       }
     },
@@ -3680,7 +3727,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 131
+      "num_rules": 133
     },
     {
       "id": "np.assets",

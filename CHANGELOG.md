@@ -17,8 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Lockfiles from a few languages (e.g., `Cargo.lock`, `Pipfile.lock`, `go.sum`) are now ignored by default.
 
 - Rules have been modified:
+
   - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` have expanded category metdata.
   - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
+  - `Jenkins Token or Crumb` has been refined to improve detection ([#232](https://github.com/praetorian-inc/noseyparker/pull/232)).
+
 
 - When using the `--copy-blobs` option, the default output format is now `parquet` (when the `parquet` feature is enabled, which it is unless you build with `--no-default-features`) ([#229](https://github.com/praetorian-inc/noseyparker/pull/229)).
 
@@ -26,9 +29,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New rules have been added:
 
+  - `Credentials in MongoDB Connection String` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
   - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `Jina Search Foundation API Key`
+  - `JSON Web Token Secret` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
   - `HTTP Basic Authentication`
   - `HTTP Bearer Token`
   - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
