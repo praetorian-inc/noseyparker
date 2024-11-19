@@ -9,7 +9,7 @@ rules:
     jenkins.{0,10}(?:crumb|token)?.{0,10}
     \b
     ( [0-9a-f-]{32,36} )
-    \b
+    (?: [^0-9a-f-] | $ )
 
   categories: [api, fuzzy, secret]
 
