@@ -6,9 +6,9 @@ rules:
   pattern: |
     (?x)
     (?i)
-    jenkins.{0,10}(?:crumb|token)?.{0,10}
+    jenkins.{0,12}(?: (?: crumb | token ) .{0,10} )?
     \b
-    ( [0-9a-f-]{32,36} )
+    ( [0-9a-f]{32,36} | [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12} )
     (?: [^0-9a-f-] | $ )
 
   categories: [api, fuzzy, secret]
