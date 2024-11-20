@@ -6,7 +6,7 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.21.0](https://github.com/praetorian-inc/noseyparker/releases/v0.21.0) (2024-11-20)
 
 ### Changes
 - Directories that appear to be Nosey Parker datastore directories are now skipped from scanning ([#224](https://github.com/praetorian-inc/noseyparker/pull/224)).
@@ -18,15 +18,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Rules have been modified:
 
-  - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` have expanded category metdata.
+  - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` now have additional category metadata.
   - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
   - `Jenkins Token or Crumb` has been refined to improve detection ([#232](https://github.com/praetorian-inc/noseyparker/pull/232)).
-
 
 - When using the `--copy-blobs` option, the default output format is now `parquet` (when the `parquet` feature is enabled, which it is unless you build with `--no-default-features`) ([#229](https://github.com/praetorian-inc/noseyparker/pull/229)).
 
 ### Additions
-
 - New rules have been added:
 
   - `Credentials in MongoDB Connection String` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
@@ -203,7 +201,6 @@ Happy secret hunting!
 - The `summarize` command now includes additional columns for the assigned finding status ([#196](https://github.com/praetorian-inc/noseyparker/pull/196)).
 
 ### Changes
-
 - The vendored copy of Boost included in the internal `vectorscan-sys` crate has been removed in favor of using the system-provided Boost ([#150](https://github.com/praetorian-inc/noseyparker/pull/150) from @seqre).
   This change is only relevant to building Nosey Parker from source.
 
