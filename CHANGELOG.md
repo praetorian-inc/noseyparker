@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `Credentials in MongoDB Connection String` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
   - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
   - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+  - `Jenkins Setup Admin Password`
   - `Jina Search Foundation API Key`
   - `JSON Web Token Secret` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
   - `HTTP Basic Authentication`

@@ -1797,6 +1797,27 @@ expression: stdout
       }
     },
     {
+      "id": "np.jenkins.2",
+      "structural_id": "2f99a1df52be6853e8c824b292b2a18a157ce57e",
+      "name": "Jenkins Setup Admin Password",
+      "syntax": {
+        "name": "Jenkins Setup Admin Password",
+        "id": "np.jenkins.2",
+        "pattern": "(?x)(?m)\nPlease\\ use\\ the\\ following\\ password\\ to\\ proceed\\ to\\ installation:\n(?: \\n\\n | \\r\\n\\r\\n )\n([a-f0-9]{30,36})$\n",
+        "examples": [
+          "*************************************************************\n*************************************************************\n*************************************************************\n\nJenkins initial setup is required. An admin user has been created and a password generated.\nPlease use the following password to proceed to installation:\n\nbd9627decc6346d780b3b6ab6ea8fe1f\n\nThis may also be found at: /root/.jenkins/secrets/initialAdminPassword\n\n*************************************************************\n*************************************************************\n*************************************************************\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.jenkins.io/doc/book/installing/linux/#setup-wizard"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.jina.1",
       "structural_id": "63bcdb8ecf540be4558d57248a668b2e1f642f78",
       "name": "Jina Search Foundation API Key",
@@ -3735,7 +3756,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 133
+      "num_rules": 134
     },
     {
       "id": "np.assets",

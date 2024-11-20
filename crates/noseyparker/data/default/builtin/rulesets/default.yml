@@ -79,6 +79,7 @@ rulesets:
   - np.http.2         # HTTP Bearer Token
   - np.huggingface.1  # HuggingFace User Access Token
   - np.jenkins.1      # Jenkins Token or Crumb
+  - np.jenkins.2      # Jenkins Setup Admin Password
   - np.jina.1         # Jina Search Foundation API Key
   - np.jwt.1          # JSON Web Token (base64url-encoded)
   - np.jwt.2          # JSON Web Token Secret

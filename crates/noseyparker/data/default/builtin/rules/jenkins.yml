@@ -35,3 +35,41 @@ rules:
   references:
   - https://www.jenkins.io/blog/2018/07/02/new-api-token-system/
   - https://www.jenkins.io/doc/book/security/csrf-protection/
+
+
+- name: Jenkins Setup Admin Password
+  id: np.jenkins.2
+
+  pattern: |
+    (?x)(?m)
+    Please\ use\ the\ following\ password\ to\ proceed\ to\ installation:
+    (?: \n\n | \r\n\r\n )
+    ([a-f0-9]{30,36})$
+
+  examples:
+  - |
+      *************************************************************
+      *************************************************************
+      *************************************************************
+
+      Jenkins initial setup is required. An admin user has been created and a password generated.
+      Please use the following password to proceed to installation:
+
+      bd9627decc6346d780b3b6ab6ea8fe1f
+
+      This may also be found at: /root/.jenkins/secrets/initialAdminPassword
+
+      *************************************************************
+      *************************************************************
+      *************************************************************
+
+  categories: [fuzzy, secret]
+
+  description: |
+    A Jenkins setup wizard admin user password was detected.
+    This password is used to configure a new Jenkins installation.
+    An attacker with possession of this password could control the Jenkins instance.
+    This could enable exfiltration of proprietary code, insertion of backdoors, or lateral movement to other resources.
+
+  references:
+  - https://www.jenkins.io/doc/book/installing/linux/#setup-wizard
