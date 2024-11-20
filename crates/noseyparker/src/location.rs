@@ -148,8 +148,10 @@ impl LocationMapping {
     /// Panics if the given `OffsetSpan` is not valid for this `LocationMapping`.
     pub fn get_source_span(&self, span: &OffsetSpan) -> SourceSpan {
         let start = self.offset_to_source[span.start];
-        let end = self.offset_to_source[span.end.saturating_sub(1)]; // XXX: is this right?
-                                                                     // let end = self.offset_to_source[span.end];
+        let end_idx = span.end.saturating_sub(1);
+
+        // FIXME: The end index is not calculated correctly here! It currently includes the line terminator
+        let end = self.offset_to_source[end_idx];
         SourceSpan { start, end }
     }
 }
