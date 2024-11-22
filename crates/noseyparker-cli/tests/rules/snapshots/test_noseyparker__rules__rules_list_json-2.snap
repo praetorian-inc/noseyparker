@@ -1232,6 +1232,52 @@ expression: stdout
       }
     },
     {
+      "id": "np.generic.7",
+      "structural_id": "9ec2aa50c06979127f00cbc82210f433154dd167",
+      "name": "Credentials in .NET System.Net.NetworkCredential",
+      "syntax": {
+        "name": "Credentials in .NET System.Net.NetworkCredential",
+        "id": "np.generic.7",
+        "pattern": "(?x)\n\\b\n(?: NetworkCredential | NETWORKCREDENTIAL | networkcredential )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# password )\n\\s* \\)\n",
+        "examples": [
+          "sender.Credentials = new NetworkCredential(\"NuGets@example.com\", \"vzihlaquknriqlht\");\n",
+          "$webClient.Credentials = new-object System.Net.NetworkCredential(\"cidownload\", \"AP7JaG9ToerxBc6gWP5LcU2CNpb\");\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/dotnet/api/system.net.networkcredential"
+        ],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.8",
+      "structural_id": "57113d55cc8becd246aeb9c912f60e35b26446dd",
+      "name": "Credentials in .NET System.DirectoryServices.DirectoryEntry",
+      "syntax": {
+        "name": "Credentials in .NET System.DirectoryServices.DirectoryEntry",
+        "id": "np.generic.8",
+        "pattern": "(?x)\n\\b\n(?: DirectoryEntry | DIRECTORYENTRY | directoryentry )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,100} ) \"               (?# path )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# password )\n  (?: \\s* , \\s* [^)]{3,50} )?         (?# authentication type )\n\\s* \\)\n",
+        "examples": [
+          "$domain = New-Object DirectoryServices.DirectoryEntry(\"LDAP://10.10.10.1\",\"domain\\user\", \"secret\")\n",
+          "new DirectoryEntry(\"LDAP://EXAMPLE.COM\",\n          \"ADMNALRRHH@EXAMPLE.COM\",\n          \"Rrhh1234\");\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.directoryentry"
+        ],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.github.1",
       "structural_id": "f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
       "name": "GitHub Personal Access Token",
@@ -3756,7 +3802,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 134
+      "num_rules": 136
     },
     {
       "id": "np.assets",

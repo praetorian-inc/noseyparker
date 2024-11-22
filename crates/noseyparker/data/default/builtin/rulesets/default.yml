@@ -56,6 +56,8 @@ rulesets:
   - np.generic.4      # Generic Username and Password
   - np.generic.5      # Generic Password
   - np.generic.6      # Generic Password
+  - np.generic.7      # Credentials in .NET System.Net.NetworkCredential
+  - np.generic.8      # Credentials in .NET System.DirectoryServices.DirectoryEntry
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token

@@ -263,3 +263,69 @@ rules:
       usernameLabel:"Username or email:",passwordLabel:"Password:",rememberMeLabel:"Remember me:"
   - |
       this.addPassword = '#add-password';
+
+
+
+- name: Credentials in .NET System.Net.NetworkCredential
+  id: np.generic.7
+
+  pattern: |
+    (?x)
+    \b
+    (?: NetworkCredential | NETWORKCREDENTIAL | networkcredential )
+    \s* \( \s*
+      " ( [^"\n]{3,50} ) "               (?# username )
+      \s* , \s*
+      " ( [^"\n]{3,50} ) "               (?# password )
+    \s* \)
+
+  categories: [fuzzy, generic, secret]
+
+  examples:
+  - |
+      sender.Credentials = new NetworkCredential("NuGets@example.com", "vzihlaquknriqlht");
+
+  - |
+      $webClient.Credentials = new-object System.Net.NetworkCredential("cidownload", "AP7JaG9ToerxBc6gWP5LcU2CNpb");
+
+  references:
+  - https://learn.microsoft.com/en-us/dotnet/api/system.net.networkcredential
+
+  description: |
+    A .NET `System.Net.NetworkCredential` value with hardcoded parameters was found.
+    This may allow an attack access to a resource that uses basic, digest, NTLM, or Kerberos authentication.
+
+
+
+- name: Credentials in .NET System.DirectoryServices.DirectoryEntry
+  id: np.generic.8
+
+  pattern: |
+    (?x)
+    \b
+    (?: DirectoryEntry | DIRECTORYENTRY | directoryentry )
+    \s* \( \s*
+      " ( [^"\n]{3,100} ) "               (?# path )
+      \s* , \s*
+      " ( [^"\n]{3,50} ) "                (?# username )
+      \s* , \s*
+      " ( [^"\n]{3,50} ) "                (?# password )
+      (?: \s* , \s* [^)]{3,50} )?         (?# authentication type )
+    \s* \)
+
+  categories: [fuzzy, generic, secret]
+
+  examples:
+  - |
+      $domain = New-Object DirectoryServices.DirectoryEntry("LDAP://10.10.10.1","domain\user", "secret")
+  - |
+      new DirectoryEntry("LDAP://EXAMPLE.COM",
+                "ADMNALRRHH@EXAMPLE.COM",
+                "Rrhh1234");
+
+  references:
+  - https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.directoryentry
+
+  description: |
+    A .NET `System.DirectoryServices.DirectoryEntry` value was found with hardcoded credentials.
+    This may allow an attack access to an Active Directory instance.
