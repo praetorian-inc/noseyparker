@@ -6,6 +6,15 @@ All notable changes to the project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Additions
+- New rules have been added:
+
+  - `Credentials in .NET System.DirectoryServices.DirectoryEntry` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
+  - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
+
+
 ## [v0.21.0](https://github.com/praetorian-inc/noseyparker/releases/v0.21.0) (2024-11-20)
 
 ### Changes

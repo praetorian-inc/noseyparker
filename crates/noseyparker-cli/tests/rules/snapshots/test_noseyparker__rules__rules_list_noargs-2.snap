@@ -2,166 +2,168 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
- Rule ID              Rule Name                                                 Categories 
-────────────────────────────────────────────────────────────────────────────────────────────────────────
- np.adafruit.1        Adafruit IO Key                                           api, secret 
- np.adobe.1           Adobe OAuth Client Secret                                 api, secret 
- np.age.1             Age Recipient (X25519 public key)                         identifier 
- np.age.2             Age Identity (X22519 secret key)                          secret 
- np.appsync.1         AWS AppSync API Key                                       api, secret 
- np.arn.1             Amazon Resource Name                                      api, identifier 
- np.artifactory.1     Artifactory API Key                                       api, fuzzy, secret 
- np.aws.1             AWS API Key                                               api, identifier 
- np.aws.2             AWS Secret Access Key                                     api, fuzzy, secret 
- np.aws.3             AWS Account ID                                            api, fuzzy, identifier 
- np.aws.4             AWS Session Token                                         api, fuzzy, secret 
- np.aws.5             Amazon MWS Auth Token                                     api 
- np.aws.6             AWS API Credentials                                       api, fuzzy, secret 
- np.azure.1           Azure Connection String                                   api, fuzzy, secret 
- np.azure.2           Azure App Configuration Connection String                 api, fuzzy, secret 
- np.azure.3           Azure Personal Access Token                               api, fuzzy, secret 
- np.bitbucket.1       Bitbucket App Password                                    api, secret 
- np.blynk.1           Blynk Device Access Token                                 api, secret 
- np.blynk.2           Blynk Organization Access Token                           api, secret 
- np.blynk.3           Blynk Organization Access Token                           api, secret 
- np.blynk.8           Blynk Organization Client Credentials                     api, secret 
- np.blynk.9           Blynk Organization Client Credentials                     api, secret 
- np.codeclimate.1     CodeClimate Reporter ID                                   api, fuzzy, secret 
- np.cratesio.1        crates.io API Key                                         api, secret 
- np.databricks.1      Databricks Personal Access Token                          api, secret 
- np.digitalocean.1    DigitalOcean Application Access Token                     api, secret 
- np.digitalocean.2    DigitalOcean Personal Access Token                        api, secret 
- np.digitalocean.3    DigitalOcean Refresh Token                                api, secret 
- np.django.1          Django Secret Key                                         fuzzy, secret 
- np.dockerhub.1       Docker Hub Personal Access Token                          api, secret 
- np.doppler.1         Doppler CLI Token                                         api, secret 
- np.doppler.2         Doppler Personal Token                                    api, secret 
- np.doppler.3         Doppler Service Token                                     api, secret 
- np.doppler.4         Doppler Service Account Token                             api, secret 
- np.doppler.5         Doppler SCIM Token                                        api, secret 
- np.doppler.6         Doppler Audit Token                                       api, secret 
- np.dropbox.1         Dropbox Access Token                                      api, secret 
- np.dtrack.1          Dependency-Track API Key                                  api, secret 
- np.dynatrace.1       Dynatrace Token                                           api, secret 
- np.facebook.1        Facebook Secret Key                                       api, fuzzy, secret 
- np.facebook.2        Facebook Access Token                                     api, secret 
- np.figma.1           Figma Personal Access Token                               api, fuzzy, secret 
- np.gcs.1             Google Cloud Storage Bucket                               api, identifier 
- np.gcs.2             Google Cloud Storage Bucket                               api, identifier 
- np.generic.1         Generic Secret                                            fuzzy, generic, secret 
- np.generic.2         Generic API Key                                           fuzzy, generic, secret 
- np.generic.3         Generic Username and Password                             fuzzy, generic, secret 
- np.generic.4         Generic Username and Password                             fuzzy, generic, secret 
- np.generic.5         Generic Password                                          fuzzy, generic, secret 
- np.generic.6         Generic Password                                          fuzzy, generic, secret 
- np.github.1          GitHub Personal Access Token                              api, secret 
- np.github.2          GitHub OAuth Access Token                                 api, secret 
- np.github.3          GitHub App Token                                          api, secret 
- np.github.4          GitHub Refresh Token                                      api, secret 
- np.github.5          GitHub Client ID                                          api, fuzzy, identifier 
- np.github.6          GitHub Secret Key                                         api, fuzzy, secret 
- np.github.7          GitHub Personal Access Token (fine-grained permissions)   api, secret 
- np.gitlab.1          GitLab Runner Registration Token                          api, secret 
- np.gitlab.2          GitLab Personal Access Token                              api, secret 
- np.gitlab.3          GitLab Pipeline Trigger Token                             api, secret 
- np.google.1          Google Client ID                                          api, identifier 
- np.google.2          Google OAuth Client Secret                                api, secret 
- np.google.3          Google OAuth Client Secret                                api, fuzzy, secret 
- np.google.4          Google OAuth Access Token                                 api, secret 
- np.google.5          Google API Key                                            api, secret 
- np.google.6          Google OAuth Credentials                                  api, fuzzy, secret 
- np.gradle.1          Hardcoded Gradle Credentials                              fuzzy, secret 
- np.grafana.1         Grafana API Token                                         api, secret 
- np.grafana.2         Grafana Cloud API Token                                   api, secret 
- np.grafana.3         Grafana Service Account Token                             api, secret 
- np.heroku.1          Heroku API Key                                            api, fuzzy, secret 
- np.http.1            HTTP Basic Authentication                                 fuzzy, generic, secret 
- np.http.2            HTTP Bearer Token                                         fuzzy, generic, secret 
- np.huggingface.1     HuggingFace User Access Token                             api, secret 
- np.jenkins.1         Jenkins Token or Crumb                                    api, fuzzy, secret 
- np.jenkins.2         Jenkins Setup Admin Password                              fuzzy, secret 
- np.jina.1            Jina Search Foundation API Key                            api, secret 
- np.jwt.1             JSON Web Token (base64url-encoded)                        api 
- np.jwt.2             JSON Web Token Secret                                     fuzzy, secret 
- np.jwt.3             JSON Web Token Secret                                     fuzzy, secret 
- np.krb5.asrep.23.1   Password Hash (Kerberos 5, etype 23, AS-REP)              hashed, secret 
- np.linkedin.1        LinkedIn Client ID                                        api, fuzzy, identifier 
- np.linkedin.2        LinkedIn Secret Key                                       api, fuzzy, secret 
- np.mailchimp.1       MailChimp API Key                                         api, fuzzy, secret 
- np.mailgun.1         Mailgun API Key                                           api, fuzzy, secret 
- np.mapbox.1          Mapbox Public Access Token                                api, fuzzy 
- np.mapbox.2          Mapbox Secret Access Token                                api, fuzzy, secret 
- np.mapbox.3          Mapbox Temporary Access Token                             api, fuzzy, secret 
- np.mongodb.1         Credentials in MongoDB Connection String                  secret 
- np.msteams.1         Microsoft Teams Webhook                                   api, secret 
- np.netrc.1           netrc Credentials                                         secret 
- np.newrelic.1        New Relic License Key                                     secret 
- np.newrelic.2        New Relic License Key                                     secret 
- np.newrelic.3        New Relic API Service Key                                 api, secret 
- np.newrelic.4        New Relic Admin API Key                                   api, secret 
- np.newrelic.5        New Relic Insights Insert Key                             api, secret 
- np.newrelic.6        New Relic Insights Query Key                              api, secret 
- np.newrelic.7        New Relic REST API Key                                    api, secret 
- np.newrelic.8        New Relic Pixie API Key                                   api, secret 
- np.newrelic.9        New Relic Pixie Deploy Key                                api, secret 
- np.npm.1             NPM Access Token (fine-grained)                           api, secret 
- np.nuget.1           NuGet API Key                                             api, secret 
- np.odbc.1            Credentials in ODBC Connection String                     fuzzy, secret 
- np.okta.1            Okta API Token                                            api, secret 
- np.openai.1          OpenAI API Key                                            api, secret 
- np.particleio.1      particle.io Access Token                                  api, secret 
- np.particleio.2      particle.io Access Token                                  api, secret 
- np.pem.1             PEM-Encoded Private Key                                   secret 
- np.pem.2             Base64-PEM-Encoded Private Key                            secret 
- np.phpmailer.1       PHPMailer Credentials                                     fuzzy, secret 
- np.postgres.1        Credentials in PostgreSQL Connection URI                  secret 
- np.postman.1         Postman API Key                                           api, secret 
- np.psexec.1          Credentials in PsExec                                     fuzzy, secret 
- np.pwhash.1          Password Hash (md5crypt)                                  hashed, secret 
- np.pwhash.2          Password Hash (bcrypt)                                    hashed, secret 
- np.pwhash.3          Password Hash (sha256crypt)                               hashed, secret 
- np.pwhash.4          Password Hash (sha512crypt)                               hashed, secret 
- np.pwhash.5          Password Hash (Cisco IOS PBKDF2 with SHA256)              hashed, secret 
- np.pypi.1            PyPI Upload Token                                         api, secret 
- np.reactapp.1        React App Username                                        fuzzy, identifier 
- np.reactapp.2        React App Password                                        fuzzy, secret 
- np.rubygems.1        RubyGems API Key                                          api, secret 
- np.s3.1              AWS S3 Bucket                                             api, identifier 
- np.s3.2              AWS S3 Bucket                                             api, identifier 
- np.salesforce.1      Salesforce Access Token                                   api, secret 
- np.sauce.1           Sauce Token                                               api, fuzzy, secret 
- np.segment.1         Segment Public API Token                                  api, secret 
- np.sendgrid.1        SendGrid API Key                                          api, secret 
- np.shopify.1         Shopify Domain                                            identifier 
- np.shopify.2         Shopify App Secret                                        api, secret 
- np.shopify.3         Shopify Access Token (Public App)                         api, secret 
- np.shopify.4         Shopify Access Token (Custom App)                         api, secret 
- np.shopify.5         Shopify Access Token (Legacy Private App)                 api, secret 
- np.slack.2           Slack Bot Token                                           api, secret 
- np.slack.3           Slack Webhook                                             api, secret 
- np.slack.4           Slack User Token                                          api, secret 
- np.slack.5           Slack App Token                                           api, secret 
- np.slack.6           Slack Legacy Bot Token                                    api, secret 
- np.sonarqube.1       SonarQube Token                                           api, fuzzy, secret 
- np.square.1          Square Access Token                                       api, secret 
- np.square.2          Square OAuth Secret                                       api, secret 
- np.stackhawk.1       StackHawk API Key                                         api, secret 
- np.stripe.1          Stripe API Key                                            api, secret 
- np.stripe.2          Stripe API Test Key                                       api, secret, test 
- np.telegram.1        Telegram Bot Token                                        api, secret 
- np.thingsboard.1     ThingsBoard Access Token                                  api, identifier, secret 
- np.thingsboard.2     ThingsBoard Provision Device Key                          api, secret 
- np.thingsboard.3     ThingsBoard Provision Device Secret                       api, fuzzy, secret 
- np.truenas.1         TrueNAS API Key (WebSocket)                               api, fuzzy, secret 
- np.truenas.2         TrueNAS API Key (REST API)                                api, fuzzy, secret 
- np.twilio.1          Twilio API Key                                            api, fuzzy, secret 
- np.twitter.1         Twitter Client ID                                         api, fuzzy, identifier 
- np.twitter.2         Twitter Secret Key                                        api, fuzzy, secret 
- np.wireguard.1       WireGuard Private Key                                     fuzzy, secret 
- np.wireguard.2       WireGuard Preshared Key                                   fuzzy, secret 
+ Rule ID              Rule Name                                                     Categories 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ np.adafruit.1        Adafruit IO Key                                               api, secret 
+ np.adobe.1           Adobe OAuth Client Secret                                     api, secret 
+ np.age.1             Age Recipient (X25519 public key)                             identifier 
+ np.age.2             Age Identity (X22519 secret key)                              secret 
+ np.appsync.1         AWS AppSync API Key                                           api, secret 
+ np.arn.1             Amazon Resource Name                                          api, identifier 
+ np.artifactory.1     Artifactory API Key                                           api, fuzzy, secret 
+ np.aws.1             AWS API Key                                                   api, identifier 
+ np.aws.2             AWS Secret Access Key                                         api, fuzzy, secret 
+ np.aws.3             AWS Account ID                                                api, fuzzy, identifier 
+ np.aws.4             AWS Session Token                                             api, fuzzy, secret 
+ np.aws.5             Amazon MWS Auth Token                                         api 
+ np.aws.6             AWS API Credentials                                           api, fuzzy, secret 
+ np.azure.1           Azure Connection String                                       api, fuzzy, secret 
+ np.azure.2           Azure App Configuration Connection String                     api, fuzzy, secret 
+ np.azure.3           Azure Personal Access Token                                   api, fuzzy, secret 
+ np.bitbucket.1       Bitbucket App Password                                        api, secret 
+ np.blynk.1           Blynk Device Access Token                                     api, secret 
+ np.blynk.2           Blynk Organization Access Token                               api, secret 
+ np.blynk.3           Blynk Organization Access Token                               api, secret 
+ np.blynk.8           Blynk Organization Client Credentials                         api, secret 
+ np.blynk.9           Blynk Organization Client Credentials                         api, secret 
+ np.codeclimate.1     CodeClimate Reporter ID                                       api, fuzzy, secret 
+ np.cratesio.1        crates.io API Key                                             api, secret 
+ np.databricks.1      Databricks Personal Access Token                              api, secret 
+ np.digitalocean.1    DigitalOcean Application Access Token                         api, secret 
+ np.digitalocean.2    DigitalOcean Personal Access Token                            api, secret 
+ np.digitalocean.3    DigitalOcean Refresh Token                                    api, secret 
+ np.django.1          Django Secret Key                                             fuzzy, secret 
+ np.dockerhub.1       Docker Hub Personal Access Token                              api, secret 
+ np.doppler.1         Doppler CLI Token                                             api, secret 
+ np.doppler.2         Doppler Personal Token                                        api, secret 
+ np.doppler.3         Doppler Service Token                                         api, secret 
+ np.doppler.4         Doppler Service Account Token                                 api, secret 
+ np.doppler.5         Doppler SCIM Token                                            api, secret 
+ np.doppler.6         Doppler Audit Token                                           api, secret 
+ np.dropbox.1         Dropbox Access Token                                          api, secret 
+ np.dtrack.1          Dependency-Track API Key                                      api, secret 
+ np.dynatrace.1       Dynatrace Token                                               api, secret 
+ np.facebook.1        Facebook Secret Key                                           api, fuzzy, secret 
+ np.facebook.2        Facebook Access Token                                         api, secret 
+ np.figma.1           Figma Personal Access Token                                   api, fuzzy, secret 
+ np.gcs.1             Google Cloud Storage Bucket                                   api, identifier 
+ np.gcs.2             Google Cloud Storage Bucket                                   api, identifier 
+ np.generic.1         Generic Secret                                                fuzzy, generic, secret 
+ np.generic.2         Generic API Key                                               fuzzy, generic, secret 
+ np.generic.3         Generic Username and Password                                 fuzzy, generic, secret 
+ np.generic.4         Generic Username and Password                                 fuzzy, generic, secret 
+ np.generic.5         Generic Password                                              fuzzy, generic, secret 
+ np.generic.6         Generic Password                                              fuzzy, generic, secret 
+ np.generic.7         Credentials in .NET System.Net.NetworkCredential              fuzzy, generic, secret 
+ np.generic.8         Credentials in .NET System.DirectoryServices.DirectoryEntry   fuzzy, generic, secret 
+ np.github.1          GitHub Personal Access Token                                  api, secret 
+ np.github.2          GitHub OAuth Access Token                                     api, secret 
+ np.github.3          GitHub App Token                                              api, secret 
+ np.github.4          GitHub Refresh Token                                          api, secret 
+ np.github.5          GitHub Client ID                                              api, fuzzy, identifier 
+ np.github.6          GitHub Secret Key                                             api, fuzzy, secret 
+ np.github.7          GitHub Personal Access Token (fine-grained permissions)       api, secret 
+ np.gitlab.1          GitLab Runner Registration Token                              api, secret 
+ np.gitlab.2          GitLab Personal Access Token                                  api, secret 
+ np.gitlab.3          GitLab Pipeline Trigger Token                                 api, secret 
+ np.google.1          Google Client ID                                              api, identifier 
+ np.google.2          Google OAuth Client Secret                                    api, secret 
+ np.google.3          Google OAuth Client Secret                                    api, fuzzy, secret 
+ np.google.4          Google OAuth Access Token                                     api, secret 
+ np.google.5          Google API Key                                                api, secret 
+ np.google.6          Google OAuth Credentials                                      api, fuzzy, secret 
+ np.gradle.1          Hardcoded Gradle Credentials                                  fuzzy, secret 
+ np.grafana.1         Grafana API Token                                             api, secret 
+ np.grafana.2         Grafana Cloud API Token                                       api, secret 
+ np.grafana.3         Grafana Service Account Token                                 api, secret 
+ np.heroku.1          Heroku API Key                                                api, fuzzy, secret 
+ np.http.1            HTTP Basic Authentication                                     fuzzy, generic, secret 
+ np.http.2            HTTP Bearer Token                                             fuzzy, generic, secret 
+ np.huggingface.1     HuggingFace User Access Token                                 api, secret 
+ np.jenkins.1         Jenkins Token or Crumb                                        api, fuzzy, secret 
+ np.jenkins.2         Jenkins Setup Admin Password                                  fuzzy, secret 
+ np.jina.1            Jina Search Foundation API Key                                api, secret 
+ np.jwt.1             JSON Web Token (base64url-encoded)                            api 
+ np.jwt.2             JSON Web Token Secret                                         fuzzy, secret 
+ np.jwt.3             JSON Web Token Secret                                         fuzzy, secret 
+ np.krb5.asrep.23.1   Password Hash (Kerberos 5, etype 23, AS-REP)                  hashed, secret 
+ np.linkedin.1        LinkedIn Client ID                                            api, fuzzy, identifier 
+ np.linkedin.2        LinkedIn Secret Key                                           api, fuzzy, secret 
+ np.mailchimp.1       MailChimp API Key                                             api, fuzzy, secret 
+ np.mailgun.1         Mailgun API Key                                               api, fuzzy, secret 
+ np.mapbox.1          Mapbox Public Access Token                                    api, fuzzy 
+ np.mapbox.2          Mapbox Secret Access Token                                    api, fuzzy, secret 
+ np.mapbox.3          Mapbox Temporary Access Token                                 api, fuzzy, secret 
+ np.mongodb.1         Credentials in MongoDB Connection String                      secret 
+ np.msteams.1         Microsoft Teams Webhook                                       api, secret 
+ np.netrc.1           netrc Credentials                                             secret 
+ np.newrelic.1        New Relic License Key                                         secret 
+ np.newrelic.2        New Relic License Key                                         secret 
+ np.newrelic.3        New Relic API Service Key                                     api, secret 
+ np.newrelic.4        New Relic Admin API Key                                       api, secret 
+ np.newrelic.5        New Relic Insights Insert Key                                 api, secret 
+ np.newrelic.6        New Relic Insights Query Key                                  api, secret 
+ np.newrelic.7        New Relic REST API Key                                        api, secret 
+ np.newrelic.8        New Relic Pixie API Key                                       api, secret 
+ np.newrelic.9        New Relic Pixie Deploy Key                                    api, secret 
+ np.npm.1             NPM Access Token (fine-grained)                               api, secret 
+ np.nuget.1           NuGet API Key                                                 api, secret 
+ np.odbc.1            Credentials in ODBC Connection String                         fuzzy, secret 
+ np.okta.1            Okta API Token                                                api, secret 
+ np.openai.1          OpenAI API Key                                                api, secret 
+ np.particleio.1      particle.io Access Token                                      api, secret 
+ np.particleio.2      particle.io Access Token                                      api, secret 
+ np.pem.1             PEM-Encoded Private Key                                       secret 
+ np.pem.2             Base64-PEM-Encoded Private Key                                secret 
+ np.phpmailer.1       PHPMailer Credentials                                         fuzzy, secret 
+ np.postgres.1        Credentials in PostgreSQL Connection URI                      secret 
+ np.postman.1         Postman API Key                                               api, secret 
+ np.psexec.1          Credentials in PsExec                                         fuzzy, secret 
+ np.pwhash.1          Password Hash (md5crypt)                                      hashed, secret 
+ np.pwhash.2          Password Hash (bcrypt)                                        hashed, secret 
+ np.pwhash.3          Password Hash (sha256crypt)                                   hashed, secret 
+ np.pwhash.4          Password Hash (sha512crypt)                                   hashed, secret 
+ np.pwhash.5          Password Hash (Cisco IOS PBKDF2 with SHA256)                  hashed, secret 
+ np.pypi.1            PyPI Upload Token                                             api, secret 
+ np.reactapp.1        React App Username                                            fuzzy, identifier 
+ np.reactapp.2        React App Password                                            fuzzy, secret 
+ np.rubygems.1        RubyGems API Key                                              api, secret 
+ np.s3.1              AWS S3 Bucket                                                 api, identifier 
+ np.s3.2              AWS S3 Bucket                                                 api, identifier 
+ np.salesforce.1      Salesforce Access Token                                       api, secret 
+ np.sauce.1           Sauce Token                                                   api, fuzzy, secret 
+ np.segment.1         Segment Public API Token                                      api, secret 
+ np.sendgrid.1        SendGrid API Key                                              api, secret 
+ np.shopify.1         Shopify Domain                                                identifier 
+ np.shopify.2         Shopify App Secret                                            api, secret 
+ np.shopify.3         Shopify Access Token (Public App)                             api, secret 
+ np.shopify.4         Shopify Access Token (Custom App)                             api, secret 
+ np.shopify.5         Shopify Access Token (Legacy Private App)                     api, secret 
+ np.slack.2           Slack Bot Token                                               api, secret 
+ np.slack.3           Slack Webhook                                                 api, secret 
+ np.slack.4           Slack User Token                                              api, secret 
+ np.slack.5           Slack App Token                                               api, secret 
+ np.slack.6           Slack Legacy Bot Token                                        api, secret 
+ np.sonarqube.1       SonarQube Token                                               api, fuzzy, secret 
+ np.square.1          Square Access Token                                           api, secret 
+ np.square.2          Square OAuth Secret                                           api, secret 
+ np.stackhawk.1       StackHawk API Key                                             api, secret 
+ np.stripe.1          Stripe API Key                                                api, secret 
+ np.stripe.2          Stripe API Test Key                                           api, secret, test 
+ np.telegram.1        Telegram Bot Token                                            api, secret 
+ np.thingsboard.1     ThingsBoard Access Token                                      api, identifier, secret 
+ np.thingsboard.2     ThingsBoard Provision Device Key                              api, secret 
+ np.thingsboard.3     ThingsBoard Provision Device Secret                           api, fuzzy, secret 
+ np.truenas.1         TrueNAS API Key (WebSocket)                                   api, fuzzy, secret 
+ np.truenas.2         TrueNAS API Key (REST API)                                    api, fuzzy, secret 
+ np.twilio.1          Twilio API Key                                                api, fuzzy, secret 
+ np.twitter.1         Twitter Client ID                                             api, fuzzy, identifier 
+ np.twitter.2         Twitter Secret Key                                            api, fuzzy, secret 
+ np.wireguard.1       WireGuard Private Key                                         fuzzy, secret 
+ np.wireguard.2       WireGuard Preshared Key                                       fuzzy, secret 
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             134 
+ default      Nosey Parker default rules             136 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
