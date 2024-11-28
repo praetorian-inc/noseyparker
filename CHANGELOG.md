@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   - `Credentials in .NET System.DirectoryServices.DirectoryEntry` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
   - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
+  - `Kubernetes Bootstrap Token` ([#235](https://github.com/praetorian-inc/noseyparker/pull/235))
 
 
 ## [v0.21.0](https://github.com/praetorian-inc/noseyparker/releases/v0.21.0) (2024-11-20)

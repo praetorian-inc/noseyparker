@@ -1,0 +1,18 @@
+rules:
+
+- name: Kubernetes Bootstrap Token
+  id: np.kubernetes.1
+
+  pattern: |
+    (?x)
+    \b
+    ([a-z0-9]{6}\.[a-z0-9]{16})
+    \b
+
+  categories: [api, secret]
+
+  examples:
+  - abcdef.0123456789abcdef
+
+  references:
+  - https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format

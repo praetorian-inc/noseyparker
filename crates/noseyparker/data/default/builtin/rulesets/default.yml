@@ -86,6 +86,7 @@ rulesets:
   - np.jwt.1          # JSON Web Token (base64url-encoded)
   - np.jwt.2          # JSON Web Token Secret
   - np.jwt.3          # JSON Web Token Secret
+  - np.kubernetes.1   # Kubernetes Bootstrap Token
   - np.linkedin.2     # LinkedIn Secret Key
   - np.mailchimp.1    # MailChimp API Key
   - np.mailgun.1      # Mailgun API Key
