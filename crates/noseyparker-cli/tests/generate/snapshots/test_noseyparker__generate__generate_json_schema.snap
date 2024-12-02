@@ -1,0 +1,515 @@
+---
+source: crates/noseyparker-cli/tests/generate/mod.rs
+expression: stdout
+---
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "BStringBase64": {
+      "description": "A standard base64-encoded bytestring",
+      "pattern": "[a-zA-Z0-9/+]*={0,2}",
+      "type": "string"
+    },
+    "BlobId": {
+      "description": "A hex-encoded blob ID as computed by Git",
+      "pattern": "[0-9a-f]{40}",
+      "type": "string"
+    },
+    "BlobMetadata": {
+      "description": "Metadata about a blob",
+      "properties": {
+        "charset": {
+          "description": "The guessed charset of the blob",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BlobId"
+            }
+          ],
+          "description": "The blob ID this metadata applies to"
+        },
+        "mime_essence": {
+          "description": "The guessed multimedia type of the blob",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "num_bytes": {
+          "description": "The length in bytes of the blob",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "num_bytes"
+      ],
+      "type": "object"
+    },
+    "CommitMetadata": {
+      "description": "Metadata about a Git commit.",
+      "properties": {
+        "author_email": {
+          "description": "The author email",
+          "type": "string"
+        },
+        "author_name": {
+          "description": "The author name",
+          "type": "string"
+        },
+        "author_timestamp": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Time"
+            }
+          ],
+          "description": "The author timestamp"
+        },
+        "commit_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ObjectId"
+            }
+          ],
+          "description": "The commit ID"
+        },
+        "committer_email": {
+          "description": "The committer email",
+          "type": "string"
+        },
+        "committer_name": {
+          "description": "The committer name",
+          "type": "string"
+        },
+        "committer_timestamp": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Time"
+            }
+          ],
+          "description": "The committer timestamp"
+        },
+        "message": {
+          "description": "The commit message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author_email",
+        "author_name",
+        "author_timestamp",
+        "commit_id",
+        "committer_email",
+        "committer_name",
+        "committer_timestamp",
+        "message"
+      ],
+      "type": "object"
+    },
+    "CommitProvenance": {
+      "description": "How was a particular Git commit encountered?",
+      "properties": {
+        "blob_path": {
+          "type": "string"
+        },
+        "commit_metadata": {
+          "$ref": "#/definitions/CommitMetadata"
+        }
+      },
+      "required": [
+        "blob_path",
+        "commit_metadata"
+      ],
+      "type": "object"
+    },
+    "Finding": {
+      "description": "A group of matches that all have the same rule and capture group content",
+      "properties": {
+        "comment": {
+          "description": "A comment assigned to this finding",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finding_id": {
+          "description": "The content-based finding identifier for this group of matches",
+          "type": "string"
+        },
+        "groups": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Groups"
+            }
+          ],
+          "description": "The matched content of all the matches in the group"
+        },
+        "matches": {
+          "items": {
+            "$ref": "#/definitions/ReportMatch"
+          },
+          "type": "array"
+        },
+        "mean_score": {
+          "description": "The mean score in this group of matches",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "num_matches": {
+          "description": "The number of matches in the group",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "rule_name": {
+          "description": "The name of the rule that detected each match",
+          "type": "string"
+        },
+        "rule_structural_id": {
+          "description": "The structural identifier of the rule that detected each match",
+          "type": "string"
+        },
+        "rule_text_id": {
+          "description": "The textual identifier of the rule that detected each match",
+          "type": "string"
+        },
+        "statuses": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Statuses"
+            }
+          ],
+          "description": "The unique statuses assigned to matches in the group"
+        }
+      },
+      "required": [
+        "finding_id",
+        "groups",
+        "matches",
+        "num_matches",
+        "rule_name",
+        "rule_structural_id",
+        "rule_text_id",
+        "statuses"
+      ],
+      "type": "object"
+    },
+    "Group": {
+      "$ref": "#/definitions/BStringBase64"
+    },
+    "Groups": {
+      "items": {
+        "$ref": "#/definitions/Group"
+      },
+      "type": "array"
+    },
+    "Location": {
+      "description": "A span, including both the byte- and source-based representation.",
+      "properties": {
+        "offset_span": {
+          "$ref": "#/definitions/OffsetSpan"
+        },
+        "source_span": {
+          "$ref": "#/definitions/SourceSpan"
+        }
+      },
+      "required": [
+        "offset_span",
+        "source_span"
+      ],
+      "type": "object"
+    },
+    "ObjectId": {
+      "description": "A hex-encoded object ID as computed by Git",
+      "pattern": "[0-9a-f]{40}",
+      "type": "string"
+    },
+    "OffsetSpan": {
+      "description": "A non-empty span, defined by two byte offsets. This is a half-open interval. A valid span will have an end value greater than the start value.",
+      "properties": {
+        "end": {
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "start": {
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "end",
+        "start"
+      ],
+      "type": "object"
+    },
+    "Provenance": {
+      "description": "`Provenance` indicates where a particular blob or match was found when scanning.",
+      "oneOf": [
+        {
+          "description": "Indicates that a blob was seen at a particular file path",
+          "properties": {
+            "kind": {
+              "enum": [
+                "file"
+              ],
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Indicates that a blob was seen in a Git repo, optionally with particular commit provenance info",
+          "properties": {
+            "first_commit": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/CommitProvenance"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "kind": {
+              "enum": [
+                "git_repo"
+              ],
+              "type": "string"
+            },
+            "repo_path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "repo_path"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "An extended provenance entry.\n\nThis is an arbitrary JSON value. If the value is an object containing certain fields, they will be interpreted specially by Nosey Parker:\n\n- A `path` field containing a string",
+          "properties": {
+            "kind": {
+              "enum": [
+                "extended"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ProvenanceSet": {
+      "description": "A non-empty set of `Provenance` entries",
+      "items": {
+        "$ref": "#/definitions/Provenance"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "ReportMatch": {
+      "description": "A match produced by one of Nosey Parker's rules. This corresponds to a single location.",
+      "properties": {
+        "blob_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BlobId"
+            }
+          ],
+          "description": "The blob this match comes from"
+        },
+        "blob_metadata": {
+          "$ref": "#/definitions/BlobMetadata"
+        },
+        "comment": {
+          "description": "An optional comment assigned to the match",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "groups": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Groups"
+            }
+          ],
+          "description": "The capture groups"
+        },
+        "location": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Location"
+            }
+          ],
+          "description": "The location of the entire matching content"
+        },
+        "provenance": {
+          "$ref": "#/definitions/ProvenanceSet"
+        },
+        "rule_name": {
+          "description": "The name of the rule that produced this match",
+          "type": "string"
+        },
+        "rule_structural_id": {
+          "description": "The rule that produced this match",
+          "type": "string"
+        },
+        "rule_text_id": {
+          "description": "The text identifier of the rule that produced this match",
+          "type": "string"
+        },
+        "score": {
+          "description": "An optional score assigned to the match",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "snippet": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Snippet"
+            }
+          ],
+          "description": "A snippet of the match and surrounding context"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Status"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "An optional status assigned to the match"
+        },
+        "structural_id": {
+          "description": "The unique content-based identifier of this match",
+          "type": "string"
+        }
+      },
+      "required": [
+        "blob_id",
+        "blob_metadata",
+        "groups",
+        "location",
+        "provenance",
+        "rule_name",
+        "rule_structural_id",
+        "rule_text_id",
+        "snippet",
+        "structural_id"
+      ],
+      "type": "object"
+    },
+    "Snippet": {
+      "properties": {
+        "after": {
+          "description": "A snippet of the input immediately after `content`",
+          "type": "string"
+        },
+        "before": {
+          "description": "A snippet of the input immediately prior to `content`",
+          "type": "string"
+        },
+        "matching": {
+          "description": "The matching input",
+          "type": "string"
+        }
+      },
+      "required": [
+        "after",
+        "before",
+        "matching"
+      ],
+      "type": "object"
+    },
+    "SourcePoint": {
+      "description": "A point defined by line and column offsets. Lines are indexed from 1; columns are indexed from 0.",
+      "properties": {
+        "column": {
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "line": {
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "column",
+        "line"
+      ],
+      "type": "object"
+    },
+    "SourceSpan": {
+      "description": "A span defined by two source points. This is a clsoed interval.",
+      "properties": {
+        "end": {
+          "$ref": "#/definitions/SourcePoint"
+        },
+        "start": {
+          "$ref": "#/definitions/SourcePoint"
+        }
+      },
+      "required": [
+        "end",
+        "start"
+      ],
+      "type": "object"
+    },
+    "Status": {
+      "description": "A status assigned to a match group",
+      "enum": [
+        "accept",
+        "reject"
+      ],
+      "type": "string"
+    },
+    "Statuses": {
+      "description": "A collection of statuses",
+      "items": {
+        "$ref": "#/definitions/Status"
+      },
+      "type": "array"
+    },
+    "Time": {
+      "type": "string"
+    }
+  },
+  "items": {
+    "$ref": "#/definitions/Finding"
+  },
+  "title": "Array_of_Finding",
+  "type": "array"
+}
