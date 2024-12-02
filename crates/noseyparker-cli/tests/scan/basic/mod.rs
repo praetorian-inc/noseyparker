@@ -210,6 +210,20 @@ fn scan_enumerator_base64_1() {
 }
 
 #[test]
+fn scan_enumerator_string_provenance() {
+    let scan_env = ScanEnv::new();
+
+    let input = scan_env.input_with_secret();
+    let jsonl_input = &serde_json::json!({
+        "content": input,
+        "provenance": "input.txt",
+    })
+    .to_string();
+    let enumerator_input = scan_env.input_file_with_contents("input.txt", jsonl_input);
+    scan_enumerator_common!(&scan_env, enumerator_input);
+}
+
+#[test]
 fn scan_default_datastore() {
     let scan_env = ScanEnv::new();
     let input = scan_env.input_file("input.txt");
