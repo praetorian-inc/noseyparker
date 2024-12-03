@@ -5,6 +5,8 @@ use common::*;
 
 mod datastore;
 
+mod generate;
+
 // XXX We'd like to actually run these tests when the `github` feature is disabled, but use
 // different snapshot files in that case. But that's not easy to do.
 #[cfg(feature = "github")]
