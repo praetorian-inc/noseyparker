@@ -4,7 +4,7 @@ At its core, Nosey Parker is a regular expression-based content matcher.
 It uses a set of rules defined in YAML syntax to determine what matching content to report.
 
 The default rules that Nosey Parker uses get embedded within the compiled `noseyparker` binary.
-The source for these rules appears in the <data/default/builtin/rules> directory.
+The source for these rules appears in the </crates/noseyparker/data/default/builtin/rules> directory.
 
 ## Rule structure
 Nosey Parker's rules are written in YAML syntax.
@@ -13,23 +13,44 @@ A rules file contains a top-level YAML object with a `rules` field that is a lis
 Each rule is a YAML object, comprising a name, a regular expression, a list of references, a list of example inputs, and an optional list of non-example inputs.
 It is easier to understand this from looking at sample rules.
 
-The [`GitHub Personal Access Token`](/crates/noseyparker/data/default/builtin/rules/github.yml) rule looks like this:
+The [`Jenkins Setup Admin Password`](/crates/noseyparker/data/default/builtin/rules/jenkins.yml) rule looks like this:
 ```
-- name: GitHub Personal Access Token
-  id: np.github.1
-  pattern: '\b(ghp_[a-zA-Z0-9]{36})\b'
+- name: Jenkins Setup Admin Password
+  id: np.jenkins.2
 
-  references:
-  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github
-  - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-  - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+  pattern: |
+    (?x)(?m)
+    Please\ use\ the\ following\ password\ to\ proceed\ to\ installation:
+    (?: \n\n | \r\n\r\n )
+    ([a-f0-9]{30,36})$
 
   examples:
-  - 'GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg'
-  - "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'"
   - |
-      ## git devaloper settings
-      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
+      *************************************************************
+      *************************************************************
+      *************************************************************
+
+      Jenkins initial setup is required. An admin user has been created and a password generated.
+      Please use the following password to proceed to installation:
+
+      bd9627decc6346d780b3b6ab6ea8fe1f
+
+      This may also be found at: /root/.jenkins/secrets/initialAdminPassword
+
+      *************************************************************
+      *************************************************************
+      *************************************************************
+
+  categories: [fuzzy, secret]
+
+  description: |
+    A Jenkins setup wizard admin user password was detected.
+    This password is used to configure a new Jenkins installation.
+    An attacker with possession of this password could control the Jenkins instance.
+    This could enable exfiltration of proprietary code, insertion of backdoors, or lateral movement to other resources.
+
+  references:
+  - https://www.jenkins.io/doc/book/installing/linux/#setup-wizard
 ```
 
 The `name` field is intended primarily for human consumption, and is used heavily in various reports.
@@ -41,8 +62,12 @@ It must be a string of alphanumeric segments, optionally separated by hyphens or
 The `pattern` field in the rule the most essential part.
 This is the regular expression pattern that controls what input gets matched.
 Each pattern must have one or more capture groups that indicate where the secret or sensitive content is within the entire match.
-In the case of this `GitHub Personal Access Token` rule, there is one capture group that is the entire match content.
-Not all rules with be this clean; many token formats are more difficult to match precisely, and hence require matching on surrounding context instead of just the secret.
+In the case of this `Jenkins Setup Admin Password` rule, there is one capture group that is password, isolated from its surrounding context.
+Other rules match things that are better specified.
+For example, the [`GitHub Personal Access Token`](/crates/noseyparker/data/default/builtin/rules/github.yml) format includes a distinctive prefix that can be matched precisely.
+
+The `description` field is a string designed for human consumption.
+It is optional; if provided, it should indicate (a) what was detected, and (b) what an attacker could do with it.
 
 The `references` field is a list of freeform strings.
 In practice, these are URLs that describe the format of the thing being matched.
@@ -53,9 +78,18 @@ This field is used for automated testing via `noseyparker rules check`.
 The `negative_examples` field, if provided, is a list of strings that are asserted _not_ to be matched by the rule.
 This field is also used for automated testing via `noseyparker rules check`.
 
+The `categories` field is a list of freeform strings.
+In practice, the following values are used:
+
+- `secret`: the rule detects things that are in fact secrets
+- `identifier`: the rule detects things that are not secrets but could be used to enumerate additional resources (e.g., S3 bucket names)
+- `hashed`: the rule detects hashed payloads (e.g., bcrypt hashes)
+- `test`: the rule detects test deployment-specific payloads (e.g., stripe test keys)
+- `api`: the rule detects payloads used for API access
+- `generic`: the rule is a "generic" one rather than one that detects a specific type of payload (e.g., username/password pairs)
+- `fuzzy`: the rule pattern requires matching of non-payload surrounding context
 
 ## Pattern syntax
-
 Nosey Parker uses a combination of regular expression engines in its implementation.
 The pattern syntax that is accepted is (approximately) the intersection of Hyperscan and Rust `regex` crate syntax.
 
@@ -103,7 +137,6 @@ For more reference:
 
 
 ## Guidelines for developing a new rule
-
 If a rule identifies secret or sensitive content used by a well-known service and does so with high precision (i.e., few false positives), it is a candidate to be added to Nosey Parker's default rules.
 Please open a pull request!
 
@@ -199,11 +232,10 @@ The examples are used in automated testing via the `noseyparker rules check` com
 We don't want to facilitate drive-by hacking by advertising real leaked secrets here.
 
 ### Test your rules to find problems
-The `noseyparker rules check --rules <PATH>` command runs a number of checks over the rules found at `<PATH>` and ensures that the examples in the rule match (or not) as expected.
-
+The `noseyparker rules check` command runs a number of checks over the builtin and ensures that the examples in the rule match (or not) as expected.
+If you are writing non-default rules in separate YAML files, you can use `noseyparker rules check --rules-path=PATH` to check those files as well.
 
 ## Performance notes
-
 Nosey Parker's implementation builds on top of the [Hyperscan](https://github.com/intel/hyperscan) library to efficiently match against all its rules simultaneously.
 This is much faster than the naive approach of trying to match each regex rule in a loop on each input.
 Adding more well-written rules to Nosey Parker should not significantly affect performance.

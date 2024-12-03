@@ -12,6 +12,7 @@ expression: stdout
         "name": "Adafruit IO Key",
         "id": "np.adafruit.1",
         "pattern": "(?x)\n\\b\n(aio\\_[a-zA-Z0-9]{28})\n\\b\n",
+        "description": null,
         "examples": [
           "#define IO_KEY       \"aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH\"",
           "export IO_KEY=\"aio_NrZCb67VvzSaM7fr3nMXrfZ1uMPH\"",
@@ -35,6 +36,7 @@ expression: stdout
         "name": "Adobe OAuth Client Secret",
         "id": "np.adobe.1",
         "pattern": "(?x)(?i)\n\\b\n(p8e-[a-z0-9-]{32})\n(?:[^a-z0-9-]|$)\n",
+        "description": null,
         "examples": [
           "{\n \"client_credentials\": {\n  \"client_id\": \"a65b0146769d433a835f36660881db50\",\n  \"client_secret\": \"p8e-ibndcvsmAp9ZgPBZ606FSlYIZVlsZ-g5\"\n},\n"
         ],
@@ -58,6 +60,7 @@ expression: stdout
         "name": "Age Recipient (X25519 public key)",
         "id": "np.age.1",
         "pattern": "\\b(age1[0-9a-z]{58})\\b",
+        "description": null,
         "examples": [
           "age1zvkyg2lqzraa2lnjvqej32nkuu0ues2s82hzrye869xeexvn73equnujwj"
         ],
@@ -80,6 +83,7 @@ expression: stdout
         "name": "Age Identity (X22519 secret key)",
         "id": "np.age.2",
         "pattern": "\\b(AGE-SECRET-KEY-1[0-9A-Z]{58})\\b",
+        "description": null,
         "examples": [
           "# created: 2022-09-26T21:55:47-05:00\n# public key: age1epzmwwzw8n09slh0c7z1z52x43nnga7lkksx3qrh07tqz5v7lcys45428t\nAGE-SECRET-KEY-1HJCRJVK7EE3A5N8CRP8YSEUGZKNW90Y5UR2RGYAS8L279LFP6LCQU5ADNR\n",
           "AGE-SECRET-KEY-1GFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPQ4EGAEX"
@@ -103,6 +107,7 @@ expression: stdout
         "name": "AWS AppSync API Key",
         "id": "np.appsync.1",
         "pattern": "(?x)\n\\b\n(da2-[a-z0-9]{26})\n\\b\n",
+        "description": null,
         "examples": [
           "  aws_appsync_apiKey: 'da2-nmaqhbb63zabjactesiydcfuvu',"
         ],
@@ -124,6 +129,7 @@ expression: stdout
         "name": "Amazon Resource Name",
         "id": "np.arn.1",
         "pattern": "(?x)\n\\b\n(\n  arn\n  :\n  (?: aws | aws-cn | aws-us-gov )         (?# partition )\n  :\n  [a-zA-Z0-9_-]{2,}                       (?# service )\n  :\n  (?: af-south-1\n    | ap-east-1\n    | ap-northeast-1\n    | ap-northeast-2\n    | ap-northeast-3\n    | ap-south-1\n    | ap-south-2\n    | ap-southeast-1\n    | ap-southeast-2\n    | ap-southeast-3\n    | ap-southeast-4\n    | ca-central-1\n    | eu-central-1\n    | eu-central-2\n    | eu-north-1\n    | eu-south-1\n    | eu-south-2\n    | eu-west-1\n    | eu-west-2\n    | eu-west-3\n    | me-central-1\n    | me-south-1\n    | sa-east-1\n    | us-east-1\n    | us-east-2\n    | us-gov-east-1\n    | us-gov-west-1\n    | us-west-1\n    | us-west-2\n    )?                                    (?# region )\n  :\n  (?: \\d{12} )?                           (?# account ID sans hyphens )\n  :\n  (?: [a-zA-Z0-9_-]+ [:/])?               (?# resource type)\n  [^\\s\"'&<>\\\\%]+                          (?# resource ID)\n)\n(?: [\\s\"'&<>\\\\%] | $ )\n",
+        "description": null,
         "examples": [
           "arn:aws:s3:::my_corporate_bucket/*",
           "arn:aws:s3:::my_corporate_bucket/Development/*",
@@ -153,6 +159,7 @@ expression: stdout
         "name": "Artifactory API Key",
         "id": "np.artifactory.1",
         "pattern": "(?i)artifactory.{0,50}\\b([a-z0-9]{73})\\b",
+        "description": null,
         "examples": [
           "export HOMEBREW_ARTIFACTORY_API_TOKEN=AKCp8igrDNFerC357m4422e4tmu7xB983QLPxJhKFcSMfoux2RFvp8rc4jC8t9ncdmYCMFD8W\nexport HOMEBREW_ARTIFACTORY_API_USER=kashorn\n",
           "jfrog rt dl --url=http://localhost:8071/artifactory --apikey=AKCp2WXX7SDvcsmny528sSDnaB3zACkNQoRcD8D1WmxhMV9gk6Wp8mVWC8bh38kJQbXagUT8Z generic-local/hello.txt"
@@ -176,6 +183,7 @@ expression: stdout
         "name": "AWS API Key",
         "id": "np.aws.1",
         "pattern": "\\b((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})\\b",
+        "description": null,
         "examples": [
           "A3T0ABCDEFGHIJKLMNOP",
           "AKIADEADBEEFDEADBEEF"
@@ -207,6 +215,7 @@ expression: stdout
         "name": "AWS Secret Access Key",
         "id": "np.aws.2",
         "pattern": "(?x)(?i)\n\\b\naws_? (?:secret)? _? (?:access)? _? (?:key)?\n[\"'']?\n\\s{0,30}\n(?::|=>|=)\n\\s{0,30}\n[\"'']?\n([a-z0-9/+=]{40})\n(?: [^a-z0-9/+=] | $ )\n",
+        "description": null,
         "examples": [
           "aws_secret_access_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "aws_secret_access_key => aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -243,6 +252,7 @@ expression: stdout
         "name": "AWS Account ID",
         "id": "np.aws.3",
         "pattern": "(?i)aws_?(?:account)_?(?:id)?[\"'`]?\\s{0,30}(?::|=>|=)\\s{0,30}[\"'`]?([0-9]{4}-?[0-9]{4}-?[0-9]{4})",
+        "description": null,
         "examples": [
           "KeyMetadata: {\n    AWSAccountId: \"324320755747\",\n    Arn: \"arn:aws:kms:us-east-2:324320755747:key/54348bc1-6e3b-4cda-8b18-c6033ca7d328\",\n    CreationDate: 2019-07-12 18:23:13 +0000 UTC,\n    Description: \"\",\n    Enabled: true,\n    KeyId: \"54348bc1-6e3b-4cda-8b18-c6033ca7d328\",\n    KeyManager: \"CUSTOMER\",\n    KeyState: \"Enabled\",\n    KeyUsage: \"ENCRYPT_DECRYPT\",\n    Origin: \"AWS_KMS\"\n}\n",
           "4. login into ecr\n\n```bash\naws_region=eu-central-1\naws_account_id=891511536143\naws_profile=serverless-bert\n\naws ecr get-login-password \\\n    --region $aws_region \\\n    --profile $aws_profile \\\n| docker login \\\n    --username AWS \\\n    --password-stdin $aws_account_id.dkr.ecr.$aws_region.amazonaws.com\n```\n"
@@ -268,6 +278,7 @@ expression: stdout
         "name": "AWS Session Token",
         "id": "np.aws.4",
         "pattern": "(?i)(?:aws.?session|aws.?session.?token|aws.?token)[\"'`]?\\s{0,30}(?::|=>|=)\\s{0,30}[\"'`]?([a-z0-9/+=]{16,200})[^a-z0-9/+=]",
+        "description": null,
         "examples": [
           "export AWS_ACCESS_KEY_ID=\"I08BCX2ACV45ED1DOC9J\"\nexport AWS_SECRET_ACCESS_KEY=\"0qk+o7XctJMmG6ydO8537c9+TofLJU1K0PiVBXSg\"\nexport AWS_SESSION_TOKEN=\"eyJhbGciOiJIUzUxMi53InR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJJMDhCQ1gySkpWNDVFRDFET0M5SiIsImFjciI6Ij53LCJhdWQiOiJhY2NvdW50IiwiYXV0aF90aW1lIjowLCJhenAiOiJtaW5pbyIsImVtYWlsIjoiYWlkYW4uY29wZUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImV4cCI6MTU4MDUwMDIzOCwiZmFtaWx5X25hbWUiOiJDb3BlIiwiZ2l2ZW5fbmFtZSI6IkFpZGFuIENvcGUiLCJpYXQiOjE1ODA0OTk5MzgsImlzcyI6Imh0dHBzOi8vYXV0aHN0Zy5wb3BkYXRhLmJjLmNhL2F1dGgvcmVhbG1zL3NhbXBsZSIsImp0aSI6IjU5ZTM5ODAxLWQxMmUtNDVhYS04NmQzLWVhMmNmZDU0NmE2MiIsIm1pbmlvX3BvbGljeSI6ImRhdGFzZXRfMV9ybyIsIm5hbWUiOiJBaWRhbiBDb3BlIENvcGUiLCJuYmYiOjAsInByZWZlcnJlZF91c2VybmFtZSI6ImFjb3BlLTk5LXQwNSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2Vzc2lvbl9zdGF0ZSI6IjcxYjczZWJjLThlMzMtNGMyMi04NmE2LWI0MzhhNDM4ZmI2MiIsInN1YiI6IjVkOTBlOTgzLTA1NDItNDYyYS1hZWIwLWYxZWVmNjcwYzdlNSIsInR5cCI6IkJlYXJlciJ9.J-a9PORJToz7MUrnPQlOywcqtVMNkXy53Gedp_V4PW-Gbf1_BAMjwuw_X7fKRd6hkNfEn43CKKju7muzi_d1Ig\"\n"
         ],
@@ -292,6 +303,7 @@ expression: stdout
         "name": "Amazon MWS Auth Token",
         "id": "np.aws.5",
         "pattern": "(?i)(amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
+        "description": null,
         "examples": [
           "AWS Access Key:AKIAIDQJ6PTGDFFWYX7A\nsecret key:IwJz1SHMccAKUKuskdVoHFfkre73BTyF80nRmcWc\nMWS Authorisation Token:  amzn.mws.dab428a1-ed97-fd8d-e045-950d712f6f58\n"
         ],
@@ -312,6 +324,7 @@ expression: stdout
         "name": "AWS API Credentials",
         "id": "np.aws.6",
         "pattern": "(?x)\n\\b\n((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})     (?# API key )\n\\b\n(?: (?s) .{0,40} )                                                        (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n([A-Za-z0-9/+=]{40})                                                      (?# secret )\n(?: [^A-Za-z0-9/+=] | $ )\n",
+        "description": null,
         "examples": [
           "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP'\nexport AWS_SECRET_ACCESS_KEY='ded7db27a4558eea9bbf0bf36e0e8521618f366c'\n",
           "export AWS_API_KEY='A3T0ABCDEFGHIJKLMNOP''ded7db27a4558eea9bbf0bf36e0e8521618f366c'"
@@ -338,6 +351,7 @@ expression: stdout
         "name": "Azure Connection String",
         "id": "np.azure.1",
         "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^;]{1,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([^;]{1,100})\n(?: ;|$ )\n",
+        "description": null,
         "examples": [
           "# Azure Storage Connection String\nAzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=hanatour9833;AccountKey=6jqh42QQjWWBwoPGGR/Jr0PZjhBMZVbHm/gkhEfHvOj8aV6+oI8ed6ZAAwB5a6993WqyQDiuJJB0QpseJwqYxw==;EndpointSuffix=core.windows.net\n",
           "DefaultEndpointsProtocol=http;AccountName=testacc1;\nAccountKey=1gy3lpE7Du1j5ljKiupgKzywSw2isjsa69sfsdfsdsgfsgfdgfdgfd/YThisv/OVVLfIOv9kQ==;\nBlobEndpoint=http://127.0.0.1:8440/testacc1;\nTableEndpoint=http://127.0.0.1:8440/testacc1;\nQueueEndpoint=http://127.0.0.1:8440/testacc1;\n",
@@ -368,6 +382,7 @@ expression: stdout
         "name": "Azure App Configuration Connection String",
         "id": "np.azure.2",
         "pattern": "(?x)\n(https://[a-zA-Z0-9-]+\\.azconfig\\.io);\nId=(.{4}-.{2}-.{2}:[a-zA-Z0-9+/]{18,22});\nSecret=([a-zA-Z0-9+/]{36,50}=)\n",
+        "description": null,
         "examples": [
           "Endpoint=https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOPqRSa53VWX05zaBCdE/fg9hi4k=",
           "https://foo-nonprod-appconfig.azconfig.io;Id=ABCD-E6-s0:tl6ABcdefGHi7kLMno/p;Secret=abCD1EF+GHIJxLMnOA53ST8uVWX05zaBCdE/fg9hi4k=",
@@ -397,6 +412,7 @@ expression: stdout
         "name": "Azure Personal Access Token",
         "id": "np.azure.3",
         "pattern": "(?x)\n(?i: ADO_PAT | pat_token | personal_?access_?token | \\$token )\n\\s* = \\s*\n[\"']\n([a-z0-9]{52})\n[\"']\n",
+        "description": null,
         "examples": [
           "var personalAccessToken = \"zpczok4kqgnw5prpfy3ehiylbqvgbjfkdiqkejsxqamy7qbkep7q\";  // Provide a value or retrieve it from configuration\n",
           "$token = \"58oo4mvqr2tpw7b4w3loeckwfu5o6nw3sihfckvlwoxgqimlddza\"\n",
@@ -421,6 +437,7 @@ expression: stdout
         "name": "Bitbucket App Password",
         "id": "np.bitbucket.1",
         "pattern": "(?x)\n\\b\n(ATBB[a-zA-Z0-9]{32})\n\\b\n",
+        "description": null,
         "examples": [
           "git ls-remote https://gemesa:ATBB3g7gLXseCxPjJs1CQNMyEjwf1D12516D@bitbucket.org/***/***"
         ],
@@ -443,6 +460,7 @@ expression: stdout
         "name": "Blynk Device Access Token",
         "id": "np.blynk.1",
         "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/external/api/[a-zA-Z0-9/]*\\?token=\n([a-zA-Z0-9_\\-]{32})\n&\n",
+        "description": null,
         "examples": [
           "curl \"https://blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1\"",
           "curl \"https://fra1.blynk.cloud/external/api/get?token=Rps15JICmtRVbFyS_95houlLbm6xIQ2L&V1\"",
@@ -471,6 +489,7 @@ expression: stdout
         "name": "Blynk Organization Access Token",
         "id": "np.blynk.2",
         "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api/[a-zA-Z0-9_\\-\\s/\\\\]*\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"\n",
+        "description": null,
         "examples": [
           "curl https://fra1.blynk.cloud/api/organization/profile -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\"",
           "curl https://fra1.blynk.cloud/api/organization/profile \\\n-H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\"\n"
@@ -493,6 +512,7 @@ expression: stdout
         "name": "Blynk Organization Access Token",
         "id": "np.blynk.3",
         "pattern": "(?x)\n-H\\s*\"Authorization:\\s*Bearer\\s*\n([a-zA-Z0-9_\\-]{40})\n\"[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/api\n",
+        "description": null,
         "examples": [
           "curl -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\" https://fra1.blynk.cloud/api/organization/profile",
           "curl -H \"Authorization: Bearer eIdWHQqRfFmvP5LDDh-IGxPUzi7I27HthzCPAVmS\" \\\nhttps://fra1.blynk.cloud/api/organization/profile\n"
@@ -515,6 +535,7 @@ expression: stdout
         "name": "Blynk Organization Client Credentials",
         "id": "np.blynk.8",
         "pattern": "(?x)\nhttps://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2/[a-zA-Z0-9_\\-\\s/\\\\?=&]*\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n(?: : | &client_secret= )\n([a-zA-Z0-9_\\-]{40})\n",
+        "description": null,
         "examples": [
           "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp",
           "curl -X POST https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials \\\n-u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp\n",
@@ -538,6 +559,7 @@ expression: stdout
         "name": "Blynk Organization Client Credentials",
         "id": "np.blynk.9",
         "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
+        "description": null,
         "examples": [
           "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",
           "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp \\\nhttps://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials\n"
@@ -560,6 +582,7 @@ expression: stdout
         "name": "CodeClimate Reporter ID",
         "id": "np.codeclimate.1",
         "pattern": "(?x)\n(?: CODECLIMATE_REPO_TOKEN | CC_TEST_REPORTER_ID)\n\\s* [:=] \\s*\n([a-f0-9]{64})\\b\n",
+        "description": null,
         "examples": [
           " - RAILS_ENV=test CODECLIMATE_REPO_TOKEN=d37a8b9e09642cb73cfcf4e1284815fc3d6a55a7714110187ac59856ae4ab5ad",
           "- uses: paambaati/codeclimate-action@v2.2.4\nenv:\n  CC_TEST_REPORTER_ID: 945dfb58a832d233a3caeb84e3e6d3be212e8c7abcb48117fce63b9adcb43647\n"
@@ -588,6 +611,7 @@ expression: stdout
         "name": "crates.io API Key",
         "id": "np.cratesio.1",
         "pattern": "\\b(cio[a-zA-Z0-9]{32})\\b",
+        "description": null,
         "examples": [
           "Bearer: ciotgp8BGZBlX192iExSQPm0SrUlBunG8zd"
         ],
@@ -610,6 +634,7 @@ expression: stdout
         "name": "Databricks Personal Access Token",
         "id": "np.databricks.1",
         "pattern": "(?x)\n\\b\n(\n  dapi[a-f0-9]{32}\n  (?: -[0-9]+ )?      (?# optional -NUM suffix )\n)\n\\b\n",
+        "description": null,
         "examples": [
           "DATABRICKS_TOKEN: 'dapicd295a7be286969133e18a58e4afe7bd-3'",
           "dapif21ee53d2b3648c2a1ed38953312a203"
@@ -634,6 +659,7 @@ expression: stdout
         "name": "DigitalOcean Application Access Token",
         "id": "np.digitalocean.1",
         "pattern": "(?x)(?i)\n\\b\n(doo_v1_[a-f0-9]{64})\n\\b\n",
+        "description": null,
         "examples": [
           "curl -X GET -H \"Content-Type: application/json\" -H \"Authorization: Bearer doo_v1_c46dde8bd620fcc382e70d5d43be6eebb141fa2452e8f8fa882433377898ebf2\" \"https://api.digitalocean.com/v2/cdn/endpoints\""
         ],
@@ -655,6 +681,7 @@ expression: stdout
         "name": "DigitalOcean Personal Access Token",
         "id": "np.digitalocean.2",
         "pattern": "(?x)(?i)\n\\b\n(dop_v1_[a-f0-9]{64})\n\\b\n",
+        "description": null,
         "examples": [
           "token         = \"dop_v1_ef0e04edc13918192246e0c90f0735c7f4db7a5a036a857e48d6cc98f1c9576b\""
         ],
@@ -676,6 +703,7 @@ expression: stdout
         "name": "DigitalOcean Refresh Token",
         "id": "np.digitalocean.3",
         "pattern": "(?x)(?i)\n\\b\n(dor_v1_[a-f0-9]{64})\n\\b\n",
+        "description": null,
         "examples": [
           "  \"refresh_token\": \"dor_v1_d6ce5b93104521c47be0b580e9296454ef4a319b02b5513469f0ec71d99af2e2\","
         ],
@@ -697,6 +725,7 @@ expression: stdout
         "name": "Django Secret Key",
         "id": "np.django.1",
         "pattern": "(?x)\n\\#\\ SECURITY\\ WARNING:\\ keep\\ the\\ secret\\ key\\ used\\ in\\ production\\ secret! \\s*\n.{0,5} SECRET_KEY \\s* = \\s* r?[\"'] ([^\"'\\n]{5,100}) [\"']\n",
+        "description": null,
         "examples": [
           "# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_du9e^cmago!%(^+=gr@cu@v9-v7ulhbk2s3!w&39w4+n3*k*$'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n",
           "# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\n# SECRET_KEY = 'django-insecure-_du9e^cmago!%(^+=gr@cu@v9-v7ulhbk2s3!w&39w4+n3*k*$'\nSECRET_KEY = 'hmm'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n"
@@ -720,6 +749,7 @@ expression: stdout
         "name": "Docker Hub Personal Access Token",
         "id": "np.dockerhub.1",
         "pattern": "(?x)\n\\b\n(dckr_pat_[a-zA-Z0-9_-]{27})\n(?: $ | [^a-zA-Z0-9_-] )\n",
+        "description": null,
         "examples": [
           "docker login -u gemesa -p dckr_pat_hc8VxYclixyTr2rDFsa2rqzkP3Y",
           "docker login -u gemesa -p dckr_pat_tkzBYxjNNC3R_Yg6jd_O-G8FbrJ",
@@ -743,6 +773,7 @@ expression: stdout
         "name": "Doppler CLI Token",
         "id": "np.doppler.1",
         "pattern": "(?x)\n\\b\n(dp\\.ct\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.ct.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -765,6 +796,7 @@ expression: stdout
         "name": "Doppler Personal Token",
         "id": "np.doppler.2",
         "pattern": "(?x)\n\\b\n(dp\\.pt\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.pt.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -787,6 +819,7 @@ expression: stdout
         "name": "Doppler Service Token",
         "id": "np.doppler.3",
         "pattern": "(?x)\n\\b\n(dp\\.st\\.(?:[a-z0-9\\-_]{2,35}\\.)?[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.st.dev.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -809,6 +842,7 @@ expression: stdout
         "name": "Doppler Service Account Token",
         "id": "np.doppler.4",
         "pattern": "(?x)\n\\b\n(dp\\.sa\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.sa.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -831,6 +865,7 @@ expression: stdout
         "name": "Doppler SCIM Token",
         "id": "np.doppler.5",
         "pattern": "(?x)\n\\b\n(dp\\.scim\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.scim.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -853,6 +888,7 @@ expression: stdout
         "name": "Doppler Audit Token",
         "id": "np.doppler.6",
         "pattern": "(?x)\n\\b\n(dp\\.audit\\.[a-zA-Z0-9]{40,44})\n\\b\n",
+        "description": null,
         "examples": [
           "dp.audit.bAqhcVzrhy5cRHkOlNTc0Ve6w5NUDCpcutm8vGE9myi"
         ],
@@ -875,6 +911,7 @@ expression: stdout
         "name": "Dropbox Access Token",
         "id": "np.dropbox.1",
         "pattern": "(?x)\n\\b\n(sl\\.[a-zA-Z0-9_-]{130,152})\n(?: $ | [^a-zA-Z0-9_-] )\n",
+        "description": null,
         "examples": [
           "curl -X POST https://api.dropboxapi.com/2/users/get_current_account --header \"Authorization: Bearer sl.hAi61Jx1hs3XlhrnsCxnctrEmxK2Q-UK29hbdxxHyAykldSeHmipBAauxTzuBEIqt2jdyyUZw8kgY3t_ars-PNIPS27ySa1ab22132U3sUuqYTXHzf2XlvMxSesUhkzx2G11_9W1f-eo\"",
           "  \"access_token\": \"sl.AbX9y6Fe3AuH5o66-gmJpR032jwAwQPIVVzWXZNkdzcYT02akC2de219dZi6gxYPVnYPrpvISRSf9lxKWJzYLjtMPH-d9fo_0gXex7X37VIvpty4-G8f4-WX45AcEPfRnJJDwzv-\","
@@ -899,6 +936,7 @@ expression: stdout
         "name": "Dependency-Track API Key",
         "id": "np.dtrack.1",
         "pattern": "\\b(odt_[A-Za-z0-9]{32,255})\\b",
+        "description": null,
         "examples": [
           "odt_KTJlDq2AGGGlqG4riKdT7p980AW8RlU5",
           "odt_ABCDDq2AGxGlrF4ribBT7p98AOM9TlU8",
@@ -929,6 +967,7 @@ expression: stdout
         "name": "Dynatrace Token",
         "id": "np.dynatrace.1",
         "pattern": "\\b(dt0[a-zA-Z]{1}[0-9]{2}\\.[A-Z0-9]{24}\\.[A-Z0-9]{64})\\b",
+        "description": null,
         "examples": [
           "helmCharts:\n- name: dynatrace-operator\n  namespace: dynatrace\n  version: 0.4.1\n  repo: https://raw.githubusercontent.com/Dynatrace/helm-charts/master/repos/stable\n  releaseName: dynatrace-operator\n  includeCRDs: true\n  valuesInline:\n    apiUrl: https://fqp43822.live.dynatrace.com/api\n    apiToken: dt0c01.FJEGSO2NBAXCOEA7WOSKOA2G.GGMUK6GJDH2TWLNKQT6F68FH22252VXP2F3QAMBUVUDV5TSYYHAWZVVFCUQLF2UA\n    paasToken: dt0c01.QS7G6CAS5G64DLXFMEDEJ2O7.XVJQTFD2H7XG45V5RTDGA78GAI5W44MFTLZTUOMH4JEXPAV6NSEHUNGAYPIZGEIV\n"
         ],
@@ -951,6 +990,7 @@ expression: stdout
         "name": "Facebook Secret Key",
         "id": "np.facebook.1",
         "pattern": "(?x)(?i)\n\\b (?: facebook | fb )\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{32}) \\b\n",
+        "description": null,
         "examples": [
           "   # config.facebook.key = \"34cebc81c056a21bc66e212f947d73ec\"",
           "    var fbApiKey = '0278fc1adf6dc1d82a156f306ce2c5cc';",
@@ -977,6 +1017,7 @@ expression: stdout
         "name": "Facebook Access Token",
         "id": "np.facebook.2",
         "pattern": "\\b(EAACEdEose0cBA[a-zA-Z0-9]+)\\b",
+        "description": null,
         "examples": [
           "url = 'https://graph.facebook.com/me/friends?access_token=EAACEdEose0cBAD5XZCz5JXYvqyeJzcSvFZC42toHiWyfjhcZCMZBZCpE3uRJnEBsrhUEMRK1wWs6SsdiDCaCI1mYwyoNuMix2XZCpvsKbZB9TumtZBlcLeIpl4pa931Ce9rTinEAhtyVVZAAZAX4NmfpBUqWtzCRC0fX5GZBn7ZC28mPKAZDZD'"
         ],
@@ -998,6 +1039,7 @@ expression: stdout
         "name": "Figma Personal Access Token",
         "id": "np.figma.1",
         "pattern": "(?x)(?i)\nfigma.{0,20}\n\\b\n(\n  [0-9a-f]{4}-\n  [0-9a-f]{8}-\n  [0-9a-f]{4}-\n  [0-9a-f]{4}-\n  [0-9a-f]{4}-\n  [0-9a-f]{12}\n)\n\\b\n",
+        "description": null,
         "examples": [
           "--header='X-Figma-Token: 1394-0ca7a5be-8e22-40ee-8c40-778d41ab2313'"
         ],
@@ -1021,6 +1063,7 @@ expression: stdout
         "name": "Google Cloud Storage Bucket",
         "id": "np.gcs.1",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+    (?# bucket name as subdomain )\nstorage\\.googleapis\\.com\n)\n\\b\n",
+        "description": null,
         "examples": [
           "c.storage.googleapis.com",
           "some-bucket.example.com.storage.googleapis.com"
@@ -1045,6 +1088,7 @@ expression: stdout
         "name": "Google Cloud Storage Bucket",
         "id": "np.gcs.2",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\nstorage\\.googleapis\\.com\n/\n[a-zA-Z0-9_-]+ (?: \\. [a-zA-Z0-9_-]+ )*    (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                   (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "description": null,
         "examples": [
           "https://storage.googleapis.com/bucket_name/object_name"
         ],
@@ -1069,6 +1113,7 @@ expression: stdout
         "name": "Generic Secret",
         "id": "np.generic.1",
         "pattern": "(?x)(?i)\nsecret\n.{0,20}\n\\b\n([0-9a-z]{32,64})\n\\b\n",
+        "description": null,
         "examples": [
           "    private static String CLIENT_SECRET = \"6fb1cff7690db9ac066cadbbde8e3c078efdabcf\";"
         ],
@@ -1093,6 +1138,7 @@ expression: stdout
         "name": "Generic API Key",
         "id": "np.generic.2",
         "pattern": "(?x)(?i)\n(?: api_key | apikey | access_key | accesskey )\n.{0,3}\n[\\ \\t]* (?: : | = | := | => | , | ' | \" ) [\\ \\t]*\n.{0,3}\n\\b\n([0-9a-z][0-9a-z\\-._/+]{30,62}[0-9a-z])\n\\b\n",
+        "description": null,
         "examples": [
           "API_KEY = \"951bc382db9abad29c68634761dd6e19\"",
           "buildConfigField 'String' , 'API_KEY' , '\"951bc382db9cfee29c68634761dd6e19\"'\tAPI_KEY\t"
@@ -1116,6 +1162,7 @@ expression: stdout
         "name": "Generic Username and Password",
         "id": "np.generic.3",
         "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([a-zA-Z0-9.@_\\-+]{3,30}) [\"']          (?# quoted username )\n\\s* [,;]? \\s*                                (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n[\"'] ([^\"']{5,30}) [\"']                      (?# quoted password )\n",
+        "description": null,
         "examples": [
           "credential = UsernamePasswordCredential(\n    client_id='da34859b-2ae4-48c3-bfe0-1b28b7cf2eed',\n    username='donjuandemarco',\n    password='1qay@WXS????',\n    tenant_id='bc877b20-f135-4c13-a266-8ed26b8f0f4b')\n",
           "hostname = '10.11.12.13'\nusername = 'donjuandemarco@example.com'\npassword = '`123QWERasdf'\n",
@@ -1144,6 +1191,7 @@ expression: stdout
         "name": "Generic Username and Password",
         "id": "np.generic.4",
         "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n([a-zA-Z0-9.@_\\-+]{3,30})                    (?# unquoted username )\n\\s* ;? \\s*                                   (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n(\\S{5,30})                                   (?# unquoted password )\n(?: \\s | $ )                                 (?# end-of-password anchor )\n",
+        "description": null,
         "examples": [
           "user = Aladdin\npassword = open_sesame\n",
           "user = Aladdin\n// some comment\n// some other comment\npassword = open_sesame\n",
@@ -1168,6 +1216,7 @@ expression: stdout
         "name": "Generic Password",
         "id": "np.generic.5",
         "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n\"\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n\"\n",
+        "description": null,
         "examples": [
           "password = \"super$ecret\"\n",
           "password=\"super$ecret\"\n",
@@ -1213,6 +1262,7 @@ expression: stdout
         "name": "Generic Password",
         "id": "np.generic.6",
         "pattern": "(?x)(?i)\npassword[\"']?                                (?# preceding context )\n[\\ \\t]* (?: = | : | := | => ) [\\ \\t]*        (?# binder )\n'\n([^$<%@.,\\s+'\"(){}&/\\#\\-][^\\s+'\"(){}/]{4,})  (?# password )\n'\n",
+        "description": null,
         "examples": [
           ":password       => '4ian1234',\n",
           "common.then_log_in({username: 'geronimo', password: '52VeZqtHDCdAr5yM'});\n",
@@ -1239,6 +1289,7 @@ expression: stdout
         "name": "Credentials in .NET System.Net.NetworkCredential",
         "id": "np.generic.7",
         "pattern": "(?x)\n\\b\n(?: NetworkCredential | NETWORKCREDENTIAL | networkcredential )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# password )\n\\s* \\)\n",
+        "description": "A .NET `System.Net.NetworkCredential` value with hardcoded parameters was found.\nThis may allow an attack access to a resource that uses basic, digest, NTLM, or Kerberos authentication.\n",
         "examples": [
           "sender.Credentials = new NetworkCredential(\"NuGets@example.com\", \"vzihlaquknriqlht\");\n",
           "$webClient.Credentials = new-object System.Net.NetworkCredential(\"cidownload\", \"AP7JaG9ToerxBc6gWP5LcU2CNpb\");\n"
@@ -1262,6 +1313,7 @@ expression: stdout
         "name": "Credentials in .NET System.DirectoryServices.DirectoryEntry",
         "id": "np.generic.8",
         "pattern": "(?x)\n\\b\n(?: DirectoryEntry | DIRECTORYENTRY | directoryentry )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,100} ) \"               (?# path )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# password )\n  (?: \\s* , \\s* [^)]{3,50} )?         (?# authentication type )\n\\s* \\)\n",
+        "description": "A .NET `System.DirectoryServices.DirectoryEntry` value was found with hardcoded credentials.\nThis may allow an attack access to an Active Directory instance.\n",
         "examples": [
           "$domain = New-Object DirectoryServices.DirectoryEntry(\"LDAP://10.10.10.1\",\"domain\\user\", \"secret\")\n",
           "new DirectoryEntry(\"LDAP://EXAMPLE.COM\",\n          \"ADMNALRRHH@EXAMPLE.COM\",\n          \"Rrhh1234\");\n"
@@ -1285,6 +1337,7 @@ expression: stdout
         "name": "GitHub Personal Access Token",
         "id": "np.github.1",
         "pattern": "\\b(ghp_[a-zA-Z0-9]{36})\\b",
+        "description": null,
         "examples": [
           "GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg",
           "let g:gh_token='ghp_4U3LSowpDx8XvYE7A8GH56oxU5aWnY2mzIbV'",
@@ -1310,6 +1363,7 @@ expression: stdout
         "name": "GitHub OAuth Access Token",
         "id": "np.github.2",
         "pattern": "\\b(gho_[a-zA-Z0-9]{36})\\b",
+        "description": null,
         "examples": [
           "    \"url\": \"git+https://FelipeMestre:gho_psT9pqNFsehnc4se0ZzzR0HBxapxZD35hNHi@github.com/gontarz/PW_2021_Website-FelipeMestre.git\"",
           "    oauth_token: gho_fq75OMU7UVbS9pTZmoCCzJT6TM5d1w099FgG"
@@ -1334,6 +1388,7 @@ expression: stdout
         "name": "GitHub App Token",
         "id": "np.github.3",
         "pattern": "\\b((?:ghu|ghs)_[a-zA-Z0-9]{36})\\b",
+        "description": null,
         "examples": [
           "            \"token\": \"ghu_16C7e42F292c69C2E7C10c838347Ae178B4a\",",
           "Example usage:\ngit clone http://ghs_RguXIkihJjwHAP6eXEYxaPNvywurTr5IOAbg@github.com/username/repo.git\n"
@@ -1358,6 +1413,7 @@ expression: stdout
         "name": "GitHub Refresh Token",
         "id": "np.github.4",
         "pattern": "\\b(ghr_[a-zA-Z0-9]{76})\\b",
+        "description": null,
         "examples": [
           "    \"refresh_token\": \"ghr_1B4a2e77838347a7E420ce178F2E7c6912E169246c3CE1ccbF66C46812d16D5B1A9Dc86A1498\","
         ],
@@ -1381,6 +1437,7 @@ expression: stdout
         "name": "GitHub Client ID",
         "id": "np.github.5",
         "pattern": "(?x)(?i)\n(?:github)\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{20}) \\b\n",
+        "description": null,
         "examples": [
           "GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7\nGITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857\n"
         ],
@@ -1404,6 +1461,7 @@ expression: stdout
         "name": "GitHub Secret Key",
         "id": "np.github.6",
         "pattern": "(?x)(?i)\ngithub\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{40}) \\b\n",
+        "description": null,
         "examples": [
           "GITHUB_CLIENT_ID=ac58d6da7d7a84c039b7\nGITHUB_SECRET=37d02377a3e9d849e18704c3ec883f9c5787d857\n"
         ],
@@ -1427,6 +1485,7 @@ expression: stdout
         "name": "GitHub Personal Access Token (fine-grained permissions)",
         "id": "np.github.7",
         "pattern": "(?x)\n\\b\n(github_pat_[0-9a-zA-Z_]{82})\n\\b\n",
+        "description": null,
         "examples": [
           "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"
         ],
@@ -1449,6 +1508,7 @@ expression: stdout
         "name": "GitLab Runner Registration Token",
         "id": "np.gitlab.1",
         "pattern": "\\b(GR1348941[0-9a-zA-Z_-]{20})(?:\\b|$)",
+        "description": null,
         "examples": [
           "sudo gitlab-runner register \\\n--non-interactive \\\n--url \"https://gitlab.com/\" \\\n--registration-token \"GR1348941_iAgdMy7a3NhZaa5oNoH\" \\\n--executor \"docker\" \\\n--docker-image ubuntu:latest \\\n--description \"docker-runner\" \\\n--tag-list \"docker, CICD, App\" \\\n--run-untagged=\"true\" \\\n--locked=\"false\" \\\n--access-level=\"not_protected\"\n"
         ],
@@ -1472,6 +1532,7 @@ expression: stdout
         "name": "GitLab Personal Access Token",
         "id": "np.gitlab.2",
         "pattern": "\\b(glpat-[0-9a-zA-Z_-]{20})(?:\\b|$)",
+        "description": null,
         "examples": [
           "docker build -t tweedledee \\\n-f Dockerfile \\\n--build-arg 'GO_REPO_TOKEN=glpat-tFrjFXD7soVU2fqxuDMh' \\\n"
         ],
@@ -1493,6 +1554,7 @@ expression: stdout
         "name": "GitLab Pipeline Trigger Token",
         "id": "np.gitlab.3",
         "pattern": "\\b(glptt-[0-9a-f]{40})\\b",
+        "description": null,
         "examples": [
           "curl    \\\n-X POST \\\n--fail  \\\n--no-progress-meter \\\n-F token=glptt-0d66598d696a02da33fb65e2a041f607c68ea50d \\\n-F ref=main\n"
         ],
@@ -1516,6 +1578,7 @@ expression: stdout
         "name": "Google Client ID",
         "id": "np.google.1",
         "pattern": "(?i)\\b([0-9]+-[a-z0-9_]{32})\\.apps\\.googleusercontent\\.com",
+        "description": null,
         "examples": [
           "                 'clientID' : '231545488769-4d1mcev9vifvlncrern52id2pqqf5u5l.apps.googleusercontent.com',",
           "                //$google_client_id     = '244082345999-o6m8f1pmb1e76tjfj9v7b96j31e53ps5.apps.googleusercontent.com';",
@@ -1538,6 +1601,7 @@ expression: stdout
         "name": "Google OAuth Client Secret",
         "id": "np.google.2",
         "pattern": "(?x)\n\\b\n(GOCSPX-[a-zA-Z0-9_-]{28})\n(?:[^a-zA-Z0-9_-] | $)\n",
+        "description": null,
         "examples": [
           "const CLIENTSECRET = \"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\""
         ],
@@ -1557,6 +1621,7 @@ expression: stdout
         "name": "Google OAuth Client Secret",
         "id": "np.google.3",
         "pattern": "(?x)(?i)\nclient.?secret .{0,10}\n\\b\n([a-z0-9_-]{24})\n(?: [^a-z0-9_-] |$)\n",
+        "description": null,
         "examples": [
           "\"client_secret\":\"aaaaaaaaaaaaaaaaaaaaaaa-\"",
           "                 //$google_client_secret = 'fnhqAakzWrX-mtFQ4PRdMoy0';",
@@ -1579,6 +1644,7 @@ expression: stdout
         "name": "Google OAuth Access Token",
         "id": "np.google.4",
         "pattern": "(?x)\n\\b\n(ya29\\.[0-9A-Za-z_-]{20,1024})\n(?: [^0-9A-Za-z_-]|$)  (?# Used instead of `\\b` because that doesn't play well with trailing `-` )\n",
+        "description": null,
         "examples": [
           "const setupCredentials = () => {\nconst { encryptedData, iv } = encrypt({\n  expiry_date: 1642441058842,\n  access_token:\n    'ya29.A0ARrdaM--PV_87ebjywDJpXKb77NBFJl16meVUapYdfNv6W6ZzCu947fNaPaRjbDbOIIcp6f49cMaX5ndK9TAFnKwlVqz3nrK9nLKqgyDIhYsIq47smcAIZkK56SWPx3X3DwAFqRu2UPojpd2upWwo-3uJrod',\n  // This token is linked to a test Google account (typebot.test.user@gmail.com)\n  refresh_token:\n    '1//039xWRt8YaYa3CgYIARAAGAMSNwF-L9Iru9FyuTrDSa7lkSceggPho83kJt2J29Ga91EhT1C6XV1vmo6bQS9puL_R2t8FIwR3gek',\n})\n",
           "-- Clear login if it's a new connection.\n--propertyTable.access_token = 'ya29.Ci_UA7aEsvT6-oVI8f96kvB6i8oO13WgdZUviLaCVtpEPYZqhQcQycR-u2X9xtmYGA'\n"
@@ -1599,6 +1665,7 @@ expression: stdout
         "name": "Google API Key",
         "id": "np.google.5",
         "pattern": "(?x)\n\\b\n(AIza[0-9A-Za-z_-]{35})\n(?: [^0-9A-Za-z_-] | $ )\n",
+        "description": null,
         "examples": [
           "  var DEVELOPER_KEY = 'AIzaSyB4sU8lU15bR_87qNb7eUVQN72_vv8mpbU';",
           "value=\"AIzaSyBnAoO3VNVUco4MXf4enYCVBg6ZnpY49N-"
@@ -1623,6 +1690,7 @@ expression: stdout
         "name": "Google OAuth Credentials",
         "id": "np.google.6",
         "pattern": "(?x)\n\\b\n([0-9]+-[a-z0-9_]{32}\\.apps\\.googleusercontent\\.com)            (?# client ID )\n(?: (?s) .{0,40} )                                              (?# Arbitrary intermediate stuff; ?s causes . to match newlines )\n\\b\n\n(?: (?i) client.?secret .{0,10} )?\n\n( (?:GOCSPX-[a-zA-Z0-9_-]{28})                                  (?# prefixed client secret )\n| (?:\\b [a-zA-Z0-9_-]{24})                                      (?# non-prefixed client secret )\n)\n\n(?:[^a-zA-Z0-9_-] | $)\n",
+        "description": null,
         "examples": [
           "const CLIENT_ID = '304167046824-45h8no7j0s38akv998nivvb7i17ckqeh.apps.googleusercontent.com';\nconst CLIENT_SECRET = '1QcFpNjHoAf4_XczYwhYicTl';\n",
           "public static GAPIS_CREDENTIALS = {\n  // 1. Generate credentials: https://console.cloud.google.com/apis/\n  // 2. Create OAuth page and set spreadsheets and drive.metadata.readonly scopes\n  client_id: '132261435625-69ubohrvppjr9hcc5t9uighsb7j2cqhv.apps.googleusercontent.com',\n  client_secret: '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',\n  redirect_uri: `http://localhost:${Config.OAUTH_HTTP_PORT}/oauth2callback`\n};\n"
@@ -1644,6 +1712,7 @@ expression: stdout
         "name": "Hardcoded Gradle Credentials",
         "id": "np.gradle.1",
         "pattern": "(?x)\n(?i)\ncredentials \\s* \\{\n  (?:\\s*//.*)*        (?# skip line comments)\n  \\s* (?:username|password) \\s+ ['\"]([^'\"]{1,60})['\"]\n  (?:\\s*//.*)*        (?# skip line comments)\n  \\s* (?:username|password) \\s+ ['\"]([^'\"]{1,60})['\"]\n",
+        "description": null,
         "examples": [
           "credentials {\n    username 'user'\n    password 'password'\n}\n",
           "publishing {\n  repositories {\n      maven {\n          url \"http://us01cmsysart01.example.com:8081/artifactory/Mobile-Libs-Internal\"\n          credentials {\n              // your password here\n\n              username \"SOME_USERNAME\"\n              password \"SOME_PASSWORD\"\n          }\n      }\n  }\n",
@@ -1666,6 +1735,7 @@ expression: stdout
         "name": "Grafana API Token",
         "id": "np.grafana.1",
         "pattern": "(?x)\n\\b\n(eyJrIjoi [A-Za-z0-9]{60,100})\n\\b\n",
+        "description": null,
         "examples": [
           "Authorization: Bearer eyJrIjoiWHZiSWd5NzdCYUZnNUtibE8obUpESmE2bzJYNDRIc1UiLCJuIjoibXlrZXkiLCJpZCI7MX1",
           "admin_client = GrafanaClient(\"eyJrIjoiY21sM1JRYjB6RnVYSTNLenRWQkFEaWN2bXI2V202U2IiLCJuIjoiYWRtaW5rZXkiLCJpZCI6MX0=\", host=grafana_host, port=3000, protocol=\"http\")"
@@ -1688,6 +1758,7 @@ expression: stdout
         "name": "Grafana Cloud API Token",
         "id": "np.grafana.2",
         "pattern": "(?x)\n\\b\n(glc_eyJrIjoi [A-Za-z0-9]{60,100})\n\\b\n",
+        "description": null,
         "examples": [
           "  \"token\": \"glc_eyJrIjoiZjI0YzZkNGEwZDBmZmZjMmUzNTU3ODcxMmY0ZWZlNTQ1NTljMDFjOCIsIm6iOiJteXRva3VuIiwiaWQiOjF8\""
         ],
@@ -1709,6 +1780,7 @@ expression: stdout
         "name": "Grafana Service Account Token",
         "id": "np.grafana.3",
         "pattern": "(?x)\n\\b\n(glsa_[a-zA-Z0-9]{32}_[a-fA-F0-9]{8})\n\\b\n",
+        "description": null,
         "examples": [
           "curl -H \"Authorization: Bearer glsa_HOruNAb7SOiCdshU7algkrq7FDsNSLAa_55e2f8be\" -X GET '<grafana_url>/api/access-control/user/permissions' | jq\n",
           "// getData()\n// {\n//  let url=\"http://localhost:4200/api/search\"\n//  const headers = new HttpHeaders({\n//    'Content-Type': 'application/json',\n//    'Authorization': `Bearer glsa_Sof0HKi3agxrQP9qm5r2G98VacBNwV5P_9b638c45`\n//  })\n//  return this.http.get(url, {headers: headers});\n// }\n"
@@ -1731,6 +1803,7 @@ expression: stdout
         "name": "Heroku API Key",
         "id": "np.heroku.1",
         "pattern": "(?i)heroku.{0,20}key.{0,20}\\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\b",
+        "description": null,
         "examples": [
           "  HEROKU_API_KEY: c55dbac4-e0e8-4a06-b892-75cac2387ce5"
         ],
@@ -1755,6 +1828,7 @@ expression: stdout
         "name": "HTTP Basic Authentication",
         "id": "np.http.1",
         "pattern": "(?x)(?i)\nAuthorization (?: :\\s+ | \\s*.{1, 5}\\s*) Basic \\s+\n( [A-Za-z0-9+/]{6,} ={0,2} )\n(?: [^A-Za-z0-9+/=] | $ )\n",
+        "description": null,
         "examples": [
           "Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
         ],
@@ -1778,6 +1852,7 @@ expression: stdout
         "name": "HTTP Bearer Token",
         "id": "np.http.2",
         "pattern": "(?x)(?i)\nAuthorization (?: :\\s+ | \\s*.{1, 5}\\s*) Bearer \\s+\n([a-zA-z0-9._~+/-]{6,} =*)\n(?: [^a-zA-z0-9._~+/=-] | $ )\n",
+        "description": null,
         "examples": [
           "GET /resource HTTP/1.1\nHost: server.example.com\nAuthorization: Bearer mF_9.B5f-4.1JqM\n"
         ],
@@ -1801,6 +1876,7 @@ expression: stdout
         "name": "HuggingFace User Access Token",
         "id": "np.huggingface.1",
         "pattern": "\\b(hf_[a-zA-Z]{34})\\b",
+        "description": null,
         "examples": [
           "HF_TOKEN:\"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\""
         ],
@@ -1822,6 +1898,7 @@ expression: stdout
         "name": "Jenkins Token or Crumb",
         "id": "np.jenkins.1",
         "pattern": "(?x)\n(?i)\njenkins.{0,12}(?: (?: crumb | token ) .{0,10} )?\n\\b\n( [0-9a-f]{32,36} | [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12} )\n(?: [^0-9a-f-] | $ )\n",
+        "description": null,
         "examples": [
           "jenkins_user = 'root'\n# jenkins_passwd = '116365fd86d63bf507aba962606a5c8956'  Pre token\njenkins_passwd = '11811f784531053132519844d047186074'   # Dev Token\njenkins_url = 'http://10.1.188.121'\n",
           "export JENKINS_USER=justin-admin-edit-view\nexport JENKINS_TOKEN=11f4274ec59be12eace9a08b08ee13d54b\nexport JENKINS=jenkins-cicd.apps.sno.openshiftlabs.net\n",
@@ -1850,6 +1927,7 @@ expression: stdout
         "name": "Jenkins Setup Admin Password",
         "id": "np.jenkins.2",
         "pattern": "(?x)(?m)\nPlease\\ use\\ the\\ following\\ password\\ to\\ proceed\\ to\\ installation:\n(?: \\n\\n | \\r\\n\\r\\n )\n([a-f0-9]{30,36})$\n",
+        "description": "A Jenkins setup wizard admin user password was detected.\nThis password is used to configure a new Jenkins installation.\nAn attacker with possession of this password could control the Jenkins instance.\nThis could enable exfiltration of proprietary code, insertion of backdoors, or lateral movement to other resources.\n",
         "examples": [
           "*************************************************************\n*************************************************************\n*************************************************************\n\nJenkins initial setup is required. An admin user has been created and a password generated.\nPlease use the following password to proceed to installation:\n\nbd9627decc6346d780b3b6ab6ea8fe1f\n\nThis may also be found at: /root/.jenkins/secrets/initialAdminPassword\n\n*************************************************************\n*************************************************************\n*************************************************************\n"
         ],
@@ -1871,6 +1949,7 @@ expression: stdout
         "name": "Jina Search Foundation API Key",
         "id": "np.jina.1",
         "pattern": "(?x)\n\\b\n(jina_[a-zA-Z0-9]{60})\n\\b\n",
+        "description": "A Jina Search Foundation API Key was found.\nThis allows access to services including Jina Reader, Embeddings, Classifier, and Segmenter.\nAn attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
         "examples": [
           "JINA_KEY = os.getenv('JINA_KEY','jina_c1758c6f49e14ced990ac7776800dc45ShJNTXBCizzwjE6IMFYJ7LD959cG')"
         ],
@@ -1892,6 +1971,7 @@ expression: stdout
         "name": "JSON Web Token (base64url-encoded)",
         "id": "np.jwt.1",
         "pattern": "(?x)\n\\b\n(\n  ey[a-zA-Z0-9_-]{12,}  (?# header )\n  \\.\n  ey[a-zA-Z0-9_-]{12,}  (?# payload )\n  \\.\n  [a-zA-Z0-9_-]{12,}    (?# signature )\n)\n(?:[^a-zA-Z0-9_-]|$)   (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "description": null,
         "examples": [
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dnZWRJbkFzIjoiYWRtaW4iLCJpYXQiOjE0MjI3Nzk2Mzh9.gzSraSYS8EXBxLN_oWnFSRgCzcmEmMjLiuyu5CSpyHI",
           "NUCLEAR_SERVICES_ANON_KEY=eyJhbGciOiJIUzI1NiIsEnR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqcnVqc2lzY2Nzdnl2am5xdG5xIiwicm9sZSI6ImEub24iLCJpYXQiOjE2NTY1OTY0NjEsImV4cCI6MTk3MjE3MjQ2MX0.WQWcwBAQFNE259f2o8ruFln_UMLTFEnEaUD7KHrs9Aw"
@@ -1919,6 +1999,7 @@ expression: stdout
         "name": "JSON Web Token Secret",
         "id": "np.jwt.2",
         "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n\"( [^\"]{6,200} )\"\n",
+        "description": null,
         "examples": [
           "something_else: true\njwt:\n  secret: \"acb1ca5bc8d7fb2ef9f890f1be16d964\" #some comment\n  ttl: 640000 #\n",
           "JWT:\n  secret: \"development#product\"\n  exp: \"50m\"\n",
@@ -1942,6 +2023,7 @@ expression: stdout
         "name": "JSON Web Token Secret",
         "id": "np.jwt.3",
         "pattern": "(?x)(?m)(?i)\n^\\s*\n(?: jwt: \\s+ secret: | jwtsecret: )\n\\s+\n'( [^']{6,200} )'\n",
+        "description": null,
         "examples": [
           "something_else: true\njwt:\n  secret: 'acb1ca5bc8d7fb2ef9f890f1be16d964' #some comment\n  ttl: 640000 #\n",
           "JWT:\n  Secret: 'development#product'\n  exp: '50m'\n",
@@ -1965,6 +2047,7 @@ expression: stdout
         "name": "Password Hash (Kerberos 5, etype 23, AS-REP)",
         "id": "np.krb5.asrep.23.1",
         "pattern": "(?x)\n(\n\\$ krb5asrep                          (?# magic )\n\\$ 23                                 (?# etype )\n\\$\n(?: [^:]+ : )?                        (?# user @ domain : )\n[0-9a-f]{32}                          (?# salt )\n\\$ [0-9a-f]{64,}                      (?# hash )\n)\n\\b\n",
+        "description": null,
         "examples": [
           "$krb5asrep$23$user@domain.com:3e156ada591263b8aab0965f5aebd837$007497cb51b6c8116d6407a782ea0e1c5402b17db7afa6b05a6d30ed164a9933c754d720e279c6c573679bd27128fe77e5fea1f72334c1193c8ff0b370fadc6368bf2d49bbfdba4c5dccab95e8c8ebfdc75f438a0797dbfb2f8a1a5f4c423f9bfc1fea483342a11bd56a216f4d5158ccc4b224b52894fadfba3957dfe4b6b8f5f9f9fe422811a314768673e0c924340b8ccb84775ce9defaa3baa0910b676ad0036d13032b0dd94e3b13903cc738a7b6d00b0b3c210d1f972a6c7cae9bd3c959acf7565be528fc179118f28c679f6deeee1456f0781eb8154e18e49cb27b64bf74cd7112a0ebae2102ac",
           "$krb5asrep$23$8cf8eb5287e28a4006c064892150c4fb$3e05ecc13548bec8e1eeb900dea5429cc6931bae9b8524490eb3a8801560871fe44355ed556202afbb39872e1bbb5c3c4f1b37dcd68fda89a23ebad917d4bbb0933edd94331598939e5d0c0c98c7e219a2e9dd6b877280d1bd7c51131413be577a167208bcc21e9fe7ae8f393278d740e72ca5c44c42d5cb0bf6bab0a36f1b88b7ddc4abbc6f152e652f6ba35c2955fb4132e11b7e566f3b422c3740f79847b77783d245a4e570b8a621b4ff6ff4815566446af70313ee78133707a76a4e4424783bd7c04920aa822a1a36b29f7e25cef186e6439fc46e42e23d6bd918969ef49b8388aef158e443b3a57dbde7ada631fbef7326f9046a9b",
@@ -1990,6 +2073,7 @@ expression: stdout
         "name": "Kubernetes Bootstrap Token",
         "id": "np.kubernetes.1",
         "pattern": "(?x)\n(?: token | Token | TOKEN | bootstrap | BOOTSTRAP)\n.{0,8}\n\\b\n([a-z0-9]{6}\\.[a-z0-9]{16})\n\\b\n",
+        "description": "A Kubernetes Boostrap Token was found.\nThis is a bearer token that allows a node to connect to a cluster.\nAn attacker may be able to use this token to create valid signatures that could be used to compromise TLS trust within the cluster.\n",
         "examples": [
           "BOOTSTRAP_TOKEN: \"be8dfd.da8a689a46edc282\"",
           "--tls-bootstrap-token abcdef.1234567890abcdef"
@@ -2016,6 +2100,7 @@ expression: stdout
         "name": "Kubernetes Bootstrap Token",
         "id": "np.kubernetes.2",
         "pattern": "(?x)\ntoken-id: \\s+ ([a-z0-9]{6}) \\s+\ntoken-secret: \\s+ ([a-z0-9]{16}) \\b\n",
+        "description": "A Kubernetes Boostrap Token was found.\nThis is a bearer token that allows a node to connect to a cluster.\nAn attacker may be able to use this token to create valid signatures that could be used to compromise TLS trust within the cluster.\n",
         "examples": [
           "# Token ID and secret. Required.\ntoken-id: 07402b\ntoken-secret: f395accd245ae53d\n"
         ],
@@ -2038,6 +2123,7 @@ expression: stdout
         "name": "LinkedIn Client ID",
         "id": "np.linkedin.1",
         "pattern": "(?x)(?i)\nlinkedin\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{12,14}) \\b\n",
+        "description": null,
         "examples": [
           "Email IDÂ Last 5 Digits of your SSNÂ LinkedIn IDÂ Availability",
           "LINKEDIN_KEY = \"77yg7tx91p4lag\"\nLINKEDIN_SECRET = \"zt7GeN6IH911xvRj\"\n"
@@ -2061,6 +2147,7 @@ expression: stdout
         "name": "LinkedIn Secret Key",
         "id": "np.linkedin.2",
         "pattern": "(?x)(?i)\nlinkedin\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{16}) \\b\n",
+        "description": null,
         "examples": [
           "LINKEDIN_KEY = \"77yg7tx91p4lag\"\nLINKEDIN_SECRET = \"zt7GeN6IH911xvRj\"\n"
         ],
@@ -2083,6 +2170,7 @@ expression: stdout
         "name": "MailChimp API Key",
         "id": "np.mailchimp.1",
         "pattern": "(?x)(?i)\n(?:mailchimp|mc).{0,20}\n\\b\n([a-f0-9]{32}-us[0-9]{1,3})\n\\b\n",
+        "description": null,
         "examples": [
           "MAILCHIMP_API='bd3777708aecfee66c5335f62a6246a4-us13'"
         ],
@@ -2106,6 +2194,7 @@ expression: stdout
         "name": "Mailgun API Key",
         "id": "np.mailgun.1",
         "pattern": "(?i)(?:mailgun|mg).{0,20}key-([a-z0-9]{32})\\b",
+        "description": null,
         "examples": [
           "var apiKey = process.env.MAILGUN_API || 'key-46cebd38c59ac222e6cf991581411eaf'"
         ],
@@ -2128,6 +2217,7 @@ expression: stdout
         "name": "Mapbox Public Access Token",
         "id": "np.mapbox.1",
         "pattern": "(?i)(?s)mapbox.{0,30}(pk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "description": null,
         "examples": [
           "mapboxApiKey:\n  'pk.eyJ1Ijoia3Jpc3R3IiwiYSI6ImNqbGg1N242NTFlczczdnBcf99iMjgzZ2sifQ.lUneM-o3NucXN189EYyXxQ',\n"
         ],
@@ -2151,6 +2241,7 @@ expression: stdout
         "name": "Mapbox Secret Access Token",
         "id": "np.mapbox.2",
         "pattern": "(?i)(?s)mapbox.{0,30}(sk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "description": null,
         "examples": [
           "  //mapboxgl.accessToken = 'sk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';",
           "export MAPBOX_SECRET_TOKEN=sk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g"
@@ -2176,6 +2267,7 @@ expression: stdout
         "name": "Mapbox Temporary Access Token",
         "id": "np.mapbox.3",
         "pattern": "(?i)(?s)mapbox.{0,30}(tk\\.[a-z0-9\\-+/=]{32,128}\\.[a-z0-9\\-+/=]{20,30})(?:[^a-z0-9\\-+/=]|$)",
+        "description": null,
         "examples": [
           "  //mapboxgl.accessToken = 'tk.eyJ1Ijoic2hlbmdsaWgiLCJhIjCf99ttaWF5bDBsMGNlaDJubGZyMGUwZXNmaCJ9.eI8KXNm5zKZXOKh0c8u9vg';",
           "export MAPBOX_SECRET_TOKEN=tk.eyJ1IjoiY2FwcGVsYWVyZSIsImEicf99c1BaTkZnIn0.P4lD1eHeSEx7AsBq1zbJ4g"
@@ -2201,6 +2293,7 @@ expression: stdout
         "name": "Credentials in MongoDB Connection String",
         "id": "np.mongodb.1",
         "pattern": "(?x)\n(?: mongodb\\+srv | mongodb ) ://                        (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
+        "description": null,
         "examples": [
           "spring:\n  application:\n    name: Prince\n  data:\n    mongodb:\n      uri: \"mongodb+srv://servicelogin:CPCdZH5k0F6dxQ9V@example-prince.mongodb.net/?retryWrites=true&w=majority\"\n      database: prince\n",
           "mongodb://myDatabaseUser:D1fficult@localhost",
@@ -2236,6 +2329,7 @@ expression: stdout
         "name": "Microsoft Teams Webhook",
         "id": "np.msteams.1",
         "pattern": "(?x)(?i)\n(\n  https://\n  outlook\\.office\\.com/webhook/\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n  @\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n  /IncomingWebhook/\n  [a-f0-9]{32}\n  /\n  [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\n)\n",
+        "description": null,
         "examples": [
           "//test //url = 'https://outlook.office.com/webhook/9da5da9c-4218-4c22-aed6-b5c8baebfff5@2f2b54b7-0141-4ba7-8fcd-ab7d17a60547/IncomingWebhook/1bf66ccbb8e745e791fa6e6de0cf465b/4361420b-8fde-48eb-b62a-0e34fec63f5c';",
           "    [T2`https://outlook.office.com/webhook/fa4983ab-49ea-4c1b-9297-2658ea56164c@f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16113d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd`](https://outlook.office.com/webhook/fe4183ab-49ea-4c1b-9297-2658ea56164c%2540f784fbed-7fc7-4c7a-aae9-d2f387b67c5d/IncomingWebhook/4d2b3a16003d47b080b7a083b5a5e533/74f315eb-1dde-4731-b6b5-2524b77f2acd)",
@@ -2263,6 +2357,7 @@ expression: stdout
         "name": "netrc Credentials",
         "id": "np.netrc.1",
         "pattern": "(?x)\n( machine \\s+ [^\\s]+ | default )\n\\s+\nlogin \\s+ ([^\\s]+)\n\\s+\npassword \\s+ ([^\\s]+)\n",
+        "description": null,
         "examples": [
           "machine api.github.com login ziggy^stardust password 012345abcdef",
           "```\nmachine raw.github.com\n  login visionmedia\n  password pass123\n```\n",
@@ -2286,6 +2381,7 @@ expression: stdout
         "name": "New Relic License Key",
         "id": "np.newrelic.1",
         "pattern": "(?x)(?i)\n\\b\n([a-z0-9]{6}[a-f0-9]{30}nral)\n\\b\n",
+        "description": null,
         "examples": [
           "# Required license key associated with your New Relic account.\nlicense_key: 033f2f2072ca3f2cb2ec39024fa9e49cd640NRAL\n\n# Your application name. Renaming here affects where data displays in New\n",
           "    license_key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaNRAL",
@@ -2312,6 +2408,7 @@ expression: stdout
         "name": "New Relic License Key",
         "id": "np.newrelic.2",
         "pattern": "(?x)(?i)\nassociated\\ with\\ your\\ New\\ Relic\\ account\\.\\s+\nlicense_key:\\s*\n([a-f0-9]{40})\n\\b\n",
+        "description": null,
         "examples": [
           "# Required license key associated with your New Relic account.\nlicense_key: 0a14254db7a1e9d29c3370dacc798cb65d25c9af\n\n# Your application name. Renaming here affects where data displays in New\n"
         ],
@@ -2336,6 +2433,7 @@ expression: stdout
         "name": "New Relic API Service Key",
         "id": "np.newrelic.3",
         "pattern": "(?x)(?i)\n\\b\n(nrak-[a-z0-9]{27})\n\\b\n",
+        "description": null,
         "examples": [
           "  PS> Get-NR1Catalog -PersonalAPIKey 'NRAK-123456788ABCDEFGHIJKLMNOPQR'",
           "                placeholder=\"e.g: NRAK-CIH1YVYWKA9ZP6E49WP5XYJH1G9\">",
@@ -2360,6 +2458,7 @@ expression: stdout
         "name": "New Relic Admin API Key",
         "id": "np.newrelic.4",
         "pattern": "(?x)(?i)\n\\b\n(nraa-[a-f0-9]{27})\n\\b\n",
+        "description": null,
         "examples": [
           "admin_access:NRAA-4780f48c47df5882dbec3fd82c7"
         ],
@@ -2382,6 +2481,7 @@ expression: stdout
         "name": "New Relic Insights Insert Key",
         "id": "np.newrelic.5",
         "pattern": "(?x)(?i)\n\\b\n(nrii-[a-z0-9_-]{32})\n(?: [^a-z0-9_-] | $)\n",
+        "description": null,
         "examples": [
           "                    insertKey: \"NRII-3nbcrMjHHs0RrT3GhRNqpd16YVMFHdcI\")",
           " \"Api-Key\": \"NRII-7a6SL_Pau5Dz923jEuBEylu3clzXzfby\""
@@ -2405,6 +2505,7 @@ expression: stdout
         "name": "New Relic Insights Query Key",
         "id": "np.newrelic.6",
         "pattern": "(?x)(?i)\n\\b\n(nriq-[a-z0-9_-]{32})\n(?: [^a-z0-9_-] | $)\n",
+        "description": null,
         "examples": [
           "  \"querykey\": \"NRIQ-pD-yUGl9Z3ACIJ89V-zGkhMxFJE5O121\","
         ],
@@ -2427,6 +2528,7 @@ expression: stdout
         "name": "New Relic REST API Key",
         "id": "np.newrelic.7",
         "pattern": "(?x)(?i)\n\\b\n(nrra-[a-f0-9]{42})\n\\b\n",
+        "description": null,
         "examples": [
           "curl -X POST \"https://api.newrelic.com/v2/applications/380836898/deployments.json\" \\\n     -H \"X-Api-Key:NRRA-e270623d47659ff6a48ac5bde6bba223bef47c8c26\" \\\n     -i \\\n     -H \"Content-Type: application/json\" \\\n     -d \"{ \\\"deployment\\\": { \\\"revision\\\": \\\"${rev}\\\" }}\"\n"
         ],
@@ -2449,6 +2551,7 @@ expression: stdout
         "name": "New Relic Pixie API Key",
         "id": "np.newrelic.8",
         "pattern": "(?x)(?i)\n\\b\n(px-api-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\n\\b\n",
+        "description": null,
         "examples": [
           "MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a3cba-d3c9-45c1-a557-8864040b8f79"
         ],
@@ -2472,6 +2575,7 @@ expression: stdout
         "name": "New Relic Pixie Deploy Key",
         "id": "np.newrelic.9",
         "pattern": "(?x)(?i)\n\\b\n(px-dep-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\n\\b\n",
+        "description": null,
         "examples": [
           "MW_PX_DEPLOY_KEY=px-dep-f43ae612-dc8a-4049-9553-4af1b0e17620 MW_PX_API_KEY=px-api-c20a2cba-d3c9-45c1-a556-8864040b8f79"
         ],
@@ -2495,6 +2599,7 @@ expression: stdout
         "name": "NPM Access Token (fine-grained)",
         "id": "np.npm.1",
         "pattern": "(?x)\n\\b\n(npm_[A-Za-z0-9]{36})\n\\b\n",
+        "description": null,
         "examples": [
           "npm_TCllNwh2WLQlMWVhybM1iQrsTj6rMQ0BOh6d"
         ],
@@ -2520,6 +2625,7 @@ expression: stdout
         "name": "NuGet API Key",
         "id": "np.nuget.1",
         "pattern": "\\b(oy2[a-z0-9]{43})\\b",
+        "description": null,
         "examples": [
           "nuget push %filename% oy2dgb333j35kjjybcf99yzxo7hjyloera4anxn4ivcvle -Source https://api.nuget.org/v3/index.json",
           "find . -name \"*.nupkg\"|xargs -I {} dotnet nuget push \"{}\"  --api-key  oy2l53fxd7xcf99dnyrqewssedgopshuticofclpespbyi  -s https://api.nuget.org/v3/index.json --skip-duplicate"
@@ -2542,6 +2648,7 @@ expression: stdout
         "name": "Credentials in ODBC Connection String",
         "id": "np.odbc.1",
         "pattern": "(?x)(?i)\n(?: User | User\\ Id | UserId | Uid) \\s*=\\s* ([^\\s;]{3,100}) \\s* ;\n[\\ \\t]* .{0,10} [\\ \\t]*  (?# possible extra stuff, e.g., string concatenation)\n(?: Password | Pwd) \\s*=\\s* ([^\\t\\ ;]{3,100})\n\\s* (?: [;\"'] | $)\n",
+        "description": null,
         "examples": [
           "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = \\\"goodspec\\\";",
           "//Database Info\\r\\n\\t\\t\\t\\t\\t$host = \\\"localhost\\\";\\r\\n\\t\\t\\t\\t\\t$database = \\\"NHOHVA\\\";\\r\\n\\t\\t\\t\\t\\t$user = \\\"mg1021\\\";              $password = goodspec;",
@@ -2584,6 +2691,7 @@ expression: stdout
         "name": "Okta API Token",
         "id": "np.okta.1",
         "pattern": "(?i)(?s)(?:okta|ssws).{0,40}\\b(00[a-z0-9_-]{39}[a-z0-9_])\\b",
+        "description": null,
         "examples": [
           "okta_api_token = 00aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "OKTA_API_KEY = \"00-aaaaaaaaaaaaa-aaaaaaaaaaaaaaaaaaaaaaaaa\"",
@@ -2615,6 +2723,7 @@ expression: stdout
         "name": "OpenAI API Key",
         "id": "np.openai.1",
         "pattern": "(?x)\n\\b\n(sk-[a-zA-Z0-9]{48})\n\\b\n",
+        "description": null,
         "examples": [
           "curl https://api.openai.com/v1/images/generations  -H 'Content-Type: application/json'  -H \"Authorization: Bearer sk-mxIt5s1tyfCJyIKHwrqOT4BlbkFJT3VVmv6VdSwB7XXIq1TO\"\n"
         ],
@@ -2637,6 +2746,7 @@ expression: stdout
         "name": "particle.io Access Token",
         "id": "np.particleio.1",
         "pattern": "(?x)\nhttps://api\\.particle\\.io/v1/[a-zA-Z0-9_\\-\\s/\"\\\\?]*\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n",
+        "description": null,
         "examples": [
           "curl https://api.particle.io/v1/devices \\\n-H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\"\n",
           "curl https://api.particle.io/v1/devices \\\n-d access_token=38bb7b318cc6898c80317decb34525844bc9db55\n",
@@ -2663,6 +2773,7 @@ expression: stdout
         "name": "particle.io Access Token",
         "id": "np.particleio.2",
         "pattern": "(?x)\n(?:access_token=|Authorization:\\s*Bearer\\s*)\n\\b\n([a-zA-Z0-9]{40})\n\\b\n[\\s\"\\\\]*https://api\\.particle\\.io/v1\n",
+        "description": null,
         "examples": [
           "curl -H \"Authorization: Bearer 38bb7b318cc6898c80317decb34525844bc9db55\" \\\nhttps://api.particle.io/v1/devices\n",
           "curl -d access_token=38bb7b318cc6898c80317decb34525844bc9db55 \\\nhttps://api.particle.io/v1/devices\n",
@@ -2687,6 +2798,7 @@ expression: stdout
         "name": "PEM-Encoded Private Key",
         "id": "np.pem.1",
         "pattern": "(?x)\n-----BEGIN\\ .{0,20}\\ ?PRIVATE\\ KEY\\ ?.{0,20}-----\n\\s*\n( (?: [a-zA-Z0-9+/=\\s\"',] | \\\\r | \\\\n ) {50,} )\n\\s*\n-----END\\ .{0,20}\\ ?PRIVATE\\ KEY\\ ?.{0,20}-----\n",
+        "description": null,
         "examples": [
           "-----BEGIN RSA PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\nNhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\nqjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\nqyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\nc3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\nQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\njScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\nVSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\nSs3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\nZcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\nGhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\ndW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\nQQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\n1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\n-----END RSA PRIVATE KEY-----\n",
           "\"-----BEGIN RSA PRIVATE KEY-----\" +\n\"b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn\" +\n\"NhAAAAAwEAAQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQ\" +\n\"qjQiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2i\" +\n\"qyjScnntFHIpTCVHNxILDxsStocj64YS0C7hfCGVhft/Ts/O0AAAIQJOKnUyTip1MAAAAH\" +\n\"c3NoLXJzYQAAAIEAtDSHFO5tfN+jYMJuiNvBaplkSI3eFqKMLOvXyVu+dmSEic6xyKWQqj\" +\n\"QiFpXogArvAq2tBxWOq7F+a6rNhDKdICD2amRwDHqKD1bzXVSZ5c1XnpCFsBiQaEyX2iqy\" +\n\"jScnntFHIpTCVHNxILDxsStocj6Cf99C7hfCGVhft/Ts/O0AAAADAQABAAAAgBcaTN8gGi\" +\n\"VSPo3fH3CoS8mw1KyAk6JvQG1Z5xZHjsl65YsNVrmUkFFh0aT3nxEbVb0QKwineN0GKmD/\" +\n\"Ss3R91a573gzli7TJPFCHhhBbE7FRC4KQMTc1/UANwFYQVcfZ4n9IVHr3jiWToSY3XbC66\" +\n\"Zcd0sg+d+YRjIxUktuNFHBAAAAQQCOOKbSUJAWzcTDbxImwDCAfBMlEeMAnJrwobL/zxbT\" +\n\"GhKdnqnomoreFdYL8vOcOlwZG0hUKIA6AM1GsMzp6aCwAAAAQQDmAABpOQnkDy8v8kTDhP\" +\n\"dW3lAqRGOU4WRWj7WystQv/VjuJpceekhOyhNJBuNHDKZ3IT1agAZHIhhL+webE2S1AAAA\" +\n\"QQDIk4H1agCohlHUg50PcyKzE/zZ85Gw0ErTmgqIIGd4B1AqUtjwVe1qFoqHuZPtq2cbVF\" +\n\"1HTHh6GX//J6rKWVJZAAAAGWJsYXJzZW5AYnJhZGZvcmRzLW1icC5sYW4B\" +\n\"-----END RSA PRIVATE KEY-----\"\n",
@@ -2710,6 +2822,7 @@ expression: stdout
         "name": "Base64-PEM-Encoded Private Key",
         "id": "np.pem.2",
         "pattern": "(?x)\n(\n  (?: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN RSA PRIVATE KEY-----` )\n    | LS0tLS1CRUdJTiBEU0EgUFJJVkFURSBLRVktLS0t             (?# prefix of base64 encoding of `-----BEGIN DSA PRIVATE KEY-----` )\n    | LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0t             (?# prefix of base64 encoding of `-----BEGIN EC PRIVATE KEY-----` )\n    )\n  [a-zA-Z0-9+/=]{50,}\n)\n(?: [^a-zA-Z0-9+/=] | $ )\n",
+        "description": null,
         "examples": [
           "PRIVATE_KEY_B64=LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBb3kxWFh1VkFRcHFIYlFFMDVta2hyTmcvMTI0Ri8ySzlPYW5pelpUWlVVaEswOFU4CkxhaC9SbVVsWHFRMDEvU255aktGOWZqUDhFcU1OZ1dpamUzYmVwL3RPOVpTMEFUMi9PVlJXeS9TOG52RDQ5WTMKenMxMktSbERhR2lZc0RsYUZrbHJkeDQ4RWhRVmdHN3hmWE1jaC9OejJzc2FEby9kRkNBOW80TkZZQWUzM2UveApWNVo1UHNkWkl6dkNZQVlCNDRoUEtpN3JXRE1IbFdzM1kvVkVtQXMzSzVNK2QvL3QzRHB4WnBEbWJERGdYa2w2CjZUdDh3VXloUVZ3MkZpMStobTF1T2QwYjFkaW9aNko2OXNTT2JOZXpSR3YxYjdZaFltT0JKL1JBbHN5ZHoxTmgKVXpXT1lYV0Z1OGJrOU9JM3lQMEc0TE84QjhtbWRldE1RVVoyelFJREFRQUJBb0lCQUN2ckhUUHVVZ0JiSlE0QwpvQ0ZQdEgrWDZIN3NIdk1ndVR0VzdUTlYxN1BYMkVQdE53ZzI3S0tld0pNYmNSbWF3THBjSk5BU09xMDY4MGZxCjlsaHE1NEsybnB4WFVBeXErV3NSc1hid2hUODhibm5aQTBaRzZJR2hTaEpFN0t1cGxBU2htQ29FV2ppbmJTNFgKTGlvTW5HWSs4VFMzSzNrMTRWUDBaWUtuNXprMERHZnFBMEo0VTRXSmxUeGwrTWZxd0pJOTlrcTdHbFVlZkdncQpuK3Q1d2NrV3BPbTd5TUJjZTlTSXlmTm54bnU3TkZYQm50VTN5RGxSUThWUWZmNEtRMzJCaWNiYlJWemR1TThNCnNxMU5CZWNzL0EzUXRvdG1nWUc4d094ZXpNS3Iyays2QzB2NmlFc0h5T0lmR25GWktSZDJFd0dnWlo3aytURHUKUUYrcjd1VUNnWUVBMkRqNUJoYmpybDFRNTZya3BhTGFvVldRV1Y5YUYzUUJtNlNZM2VQYmlvY2JNR2k1ak1ESQpkSjdJVXlLYUljK3BNV1RQYlBmVUd2WmNENlczZDFBNUNUSnFuWHVuVlY3czRqaWJ6WDZUbjhNM3IrMHZTZnNZCmdPMHBtRFpndlNqaVZTRUNBQTZFOFUxQ1lFZU5KUDFDOW12cGJVNzJRTEpndWp3M3JMb2oyYmNDZ1lFQXdUSXYKOUNSeWNOQXRBbDcvUHdWZGh5eXRvVHBSRnZDSU1HSVk5SjMxZ3lva0ZlaFQvWjQ4WkF6anl6ZTBSUXYzdGUxTQoveVJMQkVETGkwbEtrZFVXckVkaVR3dm1KdkpwMDZ0OEdCbERsK25ycXVLWTFxVThDbTR5cis4QzZtRThkVnZrClNINXBhRXptOERFTE1wSjhGVTZFYnhmZHZjRzZmSGx6dnVnZmc1c0NnWUFFQ1BRa3QvS2h3MTRLSkxkRm5BZG0KY1ZsVFFhTkZ3c1Z3NlI1dExaNWdOR3MrZVFYVmFaZVVEWTZCZHFqWHJxOWltNVgvVzVTYXVEUTVtb2NVOCt0TQpqNk5Mc3c0SldzOGkzWm1TdVNUNkcwT0R4ZkpXK0JlWitGTUpZeUpsQlVsTCsyUzFLWkF6akpTTGhXcE40V2dKCmZ6UUk5U3RGUTg3b1NzMWpMTW9VZXdLQmdGOE9CMlFURHErTTdhaE4vejROc0wvU2JyZDJEdkcvZFBLQlFaQVIKcS90V0g1MGJ5ejlzdkgvcGk2YXdDS1UwUnpPZXh4UjkwZDhNMWxqNHZaVFZDQ3ZKajRnZTdhVlovbEdqL1JHSwpWS1NJOW1nRXgzaE1vaWJybzByR3lXTnlaaUhFRGFUUmRhRll2UU9PemRpYkZDd1RqcnR1UGE2Z2c5VzhtQU5sCkNDUmpBb0dBSTRIbnpyV3kzaU5kR2xqVnh4bW1DN1V0c0MvajJBUEZpcHc0ZHJ0U2NsMDFRZzF5WkowbDNBTk4KOU5lTmVSUUFzN3pFTng2T1B1SzlxYy83T1ROMTJKaHdoUTIzdXZwNjZjV0krdTRjcVpOZTJyZVFVVWVmM3psbQpMcXRmOU50VHp5M3pjMGZQcGoxQnBlRmxHSG9SVDhjVHpBWjFTeGwyZWChazlqS2RVeDQ9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0t",
           "    \"privateKey\": \"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBbUhKOEJHdTFYZUZ4aENVQXBrNHNSTVI4RnRTdGtyMEx0OWtWTGNSUjRFWitiOWhHCmR0blJpOFhqV3d5MU5zMHliMkJMdHBpVHZKSFVKTUphWXluZ2ZkZnZhcWhocm1yYm5vV0pLQkxmeUxwTXFNS1EKQ3RialFxbnVrQURJUWVQd2ZGeTNpVHkxd1JkRC9zTUs1U0VtV0Fxb0pZQk50eTFZZzA2UzVkYVlPM2xjY3hrYQpQWjRjcm9McWF6Ny9tU3dDVTR5VWRSb3h4WVF4VG1MZXg5M2tqU09TTmdpK0FXc0lCbjV3UHI0VHNuVHFSeWpIClN2aEdMdk9YREpRYWZRdk56WjFSL1FYMzlOQk9xOEVKZW5pWXdaUm9uNVcvNVhMYW94MFFyUGhrY1BES3A5SVUKeHpJakUwWlNmMStUK1FFbTQ3TkFtSnhvZjFhdGRFVzZDTCtheHdJREFRQUJBb0lCQUQ3enI4REhsWnFSK1NWZgpmbGd1bWRzLzVCb3Rjd3ZRWXlGbFZIaVV4RmEvNVlCY0tDVDJKN0QzWTc1NmplNTJaK2hVTkkvUGk5cG53ZG40CkpBa2xCdDRRcUg0NzBES05UK216TFFOT1gvanM3YkVXdnhLcTBDZjhNbFptN0V0QlRGS2VtdS9pRVJBT2duYVcKcGs0ZUZVNXdBQ1dVU1FObWgxR1p4ZEdCZjFXM1VjUnQxcFRvOEtQTDluZm4vSGJiRFNsQkNVL3VIcWd2TSt2cApmTE03bzRIVDZ1K1ZzU00rWGZqeDhpeE5ZRHdoalNuKzQyZm13d1d3ZzJISHUrdUozZ1pUSWQwRUI1VW9hdUNjCjZUTlVtcEJscjU5UGFmVkZRWUY1S3VxaHJXKzVQaWpHcHBZcXg4Ynl6aFpOQzkwZnl5V0NXcXg2eGFZVm5OdzgKNkJmUXM2a0NnWUVBeVlyRVg1NU1RTzJnWDY2TGwxaGJDMzNzWk1OZzloVG1SK1doSTFjNksvbFZ1TFoyL0RPdwpsYTZ6eHdBU204Z0ZyVUFYbUljV2h2b3FwWGVzNWZzOVZKeDlNT0ZVYVBrckRPQllnY1laMUR6VVNVOHc3SSttCnlyV3hRUkRNajhvSGpRbHVpM0s2MzZucm5RajhxOGkvQ2dranVPcHJGZnliMzVEMFlDdjVXZzBDZ1lFQXdhT3cKRWFhN0l1MjFGa08vbmFjdVhjSnBhNkVlUTNqZFNlNlRQaXZ6bVVXU0haeGJuUy9XSnJaRjQwSExzUWxOZHl0ZgpNTTBKZFU0VmMyR0NVc1pMYjdQSmJwdVRqRERSSHJXV1pCMnhiemF0K3A3N2RzNWlOcXFRcTZ6M0syUVh4Y3ZTCis5am5VZXpDU2Y0N1R1OWNTTW96V3hTMW82b1BPSFdHVFRvdHR5TUNnWUFQdWc1Y3o4TnZoWnR3Ry9TMG1LWnkKSFI5bk5YL0pkQlFNSkRVUXh1dTVKcm16c2psU3NNM2t3RDh6RmlSZGw1d3B5c2lNbEc0RGxsM2hqNWNrVXhpVQpFNm9KT0d3WHpPbTVGWUNTajl6UUhQY0x5V3d0NlgvQWJiRXBQS0JaMEJBS3gyT2k2ZzcvQ1FsanRhSFIzZFphCmVDQWJlOTlqVmRUcit5bTJuM2ZUdVFLQmdBMm5TZ25rbEx0Z3dXMEJkK2hZMm1jWUJ6RGttbXF0Z2dUdGdvcFcKdFFWd3AxM1pJWWlTeituSTNtS295QUVDbytpc01Ua1NyQUVPY1dyQ1RGc2p5anZsRkdYdEtGa3hNLzJUVmpoVwo4NlRnMlNHYnhpVlpaZ2x1dTJhdmVub2Z3NkZadnRXdE5KcE5OR0hkUURkUG4xVXVsTEp1WW1SWTRGdmR4WXQ2CmQ3QzdBb0dBRUsvalFiZ0l3OXFLQUNOZ0JySnB1cU5Ham9JajFoQTRlb29DMXp1bFEyZUpnZ2J5OTBpSDg2VzEKM0xyOVZMVFkyc2JKTzlqekZVR0lOL01BOEhYQTE1a2grZHRibkRsdFRFZGNnenBCRzhCQUZRQ3hQWnBGWHhtZgpDUmhXN1l6RW1IeWJ4R0toR3NOK2M3NUhKTHZFSWwrRTh6eitXRk9xT240dkJXU1ZwSnc9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==\","
@@ -2732,6 +2845,7 @@ expression: stdout
         "name": "PHPMailer Credentials",
         "id": "np.phpmailer.1",
         "pattern": "(?x)\n\\$mail->Host     \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n(?: \\s* .* \\s* ){0,3}\n\\$mail->Username \\s* = \\s* '([^'\\n]{5,})'; \\s* (?: //.* )?\n(?: \\s* .* \\s* ){0,3}\n\\$mail->Password \\s* = \\s* '([^'\\n]{5,})';\n",
+        "description": null,
         "examples": [
           "//Server settings\n$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output\n$mail->isSMTP();                                            //Send using SMTP\n$mail->Host       = 'smtp.example.com';                     //Set the SMTP server to send through\n$mail->SMTPAuth   = true;                                   //Enable SMTP authentication\n$mail->Username   = 'user@example.com';                     //SMTP username\n$mail->Password   = 'secret';                               //SMTP password\n$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption\n$mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`\n",
           "require 'PHPMailerAutoload.php';\n\nfunction SendMail($sub,$to,$msg)\n{\n    $mail = new PHPMailer;\n    $mail->isSMTP();                                      // Set mailer to use SMTP\n    $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers\n    $mail->SMTPAuth = true;                               // Enable SMTP authentication\n    $mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted\n    $mail->Username = 'ersatz.technologies@example.com';                 // SMTP username\n\n\n\n    $mail->Password = 'un!techwhooah';                           // SMTP password\n    $mail->From = 'from@example.com';\n    $mail->FromName = 'Admin';\n"
@@ -2754,6 +2868,7 @@ expression: stdout
         "name": "Credentials in PostgreSQL Connection URI",
         "id": "np.postgres.1",
         "pattern": "(?x)\n(?: postgres | postgresql ) ://                         (?# URI scheme )\n  ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# username)\n: ([a-zA-Z0-9%;._~!$&'()*+,;=-]{3,})                    (?# password)\n@ ([a-zA-Z0-9_.-]{3,} (?: :\\d{1,5})?)                   (?# hostname and port)\n(?: [^a-zA-Z0-9_.-] | $ )\n",
+        "description": null,
         "examples": [
           "postgresql://user:secret@localhost",
           "postgresql://user:secret@localhost/",
@@ -2785,6 +2900,7 @@ expression: stdout
         "name": "Postman API Key",
         "id": "np.postman.1",
         "pattern": "(?x)\n\\b\n(PMAK-[a-zA-Z0-9]{24}-[a-zA-Z0-9]{34})\n\\b\n",
+        "description": null,
         "examples": [
           "// ('x-api-key', 'PMAK-629c73facbc064567cbf6970-f56e8b4cd0bb14d00962f17afc158dc2a2')"
         ],
@@ -2808,6 +2924,7 @@ expression: stdout
         "name": "Credentials in PsExec",
         "id": "np.psexec.1",
         "pattern": "(?x)\n(?i)\npsexec .{0,100}\n-u \\s* (\\S+) \\s+    (?# username )\n-p \\s* (\\S+)        (?# password )\n",
+        "description": null,
         "examples": [
           "cmd.exe /C PSEXEC \\\\10.0.94.120 -u Administrator -p dev_admin CMD /C ECHO",
           "PSEXEC.EXE \\\\LocalComputerIPAddress -u DOMAIN\\my-user -p mypass CMD",
@@ -2834,6 +2951,7 @@ expression: stdout
         "name": "Password Hash (md5crypt)",
         "id": "np.pwhash.1",
         "pattern": "(\\$1\\$[./A-Za-z0-9]{8}\\$[./A-Za-z0-9]{22})",
+        "description": null,
         "examples": [
           "$1$OKgLCmVl$d02jECa4DXn/oXX0R.MoQ/",
           "$1$28772684$iEwNOgGugqO9.bIz5sk8k/"
@@ -2859,6 +2977,7 @@ expression: stdout
         "name": "Password Hash (bcrypt)",
         "id": "np.pwhash.2",
         "pattern": "(\\$2[abxy]\\$\\d+\\$[./A-Za-z0-9]{53})",
+        "description": null,
         "examples": [
           "$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
           "$2a$05$/VT2Xs2dMd8GJKfrXhjYP.DkTjOVrY12yDN7/6I8ZV0q/1lEohLru",
@@ -2885,6 +3004,7 @@ expression: stdout
         "name": "Password Hash (sha256crypt)",
         "id": "np.pwhash.3",
         "pattern": "(?x)\n(\n\\$ 5                    (?# magic )\n(?: \\$ rounds=\\d+ )?    (?# optional rounds )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{43}    (?# hash )\n)\n",
+        "description": null,
         "examples": [
           "$5$rounds=5000$GX7BopJZJxPc/KEK$le16UF8I2Anb.rOrn22AUPWvzUETDGefUmAV8AZkGcD",
           "$5$9ks3nNEqv31FX.F$gdEoLFsCRsn/WRN3wxUnzfeZLoooVlzeF4WjLomTRFD",
@@ -2910,6 +3030,7 @@ expression: stdout
         "name": "Password Hash (sha512crypt)",
         "id": "np.pwhash.4",
         "pattern": "(?x)\n(\n\\$ 6                    (?# magic )\n(?: \\$ rounds=\\d+ )?    (?# optional rounds )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{86}    (?# hash )\n)\n",
+        "description": null,
         "examples": [
           "$6$52450745$k5ka2p8bFuSmoVT1tzOyyuaREkkKBcCNqoDKzYiJL9RaE8yMnPgh2XzzF0NDrUhgrcLwg78xs1w5pJiypEdFX/",
           "$6$qoE2letU$wWPRl.PVczjzeMVgjiA8LLy2nOyZbf7Amj3qLIL978o18gbMySdKZ7uepq9tmMQXxyTIrS12Pln.2Q/6Xscao0"
@@ -2934,6 +3055,7 @@ expression: stdout
         "name": "Password Hash (Cisco IOS PBKDF2 with SHA256)",
         "id": "np.pwhash.5",
         "pattern": "(?x)\n(\n\\$ 8                    (?# magic )\n\\$ [./A-Za-z0-9]{8,16}  (?# salt )\n\\$ [./A-Za-z0-9]{43}    (?# hash )\n)\n",
+        "description": null,
         "examples": [
           "$8$TnGX/fE4KGHOVU$pEhnEvxrvaynpi8j4f.EMHr6M.FzU8xnZnBr/tJdFWk",
           "$8$mTj4RZG8N9ZDOk$elY/asfm8kD3iDmkBe3hD2r4xcA/0oWS5V3os.O91u."
@@ -2957,6 +3079,7 @@ expression: stdout
         "name": "PyPI Upload Token",
         "id": "np.pypi.1",
         "pattern": "(?x)\n\\b\n(pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{50,})\n(?:[^a-zA-Z0-9_-]|$)\n",
+        "description": null,
         "examples": [
           "# password = pypi-AgEIcHlwaS5vcmcCJDkwNzYwNzU1LWMwOTUtNGNkOC1iYjQzLTU3OWNhZjI1NDQ1MwACJXsicGVybWCf99lvbnMiOiAidXNlciIsICJ2ZXJzaW9uIjogMX0AAAYgSpW5PAywXvchMUQnkF5H6-SolJysfUvIWopMsxE4hCM",
           "- name: Publish package\nuses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29\nwith:\n  user: santoshp\n  password: ${{ secrets.pypi-AgEIcHlwaS5vcmcCJDA1NTdiYzI2LTQ3N2QtNDAyYy04YzBjLTVmODU4ZTFkMjACf99COXsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJlbXB5cmlhbCJdfSwgInZlcnNpb24iOiAxfQAABiAx85KUjr83dNyI9uO0RVMmH7DKqoXNH4_rMkO5SQYItA}}\n",
@@ -2985,6 +3108,7 @@ expression: stdout
         "name": "React App Username",
         "id": "np.reactapp.1",
         "pattern": "(?x)(?i)\n\\b\nREACT_APP (?: _[A-Z0-9]+)* _USER (?: NAME)?          (?# variable name )\n\\s* = \\s*\n['\"]?\n( [^\\s'\"$]{3,} )                                     (?# value )\n(?: [\\s'\"$] | $ )\n",
+        "description": null,
         "examples": [
           "# REACT_APP_GUEST_USERNAME=guest",
           "# REACT_APP_USER=postgres",
@@ -3014,6 +3138,7 @@ expression: stdout
         "name": "React App Password",
         "id": "np.reactapp.2",
         "pattern": "(?x)(?i)\n\\b\nREACT_APP (?: _[A-Z0-9]+)* _PASS (?: WORD)?          (?# variable name )\n\\s* = \\s*\n['\"]?\n( [^\\s'\"$]{6,} )                                     (?# value )\n(?: [\\s'\"$] | $ )\n",
+        "description": null,
         "examples": [
           "# REACT_APP_GUEST_PASSWORD=mycoin!1",
           "# REACT_APP_PASS=whiteduke",
@@ -3044,6 +3169,7 @@ expression: stdout
         "name": "RubyGems API Key",
         "id": "np.rubygems.1",
         "pattern": "(?x)(?i)\n\\b\n(rubygems_[a-f0-9]{48})\n\\b\n",
+        "description": null,
         "examples": [
           "$ curl -H 'Authorization:rubygems_b9ce70c306b3a2e248679fbbbd66723d408d3c8c5f00566c' \\\n       https://rubygems.org/api/v1/web_hooks.json\n"
         ],
@@ -3066,6 +3192,7 @@ expression: stdout
         "name": "AWS S3 Bucket",
         "id": "np.s3.1",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: [a-zA-Z0-9_-]+ \\. )+   (?# bucket name as subdomain )\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n) \\b\n",
+        "description": null,
         "examples": [
           "example-bucket.s3.amazonaws.com",
           "http://bucket.s3-us-east-2.amazonaws.com",
@@ -3092,6 +3219,7 @@ expression: stdout
         "name": "AWS S3 Bucket",
         "id": "np.s3.2",
         "pattern": "(?x)\n(?: ^ | [\\s/\"'] | %2F )\n(\n(?: s3\n  | s3-af-south-1\n  | s3-ap-east-1\n  | s3-ap-northeast-1\n  | s3-ap-northeast-2\n  | s3-ap-northeast-3\n  | s3-ap-south-1\n  | s3-ap-south-2\n  | s3-ap-southeast-1\n  | s3-ap-southeast-2\n  | s3-ap-southeast-3\n  | s3-ap-southeast-4\n  | s3-ca-central-1\n  | s3-eu-central-1\n  | s3-eu-central-2\n  | s3-eu-north-1\n  | s3-eu-south-1\n  | s3-eu-south-2\n  | s3-eu-west-1\n  | s3-eu-west-2\n  | s3-eu-west-3\n  | s3-me-central-1\n  | s3-me-south-1\n  | s3-sa-east-1\n  | s3-us-east-1\n  | s3-us-east-2\n  | s3-us-gov-east-1\n  | s3-us-gov-west-1\n  | s3-us-west-1\n  | s3-us-west-2\n  )\n\\.amazonaws\\.com\n/\n[a-zA-Z0-9_][a-zA-Z0-9_-]* (?: \\. [a-zA-Z0-9_-]+)*   (?# bucket name as path )\n)\n(?: [^a-zA-Z0-9_-] | $ )                             (?# this instead of a \\b anchor because that doesn't play nicely with `-` )\n",
+        "description": null,
         "examples": [
           "s3.amazonaws.com/example-bucket",
           "http://s3-us-east-2.amazonaws.com/example-bucket"
@@ -3120,6 +3248,7 @@ expression: stdout
         "name": "Salesforce Access Token",
         "id": "np.salesforce.1",
         "pattern": "(?x)\n\\b\n(\n  00[a-zA-Z0-9]{13}             (?# organization ID )\n  !\n  [a-zA-Z0-9._]{96}             (?# opaque token )\n)\n(?: \\b | $ | [^a-zA-Z0-9._] )\n",
+        "description": null,
         "examples": [
           "00DE0X0A0M0PeLE!CJoAQOx1GCLf1UIt4UU9y0VOPLUZAYN6I8DsdGEDyHh5cO02egObcAhIDHYiGCfi94c53oFbr4HB.xZfuYRGhvNuxobAAXRe",
           "=== Org Description\nKEY               VALUE\n────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────\nAccess Token      00DE0X0A0M0PeLE!AQcAQH0dMHEXAMPLEzmpkb58urFRkgeBGsxL_QJWwYMfAbUeeG7c1EXAMPLEDUkWe6H34r1AAwOR8B8fLEz6nEXAMPLEAAAA\nClient Id         PlatformCLI\nConnected Status  Connected\nId                00D5fORGIDEXAMPLE\nInstance Url      https://MyDomainName.my.salesforce.com\nUsername          juliet.capulet@empathetic-wolf-g5qddtr.com\n"
@@ -3143,6 +3272,7 @@ expression: stdout
         "name": "Sauce Token",
         "id": "np.sauce.1",
         "pattern": "(?x)(?i)\nsauce .{0,50}\n\\b\n([a-f0-9-]{36})\n(?: [^a-f0-9-] | $ )\n",
+        "description": null,
         "examples": [
           "- SAUCE_USERNAME=vitess\n- SAUCE_ACCESS_KEY=2397f603-c2c4-4897-a8ca-587ace5dc8dd\n- SAUCE_ACCESS_KEY=2397f603-c2c4-4897-a8ca-587ace5dc8d-\n"
         ],
@@ -3166,6 +3296,7 @@ expression: stdout
         "name": "Segment Public API Token",
         "id": "np.segment.1",
         "pattern": "(?x)\n\\b\n(sgp_[a-zA-Z0-9]{64})\n\\b\n",
+        "description": null,
         "examples": [
           "\"token\": \"sgp_b8eaD5d9Ae59a15a407bb7C88350bc85dc959EBE8277883d50Bc84dc960eE826\""
         ],
@@ -3188,6 +3319,7 @@ expression: stdout
         "name": "SendGrid API Key",
         "id": "np.sendgrid.1",
         "pattern": "\\b(SG\\.[0-9A-Za-z_-]{22}\\.[0-9A-Za-z_-]{43})\\b",
+        "description": null,
         "examples": [
           "      'SENDGRID_API_KEYSID': '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'",
           "var sendgrid = require('sendgrid')('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');"
@@ -3210,6 +3342,7 @@ expression: stdout
         "name": "Shopify Domain",
         "id": "np.shopify.1",
         "pattern": "(?x)\n\\b\n(\n  (?:[a-zA-Z0-9-]+\\.)* [a-zA-Z0-9-]+ \\.myshopify\\.com\n)\n\\b\n",
+        "description": null,
         "examples": [
           "handsomestranger.myshopify.com",
           "store.handsomestranger.myshopify.com"
@@ -3231,6 +3364,7 @@ expression: stdout
         "name": "Shopify App Secret",
         "id": "np.shopify.2",
         "pattern": "\\b(shpss_[a-fA-F0-9]{32})\\b",
+        "description": null,
         "examples": [
           "SHOPIFY_API_KEY='66eaacb546afcad32162d40acb6bd2b0'\nSHOPIFY_API_SECRET_KEY='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'\n",
           "SHOPIFY_API_KEY: 38d5b9a8b6c0a3d3ad3f2c422c77db80\nSHOPIFY_API_SECRET: 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\n"
@@ -3254,6 +3388,7 @@ expression: stdout
         "name": "Shopify Access Token (Public App)",
         "id": "np.shopify.3",
         "pattern": "\\b(shpat_[a-fA-F0-9]{32})\\b",
+        "description": null,
         "examples": [
           "include('layouts/header.php');\n$shop = $_GET['shop'];\n$token = \"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\";\n$query = array(\n"
         ],
@@ -3276,6 +3411,7 @@ expression: stdout
         "name": "Shopify Access Token (Custom App)",
         "id": "np.shopify.4",
         "pattern": "\\b(shpca_[a-fA-F0-9]{32})\\b",
+        "description": null,
         "examples": [
           "const TEMP_CONTENT = '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 handsomestranger.myshopify.com'"
         ],
@@ -3298,6 +3434,7 @@ expression: stdout
         "name": "Shopify Access Token (Legacy Private App)",
         "id": "np.shopify.5",
         "pattern": "\\b(shppa_[a-fA-F0-9]{32})\\b",
+        "description": null,
         "examples": [
           "SHOP_PASSWORD=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"
         ],
@@ -3320,6 +3457,7 @@ expression: stdout
         "name": "Slack Bot Token",
         "id": "np.slack.2",
         "pattern": "\\b(xoxb-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24})\\b",
+        "description": null,
         "examples": [
           "SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D"
         ],
@@ -3347,6 +3485,7 @@ expression: stdout
         "name": "Slack Webhook",
         "id": "np.slack.3",
         "pattern": "(?i)(https://hooks.slack.com/services/T[a-z0-9_]{8}/B[a-z0-9_]{8,12}/[a-z0-9_]{24})",
+        "description": null,
         "examples": [
           "#notifications_marcus: https://hooks.slack.com/services/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",
           "// Import and Configure Console.Slack (Thanks David <3)\n// const slack = require('console-slack');\n// slack.options = {\n//   webhook : \"https://hooks.slack.com/services/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\",\n//   username: \"console.slack.bot\",\n//   emoji : \":trollface:\",\n//   channel : \"#payx-logs\"\n// };\n"
@@ -3369,6 +3508,7 @@ expression: stdout
         "name": "Slack User Token",
         "id": "np.slack.4",
         "pattern": "\\b(xoxp-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-f0-9]{32})\\b",
+        "description": null,
         "examples": [
           "python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 \"This is a test run. Ignore\"",
           "curl -X POST -H \"Content-type: application/json\" -H \"Authorization: Bearer xoxp-283316862324-298911817009-298923149681-44f585044dace54f5701618e97cd1c0b\" --data @data.json https://wirecard-issuing.slack.com/api/chat.postMessage",
@@ -3398,6 +3538,7 @@ expression: stdout
         "name": "Slack App Token",
         "id": "np.slack.5",
         "pattern": "\\b(xapp-[0-9]{12}-[a-zA-Z0-9/+]{24})\\b",
+        "description": null,
         "examples": [
           "ENV SLACK_TOKEN=\"xapp-083452001657-ShAYwge/87H4lC3j7lZ48pAL\" \\"
         ],
@@ -3421,6 +3562,7 @@ expression: stdout
         "name": "Slack Legacy Bot Token",
         "id": "np.slack.6",
         "pattern": "\\b(xoxb-[0-9]{10,13}-[a-zA-Z0-9]{24})\\b",
+        "description": null,
         "examples": [
           "this is the api token to connect to the bot user\n\nxoxb-153445930147-Tjy11gGxUW6Cf99YOYwtzG0K\n",
           "def send_slack_notification(message):\n    token = \"xoxb-47834520726-N3otsrwj8Cf99cs8GhiRZsX1\"\n"
@@ -3451,6 +3593,7 @@ expression: stdout
         "name": "SonarQube Token",
         "id": "np.sonarqube.1",
         "pattern": "(?i)sonar.{0,5}login.{0,5}\\s*\\b([a-f0-9]{40})\\b",
+        "description": null,
         "examples": [
           "sonar.host.url=https://sonarcloud.io -Dsonar.login=5524bf449ca45fcace54698371466398321f3a82",
           "sonar.login', '826de5590c75919a8317fdface58206eebe7ebbc",
@@ -3480,6 +3623,7 @@ expression: stdout
         "name": "Square Access Token",
         "id": "np.square.1",
         "pattern": "(?i)\\b(sq0atp-[a-z0-9_-]{22})\\b",
+        "description": null,
         "examples": [
           "  personal access token sq0atp-qUlZzae8wVMc5P5NZdf5DA<br/>",
           "var applicationId = 'sq0idp-r34HdSnJVWaCesH3dnJrGA';\nvar accessToken = 'sq0atp-RdSPeJa5qDMaCesxHOjeRQ';\n"
@@ -3500,6 +3644,7 @@ expression: stdout
         "name": "Square OAuth Secret",
         "id": "np.square.2",
         "pattern": "(?i)\\b(sq0csp-[a-z0-9_-]{43})\\b",
+        "description": null,
         "examples": [
           "app_secret: sq0csp-VQgEphNJFVxfoEtJ1M_2KaCesfzP2_ugNWnlMPwZaZk\nsandbox_app_id: sandbox-sq0idp-wWAaCesVx0PhRbXkdUUg9Q\nsandbox_access_token: sandbox-sq0atb-KVmmWPaCesnJkFsvje76sQ\nproduction_app_id: sq0idp-wWACO1oVx0aCesXkdUUg9Q\n",
           "private String accessTokenEndpoint = \"https://connect.squareup.com/oauth2/token\";\nprivate String baseURL = \"https://connect.squareup.com\";\nprivate String clientId = \"sq0idp-Ux0S-9iMfaCeszTkDpSjDw\";\nprivate String clientSecret = \"sq0csp-lBGGHNQmcaCesLfa3x6W7jJj8SQ-Fx5Y0yQiCrUWM40\";\n"
@@ -3520,6 +3665,7 @@ expression: stdout
         "name": "StackHawk API Key",
         "id": "np.stackhawk.1",
         "pattern": "\\b(hawk\\.[0-9A-Za-z_-]{20}\\.[0-9A-Za-z_-]{20})\\b",
+        "description": null,
         "examples": [
           "HAWK_API_KEY=\"hawk.nHAOHdJjXoNyzAcTDC5M.R2gqQh2aCesrh0yCGB7q\""
         ],
@@ -3541,6 +3687,7 @@ expression: stdout
         "name": "Stripe API Key",
         "id": "np.stripe.1",
         "pattern": "(?i)\\b((?:sk|rk)_live_[a-z0-9]{24})\\b",
+        "description": null,
         "examples": [
           "Stripe.api_key = \"sk_live_dhhfUUyfrAace5dBAZ10JrAD\"",
           "var stripe = require(\"stripe\")(\"sk_live_qdyFazIVmace52bThiOzbEVT\");"
@@ -3563,6 +3710,7 @@ expression: stdout
         "name": "Stripe API Test Key",
         "id": "np.stripe.2",
         "pattern": "(?i)\\b((?:sk|rk)_test_[a-z0-9]{24})\\b",
+        "description": null,
         "examples": [
           "//var stripe = require(\"stripe\")(\"sk_test_nxOdTTuEace5Ajbh3svpG32m\");"
         ],
@@ -3585,6 +3733,7 @@ expression: stdout
         "name": "Telegram Bot Token",
         "id": "np.telegram.1",
         "pattern": "(?x)\n\\b\n(\\d+:AA[a-zA-Z0-9_-]{32,33})\n(?: [^a-zA-Z0-9_-] | $)\n",
+        "description": null,
         "examples": [
           "4839574813:AAFD39kkdpWt3ywyRZergyOLMaJhac61qc",
           "4839574813:AAE4A6Rz0CSnIGzeu897OjQnjzsMEG2_uso"
@@ -3608,6 +3757,7 @@ expression: stdout
         "name": "ThingsBoard Access Token",
         "id": "np.thingsboard.1",
         "pattern": "(?x)\nthingsboard\\.cloud/api/v1/\n([a-z0-9]{20})\n",
+        "description": null,
         "examples": [
           "http://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry",
           "https://thingsboard.cloud/api/v1/354u1g321kcqc1oad3w7/telemetry",
@@ -3633,6 +3783,7 @@ expression: stdout
         "name": "ThingsBoard Provision Device Key",
         "id": "np.thingsboard.2",
         "pattern": "(?x)\n\"provisionDeviceKey\"\\s*:\\s*\"\n([a-z0-9]{20})\n\"\n",
+        "description": null,
         "examples": [
           "\"{\"deviceName\": \"DEVICE_NAME\", \"provisionDeviceKey\": \"s2s1gfcuatgbi61n8h5s\", \"provisionDeviceSecret\": \"xbzsovaw9ix4qfhi14an\"}\""
         ],
@@ -3655,6 +3806,7 @@ expression: stdout
         "name": "ThingsBoard Provision Device Secret",
         "id": "np.thingsboard.3",
         "pattern": "(?x)\n\"provisionDeviceSecret\"\\s*:\\s*\"\n([a-z0-9]{20})\n\"\n",
+        "description": null,
         "examples": [
           "\"{\"deviceName\": \"DEVICE_NAME\", \"provisionDeviceKey\": \"s2s1gfcuatgbi61n8h5s\", \"provisionDeviceSecret\": \"xbzsovaw9ix4qfhi14an\"}\""
         ],
@@ -3678,6 +3830,7 @@ expression: stdout
         "name": "TrueNAS API Key (WebSocket)",
         "id": "np.truenas.1",
         "pattern": "(?x)\n\"params\"\\s*:\\s*\\[\\s*\"\n(\\d+-[a-zA-Z0-9]{64})\n\"\\s*\\]\n",
+        "description": null,
         "examples": [
           "{\"id\":\"3286a508-a6ca-278a-c078-85b2b515d8d2\", \"msg\":\"method\", \"method\":\"auth.login_with_api_key\", \"params\":[\"8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu\"]}",
           "{\"id\":\"677d9914-f598-f497-e77e-2a3aadbb822e\", \"msg\":\"method\", \"method\":\"auth.login_with_api_key\", \"params\" : [\"9-hTSZDBPyg0PjRZvWb8omoxJ7X2gAjRGmiPKql9ENGIUP9OPtEAzz5f6g9YIMVbZT\"]}",
@@ -3708,6 +3861,7 @@ expression: stdout
         "name": "TrueNAS API Key (REST API)",
         "id": "np.truenas.2",
         "pattern": "(?x)\nBearer\\s*\n(\\d+-[a-zA-Z0-9]{64})\n\\b\n",
+        "description": null,
         "examples": [
           "curl -X POST \"http://192.168.0.30/api/v2.0/device/get_info\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer 8-Lp22ov7halMBLUpG97Wg4y7fibQi3CW19VJiZcCu746zgCs0mdDdTCoOcpgEucgu\" -d \"\\\"SERIAL\\\"\""
         ],
@@ -3735,6 +3889,7 @@ expression: stdout
         "name": "Twilio API Key",
         "id": "np.twilio.1",
         "pattern": "(?i)twilio.{0,20}\\b(sk[a-f0-9]{32})\\b",
+        "description": null,
         "examples": [
           "const twilioAccountSid = 'AC712594f590c0d8ace55c04858f7398f9' // Your Account SID from www.twilio.com/console\nconst twilioApiKeySID = 'SK9b4cc552783500ace5414a1ed3e9fd1a'\nconst twilioApiKeySecret = 'l6LUelKF2BUtMLace5oShZSmRppadYqI'\n",
           "// https://www.twilio.com/console/video/dev-tools/api-keys\n'API'              => env('TWILIO_API','SK6e84981d07ace5c9df33e1ab043a2fb2'),\n'API_KEY'          => env('TWILIO_API_KEY', 'wbTs1SUt6Aace5eKeNCxuYvJa6PhaRd0')\n"
@@ -3760,6 +3915,7 @@ expression: stdout
         "name": "Twitter Client ID",
         "id": "np.twitter.1",
         "pattern": "(?x)(?i)\n\\b twitter\n.?\n(?: api | app | application | client | consumer | customer )?\n.?\n(?: id | identifier | key )\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{18,25}) \\b\n",
+        "description": null,
         "examples": [
           "     TWITTER_ID:               \"DkWLqcP3ace3wHuJ7fiw\",",
           "# TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'\n# TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'\n"
@@ -3783,6 +3939,7 @@ expression: stdout
         "name": "Twitter Secret Key",
         "id": "np.twitter.2",
         "pattern": "(?x)(?i)\ntwitter\n.?\n(?: api | app | application | client | consumer | customer | secret | key )\n.?\n(?: key | oauth | sec | secret )?\n.{0,2} \\s{0,20} .{0,2} \\s{0,20} .{0,2}  (?# string terminators, whitespace, binding operators, etc )\n\\b ([a-z0-9]{35,44}) \\b\n",
+        "description": null,
         "examples": [
           "# TWITTER_API_KEY = 'UZYoBAfBzNace3mBwPOGYw'\n# TWITTER_API_SECRET = 'ngHaeaRPKA5BDQNXace3LWA1PvTA1kBGDaAJmc517E'\n"
         ],
@@ -3807,6 +3964,7 @@ expression: stdout
         "name": "WireGuard Private Key",
         "id": "np.wireguard.1",
         "pattern": "PrivateKey\\s*=\\s*([A-Za-z0-9+/]{43}=)",
+        "description": null,
         "examples": [
           "[Interface]\nAddress = 10.200.200.3/32\nPrivateKey = AsaFot43bfs1fEWjvtty+rGcjh3rP1H6sug1l3u19ix=\nDNS = 8.8.8.8\n"
         ],
@@ -3830,6 +3988,7 @@ expression: stdout
         "name": "WireGuard Preshared Key",
         "id": "np.wireguard.2",
         "pattern": "PresharedKey\\s*=\\s*([A-Za-z0-9+/]{43}=)",
+        "description": null,
         "examples": [
           "[Peer]\nPublicKey = [Server's public key]\nPresharedKey = uRsfsZ2Ts1rach4Zv3hhwcx6wa5fuIo2u3w7sa+7j81=\nAllowedIPs = 0.0.0.0/0, ::/0\nEndpoint = [Server Addr:Server Port]\n"
         ],

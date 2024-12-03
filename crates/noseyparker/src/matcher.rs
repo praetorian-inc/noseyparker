@@ -346,6 +346,7 @@ mod test {
             negative_examples: vec![],
             references: vec![],
             categories: vec![],
+            description: None,
         })];
         let rules_db = RulesDatabase::from_rules(rules)?;
         let input = "some test data for vectorscan";

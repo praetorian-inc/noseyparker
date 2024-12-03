@@ -319,6 +319,11 @@ fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
         }
     }
 
+    if args.pedantic && syntax.description.is_none() {
+        error!("Rule has no description");
+        num_errors += 1;
+    }
+
     if num_warnings == 0 && num_errors == 0 {
         info!("No issues detected");
     } else {

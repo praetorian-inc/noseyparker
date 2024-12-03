@@ -18,6 +18,10 @@ pub struct RuleSyntax {
     /// The regex pattern that the rule uses
     pub pattern: String,
 
+    /// A human-readable description of the rule, often answering what was found and how an attacker could use it
+    #[serde(default)]
+    pub description: Option<String>,
+
     /// Example inputs that this rule is expected to match
     #[serde(default)]
     pub examples: Vec<String>,
@@ -77,6 +81,7 @@ impl RuleSyntax {
     ///     name: "Test rule".to_string(),
     ///     id: "test.1".to_string(),
     ///     pattern: r"hello\s*world".to_string(),
+    ///     description: None,
     ///     examples: vec![],
     ///     negative_examples: vec![],
     ///     references: vec![],
