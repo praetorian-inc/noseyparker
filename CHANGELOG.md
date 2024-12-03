@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Breaking Changes
-- The JSON output format from `report` has changed slightly.
+- The JSON output format from `report` has changed slightly ([#235](https://github.com/praetorian-inc/noseyparker/pull/235)).
 
   Now, the JSON representation of provenance entries from extensible enumerators (i.e., `scan --enumerator=FILE`, introduced in v0.20.0) includes an additional `"payload"` field around the actual provenance content.
   For example, an extended provenance entry that previously would look like this:
