@@ -1984,22 +1984,27 @@ expression: stdout
     },
     {
       "id": "np.kubernetes.1",
-      "structural_id": "eeeb1d3ab34f40b5cbd985aea39136b76ab80171",
+      "structural_id": "22e2737b6122f2c9a606413dd423bbb02cce8ada",
       "name": "Kubernetes Bootstrap Token",
       "syntax": {
         "name": "Kubernetes Bootstrap Token",
         "id": "np.kubernetes.1",
-        "pattern": "(?x)\n\\b\n([a-z0-9]{6}\\.[a-z0-9]{16})\n\\b\n",
+        "pattern": "(?x)\n(?: token | Token | TOKEN | bootstrap | BOOTSTRAP)\n.{0,8}\n\\b\n([a-z0-9]{6}\\.[a-z0-9]{16})\n\\b\n",
         "examples": [
+          "BOOTSTRAP_TOKEN: \"be8dfd.da8a689a46edc282\"",
+          "--tls-bootstrap-token abcdef.1234567890abcdef"
+        ],
+        "negative_examples": [
           "abcdef.0123456789abcdef"
         ],
-        "negative_examples": [],
         "references": [
-          "https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format"
+          "https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format",
+          "https://github.com/kubernetes/cluster-bootstrap/blob/e37c6240fdbd81679a5bcfdf4a265e4eafde7e8d/token/util/helpers.go"
         ],
         "categories": [
           "api",
-          "secret"
+          "secret",
+          "fuzzy"
         ]
       }
     },
