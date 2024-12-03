@@ -41,9 +41,7 @@ expression: json_output
         "provenance": [
           {
             "kind": "extended",
-            "payload": {
-              "filename": "input.txt"
-            }
+            "payload": "input.txt"
           }
         ],
         "rule_name": "GitHub Personal Access Token",

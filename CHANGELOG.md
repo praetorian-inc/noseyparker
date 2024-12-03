@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Breaking Changes
+- The JSON output format from `report` has changed slightly ([#235](https://github.com/praetorian-inc/noseyparker/pull/235)).
+
+  Now, the JSON representation of provenance entries from extensible enumerators (i.e., `scan --enumerator=FILE`, introduced in v0.20.0) includes an additional `"payload"` field around the actual provenance content.
+  For example, an extended provenance entry that previously would look like this:
+
+      {"kind": "extended", "filename": "input.txt"}
+
+  is now represented like this:
+
+      {"kind": "extended", "payload": {"filename": "input.txt"}}
+
+  This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
+
+
 ### Additions
 - New rules have been added:
 

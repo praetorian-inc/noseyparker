@@ -313,10 +313,12 @@ expression: stdout
                 "extended"
               ],
               "type": "string"
-            }
+            },
+            "payload": true
           },
           "required": [
-            "kind"
+            "kind",
+            "payload"
           ],
           "type": "object"
         }

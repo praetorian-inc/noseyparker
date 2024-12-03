@@ -56,8 +56,8 @@ impl Provenance {
     }
 
     /// Create a `Provenance` entry from an arbitrary JSON value.
-    pub fn from_extended(value: serde_json::Value) -> Self {
-        Provenance::Extended(ExtendedProvenance(value))
+    pub fn from_extended(payload: serde_json::Value) -> Self {
+        Provenance::Extended(ExtendedProvenance { payload })
     }
 
     /// Get the path for the blob from this `Provenance` entry, if one is specified.
@@ -146,17 +146,19 @@ pub struct CommitProvenance {
 // - XXX A `parent_start_byte` integer field
 // - XXX A `parent_end_byte` integer field
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-pub struct ExtendedProvenance(pub serde_json::Value);
+pub struct ExtendedProvenance {
+    pub payload: serde_json::Value,
+}
 
 impl std::fmt::Display for ExtendedProvenance {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.0, f)
+        std::fmt::Display::fmt(&self.payload, f)
     }
 }
 
 impl ExtendedProvenance {
     pub fn path(&self) -> Option<&Path> {
-        let p = self.0.get("path")?.as_str()?;
+        let p = self.payload.get("path")?.as_str()?;
         Some(Path::new(p))
     }
 }
@@ -184,5 +186,32 @@ mod sql {
             let s = value.as_str()?;
             serde_json::from_str(s).map_err(|e| FromSqlError::Other(e.into()))
         }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// tests
+// -------------------------------------------------------------------------------------------------
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use anyhow::Result;
+    use serde_json::json;
+    use test_case::test_case;
+
+    #[test_case(json!{"this is a string"}; "string")]
+    #[test_case(json!{42}; "int")]
+    #[test_case(json!{42.0}; "float")]
+    #[test_case(json!{true}; "bool true")]
+    #[test_case(json!{false}; "bool false")]
+    #[test_case(json!{null}; "null")]
+    #[test_case(json!{["this is a string in an array"]}; "array")]
+    #[test_case(json!{{"value": "this is a string in an array"}}; "object")]
+    fn serialize_extended_provenance(val: serde_json::Value) -> Result<()> {
+        let p = Provenance::from_extended(val);
+        let _s = serde_json::to_string(&p)?;
+
+        Ok(())
     }
 }
