@@ -1,0 +1,7 @@
+---
+source: crates/noseyparker-cli/tests/scan/basic/mod.rs
+expression: stdout
+---
+ Rule                           Findings   Matches   Accepted   Rejected   Mixed   Unlabeled 
+─────────────────────────────────────────────────────────────────────────────────────────────
+ GitHub Personal Access Token          1         1          0          0       0           1

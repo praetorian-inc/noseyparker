@@ -59,3 +59,4 @@ vectorscan-rs = { version = "0.0.4" }
 
 [dev-dependencies]
 pretty_assertions = "1.3"
+test-case = "3"
