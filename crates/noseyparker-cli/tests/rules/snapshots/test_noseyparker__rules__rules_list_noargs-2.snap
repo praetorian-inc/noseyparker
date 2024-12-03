@@ -87,6 +87,8 @@ expression: stdout
  np.jwt.2             JSON Web Token Secret                                         fuzzy, secret 
  np.jwt.3             JSON Web Token Secret                                         fuzzy, secret 
  np.krb5.asrep.23.1   Password Hash (Kerberos 5, etype 23, AS-REP)                  hashed, secret 
+ np.kubernetes.1      Kubernetes Bootstrap Token                                    api, fuzzy, secret 
+ np.kubernetes.2      Kubernetes Bootstrap Token                                    api, secret 
  np.linkedin.1        LinkedIn Client ID                                            api, fuzzy, identifier 
  np.linkedin.2        LinkedIn Secret Key                                           api, fuzzy, secret 
  np.mailchimp.1       MailChimp API Key                                             api, fuzzy, secret 
@@ -164,6 +166,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             136 
+ default      Nosey Parker default rules             138 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

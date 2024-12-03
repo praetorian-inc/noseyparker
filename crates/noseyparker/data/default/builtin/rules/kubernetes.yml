@@ -1,0 +1,56 @@
+rules:
+
+- name: Kubernetes Bootstrap Token
+  id: np.kubernetes.1
+
+  description: |
+    A Kubernetes Boostrap Token was found.
+    This is a bearer token that allows a node to connect to a cluster.
+    An attacker may be able to use this token to create valid signatures that could be used to compromise TLS trust within the cluster.
+
+  pattern: |
+    (?x)
+    (?: token | Token | TOKEN | bootstrap | BOOTSTRAP)
+    .{0,8}
+    \b
+    ([a-z0-9]{6}\.[a-z0-9]{16})
+    \b
+
+  categories: [api, secret, fuzzy]
+
+  examples:
+  - 'BOOTSTRAP_TOKEN: "be8dfd.da8a689a46edc282"'
+  - '--tls-bootstrap-token abcdef.1234567890abcdef'
+
+  negative_examples:
+  - abcdef.0123456789abcdef
+
+  references:
+  - https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format
+  - https://github.com/kubernetes/cluster-bootstrap/blob/e37c6240fdbd81679a5bcfdf4a265e4eafde7e8d/token/util/helpers.go
+
+
+- name: Kubernetes Bootstrap Token
+  id: np.kubernetes.2
+
+  description: |
+    A Kubernetes Boostrap Token was found.
+    This is a bearer token that allows a node to connect to a cluster.
+    An attacker may be able to use this token to create valid signatures that could be used to compromise TLS trust within the cluster.
+
+  pattern: |
+    (?x)
+    token-id: \s+ ([a-z0-9]{6}) \s+
+    token-secret: \s+ ([a-z0-9]{16}) \b
+
+  categories: [api, secret]
+
+  examples:
+  - |
+      # Token ID and secret. Required.
+      token-id: 07402b
+      token-secret: f395accd245ae53d
+
+  references:
+  - https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format
+  - https://github.com/kubernetes/cluster-bootstrap/blob/e37c6240fdbd81679a5bcfdf4a265e4eafde7e8d/token/util/helpers.go
