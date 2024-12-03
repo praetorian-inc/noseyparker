@@ -2009,6 +2009,28 @@ expression: stdout
       }
     },
     {
+      "id": "np.kubernetes.2",
+      "structural_id": "c200120c1b59de7e2ef87be56c2f0b26ff334d06",
+      "name": "Kubernetes Bootstrap Token",
+      "syntax": {
+        "name": "Kubernetes Bootstrap Token",
+        "id": "np.kubernetes.2",
+        "pattern": "(?x)\ntoken-id: \\s+ ([a-z0-9]{6}) \\s+\ntoken-secret: \\s+ ([a-z0-9]{16}) \\b\n",
+        "examples": [
+          "# Token ID and secret. Required.\ntoken-id: 07402b\ntoken-secret: f395accd245ae53d\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/#token-format",
+          "https://github.com/kubernetes/cluster-bootstrap/blob/e37c6240fdbd81679a5bcfdf4a265e4eafde7e8d/token/util/helpers.go"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.linkedin.1",
       "structural_id": "2fb4e1caf47a02501461f43476d779dc3c867f0f",
       "name": "LinkedIn Client ID",
@@ -3828,7 +3850,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 137
+      "num_rules": 138
     },
     {
       "id": "np.assets",
