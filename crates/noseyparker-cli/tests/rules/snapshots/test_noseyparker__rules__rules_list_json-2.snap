@@ -1289,7 +1289,7 @@ expression: stdout
         "name": "Credentials in .NET System.Net.NetworkCredential",
         "id": "np.generic.7",
         "pattern": "(?x)\n\\b\n(?: NetworkCredential | NETWORKCREDENTIAL | networkcredential )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"               (?# password )\n\\s* \\)\n",
-        "description": "A .NET `System.Net.NetworkCredential` value with hardcoded parameters was found.\nThis may allow an attack access to a resource that uses basic, digest, NTLM, or Kerberos authentication.\n",
+        "description": "A .NET `System.Net.NetworkCredential` value with hardcoded parameters was found. This may allow an attack access to a resource that uses basic, digest, NTLM, or Kerberos authentication.\n",
         "examples": [
           "sender.Credentials = new NetworkCredential(\"NuGets@example.com\", \"vzihlaquknriqlht\");\n",
           "$webClient.Credentials = new-object System.Net.NetworkCredential(\"cidownload\", \"AP7JaG9ToerxBc6gWP5LcU2CNpb\");\n"
@@ -1313,7 +1313,7 @@ expression: stdout
         "name": "Credentials in .NET System.DirectoryServices.DirectoryEntry",
         "id": "np.generic.8",
         "pattern": "(?x)\n\\b\n(?: DirectoryEntry | DIRECTORYENTRY | directoryentry )\n\\s* \\( \\s*\n  \" ( [^\"\\n]{3,100} ) \"               (?# path )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# username )\n  \\s* , \\s*\n  \" ( [^\"\\n]{3,50} ) \"                (?# password )\n  (?: \\s* , \\s* [^)]{3,50} )?         (?# authentication type )\n\\s* \\)\n",
-        "description": "A .NET `System.DirectoryServices.DirectoryEntry` value was found with hardcoded credentials.\nThis may allow an attack access to an Active Directory instance.\n",
+        "description": "A .NET `System.DirectoryServices.DirectoryEntry` value was found with hardcoded credentials. This may allow an attacker access to an Active Directory instance.\n",
         "examples": [
           "$domain = New-Object DirectoryServices.DirectoryEntry(\"LDAP://10.10.10.1\",\"domain\\user\", \"secret\")\n",
           "new DirectoryEntry(\"LDAP://EXAMPLE.COM\",\n          \"ADMNALRRHH@EXAMPLE.COM\",\n          \"Rrhh1234\");\n"
@@ -1321,6 +1321,30 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.directoryentry"
+        ],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.9",
+      "structural_id": "37dadc2ef09aa6f150315ce6f9aaebdf2d8b473b",
+      "name": "Sensitive value in .NET configuration",
+      "syntax": {
+        "name": "Sensitive value in .NET configuration",
+        "id": "np.generic.9",
+        "pattern": "(?x)\n< \\s* add \\s+ key \\s* = \\s*\n  \" (\n  [^\\n\"]{0,20}\n  (?: pass | Pass | PASS\n    | secret | Secret | SECRET\n    | user | User | USER\n    | admin | Admin | ADMIN\n    | token | Token | TOKEN\n    )\n  [^\\n\"]{0,20}\n  ) \"\n\\s+\nvalue \\s* = \\s* \" ([^\\n\"]{3,100}) \" \\s* / \\s* >\n",
+        "description": "A possibly-sensitive value in .NET app configuration was found. This may allow an attacker a way to bypass authentication or move laterally.\n",
+        "examples": [
+          "<add key=\"FromEmailAddress\" value=\"killer.joe@example.com\"/>\n<add key=\"FromEmailPassword\" value=\"Prestigitariu$\"/>\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview",
+          "https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration"
         ],
         "categories": [
           "fuzzy",
@@ -4009,7 +4033,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 138
+      "num_rules": 139
     },
     {
       "id": "np.assets",

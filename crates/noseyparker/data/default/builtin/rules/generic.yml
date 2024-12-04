@@ -291,7 +291,7 @@ rules:
   references:
   - https://learn.microsoft.com/en-us/dotnet/api/system.net.networkcredential
 
-  description: |
+  description: >
     A .NET `System.Net.NetworkCredential` value with hardcoded parameters was found.
     This may allow an attack access to a resource that uses basic, digest, NTLM, or Kerberos authentication.
 
@@ -326,6 +326,41 @@ rules:
   references:
   - https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.directoryentry
 
-  description: |
+  description: >
     A .NET `System.DirectoryServices.DirectoryEntry` value was found with hardcoded credentials.
-    This may allow an attack access to an Active Directory instance.
+    This may allow an attacker access to an Active Directory instance.
+
+
+- name: Sensitive value in .NET configuration
+  id: np.generic.9
+
+  pattern: |
+    (?x)
+    < \s* add \s+ key \s* = \s*
+      " (
+      [^\n"]{0,20}
+      (?: pass | Pass | PASS
+        | secret | Secret | SECRET
+        | user | User | USER
+        | admin | Admin | ADMIN
+        | token | Token | TOKEN
+        )
+      [^\n"]{0,20}
+      ) "
+    \s+
+    value \s* = \s* " ([^\n"]{3,100}) " \s* / \s* >
+
+  categories: [fuzzy, generic, secret]
+
+  description: >
+    A possibly-sensitive value in .NET app configuration was found.
+    This may allow an attacker a way to bypass authentication or move laterally.
+
+  examples:
+  - |
+      <add key="FromEmailAddress" value="killer.joe@example.com"/>
+      <add key="FromEmailPassword" value="Prestigitariu$"/>
+
+  references:
+  - https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview
+  - https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration
