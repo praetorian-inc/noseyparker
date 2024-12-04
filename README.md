@@ -2,18 +2,16 @@
 
 ## Overview
 
-Nosey Parker is a command-line tool that finds secrets and sensitive information in textual data. It is useful both for offensive and defensive security testing.
+Nosey Parker is a CLI tool that finds secrets and sensitive information in textual data.
+It has been designed for offensive security (e.g., red teams), though can also be useful for defensive security testing.
+It has found secrets in hundreds of offensive security engagements at [Praetorian](https://praetorian.com).
 
 **Key features:**
 - It natively scans files, directories, and Git repository history
-- It uses regular expression matching with a set of [160 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high signal-to-noise based on experience and feedback from offensive security engagements
-- It deduplicates its findings, grouping matches together that share the same secret, which in practice can reduce review burden by 100x or more compared to other tools
-- It is fast: it can scan at hundreds of megabytes per second on a single core, and is able to scan 100GB of Linux kernel source history in less than 2 minutes on an older MacBook Pro
+- It uses regular expressions with [160 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high signal-to-noise based on feedback from security engineers
+- It deduplicates findings, grouping matches that share the same secret, which reduces review burden by 10-1000x or more
+- It is fast: it can scan hundreds of megabytes per second on a single core
 - It scales: it has scanned inputs as large as 20TiB during security engagements
-
-An internal version of Nosey Parker has found secrets in hundreds of offensive security engagements at [Praetorian](https://praetorian.com).
-The internal version has additional capabilities for false positive suppression and a rule-free machine learning-based detection engine.
-Read more in blog posts [here](https://www.praetorian.com/blog/nosey-parker-ai-secrets-scanner-release/) and [here](https://www.praetorian.com/blog/six-months-of-finding-secrets-with-nosey-parker/).
 
 
 ## Installation
@@ -175,9 +173,7 @@ docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
 The Docker container runs with `/scan` as its working directory, so mounting `$PWD` at `/scan` in the container will make tab completion and relative paths in your command-line invocation work.
 
 
-### Scan inputs for secrets
-
-#### Filesystem content, including local Git repos
+### Scan filesystem content, including local Git repos
 ![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](docs/usage-examples/gifs/02-scan-git-history.gif)
 
 <details>
@@ -206,7 +202,7 @@ Run the `report` command next to show finding details.
 </details>
 
 
-#### Git repos given URL, GitHub username, or GitHub organization name
+### Scan Git repos given URL, GitHub username, or GitHub organization name
 
 <details>
 
