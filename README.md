@@ -3,70 +3,62 @@
 ## Overview
 
 Nosey Parker is a CLI tool that finds secrets and sensitive information in textual data.
-It has been designed for offensive security (e.g., red teams), though can also be useful for defensive security testing.
+It is essentially a special-purpose `grep`-like tool for detection of secrets.
+
+It has been designed for offensive security (e.g., enabling lateral movement on red teams), but it can also be useful for defensive security testing.
 It has found secrets in hundreds of offensive security engagements at [Praetorian](https://praetorian.com).
 
 **Key features:**
-- It natively scans files, directories, and Git repository history
-- It uses regular expressions with [160 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high signal-to-noise based on feedback from security engineers
-- It deduplicates findings, grouping matches that share the same secret, which reduces review burden by 10-1000x or more
-- It is fast: it can scan hundreds of megabytes per second on a single core
-- It scales: it has scanned inputs as large as 20TiB during security engagements
+- **Flexiblity:** It natively scans files, directories, GitHub, and Git history, and has an extensible input enumeration mechanism
+- **Field-tested rules:** It uses regular expressions with [160 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high precision based on feedback from security engineers
+- **Signal-to-noise:** It deduplicates matches that share the same secret, reducing review burden by 10-1000x or more
+- **Speed & scalability:** it can scan at GB/s on a multicore system, and has scanned inputs as large as 20TB during security engagements
 
+The typical workflow is three phases:
+
+1. Scan inputs of interest using the `scan` command
+2. Report details of scan results using the `report` command
+3. Review and triage findings
 
 ## Installation
 
-### Homebrew formula
+### [Homebrew](https://brew.sh) formula
 
-Nosey Parker is available in [Homebrew](https://brew.sh):
 ```shell
-$ brew install noseyparker
+brew install noseyparker
 ```
 
 
 ### Prebuilt binaries
 
-Prebuilt binaries are available for x86_64 Linux and x86_64/aarch64 macOS on the [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest).
-This is a simple way to get started and will give good performance.
+The [latest release page](https://github.com/praetorian-inc/noseyparker/releases/latest) contains prebuilt binaries for x86_64/aarch64 Linux and macOS. 
 
 
-### Docker images
+### Docker: x86_64/aarch64
 
-<details>
-
-A multiplatform Docker image is available for the **latest release** for x86_64 and aarch64:
 ```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker:latest
+docker pull ghcr.io/praetorian-inc/noseyparker:latest
 ```
 
-A multiplatform Docker image is available for **the most recent commit** for x86_64 and aarch64:
+The **most recent commit** is also available via the `main` tag.
+
+### Docker: x86_64/aarch64, Alpine base:
+
 ```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker:main
+docker pull ghcr.io/praetorian-inc/noseyparker-alpine:latest
 ```
 
-A multiplatform [Alpine-based](https://hub.docker.com/_/alpine) Docker image is available for the **latest release** for x86_64 and aarch64:
-```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:latest
-```
-
-A multiplatform [Alpine-based](https://hub.docker.com/_/alpine) Docker image is available for **the most recent commit** for x86_64 and aarch64:
-```shell
-$ docker pull ghcr.io/praetorian-inc/noseyparker-alpine:main
-```
-
-**Note:** The Docker images run noticeably slower than a native binary, particularly on macOS.
-
-</details>
+The **most recent commit** is also available via the `main` tag.
 
 
 ### Arch Linux package
 
-Nosey Parker is available in the [Arch User Repository](https://aur.archlinux.org/packages/noseyparker).
+<https://aur.archlinux.org/packages/noseyparker>
 
 
 ### Windows
 
-Nosey Parker does not currently provide native binaries for Windows ([#121](https://github.com/praetorian-inc/noseyparker/issues/121)).
+Nosey Parker does not build natively on Windows ([#121](https://github.com/praetorian-inc/noseyparker/issues/121)).
 It _is_ possible to run on Windows using [WSL1](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) and the native Linux release.
 
 
@@ -75,7 +67,7 @@ It _is_ possible to run on Windows using [WSL1](https://en.wikipedia.org/wiki/Wi
 <details>
 
 #### 1. Install prerequisites
-This has been tested with several versions of Ubuntu Linux on x86_64 and with macOS on both x86_64 and aarch64.
+This has been tested with several versions of Ubuntu Linux and macOS on both x86_64 and aarch64.
 
 Required dependencies:
 - `cargo`: recommended approach: install from <https://rustup.rs>
@@ -97,21 +89,7 @@ The command-line program will be at `release/bin/noseyparker`.
 </details>
 
 
-## Usage
-
-### Overview
-
-Nosey Parker is essentially a special-purpose `grep`-like tool for detection of secrets.
-The typical workflow is three phases:
-
-1. Scan inputs of interest using the `scan` command
-2. Report details of scan results using the `report` command
-3. Review and triage findings
-
-The scanning and reporting steps are implemented as separate commands because you may wish to generate several reports from one expensive scan run.
-
-
-### Getting help
+## Getting help
 
 Running the `noseyparker` binary without arguments prints top-level help and exits.
 You can get abbreviated help for a particular command by running `noseyparker COMMAND -h`.
@@ -120,51 +98,47 @@ More detailed help is available with the `help` command or long-form `--help` op
 The prebuilt releases also include manpages that collect the command-line help in one place.
 These manpages converted into Markdown format are also included in the repository [here](docs/v0.17.0/man/man1).
 
-If you have a question that's not answered by this documentation, feel free to [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose).
+If you have a question that's not answered by this documentation, please [start a discussion](https://github.com/praetorian-inc/noseyparker/discussions/new/choose).
 
 
-### Terminology and data model
+## Terminology and data model
 
-<details>
-
-#### The datastore
-Most Nosey Parker commands use a _datastore_, which is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
+### The datastore
+The _datastore_ is a special directory that Nosey Parker uses to record its findings and maintain its internal state.
 A datastore will be implicitly created by the `scan` command if needed.
 
-#### Blobs
-Each input that Nosey Parker scans is called a _blob_, and has a unique blob ID, which is a SHA-1 digest computed the same way `git` does.
+### Blobs
+Each scanned input is called a _blob_. Each blob has a unique blob ID, which is a SHA-1 digest computed the same way `git` does.
 
-#### Provenance
+### Provenance
 Each blob has one or more _provenance_ entries associated with it.
-A provenance entry is metadata that describes how the input was discovered, such as a file on the filesystem or an entry in Git repository history.
+A provenance entry is metadata that describes how the input was discovered, such as a file on the filesystem or a file in Git repository history.
 
-#### Rules
+### Rules
 Nosey Parker is a rule-based system that uses regular expressions.
 Each _rule_ has a single pattern with at least one capture group that isolates the match content from the surrounding context.
 You can list available rules with `noseyparker rules list`.
 
-#### Rulesets
+### Rulesets
 A collection of rules is organized into a _ruleset_.
-Nosey Parker's default ruleset includes rules that detect things that appear to be hardcoded secrets.
+Nosey Parker's default ruleset includes rules that detect things that appear to be secrets.
 Other rulesets are available; you can list them with `noseyparker rules list.`
 
-#### Matches
+### Matches
 When a rule's pattern matches an input, it produces a _match_.
-A match is defined by a rule, blob ID, start byte offset, and end byte offset; these fields are used to determine a unique match identifier.
+A match is uniquely defined by a rule, blob ID, start byte offset, and end byte offset; these fields are used to compute a unique match identifier.
 
-#### Findings
-Matches that were produced by the same rule and share the same capture groups are grouped into a _finding_.
+### Findings
+Matches that share a rule and capture groups are combined into a _finding_.
 In other words, a _finding_ is a group of matches.
 This is Nosey Parker's top-level unit of reporting.
-
-</details>
 
 
 ## Usage examples
 
 ### NOTE: When using Docker...
 
-If you are using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
+When using the Docker image, replace `noseyparker` in the following commands with a Docker invocation that uses a mounted volume:
 
 ```shell
 docker run -v "$PWD":/scan ghcr.io/praetorian-inc/noseyparker:latest <ARGS>
@@ -176,123 +150,63 @@ The Docker container runs with `/scan` as its working directory, so mounting `$P
 ### Scan filesystem content, including local Git repos
 ![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](docs/usage-examples/gifs/02-scan-git-history.gif)
 
-<details>
+Nosey Parker has native support for scanning files, directories, and the entire history of Git repositories.
 
-Nosey Parker has built-in support for scanning files, recursively scanning directories, and scanning the entire history of Git repositories.
-
-For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan its entire history with the `scan` command.
-Nosey Parker will create a new datastore at `np.cpython` and saves its findings there.
-(The name `np.cpython` is nonessential; it can be whatever you want.)
+For example, if you have a Git clone of [CPython](https://github.com/python/cpython) locally at `cpython.git`, you can scan it with the `scan` command.
+Nosey Parker will create a new datastore at `cpython.np` and saves its findings there.
+(The name `cpython.np` is innessential, and can be whatever you want.)
 ```
-$ noseyparker scan --datastore np.cpython cpython.git
-Found 28.30 GiB from 18 plain files and 427,712 blobs from 1 Git repos [00:00:04]
-Scanning content  ████████████████████ 100%  28.30 GiB/28.30 GiB  [00:00:53]
-Scanned 28.30 GiB from 427,730 blobs in 54 seconds (538.46 MiB/s); 4,904/4,904 new matches
+$ noseyparker scan -d cpython.np cpython.git
+Scanned 19.19 GiB from 335,849 blobs in 17 seconds (1.11 GiB/s); 2,178/2,178 new matches
 
- Rule                      Distinct Groups   Total Matches
-───────────────────────────────────────────────────────────
- PEM-Encoded Private Key             1,076           1,192
- Generic Secret                        331             478
- netrc Credentials                      42           3,201
- Generic API Key                         2              31
- md5crypt Hash                           1               2
+ Rule                            Findings   Matches   Accepted   Rejected   Mixed   Unlabeled
+──────────────────────────────────────────────────────────────────────────────────────────────
+ Generic API Key                        1         8          0          0       0           1
+ Generic Password                       8     1,283          0          0       0           8
+ Generic Username and Password          2        40          0          0       0           2
+ HTTP Bearer Token                      1       108          0          0       0           1
+ PEM-Encoded Private Key               61       151          0          0       0          61
+ netrc Credentials                     27       588          0          0       0          27
 
 Run the `report` command next to show finding details.
 ```
-</details>
 
+See `noseyparker help scan` for more details.
 
-### Scan Git repos given URL, GitHub username, or GitHub organization name
-
-<details>
-
-Nosey Parker can also scan Git repos that have not already been cloned to the local filesystem.
-The `--git-url URL`, `--github-user NAME`, and `--github-org NAME` options to `scan` allow you to specify repositories of interest.
+### Scan a Git repo from an HTTPS URL
 
 For example, to scan the Nosey Parker repo itself:
 ```
-$ noseyparker scan --datastore np.noseyparker --git-url https://github.com/praetorian-inc/noseyparker
+noseyparker scan --datastore np.noseyparker --git-url https://github.com/praetorian-inc/noseyparker
 ```
 
-For example, to scan accessible repositories belonging to [`octocat`](https://github.com/octocat):
+See `noseyparker help scan` for more details.
+
+### Scan Git repos of a GitHub user or organization
+
+Use `--github-user=USER` or `--github-org=ORG`. For example, to scan accessible repositories belonging to the [`octocat`](https://github.com/octocat) user:
 ```
-$ noseyparker scan --datastore np.noseyparker --github-user octocat
+noseyparker scan --datastore np.noseyparker --github-user octocat
 ```
 
 These input specifiers will use an optional GitHub token if available in the `NP_GITHUB_TOKEN` environment variable.
 Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
 
 See `noseyparker help scan` for more details.
-</details>
 
 
-### Report findings
-
-<details>
-
-To see details of Nosey Parker's findings, use the `report` command.
-This prints out a text-based report designed for human consumption:
-```
-$ noseyparker report --datastore np.cpython
-Finding 1/1452: Generic API Key
-Match: QTP4LAknlFml0NuPAbCdtvH4KQaokiQE
-Showing 3/29 occurrences:
-
-    Occurrence 1:
-    Git repo: clones/cpython.git
-    Blob: 04144ceb957f550327637878dd99bb4734282d07
-    Lines: 70:61-70:100
-
-        e buildbottest
-
-        notifications:
-          email: false
-          webhooks:
-            urls:
-              - https://python.zulipchat.com/api/v1/external/travis?api_key=QTP4LAknlFml0NuPAbCdtvH4KQaokiQE&stream=core%2Ftest+runs
-            on_success: change
-            on_failure: always
-          irc:
-            channels:
-              # This is set to a secure vari
-
-    Occurrence 2:
-    Git repo: clones/cpython.git
-    Blob: 0e24bae141ae2b48b23ef479a5398089847200b3
-    Lines: 174:61-174:100
-
-        j4 -uall,-cpu"
-
-        notifications:
-          email: false
-          webhooks:
-            urls:
-              - https://python.zulipchat.com/api/v1/external/travis?api_key=QTP4LAknlFml0NuPAbCdtvH4KQaokiQE&stream=core%2Ftest+runs
-            on_success: change
-            on_failure: always
-          irc:
-            channels:
-              # This is set to a secure vari
-...
-```
-
-(Note: the findings above are synthetic, invalid secrets.)
-Additional output formats are supported, including JSON, JSON lines, and SARIF (experimental), via the `--format=FORMAT` option.
-</details>
-
-#### Human-readable text format
+### Report findings in human-readable text format
 ![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](docs/usage-examples/gifs/03-report-human.gif)
 
-#### JSON format
+
+### Report findings in JSON format
 ![Screenshot showing Nosey Parker's workflow for rendering its findings in JSON format](docs/usage-examples/gifs/04-report-json.gif)
 
 
 ### Summarize findings
 
-<details>
-
 Nosey Parker prints out a summary of its findings when it finishes scanning.
-You can also run this step separately:
+You can also run this step separately after scanning:
 ```
 $ noseyparker summarize --datastore np.cpython
 
@@ -306,15 +220,14 @@ $ noseyparker summarize --datastore np.cpython
 ```
 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
-</details>
+
+See `noseyparker help summarize` for more details.
 
 
 ### Enumerate repositories from GitHub
 
-<details>
-
-To list URLs for repositories belonging to GitHub users or organizations, use the `github repos list` command.
-This command uses the GitHub REST API to enumerate repositories belonging to one or more users or organizations.
+Use `github repos list` command to list URLs for repositories belonging to GitHub users or organizations.
+This command uses the GitHub REST API to enumerate repositories belonging to users or organizations.
 For example:
 ```
 $ noseyparker github repos list --user octocat
@@ -328,13 +241,12 @@ https://github.com/octocat/octocat.github.io.git
 https://github.com/octocat/test-repo1.git
 ```
 
-An optional GitHub Personal Access Token can be provided via the `NP_GITHUB_TOKEN` environment variable.
+This command will use an optional GitHub token if available in the `NP_GITHUB_TOKEN` environment variable.
 Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
 
 Additional output formats are supported, including JSON and JSON lines, via the `--format=FORMAT` option.
 
 See `noseyparker help github` for more details.
-</details>
 
 
 ## Integrations
@@ -352,7 +264,7 @@ If you have an integration you'd like to share that's not listed here, please cr
 
 ## Contributing
 
-Feel free to ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) page.
+Ask questions or share ideas in the [Discussions](https://github.com/praetorian-inc/noseyparker/discussions) area.
 
 Contributions are welcome, especially new regex rules.
 Developing new regex rules is detailed in a [separate document](docs/RULES.md).
