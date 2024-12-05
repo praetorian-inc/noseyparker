@@ -331,7 +331,7 @@ rules:
     This may allow an attacker access to an Active Directory instance.
 
 
-- name: Sensitive value in .NET configuration
+- name: Sensitive Value in .NET Configuration
   id: np.generic.9
 
   pattern: |
@@ -371,7 +371,7 @@ rules:
   - https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration
 
 
-- name: Connection string in .NET configuration
+- name: Connection String in .NET Configuration
   id: np.generic.10
 
   pattern: |

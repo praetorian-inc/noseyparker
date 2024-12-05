@@ -1133,9 +1133,9 @@ expression: stdout
     {
       "id": "np.generic.10",
       "structural_id": "7139cc6e9cf6d7babcdd37a5183e95a9a3e6ccfc",
-      "name": "Connection string in .NET configuration",
+      "name": "Connection String in .NET Configuration",
       "syntax": {
-        "name": "Connection string in .NET configuration",
+        "name": "Connection String in .NET Configuration",
         "id": "np.generic.10",
         "pattern": "(?x)\n< \\s* add \\s+ key \\s* = \\s*\n  \" (\n  [^\\n\"]{0,20}\n  (?: [Cc]onnection[Ss]tring | CONNECTIONSTRING )\n  [^\\n\"]{0,20}\n  ) \"\n\\s+\nvalue \\s* = \\s* \" ([^\\n\"]{3,200}) \" \\s* / \\s* >\n",
         "description": "A possibly-sensitive connection string in .NET app configuration was found. This may allow an attacker direct access to a database.\n",
@@ -1358,9 +1358,9 @@ expression: stdout
     {
       "id": "np.generic.9",
       "structural_id": "37dadc2ef09aa6f150315ce6f9aaebdf2d8b473b",
-      "name": "Sensitive value in .NET configuration",
+      "name": "Sensitive Value in .NET Configuration",
       "syntax": {
-        "name": "Sensitive value in .NET configuration",
+        "name": "Sensitive Value in .NET Configuration",
         "id": "np.generic.9",
         "pattern": "(?x)\n< \\s* add \\s+ key \\s* = \\s*\n  \" (\n  [^\\n\"]{0,20}\n  (?: pass | Pass | PASS\n    | secret | Secret | SECRET\n    | user | User | USER\n    | admin | Admin | ADMIN\n    | token | Token | TOKEN\n    )\n  [^\\n\"]{0,20}\n  ) \"\n\\s+\nvalue \\s* = \\s* \" ([^\\n\"]{3,100}) \" \\s* / \\s* >\n",
         "description": "A possibly-sensitive value in .NET app configuration was found. This may allow an attacker a way to bypass authentication or move laterally.\n",
