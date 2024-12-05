@@ -361,6 +361,45 @@ rules:
       <add key="FromEmailAddress" value="killer.joe@example.com"/>
       <add key="FromEmailPassword" value="Prestigitariu$"/>
 
+  negative_examples:
+  - |
+      <add key="ConnectionString_B2B" value="Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False" />
+
+
+  references:
+  - https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview
+  - https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration
+
+
+- name: Connection string in .NET configuration
+  id: np.generic.10
+
+  pattern: |
+    (?x)
+    < \s* add \s+ key \s* = \s*
+      " (
+      [^\n"]{0,20}
+      (?: [Cc]onnection[Ss]tring | CONNECTIONSTRING )
+      [^\n"]{0,20}
+      ) "
+    \s+
+    value \s* = \s* " ([^\n"]{3,200}) " \s* / \s* >
+
+  categories: [fuzzy, generic, secret]
+
+  description: >
+    A possibly-sensitive connection string in .NET app configuration was found.
+    This may allow an attacker direct access to a database.
+
+  examples:
+  - |
+      <add key="ConnectionString_B2B" value="Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False" />
+
+  negative_examples:
+  - |
+      <add key="FromEmailAddress" value="killer.joe@example.com"/>
+      <add key="FromEmailPassword" value="Prestigitariu$"/>
+
   references:
   - https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview
   - https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration

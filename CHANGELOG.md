@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Additions
 - New rules have been added:
 
+  - `Connection string in .NET configuration` ([#238](https://github.com/praetorian-inc/noseyparker/pull/238))
   - `Credentials in .NET System.DirectoryServices.DirectoryEntry` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
   - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
   - `Kubernetes Bootstrap Token` ([#235](https://github.com/praetorian-inc/noseyparker/pull/235))

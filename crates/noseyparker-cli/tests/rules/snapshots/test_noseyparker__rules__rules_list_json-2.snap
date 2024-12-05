@@ -1131,6 +1131,32 @@ expression: stdout
       }
     },
     {
+      "id": "np.generic.10",
+      "structural_id": "7139cc6e9cf6d7babcdd37a5183e95a9a3e6ccfc",
+      "name": "Connection string in .NET configuration",
+      "syntax": {
+        "name": "Connection string in .NET configuration",
+        "id": "np.generic.10",
+        "pattern": "(?x)\n< \\s* add \\s+ key \\s* = \\s*\n  \" (\n  [^\\n\"]{0,20}\n  (?: [Cc]onnection[Ss]tring | CONNECTIONSTRING )\n  [^\\n\"]{0,20}\n  ) \"\n\\s+\nvalue \\s* = \\s* \" ([^\\n\"]{3,200}) \" \\s* / \\s* >\n",
+        "description": "A possibly-sensitive connection string in .NET app configuration was found. This may allow an attacker direct access to a database.\n",
+        "examples": [
+          "<add key=\"ConnectionString_B2B\" value=\"Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False\" />\n"
+        ],
+        "negative_examples": [
+          "<add key=\"FromEmailAddress\" value=\"killer.joe@example.com\"/>\n<add key=\"FromEmailPassword\" value=\"Prestigitariu$\"/>\n"
+        ],
+        "references": [
+          "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview",
+          "https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration"
+        ],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.generic.2",
       "structural_id": "ac1028729d342a4d0cf282377532d882a48795c6",
       "name": "Generic API Key",
@@ -1341,7 +1367,9 @@ expression: stdout
         "examples": [
           "<add key=\"FromEmailAddress\" value=\"killer.joe@example.com\"/>\n<add key=\"FromEmailPassword\" value=\"Prestigitariu$\"/>\n"
         ],
-        "negative_examples": [],
+        "negative_examples": [
+          "<add key=\"ConnectionString_B2B\" value=\"Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False\" />\n"
+        ],
         "references": [
           "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview",
           "https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration"
@@ -4033,7 +4061,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 139
+      "num_rules": 140
     },
     {
       "id": "np.assets",
