@@ -49,6 +49,7 @@ expression: stdout
  np.gcs.1             Google Cloud Storage Bucket                                   api, identifier 
  np.gcs.2             Google Cloud Storage Bucket                                   api, identifier 
  np.generic.1         Generic Secret                                                fuzzy, generic, secret 
+ np.generic.10        Connection String in .NET Configuration                       fuzzy, generic, secret 
  np.generic.2         Generic API Key                                               fuzzy, generic, secret 
  np.generic.3         Generic Username and Password                                 fuzzy, generic, secret 
  np.generic.4         Generic Username and Password                                 fuzzy, generic, secret 
@@ -56,7 +57,7 @@ expression: stdout
  np.generic.6         Generic Password                                              fuzzy, generic, secret 
  np.generic.7         Credentials in .NET System.Net.NetworkCredential              fuzzy, generic, secret 
  np.generic.8         Credentials in .NET System.DirectoryServices.DirectoryEntry   fuzzy, generic, secret 
- np.generic.9         Sensitive value in .NET configuration                         fuzzy, generic, secret 
+ np.generic.9         Sensitive Value in .NET Configuration                         fuzzy, generic, secret 
  np.github.1          GitHub Personal Access Token                                  api, secret 
  np.github.2          GitHub OAuth Access Token                                     api, secret 
  np.github.3          GitHub App Token                                              api, secret 
@@ -167,6 +168,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             139 
+ default      Nosey Parker default rules             140 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
