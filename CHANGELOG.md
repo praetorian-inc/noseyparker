@@ -23,6 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
 
 
+### Changes
+- The `Slack Bot Token` rule has been modified to match additional cases.
+
 ### Additions
 - New rules have been added:
 

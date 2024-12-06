@@ -7,7 +7,7 @@ rules:
 
 - name: Slack Bot Token
   id: np.slack.2
-  pattern: '\b(xoxb-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24})\b'
+  pattern: '\b(xoxb-[0-9]{10,12}-[0-9]{10,12}-[a-zA-Z0-9]{23,25})\b'
 
   references:
   - https://api.slack.com/authentication
@@ -18,8 +18,13 @@ rules:
   - api
   - secret
 
+  description: >
+    A Slack Bot Token was found.
+    An attacker could use the token to impersonate or control the corresponding Slack bot.
+
   examples:
   - 'SLACK_API_TOKEN=xoxb-893582989554-899326518131-JRHeVv1o9Cf99fwDpuortR2D'
+  - 'REM SET SLACK_TOKEN=xoxb-31446298938-537092655923-AeFmqVRV5nS3q028kmmHUFm3'
 
   negative_examples:
   - 'python log_announce.py xoxp-513768634356-513201028496-513937500594-185e196ace562dd6443b5d29b1d817c2 "This is a test run. Ignore"'
