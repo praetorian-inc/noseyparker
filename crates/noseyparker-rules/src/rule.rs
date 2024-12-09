@@ -87,10 +87,10 @@ impl RuleSyntax {
     ///     references: vec![],
     ///     categories: vec![],
     /// };
-    /// assert_eq!(r.as_anchored_regex().unwrap().as_str(), r"hello\s*world$");
+    /// assert_eq!(r.as_anchored_regex().unwrap().as_str(), r"hello\s*world\z");
     /// ```
     pub fn as_anchored_regex(&self) -> Result<regex::bytes::Regex> {
-        Self::build_regex(&format!("{}$", self.uncommented_pattern()))
+        Self::build_regex(&format!(r"{}\z", self.uncommented_pattern()))
     }
 
     /// Compute the content-based structural ID of this rule.
