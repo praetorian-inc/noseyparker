@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use regex::Regex;
 use std::collections::HashSet;
-use tracing::{error, error_span, info, warn};
+use tracing::{debug, error, error_span, info, warn};
 use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
 use noseyparker::rules_database::RulesDatabase;
@@ -269,12 +269,15 @@ fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
         }
     };
 
-    match hs_compile_pattern(&syntax.uncommented_pattern()) {
+    let uncommented_pattern = syntax.uncommented_pattern();
+    match hs_compile_pattern(&uncommented_pattern) {
         Err(e) => {
             error!("Vectorscan: failed to compile pattern: {e}");
             num_errors += 1;
         }
         Ok(db) => {
+            debug!("{} regex bytes -> {} vectorscan bytes", uncommented_pattern.len(), db.size()?);
+
             let mut scanner = vectorscan_rs::BlockScanner::new(&db)?;
 
             let mut num_succeeded = 0;
