@@ -22,9 +22,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
 
+### Fixes
+- The `Blynk Organization Client Credentials` rule now has a non-varying number of capture groups
 
 ### Changes
 - The `Slack Bot Token` rule has been modified to match additional cases.
+- The `rules check` command now more thoroughly checks the number of capture groups of each rule
 
 ### Additions
 - New rules have been added:

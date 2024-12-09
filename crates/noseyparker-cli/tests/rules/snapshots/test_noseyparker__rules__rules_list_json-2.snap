@@ -553,12 +553,12 @@ expression: stdout
     },
     {
       "id": "np.blynk.9",
-      "structural_id": "61027ac6a0bd9260330393485339d3012565b1b0",
+      "structural_id": "c6cec8b505fc62859dde26fd04c1656d6ab79286",
       "name": "Blynk Organization Client Credentials",
       "syntax": {
         "name": "Blynk Organization Client Credentials",
         "id": "np.blynk.9",
-        "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
+        "pattern": "(?x)\n\\b\n(oa2-client-id_[a-zA-Z0-9_\\-]{32})\n:([a-zA-Z0-9_\\-]{40})\n[\\s\\\\]*https://(?:fra1\\.|lon1\\.|ny3\\.|sgp1\\.|blr1\\.)*blynk\\.cloud/oauth2\n",
         "description": null,
         "examples": [
           "curl -X POST -u oa2-client-id_zmNtW-D0Toqpz4AZnBLCIlklBrz9ynU-:5uC5Y4Mcvdl5rB56rBmxnvB4DZgiIpcyTPbOoEWp https://fra1.blynk.cloud/oauth2/token?grant_type=client_credentials",

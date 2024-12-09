@@ -105,7 +105,7 @@ rules:
     \b
     (oa2-client-id_[a-zA-Z0-9_\-]{32})
     :([a-zA-Z0-9_\-]{40})
-    [\s\\]*https://(fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2
+    [\s\\]*https://(?:fra1\.|lon1\.|ny3\.|sgp1\.|blr1\.)*blynk\.cloud/oauth2
 
   categories:
   - api

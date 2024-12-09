@@ -223,9 +223,16 @@ fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
         }
         Ok(pat) => {
             // Check that the rule has at least one capture group
-            if pat.captures_len() <= 1 {
-                error!("Rule has no capture groups");
-                num_errors += 1;
+            match pat.static_captures_len() {
+                Some(0) => {
+                    error!("Rule has no capture groups");
+                    num_errors += 1;
+                }
+                Some(_len) => {}
+                None => {
+                    error!("Rule has a variable number of capture groups");
+                    num_errors += 1;
+                }
             }
 
             let mut num_succeeded = 0;
