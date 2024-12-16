@@ -4,6 +4,7 @@ This is the changelog for [Nosey Parker](https://github.com/praetorian-inc/nosey
 All notable changes to the project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Note that the use of semantic versioning applies to the command-line interface and output formats; the Rust crate APIs are considered an implementation detail at this point.
 
 
 ## Unreleased
