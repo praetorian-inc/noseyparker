@@ -171,6 +171,12 @@ expression: stdout
           "minimum": 0.0,
           "type": "integer"
         },
+        "num_redundant_matches": {
+          "description": "The number of matches in the group that are considered redundant",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
         "rule_name": {
           "description": "The name of the rule that detected each match",
           "type": "string"
@@ -197,6 +203,7 @@ expression: stdout
         "groups",
         "matches",
         "num_matches",
+        "num_redundant_matches",
         "rule_name",
         "rule_structural_id",
         "rule_text_id",
@@ -372,6 +379,13 @@ expression: stdout
         "provenance": {
           "$ref": "#/definitions/ProvenanceSet"
         },
+        "redundant_to": {
+          "description": "The match structural IDs that this match is considered redundant to",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "rule_name": {
           "description": "The name of the rule that produced this match",
           "type": "string"
@@ -424,6 +438,7 @@ expression: stdout
         "groups",
         "location",
         "provenance",
+        "redundant_to",
         "rule_name",
         "rule_structural_id",
         "rule_text_id",

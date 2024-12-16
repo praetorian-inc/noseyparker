@@ -24,4 +24,5 @@ pub struct FindingDataEntry {
     pub match_comment: Option<String>,
     pub match_score: Option<f64>,
     pub match_status: Option<Status>,
+    pub redundant_to: Vec<String>,
 }

@@ -6,7 +6,10 @@ use noseyparker::datastore::{Datastore, FindingSummary};
 use crate::args::{GlobalArgs, SummarizeArgs, SummarizeOutputFormat};
 use crate::reportable::Reportable;
 
-struct FindingSummaryReporter(FindingSummary);
+struct FindingSummaryReporter {
+    summary: FindingSummary,
+    simple: bool,
+}
 
 impl Reportable for FindingSummaryReporter {
     type Format = SummarizeOutputFormat;
@@ -22,23 +25,19 @@ impl Reportable for FindingSummaryReporter {
 
 impl FindingSummaryReporter {
     fn human_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let summary = &self.0;
         writeln!(writer)?;
-        let table = summary_table(summary);
         // FIXME: this doesn't preserve ANSI styling on the table
-        table.print(&mut writer)?;
+        summary_table(&self.summary, self.simple).print(&mut writer)?;
         Ok(())
     }
 
     fn json_format<W: std::io::Write>(&self, writer: W) -> Result<()> {
-        let summary = &self.0;
-        serde_json::to_writer_pretty(writer, &summary)?;
+        serde_json::to_writer_pretty(writer, &self.summary)?;
         Ok(())
     }
 
     fn jsonl_format<W: std::io::Write>(&self, mut writer: W) -> Result<()> {
-        let summary = &self.0;
-        for entry in summary.0.iter() {
+        for entry in self.summary.0.iter() {
             serde_json::to_writer(&mut writer, entry)?;
             writeln!(&mut writer)?;
         }
@@ -57,10 +56,14 @@ pub fn run(global_args: &GlobalArgs, args: &SummarizeArgs) -> Result<()> {
         .get_summary()
         .context("Failed to get finding summary")
         .unwrap();
-    FindingSummaryReporter(summary).report(args.output_args.format, output)
+    FindingSummaryReporter {
+        simple: false,
+        summary,
+    }
+    .report(args.output_args.format, output)
 }
 
-pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
+pub(crate) fn summary_table(summary: &FindingSummary, simple: bool) -> prettytable::Table {
     use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
     use prettytable::row;
 
@@ -70,30 +73,51 @@ pub fn summary_table(summary: &FindingSummary) -> prettytable::Table {
         .padding(1, 1)
         .build();
 
-    let mut table: prettytable::Table = summary
-        .0
-        .iter()
-        .map(|e| {
-            row![
-                 l -> &e.rule_name,
-                 r -> HumanCount(e.distinct_count.try_into().unwrap()),
-                 r -> HumanCount(e.total_count.try_into().unwrap()),
-                 r -> HumanCount(e.accept_count.try_into().unwrap()),
-                 r -> HumanCount(e.reject_count.try_into().unwrap()),
-                 r -> HumanCount(e.mixed_count.try_into().unwrap()),
-                 r -> HumanCount(e.unlabeled_count.try_into().unwrap()),
-            ]
-        })
-        .collect();
-    table.set_format(f);
-    table.set_titles(row![
-        lb -> "Rule",
-        cb -> "Findings",
-        cb -> "Matches",
-        cb -> "Accepted",
-        cb -> "Rejected",
-        cb -> "Mixed",
-        cb -> "Unlabeled",
-    ]);
-    table
+    if simple {
+        let mut table: prettytable::Table = summary
+            .0
+            .iter()
+            .map(|e| {
+                row![
+                     l -> &e.rule_name,
+                     r -> HumanCount(e.distinct_count.try_into().unwrap()),
+                     r -> HumanCount(e.total_count.try_into().unwrap()),
+                ]
+            })
+            .collect();
+        table.set_format(f);
+        table.set_titles(row![
+            lb -> "Rule",
+            cb -> "Findings",
+            cb -> "Matches",
+        ]);
+        table
+    } else {
+        let mut table: prettytable::Table = summary
+            .0
+            .iter()
+            .map(|e| {
+                row![
+                     l -> &e.rule_name,
+                     r -> HumanCount(e.distinct_count.try_into().unwrap()),
+                     r -> HumanCount(e.total_count.try_into().unwrap()),
+                     r -> HumanCount(e.accept_count.try_into().unwrap()),
+                     r -> HumanCount(e.reject_count.try_into().unwrap()),
+                     r -> HumanCount(e.mixed_count.try_into().unwrap()),
+                     r -> HumanCount(e.unlabeled_count.try_into().unwrap()),
+                ]
+            })
+            .collect();
+        table.set_format(f);
+        table.set_titles(row![
+            lb -> "Rule",
+            cb -> "Findings",
+            cb -> "Matches",
+            cb -> "Accepted",
+            cb -> "Rejected",
+            cb -> "Mixed",
+            cb -> "Unlabeled",
+        ]);
+        table
+    }
 }

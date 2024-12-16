@@ -549,7 +549,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         .unwrap()
         .context("Failed to enumerate inputs")?;
 
-    let (datastore, num_matches, num_new_matches) = datastore_thread
+    let (mut datastore, num_matches, num_new_matches) = datastore_thread
         .join()
         .unwrap()
         .context("Failed to save results to the datastore")?;
@@ -560,6 +560,8 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
     scan_res.context("Failed to scan inputs")?;
 
     progress.finish();
+
+    datastore.check_match_redundancies()?;
 
     // ---------------------------------------------------------------------------------------------
     // Finalize and report
@@ -614,7 +616,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
                 .get_summary()
                 .context("Failed to get finding summary")
                 .unwrap();
-            let table = crate::cmd_summarize::summary_table(&summary);
+            let table = crate::cmd_summarize::summary_table(&summary, /* simple= */ true);
             println!();
             table.print_tty(global_args.use_color(std::io::stdout()))?;
         }

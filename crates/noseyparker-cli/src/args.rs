@@ -1078,7 +1078,18 @@ pub struct ReportFilterArgs {
     )]
     pub max_matches: i64,
 
-    /// Only report findings that have a mean score of at least N.
+    /// Limit the number of provenance entries per match to at most N
+    ///
+    /// A negative value means "no limit".
+    #[arg(
+        long,
+        default_value_t = 3,
+        value_name = "N",
+        allow_negative_numbers = true
+    )]
+    pub max_provenance: i64,
+
+    /// Only report findings that have a mean score of at least N
     ///
     /// Scores are floating point numbers in the range [0, 1].
     /// Use the value `0` to disable this filtering.
@@ -1090,6 +1101,13 @@ pub struct ReportFilterArgs {
     /// Include only findings with the assigned status
     #[arg(long, value_name = "STATUS")]
     pub finding_status: Option<FindingStatus>,
+
+    /// Suppress redundant matches and findings
+    ///
+    /// A match is considered redundant to another if they overlap significantly within the same
+    /// blob and satisfy a handful of heuristics.
+    #[arg(long, default_value_t=true, action=ArgAction::Set, value_name="BOOL")]
+    pub suppress_redundant: bool,
 }
 
 #[derive(ValueEnum, Debug, Display, Clone, Copy)]

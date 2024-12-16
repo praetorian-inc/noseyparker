@@ -44,6 +44,7 @@ expression: json_output
             "path": "<ROOT>/input.txt"
           }
         ],
+        "redundant_to": [],
         "rule_name": "GitHub Personal Access Token",
         "rule_structural_id": "f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
         "rule_text_id": "np.github.1",
@@ -59,6 +60,7 @@ expression: json_output
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "GitHub Personal Access Token",
     "rule_structural_id": "f6c4fca24a1c7f275d51d2718a1585ca6e4ae664",
     "rule_text_id": "np.github.1",

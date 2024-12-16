@@ -59,6 +59,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS API Credentials",
         "rule_structural_id": "39d60c56d8a84ca6ab5999de8fea93657e3cae99",
         "rule_text_id": "np.aws.6",
@@ -74,6 +75,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS API Credentials",
     "rule_structural_id": "39d60c56d8a84ca6ab5999de8fea93657e3cae99",
     "rule_text_id": "np.aws.6",
@@ -133,6 +135,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS API Key",
         "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
         "rule_text_id": "np.aws.1",
@@ -148,6 +151,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS API Key",
     "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
     "rule_text_id": "np.aws.1",
@@ -207,6 +211,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS API Key",
         "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
         "rule_text_id": "np.aws.1",
@@ -222,80 +227,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
-    "rule_name": "AWS API Key",
-    "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
-    "rule_text_id": "np.aws.1",
-    "statuses": []
-  },
-  {
-    "comment": null,
-    "finding_id": "01e1da0929b8d870274f935862cc930ebabd08ab",
-    "groups": [
-      "QUtJQUpVWlBMVE5NWTJKU1hMWUE="
-    ],
-    "matches": [
-      {
-        "blob_id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
-        "blob_metadata": {
-          "charset": null,
-          "id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
-          "mime_essence": null,
-          "num_bytes": 523
-        },
-        "comment": null,
-        "groups": [
-          "QUtJQUpVWlBMVE5NWTJKU1hMWUE="
-        ],
-        "location": {
-          "offset_span": {
-            "end": 377,
-            "start": 357
-          },
-          "source_span": {
-            "end": {
-              "column": 27,
-              "line": 9
-            },
-            "start": {
-              "column": 8,
-              "line": 9
-            }
-          }
-        },
-        "provenance": [
-          {
-            "first_commit": {
-              "blob_path": "my.env",
-              "commit_metadata": {
-                "author_email": "david.ascher@gmail.com",
-                "author_name": "David Ascher",
-                "author_timestamp": "1378126038 +0100",
-                "commit_id": "9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a",
-                "committer_email": "david.ascher@gmail.com",
-                "committer_name": "David Ascher",
-                "committer_timestamp": "1378126038 +0100",
-                "message": "fix both 254 and 257\n"
-              }
-            },
-            "kind": "git_repo",
-            "repo_path": "<REPO>"
-          }
-        ],
-        "rule_name": "AWS API Key",
-        "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
-        "rule_text_id": "np.aws.1",
-        "score": null,
-        "snippet": {
-          "after": "\nS3_OBJECT_PREFIX=flathead\nS3_SECRET=DvHxHLMsO0fSnNqI82efq4sO8QefdMSz3l2q2Xk1\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
-          "before": " a janitor for arrogant rich people; so I clean their computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=",
-          "matching": "AKIAJUZPLTNMY2JSXLYA"
-        },
-        "status": null,
-        "structural_id": "a05586d6f6356a67f91b8d693b24f6a7e14a3b7e"
-      }
-    ],
-    "mean_score": null,
-    "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS API Key",
     "rule_structural_id": "1e4113c48323df7405840eede9a2be89a9797520",
     "rule_text_id": "np.aws.1",
@@ -355,6 +287,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS S3 Bucket",
         "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
         "rule_text_id": "np.s3.2",
@@ -370,6 +303,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS S3 Bucket",
     "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
     "rule_text_id": "np.s3.2",
@@ -429,6 +363,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS S3 Bucket",
         "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
         "rule_text_id": "np.s3.2",
@@ -488,6 +423,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS S3 Bucket",
         "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
         "rule_text_id": "np.s3.2",
@@ -547,6 +483,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS S3 Bucket",
         "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
         "rule_text_id": "np.s3.2",
@@ -562,6 +499,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 11,
+    "num_redundant_matches": 0,
     "rule_name": "AWS S3 Bucket",
     "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
     "rule_text_id": "np.s3.2",
@@ -621,6 +559,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS S3 Bucket",
         "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
         "rule_text_id": "np.s3.2",
@@ -636,6 +575,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS S3 Bucket",
     "rule_structural_id": "a09eba269cc7230d53713d75a4c04a5bad6044a5",
     "rule_text_id": "np.s3.2",
@@ -695,6 +635,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "AWS Secret Access Key",
         "rule_structural_id": "faaf86b6ca922630c4bf6425ee7fb688410c490b",
         "rule_text_id": "np.aws.2",
@@ -710,6 +651,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "AWS Secret Access Key",
     "rule_structural_id": "faaf86b6ca922630c4bf6425ee7fb688410c490b",
     "rule_text_id": "np.aws.2",
@@ -786,6 +728,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "Amazon Resource Name",
         "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
         "rule_text_id": "np.arn.1",
@@ -801,6 +744,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "Amazon Resource Name",
     "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
     "rule_text_id": "np.arn.1",
@@ -877,6 +821,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "Amazon Resource Name",
         "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
         "rule_text_id": "np.arn.1",
@@ -892,6 +837,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "Amazon Resource Name",
     "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
     "rule_text_id": "np.arn.1",
@@ -968,6 +914,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "Amazon Resource Name",
         "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
         "rule_text_id": "np.arn.1",
@@ -983,157 +930,10 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "Amazon Resource Name",
     "rule_structural_id": "9b6dbcab66d56d9b6b9b3abbe3269f0eefcfd7da",
     "rule_text_id": "np.arn.1",
-    "statuses": []
-  },
-  {
-    "comment": null,
-    "finding_id": "a2795aa2248cdcbf164e7ab85873e6044e508c16",
-    "groups": [
-      "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
-    ],
-    "matches": [
-      {
-        "blob_id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
-        "blob_metadata": {
-          "charset": null,
-          "id": "fba046509dc93ea42e3be8bf0f8bd181ae3ddb20",
-          "mime_essence": null,
-          "num_bytes": 523
-        },
-        "comment": null,
-        "groups": [
-          "RHZIeEhMTXNPMGZTbk5xSTgyZWZxNHNPOFFlZmRNU3ozbDJxMlhrMQ=="
-        ],
-        "location": {
-          "offset_span": {
-            "end": 454,
-            "start": 407
-          },
-          "source_span": {
-            "end": {
-              "column": 50,
-              "line": 11
-            },
-            "start": {
-              "column": 4,
-              "line": 11
-            }
-          }
-        },
-        "provenance": [
-          {
-            "first_commit": {
-              "blob_path": "my.env",
-              "commit_metadata": {
-                "author_email": "david.ascher@gmail.com",
-                "author_name": "David Ascher",
-                "author_timestamp": "1378126038 +0100",
-                "commit_id": "9ba2c5654ef78e49ce0173b81f1bcf8f25fcb36a",
-                "committer_email": "david.ascher@gmail.com",
-                "committer_name": "David Ascher",
-                "committer_timestamp": "1378126038 +0100",
-                "message": "fix both 254 and 257\n"
-              }
-            },
-            "kind": "git_repo",
-            "repo_path": "<REPO>"
-          }
-        ],
-        "rule_name": "Generic Secret",
-        "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
-        "rule_text_id": "np.generic.1",
-        "score": null,
-        "snippet": {
-          "after": "\nSHARE_URL_PREFIX=https://s3.amazonaws.com/com.mozillalabs.appmaker/\n",
-          "before": "eir computer keyboareds with the toilet brush\nPATH=bin:node_modules/.bin:/usr/local/bin:/usr/bin:/bin\nPORT=5002\nPUBLISH_HOST=appalot.me\nPUBLISH_HOST_PREFIX=http://\nS3_BUCKET=com.mozillalabs.appmaker\nS3_KEY=AKIAJUZPLTNMY2JSXLYA\nS3_OBJECT_PREFIX=flathead\nS3_",
-          "matching": "SECRET=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"
-        },
-        "status": null,
-        "structural_id": "c471047ad5c5cda2503dd11cde88ef5bad0e582b"
-      }
-    ],
-    "mean_score": null,
-    "num_matches": 1,
-    "rule_name": "Generic Secret",
-    "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
-    "rule_text_id": "np.generic.1",
-    "statuses": []
-  },
-  {
-    "comment": null,
-    "finding_id": "d1e7983992d3b49f7084eab3817a6c38e24c9e17",
-    "groups": [
-      "YUxjY2NMckhiZFd0Q25ONzVNS0k3Tm1iOU5aUUhaNWNTeHdPb20="
-    ],
-    "matches": [
-      {
-        "blob_id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
-        "blob_metadata": {
-          "charset": null,
-          "id": "4355c1c85f858cb4e2737b543ab87007ff71f48a",
-          "mime_essence": null,
-          "num_bytes": 1299
-        },
-        "comment": null,
-        "groups": [
-          "YUxjY2NMckhiZFd0Q25ONzVNS0k3Tm1iOU5aUUhaNWNTeHdPb20="
-        ],
-        "location": {
-          "offset_span": {
-            "end": 1187,
-            "start": 1138
-          },
-          "source_span": {
-            "end": {
-              "column": 1187,
-              "line": 1
-            },
-            "start": {
-              "column": 1139,
-              "line": 1
-            }
-          }
-        },
-        "provenance": [
-          {
-            "first_commit": {
-              "blob_path": "tmp.env",
-              "commit_metadata": {
-                "author_email": "david.ascher@gmail.com",
-                "author_name": "David Ascher",
-                "author_timestamp": "1384157507 -0800",
-                "commit_id": "efda07fbb9e3a2c172f07e441c29b6988f90fe2f",
-                "committer_email": "david.ascher@gmail.com",
-                "committer_name": "David Ascher",
-                "committer_timestamp": "1384157507 -0800",
-                "message": "cleanup\n"
-              }
-            },
-            "kind": "git_repo",
-            "repo_path": "<REPO>"
-          }
-        ],
-        "rule_name": "Generic Secret",
-        "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
-        "rule_text_id": "np.generic.1",
-        "score": null,
-        "snippet": {
-          "after": "\",\"DISPLAY\":\"/tmp/launch-xo2Dks/org.macosforge.xquartz:0\",\"SECURITYSESSIONID\":\"186a4\",\"_\":\"/usr/local/bin/node\"}",
-          "before": "eworks/JavaVM.framework/Versions/1.6/Home\",\"LANG\":\"en_CA.UTF-8\",\"BING_APP_ID\":\"yX/AEjX7Iz6zSSDo+rvTxDCvTEjuQDGC+fNdVgk6bZs=\",\"SHLVL\":\"2\",\"HOME\":\"/Users/davida\",\"PYTHONPATH\":\"/Users/davida/lib/python2.6/site-packages:\",\"LOGNAME\":\"davida\",\"PORT\":\"1234\",\"AWS_",
-          "matching": "SECRET\":\"D+aLcccLrHbdWtCnN75MKI7Nmb9NZQHZ5cSxwOom"
-        },
-        "status": null,
-        "structural_id": "865163cf72afa33926f788881c1d290419d175a4"
-      }
-    ],
-    "mean_score": null,
-    "num_matches": 1,
-    "rule_name": "Generic Secret",
-    "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
-    "rule_text_id": "np.generic.1",
     "statuses": []
   },
   {
@@ -1190,6 +990,7 @@ expression: read_json(report_json.path()).unwrap()
             "repo_path": "<REPO>"
           }
         ],
+        "redundant_to": [],
         "rule_name": "Generic Secret",
         "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
         "rule_text_id": "np.generic.1",
@@ -1205,6 +1006,7 @@ expression: read_json(report_json.path()).unwrap()
     ],
     "mean_score": null,
     "num_matches": 1,
+    "num_redundant_matches": 0,
     "rule_name": "Generic Secret",
     "rule_structural_id": "3a961eccebcf7356ad803ec8e1a711d01801b9d7",
     "rule_text_id": "np.generic.1",

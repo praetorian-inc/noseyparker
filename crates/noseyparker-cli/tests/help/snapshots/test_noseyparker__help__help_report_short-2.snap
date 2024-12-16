@@ -11,11 +11,15 @@ Options:
   -h, --help              Print help (see more with '--help')
 
 Filtering Options:
-      --max-matches <N>          Limit the number of matches per finding to at most N [default: 3]
-      --min-score <SCORE>        Only report findings that have a mean score of at least N [default:
-                                 0.05]
-      --finding-status <STATUS>  Include only findings with the assigned status [possible values:
-                                 accept, reject, mixed, null]
+      --max-matches <N>            Limit the number of matches per finding to at most N [default: 3]
+      --max-provenance <N>         Limit the number of provenance entries per match to at most N
+                                   [default: 3]
+      --min-score <SCORE>          Only report findings that have a mean score of at least N
+                                   [default: 0.05]
+      --finding-status <STATUS>    Include only findings with the assigned status [possible values:
+                                   accept, reject, mixed, null]
+      --suppress-redundant <BOOL>  Suppress redundant matches and findings [default: true] [possible
+                                   values: true, false]
 
 Output Options:
   -o, --output <PATH>    Write output to the specified path

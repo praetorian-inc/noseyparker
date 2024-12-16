@@ -23,14 +23,30 @@ Note that the use of semantic versioning applies to the command-line interface a
 
   This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
 
+- The datastore schema has changed in order to support a new finding deduplication mechanism ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+  Datastores from previous versions of Nosey Parker are not supported.
+
+- The `report` command now reports at most 3 provenenance entries per maych by default ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+  This can be overridden with the new `--max-provenance=N` option.
+
+- The `report` command now includes finding and match IDs in its default "human" format ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+
+- The `scan` command now prints a simplified summary at the end, without the unpopulated status columns ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+
 ### Fixes
 - The `Blynk Organization Client Credentials` rule now has a non-varying number of capture groups
+
+- Fixed a typo in the `report` command that could cause a diagnostic message about suppressed matches to be incorrect ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
 
 ### Changes
 - The `Slack Bot Token` rule has been modified to match additional cases.
 - The `rules check` command now more thoroughly checks the number of capture groups of each rule
 
 ### Additions
+- A new finding deduplication mechanism is enabled by default when reporting ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+  This mechanism suppresses matches and findings that overlap with others if they are less specific.
+  For example, a single blob might contain text that matches _both_ the `HTTP Bearer Token` and `Slack User Token` rules; the less-specific `HTTP Bearer Token` match will be suppressed.
+
 - New rules have been added:
 
   - `Connection String in .NET Configuration` ([#238](https://github.com/praetorian-inc/noseyparker/pull/238))
@@ -43,6 +59,10 @@ Note that the use of semantic versioning applies to the command-line interface a
   This is intended to be a message for human consumption that indicates (a) what was detected and (b) how an attacker might use it.
   Only a few rules have descriptions so far.
   Use `rules list -f json` to see.
+
+- The `report` command has a new `--max-provenance=N` option that limits the number of provenance entries displayed for any single match ([#237](https://github.com/praetorian-inc/noseyparker/pull/237)).
+  A negative number means "no limit".
+  The default value is 3.
 
 
 ## [v0.21.0](https://github.com/praetorian-inc/noseyparker/releases/v0.21.0) (2024-11-20)
