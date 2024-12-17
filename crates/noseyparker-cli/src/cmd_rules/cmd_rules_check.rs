@@ -224,7 +224,9 @@ fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
         Ok(pat) => {
             // Check that the rule has at least one capture group
             match pat.static_captures_len() {
-                Some(0) => {
+                // the default is a single capture group for the entire match
+                // not sure if 0 can actually happen
+                Some(0) | Some(1) => {
                     error!("Rule has no capture groups");
                     num_errors += 1;
                 }

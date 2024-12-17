@@ -36,6 +36,7 @@ rules:
       it "sets the relation to nil" do
         eye.eyeable.should be_nill
       end
+  - '<add key="ClearTextPassword" value="eyJ0eXAiOiAiVENWMiJ9.RkNWLXdXS3M1RVBfencxM4A0WmJzdVlCQzFj.OGY1OWRkNGMtYTUxYS04ZDYwLWFiZGYtZWE5MWFhZWJiODhh" />'
 
 
 # This kind of thing is often seen in spring config files and other configs
