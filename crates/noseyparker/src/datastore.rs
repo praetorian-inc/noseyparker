@@ -995,6 +995,10 @@ impl Datastore {
         metadata: &BlobMetadata,
         max_provenance_entries: Option<usize>,
     ) -> Result<ProvenanceSet> {
+        let max_provenance_entries: i64 = match max_provenance_entries {
+            Some(m) => m.try_into().expect("max_matches should be convertible"),
+            None => -1,
+        };
         let mut get = self.conn.prepare_cached(indoc! {r#"
             select provenance
             from blob_provenance_denorm

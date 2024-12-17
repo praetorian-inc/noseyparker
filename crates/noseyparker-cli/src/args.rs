@@ -987,7 +987,7 @@ pub struct ContentFilteringArgs {
     /// Do not scan files larger than the specified size
     ///
     /// The value is parsed as a floating point literal, and hence fractional values can be supplied.
-    /// A negative value means "no limit".
+    /// A non-positive value means "no limit".
     /// Note that scanning requires reading the entire contents of each file into memory, so using an excessively large limit may be problematic.
     #[arg(
         long("max-file-size"),
@@ -1069,7 +1069,7 @@ pub struct ReportArgs {
 pub struct ReportFilterArgs {
     /// Limit the number of matches per finding to at most N
     ///
-    /// A negative value means "no limit".
+    /// A non-positive value means "no limit".
     #[arg(
         long,
         default_value_t = 3,
@@ -1080,7 +1080,7 @@ pub struct ReportFilterArgs {
 
     /// Limit the number of provenance entries per match to at most N
     ///
-    /// A negative value means "no limit".
+    /// A non-positive value means "no limit".
     #[arg(
         long,
         default_value_t = 3,

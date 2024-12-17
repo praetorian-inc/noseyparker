@@ -20,14 +20,14 @@ Filtering Options:
       --max-matches <N>
           Limit the number of matches per finding to at most N
           
-          A negative value means "no limit".
+          A non-positive value means "no limit".
           
           [default: 3]
 
       --max-provenance <N>
           Limit the number of provenance entries per match to at most N
           
-          A negative value means "no limit".
+          A non-positive value means "no limit".
           
           [default: 3]
 
