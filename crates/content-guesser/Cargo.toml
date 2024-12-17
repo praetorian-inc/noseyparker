@@ -21,4 +21,4 @@ path = "src/lib.rs"
 magic = { version = "0.16", optional = true }
 mime_guess = "2"
 mime = "0.3"
-thiserror = "1"
+thiserror = "2"

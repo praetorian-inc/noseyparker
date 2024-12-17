@@ -33,7 +33,7 @@ bstring-serde = { path = "../bstring-serde" }
 chrono = { version = "0.4", default-features = false, features = ["std"], optional = true }
 console = "0.15"
 fixedbitset = "0.5"
-gix = { version = "0.67", features = ["max-performance", "serde"] }
+gix = { version = "0.68", features = ["max-performance", "serde"] }
 hex = "0.4"
 include_dir = { version = "0.7", features = ["glob"] }
 input-enumerator = { path = "../input-enumerator" }
@@ -51,7 +51,7 @@ secrecy = { version = "0.10.0", optional = true }
 smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = { version = "1.0" }
-thiserror = "1"
+thiserror = "2"
 tokio = { version = "1.23", optional = true }
 tracing = "0.1"
 url = "2.3"
