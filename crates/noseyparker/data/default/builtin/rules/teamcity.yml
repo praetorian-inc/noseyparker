@@ -1,0 +1,28 @@
+rules:
+
+- name: TeamCity API Token
+
+  id: np.teamcity.1
+
+  # This is a JWT-like format that always seems to have the same `{"typ": "TCV2"}` header.
+  # Note that the payload part does not decode as a JSON object, and hence makes this an invalid JWT.
+  pattern: |
+    (?x)
+    \b (
+    eyJ0eXAiOiAiVENWMiJ9             (?# decodes to `{"typ": "TCV2"}` )
+    \.
+    [A-Za-z0-9_-]{36}
+    \.
+    [A-Za-z0-9_-]{48}
+    ) (?: [^A-Za-z0-9_-] | $ )
+
+  examples:
+  - '<add key="ClearTextPassword" value="eyJ0eXAiOiAiVENWMiJ9.RkNWLXdXS3M1RVBfencxM4A0WmJzdVlCQzFj.OGY1OWRkNGMtYTUxYS04ZDYwLWFiZGYtZWE5MWFhZWJiODhh" />'
+
+  references:
+  - https://www.jetbrains.com/help/teamcity/rest/teamcity-rest-api-documentation.html
+
+  description: >
+    A TeamCity REST API token was found.
+    TeamCity is a CI/CD platform from JetBrains.
+    An attacker may be able to use this token to access source code, secrets, and build resources, enabling a supply chain attack.
