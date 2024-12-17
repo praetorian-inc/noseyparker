@@ -23,7 +23,7 @@ lazy_static! {
     static ref RAM_GB: Option<f64> = {
         if sysinfo::IS_SUPPORTED_SYSTEM {
             use sysinfo::{System,RefreshKind,MemoryRefreshKind};
-            let s = System::new_with_specifics(RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()));
+            let s = System::new_with_specifics(RefreshKind::default().with_memory(MemoryRefreshKind::default().with_ram()));
             Some(s.total_memory() as f64 / 1024.0 / 1024.0 / 1024.0)
         } else {
             None

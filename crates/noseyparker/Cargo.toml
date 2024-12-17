@@ -51,7 +51,7 @@ secrecy = { version = "0.10.0", optional = true }
 smallvec = { version = "1", features = ["const_generics", "const_new", "union"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = { version = "1.0" }
-thiserror = "1"
+thiserror = "2"
 tokio = { version = "1.23", optional = true }
 tracing = "0.1"
 url = "2.3"
