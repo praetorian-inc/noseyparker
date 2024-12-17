@@ -28,6 +28,9 @@ pub struct FindingMetadata {
     /// The number of matches in the group
     pub num_matches: usize,
 
+    /// The number of matches in the group that are considered redundant
+    pub num_redundant_matches: usize,
+
     /// The unique statuses assigned to matches in the group
     pub statuses: Statuses,
 

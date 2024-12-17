@@ -14,8 +14,8 @@ use crate::provenance::Provenance;
 use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
-const CURRENT_SCHEMA_VERSION: u64 = 60;
-const CURRENT_SCHEMA: &str = include_str!("datastore/schema_60.sql");
+const CURRENT_SCHEMA_VERSION: u64 = 70;
+const CURRENT_SCHEMA: &str = include_str!("datastore/schema_70.sql");
 
 pub mod annotation;
 pub mod finding_data;
@@ -111,7 +111,7 @@ impl Datastore {
 
         let mut ds = Self::open_impl(root_dir, cache_size)?;
 
-        ds.migrate_0_60()
+        ds.migrate_0_70()
             .context("Failed to initialize database schema")?;
 
         Self::open(root_dir, cache_size)
@@ -528,68 +528,16 @@ impl Datastore {
     pub fn get_summary(&self) -> Result<FindingSummary> {
         let _span = debug_span!("Datastore::get_summary", "{}", self.root_dir.display()).entered();
 
-        // XXX this should be moved into a view in the datastore (probably should replace
-        // `finding_summary`), but it is inlined here instead to avoid a schema migration for now
-        let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            with
-                -- table of relevant per-match information
-                m as (
-                    select
-                        f.finding_id finding_id,
-                        r.name rule_name,
-                        r.structural_id rule_structural_id,
-                        ms.status match_status
-                    from
-                        finding f
-                        inner join match m on (m.finding_id = f.id)
-                        inner join rule r on (f.rule_id = r.id)
-                        left outer join match_status ms on (m.id = ms.match_id)
-                ),
-                -- summarize per-match information by finding
-                f as (
-                    select
-                        finding_id,
-                        rule_name,
-                        rule_structural_id,
-                        case group_concat(distinct match_status)
-                            when 'accept' then 'accept'
-                            when 'reject' then 'reject'
-                            when 'accept,reject' then 'mixed'
-                            when 'reject,accept' then 'mixed'
-                        end finding_status,
-                        count(*) num_matches,
-                        sum(case when match_status = 'accept' then 1 else 0 end) num_accept_matches,
-                        sum(case when match_status = 'reject' then 1 else 0 end) num_reject_matches,
-                        sum(case when match_status is null then 1 else 0 end) num_unlabeled_matches
-                    from m
-                    group by finding_id
-                )
-            select
-                rule_name,
-                -- rule_structural_id,
-                count(distinct finding_id) total_findings,
-                sum(num_matches) total_matches,
-                sum(case when finding_status = 'accept' then 1 else 0 end) accept_findings,
-                sum(case when finding_status = 'reject' then 1 else 0 end) reject_findings,
-                sum(case when finding_status = 'mixed' then 1 else 0 end) mixed_findings,
-                sum(case when finding_status is null then 1 else 0 end) unlabeled_findings
-                -- ,
-                -- sum(num_accept_matches) accept_matches,
-                -- sum(num_reject_matches) reject_matches,
-                -- sum(num_unlabeled_matches) unlabeled_matches
-            from
-                f
-            group by rule_name
-        "#})?;
+        let mut stmt = self.conn.prepare_cached("select * from finding_summary")?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingSummaryEntry {
                 rule_name: row.get(0)?,
-                distinct_count: row.get(1)?,
-                total_count: row.get(2)?,
-                accept_count: row.get(3)?,
-                reject_count: row.get(4)?,
-                mixed_count: row.get(5)?,
-                unlabeled_count: row.get(6)?,
+                distinct_count: row.get(2)?,
+                total_count: row.get(3)?,
+                accept_count: row.get(4)?,
+                reject_count: row.get(5)?,
+                mixed_count: row.get(6)?,
+                unlabeled_count: row.get(7)?,
             })
         })?;
         let es = collect(entries)?;
@@ -861,24 +809,37 @@ impl Datastore {
     }
 
     /// Get metadata for all groups of identical matches recorded within this datastore.
-    pub fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
+    pub fn get_finding_metadata(
+        &self,
+        suppress_redundant_matches: bool,
+    ) -> Result<Vec<FindingMetadata>> {
         let _span =
             debug_span!("Datastore::get_finding_metadata", "{}", self.root_dir.display()).entered();
 
-        let mut stmt = self.conn.prepare_cached(indoc! {r#"
-            select
-                finding_id,
-                groups,
-                rule_structural_id,
-                rule_text_id,
-                rule_name,
-                num_matches,
-                comment,
-                match_statuses,
-                mean_score
-            from finding_denorm
-            order by rule_name, rule_structural_id, mean_score desc, groups
-        "#})?;
+        let query_str = format!(
+            indoc! {r#"
+                select
+                    finding_id,
+                    groups,
+                    rule_structural_id,
+                    rule_text_id,
+                    rule_name,
+                    num_matches,
+                    num_redundant_matches,
+                    comment,
+                    match_statuses,
+                    mean_score
+                from finding_denorm
+                where {}
+                order by rule_name, rule_structural_id, mean_score desc, groups
+            "#},
+            if suppress_redundant_matches {
+                "num_matches != num_redundant_matches"
+            } else {
+                "true"
+            }
+        );
+        let mut stmt = self.conn.prepare_cached(&query_str)?;
         let entries = stmt.query_map((), |row| {
             Ok(FindingMetadata {
                 finding_id: row.get(0)?,
@@ -887,31 +848,44 @@ impl Datastore {
                 rule_text_id: row.get(3)?,
                 rule_name: row.get(4)?,
                 num_matches: row.get(5)?,
-                comment: row.get(6)?,
-                statuses: row.get(7)?,
-                mean_score: row.get(8)?,
+                num_redundant_matches: row.get(6)?,
+                comment: row.get(7)?,
+                statuses: row.get(8)?,
+                mean_score: row.get(9)?,
             })
         })?;
         collect(entries)
     }
 
-    /// Get up to `limit` matches that belong to the finding with the given finding metadata.
+    /// Get up to `max_matches` matches that belong to the finding with the given finding metadata.
+    /// Each match will have up to `max_provenance_entries`.
     ///
-    /// A value of `None` means "no limit".
+    /// A value of `None` for either limit value means "no limit".
     pub fn get_finding_data(
         &self,
         metadata: &FindingMetadata,
-        limit: Option<usize>,
+        max_matches: Option<usize>,
+        max_provenance_entries: Option<usize>,
+        suppress_redundant_matches: bool,
     ) -> Result<FindingData> {
         let _span =
             debug_span!("Datastore::get_finding_data", "{}", self.root_dir.display()).entered();
 
-        let match_limit: i64 = match limit {
-            Some(limit) => limit.try_into().expect("limit should be convertible"),
+        let match_limit: i64 = match max_matches {
+            Some(max_matches) => max_matches
+                .try_into()
+                .expect("max_matches should be convertible"),
             None => -1,
         };
 
-        let mut get_blob_metadata_and_match = self.conn.prepare_cached(indoc! {r#"
+        let suppress_redundant = if suppress_redundant_matches {
+            "m.id not in (select match_id from match_redundancy)"
+        } else {
+            "true"
+        };
+
+        let query_str = format!(
+            indoc! {r#"
             select
                 m.blob_id,
                 m.start_byte,
@@ -939,10 +913,14 @@ impl Datastore {
 
             from match_denorm m
             inner join blob_denorm b on (m.blob_id = b.blob_id)
-            where m.groups = ?1 and m.rule_structural_id = ?2
+            where m.groups = ?1 and m.rule_structural_id = ?2 and {}
             order by m.blob_id, m.start_byte, m.end_byte
             limit ?3
-        "#})?;
+        "#},
+            suppress_redundant
+        );
+
+        let mut get_blob_metadata_and_match = self.conn.prepare_cached(&query_str)?;
 
         let entries = get_blob_metadata_and_match.query_map(
             (&metadata.groups, &metadata.rule_structural_id, match_limit),
@@ -996,7 +974,8 @@ impl Datastore {
         let mut es = Vec::new();
         for e in entries {
             let (md, id, m, match_score, match_comment, match_status) = e?;
-            let ps = self.get_provenance_set(&md)?;
+            let ps = self.get_provenance_set(&md, max_provenance_entries)?;
+            let redundant_to = self.get_redundant_to(id)?;
             es.push(FindingDataEntry {
                 provenance: ps,
                 blob_metadata: md,
@@ -1005,26 +984,51 @@ impl Datastore {
                 match_comment,
                 match_score,
                 match_status,
+                redundant_to,
             });
         }
         Ok(es)
     }
 
-    fn get_provenance_set(&self, metadata: &BlobMetadata) -> Result<ProvenanceSet> {
+    fn get_provenance_set(
+        &self,
+        metadata: &BlobMetadata,
+        max_provenance_entries: Option<usize>,
+    ) -> Result<ProvenanceSet> {
+        let max_provenance_entries: i64 = match max_provenance_entries {
+            Some(m) => m.try_into().expect("max_matches should be convertible"),
+            None => -1,
+        };
         let mut get = self.conn.prepare_cached(indoc! {r#"
             select provenance
             from blob_provenance_denorm
             where blob_id = ?
             order by provenance
+            limit ?
         "#})?;
 
-        let ps = get.query_map((metadata.id,), val_from_row)?;
+        let ps = get.query_map((metadata.id, max_provenance_entries), val_from_row)?;
 
         let results = collect(ps)?;
         match ProvenanceSet::try_from_iter(results) {
             Some(ps) => Ok(ps),
             None => bail!("At least 1 provenance entry must be provided"),
         }
+    }
+
+    /// Get the structural IDs of matches that the given one is considered redundant to
+    fn get_redundant_to(&self, match_id: MatchIdInt) -> Result<Vec<String>> {
+        let mut get = self.conn.prepare_cached(indoc! {r#"
+            select m.structural_id
+            from
+                match_redundancy mr
+                inner join match m on (mr.redundant_to = m.id)
+            where mr.match_id = ?
+            order by m.structural_id
+        "#})?;
+
+        let ids = get.query_map((match_id.0,), val_from_row)?;
+        collect(ids)
     }
 
     fn open_impl(root_dir: &Path, cache_size: i64) -> Result<Self> {
@@ -1060,8 +1064,8 @@ impl Datastore {
         Ok(())
     }
 
-    fn migrate_0_60(&mut self) -> Result<()> {
-        let _span = debug_span!("Datastore::migrate_0_60", "{}", self.root_dir.display()).entered();
+    fn migrate_0_70(&mut self) -> Result<()> {
+        let _span = debug_span!("Datastore::migrate_0_70", "{}", self.root_dir.display()).entered();
         let tx = self.conn.transaction()?;
 
         let get_user_version = || -> Result<u64> {
@@ -1095,6 +1099,85 @@ impl Datastore {
 
         assert_eq!(get_user_version()?, CURRENT_SCHEMA_VERSION);
         tx.commit()?;
+
+        Ok(())
+    }
+
+    /// Analyze the recorded matches to determine which matches are redundant.
+    /// This populates the `match_redundancy` table.
+    /// This information is needed for suppressing redundant matches at reporting time.
+    pub fn check_match_redundancies(&mut self) -> Result<()> {
+        self.conn.execute(indoc! {r#"
+            insert into match_redundancy (match_id, redundant_to)
+            with
+                match_overlap_metadata as (
+                    select
+                        match.id,
+                        finding.rule_id in generic_rule_id generic,
+                        finding.rule_id in fuzzy_rule_id fuzzy,
+                        rpl.length pattern_len,
+                        json_array_length(finding.groups) num_groups,
+                        length(finding.groups) groups_len,
+                        match.end_byte - match.start_byte match_len
+                    from
+                        match
+                        inner join finding on (match.finding_id = finding.id)
+                        inner join rule_pattern_length rpl on (finding.rule_id = rpl.rule_id)
+                ),
+
+                ordered_overlapping_match_ids as (
+                    select m1.id m1_id, m2.id m2_id
+                    from
+                        match m1
+                        inner join match m2 on (
+                                m1.blob_id = m2.blob_id
+                            and m1.id != m2.id
+                            and (m1.start_byte <= m2.start_byte and m2.start_byte < m1.end_byte)
+                            -- require at least 20% of both matches to be overlapping to be considered as an overlap
+                            and (cast(m1.end_byte - m2.start_byte as real) / cast(m1.end_byte - m1.start_byte as real) >= 0.20)
+                            and (cast(m1.end_byte - m2.start_byte as real) / cast(m2.end_byte - m2.start_byte as real) >= 0.20)
+                        )
+                ),
+
+                overlapping_match_ids (m1_id, m2_id) as (
+                    select distinct * from (
+                        select m1_id, m2_id from ordered_overlapping_match_ids
+                            union all
+                        select m2_id, m1_id from ordered_overlapping_match_ids
+                    )
+                )
+
+            select
+                o.m1_id,
+                o.m2_id
+            from
+                overlapping_match_ids o
+                inner join match_overlap_metadata md1 on (o.m1_id = md1.id)
+                inner join match_overlap_metadata md2 on (o.m2_id = md2.id)
+            where
+                -- a generic match can only replace another generic one
+                (not md2.generic or md1.generic)
+                    and
+                -- a match can only replace one if it has at least as many groups
+                (md2.num_groups >= md1.num_groups)
+                    and
+                (
+                    -- a match can replace another with the same number of groups if any of the following apply:
+                    -- * its group content is longer
+                    -- * it is not fuzzy
+                    -- * its group length is the same but it matches a shorter amount of overall input
+                    -- * it has a longer pattern
+                    not (md2.num_groups = md1.num_groups) or (
+                        md2.groups_len > md1.groups_len
+                            or
+                        not md2.fuzzy
+                            or
+                        (md2.groups_len = md1.groups_len and md2.match_len < md1.match_len)
+                            or
+                        md2.pattern_len > md1.pattern_len
+                    )
+                )
+        "#}, [])?;
 
         Ok(())
     }

@@ -2,11 +2,11 @@
 source: crates/noseyparker-cli/tests/scan/basic/mod.rs
 expression: stdout
 ---
-Finding 1/1
+Finding 1/1 (id d551329ba5578559646aa49467be47e9d496578d)
 Rule: GitHub Personal Access Token
 Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
-    Occurrence 1/1
+    Match 1/1 (id 155cdfa3e16d6abc09ecb8a2f659c2f84f7b91fc)
     Extended Provenance: {"filename":"input.txt"}
     Blob:  <BLOB>
     Lines: 3:12-3:51

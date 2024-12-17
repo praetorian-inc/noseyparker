@@ -37,6 +37,12 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
         Some(args.filter_args.max_matches.try_into().unwrap())
     };
 
+    let max_provenance = if args.filter_args.max_provenance <= 0 {
+        None
+    } else {
+        Some(args.filter_args.max_provenance.try_into().unwrap())
+    };
+
     let min_score = if args.filter_args.min_score <= 0.0 {
         None
     } else {
@@ -57,6 +63,8 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
     let reporter = DetailsReporter {
         datastore,
         max_matches,
+        max_provenance,
+        suppress_redundant: args.filter_args.suppress_redundant,
         min_score,
         finding_status: args.filter_args.finding_status,
         styles,
@@ -67,7 +75,9 @@ pub fn run(global_args: &GlobalArgs, args: &ReportArgs) -> Result<()> {
 struct DetailsReporter {
     datastore: Datastore,
     max_matches: Option<usize>,
+    max_provenance: Option<usize>,
     min_score: Option<f64>,
+    suppress_redundant: bool,
     finding_status: Option<FindingStatus>,
     styles: Styles,
 }
@@ -89,66 +99,43 @@ impl DetailsReporter {
     fn get_finding_metadata(&self) -> Result<Vec<FindingMetadata>> {
         let datastore = &self.datastore;
         let mut group_metadata = datastore
-            .get_finding_metadata()
+            .get_finding_metadata(self.suppress_redundant)
             .context("Failed to get match group metadata from datastore")?;
-
-        // How many findings were suppressed due to their status not matching?
-        let mut num_suppressed_for_status: usize = 0;
-
-        // How many findings were suppressed due to their status not matching?
-        let mut num_suppressed_for_score: usize = 0;
 
         // Suppress findings with non-matching status
         if let Some(status) = self.finding_status {
-            group_metadata.retain(|md| {
-                if statuses_match(status, md.statuses.0.as_slice()) {
-                    true
-                } else {
-                    num_suppressed_for_status += 1;
-                    false
-                }
-            })
-        }
+            let old_len = group_metadata.len();
+            group_metadata.retain(|md| statuses_match(status, md.statuses.0.as_slice()));
+            let num_suppressed = old_len - group_metadata.len();
 
-        // Suppress findings with non-matching score
-        if let Some(min_score) = self.min_score {
-            group_metadata.retain(|md| match md.mean_score {
-                Some(mean_score) if mean_score < min_score => {
-                    num_suppressed_for_score += 1;
-                    false
-                }
-                _ => true,
-            })
-        }
-
-        if num_suppressed_for_status > 0 {
-            let finding_status = self.finding_status.unwrap();
-
-            if num_suppressed_for_status == 1 {
+            if num_suppressed == 1 {
                 info!(
-                    "Note: 1 finding with status not matching {finding_status} was suppressed; \
-                       rerun without `--finding-status={finding_status}` to show it"
+                    "Note: 1 finding with status not matching {status} was suppressed; \
+                       rerun without `--finding-status={status}` to show it"
                 );
-            } else {
+            } else if num_suppressed > 1 {
                 info!(
-                    "Note: {num_suppressed_for_status} findings with status not matching \
-                       `{finding_status}` were suppressed; \
-                       rerun without `--finding-status={finding_status}` to show them"
+                    "Note: {num_suppressed} findings with status not matching \
+                       `{status}` were suppressed; \
+                       rerun without `--finding-status={status}` to show them"
                 );
             }
         }
 
-        if num_suppressed_for_score > 0 {
-            let min_score = self.min_score.unwrap();
+        // Suppress findings with non-matching score
+        if let Some(min_score) = self.min_score {
+            let old_len = group_metadata.len();
+            group_metadata.retain(|md| md.mean_score.map(|s| s >= min_score).unwrap_or(true));
+            let num_suppressed = old_len - group_metadata.len();
 
-            if num_suppressed_for_status == 1 {
+            if num_suppressed == 1 {
                 info!(
                     "Note: 1 finding with meanscore less than {min_score} was suppressed; \
                        rerun with `--min-score=0` to show it"
                 );
-            } else {
+            } else if num_suppressed > 1 {
                 info!(
-                    "Note: {num_suppressed_for_score} findings with mean score less than \
+                    "Note: {num_suppressed} findings with mean score less than \
                        {min_score} were suppressed; \
                        rerun with `--min-score=0` to show them"
                 );
@@ -162,7 +149,12 @@ impl DetailsReporter {
     fn get_matches(&self, metadata: &FindingMetadata) -> Result<Vec<ReportMatch>> {
         Ok(self
             .datastore
-            .get_finding_data(metadata, self.max_matches)
+            .get_finding_data(
+                metadata,
+                self.max_matches,
+                self.max_provenance,
+                self.suppress_redundant,
+            )
             .with_context(|| format!("Failed to get matches for finding {metadata:?}"))
             .expect("should be able to find get matches for finding")
             .into_iter()
@@ -180,6 +172,10 @@ impl DetailsReporter {
 
     fn style_heading<D>(&self, val: D) -> StyledObject<D> {
         self.styles.style_heading.apply_to(val)
+    }
+
+    fn style_id<D>(&self, val: D) -> StyledObject<D> {
+        self.styles.style_id.apply_to(val)
     }
 
     fn style_match<D>(&self, val: D) -> StyledObject<D> {
@@ -286,6 +282,9 @@ struct ReportMatch {
 
     /// An optional status assigned to the match
     status: Option<Status>,
+
+    /// The match structural IDs that this match is considered redundant to
+    redundant_to: Vec<String>,
 }
 
 impl From<FindingDataEntry> for ReportMatch {
@@ -297,6 +296,7 @@ impl From<FindingDataEntry> for ReportMatch {
             score: e.match_score,
             comment: e.match_comment,
             status: e.match_status,
+            redundant_to: e.redundant_to,
         }
     }
 }

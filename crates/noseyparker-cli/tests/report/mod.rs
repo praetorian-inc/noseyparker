@@ -1,4 +1,6 @@
 use super::*;
+
+use indoc::indoc;
 pub use pretty_assertions::{assert_eq, assert_ne};
 
 #[test]
@@ -125,6 +127,95 @@ fn report_finding_status() {
     let findings = read_json_file(output.path());
     assert!(findings.is_array());
     assert_eq!(findings.as_array().unwrap().len(), 1);
+}
+
+#[test]
+fn max_provenance_exceeded() {
+    let scan_env = ScanEnv::new();
+
+    // 4 inputs with the same content
+    let i1 = scan_env.input_file_with_secret("i1.txt");
+    let i2 = scan_env.input_file_with_secret("i2.txt");
+    let i3 = scan_env.input_file_with_secret("i3.txt");
+    let i4 = scan_env.input_file_with_secret("i4.txt");
+
+    noseyparker_success!(
+        "scan",
+        "-d",
+        scan_env.dspath(),
+        i1.path(),
+        i2.path(),
+        i3.path(),
+        i4.path()
+    )
+    .stdout(match_scan_stats("416 B", 4, 1, 1));
+
+    // default setting truncates provenance to 3
+    {
+        let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
+        let output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+        let ps = &output[0]["matches"][0]["provenance"];
+        assert!(ps.is_array(), "not an array: {ps:?}");
+        assert_eq!(ps.as_array().unwrap().len(), 3);
+    }
+
+    // unlimited setting gives us 4
+    for limit in ["-1", "0"] {
+        let cmd = noseyparker_success!(
+            "report",
+            "-d",
+            scan_env.dspath(),
+            "--format=json",
+            "--max-provenance",
+            limit
+        );
+        let output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+        let ps = &output[0]["matches"][0]["provenance"];
+        assert!(ps.is_array(), "not an array: {ps:?}");
+        assert_eq!(ps.as_array().unwrap().len(), 4);
+    }
+}
+
+#[test]
+fn redundant_matches() {
+    let scan_env = ScanEnv::new();
+    let input = scan_env.input_file_with_contents(
+        "input.txt",
+        indoc! {r#"
+            aws_access_key_id = 'AKIADEADBEEFDEADBEEF'
+            aws_secret_access_key = 'FakeValues99cl9bqJFVA3iFUm+yqVe08HxhXFE/'
+        "#},
+    );
+
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
+        .stdout(match_scan_stats("110 B", 1, 3, 3));
+
+    // Should have only a single finding / match reported by default settings
+    {
+        let cmd = noseyparker_success!("report", "-d", scan_env.dspath(), "--format=json");
+        let output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+
+        assert_eq!(output.as_array().unwrap().len(), 1);
+        let ms = &output[0]["matches"];
+        assert_eq!(ms.as_array().unwrap().len(), 1);
+    }
+
+    // Should have 3 findings with 1 match each with `--suppress-redundant=false`
+    {
+        let cmd = noseyparker_success!(
+            "report",
+            "-d",
+            scan_env.dspath(),
+            "--format=json",
+            "--suppress-redundant=false"
+        );
+        let output: serde_json::Value = serde_json::from_slice(&cmd.get_output().stdout).unwrap();
+
+        assert_eq!(output.as_array().unwrap().len(), 3);
+        for f in output.as_array().unwrap() {
+            assert_eq!(f["matches"].as_array().unwrap().len(), 1);
+        }
+    }
 }
 
 // Test that the `report` command uses colors as expected when running under a pty:

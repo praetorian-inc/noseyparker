@@ -6,6 +6,7 @@ pub struct Styles {
     pub style_heading: Style,
     pub style_match: Style,
     pub style_metadata: Style,
+    pub style_id: Style,
 }
 
 impl Styles {
@@ -23,6 +24,7 @@ impl Styles {
         let style_heading = Style::new().bold().force_styling(styles_enabled);
         let style_match = Style::new().yellow().force_styling(styles_enabled);
         let style_metadata = Style::new().bright().blue().force_styling(styles_enabled);
+        let style_id = Style::new().bright().green().force_styling(styles_enabled);
 
         Self {
             style_finding_heading,
@@ -30,6 +32,7 @@ impl Styles {
             style_heading,
             style_match,
             style_metadata,
+            style_id,
         }
     }
 }

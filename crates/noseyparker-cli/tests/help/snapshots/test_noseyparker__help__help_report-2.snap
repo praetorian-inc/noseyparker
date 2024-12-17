@@ -20,12 +20,19 @@ Filtering Options:
       --max-matches <N>
           Limit the number of matches per finding to at most N
           
-          A negative value means "no limit".
+          A non-positive value means "no limit".
+          
+          [default: 3]
+
+      --max-provenance <N>
+          Limit the number of provenance entries per match to at most N
+          
+          A non-positive value means "no limit".
           
           [default: 3]
 
       --min-score <SCORE>
-          Only report findings that have a mean score of at least N.
+          Only report findings that have a mean score of at least N
           
           Scores are floating point numbers in the range [0, 1]. Use the value `0` to disable this
           filtering.
@@ -42,6 +49,15 @@ Filtering Options:
           - reject: Findings with `reject` matches
           - mixed:  Findings with both `accept` and `reject` matches
           - null:   Findings without any `accept` or `reject` matches
+
+      --suppress-redundant <BOOL>
+          Suppress redundant matches and findings
+          
+          A match is considered redundant to another if they overlap significantly within the same
+          blob and satisfy a handful of heuristics.
+          
+          [default: true]
+          [possible values: true, false]
 
 Output Options:
   -o, --output <PATH>

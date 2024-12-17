@@ -107,6 +107,36 @@ CREATE TABLE rule
 ) STRICT;
 
 --------------------------------------------------------------------------------
+-- generic rules
+--------------------------------------------------------------------------------
+CREATE VIEW generic_rule_id (rule_id) AS
+-- The set of IDs of rules that are categorized as `generic`
+select id from rule
+where exists (
+    select 1 from json_each(syntax->>'categories')
+    where value = 'generic'
+);
+
+--------------------------------------------------------------------------------
+-- fuzzy rules
+--------------------------------------------------------------------------------
+CREATE VIEW fuzzy_rule_id (rule_id) AS
+-- The set of IDs of rules that are categorized as `fuzzy`
+select id from rule
+where exists (
+    select 1 from json_each(syntax->>'categories')
+    where value = 'fuzzy'
+);
+
+--------------------------------------------------------------------------------
+-- rule pattern length
+--------------------------------------------------------------------------------
+CREATE VIEW rule_pattern_length (rule_id, length) AS
+-- The length of each rule's pattern in bytes
+select id, length(syntax->>'pattern') length
+from rule;
+
+--------------------------------------------------------------------------------
 -- snippets
 --------------------------------------------------------------------------------
 CREATE TABLE snippet
@@ -198,7 +228,8 @@ CREATE TABLE match
         finding_id
     ),
 
-    foreign key (blob_id, start_byte, end_byte) references blob_source_span(blob_id, start_byte, end_byte)
+    foreign key (blob_id, start_byte, end_byte)
+        references blob_source_span(blob_id, start_byte, end_byte)
 ) STRICT;
 
 CREATE INDEX match_finding_id_index on match(finding_id);
@@ -217,6 +248,19 @@ CREATE TABLE match_status
 
     constraint status_valid check (status in ('accept', 'reject'))
 ) STRICT;
+
+--------------------------------------------------------------------------------
+-- Redundancies
+--------------------------------------------------------------------------------
+CREATE TABLE match_redundancy (
+    -- The integer identifier of the match
+    match_id integer not null references match(id),
+
+    -- The integer identifier of the match that replaces `match_id`
+    redundant_to integer not null references match(id),
+
+    unique (match_id, redundant_to)
+);
 
 --------------------------------------------------------------------------------
 -- Comments
@@ -325,13 +369,19 @@ select
     match_score.score
 from
     match m
-    inner join finding f on (m.finding_id = f.id)
-    inner join blob_source_span bss on (m.blob_id = bss.blob_id and m.start_byte = bss.start_byte and m.end_byte = bss.end_byte)
-    inner join blob b on (m.blob_id = b.id)
-    inner join rule r on (f.rule_id = r.id)
-    inner join snippet before_snippet on (m.before_snippet_id = before_snippet.id)
-    inner join snippet matching_snippet on (m.matching_snippet_id = matching_snippet.id)
-    inner join snippet after_snippet on (m.after_snippet_id = after_snippet.id)
+    left outer join finding f on (m.finding_id = f.id)
+    left outer join blob_source_span bss on (
+        m.blob_id = bss.blob_id
+            and
+        m.start_byte = bss.start_byte
+            and
+        m.end_byte = bss.end_byte
+    )
+    left outer join blob b on (m.blob_id = b.id)
+    left outer join rule r on (f.rule_id = r.id)
+    left outer join snippet before_snippet on (m.before_snippet_id = before_snippet.id)
+    left outer join snippet matching_snippet on (m.matching_snippet_id = matching_snippet.id)
+    left outer join snippet after_snippet on (m.after_snippet_id = after_snippet.id)
     left outer join match_status on (m.id = match_status.match_id)
     left outer join match_comment on (m.id = match_comment.match_id)
     left outer join match_score on (m.id = match_score.match_id)
@@ -387,6 +437,7 @@ CREATE VIEW finding_denorm
     rule_syntax,
     groups,
     num_matches,
+    num_redundant_matches,
     mean_score,
     comment,
     match_statuses
@@ -400,19 +451,21 @@ select
     r.syntax,
     f.groups,
     count(*),
+    sum(case when m.id in (select match_id from match_redundancy) then 1 else 0 end),
     avg(ms.score),
     fc.comment,
     json_group_array(distinct match_status.status)
         filter (where match_status.status is not null) match_statuses
 from
     finding f
-    inner join match m on (m.finding_id = f.id)
-    inner join rule r on (f.rule_id = r.id)
+    left outer join match m on (m.finding_id = f.id)
+    left outer join rule r on (f.rule_id = r.id)
     left outer join match_score ms on (m.id = ms.match_id)
     left outer join match_status on (m.id = match_status.match_id)
     left outer join finding_comment fc on (f.id = fc.finding_id)
 group by f.id
 ;
+
 
 CREATE VIEW finding_summary
 -- A convenience view for a summary of findings in denormalized form.
@@ -420,17 +473,52 @@ CREATE VIEW finding_summary
     rule_name,
     rule_structural_id,
     total_findings,
-    total_matches
+    total_matches,
+    accept_findings,
+    reject_findings,
+    mixed_findings,
+    unlabeled_findings
 )
 as
+with
+    -- table of relevant per-match information
+    m as (
+        select
+            f.finding_id finding_id,
+            r.name rule_name,
+            r.structural_id rule_structural_id,
+            ms.status match_status
+        from
+            finding f
+            inner join match m on (m.finding_id = f.id)
+            inner join rule r on (f.rule_id = r.id)
+            left outer join match_status ms on (m.id = ms.match_id)
+    ),
+    -- summarize per-match information by finding
+    f as (
+        select
+            finding_id,
+            rule_name,
+            rule_structural_id,
+            case group_concat(distinct match_status)
+                when 'accept' then 'accept'
+                when 'reject' then 'reject'
+                when 'accept,reject' then 'mixed'
+                when 'reject,accept' then 'mixed'
+            end finding_status,
+            count(*) num_matches
+        from m
+        group by finding_id
+    )
 select
-    r.name rule_name,
-    r.structural_id rule_structural_id,
-    count(distinct f.finding_id) total_findings,
-    count(*) total_matches
+    rule_name,
+    rule_structural_id,
+    count(distinct finding_id) total_findings,
+    sum(num_matches) total_matches,
+    sum(case when finding_status = 'accept' then 1 else 0 end) accept_findings,
+    sum(case when finding_status = 'reject' then 1 else 0 end) reject_findings,
+    sum(case when finding_status = 'mixed' then 1 else 0 end) mixed_findings,
+    sum(case when finding_status is null then 1 else 0 end) unlabeled_findings
 from
-    finding f
-    inner join match m on (m.finding_id = f.id)
-    inner join rule r on (f.rule_id = r.id)
-group by rule_name, rule_structural_id
-;
+    f
+group by rule_name

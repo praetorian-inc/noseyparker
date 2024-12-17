@@ -10,8 +10,9 @@ impl DetailsReporter {
             let finding = Finding { metadata, matches };
             writeln!(
                 &mut writer,
-                "{}",
-                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}"))
+                "{} (id {})",
+                self.style_finding_heading(format!("Finding {finding_num}/{num_findings}")),
+                self.style_id(&finding.metadata.finding_id),
             )?;
             writeln!(&mut writer, "{}", PrettyFinding(self, &finding))?;
         }
@@ -90,7 +91,7 @@ impl<'a> Display for PrettyFinding<'a> {
                 f,
                 "{}",
                 reporter.style_heading(format!(
-                    "Showing {}/{} occurrences:",
+                    "Showing {}/{} matches:",
                     finding.num_matches_available(),
                     finding.total_matches()
                 ))
@@ -109,13 +110,24 @@ impl<'a> Display for PrettyFinding<'a> {
                 score,
                 comment,
                 status,
+                redundant_to,
             } = rm;
 
             writeln!(
                 f,
-                "{}",
-                reporter.style_heading(format!("Occurrence {i}/{}", finding.total_matches())),
+                "{} (id {})",
+                reporter.style_heading(format!("Match {i}/{}", finding.total_matches())),
+                reporter.style_id(&m.structural_id),
             )?;
+
+            if !redundant_to.is_empty() {
+                writeln!(
+                    f,
+                    "{} {}",
+                    reporter.style_heading("Redundant to:"),
+                    redundant_to.join(", "),
+                )?;
+            }
 
             // write out match status if set
             if let Some(status) = status {
@@ -145,7 +157,6 @@ impl<'a> Display for PrettyFinding<'a> {
                 )
             };
 
-            // FIXME: limit the total number of provenance entries displayed
             for p in provenance.iter() {
                 match p {
                     Provenance::File(e) => {

@@ -2,11 +2,11 @@
 source: crates/noseyparker-cli/tests/scan/snippet_length/mod.rs
 expression: stdout
 ---
-Finding 1/1
+Finding 1/1 (id d551329ba5578559646aa49467be47e9d496578d)
 Rule: GitHub Personal Access Token
 Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
-    Occurrence 1/1
+    Match 1/1 (id 02f264f3a42f38d96d0069e4b91e3d3e66bf8b08)
     File:  <FILENAME>
     Blob:  <BLOB>
     Lines: 30:12-30:51
@@ -15,7 +15,4 @@ Group: ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
         USERNAME=the_dude
         GITHUB_KEY=ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
-        function lorem(ipsum, dolor = 
-
-
-
+        function lorem(ipsum, dolor =

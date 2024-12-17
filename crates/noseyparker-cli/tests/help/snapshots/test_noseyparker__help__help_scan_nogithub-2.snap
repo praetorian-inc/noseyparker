@@ -126,7 +126,7 @@ Content Filtering Options:
           Do not scan files larger than the specified size
           
           The value is parsed as a floating point literal, and hence fractional values can be
-          supplied. A negative value means "no limit". Note that scanning requires reading the
+          supplied. A non-positive value means "no limit". Note that scanning requires reading the
           entire contents of each file into memory, so using an excessively large limit may be
           problematic.
           
