@@ -54,6 +54,7 @@ Note that the use of semantic versioning applies to the command-line interface a
   - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
   - `Kubernetes Bootstrap Token` ([#235](https://github.com/praetorian-inc/noseyparker/pull/235))
   - `Sensitive Value in .NET Configuration` ([#237](https://github.com/praetorian-inc/noseyparker/pull/237))
+  - `TeamCity API Token` ([#240](https://github.com/praetorian-inc/noseyparker/pull/240))
 
 - Rules now contain an optional `description` string field.
   This is intended to be a message for human consumption that indicates (a) what was detected and (b) how an attacker might use it.

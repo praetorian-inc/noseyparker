@@ -1368,7 +1368,8 @@ expression: stdout
           "<add key=\"FromEmailAddress\" value=\"killer.joe@example.com\"/>\n<add key=\"FromEmailPassword\" value=\"Prestigitariu$\"/>\n"
         ],
         "negative_examples": [
-          "<add key=\"ConnectionString_B2B\" value=\"Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False\" />\n"
+          "<add key=\"ConnectionString_B2B\" value=\"Server=awsbman-t,1433;Database=B2B;User ID=b2buser;Password=#gets0m3;Trusted_Connection=False\" />\n",
+          "<add key=\"ClearTextPassword\" value=\"eyJ0eXAiOiAiVENWMiJ9.RkNWLXdXS3M1RVBfencxM4A0WmJzdVlCQzFj.OGY1OWRkNGMtYTUxYS04ZDYwLWFiZGYtZWE5MWFhZWJiODhh\" />"
         ],
         "references": [
           "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview",
@@ -2029,7 +2030,8 @@ expression: stdout
           "NUCLEAR_SERVICES_ANON_KEY=eyJhbGciOiJIUzI1NiIsEnR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqcnVqc2lzY2Nzdnl2am5xdG5xIiwicm9sZSI6ImEub24iLCJpYXQiOjE2NTY1OTY0NjEsImV4cCI6MTk3MjE3MjQ2MX0.WQWcwBAQFNE259f2o8ruFln_UMLTFEnEaUD7KHrs9Aw"
         ],
         "negative_examples": [
-          "it \"sets the relation to nil\" do\n  eye.eyeable.should be_nill\nend\n"
+          "it \"sets the relation to nil\" do\n  eye.eyeable.should be_nill\nend\n",
+          "<add key=\"ClearTextPassword\" value=\"eyJ0eXAiOiAiVENWMiJ9.RkNWLXdXS3M1RVBfencxM4A0WmJzdVlCQzFj.OGY1OWRkNGMtYTUxYS04ZDYwLWFiZGYtZWE5MWFhZWJiODhh\" />"
         ],
         "references": [
           "https://en.wikipedia.org/wiki/JSON_Web_Token",
@@ -3779,6 +3781,25 @@ expression: stdout
       }
     },
     {
+      "id": "np.teamcity.1",
+      "structural_id": "30070e2cca5869c3ed8b7cd1ed39ee2c858bd596",
+      "name": "TeamCity API Token",
+      "syntax": {
+        "name": "TeamCity API Token",
+        "id": "np.teamcity.1",
+        "pattern": "(?x)\n\\b (\neyJ0eXAiOiAiVENWMiJ9             (?# decodes to `{\"typ\": \"TCV2\"}` )\n\\.\n[A-Za-z0-9_-]{36}\n\\.\n[A-Za-z0-9_-]{48}\n) (?: [^A-Za-z0-9_-] | $ )\n",
+        "description": "A TeamCity REST API token was found. TeamCity is a CI/CD platform from JetBrains. An attacker may be able to use this token to access source code, secrets, and build resources, enabling a supply chain attack.\n",
+        "examples": [
+          "<add key=\"ClearTextPassword\" value=\"eyJ0eXAiOiAiVENWMiJ9.RkNWLXdXS3M1RVBfencxM4A0WmJzdVlCQzFj.OGY1OWRkNGMtYTUxYS04ZDYwLWFiZGYtZWE5MWFhZWJiODhh\" />"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.jetbrains.com/help/teamcity/rest/teamcity-rest-api-documentation.html"
+        ],
+        "categories": []
+      }
+    },
+    {
       "id": "np.telegram.1",
       "structural_id": "ee0a6f62cff7ae26886389e9a542f673c0cfdc00",
       "name": "Telegram Bot Token",
@@ -4062,7 +4083,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 140
+      "num_rules": 141
     },
     {
       "id": "np.assets",
