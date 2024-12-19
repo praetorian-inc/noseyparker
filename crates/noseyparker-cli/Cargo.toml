@@ -43,7 +43,7 @@ vectorscan_simd_specialization = ["vectorscan-rs/simd_specialization"]
 vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
 
 # Use the mimalloc global allocator
-mimalloc = ["dep:mimalloc", "dep:libmimalloc-sys"]
+mimalloc = ["dep:mimalloc"]
 
 # Use color backtraces
 color_backtrace = ["dep:color-backtrace"]
@@ -84,12 +84,10 @@ indicatif = { version = "0.17", features = ["improved_unicode"] }
 indoc = "2.0"
 input-enumerator = { path = "../input-enumerator" }
 lazy_static = "1.4"
-libmimalloc-sys = { version = "0.1.39", optional = true }
 log = { version = "0.4", optional = true }
 mimalloc = { version = "0.1.43", optional = true }
 mime = "0.3"
 noseyparker = { path = "../noseyparker" }
-noseyparker-digest = { path = "../noseyparker-digest" }
 noseyparker-rules = { path = "../noseyparker-rules" }
 prettytable-rs = "0.10"
 progress = { path = "../progress" }
