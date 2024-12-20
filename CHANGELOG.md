@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Note that the use of semantic versioning applies to the command-line interface and output formats; the Rust crate APIs are considered an implementation detail at this point.
 
 
-## Unreleased
+## [v0.22.0](https://github.com/praetorian-inc/noseyparker/releases/v0.22.0) (2024-12-20)
 
 ### Breaking Changes
 - The JSON output format from `report` has changed slightly ([#236](https://github.com/praetorian-inc/noseyparker/pull/236)).
@@ -43,7 +43,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 ### Changes
 - The `Slack Bot Token` rule has been modified to match additional cases.
-- The `rules check` command now more thoroughly checks the number of capture groups of each rule
+- The `rules check` command now more thoroughly checks the number of capture groups of each rule.
 
 ### Additions
 - A new finding deduplication mechanism is enabled by default when reporting ([#239](https://github.com/praetorian-inc/noseyparker/pull/239)).
