@@ -38,6 +38,9 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 - Fixed a typo in the `report` command that could cause a diagnostic message about suppressed matches to be incorrect ([#239](https://github.com/praetorian-inc/noseyparker/pull/239)).
 
+- Release binaries are no longer stripped of symbols, just of debug info.
+  This should improve stack trace collection in the event of a crash on Linux systems.
+
 ### Changes
 - The `Slack Bot Token` rule has been modified to match additional cases.
 - The `rules check` command now more thoroughly checks the number of capture groups of each rule

@@ -21,9 +21,9 @@ publish = false
 opt-level = 3
 lto = "thin"
 
-strip = true  # strip out debug info and symbols
-
-split-debuginfo = "packed"  # generate separate packed debug info
+# strip out debug info from binary, but generate separate debuginfo
+strip = "debuginfo"
+split-debuginfo = "packed"
 
 debug = "line-tables-only"  # generate enough debug info to give useful stack traces upon panic
 #debug = true               # generate full debug info; significantly larger!
