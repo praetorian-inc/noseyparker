@@ -1157,6 +1157,91 @@ expression: stdout
       }
     },
     {
+      "id": "np.generic.11",
+      "structural_id": "2ee092ce0b11c7cba7386f7dc4b82aa38b4d01c6",
+      "name": "Generic Password",
+      "syntax": {
+        "name": "Generic Password",
+        "id": "np.generic.11",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ '\n(\n  [^'\\n\\#$|\"{<]         (?# more restrictive first character to eliminate common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "echo \"Rrun 'bin/ipa_kinit admin' to acquire a Kerberos ticket\"\necho \"The password is 'Secret123'\"\n",
+          "The Blooby has a default Access Point Name 'Blooby'\nThe default Password is 'blooberry'\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.12",
+      "structural_id": "31987ead3f9e89f375aa3a2344e5840ed274c5fb",
+      "name": "Generic Password",
+      "syntax": {
+        "name": "Generic Password",
+        "id": "np.generic.12",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<]   (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)\"\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "so at this point, just fill in your mount point name, ensure the password is \"centipede\" and press the \"On\" button!\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.13",
+      "structural_id": "e7254d9bf4f549eccbaece590afc3ae6d7b3c2db",
+      "name": "Generic Username and Password",
+      "syntax": {
+        "name": "Generic Username and Password",
+        "id": "np.generic.13",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ '\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)'\n\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "2. Ensure the password for user 'postgres' is 'admin' or change .env file.\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.14",
+      "structural_id": "ba2b4ce7707e9d338549d7b7ecba23d091c75c3b",
+      "name": "Generic Username and Password",
+      "syntax": {
+        "name": "Generic Username and Password",
+        "id": "np.generic.14",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ \"\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)\"\n\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)\"\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "The default password for the user \"pyne-user\" is \"pyne\".\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.generic.2",
       "structural_id": "ac1028729d342a4d0cf282377532d882a48795c6",
       "name": "Generic API Key",
@@ -4083,7 +4168,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 141
+      "num_rules": 145
     },
     {
       "id": "np.assets",
