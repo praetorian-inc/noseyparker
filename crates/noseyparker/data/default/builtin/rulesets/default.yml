@@ -60,6 +60,10 @@ rulesets:
   - np.generic.8      # Credentials in .NET System.DirectoryServices.DirectoryEntry
   - np.generic.9      # Sensitive value in .NET configuration
   - np.generic.10     # Connection string in .NET configuration
+  - np.generic.11     # Generic Password
+  - np.generic.12     # Generic Password
+  - np.generic.13     # Generic Credentials
+  - np.generic.14     # Generic Credentials
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token

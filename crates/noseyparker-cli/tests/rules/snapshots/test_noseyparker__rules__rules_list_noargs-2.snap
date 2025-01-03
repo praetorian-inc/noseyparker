@@ -50,6 +50,10 @@ expression: stdout
  np.gcs.2             Google Cloud Storage Bucket                                   api, identifier 
  np.generic.1         Generic Secret                                                fuzzy, generic, secret 
  np.generic.10        Connection String in .NET Configuration                       fuzzy, generic, secret 
+ np.generic.11        Generic Password                                              fuzzy, generic, secret 
+ np.generic.12        Generic Password                                              fuzzy, generic, secret 
+ np.generic.13        Generic Username and Password                                 fuzzy, generic, secret 
+ np.generic.14        Generic Username and Password                                 fuzzy, generic, secret 
  np.generic.2         Generic API Key                                               fuzzy, generic, secret 
  np.generic.3         Generic Username and Password                                 fuzzy, generic, secret 
  np.generic.4         Generic Username and Password                                 fuzzy, generic, secret 
@@ -169,6 +173,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             141 
+ default      Nosey Parker default rules             145 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
