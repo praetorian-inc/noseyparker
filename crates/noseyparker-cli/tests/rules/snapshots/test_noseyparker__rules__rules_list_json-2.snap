@@ -1158,12 +1158,12 @@ expression: stdout
     },
     {
       "id": "np.generic.11",
-      "structural_id": "2ee092ce0b11c7cba7386f7dc4b82aa38b4d01c6",
+      "structural_id": "ac0e578c05426514bda3d09b09af48eea0f00467",
       "name": "Generic Password",
       "syntax": {
         "name": "Generic Password",
         "id": "np.generic.11",
-        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ '\n(\n  [^'\\n\\#$|\"{<]         (?# more restrictive first character to eliminate common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]      (?# more restrictive first character to eliminate common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
         "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
         "examples": [
           "echo \"Rrun 'bin/ipa_kinit admin' to acquire a Kerberos ticket\"\necho \"The password is 'Secret123'\"\n",
@@ -1180,12 +1180,12 @@ expression: stdout
     },
     {
       "id": "np.generic.12",
-      "structural_id": "31987ead3f9e89f375aa3a2344e5840ed274c5fb",
+      "structural_id": "d1e0702d504614050fef6c41343fd77f57870197",
       "name": "Generic Password",
       "syntax": {
         "name": "Generic Password",
         "id": "np.generic.12",
-        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<]   (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)\"\n",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{3,60}\n)\"\n",
         "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
         "examples": [
           "so at this point, just fill in your mount point name, ensure the password is \"centipede\" and press the \"On\" button!\n"
@@ -1201,12 +1201,12 @@ expression: stdout
     },
     {
       "id": "np.generic.13",
-      "structural_id": "e7254d9bf4f549eccbaece590afc3ae6d7b3c2db",
+      "structural_id": "03bbe74bdec2a8d1cb1323b3e77a95e821c809c9",
       "name": "Generic Username and Password",
       "syntax": {
         "name": "Generic Username and Password",
         "id": "np.generic.13",
-        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ '\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)'\n\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)'\n\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
         "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
         "examples": [
           "2. Ensure the password for user 'postgres' is 'admin' or change .env file.\n"
@@ -1222,12 +1222,12 @@ expression: stdout
     },
     {
       "id": "np.generic.14",
-      "structural_id": "ba2b4ce7707e9d338549d7b7ecba23d091c75c3b",
+      "structural_id": "354b65752536c962dcb9444225b37c114889b6cb",
       "name": "Generic Username and Password",
       "syntax": {
         "name": "Generic Username and Password",
         "id": "np.generic.14",
-        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ \"\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)\"\n\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+]       (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)\"\n",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{2,24}\n)\"\n\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{3,60}\n)\"\n",
         "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
         "examples": [
           "The default password for the user \"pyne-user\" is \"pyne\".\n"

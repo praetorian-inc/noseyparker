@@ -413,7 +413,7 @@ rules:
     (?x)(?i)
     the\ (?: default\ )? password\ is\ '
     (
-      [^'\n\#$|"{<]         (?# more restrictive first character to eliminate common interpolation forms )
+      [^'\n\#$|"{<+\ ()\\]      (?# more restrictive first character to eliminate common interpolation forms )
       [^'\n]{3,60}
     )'
 
@@ -440,8 +440,8 @@ rules:
     (?x)(?i)
     the\ (?: default\ )? password\ is\ "
     (
-      [^'\n\#$|"{<]   (?# restrictive first character to suppress common interpolation forms )
-      [^'\n]{3,60}
+      [^'\n\#$|"{<+\ ()\\]     (?# restrictive first character to suppress common interpolation forms )
+      [^"\n]{3,60}
     )"
 
   description: >
@@ -462,12 +462,12 @@ rules:
     (?x)(?i)
     the\ (?: default\ )? password\ for\ (?: the\ )? (?: user|username ) \ '
     (
-      [^'\n\#$|"{<+]       (?# restrictive first character to suppress common interpolation forms )
+      [^'\n\#$|"{<+\ ()\\]     (?# restrictive first character to suppress common interpolation forms )
       [^'\n]{2,24}
     )'
     \ is\ '
     (
-      [^'\n\#$|"{<+]       (?# restrictive first character to suppress common interpolation forms )
+      [^'\n\#$|"{<+\ ()\\]     (?# restrictive first character to suppress common interpolation forms )
       [^'\n]{3,60}
     )'
 
@@ -489,13 +489,13 @@ rules:
     (?x)(?i)
     the\ (?: default\ )? password\ for\ (?: the\ )? (?: user|username ) \ "
     (
-      [^'\n\#$|"{<+]       (?# restrictive first character to suppress common interpolation forms )
-      [^'\n]{2,24}
+      [^'\n\#$|"{<+\ ()\\]     (?# restrictive first character to suppress common interpolation forms )
+      [^"\n]{2,24}
     )"
     \ is\ "
     (
-      [^'\n\#$|"{<+]       (?# restrictive first character to suppress common interpolation forms )
-      [^'\n]{3,60}
+      [^'\n\#$|"{<+\ ()\\]     (?# restrictive first character to suppress common interpolation forms )
+      [^"\n]{3,60}
     )"
 
   description: >
