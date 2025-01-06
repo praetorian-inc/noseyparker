@@ -1056,6 +1056,29 @@ expression: stdout
       }
     },
     {
+      "id": "np.firecrawl.1",
+      "structural_id": "6291ac1a4df29fbc1e6b916589f00de2c0bb6f35",
+      "name": "Firecrawl API Key",
+      "syntax": {
+        "name": "Firecrawl API Key",
+        "id": "np.firecrawl.1",
+        "pattern": "\\b(fc-[a-f0-9]{32})\\b",
+        "description": "A Firecrawl API Key was found. Firecrawl provides LLM-centric services for web scraping and crawling. An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
+        "examples": [
+          "app = FirecrawlApp(api_key=\"fc-7da8b1ca1d2150c496e91440d777fea8\")"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.firecrawl.dev",
+          "https://docs.firecrawl.dev/api-reference/introduction#authentication"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.gcs.1",
       "structural_id": "5eddb5305d1dd0c6b3dbe21c1967adce9d49242a",
       "name": "Google Cloud Storage Bucket",
@@ -4168,7 +4191,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 145
+      "num_rules": 146
     },
     {
       "id": "np.assets",

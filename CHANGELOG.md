@@ -13,8 +13,9 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 - New rules:
 
-  - `Generic Secret` x2
-  - `Generic Username and Password` x2
+  - `Firecrawl API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+  - `Generic Secret` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+  - `Generic Username and Password` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
 
 
 ## [v0.22.0](https://github.com/praetorian-inc/noseyparker/releases/v0.22.0) (2024-12-20)

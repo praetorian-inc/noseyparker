@@ -50,6 +50,7 @@ rulesets:
   - np.facebook.1     # Facebook Secret Key
   - np.facebook.2     # Facebook Access Token
   - np.figma.1        # Figma Personal Access Token
+  - np.firecrawl.1    # Firecrawl API Key
   - np.generic.1      # Generic Secret
   - np.generic.2      # Generic API Key
   - np.generic.3      # Generic Username and Password

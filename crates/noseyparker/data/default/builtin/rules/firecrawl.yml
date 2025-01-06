@@ -1,0 +1,19 @@
+rules:
+
+- name: Firecrawl API Key
+  id: np.firecrawl.1
+  pattern: '\b(fc-[a-f0-9]{32})\b'
+
+  categories: [api, secret]
+
+  description: >
+    A Firecrawl API Key was found.
+    Firecrawl provides LLM-centric services for web scraping and crawling.
+    An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.
+
+  references:
+  - https://www.firecrawl.dev
+  - https://docs.firecrawl.dev/api-reference/introduction#authentication
+
+  examples:
+  - 'app = FirecrawlApp(api_key="fc-7da8b1ca1d2150c496e91440d777fea8")'

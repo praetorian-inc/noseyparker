@@ -46,6 +46,7 @@ expression: stdout
  np.facebook.1        Facebook Secret Key                                           api, fuzzy, secret 
  np.facebook.2        Facebook Access Token                                         api, secret 
  np.figma.1           Figma Personal Access Token                                   api, fuzzy, secret 
+ np.firecrawl.1       Firecrawl API Key                                             api, secret 
  np.gcs.1             Google Cloud Storage Bucket                                   api, identifier 
  np.gcs.2             Google Cloud Storage Bucket                                   api, identifier 
  np.generic.1         Generic Secret                                                fuzzy, generic, secret 
@@ -173,6 +174,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             145 
+ default      Nosey Parker default rules             146 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
