@@ -50,6 +50,7 @@ rulesets:
   - np.facebook.1     # Facebook Secret Key
   - np.facebook.2     # Facebook Access Token
   - np.figma.1        # Figma Personal Access Token
+  - np.firecrawl.1    # Firecrawl API Key
   - np.generic.1      # Generic Secret
   - np.generic.2      # Generic API Key
   - np.generic.3      # Generic Username and Password
@@ -60,6 +61,10 @@ rulesets:
   - np.generic.8      # Credentials in .NET System.DirectoryServices.DirectoryEntry
   - np.generic.9      # Sensitive value in .NET configuration
   - np.generic.10     # Connection string in .NET configuration
+  - np.generic.11     # Generic Password
+  - np.generic.12     # Generic Password
+  - np.generic.13     # Generic Credentials
+  - np.generic.14     # Generic Credentials
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token
@@ -78,6 +83,7 @@ rulesets:
   - np.grafana.1      # Grafana API Token
   - np.grafana.2      # Grafana Cloud API Token
   - np.grafana.3      # Grafana Service Account Token
+  - np.groq.1         # Groq API Key
   - np.heroku.1       # Heroku API Key
   - np.http.1         # HTTP Basic Authentication
   - np.http.2         # HTTP Bearer Token

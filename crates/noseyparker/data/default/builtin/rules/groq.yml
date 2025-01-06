@@ -1,0 +1,23 @@
+rules:
+
+- name: Groq API Key
+  id: np.groq.1
+  pattern: '\b(gsk_[a-zA-Z0-9]{50,54})\b'
+
+  categories: [api, secret]
+
+  description: >
+    A Groq API Key was found.
+    This may allow an attacker to consume limited resources or access proprietary fine-tuned ML models.
+
+  references:
+  - https://groq.com
+  - https://console.groq.com/docs/quickstart#set-up-your-api-key-recommended
+
+  examples:
+  - |
+      # Set up the client for OpenAI
+      client = OpenAI(base_url="https://api.groq.com/openai/v1/", api_key="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")
+
+  - |
+      const apiKey = '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'; // Replace with your actual API key

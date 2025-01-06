@@ -1056,6 +1056,29 @@ expression: stdout
       }
     },
     {
+      "id": "np.firecrawl.1",
+      "structural_id": "6291ac1a4df29fbc1e6b916589f00de2c0bb6f35",
+      "name": "Firecrawl API Key",
+      "syntax": {
+        "name": "Firecrawl API Key",
+        "id": "np.firecrawl.1",
+        "pattern": "\\b(fc-[a-f0-9]{32})\\b",
+        "description": "A Firecrawl API Key was found. Firecrawl provides LLM-centric services for web scraping and crawling. An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
+        "examples": [
+          "app = FirecrawlApp(api_key=\"fc-7da8b1ca1d2150c496e91440d777fea8\")"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://www.firecrawl.dev",
+          "https://docs.firecrawl.dev/api-reference/introduction#authentication"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.gcs.1",
       "structural_id": "5eddb5305d1dd0c6b3dbe21c1967adce9d49242a",
       "name": "Google Cloud Storage Bucket",
@@ -1149,6 +1172,91 @@ expression: stdout
           "https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/application-settings-overview",
           "https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/appsettings/appsettings-element-for-configuration"
         ],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.11",
+      "structural_id": "ac0e578c05426514bda3d09b09af48eea0f00467",
+      "name": "Generic Password",
+      "syntax": {
+        "name": "Generic Password",
+        "id": "np.generic.11",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]      (?# more restrictive first character to eliminate common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "echo \"Rrun 'bin/ipa_kinit admin' to acquire a Kerberos ticket\"\necho \"The password is 'Secret123'\"\n",
+          "The Blooby has a default Access Point Name 'Blooby'\nThe default Password is 'blooberry'\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.12",
+      "structural_id": "d1e0702d504614050fef6c41343fd77f57870197",
+      "name": "Generic Password",
+      "syntax": {
+        "name": "Generic Password",
+        "id": "np.generic.12",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{3,60}\n)\"\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "so at this point, just fill in your mount point name, ensure the password is \"centipede\" and press the \"On\" button!\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.13",
+      "structural_id": "03bbe74bdec2a8d1cb1323b3e77a95e821c809c9",
+      "name": "Generic Username and Password",
+      "syntax": {
+        "name": "Generic Username and Password",
+        "id": "np.generic.13",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{2,24}\n)'\n\\ is\\ '\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^'\\n]{3,60}\n)'\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "2. Ensure the password for user 'postgres' is 'admin' or change .env file.\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.14",
+      "structural_id": "354b65752536c962dcb9444225b37c114889b6cb",
+      "name": "Generic Username and Password",
+      "syntax": {
+        "name": "Generic Username and Password",
+        "id": "np.generic.14",
+        "pattern": "(?x)(?i)\nthe\\ (?: default\\ )? password\\ for\\ (?: the\\ )? (?: user|username ) \\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{2,24}\n)\"\n\\ is\\ \"\n(\n  [^'\\n\\#$|\"{<+\\ ()\\\\]     (?# restrictive first character to suppress common interpolation forms )\n  [^\"\\n]{3,60}\n)\"\n",
+        "description": "A password was found. This may allow an attacker unintended access to a resource.\n",
+        "examples": [
+          "The default password for the user \"pyne-user\" is \"pyne\".\n"
+        ],
+        "negative_examples": [],
+        "references": [],
         "categories": [
           "fuzzy",
           "generic",
@@ -1841,6 +1949,30 @@ expression: stdout
         "negative_examples": [],
         "references": [
           "https://grafana.com/docs/grafana/latest/administration/service-accounts/"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.groq.1",
+      "structural_id": "ce295d7c536982c43de9a4a9107da04750a9c70e",
+      "name": "Groq API Key",
+      "syntax": {
+        "name": "Groq API Key",
+        "id": "np.groq.1",
+        "pattern": "\\b(gsk_[a-zA-Z0-9]{50,54})\\b",
+        "description": "A Groq API Key was found. This may allow an attacker to consume limited resources or access proprietary fine-tuned ML models.\n",
+        "examples": [
+          "# Set up the client for OpenAI\nclient = OpenAI(base_url=\"https://api.groq.com/openai/v1/\", api_key=\"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\")\n",
+          "const apiKey = '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'; // Replace with your actual API key\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://groq.com",
+          "https://console.groq.com/docs/quickstart#set-up-your-api-key-recommended"
         ],
         "categories": [
           "api",
@@ -4083,7 +4215,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 141
+      "num_rules": 147
     },
     {
       "id": "np.assets",
