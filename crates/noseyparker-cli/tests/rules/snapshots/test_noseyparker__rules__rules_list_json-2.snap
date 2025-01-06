@@ -1957,6 +1957,30 @@ expression: stdout
       }
     },
     {
+      "id": "np.groq.1",
+      "structural_id": "ce295d7c536982c43de9a4a9107da04750a9c70e",
+      "name": "Groq API Key",
+      "syntax": {
+        "name": "Groq API Key",
+        "id": "np.groq.1",
+        "pattern": "\\b(gsk_[a-zA-Z0-9]{50,54})\\b",
+        "description": "A Groq API Key was found. This may allow an attacker to consume limited resources or access proprietary fine-tuned ML models.\n",
+        "examples": [
+          "# Set up the client for OpenAI\nclient = OpenAI(base_url=\"https://api.groq.com/openai/v1/\", api_key=\"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\")\n",
+          "const apiKey = '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'; // Replace with your actual API key\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://groq.com",
+          "https://console.groq.com/docs/quickstart#set-up-your-api-key-recommended"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.heroku.1",
       "structural_id": "5f46a2e3fa26e1f50f8ac4073fb67bd07700bd29",
       "name": "Heroku API Key",
@@ -4191,7 +4215,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 146
+      "num_rules": 147
     },
     {
       "id": "np.assets",

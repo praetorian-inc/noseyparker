@@ -83,6 +83,7 @@ rulesets:
   - np.grafana.1      # Grafana API Token
   - np.grafana.2      # Grafana Cloud API Token
   - np.grafana.3      # Grafana Service Account Token
+  - np.groq.1         # Groq API Key
   - np.heroku.1       # Heroku API Key
   - np.http.1         # HTTP Basic Authentication
   - np.http.2         # HTTP Bearer Token
