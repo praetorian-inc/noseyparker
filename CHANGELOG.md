@@ -10,13 +10,15 @@ Note that the use of semantic versioning applies to the command-line interface a
 ## Unreleased
 
 ### Additions
-
 - New rules:
 
-  - `Firecrawl API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
-  - `Generic Secret` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
-  - `Generic Username and Password` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
-  - `Groq API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+    - `Firecrawl API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+    - `Generic Secret` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+    - `Generic Username and Password` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+    - `Groq API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+
+### Fixes
+- Rerunning a scan with the same input and datastore no longer crashes with a `UNIQUE constraint failed` error.
 
 
 ## [v0.22.0](https://github.com/praetorian-inc/noseyparker/releases/v0.22.0) (2024-12-20)
@@ -24,16 +26,16 @@ Note that the use of semantic versioning applies to the command-line interface a
 ### Breaking Changes
 - The JSON output format from `report` has changed slightly ([#236](https://github.com/praetorian-inc/noseyparker/pull/236)).
 
-  Now, the JSON representation of provenance entries from extensible enumerators (i.e., `scan --enumerator=FILE`, introduced in v0.20.0) includes an additional `"payload"` field around the actual provenance content.
-  For example, an extended provenance entry that previously would look like this:
+    Now, the JSON representation of provenance entries from extensible enumerators (i.e., `scan --enumerator=FILE`, introduced in v0.20.0) includes an additional `"payload"` field around the actual provenance content.
+    For example, an extended provenance entry that previously would look like this:
 
-      {"kind": "extended", "filename": "input.txt"}
+        {"kind": "extended", "filename": "input.txt"}
 
-  is now represented like this:
+    is now represented like this:
 
-      {"kind": "extended", "payload": {"filename": "input.txt"}}
+        {"kind": "extended", "payload": {"filename": "input.txt"}}
 
-  This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
+    This fixes a bug in v0.20.0 where provenance entries from an extensible enumerator could _only_ be JSON objects, instead of arbitrary JSON values as claimed by the documentation.
 
 - The datastore schema has changed in order to support a new finding deduplication mechanism ([#239](https://github.com/praetorian-inc/noseyparker/pull/239)).
   Datastores from previous versions of Nosey Parker are not supported.
@@ -64,12 +66,12 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 - New rules have been added:
 
-  - `Connection String in .NET Configuration` ([#238](https://github.com/praetorian-inc/noseyparker/pull/238))
-  - `Credentials in .NET System.DirectoryServices.DirectoryEntry` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
-  - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
-  - `Kubernetes Bootstrap Token` ([#235](https://github.com/praetorian-inc/noseyparker/pull/235))
-  - `Sensitive Value in .NET Configuration` ([#237](https://github.com/praetorian-inc/noseyparker/pull/237))
-  - `TeamCity API Token` ([#240](https://github.com/praetorian-inc/noseyparker/pull/240))
+    - `Connection String in .NET Configuration` ([#238](https://github.com/praetorian-inc/noseyparker/pull/238))
+    - `Credentials in .NET System.DirectoryServices.DirectoryEntry` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
+    - `Credentials in .NET System.Net.NetworkCredential` ([#234](https://github.com/praetorian-inc/noseyparker/pull/234))
+    - `Kubernetes Bootstrap Token` ([#235](https://github.com/praetorian-inc/noseyparker/pull/235))
+    - `Sensitive Value in .NET Configuration` ([#237](https://github.com/praetorian-inc/noseyparker/pull/237))
+    - `TeamCity API Token` ([#240](https://github.com/praetorian-inc/noseyparker/pull/240))
 
 - Rules now contain an optional `description` string field.
   This is intended to be a message for human consumption that indicates (a) what was detected and (b) how an attacker might use it.
@@ -93,24 +95,24 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 - Rules have been modified:
 
-  - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` now have additional category metadata.
-  - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
-  - `Jenkins Token or Crumb` has been refined to improve detection ([#232](https://github.com/praetorian-inc/noseyparker/pull/232)).
+    - `Age Recipient (X25519 public key)` and `ThingsBoard Access Token` now have additional category metadata.
+    - `Credentials in ODBC Connection String` detects more occurrences ([#227](https://github.com/praetorian-inc/noseyparker/pull/227)).
+    - `Jenkins Token or Crumb` has been refined to improve detection ([#232](https://github.com/praetorian-inc/noseyparker/pull/232)).
 
 - When using the `--copy-blobs` option, the default output format is now `parquet` (when the `parquet` feature is enabled, which it is unless you build with `--no-default-features`) ([#229](https://github.com/praetorian-inc/noseyparker/pull/229)).
 
 ### Additions
 - New rules have been added:
 
-  - `Credentials in MongoDB Connection String` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
-  - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
-  - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
-  - `Jenkins Setup Admin Password`
-  - `Jina Search Foundation API Key`
-  - `JSON Web Token Secret` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
-  - `HTTP Basic Authentication`
-  - `HTTP Bearer Token`
-  - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+    - `Credentials in MongoDB Connection String` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
+    - `Credentials in PostgreSQL Connection URI` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+    - `Django Secret Key` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
+    - `Jenkins Setup Admin Password`
+    - `Jina Search Foundation API Key`
+    - `JSON Web Token Secret` ([#232](https://github.com/praetorian-inc/noseyparker/pull/232))
+    - `HTTP Basic Authentication`
+    - `HTTP Bearer Token`
+    - `PHPMailer Credentials` ([#227](https://github.com/praetorian-inc/noseyparker/pull/227))
 
 - The `rules check` command now has an optional `--pedantic` mode that verifies some additional non-material properties.
 
@@ -137,7 +139,7 @@ Happy secret hunting!
       { "content_base64": "base64-encoded bytestring to scan", "provenance": <arbitrary object> }
       { "content": "utf8 string to scan", "provenance": <arbitrary object> }
 
-  Shell process substitution can make _streaming_ invocation ergonomic, e.g., `scan --enumerator=<(my-enumerator-program)`.
+    Shell process substitution can make _streaming_ invocation ergonomic, e.g., `scan --enumerator=<(my-enumerator-program)`.
 
 ### Changes
 - Inputs are now enumerated incrementally as scanning proceeds rather than done in an initial batch step ([#216](https://github.com/praetorian-inc/noseyparker/pull/216)).
@@ -184,15 +186,15 @@ Happy secret hunting!
   Each rule can have zero or more freeform text categories assigned to it.
   The existing rules have been updated with category information with the following meanings:
 
-  - `secret`: the rule detects things that are in fact secrets
-  - `identifier`: the rule detects things that are not secrets but could be used to enumerate additional resources (e.g., S3 bucket names)
-  - `hashed`: the rule detects hashed payloads (e.g., bcrypt hashes)
-  - `test`: the rule detects test deployment-specific payloads (e.g., stripe test keys)
-  - `api`: the rule detects payloads used for API access
-  - `generic`: the rule is a "generic" one rather than one that detects a specific type of payload (e.g., username/password pairs)
-  - `fuzzy`: the rule pattern requires matching of non-payload surrounding context
+    - `secret`: the rule detects things that are in fact secrets
+    - `identifier`: the rule detects things that are not secrets but could be used to enumerate additional resources (e.g., S3 bucket names)
+    - `hashed`: the rule detects hashed payloads (e.g., bcrypt hashes)
+    - `test`: the rule detects test deployment-specific payloads (e.g., stripe test keys)
+    - `api`: the rule detects payloads used for API access
+    - `generic`: the rule is a "generic" one rather than one that detects a specific type of payload (e.g., username/password pairs)
+    - `fuzzy`: the rule pattern requires matching of non-payload surrounding context
 
-  The category information is included in output in the `rules list` command.
+    The category information is included in output in the `rules list` command.
 
 ### Changes
 - The `scan` and `github repos list` commands now only consider non-forked repositories by default ([#204](https://github.com/praetorian-inc/noseyparker/pull/204)).
@@ -206,22 +208,22 @@ Happy secret hunting!
 
 - Several rules have been renamed ([#208](https://github.com/praetorian-inc/noseyparker/pull/208)):
 
-  - `AWS S3 Bucket (subdomain style)` -> `AWS S3 Bucket`
-  - `AWS S3 Bucket (path style)` -> `AWS S3 Bucket`
-  - `Blynk Organization Access Token (URL first)` -> `Blynk Organization Access Token`.
-  - `Blynk Organization Access Token (URL last)` -> `Blynk Organization Access Token`.
-  - `Generic Password (double quoted)` -> `Generic Password`
-  - `Generic Password (single quoted)` -> `Generic Password`
-  - `Generic Username and Password (quoted)` -> `Generic Username and Password`
-  - `Generic Username and Password (unquoted)` -> `Generic Username and Password`
-  - `Google Cloud Storage Bucket (path style)` -> `Google Cloud Storage Bucket`
-  - `Google Cloud Storage Bucket (subdomain style)` -> `Google Cloud Storage Bucket`
-  - `Google OAuth Client Secret (prefixed)` -> `Google OAuth Client Secret`
-  - `New Relic License Key (non-suffixed)` -> `New Relic License Key`
-  - `particle.io Access Token (URL first)` -> `particle.io Access Token`
-  - `particle.io Access Token (URL last)` -> `particle.io Access Token`
+    - `AWS S3 Bucket (subdomain style)` -> `AWS S3 Bucket`
+    - `AWS S3 Bucket (path style)` -> `AWS S3 Bucket`
+    - `Blynk Organization Access Token (URL first)` -> `Blynk Organization Access Token`.
+    - `Blynk Organization Access Token (URL last)` -> `Blynk Organization Access Token`.
+    - `Generic Password (double quoted)` -> `Generic Password`
+    - `Generic Password (single quoted)` -> `Generic Password`
+    - `Generic Username and Password (quoted)` -> `Generic Username and Password`
+    - `Generic Username and Password (unquoted)` -> `Generic Username and Password`
+    - `Google Cloud Storage Bucket (path style)` -> `Google Cloud Storage Bucket`
+    - `Google Cloud Storage Bucket (subdomain style)` -> `Google Cloud Storage Bucket`
+    - `Google OAuth Client Secret (prefixed)` -> `Google OAuth Client Secret`
+    - `New Relic License Key (non-suffixed)` -> `New Relic License Key`
+    - `particle.io Access Token (URL first)` -> `particle.io Access Token`
+    - `particle.io Access Token (URL last)` -> `particle.io Access Token`
 
-  Note that although several rules share the same name now, they all still have distinct IDs.
+    Note that although several rules share the same name now, they all still have distinct IDs.
 
 - The default set of patterns for the existing gitignore-style path-based exclusion mechanism (`scan --ignore=GITIGNORE_FILE`) has been expanded ([#209](https://github.com/praetorian-inc/noseyparker/pull/209)).
   The new patterns cover test files from things like vendored Python, Node.js, and Go packages.
@@ -261,13 +263,13 @@ Happy secret hunting!
 
 - New rules have been added:
 
-  - AWS API Credentials ([#190](https://github.com/praetorian-inc/noseyparker/pull/190))
-  - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
-  - Azure Personal Access Token ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
-  - Base64-PEM-Encoded Private Key ([#192](https://github.com/praetorian-inc/noseyparker/pull/192))
-  - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from @tobiasgyoerfi)
-  - Google OAuth Credentials ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
-  - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
+    - AWS API Credentials ([#190](https://github.com/praetorian-inc/noseyparker/pull/190))
+    - AWS AppSync API Key ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
+    - Azure Personal Access Token ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
+    - Base64-PEM-Encoded Private Key ([#192](https://github.com/praetorian-inc/noseyparker/pull/192))
+    - Databricks Personal Access Token ([#187](https://github.com/praetorian-inc/noseyparker/pull/187) from @tobiasgyoerfi)
+    - Google OAuth Credentials ([#193](https://github.com/praetorian-inc/noseyparker/pull/193))
+    - Password Hash (Kerberos 5, etype 23, AS-REP) ([#176](https://github.com/praetorian-inc/noseyparker/pull/176))
 
 - Prebuilt releases now included separate debug symbols (.dSYM or .dwp files) ([#191](https://github.com/praetorian-inc/noseyparker/pull/191)).
   Having the debug symbols available makes stack traces more useful in the rare event of a crash.
@@ -321,44 +323,44 @@ Happy secret hunting!
 
 - New rules have been added (thank you @gemesa):
 
-  - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
-  - Blynk Device Access Token ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Access Token (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Access Token (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Client ID (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Client ID (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Client Secret (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Blynk Organization Client Secret (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
-  - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108))
-  - Doppler CLI Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Doppler Personal Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Doppler Service Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Doppler Service Account Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Doppler SCIM Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Doppler Audit Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
-  - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106))
-  - particle.io Access Token (URL first) ([#113](https://github.com/praetorian-inc/noseyparker/pull/113))
-  - particle.io Access Token (URL last) ([#113](https://github.com/praetorian-inc/noseyparker/pull/113))
-  - ThingsBoard Access Token ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
-  - ThingsBoard Provision Device Key ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
-  - ThingsBoard Provision Device Secret ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
-  - TrueNAS API Key (WebSocket) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
-  - TrueNAS API Key (REST API) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
-  - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
-  - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
+    - Adafruit IO Key ([#114](https://github.com/praetorian-inc/noseyparker/pull/114))
+    - Blynk Device Access Token ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Access Token (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Access Token (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Client ID (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Client ID (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Client Secret (URL first) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Blynk Organization Client Secret (URL last) ([#117](https://github.com/praetorian-inc/noseyparker/pull/117))
+    - Docker Hub Personal Access Token ([#108](https://github.com/praetorian-inc/noseyparker/pull/108))
+    - Doppler CLI Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Doppler Personal Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Doppler Service Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Doppler Service Account Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Doppler SCIM Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Doppler Audit Token ([#111](https://github.com/praetorian-inc/noseyparker/pull/111))
+    - Dropbox Access Token ([#106](https://github.com/praetorian-inc/noseyparker/pull/106))
+    - particle.io Access Token (URL first) ([#113](https://github.com/praetorian-inc/noseyparker/pull/113))
+    - particle.io Access Token (URL last) ([#113](https://github.com/praetorian-inc/noseyparker/pull/113))
+    - ThingsBoard Access Token ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
+    - ThingsBoard Provision Device Key ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
+    - ThingsBoard Provision Device Secret ([#112](https://github.com/praetorian-inc/noseyparker/pull/112))
+    - TrueNAS API Key (WebSocket) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
+    - TrueNAS API Key (REST API) ([#110](https://github.com/praetorian-inc/noseyparker/pull/110))
+    - WireGuard Private Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
+    - WireGuard Preshared Key ([#104](https://github.com/praetorian-inc/noseyparker/pull/104))
 
 - A new `generate` command has been added, which generates various assets that are included in prebuilt releases:
 
-  - Shell completion scripts via `generate shell-completions`
-  - A JSON Schema for the `report -f json` output via `generate json-schema` ([#128](https://github.com/praetorian-inc/noseyparker/issues/128))
-  - Manpages via `generate manpages` ([#88](https://github.com/praetorian-inc/noseyparker/issues/88))
+    - Shell completion scripts via `generate shell-completions`
+    - A JSON Schema for the `report -f json` output via `generate json-schema` ([#128](https://github.com/praetorian-inc/noseyparker/issues/128))
+    - Manpages via `generate manpages` ([#88](https://github.com/praetorian-inc/noseyparker/issues/88))
 
 ### Fixes
 - Several rules have been fixed that in certain circumstances would fail to match and produce a runtime error message:
 
-  - Google API Key
-  - ODBC Connection String
-  - Sauce Token
+    - Google API Key
+    - ODBC Connection String
+    - Sauce Token
 
 - The `netrc Credentials` rule has been modified to avoid a runtime message about an empty capture group.
 
@@ -372,36 +374,36 @@ Happy secret hunting!
 
 - The data model and datastore have been significantly overhauled:
 
-  - The rules used during scanning are now explicitly recorded in the datastore.
-    Each rule is additionally accompanied by a content-based identifier that uniquely identifies the rule based on its pattern.
+    - The rules used during scanning are now explicitly recorded in the datastore.
+      Each rule is additionally accompanied by a content-based identifier that uniquely identifies the rule based on its pattern.
 
-  - Each match is now associated with the rule that produced it, rather than just the rule's name (which can change as rules are modified).
+    - Each match is now associated with the rule that produced it, rather than just the rule's name (which can change as rules are modified).
 
-  - Each match is now assigned a unique content-based identifier.
+    - Each match is now assigned a unique content-based identifier.
 
-  - Findings (i.e., groups of matches with the same capture groups, produced by the same rule) are now represented explicitly in the datastore.
-    Each finding is assigned a unique content-based identifier.
+    - Findings (i.e., groups of matches with the same capture groups, produced by the same rule) are now represented explicitly in the datastore.
+      Each finding is assigned a unique content-based identifier.
 
-  - Now, each time a rule matches, a single match object is produced.
-    Each match in the datastore is now associated with an array of capture groups.
-    Previously, a rule whose pattern had multiple capture groups would produce one match object for each group, with each one being associated with a single capture group.
+    - Now, each time a rule matches, a single match object is produced.
+      Each match in the datastore is now associated with an array of capture groups.
+      Previously, a rule whose pattern had multiple capture groups would produce one match object for each group, with each one being associated with a single capture group.
 
-  - Provenance metadata for blobs is recorded in a much simpler way than before.
-    The new representation explicitly records file and git-based provenance, but also adds explicit support for _extensible_ provenance.
-    This change will make it possible in the future to have Nosey Parker scan and usefully report blobs produced by custom input data enumerators (e.g., a Python script that lists files from the Common Crawl WARC files).
+    - Provenance metadata for blobs is recorded in a much simpler way than before.
+      The new representation explicitly records file and git-based provenance, but also adds explicit support for _extensible_ provenance.
+      This change will make it possible in the future to have Nosey Parker scan and usefully report blobs produced by custom input data enumerators (e.g., a Python script that lists files from the Common Crawl WARC files).
 
-  - Scores are now associated with matches instead of findings.
+    - Scores are now associated with matches instead of findings.
 
-  - Comments can now be associated with both matches and findings, instead of just findings.
+    - Comments can now be associated with both matches and findings, instead of just findings.
 
 - The JSON and JSONL report formats have changed.
   These will stabilize in a future release ([#101](https://github.com/praetorian-inc/noseyparker/issues/101)).
 
-  - The `matching_input` field for matches has been removed and replaced with a new `groups` field, which contains an array of base64-encoded bytestrings.
+    - The `matching_input` field for matches has been removed and replaced with a new `groups` field, which contains an array of base64-encoded bytestrings.
 
-  - Each match now includes additional `rule_text_id`, `rule_structural_id`, and `structural_id` fields.
+    - Each match now includes additional `rule_text_id`, `rule_structural_id`, and `structural_id` fields.
 
-  - The `provenance` field of each match is now slightly different.
+    - The `provenance` field of each match is now slightly different.
 
 - Schema migration of older Nosey Parker datastores is no longer performed.
   Previously, this would automatically and silently be done when opening a datastore from an older version.
@@ -422,7 +424,7 @@ Happy secret hunting!
 
 - A new advanced global command-line parameter has been exposed:
 
-  - `--sqlite-cache-size=SIZE` to control the `pragma cache_size` value used in sqlite database connections
+    `--sqlite-cache-size=SIZE` to control the `pragma cache_size` value used in sqlite database connections
 
 - The datastore now contains two additional tables for to represent freeform comments and accept/reject status associated with findings.
   These additional tables are not currently populated in the open-source version of Nosey Parker.
@@ -443,22 +445,22 @@ Happy secret hunting!
 
 - Additional checks have been added to the `rules check` command:
 
-  - Each regex rule must have at least one capture group
-  - Each ruleset must have a globally-unique ID
-  - A ruleset's included rules must resolve to actual rules
-  - A ruleset should not include duplicate rules
+    - Each regex rule must have at least one capture group
+    - Each ruleset must have a globally-unique ID
+    - A ruleset's included rules must resolve to actual rules
+    - A ruleset should not include duplicate rules
 
 - A new `rules list` command is available, which lists available rules and rulesets.
   This command can emit its output in human-oriented format or in JSON format.
 
 - New rules have been added:
 
-  - Dependency-Track API Key (Thank you @tpat13!)
-  - Password Hash (sha256crypt)
-  - Password Hash (sha512crypt)
-  - Password Hash (Cisco IOS PBKDF2 with SHA256)
-  - React App Username
-  - React App Password
+    - Dependency-Track API Key (Thank you @tpat13!)
+    - Password Hash (sha256crypt)
+    - Password Hash (sha512crypt)
+    - Password Hash (Cisco IOS PBKDF2 with SHA256)
+    - React App Username
+    - React App Password
 
 - A new global `--quiet` / `-q` option has been added, which suppresses non-error feedback messages and disables progress bars ([#97](https://github.com/praetorian-inc/noseyparker/issues/97)).
 
@@ -467,18 +469,18 @@ Happy secret hunting!
 
 - Fixed three rules that were missing capture groups:
 
-  - Age Recipient (X25519 public key)
-  - Age Identity (X22519 secret key)
-  - crates.io API Key
+    - Age Recipient (X25519 public key)
+    - Age Identity (X22519 secret key)
+    - crates.io API Key
 
-  Due to nuanced details of how scanning is performed, rules without capture groups will never produce reported matches.
-  An additional check was added to the `rules check` command and a couple assertions were added that should help prevent this type of error in the future.
+    Due to nuanced details of how scanning is performed, rules without capture groups will never produce reported matches.
+    An additional check was added to the `rules check` command and a couple assertions were added that should help prevent this type of error in the future.
 
 - Fixed several rules:
 
-  - Amazon MWS Auth Token: the capture group was smaller than it should have been
-  - Microsoft Teams Webhook: changed 3 capture groups to 1; full URL is now included
-  - Slack Webhook: full URL is now included
+    - Amazon MWS Auth Token: the capture group was smaller than it should have been
+    - Microsoft Teams Webhook: changed 3 capture groups to 1; full URL is now included
+    - Slack Webhook: full URL is now included
 
 - The LICENSE, README.md, and CHANGELOG.md files are now included in prebuilt binary releases.
 
@@ -497,11 +499,11 @@ Happy secret hunting!
 
 - Several rules have been changed:
 
-  - The `Slack` rule (id `np.slack.1`) has been removed, as it was redundant with `Slack Token`.
-  - `Slack Token` has been split into `Slack Bot Token`, `Slack Legacy Bot Token`, `Slack User Token`, and `Slack App Token`.
-  - `CodeClimate` was enhanced to detect additional cases and was renamed to `CodeClimate Reporter ID`.
-  - `md5crypt Hash` (id `np.md5.1`) has been renamed to `Password Hash (md5crypt)` and re-identified as `np.pwhash.1`.
-  - `bcrypt Hash` (id `np.bcrypt.1`) has been renamed to `Password Hash (bcrypt)` and re-identified as `np.pwhash.2`.
+    - The `Slack` rule (id `np.slack.1`) has been removed, as it was redundant with `Slack Token`.
+    - `Slack Token` has been split into `Slack Bot Token`, `Slack Legacy Bot Token`, `Slack User Token`, and `Slack App Token`.
+    - `CodeClimate` was enhanced to detect additional cases and was renamed to `CodeClimate Reporter ID`.
+    - `md5crypt Hash` (id `np.md5.1`) has been renamed to `Password Hash (md5crypt)` and re-identified as `np.pwhash.1`.
+    - `bcrypt Hash` (id `np.bcrypt.1`) has been renamed to `Password Hash (bcrypt)` and re-identified as `np.pwhash.2`.
 
 - Log messages are written to stderr instead of stdout ([#97](https://github.com/praetorian-inc/noseyparker/issues/97)).
 
@@ -524,8 +526,8 @@ Happy secret hunting!
 
 - New rules have been added:
 
-  - Mapbox Temporary Access Token
-  - Salesforce Access Token
+    - Mapbox Temporary Access Token
+    - Salesforce Access Token
 
 - A new `disable_tracing` Cargo feature has been added, which disables `trace`-level logging and tracing messages.
   This feature is also aliased by a new `release` feature, which is enabled in prebuilt releases.
@@ -565,19 +567,19 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.14.0
 
 - New rules have been added:
 
-  - Amazon Resource Name
-  - AWS S3 Bucket (subdomain style)
-  - AWS S3 Bucket (path style)
-  - Google Cloud Storage Bucket (subdomain style)
-  - Google Cloud Storage Bucket (path style)
-  - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
+    - Amazon Resource Name
+    - AWS S3 Bucket (subdomain style)
+    - AWS S3 Bucket (path style)
+    - Google Cloud Storage Bucket (subdomain style)
+    - Google Cloud Storage Bucket (path style)
+    - HuggingFace User Access Token ([#54](https://github.com/praetorian-inc/noseyparker/pull/54)—thank you @AdnaneKhan!)
 
 - Rules are now required to have a globally-unique identifier ([#62](https://github.com/praetorian-inc/noseyparker/pull/62))
 
 - Two new advanced global command-line parameters have been exposed:
 
-  - `--rlimit-nofile LIMIT` to control the maximum number of open file descriptors
-  - `--enable-backtraces BOOL` to control whether backtraces are printed upon panic
+    - `--rlimit-nofile LIMIT` to control the maximum number of open file descriptors
+    - `--enable-backtraces BOOL` to control whether backtraces are printed upon panic
 
 - The snippet length for matches found by the `scan` command can now be controlled with the new `--snippet-length BYTES` parameter.
 
@@ -587,16 +589,16 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.14.0
   This metadata includes size in bytes and guessed mime type based on filename extension.
   Optionally, if the non-default `libmagic` Cargo feature is enabled, the mime type and charset are guessed by passing the content of the blob through `libmagic` (the guts of the `file` command-line program).
 
-  By default, all this additional metadata is recorded into the datastore for each blob in which matches are found.
-  This can be more precisely controlled using the new `--blob-metadata={all,matching,none}` parameter.
+    By default, all this additional metadata is recorded into the datastore for each blob in which matches are found.
+    This can be more precisely controlled using the new `--blob-metadata={all,matching,none}` parameter.
 
-  This newly-collected metadata is included in output of the `report` command.
+    This newly-collected metadata is included in output of the `report` command.
 
 - The `scan` command now collects additional metadata about blobs found within Git repositories.
   Specifically, for each blob found in Git repository history, the set of commits where it was introduced and the accompanying pathname for the blob is collected ([#16](https://github.com/praetorian-inc/noseyparker/issues/16)).
   This is enabled by default, but can be controlled using the new `--git-blob-provenance={first-seen,minimal}` parameter.
 
-  This newly-collected metadata is included in output of the `report` command.
+    This newly-collected metadata is included in output of the `report` command.
 
 ### Changes
 - The datastore schema has been changed in an incompatible way such that migrating existing datastores to the new version is not possible.
@@ -610,8 +612,8 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.14.0
 
 - Existing rules were modified to reduce both false positives and false negatives:
 
-  - Generic Password (double quoted)
-  - Generic Password (single quoted)
+    - Generic Password (double quoted)
+    - Generic Password (single quoted)
 
 - The default size of match snippets has been increased from 128 bytes before and after to 256.
   This typically gives 4-7 lines of context before and after each match.
@@ -646,25 +648,25 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.13.0
 
 - Several existing rules were modified to reduce false positives and false negatives:
 
-  - Generic API Key
-  - Telegram Bot Token
+    - Generic API Key
+    - Telegram Bot Token
 
 ### Additions
 - New rules have been added:
 
-  - Generic Username and Password (quoted)
-  - Generic Username and Password (unquoted)
-  - Generic Password (double quoted)
-  - Generic Password (single quoted)
-  - Grafana API Token
-  - Grafana Cloud API Token
-  - Grafana Service Account Token
-  - Postman API Key
+    - Generic Username and Password (quoted)
+    - Generic Username and Password (unquoted)
+    - Generic Password (double quoted)
+    - Generic Password (single quoted)
+    - Grafana API Token
+    - Grafana Cloud API Token
+    - Grafana Service Account Token
+    - Postman API Key
 
 - References have been added for several rules:
 
-  - Twilio API Key
-  - Dynatrace Token
+    - Twilio API Key
+    - Dynatrace Token
 
 ### Fixes
 - The Docker image now has the `git` binary installed. Previously this was missing, causing the `scan` command to fail when the `--git-url`, `--github-user`, or `--github-organization` input specifiers were used ([#38](https://github.com/praetorian-inc/noseyparker/issues/38)).
@@ -689,45 +691,45 @@ docker pull ghcr.io/praetorian-inc/noseyparker:v0.12.0
 
 - Many new rules have been added:
 
-  - Adobe OAuth Client Secret
-  - Age Identity (X22519 secret key)
-  - Age Recipient (X25519 public key)
-  - crates.io API Key
-  - DigitalOcean Application Access Token
-  - DigitalOcean Personal Access Token
-  - DigitalOcean Refresh Token
-  - Figma Personal Access Token
-  - GitLab Personal Access Token
-  - GitLab Pipeline Trigger Token
-  - GitLab Runner Registration Token
-  - Google OAuth Client Secret (prefixed)
-  - New Relic API Service Key
-  - New Relic Admin API Key
-  - New Relic Insights Insert Key
-  - New Relic Insights Query Key
-  - New Relic License Key
-  - New Relic License Key (non-suffixed)
-  - New Relic Pixie API Key
-  - New Relic Pixie Deploy Key
-  - New Relic REST API Key
-  - NPM Access Token (fine-grained)
-  - OpenAI API Key
-  - Segment Public API Token
-  - Shopify Access Token (Custom App)
-  - Shopify Access Token (Legacy Private App)
-  - Shopify Access Token (Public App)
-  - Shopify App Secret
-  - Shopify Domain
-  - RubyGems API Key
-  - Telegram Bot Token
+    - Adobe OAuth Client Secret
+    - Age Identity (X22519 secret key)
+    - Age Recipient (X25519 public key)
+    - crates.io API Key
+    - DigitalOcean Application Access Token
+    - DigitalOcean Personal Access Token
+    - DigitalOcean Refresh Token
+    - Figma Personal Access Token
+    - GitLab Personal Access Token
+    - GitLab Pipeline Trigger Token
+    - GitLab Runner Registration Token
+    - Google OAuth Client Secret (prefixed)
+    - New Relic API Service Key
+    - New Relic Admin API Key
+    - New Relic Insights Insert Key
+    - New Relic Insights Query Key
+    - New Relic License Key
+    - New Relic License Key (non-suffixed)
+    - New Relic Pixie API Key
+    - New Relic Pixie Deploy Key
+    - New Relic REST API Key
+    - NPM Access Token (fine-grained)
+    - OpenAI API Key
+    - Segment Public API Token
+    - Shopify Access Token (Custom App)
+    - Shopify Access Token (Legacy Private App)
+    - Shopify Access Token (Public App)
+    - Shopify App Secret
+    - Shopify Domain
+    - RubyGems API Key
+    - Telegram Bot Token
 
-  These rules match token formats that are well-specified fixed-length strings with notable prefixes or suffixes, and so should produce very few false positives.
+    These rules match token formats that are well-specified fixed-length strings with notable prefixes or suffixes, and so should produce very few false positives.
 
 - Several existing rules were modified to improve signal-to-noise:
 
-  - Azure Connection String
-  - Credentials in ODBC Connection String
-  - PyPI Upload Token
+    - Azure Connection String
+    - Credentials in ODBC Connection String
+    - PyPI Upload Token
 
 - The `report` command now offers rudimentary SARIF support ([#4](https://github.com/praetorian-inc/noseyparker/issues/4)).
   Thank you @Coruscant11!

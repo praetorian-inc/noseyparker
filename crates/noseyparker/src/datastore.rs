@@ -1108,7 +1108,7 @@ impl Datastore {
     /// This information is needed for suppressing redundant matches at reporting time.
     pub fn check_match_redundancies(&mut self) -> Result<()> {
         self.conn.execute(indoc! {r#"
-            insert into match_redundancy (match_id, redundant_to)
+            insert or ignore into match_redundancy (match_id, redundant_to)
             with
                 match_overlap_metadata as (
                     select

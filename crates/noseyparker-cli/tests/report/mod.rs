@@ -216,6 +216,10 @@ fn redundant_matches() {
             assert_eq!(f["matches"].as_array().unwrap().len(), 1);
         }
     }
+
+    // Make sure re-scanning doesn't crash
+    noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
+        .stdout(match_scan_stats("110 B", 1, 0, 3));
 }
 
 // Test that the `report` command uses colors as expected when running under a pty:
