@@ -24,7 +24,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 ## [v0.22.0](https://github.com/praetorian-inc/noseyparker/releases/v0.22.0) (2024-12-20)
 
 ### Breaking Changes
-- The JSON output format from `report` has changed slightly ([#236](https://github.com/praetorian-inc/noseyparker/pull/236)).
+-   The JSON output format from `report` has changed slightly ([#236](https://github.com/praetorian-inc/noseyparker/pull/236)).
 
     Now, the JSON representation of provenance entries from extensible enumerators (i.e., `scan --enumerator=FILE`, introduced in v0.20.0) includes an additional `"payload"` field around the actual provenance content.
     For example, an extended provenance entry that previously would look like this:

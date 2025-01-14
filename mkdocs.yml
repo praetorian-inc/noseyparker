@@ -1,0 +1,127 @@
+#strict: true
+
+site_name: Nosey Parker
+site_description: Find secrets in textual data and Git history
+site_url: https://praetorian-inc.github.io/noseyparker
+
+repo_url: https://github.com/praetorian-inc/noseyparker
+edit_uri: edit/main/docs
+
+nav:
+
+- Home: index.md
+- installation.md
+
+- tutorial.md
+
+- Examples:
+
+  - scanning.md
+  - reporting.md
+  - enumeration.md
+
+- Reference:
+  - data-model.md
+
+  - Commands:
+    - commands/index.md
+    - v0.17.0/man/man1/noseyparker-datastore-init.1.md
+    # ├── noseyparker-datastore.1.md
+    # ├── noseyparker-generate-json-schema.1.md
+    # ├── noseyparker-generate-manpages.1.md
+    # ├── noseyparker-generate-shell-completions.1.md
+    # ├── noseyparker-generate.1.md
+    # ├── noseyparker-github-repos-list.1.md
+    # ├── noseyparker-github-repos.1.md
+    # ├── noseyparker-github.1.md
+    # ├── noseyparker-report.1.md
+    # ├── noseyparker-rules-check.1.md
+    # ├── noseyparker-rules-list.1.md
+    # ├── noseyparker-rules.1.md
+    # ├── noseyparker-scan.1.md
+    # ├── noseyparker-summarize.1.md
+    # └── noseyparker.1.md
+
+  - adding-rules.md
+
+# N.B., The rules directory is handled by the `generate_rules_docs.py` script
+# and the `gen-files` and `literate-nav` extensions.
+- Built-in Rules: rules/
+
+- Changelog: CHANGELOG.md
+
+
+markdown_extensions:
+# allows for notes / callouts
+- admonition
+- pymdownx.fancylists
+# allows for arbitrary nesting of code and content blocks inside each other,
+# including admonitions, tabs, lists and all other elements
+- pymdownx.superfences
+- toc:
+    permalink: true
+    toc_depth: 2  # Only show 2 levels in the table of contents
+
+
+plugins:
+- gen-files:
+    scripts:
+    - docs/scripts/generate_rules_docs.py
+- literate-nav
+- search
+
+# Explicitly add some entries to make `mkdocs serve` more useful
+watch:
+- docs/scripts
+
+theme:
+  name: material
+  palette:
+  # Palette toggle for automatic mode
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+
+  # Palette toggle for light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+
+  # Palette toggle for dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to system preference
+
+  features:
+
+  - content.action.edit
+  - content.action.view
+  - content.code.copy
+  - content.code.annotate
+
+  - navigation.tabs
+  - navigation.expand
+  - navigation.instant
+  - navigation.instant.prefetch
+  # - navigation.instant.preview
+  #- navigation.prune
+  #- navigation.footer
+  #- navigation.sections
+  - navigation.tracking
+
+  - toc.integrate
+
+  exclude:
+    glob:
+      - "scripts"
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn

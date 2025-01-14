@@ -1,4 +1,4 @@
-# Nosey Parker Rules
+# Adding Rules
 
 At its core, Nosey Parker is a regular expression-based content matcher.
 It uses a set of rules defined in YAML syntax to determine what matching content to report.
