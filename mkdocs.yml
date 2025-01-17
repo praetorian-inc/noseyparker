@@ -66,13 +66,14 @@ markdown_extensions:
 plugins:
 - gen-files:
     scripts:
-    - docs/scripts/generate_rules_docs.py
+    - doc-scripts/generate_rules_docs.py
 - literate-nav
+#- offline
 - search
 
 # Explicitly add some entries to make `mkdocs serve` more useful
 watch:
-- docs/scripts
+- doc-scripts
 
 theme:
   name: material
@@ -107,19 +108,17 @@ theme:
 
   - navigation.tabs
   - navigation.expand
+
   - navigation.instant
-  - navigation.instant.prefetch
-  # - navigation.instant.preview
+  # - navigation.instant.prefetch
+  - navigation.instant.preview
+
   #- navigation.prune
   #- navigation.footer
   #- navigation.sections
   - navigation.tracking
 
   - toc.integrate
-
-  exclude:
-    glob:
-      - "scripts"
 
 validation:
   omitted_files: warn
