@@ -20,6 +20,9 @@ Note that the use of semantic versioning applies to the command-line interface a
 ### Fixes
 - Rerunning a scan with the same input and datastore no longer crashes with a `UNIQUE constraint failed` error.
 
+### Changes
+- The `generate manpages` command now creates output directories as needed instead of exiting with an error.
+
 
 ## [v0.22.0](https://github.com/praetorian-inc/noseyparker/releases/v0.22.0) (2024-12-20)
 

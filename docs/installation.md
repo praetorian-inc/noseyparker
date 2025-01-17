@@ -59,7 +59,7 @@ Required dependencies:
 - `sha256sum`: needed for computing digests (often provided by the `coreutils` package)
 - `zsh`: needed for build scripts
 
-### 2. Build using the [`create-release.zsh`](scripts/create-release.zsh) script
+### 2. Build using the [`create-release.zsh`](https://github.com/praetorian-inc/noseyparker/blob/main/scripts/create-release.zsh) script
 ```shell
 $ rm -rf release && ./scripts/create-release.zsh
 ```

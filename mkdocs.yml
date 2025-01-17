@@ -10,9 +10,10 @@ edit_uri: edit/main/docs
 nav:
 
 - Home: index.md
-- installation.md
 
-- tutorial.md
+- Getting Started:
+  - installation.md
+  - tutorial.md
 
 - Examples:
 
@@ -23,30 +24,16 @@ nav:
 - Reference:
   - data-model.md
 
-  - Commands:
-    - commands/index.md
-    - v0.17.0/man/man1/noseyparker-datastore-init.1.md
-    # ├── noseyparker-datastore.1.md
-    # ├── noseyparker-generate-json-schema.1.md
-    # ├── noseyparker-generate-manpages.1.md
-    # ├── noseyparker-generate-shell-completions.1.md
-    # ├── noseyparker-generate.1.md
-    # ├── noseyparker-github-repos-list.1.md
-    # ├── noseyparker-github-repos.1.md
-    # ├── noseyparker-github.1.md
-    # ├── noseyparker-report.1.md
-    # ├── noseyparker-rules-check.1.md
-    # ├── noseyparker-rules-list.1.md
-    # ├── noseyparker-rules.1.md
-    # ├── noseyparker-scan.1.md
-    # ├── noseyparker-summarize.1.md
-    # └── noseyparker.1.md
+  # N.B., handled by the `generate_commands_reference.py` script and `gen-files` / `literate-nav` extensions
+  - Commands: commands/
 
-  - adding-rules.md
-
-# N.B., The rules directory is handled by the `generate_rules_docs.py` script
-# and the `gen-files` and `literate-nav` extensions.
+# N.B., handled by the `generate_rules_docs.py` script and `gen-files` / `literate-nav` extensions
 - Built-in Rules: rules/
+
+- Contributing:
+  - Overview: contributing/index.md
+  - adding-rules.md
+  - integrations.md
 
 - Changelog: CHANGELOG.md
 
@@ -67,6 +54,7 @@ plugins:
 - gen-files:
     scripts:
     - doc-scripts/generate_rules_docs.py
+    - doc-scripts/generate_command_reference.py
 - literate-nav
 #- offline
 - search
@@ -124,3 +112,5 @@ validation:
   omitted_files: warn
   absolute_links: warn
   unrecognized_links: warn
+
+copyright: Copyright &copy; <a href="https://praetorian.com">Praetorian</a>

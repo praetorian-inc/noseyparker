@@ -12,7 +12,7 @@
 
 
 ## Scan filesystem content, including local Git repos
-![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](usage-examples/gifs/02-scan-git-history.gif)
+![Screenshot showing Nosey Parker's workflow for scanning the filesystem for secrets](img/02-scan-git-history.gif)
 
 Nosey Parker has native support for scanning files, directories, and the entire history of Git repositories.
 
@@ -57,3 +57,5 @@ These input specifiers will use an optional GitHub token if available in the `NP
 Providing an access token gives a higher API rate limit and may make additional repositories accessible to you.
 
 See `noseyparker help scan` for more details.
+
+## Scan from Parquet files using the extensible enumerator mechanism

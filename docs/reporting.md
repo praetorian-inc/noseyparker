@@ -1,11 +1,11 @@
 # Reporting
 
 ## Report findings in human-readable text format
-![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](usage-examples/gifs/03-report-human.gif)
+![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](img/03-report-human.gif)
 
 
 ## Report findings in JSON format
-![Screenshot showing Nosey Parker's workflow for rendering its findings in JSON format](usage-examples/gifs/04-report-json.gif)
+![Screenshot showing Nosey Parker's workflow for rendering its findings in JSON format](img/04-report-json.gif)
 
 
 ## Summarize findings
