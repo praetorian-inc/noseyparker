@@ -92,4 +92,40 @@ mod test {
         assert_eq!(matches, vec![(5, 9)]);
         Ok(())
     }
+
+    #[test]
+    pub fn test_vectorscan_utf8() -> Result<()> {
+        use vectorscan_rs::{BlockDatabase, BlockScanner, Pattern, Scan};
+
+        let pattern = r"(?i)(Güten Tag)";
+        let pattern = Pattern::new(pattern.as_bytes().to_vec(), Flag::UTF8 | Flag::UCP, None);
+        let db: BlockDatabase = BlockDatabase::new(vec![pattern])?;
+
+        let mut scanner = BlockScanner::new(&db)?;
+
+        {
+            let input = "GÜTEN TAG";
+            let mut matches: Vec<(u64, u64)> = vec![];
+            scanner.scan(input.as_bytes(), |id: u32, from: u64, to: u64, _flags: u32| {
+                println!("found pattern #{} @ [{}, {})", id, from, to);
+                matches.push((from, to));
+                Scan::Continue
+            })?;
+
+            assert_eq!(matches, vec![(0, 10)]);
+        }
+
+        {
+            let input = "güten tag";
+            let mut matches: Vec<(u64, u64)> = vec![];
+            scanner.scan(input.as_bytes(), |id: u32, from: u64, to: u64, _flags: u32| {
+                println!("found pattern #{} @ [{}, {})", id, from, to);
+                matches.push((from, to));
+                Scan::Continue
+            })?;
+
+            assert_eq!(matches, vec![(0, 10)]);
+        }
+        Ok(())
+    }
 }
