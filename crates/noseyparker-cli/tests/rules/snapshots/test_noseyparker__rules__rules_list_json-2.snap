@@ -100,6 +100,29 @@ expression: stdout
       }
     },
     {
+      "id": "np.anthropic.1",
+      "structural_id": "af4099fe0621255b2eef7a5189583ad08e1411e1",
+      "name": "Anthropic API Key",
+      "syntax": {
+        "name": "Anthropic API Key",
+        "id": "np.anthropic.1",
+        "pattern": "(?x)\n\\b\n(sk-ant-api[0-9]{2}-[a-zA-Z0-9_-]{95})\n(?: [^a-zA-Z0-9_-] | $ )\n",
+        "description": "An Anthropic API key was found. An attacker could use this API key to consume limited resources, cause denial-of-service, or access\n",
+        "examples": [
+          "sk-ant-api03-jSq6OMjv1syXaEUE0bvOckLe_GtCKy8lvZdko3eOJgV8TH-f2iyzRekyZNSby5d9ScikGYuqQhsrxML3X3N3rQ-XwQaQAAA",
+          "sk-ant-api03-f-SD8UXTHZuL3dhlRLMzMh7sxOopjFG510MC0B6g5Whzu2gM6gYJrQUduYWWQkG8XvkjeVj-MfYvtzMBF7NXSg-W34tmAAA"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.anthropic.com/en/api/getting-started"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.appsync.1",
       "structural_id": "1a653a8d9b81fd1ef03814630e219dfcd01d847b",
       "name": "AWS AppSync API Key",
@@ -4215,7 +4238,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 147
+      "num_rules": 148
     },
     {
       "id": "np.assets",
