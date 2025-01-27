@@ -114,7 +114,8 @@ expression: stdout
         ],
         "negative_examples": [],
         "references": [
-          "https://docs.anthropic.com/en/api/getting-started"
+          "https://docs.anthropic.com/en/api/getting-started",
+          "https://support.anthropic.com/en/articles/9767949-api-key-best-practices-keeping-your-keys-safe-and-secure"
         ],
         "categories": [
           "api",
