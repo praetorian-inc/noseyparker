@@ -12,6 +12,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 ### Additions
 - New rules:
 
+    - `Anthropic API Key`
     - `Firecrawl API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
     - `Generic Secret` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
     - `Generic Username and Password` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))

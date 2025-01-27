@@ -1,0 +1,23 @@
+rules:
+
+- name: Anthropic API Key
+  id: np.anthropic.1
+
+  pattern: |
+    (?x)
+    \b
+    (sk-ant-api[0-9]{2}-[a-zA-Z0-9_-]{95})
+    (?: [^a-zA-Z0-9_-] | $ )
+
+  categories: [api, secret]
+
+  description: >
+    An Anthropic API key was found.
+    An attacker could use this API key to consume limited resources, cause denial-of-service, or access
+
+  examples:
+  - 'sk-ant-api03-jSq6OMjv1syXaEUE0bvOckLe_GtCKy8lvZdko3eOJgV8TH-f2iyzRekyZNSby5d9ScikGYuqQhsrxML3X3N3rQ-XwQaQAAA'
+  - 'sk-ant-api03-f-SD8UXTHZuL3dhlRLMzMh7sxOopjFG510MC0B6g5Whzu2gM6gYJrQUduYWWQkG8XvkjeVj-MfYvtzMBF7NXSg-W34tmAAA'
+
+  references:
+  - https://docs.anthropic.com/en/api/getting-started
