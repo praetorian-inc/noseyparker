@@ -107,7 +107,7 @@ expression: stdout
         "name": "Anthropic API Key",
         "id": "np.anthropic.1",
         "pattern": "(?x)\n\\b\n(sk-ant-api[0-9]{2}-[a-zA-Z0-9_-]{95})\n(?: [^a-zA-Z0-9_-] | $ )\n",
-        "description": "An Anthropic API key was found. An attacker could use this API key to consume limited resources, cause denial-of-service, or access\n",
+        "description": "An Anthropic API key was found. Anthropic is an AI company. An attacker could use this API key to consume limited resources, cause denial-of-service, or access internal fine-tuned models.\n",
         "examples": [
           "sk-ant-api03-jSq6OMjv1syXaEUE0bvOckLe_GtCKy8lvZdko3eOJgV8TH-f2iyzRekyZNSby5d9ScikGYuqQhsrxML3X3N3rQ-XwQaQAAA",
           "sk-ant-api03-f-SD8UXTHZuL3dhlRLMzMh7sxOopjFG510MC0B6g5Whzu2gM6gYJrQUduYWWQkG8XvkjeVj-MfYvtzMBF7NXSg-W34tmAAA"
@@ -1511,6 +1511,33 @@ expression: stdout
           "fuzzy",
           "generic",
           "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.gitalk.1",
+      "structural_id": "f0cc3189bc13e0013683fce0161c8a211464f52d",
+      "name": "Gitalk OAuth Credentials",
+      "syntax": {
+        "name": "Gitalk OAuth Credentials",
+        "id": "np.gitalk.1",
+        "pattern": "(?x)\n\\b\nnew \\s+ Gitalk \\s* \\( \\s* \\{ \\s*\n  clientID: \\s* '([a-f0-9]{20})', \\s*\n  clientSecret: \\s* '([a-f0-9]{40})',\n",
+        "description": "Gitalk OAuth credentials were found. Gitalk is a GitHub-based commenting system. An attacker may be able to use these credentials to impersonate the Gitalk app and control its data.\n",
+        "examples": [
+          "new Gitalk({\n  clientID: 'd17d49be2e680b78a83d',\n  clientSecret:'9363cb456dda6402cb71d65092490e75c9f11873',\n"
+        ],
+        "negative_examples": [
+          "'\\\\n    <script type=\"text/javascript\">'+\n'\\\\n        const gitalk = new Gitalk({'+\n'\\\\n        clientID: \\\\'2e62dee7b9895e3eede6\\\\','+\n'\\\\n        clientSecret: \\\\'ca6819a54657af0d87960af15315319f8a628a53\\\\','+\n'\\\\n        repo: \\\\'AiLearning\\\\','+\n",
+          "var gitalk = new Gitalk({\n    \"clientID\": \"7bf1e92eaff34fd005dc\",\n    \"clientSecret\": \"d151c7bc86d545dafe2c1de75e3a174623230a2a\",\n    \"repo\": \"wibble.github.io\",\n"
+        ],
+        "references": [
+          "https://gitalk.github.io",
+          "https://github.com/gitalk/gitalk"
+        ],
+        "categories": [
+          "api",
+          "secret",
+          "fuzzy"
         ]
       }
     },
@@ -4239,7 +4266,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 148
+      "num_rules": 149
     },
     {
       "id": "np.assets",

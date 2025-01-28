@@ -1,0 +1,43 @@
+rules:
+
+- name: Gitalk OAuth Credentials
+  id: np.gitalk.1
+
+  pattern: |
+    (?x)
+    \b
+    new \s+ Gitalk \s* \( \s* \{ \s*
+      clientID: \s* '([a-f0-9]{20})', \s*
+      clientSecret: \s* '([a-f0-9]{40})',
+
+  categories: [api, secret, fuzzy]
+
+  description: >
+    Gitalk OAuth credentials were found.
+    Gitalk is a GitHub-based commenting system.
+    An attacker may be able to use these credentials to impersonate the Gitalk
+    app and control its data.
+
+  references:
+  - https://gitalk.github.io
+  - https://github.com/gitalk/gitalk
+
+  examples:
+  - |
+      new Gitalk({
+        clientID: 'd17d49be2e680b78a83d',
+        clientSecret:'9363cb456dda6402cb71d65092490e75c9f11873',
+
+  negative_examples:
+  - |
+      '\\n    <script type="text/javascript">'+
+      '\\n        const gitalk = new Gitalk({'+
+      '\\n        clientID: \\'2e62dee7b9895e3eede6\\','+
+      '\\n        clientSecret: \\'ca6819a54657af0d87960af15315319f8a628a53\\','+
+      '\\n        repo: \\'AiLearning\\','+
+
+  - |
+      var gitalk = new Gitalk({
+          "clientID": "7bf1e92eaff34fd005dc",
+          "clientSecret": "d151c7bc86d545dafe2c1de75e3a174623230a2a",
+          "repo": "wibble.github.io",

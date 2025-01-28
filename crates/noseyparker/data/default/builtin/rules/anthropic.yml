@@ -13,7 +13,9 @@ rules:
 
   description: >
     An Anthropic API key was found.
-    An attacker could use this API key to consume limited resources, cause denial-of-service, or access
+    Anthropic is an AI company.
+    An attacker could use this API key to consume limited resources, cause
+    denial-of-service, or access internal fine-tuned models.
 
   examples:
   - 'sk-ant-api03-jSq6OMjv1syXaEUE0bvOckLe_GtCKy8lvZdko3eOJgV8TH-f2iyzRekyZNSby5d9ScikGYuqQhsrxML3X3N3rQ-XwQaQAAA'

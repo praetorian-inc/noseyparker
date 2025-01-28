@@ -16,6 +16,7 @@ Note that the use of semantic versioning applies to the command-line interface a
     - `Firecrawl API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
     - `Generic Secret` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
     - `Generic Username and Password` x2 ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
+    - `Gitalk OAuth Credentials` ([#247](https://github.com/praetorian-inc/noseyparker/pull/247))
     - `Groq API Key` ([#244](https://github.com/praetorian-inc/noseyparker/pull/244))
 
 ### Fixes

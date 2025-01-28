@@ -66,6 +66,7 @@ rulesets:
   - np.generic.12     # Generic Password
   - np.generic.13     # Generic Credentials
   - np.generic.14     # Generic Credentials
+  - np.gitalk.1       # Gitalk OAuth Credentials
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token

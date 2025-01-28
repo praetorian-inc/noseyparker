@@ -64,6 +64,7 @@ expression: stdout
  np.generic.7         Credentials in .NET System.Net.NetworkCredential              fuzzy, generic, secret 
  np.generic.8         Credentials in .NET System.DirectoryServices.DirectoryEntry   fuzzy, generic, secret 
  np.generic.9         Sensitive Value in .NET Configuration                         fuzzy, generic, secret 
+ np.gitalk.1          Gitalk OAuth Credentials                                      api, fuzzy, secret 
  np.github.1          GitHub Personal Access Token                                  api, secret 
  np.github.2          GitHub OAuth Access Token                                     api, secret 
  np.github.3          GitHub App Token                                              api, secret 
@@ -176,6 +177,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             148 
+ default      Nosey Parker default rules             149 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
