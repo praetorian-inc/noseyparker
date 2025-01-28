@@ -63,7 +63,8 @@ default = ["mimalloc", "color_backtrace", "github", "parquet"]
 
 [build-dependencies]
 # Used for embedding compile-time version information into the `noseyparker` CLI
-vergen = { version = "8.3", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
+vergen = { version = "9.0", features = ["build", "cargo", "rustc", "si"] }
+vergen-gitcl = { version = "1.0", features = ["build", "cargo", "rustc", "si"] }
 
 [dependencies]
 anyhow = { version = "1.0" }
