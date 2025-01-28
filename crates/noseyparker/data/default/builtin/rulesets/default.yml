@@ -15,6 +15,7 @@ rulesets:
   - np.adafruit.1     # Adafruit IO Key
   - np.adobe.1        # Adobe OAuth Client Secret
   - np.age.2          # Age Identity (X22519 secret key)
+  - np.anthropic.1    # Anthropic API Key
   - np.artifactory.1  # Artifactory API Key
   - np.appsync.1      # AWS AppSync API Key
   - np.aws.2          # AWS Secret Access Key
@@ -65,6 +66,7 @@ rulesets:
   - np.generic.12     # Generic Password
   - np.generic.13     # Generic Credentials
   - np.generic.14     # Generic Credentials
+  - np.gitalk.1       # Gitalk OAuth Credentials
   - np.github.1       # GitHub Personal Access Token
   - np.github.2       # GitHub OAuth Access Token
   - np.github.3       # GitHub App Token
