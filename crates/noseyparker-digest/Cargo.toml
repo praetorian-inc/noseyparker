@@ -10,7 +10,7 @@ version = "0.0.0"
 publish.workspace = true
 
 [dependencies]
-gix-features = "0.39"
+gix-features = "0.40"
 hex = "0.4"
 
 [dev-dependencies]

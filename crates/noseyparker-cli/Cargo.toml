@@ -77,7 +77,7 @@ console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 flate2 = "1.0"
-gix = { version = "0.68", features = ["max-performance", "serde"] }
+gix = { version = "0.70", features = ["max-performance", "serde"] }
 glob = "0.3.1"
 indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode"] }
@@ -97,7 +97,7 @@ rlimit = "0.10.0"
 schemars = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde-sarif = "0.6"
+serde-sarif = "0.7"
 strum = { version = "0.26", features = ["derive"] }
 sysinfo = { version =  "0.33" }
 tar = "0.4"
@@ -108,9 +108,9 @@ tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-
 url = "2.3"
 vectorscan-rs = { version = "0.0.5" }
 object-pool = "0.6.0"
-parquet = { version = "53.2.0", optional = true }
-arrow-schema = { version = "53.2.0", optional = true }
-arrow-array = { version = "53.2.0", optional = true }
+parquet = { version = "54.0.0", optional = true }
+arrow-schema = { version = "54.0.0", optional = true }
+arrow-array = { version = "54.0.0", optional = true }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

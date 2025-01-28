@@ -15,9 +15,9 @@ bstr = { version = "1.0", features = ["serde"] }
 bstring-serde = { path = "../bstring-serde" }
 crossbeam-channel = "0.5"
 fixedbitset = "0.5"
-gix = { version = "0.68", features = ["max-performance", "serde"] }
+gix = { version = "0.70", features = ["max-performance", "serde"] }
 ignore = "0.4"
-petgraph = "0.6"
+petgraph = "0.7"
 roaring = "0.10"
 schemars = { version = "0.8" }
 serde = { version = "1.0", features = ["derive"] }
