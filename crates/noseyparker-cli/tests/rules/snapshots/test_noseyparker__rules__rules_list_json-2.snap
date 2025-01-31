@@ -2185,7 +2185,7 @@ expression: stdout
         "name": "Jina Search Foundation API Key",
         "id": "np.jina.1",
         "pattern": "(?x)\n\\b\n(jina_[a-zA-Z0-9]{60})\n\\b\n",
-        "description": "A Jina Search Foundation API Key was found.\nThis allows access to services including Jina Reader, Embeddings, Classifier, and Segmenter.\nAn attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
+        "description": "A Jina Search Foundation API Key was found. This allows access to services including Jina Reader, Embeddings, Classifier, and Segmenter. An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
         "examples": [
           "JINA_KEY = os.getenv('JINA_KEY','jina_c1758c6f49e14ced990ac7776800dc45ShJNTXBCizzwjE6IMFYJ7LD959cG')"
         ],
@@ -3156,9 +3156,9 @@ expression: stdout
     {
       "id": "np.psexec.1",
       "structural_id": "eb6bb9dbb032eebac8af247d96ebe4071484baf1",
-      "name": "Credentials in PsExec",
+      "name": "Credentials in PsExec Invocation",
       "syntax": {
-        "name": "Credentials in PsExec",
+        "name": "Credentials in PsExec Invocation",
         "id": "np.psexec.1",
         "pattern": "(?x)\n(?i)\npsexec .{0,100}\n-u \\s* (\\S+) \\s+    (?# username )\n-p \\s* (\\S+)        (?# password )\n",
         "description": null,
@@ -4214,6 +4214,31 @@ expression: stdout
       }
     },
     {
+      "id": "np.vmware.1",
+      "structural_id": "f7e14def3f20662a8df1097825493bcf39bfc97c",
+      "name": "Credentials in Connect-VIServer Invocation",
+      "syntax": {
+        "name": "Credentials in Connect-VIServer Invocation",
+        "id": "np.vmware.1",
+        "pattern": "(?x)(?i)\nConnect-VIServer\n.{0,50}\n-User \\s+ (\\S{3,30}) \\s+        (?# username )\n.{0,50}\n-Password \\s+ (\\S{3,30})        (?# password )\n",
+        "description": "Credentials were found in a `Connect-VIServer` invocation. `Connect-VIServer` is a command to connect to a VMWare vCenter Server. An attacker may be able to use these credentials to authenticate to vSphere instances, and depending on the associated privileges, administrate the resources such as Virtual Machines.\n",
+        "examples": [
+          "Connect-VIServer -Server 192.168.1.51 -User administrator@vSphere.local -Password VMware1!",
+          "#Set-PowerCLIConfiguration -InvalidCertificateAction:Ignore\nConnect-VIServer \"$endpoint\" -User \"$username\" -Password \"$password\" | Out-Null\n",
+          "Connect-VIServer $ESXiHost.EsxiHost -user $ESXiUser -password $ESXipass",
+          "$null = connect-viserver vc.lab.local -user administrator@vsphere.local -password VMware1!"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developer.broadcom.com/powercli/latest/vmware.vimautomation.core/commands/connect-viserver"
+        ],
+        "categories": [
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.wireguard.1",
       "structural_id": "c4defd244686e5be662bc73970771a1f4f0083be",
       "name": "WireGuard Private Key",
@@ -4266,7 +4291,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 149
+      "num_rules": 150
     },
     {
       "id": "np.assets",

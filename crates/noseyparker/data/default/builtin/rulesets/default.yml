@@ -127,7 +127,7 @@ rulesets:
   - np.phpmailer.1    # PHPMailer Credentials
   - np.postgres.1     # Credentials in PostgreSQL Connection URI
   - np.postman.1      # Postman API Key
-  - np.psexec.1       # Credentials in PsExec
+  - np.psexec.1       # Credentials in PsExec Command
   - np.pypi.1         # PyPI Upload Token
   - np.reactapp.1     # React App Username
   - np.reactapp.2     # React App Password
@@ -159,5 +159,6 @@ rulesets:
   - np.truenas.2      # TrueNAS API Key (REST API)
   - np.twilio.1       # Twilio API Key
   - np.twitter.2      # Twitter Secret Key
+  - np.vmware.1       # Credentials in Connect-VIServer Command
   - np.wireguard.1    # WireGuard Private Key
   - np.wireguard.2    # WireGuard Preshared Key
