@@ -1,0 +1,30 @@
+rules:
+
+- name: Credentials in Connect-VIServer Invocation
+  id: np.vmware.1
+
+  pattern: |
+    (?x)(?i)
+    Connect-VIServer
+    .{0,50}
+    -User \s+ (\S{3,30}) \s+        (?# username )
+    .{0,50}
+    -Password \s+ (\S{3,30})        (?# password )
+
+  categories: [fuzzy, secret]
+
+  description: >
+    Credentials were found in a `Connect-VIServer` invocation.
+    `Connect-VIServer` is a command to connect to a VMWare vCenter Server.
+    An attacker may be able to use these credentials to authenticate to vSphere instances, and depending on the associated privileges, administrate the resources such as Virtual Machines.
+
+  examples:
+  - 'Connect-VIServer -Server 192.168.1.51 -User administrator@vSphere.local -Password VMware1!'
+  - |
+      #Set-PowerCLIConfiguration -InvalidCertificateAction:Ignore
+      Connect-VIServer "$endpoint" -User "$username" -Password "$password" | Out-Null
+  - 'Connect-VIServer $ESXiHost.EsxiHost -user $ESXiUser -password $ESXipass'
+  - '$null = connect-viserver vc.lab.local -user administrator@vsphere.local -password VMware1!'
+
+  references:
+  - https://developer.broadcom.com/powercli/latest/vmware.vimautomation.core/commands/connect-viserver

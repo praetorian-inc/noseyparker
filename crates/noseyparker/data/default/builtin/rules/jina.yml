@@ -14,7 +14,7 @@ rules:
   references:
   - https://jina.ai
 
-  description: |
+  description: >
     A Jina Search Foundation API Key was found.
     This allows access to services including Jina Reader, Embeddings, Classifier, and Segmenter.
     An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.

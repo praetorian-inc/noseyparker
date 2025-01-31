@@ -1,6 +1,6 @@
 rules:
 
-- name: Credentials in PsExec
+- name: Credentials in PsExec Invocation
   id: np.psexec.1
 
   pattern: |
