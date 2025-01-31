@@ -12,10 +12,10 @@ Note that the use of semantic versioning applies to the command-line interface a
 ### Additions
 - New rules:
 
-    - `Credentials in Connect-VIServer Invocation`
+    - `Credentials in Connect-VIServer Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
 
 ### Changes
-- The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation`
+- The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
 
 
 ## [v0.23.0](https://github.com/praetorian-inc/noseyparker/releases/v0.23.0) (2025-01-28)
