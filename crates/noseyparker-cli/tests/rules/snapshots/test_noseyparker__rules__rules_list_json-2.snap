@@ -3854,6 +3854,31 @@ expression: stdout
       }
     },
     {
+      "id": "np.sourcegraph.1",
+      "structural_id": "37afa71f65cf37c1b3cf1aa4e7aa472ed567c81b",
+      "name": "Sourcegraph Access Token",
+      "syntax": {
+        "name": "Sourcegraph Access Token",
+        "id": "np.sourcegraph.1",
+        "pattern": "\\b(sgp_(?:[a-fA-F0-9]{16}|local)_[a-fA-F0-9]{40}|sgp_[a-fA-F0-9]{40})\\b",
+        "description": null,
+        "examples": [
+          "  sourcegraph access token sgp_fd1b4edb60bf82b8_a70aabf5f685734b19792789feeb73c6393cd02e<br/>",
+          "  access token sgp_b70acbf2f685734c19791789fdeb73c6393dd02a",
+          "  access token sgp_local_b70acbf2f685734c19791789fdeb73c6393dd02a",
+          "var applicationId = 'x-sourcegraph-token';\nvar accessToken = 'sgp_fd1b4edb60bf82b8_a70aabf5f685734b19792789feeb73c6393cd02e';\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://sourcegraph.com/docs/api/graphql"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.square.1",
       "structural_id": "3f8708418bfa64b2123fac51d9e640838af45cbf",
       "name": "Square Access Token",
@@ -4291,7 +4316,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 150
+      "num_rules": 151
     },
     {
       "id": "np.assets",
