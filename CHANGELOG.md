@@ -13,6 +13,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 - New rules:
 
     - `Credentials in Connect-VIServer Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
+    - `Sourcegraph Access Token` ([#252](https://github.com/praetorian-inc/noseyparker/pull/252))
 
 ### Changes
 - The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))

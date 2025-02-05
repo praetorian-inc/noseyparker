@@ -1,0 +1,26 @@
+rules:
+
+- name: Sourcegraph Access Token
+  id: np.sourcegraph.1
+
+  pattern: '\b(sgp_(?:[a-fA-F0-9]{16}_|local_)?[a-fA-F0-9]{40})\b'
+
+  description: >
+    A Sourcegraph Access Token was found.
+    Sourcegraph is a code search and AI platform.
+    Depending on permissions, an attacker may be able to use this token to access proprietary source code, move laterally to code hosting providers such as GitHub or GitLab, or administer the Sourcegraph organization settings.
+
+  categories:
+  - api
+  - secret
+
+  references:
+  - https://sourcegraph.com/docs/api/graphql
+
+  examples:
+  - '  sourcegraph access token sgp_fd1b4edb60bf82b8_a70aabf5f685734b19792789feeb73c6393cd02e<br/>'
+  - '  access token sgp_b70acbf2f685734c19791789fdeb73c6393dd02a'
+  - "  access token sgp_local_b70acbf2f685734c19791789fdeb73c6393dd02a"
+  - |
+      var applicationId = 'x-sourcegraph-token';
+      var accessToken = 'sgp_fd1b4edb60bf82b8_a70aabf5f685734b19792789feeb73c6393cd02e';

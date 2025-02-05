@@ -145,6 +145,7 @@ rulesets:
   - np.slack.5        # Slack App Token
   - np.slack.6        # Slack Legacy Bot Token
   - np.sonarqube.1    # SonarQube Token
+  - np.sourcegraph.1  # Sourcegraph Access Token
   - np.square.1       # Square Access Token
   - np.square.2       # Square OAuth Secret
   - np.stackhawk.1    # StackHawk API Key
