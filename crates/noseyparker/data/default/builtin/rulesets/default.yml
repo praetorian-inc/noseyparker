@@ -18,6 +18,7 @@ rulesets:
   - np.anthropic.1    # Anthropic API Key
   - np.artifactory.1  # Artifactory API Key
   - np.appsync.1      # AWS AppSync API Key
+  - np.auth0.1        # Auth0 Application Credentials
   - np.aws.2          # AWS Secret Access Key
   - np.aws.4          # AWS Session Token
   - np.aws.5          # Amazon MWS Auth Token

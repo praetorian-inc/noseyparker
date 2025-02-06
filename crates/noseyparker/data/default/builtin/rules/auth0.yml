@@ -1,0 +1,62 @@
+rules:
+
+- name: Auth0 Application Credentials
+  id: np.auth0.1
+
+  pattern: |
+    (?x)(?s)
+    (?: AUTH0_DOMAIN | AUTH0_ISSUER_BASE_URL ) \s* = \s* ['"] ( (?:https?://)? [a-zA-Z0-9._-]{10,100}) ['"]
+    .{0,100}
+    AUTH0_CLIENT_ID \s* = \s* ['"] ([a-zA-Z0-9]{32}) ['"]
+    .{0,100}
+    AUTH0_CLIENT_SECRET \s* = \s* ['"] ([a-zA-Z0-9_-]{32,80}) ['"]
+
+  categories: [api, secret, fuzzy]
+
+  references:
+  - https://auth0.com/docs
+  - https://auth0.com/docs/api/authentication
+  - https://auth0.com/docs/secure/application-credentials
+
+  description: >
+    Auth0 OAuth credentials were found.
+    Auth0 is an identity platform that provides authorization and authentication capabilities for applications.
+    An attacker may be able to use these credentials to impersonate an application or access protected resources.
+
+  examples:
+  - |
+      ```
+      REACT_APP_AUTH0_DOMAIN='dev-boomhauer88dw6tag.us.auth0.com'
+      REACT_APP_AUTH0_CLIENT_ID='HaDNmcczGrrwZ7SkPFTh6Owu3VDcjltm'
+      REACT_APP_AUTH0_CLIENT_SECRET='HgikpUzur6WkE4ol7r2yk_O7wbqd6UWGnFSBE4ByVnGw1cC5_jy_mjWoerv8UXqp'
+      REACT_APP_BACKEND_LINK='http://localhost:3001/signup'
+      ```
+
+  - |
+      AUTH0_SECRET='2816e32737432c3dec1f5de788696b4efc06e8f833910c8bdef1075b632e4f30'
+      AUTH0_BASE_URL='http://localhost:3000'
+      AUTH0_ISSUER_BASE_URL='https://dev-3a44tw2sa77x73tx.us.auth0.com'
+      AUTH0_CLIENT_ID='oCloQt7XYc1HFas3gSBtYAcekWY25MlF'
+      AUTH0_CLIENT_SECRET='LTYtNGq_4Y48dX5-w7Q96_eBGMcBL1Ic-H62xFcQKn1lg9rmRZQAFw-FHzEQhJuz'
+
+  - |
+      AUTH0_DOMAIN="dev-r0alk1x87r7luw3z.us.auth0.com"
+      AUTH0_CLIENT_ID="ptk5mAig7ibFKW1vhJPNTfEkN5lHQPw8"
+      AUTH0_CLIENT_SECRET="yJ-xZ1qycWHUzTUBKr20pUt6zWFmcHSBHus9769LsdOPp2ob8iESrG6MKAMGRkfX"
+
+  - |
+      export AUTH0_DOMAIN='example1.us.auth0.com'
+      export ALGORITHMS='RS256'  # Without brackets
+      export API_AUDIENCE='https://example.com'
+      export AUTH0_CLIENT_ID='bR75Zy5DPJHhhh7mHw4k0PRRohl5Rytk'
+      export AUTH0_CLIENT_SECRET='_r7NxNEt5Vd8rjUB_4efca_TtxlRiG_jbWTnRYKMoI86ujEgxSpaP3BcxMx3IJDR'
+
+  negative_examples:
+  # this one unfortunately doesn't match because the domain follows the ID and secret
+  - |
+      # config variables
+      export AUTH0_CALLBACK_URL="http://auth0-rails.dev/callback"
+      export AUTH0_CLIENT_ID="nUBJjeJElAPmpwBjhWgWX6aJYovpK0n5"
+      export AUTH0_CLIENT_SECRET="wsxY2eUG78qKGTyUpAOUbwCDCwc8mZSQzTmNS-k0qf56uX5nAjQyjRe_iD7oq8b7"
+      export AUTH0_DOMAIN="appman18922506.auth0.com"
+
