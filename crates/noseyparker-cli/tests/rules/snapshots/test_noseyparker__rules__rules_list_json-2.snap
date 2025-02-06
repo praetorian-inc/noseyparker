@@ -3989,6 +3989,30 @@ expression: stdout
       }
     },
     {
+      "id": "np.tavily.1",
+      "structural_id": "cc1a2acbeb2a689bf5673b86b4c29a0da0d28602",
+      "name": "Tavily API Key",
+      "syntax": {
+        "name": "Tavily API Key",
+        "id": "np.tavily.1",
+        "pattern": "(?x)\n\\b\n(\n  tvly-[a-zA-Z0-9]{32}\n)\n\\b\n",
+        "description": "A Tavily API Key was found. Tavily provides web search capabilities for AI and LLM applications. An attacker could use this API key to consume limited, possibly paid resources, or cause denial-of-service.\n",
+        "examples": [
+          "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",
+          "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",
+          "TAVILY_API_KEY = \"tvly-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://docs.tavily.com/api-reference"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.teamcity.1",
       "structural_id": "30070e2cca5869c3ed8b7cd1ed39ee2c858bd596",
       "name": "TeamCity API Token",
@@ -4316,7 +4340,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 151
+      "num_rules": 152
     },
     {
       "id": "np.assets",

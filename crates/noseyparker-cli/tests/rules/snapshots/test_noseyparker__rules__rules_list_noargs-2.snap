@@ -163,6 +163,7 @@ expression: stdout
  np.stackhawk.1       StackHawk API Key                                             api, secret 
  np.stripe.1          Stripe API Key                                                api, secret 
  np.stripe.2          Stripe API Test Key                                           api, secret, test 
+ np.tavily.1          Tavily API Key                                                api, secret 
  np.teamcity.1        TeamCity API Token                                             
  np.telegram.1        Telegram Bot Token                                            api, secret 
  np.thingsboard.1     ThingsBoard Access Token                                      api, identifier, secret 
@@ -179,6 +180,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             151 
+ default      Nosey Parker default rules             152 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

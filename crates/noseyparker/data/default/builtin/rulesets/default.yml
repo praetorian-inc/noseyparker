@@ -151,6 +151,7 @@ rulesets:
   - np.stackhawk.1    # StackHawk API Key
   - np.stripe.1       # Stripe API Key
   - np.stripe.2       # Stripe API Test Key
+  - np.tavily.1       # Tavily API Key
   - np.teamcity.1     # TeamCity API Token
   - np.telegram.1     # Telegram Bot Token
   - np.thingsboard.1  # ThingsBoard Access Token
