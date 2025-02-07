@@ -2307,6 +2307,34 @@ expression: stdout
       }
     },
     {
+      "id": "np.kagi.1",
+      "structural_id": "6f6ec59aa63cc565f772cf22de0c5bf223368763",
+      "name": "Kagi API Key",
+      "syntax": {
+        "name": "Kagi API Key",
+        "id": "np.kagi.1",
+        "pattern": "(?x)(?s)\n\\b\n(?: kagi | KAGI )\n.{0,100}\n\\b\n( [a-zA-Z0-9_-]{11}\\.[a-zA-Z0-9_-]{43} )\n(?: $ | [^a-zA-Z0-9_-] )\n",
+        "description": "A Kagi API Key was found. Kagi is an internet search company. An attacker may be able to use this API key to consume limited paid resources or access account information and settings.\n",
+        "examples": [
+          "KAGI_API_KEY='AQAAUPJ-iQc.yLFDzC5RRHzPNDThhulREdoG0Bn3PiZMwJ6yqC6uJLE'",
+          "https://kagi.com/search?token=uwHBLWXZpgY.STzubkAbVXqpfV39Q6TOfzp43KulJeYWK6-963uz1-o"
+        ],
+        "negative_examples": [
+          "AQAAUPJ-iQc.yLFDzC5RRHzPNDThhulREdoG0Bn3PiZMwJ6yqC6uJLE",
+          "BwCASYSBiQc.RyTxij9nKwqG08jnmzAn45p0RLUEHCii_vojyPh-6ZA",
+          "CQCAbaKBiQc.hcyqFSgvar58Fg8AXOdxnXSyEVC6Ldt-axCKSxf8Gxk"
+        ],
+        "references": [
+          "https://help.kagi.com/kagi/api/overview.html"
+        ],
+        "categories": [
+          "api",
+          "fuzzy",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.krb5.asrep.23.1",
       "structural_id": "0026c7bd3577be46d947892edab1bde4e1c320a0",
       "name": "Password Hash (Kerberos 5, etype 23, AS-REP)",
@@ -4370,7 +4398,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 153
+      "num_rules": 154
     },
     {
       "id": "np.assets",

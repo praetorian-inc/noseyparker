@@ -2,4 +2,4 @@
 source: crates/noseyparker-cli/tests/rules/mod.rs
 expression: stdout
 ---
-174 rules and 3 rulesets: no issues detected
+175 rules and 3 rulesets: no issues detected
