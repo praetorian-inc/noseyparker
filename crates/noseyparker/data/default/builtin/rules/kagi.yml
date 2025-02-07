@@ -1,0 +1,34 @@
+rules:
+
+- name: Kagi API Key
+  id: np.kagi.1
+
+  pattern: |
+    (?x)(?s)
+    \b
+    (?: kagi | KAGI )
+    .{0,100}
+    \b
+    ( [a-zA-Z0-9_-]{11}\.[a-zA-Z0-9_-]{43} )
+    (?: $ | [^a-zA-Z0-9_-] )
+
+  categories: [api, fuzzy, secret]
+
+  description: >
+    A Kagi API Key was found.
+    Kagi is an internet search company.
+    An attacker may be able to use this API key to consume limited paid resources or access account information and settings.
+
+
+  references:
+  - https://help.kagi.com/kagi/api/overview.html
+
+  examples:
+  - "KAGI_API_KEY='AQAAUPJ-iQc.yLFDzC5RRHzPNDThhulREdoG0Bn3PiZMwJ6yqC6uJLE'"
+  - 'https://kagi.com/search?token=uwHBLWXZpgY.STzubkAbVXqpfV39Q6TOfzp43KulJeYWK6-963uz1-o'
+
+  # These lack the necessary leading context
+  negative_examples:
+  - 'AQAAUPJ-iQc.yLFDzC5RRHzPNDThhulREdoG0Bn3PiZMwJ6yqC6uJLE'
+  - 'BwCASYSBiQc.RyTxij9nKwqG08jnmzAn45p0RLUEHCii_vojyPh-6ZA'
+  - 'CQCAbaKBiQc.hcyqFSgvar58Fg8AXOdxnXSyEVC6Ldt-axCKSxf8Gxk'
