@@ -195,6 +195,10 @@ Providing an access token gives a higher API rate limit and may make additional 
 See `noseyparker help scan` for more details.
 
 
+### Interactively review and annotate findings
+See the companion project, [Nosey Parker Explorer](https://github.com/praetorian-inc/noseyparkerexplorer):
+![Screenshot showing the main interface of Nosey Parker Explorer](https://github.com/praetorian-inc/noseyparkerexplorer/blob/32e9133600c79eee53cd9000e37b71792e555fdd/docs/img/main-screen.png?raw=true)
+
 ### Report findings in human-readable text format
 ![Screenshot showing Nosey Parker's workflow for rendering its findings in human-readable format](docs/usage-examples/gifs/03-report-human.gif)
 
