@@ -20,7 +20,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 
 ### Changes
 - The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
-- The `Azure Connection String` rule has been refined to reduce false positives ([#257](https://github.com/praetorian-inc/noseyparker/pull/257)).
+- The `Azure Connection String` rule has been refined to improve signal-to-noise ([#257](https://github.com/praetorian-inc/noseyparker/pull/257)).
 
 
 ## [v0.23.0](https://github.com/praetorian-inc/noseyparker/releases/v0.23.0) (2025-01-28)
