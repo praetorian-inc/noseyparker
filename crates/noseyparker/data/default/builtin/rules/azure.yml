@@ -14,10 +14,10 @@ rules:
   pattern: |
     (?x)
     (?i)
-    (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^${;<\[.][^.;]{2,80}) \s*;\s*
+    (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^${;<\[.\s*] [^.;\n]{2,80}) \s*;\s*
     .{0,10}\s*  (?# possible extra stuff, e.g., string concatenation)
-    (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^${;<\[.][^.;]{2,100})
-    (?: ;|$ )
+    (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^${;<\[.\s*] [^.;\n]{2,100})
+    (?: \.|;|\n|$ )
 
   references:
   - https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/
@@ -57,6 +57,9 @@ rules:
   - |
       let accountName = "";
       let accountKey = Buffer.from("accountKey", "base64");
+  - |
+      let accountName = $accountName;
+      let accountKey = $accountKey;
   - |
       AccountName=<YOUR_ACCOUNT_NAME>;
       AccountKey=<YOUR_ACCOUNT_KEY>;

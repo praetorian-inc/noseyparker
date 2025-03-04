@@ -399,12 +399,12 @@ expression: stdout
     },
     {
       "id": "np.azure.1",
-      "structural_id": "429426816110a743c3905c663a3a85577531cb77",
+      "structural_id": "ec48fdb82529f564452ac11a98ecc5c1ffed88d5",
       "name": "Azure Connection String",
       "syntax": {
         "name": "Azure Connection String",
         "id": "np.azure.1",
-        "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^${;<\\[.][^.;]{2,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([^${;<\\[.][^.;]{2,100})\n(?: ;|$ )\n",
+        "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^${;<\\[.\\s*] [^.;\\n]{2,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([^${;<\\[.\\s*] [^.;\\n]{2,100})\n(?: \\.|;|\\n|$ )\n",
         "description": null,
         "examples": [
           "# Azure Storage Connection String\nAzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=hanatour9833;AccountKey=6jqh42QQjWWBwoPGGR/Jr0PZjhBMZVbHm/gkhEfHvOj8aV6+oI8ed6ZAAwB5a6993WqyQDiuJJB0QpseJwqYxw==;EndpointSuffix=core.windows.net\n",
@@ -416,6 +416,7 @@ expression: stdout
           "InstrumentationKey=00000000-0000-0000-0000-000000000000;EndpointSuffix=ai.contoso.com;",
           "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://custom.com:111/;LiveEndpoint=https://custom.com:222/;ProfilerEndpoint=https://custom.com:333/;SnapshotEndpoint=https://custom.com:444/;",
           "let accountName = \"\";\nlet accountKey = Buffer.from(\"accountKey\", \"base64\");\n",
+          "let accountName = $accountName;\nlet accountKey = $accountKey;\n",
           "AccountName=<YOUR_ACCOUNT_NAME>;\nAccountKey=<YOUR_ACCOUNT_KEY>;\n",
           "AccountName=X;AccountKey=X;\n",
           "AccountName={2};AccountKey={3};\n",
