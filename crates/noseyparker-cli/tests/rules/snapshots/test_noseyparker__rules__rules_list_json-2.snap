@@ -399,13 +399,13 @@ expression: stdout
     },
     {
       "id": "np.azure.1",
-      "structural_id": "ec48fdb82529f564452ac11a98ecc5c1ffed88d5",
+      "structural_id": "e7e78f0dfbe275a066583eadf3bb16632f740a76",
       "name": "Azure Connection String",
       "syntax": {
         "name": "Azure Connection String",
         "id": "np.azure.1",
-        "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^${;<\\[.\\s*] [^.;\\n]{2,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([^${;<\\[.\\s*] [^.;\\n]{2,100})\n(?: \\.|;|\\n|$ )\n",
-        "description": null,
+        "pattern": "(?x)\n(?i)\n(?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \\s*=\\s* ([^${;<\\[.\\s*\"'\\#] [^.;\\n\"'\\#]{2,80}) \\s*;\\s*\n.{0,10}\\s*  (?# possible extra stuff, e.g., string concatenation)\n(?: AccountKey | SharedAccessKey | SharedSecretValue) \\s*=\\s* ([a-zA-Z0-9/+]{20,100}[=]{0,3})\n(?: [^a-zA-Z0-9/+=] | $ )\n",
+        "description": "Credentials in an Azure connection string were found. Depending on assigned privileges, these may allow an attacker read or write access to Azure storage.\n",
         "examples": [
           "# Azure Storage Connection String\nAzureWebJobsStorage=DefaultEndpointsProtocol=https;AccountName=hanatour9833;AccountKey=6jqh42QQjWWBwoPGGR/Jr0PZjhBMZVbHm/gkhEfHvOj8aV6+oI8ed6ZAAwB5a6993WqyQDiuJJB0QpseJwqYxw==;EndpointSuffix=core.windows.net\n",
           "DefaultEndpointsProtocol=http;AccountName=testacc1;\nAccountKey=1gy3lpE7Du1j5ljKiupgKzywSw2isjsa69sfsdfsdsgfsgfdgfdgfd/YThisv/OVVLfIOv9kQ==;\nBlobEndpoint=http://127.0.0.1:8440/testacc1;\nTableEndpoint=http://127.0.0.1:8440/testacc1;\nQueueEndpoint=http://127.0.0.1:8440/testacc1;\n",
