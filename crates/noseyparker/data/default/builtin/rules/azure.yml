@@ -14,10 +14,10 @@ rules:
   pattern: |
     (?x)
     (?i)
-    (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^;]{1,80}) \s*;\s*
+    (?: AccountName | SharedAccessKeyName | SharedSecretIssuer) \s*=\s* ([^${;<\[.\s*"'\#] [^.;\n"'\#]{2,80}) \s*;\s*
     .{0,10}\s*  (?# possible extra stuff, e.g., string concatenation)
-    (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([^;]{1,100})
-    (?: ;|$ )
+    (?: AccountKey | SharedAccessKey | SharedSecretValue) \s*=\s* ([a-zA-Z0-9/+]{20,100}[=]{0,3})
+    (?: [^a-zA-Z0-9/+=] | $ )
 
   references:
   - https://azure.microsoft.com/en-us/blog/windows-azure-web-sites-how-application-strings-and-connection-strings-work/
@@ -28,6 +28,10 @@ rules:
   - api
   - fuzzy
   - secret
+
+  description: >
+    Credentials in an Azure connection string were found.
+    Depending on assigned privileges, these may allow an attacker read or write access to Azure storage.
 
   examples:
   - |
@@ -54,6 +58,21 @@ rules:
   # https://docs.microsoft.com/en-us/azure/azure-monitor/app/sdk-connection-string
   - 'InstrumentationKey=00000000-0000-0000-0000-000000000000;EndpointSuffix=ai.contoso.com;'
   - 'InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://custom.com:111/;LiveEndpoint=https://custom.com:222/;ProfilerEndpoint=https://custom.com:333/;SnapshotEndpoint=https://custom.com:444/;'
+  - |
+      let accountName = "";
+      let accountKey = Buffer.from("accountKey", "base64");
+  - |
+      let accountName = $accountName;
+      let accountKey = $accountKey;
+  - |
+      AccountName=<YOUR_ACCOUNT_NAME>;
+      AccountKey=<YOUR_ACCOUNT_KEY>;
+  - |
+      AccountName=X;AccountKey=X;
+  - |
+      AccountName={2};AccountKey={3};
+  - |
+      SharedAccessKeyName=[Shared Access Key Name goes here];SharedAccessKey=[Shared Access key goes here];
 
 
 - name: Azure App Configuration Connection String
