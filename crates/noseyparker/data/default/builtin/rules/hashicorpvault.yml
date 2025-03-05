@@ -1,0 +1,26 @@
+rules:
+
+- name: Hashicorp Vault Token
+  id: np.hashicorpvault.1
+
+  pattern: '\b(s|b|r|hvs|hvb|hvr)\.[A-Za-z0-9]{23,}\b'
+
+  examples:
+  - 'VAULT_CLIENT_TOKEN="s.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+  - 'apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+
+  categories:
+  - api
+  - secret
+
+rulesets:
+
+- name: Hashicorp Vault Token
+  description: 'Tests for detecting Hashicorp Vault Tokens'
+  id: hashicorpvault
+
+  include_rule_ids:
+  - np.hashicorpvault.1
