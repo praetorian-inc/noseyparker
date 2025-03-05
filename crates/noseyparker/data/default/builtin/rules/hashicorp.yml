@@ -5,18 +5,21 @@ rules:
 
   pattern: |
     (?x)
-    (?i: vault | client | token | key | api )
-    .{0,15}
+    (?i: hashicorp | vault | token | key | secret )
+    ["':=\ ]{0,5}
     \b
-    (s\.[A-Za-z0-9]{24,100})
-    \b
+    (s\.[A-Za-z0-9_-]{24,128})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'VAULT_CLIENT_TOKEN="s.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+  - '`-vaultToken s.CAESIP2jTxc9S3K7Z6CtcFWQv7-044m_oSsxnPE0H3nF89l3GiYKHGh3cy5sQmlIZVNyTWJNcDRsYWJpQjlhYjVlb2cQh6PL8wEYAg"`'
 
   negative_examples:
   - 'apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
   - 'function(){s.addComponentsFromRegistry()}'
+  - 'this._emitEOFToken()):(this._err(s.unexpectedCharacterAfterDoctypeSystemIdentifier)'
+  - '// TODO: ServerAddressByClientCIDRs: s.getServerAddressByClientCIDRs(req.Request),'
 
   description: >
     A Hashicorp Vault service token was found.
@@ -33,11 +36,11 @@ rules:
 
   pattern: |
     (?x)
-    (?i: vault | client | token | key | api )
-    .{0,15}
+    (?i: hashicorp | vault | token | key | secret )
+    ["':=\ ]{0,5}
     \b
-    (b\.[A-Za-z0-9]{24,100})
-    \b
+    (b\.[A-Za-z0-9_-]{24,500})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'VAULT_CLIENT_TOKEN="b.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
@@ -45,6 +48,7 @@ rules:
   negative_examples:
   - 'apikey: hvb.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
   - 'b.removeTransientObservers()'
+  - 'b.AAAAAQJgxDgqsGNorpoOR8hPZ5SU-ynBvCl764jyRP_fnX8WvkdkDzGjbLNGdPdtlY32Als2P36yDZueqzfdGw9RsaTeaYXSH5E4RYSWuRoQ9YRKIw9o7mDDY2ZcT3KOB7RwtW2w1FN2eDqcy_sbCjXPaM1iBVH-mqMSYRmRd2nb5D1SJPeBzIYRqSglLc32wUGN7xEzyrKUczqOKsIcybQA'
 
   description: >
     A Hashicorp Vault batch token was found.
@@ -61,11 +65,11 @@ rules:
 
   pattern: |
     (?x)
-    (?i: vault | client | token | key | api )
-    .{0,15}
+    (?i: hashicorp | vault | token | key | secret )
+    ["':=\ ]{0,5}
     \b
-    (r\.[A-Za-z0-9]{24,100})
-    \b
+    (r\.[A-Za-z0-9_-]{24,500})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'VAULT_CLIENT_TOKEN="r.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
@@ -89,7 +93,11 @@ rules:
 - name: Hashicorp Vault Service Token (>= v1.10)
   id: np.hashicorp.4
 
-  pattern: '\b(hvs\.[A-Za-z0-9]{24,100})\b'
+  pattern: |
+    (?x)
+    \b
+    (hvs\.[A-Za-z0-9]{24,130})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
@@ -110,10 +118,15 @@ rules:
 - name: Hashicorp Vault Batch Token (>= v1.10)
   id: np.hashicorp.5
 
-  pattern: '\b(hvb\.[A-Za-z0-9]{24,100})\b'
+  pattern: |
+    (?x)
+    \b
+    (hvb\.[A-Za-z0-9_-]{24,500})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'apikey: hvb.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+  - 'hvb.AAAAAQJgxDgqsGNorpoOR8hPZ5SU-ynBvCl764jyRP_fnX8WvkdkDzGjbLNGdPdtlY32Als2P36yDZueqzfdGw9RsaTeaYXSH5E4RYSWuRoQ9YRKIw9o7mDDY2ZcT3KOB7RwtW2w1FN2eDqcy_sbCjXPaM1iBVH-mqMSYRmRd2nb5D1SJPeBzIYRqSglLc32wUGN7xEzyrKUczqOKsIcybQA'
 
   negative_examples:
   - 'VAULT_CLIENT_TOKEN="b.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
@@ -131,7 +144,11 @@ rules:
 - name: Hashicorp Vault Recovery Token (>= v1.10)
   id: np.hashicorp.6
 
-  pattern: '\b(hvr\.[A-Za-z0-9]{24,100})\b'
+  pattern: |
+    (?x)
+    \b
+    (hvr\.[A-Za-z0-9]{24,130})
+    (?: [^A-Za-z0-9_-] | $ )
 
   examples:
   - 'apikey: hvr.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
