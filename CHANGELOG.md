@@ -14,6 +14,12 @@ Note that the use of semantic versioning applies to the command-line interface a
 
     - `Auth0 Application Credentials` ([#254](https://github.com/praetorian-inc/noseyparker/pull/254))
     - `Credentials in Connect-VIServer Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
+    - `Hashicorp Vault Batch Token (< v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
+    - `Hashicorp Vault Recovery Token (< v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
+    - `Hashicorp Vault Service Token (< v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
+    - `Hashicorp Vault Batch Token (>= v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
+    - `Hashicorp Vault Recovery Token (>= v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
+    - `Hashicorp Vault Service Token (>= v1.10)` ([#258](https://github.com/praetorian-inc/noseyparker/pull/258) from @n0tspam)
     - `Kagi API Key` ([#255](https://github.com/praetorian-inc/noseyparker/pull/255))
     - `Sourcegraph Access Token` ([#252](https://github.com/praetorian-inc/noseyparker/pull/252))
     - `Tavily API Key` ([#253](https://github.com/praetorian-inc/noseyparker/pull/253))

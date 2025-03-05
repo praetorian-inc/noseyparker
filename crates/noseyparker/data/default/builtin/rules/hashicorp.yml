@@ -1,0 +1,150 @@
+rules:
+
+- name: Hashicorp Vault Service Token (< v1.10)
+  id: np.hashicorp.1
+
+  pattern: |
+    (?x)
+    (?i: vault | client | token | key | api )
+    .{0,15}
+    \b
+    (s\.[A-Za-z0-9]{24,100})
+    \b
+
+  examples:
+  - 'VAULT_CLIENT_TOKEN="s.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  negative_examples:
+  - 'apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+  - 'function(){s.addComponentsFromRegistry()}'
+
+  description: >
+    A Hashicorp Vault service token was found.
+    This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
+
+  categories: [fuzzy, api, secret]
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+
+
+- name: Hashicorp Vault Batch Token (< v1.10)
+  id: np.hashicorp.2
+
+  pattern: |
+    (?x)
+    (?i: vault | client | token | key | api )
+    .{0,15}
+    \b
+    (b\.[A-Za-z0-9]{24,100})
+    \b
+
+  examples:
+  - 'VAULT_CLIENT_TOKEN="b.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  negative_examples:
+  - 'apikey: hvb.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+  - 'b.removeTransientObservers()'
+
+  description: >
+    A Hashicorp Vault batch token was found.
+    This could allow an attacker access to a secrets vault.
+
+  categories: [fuzzy, api, secret]
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+
+
+- name: Hashicorp Vault Recovery Token (< v1.10)
+  id: np.hashicorp.3
+
+  pattern: |
+    (?x)
+    (?i: vault | client | token | key | api )
+    .{0,15}
+    \b
+    (r\.[A-Za-z0-9]{24,100})
+    \b
+
+  examples:
+  - 'VAULT_CLIENT_TOKEN="r.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  negative_examples:
+  - 'apikey: hvr.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+  - 'r.addComponentsFromRegistry()'
+
+  description: >
+    A Hashicorp Vault recovery token was found.
+    This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
+
+  categories: [fuzzy, api, secret]
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+  - https://developer.hashicorp.com/vault/docs/concepts/recovery-mode
+
+
+
+- name: Hashicorp Vault Service Token (>= v1.10)
+  id: np.hashicorp.4
+
+  pattern: '\b(hvs\.[A-Za-z0-9]{24,100})\b'
+
+  examples:
+  - 'apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+
+  negative_examples:
+  - 'VAULT_CLIENT_TOKEN="s.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  categories: [api, secret]
+
+  description: >
+    A Hashicorp Vault service token was found.
+    This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+
+
+- name: Hashicorp Vault Batch Token (>= v1.10)
+  id: np.hashicorp.5
+
+  pattern: '\b(hvb\.[A-Za-z0-9]{24,100})\b'
+
+  examples:
+  - 'apikey: hvb.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+
+  negative_examples:
+  - 'VAULT_CLIENT_TOKEN="b.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  categories: [api, secret]
+
+  description: >
+    A Hashicorp Vault batch token was found.
+    This could allow an attacker access to a secrets vault.
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+
+
+- name: Hashicorp Vault Recovery Token (>= v1.10)
+  id: np.hashicorp.6
+
+  pattern: '\b(hvr\.[A-Za-z0-9]{24,100})\b'
+
+  examples:
+  - 'apikey: hvr.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4'
+
+  negative_examples:
+  - 'VAULT_CLIENT_TOKEN="r.Z4bTMtngfLeQ18AqVoBBkUAOD1"'
+
+  categories: [api, secret]
+
+  description: >
+    A Hashicorp Vault recovery token was found.
+    This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/tokens
+  - https://developer.hashicorp.com/vault/docs/concepts/recovery-mode
