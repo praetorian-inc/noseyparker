@@ -12,15 +12,3 @@ rules:
   references:
   - https://developer.hashicorp.com/vault/docs/concepts/tokens
 
-  categories:
-  - api
-  - secret
-
-rulesets:
-
-- name: Hashicorp Vault Token
-  description: 'Tests for detecting Hashicorp Vault Tokens'
-  id: hashicorpvault
-
-  include_rule_ids:
-  - np.hashicorpvault.1
