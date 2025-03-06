@@ -2075,7 +2075,7 @@ expression: stdout
         "name": "Hashicorp Vault Service Token (< v1.10)",
         "id": "np.hashicorp.1",
         "pattern": "(?x)\n(?i: hashicorp | vault | token | key | secret )\n[\"':=\\ ]{0,5}\n\\b\n(s\\.[A-Za-z0-9_-]{24,128})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault service token was found. This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.\n",
+        "description": "A Hashicorp Vault service token was found. This may allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.\n",
         "examples": [
           "VAULT_CLIENT_TOKEN=\"s.Z4bTMtngfLeQ18AqVoBBkUAOD1\"",
           "`-vaultToken s.CAESIP2jTxc9S3K7Z6CtcFWQv7-044m_oSsxnPE0H3nF89l3GiYKHGh3cy5sQmlIZVNyTWJNcDRsYWJpQjlhYjVlb2cQh6PL8wEYAg\"`"
@@ -2104,7 +2104,7 @@ expression: stdout
         "name": "Hashicorp Vault Batch Token (< v1.10)",
         "id": "np.hashicorp.2",
         "pattern": "(?x)\n(?i: hashicorp | vault | token | key | secret )\n[\"':=\\ ]{0,5}\n\\b\n(b\\.[A-Za-z0-9_-]{24,500})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault batch token was found. This could allow an attacker access to a secrets vault.\n",
+        "description": "A Hashicorp Vault batch token was found. This may allow an attacker access to a secrets vault.\n",
         "examples": [
           "VAULT_CLIENT_TOKEN=\"b.Z4bTMtngfLeQ18AqVoBBkUAOD1\""
         ],
@@ -2131,7 +2131,7 @@ expression: stdout
         "name": "Hashicorp Vault Recovery Token (< v1.10)",
         "id": "np.hashicorp.3",
         "pattern": "(?x)\n(?i: hashicorp | vault | token | key | secret )\n[\"':=\\ ]{0,5}\n\\b\n(r\\.[A-Za-z0-9_-]{24,500})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault recovery token was found. This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.\n",
+        "description": "A Hashicorp Vault recovery token was found. This may allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.\n",
         "examples": [
           "VAULT_CLIENT_TOKEN=\"r.Z4bTMtngfLeQ18AqVoBBkUAOD1\""
         ],
@@ -2158,7 +2158,7 @@ expression: stdout
         "name": "Hashicorp Vault Service Token (>= v1.10)",
         "id": "np.hashicorp.4",
         "pattern": "(?x)\n\\b\n(hvs\\.[A-Za-z0-9]{24,130})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault service token was found. This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.\n",
+        "description": "A Hashicorp Vault service token was found. This may allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.\n",
         "examples": [
           "apikey: hvs.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4"
         ],
@@ -2182,7 +2182,7 @@ expression: stdout
         "name": "Hashicorp Vault Batch Token (>= v1.10)",
         "id": "np.hashicorp.5",
         "pattern": "(?x)\n\\b\n(hvb\\.[A-Za-z0-9_-]{24,500})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault batch token was found. This could allow an attacker access to a secrets vault.\n",
+        "description": "A Hashicorp Vault batch token was found. This may allow an attacker access to a secrets vault.\n",
         "examples": [
           "apikey: hvb.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4",
           "hvb.AAAAAQJgxDgqsGNorpoOR8hPZ5SU-ynBvCl764jyRP_fnX8WvkdkDzGjbLNGdPdtlY32Als2P36yDZueqzfdGw9RsaTeaYXSH5E4RYSWuRoQ9YRKIw9o7mDDY2ZcT3KOB7RwtW2w1FN2eDqcy_sbCjXPaM1iBVH-mqMSYRmRd2nb5D1SJPeBzIYRqSglLc32wUGN7xEzyrKUczqOKsIcybQA"
@@ -2207,7 +2207,7 @@ expression: stdout
         "name": "Hashicorp Vault Recovery Token (>= v1.10)",
         "id": "np.hashicorp.6",
         "pattern": "(?x)\n\\b\n(hvr\\.[A-Za-z0-9]{24,130})\n(?: [^A-Za-z0-9_-] | $ )\n",
-        "description": "A Hashicorp Vault recovery token was found. This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.\n",
+        "description": "A Hashicorp Vault recovery token was found. This may allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.\n",
         "examples": [
           "apikey: hvr.JGbZZaCkOSgsZ56uhGlTK2zyC1j2mwhy0VLp4"
         ],
@@ -2221,6 +2221,30 @@ expression: stdout
         "categories": [
           "api",
           "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.hashicorp.7",
+      "structural_id": "9f225e1b837874c2f803d2e20cca278bd95c1767",
+      "name": "Hashicorp Vault Unseal Key",
+      "syntax": {
+        "name": "Hashicorp Vault Unseal Key",
+        "id": "np.hashicorp.7",
+        "pattern": "(?x)\n(?i: unseal )\n\\b\n.{1,10}\n\\b\n([a-zA-Z0-9+/]{44})\n(?: [^a-zA-Z0-9+/] | $ )\n",
+        "description": "A Hashicorp Vault unseal key was found. This may allow an attacker the ability to decrypt a vault.\n",
+        "examples": [
+          "Unseal Key 2: 0tZn+7QQCxphpHwTm7/dC3LpP5JGIbYl3PK8Sy81R+P2",
+          "oc -n vault exec -ti vault-0 -- vault operator unseal 98m+o2ylRhVbOi+3o5ub6PbP343ocFUVORgSYeypMDjh"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developer.hashicorp.com/vault/docs/concepts/seal"
+        ],
+        "categories": [
+          "api",
+          "secret",
+          "fuzzy"
         ]
       }
     },
@@ -4561,7 +4585,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 160
+      "num_rules": 161
     },
     {
       "id": "np.assets",

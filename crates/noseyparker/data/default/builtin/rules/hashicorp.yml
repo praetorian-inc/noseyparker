@@ -23,7 +23,7 @@ rules:
 
   description: >
     A Hashicorp Vault service token was found.
-    This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
+    This may allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
 
   categories: [fuzzy, api, secret]
 
@@ -52,7 +52,7 @@ rules:
 
   description: >
     A Hashicorp Vault batch token was found.
-    This could allow an attacker access to a secrets vault.
+    This may allow an attacker access to a secrets vault.
 
   categories: [fuzzy, api, secret]
 
@@ -80,7 +80,7 @@ rules:
 
   description: >
     A Hashicorp Vault recovery token was found.
-    This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
+    This may allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
 
   categories: [fuzzy, api, secret]
 
@@ -109,7 +109,7 @@ rules:
 
   description: >
     A Hashicorp Vault service token was found.
-    This could allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
+    This may allow an attacker access to a secrets vault, and depending upon privileges, may be used to create additional tokens.
 
   references:
   - https://developer.hashicorp.com/vault/docs/concepts/tokens
@@ -135,7 +135,7 @@ rules:
 
   description: >
     A Hashicorp Vault batch token was found.
-    This could allow an attacker access to a secrets vault.
+    This may allow an attacker access to a secrets vault.
 
   references:
   - https://developer.hashicorp.com/vault/docs/concepts/tokens
@@ -160,8 +160,34 @@ rules:
 
   description: >
     A Hashicorp Vault recovery token was found.
-    This could allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
+    This may allow an attacker access to a secrets vault if they are able to start Vault in recovery mode.
 
   references:
   - https://developer.hashicorp.com/vault/docs/concepts/tokens
   - https://developer.hashicorp.com/vault/docs/concepts/recovery-mode
+
+
+- name: Hashicorp Vault Unseal Key
+  id: np.hashicorp.7
+
+  pattern: |
+    (?x)
+    (?i: unseal )
+    \b
+    .{1,10}
+    \b
+    ([a-zA-Z0-9+/]{44})
+    (?: [^a-zA-Z0-9+/] | $ )
+
+  examples:
+  - 'Unseal Key 2: 0tZn+7QQCxphpHwTm7/dC3LpP5JGIbYl3PK8Sy81R+P2'
+  - 'oc -n vault exec -ti vault-0 -- vault operator unseal 98m+o2ylRhVbOi+3o5ub6PbP343ocFUVORgSYeypMDjh'
+
+  categories: [api, secret, fuzzy]
+
+  description: >
+    A Hashicorp Vault unseal key was found.
+    This may allow an attacker the ability to decrypt a vault.
+
+  references:
+  - https://developer.hashicorp.com/vault/docs/concepts/seal
