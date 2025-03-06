@@ -87,6 +87,13 @@ rulesets:
   - np.grafana.2      # Grafana Cloud API Token
   - np.grafana.3      # Grafana Service Account Token
   - np.groq.1         # Groq API Key
+  - np.hashicorp.1    # Hashicorp Vault Service Token (< v1.10)
+  - np.hashicorp.2    # Hashicorp Vault Batch Token (< v1.10)
+  - np.hashicorp.3    # Hashicorp Vault Recovery Token (< v1.10)
+  - np.hashicorp.4    # Hashicorp Vault Service Token (>= v1.10)
+  - np.hashicorp.5    # Hashicorp Vault Batch Token (>= v1.10)
+  - np.hashicorp.6    # Hashicorp Vault Recovery Token (>= v1.10)
+  - np.hashicorp.7    # Hashicorp Vault Unseal Key
   - np.heroku.1       # Heroku API Key
   - np.http.1         # HTTP Basic Authentication
   - np.http.2         # HTTP Bearer Token

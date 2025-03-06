@@ -87,6 +87,13 @@ expression: stdout
  np.grafana.2         Grafana Cloud API Token                                       api, secret 
  np.grafana.3         Grafana Service Account Token                                 api, secret 
  np.groq.1            Groq API Key                                                  api, secret 
+ np.hashicorp.1       Hashicorp Vault Service Token (< v1.10)                       api, fuzzy, secret 
+ np.hashicorp.2       Hashicorp Vault Batch Token (< v1.10)                         api, fuzzy, secret 
+ np.hashicorp.3       Hashicorp Vault Recovery Token (< v1.10)                      api, fuzzy, secret 
+ np.hashicorp.4       Hashicorp Vault Service Token (>= v1.10)                      api, secret 
+ np.hashicorp.5       Hashicorp Vault Batch Token (>= v1.10)                        api, secret 
+ np.hashicorp.6       Hashicorp Vault Recovery Token (>= v1.10)                     api, secret 
+ np.hashicorp.7       Hashicorp Vault Unseal Key                                    api, fuzzy, secret 
  np.heroku.1          Heroku API Key                                                api, fuzzy, secret 
  np.http.1            HTTP Basic Authentication                                     fuzzy, generic, secret 
  np.http.2            HTTP Bearer Token                                             fuzzy, generic, secret 
@@ -182,6 +189,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             154 
+ default      Nosey Parker default rules             161 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
