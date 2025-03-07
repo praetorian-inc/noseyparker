@@ -1,0 +1,40 @@
+rules:
+
+- name: Postmark API Token
+
+  id: np.postmark.1
+
+  pattern: |
+    (?x)
+    (?i)
+    postmark [a-z0-9_-]{0,20}
+    .{0,10}
+    \b
+    ([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})
+    \b
+
+  categories: [fuzzy, api, secret]
+
+  description: >
+    A Postmark API token was found.
+    This may allow an attacker the ability to send email from a Postmark account, enabling phishing.
+
+  examples:
+  - |
+      postmark: "f59dffd2-83ea-47c7-ba8f-95e053a6d0ae",
+
+  - |
+      postmark: {
+        fromEmail: '...@....com', // must be verified with postmarkapp.com
+        postmarkApiToken: '00917922-dbe7-4882-bedc-10b93fc4c4c5', // our account token
+      },
+
+  - |
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": "c2321bd2-5a8f-46f2-b8fb-dbc706bd6923",
+      },
+
+  references:
+  - https://postmarkapp.com/developer/api/overview
