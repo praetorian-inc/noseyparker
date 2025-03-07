@@ -22,12 +22,17 @@ Note that the use of semantic versioning applies to the command-line interface a
     - `Hashicorp Vault Service Token (>= v1.10)` ([#259](https://github.com/praetorian-inc/noseyparker/pull/259))
     - `Hashicorp Vault Unseal Key` ([#259](https://github.com/praetorian-inc/noseyparker/pull/259))
     - `Kagi API Key` ([#255](https://github.com/praetorian-inc/noseyparker/pull/255))
+    - `Postmark API Token` ([#260](https://github.com/praetorian-inc/noseyparker/pull/260))
     - `Sourcegraph Access Token` ([#252](https://github.com/praetorian-inc/noseyparker/pull/252))
     - `Tavily API Key` ([#253](https://github.com/praetorian-inc/noseyparker/pull/253))
 
 ### Changes
 - The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
-- The `Azure Connection String` rule has been refined to improve signal-to-noise ([#257](https://github.com/praetorian-inc/noseyparker/pull/257)).
+
+- Rules have been refined to improve signal-to-noise:
+
+    - `Azure Connection String` ([#257](https://github.com/praetorian-inc/noseyparker/pull/257))
+    - `Generic Username and Password` ([#260](https://github.com/praetorian-inc/noseyparker/pull/260))
 
 
 ## [v0.23.0](https://github.com/praetorian-inc/noseyparker/releases/v0.23.0) (2025-01-28)

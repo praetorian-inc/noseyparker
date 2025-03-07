@@ -98,7 +98,6 @@ rules:
       user = 'Aladdin'
       password = 'open sesame'
 
-
   negative_examples:
   - |
       USERNAME=donjuan
@@ -120,15 +119,18 @@ rules:
   id: np.generic.4
   pattern: |
     (?x)
-    (?: username | USERNAME | user | USER)       (?# username context keyword )
-    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
-    ([a-zA-Z0-9.@_\-+]{3,30})                    (?# unquoted username )
-    \s* ;? \s*                                   (?# optional assignment separator )
-    (?: \s* (?: \# | //) [^\n\r]*[\n\r])*        (?# optional line comments )
-    (?: password | pass | PASSWORD | PASS)       (?# password context keyword )
-    [\ \t]* = [\ \t]*                            (?# assignment / binder, sans newline )
-    (\S{5,30})                                   (?# unquoted password )
-    (?: \s | $ )                                 (?# end-of-password anchor )
+    (?: username | USERNAME | Username | UserName | user | USER)    (?# username context keyword )
+    [\ \t]* = [\ \t]*                                               (?# assignment / binder, sans newline )
+    ( [a-zA-Z][a-zA-Z0-9_+-]{2,29}
+    | [a-zA-Z][a-zA-Z0-9._+-]{2,29}@[a-zA-Z_.-]{2,30}
+    )                                                               (?# unquoted username or email )
+    \s* ;? \s*                                                      (?# optional assignment separator )
+    (?: \s* (?: \# | //) [^\n\r]*[\n\r])*                           (?# optional line comments )
+    [a-zA-Z0-9_]{0,30}                                              (?# optional prefix on password keyword )
+    (?: password | pass | PASSWORD | PASS | Password)               (?# password context keyword )
+    [\ \t]* = [\ \t]*                                               (?# assignment / binder, sans newline )
+    ([^\s$@{<]\S{4,29})                                             (?# unquoted password )
+    (?: \s | $ )                                                    (?# end-of-password anchor )
 
   categories: [fuzzy, generic, secret]
 
@@ -145,10 +147,24 @@ rules:
 
   - ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
 
+  - |
+      [SupportSite]
+      Username=thisismyunsername
+      Password=thisismypassword
+
+  - |
+      [HELP_CLIENT]
+      AUTO_SESSION_USERNAME=myusername
+      AUTO_SESSION_PASSWORD=mypassword
+
   negative_examples:
   - |
       user = 'Aladdin'
       password = 'open_sesame'
+
+  - |
+      username = env.PERKEEP_TEST_USERNAME
+      password = env.PERKEEP_TEST_PASSWORD
 
 
 - name: Generic Password

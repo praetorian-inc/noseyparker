@@ -139,6 +139,7 @@ expression: stdout
  np.phpmailer.1       PHPMailer Credentials                                         fuzzy, secret 
  np.postgres.1        Credentials in PostgreSQL Connection URI                      secret 
  np.postman.1         Postman API Key                                               api, secret 
+ np.postmark.1        Postmark API Token                                            api, fuzzy, secret 
  np.psexec.1          Credentials in PsExec Invocation                              fuzzy, secret 
  np.pwhash.1          Password Hash (md5crypt)                                      hashed, secret 
  np.pwhash.2          Password Hash (bcrypt)                                        hashed, secret 
@@ -189,6 +190,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             161 
+ default      Nosey Parker default rules             162 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

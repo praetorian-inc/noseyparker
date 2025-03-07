@@ -136,6 +136,7 @@ rulesets:
   - np.phpmailer.1    # PHPMailer Credentials
   - np.postgres.1     # Credentials in PostgreSQL Connection URI
   - np.postman.1      # Postman API Key
+  - np.postmark.1     # Postmark API Token
   - np.psexec.1       # Credentials in PsExec Command
   - np.pypi.1         # PyPI Upload Token
   - np.reactapp.1     # React App Username

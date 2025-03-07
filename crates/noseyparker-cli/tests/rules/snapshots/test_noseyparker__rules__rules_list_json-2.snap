@@ -1379,20 +1379,23 @@ expression: stdout
     },
     {
       "id": "np.generic.4",
-      "structural_id": "858195023faa03c3aad1d8534cba1bf332439bee",
+      "structural_id": "2a60a792ed97fcb169b4abba87752a44b23ba848",
       "name": "Generic Username and Password",
       "syntax": {
         "name": "Generic Username and Password",
         "id": "np.generic.4",
-        "pattern": "(?x)\n(?: username | USERNAME | user | USER)       (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n([a-zA-Z0-9.@_\\-+]{3,30})                    (?# unquoted username )\n\\s* ;? \\s*                                   (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*        (?# optional line comments )\n(?: password | pass | PASSWORD | PASS)       (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                            (?# assignment / binder, sans newline )\n(\\S{5,30})                                   (?# unquoted password )\n(?: \\s | $ )                                 (?# end-of-password anchor )\n",
+        "pattern": "(?x)\n(?: username | USERNAME | Username | UserName | user | USER)    (?# username context keyword )\n[\\ \\t]* = [\\ \\t]*                                               (?# assignment / binder, sans newline )\n( [a-zA-Z][a-zA-Z0-9_+-]{2,29}\n| [a-zA-Z][a-zA-Z0-9._+-]{2,29}@[a-zA-Z_.-]{2,30}\n)                                                               (?# unquoted username or email )\n\\s* ;? \\s*                                                      (?# optional assignment separator )\n(?: \\s* (?: \\# | //) [^\\n\\r]*[\\n\\r])*                           (?# optional line comments )\n[a-zA-Z0-9_]{0,30}                                              (?# optional prefix on password keyword )\n(?: password | pass | PASSWORD | PASS | Password)               (?# password context keyword )\n[\\ \\t]* = [\\ \\t]*                                               (?# assignment / binder, sans newline )\n([^\\s$@{<]\\S{4,29})                                             (?# unquoted password )\n(?: \\s | $ )                                                    (?# end-of-password anchor )\n",
         "description": null,
         "examples": [
           "user = Aladdin\npassword = open_sesame\n",
           "user = Aladdin\n// some comment\n// some other comment\npassword = open_sesame\n",
-          ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',"
+          ":authn_dbd_params => 'host=db_host port=3306 user=apache password=###### dbname=apache_auth',",
+          "[SupportSite]\nUsername=thisismyunsername\nPassword=thisismypassword\n",
+          "[HELP_CLIENT]\nAUTO_SESSION_USERNAME=myusername\nAUTO_SESSION_PASSWORD=mypassword\n"
         ],
         "negative_examples": [
-          "user = 'Aladdin'\npassword = 'open_sesame'\n"
+          "user = 'Aladdin'\npassword = 'open_sesame'\n",
+          "username = env.PERKEEP_TEST_USERNAME\npassword = env.PERKEEP_TEST_PASSWORD\n"
         ],
         "references": [],
         "categories": [
@@ -3399,6 +3402,31 @@ expression: stdout
       }
     },
     {
+      "id": "np.postmark.1",
+      "structural_id": "13dfa379a747507e3d3d284b1fdf1eb07235d0bb",
+      "name": "Postmark API Token",
+      "syntax": {
+        "name": "Postmark API Token",
+        "id": "np.postmark.1",
+        "pattern": "(?x)\n(?i)\npostmark [a-z0-9_-]{0,20}\n.{0,10}\n\\b\n([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\n\\b\n",
+        "description": "A Postmark API token was found. This may allow an attacker the ability to send email from a Postmark account, enabling phishing.\n",
+        "examples": [
+          "postmark: \"f59dffd2-83ea-47c7-ba8f-95e053a6d0ae\",\n",
+          "postmark: {\n  fromEmail: '...@....com', // must be verified with postmarkapp.com\n  postmarkApiToken: '00917922-dbe7-4882-bedc-10b93fc4c4c5', // our account token\n},\n",
+          "headers: {\n  Accept: \"application/json\",\n  \"Content-Type\": \"application/json\",\n  \"X-Postmark-Server-Token\": \"c2321bd2-5a8f-46f2-b8fb-dbc706bd6923\",\n},\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://postmarkapp.com/developer/api/overview"
+        ],
+        "categories": [
+          "fuzzy",
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.psexec.1",
       "structural_id": "eb6bb9dbb032eebac8af247d96ebe4071484baf1",
       "name": "Credentials in PsExec Invocation",
@@ -4585,7 +4613,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 161
+      "num_rules": 162
     },
     {
       "id": "np.assets",
