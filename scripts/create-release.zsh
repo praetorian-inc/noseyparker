@@ -101,7 +101,7 @@ CARGO_BUILD_DIR="target/release"
 NOSEYPARKER="noseyparker"
 
 mkdir "$RELEASE_DIR" || fatal "could not create release directory"
-mkdir "$RELEASE_DIR"/{bin,share,share/completions,share/man,share/man/man1,share/"${NOSEYPARKER}"} || fatal "could not create release directory tree"
+mkdir "$RELEASE_DIR"/{bin,share,share/completions,share/man,share/"${NOSEYPARKER}"} || fatal "could not create release directory tree"
 
 ################################################################################
 # Build release version of noseyparker

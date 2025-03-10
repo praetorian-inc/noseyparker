@@ -33,7 +33,5 @@ debug = "line-tables-only"  # generate enough debug info to give useful stack tr
 # A number of packages benefit from being compiled with optimization even as dev dependencies.
 [profile.dev.package]
 insta = { opt-level = 3 }
-similar = { opt-level = 3 }
 # Using optimization on the vectorscan packages saves ~6s on each integration test case!
 vectorscan-rs = { opt-level = 3 }
-vectorscan-rs-sys = { opt-level = 3 }
