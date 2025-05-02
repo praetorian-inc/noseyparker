@@ -39,8 +39,21 @@ impl DetailsReporter {
                     let source_span = &m.location.source_span;
                     // let offset_span = &m.location.offset_span;
 
-                    let additional_properties =
+                    let mut additional_properties =
                         vec![(String::from("blob_metadata"), serde_json::json!(blob_metadata))];
+
+                    // Adds provenance information about the commit to additional properties if available
+                    if let Provenance::GitRepo(git_repo) = p {
+                        if let Some(commit_info) = &git_repo.first_commit {
+                            let commit_provenance = serde_json::json!({
+                                "blob_path": commit_info.blob_path.to_string(),
+                                "commit_kind": "first_seen",
+                                "commit_metadata": commit_info.commit_metadata
+                            });
+                            additional_properties
+                                .push((String::from("commit_provenance"), commit_provenance));
+                        }
+                    }
 
                     let artifact_location = if let Some(path) = p.blob_path() {
                         sarif::ArtifactLocation::builder()
