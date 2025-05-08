@@ -4,7 +4,7 @@ This is the changelog for [Nosey Parker](https://github.com/praetorian-inc/nosey
 All notable changes to the project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project aspires to use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-Note that the use of semantic versioning applies to the command-line interface and output formats; the Rust crate APIs are considered an implementation detail at this point.
+Note that the use of semantic versioning applies only to the command-line interface and output formats; the Rust crate APIs are considered an implementation detail.
 
 
 ## Unreleased
@@ -36,6 +36,7 @@ Note that the use of semantic versioning applies to the command-line interface a
 
     - `Azure Connection String` ([#257](https://github.com/praetorian-inc/noseyparker/pull/257))
     - `Generic Username and Password` ([#260](https://github.com/praetorian-inc/noseyparker/pull/260))
+    - `Slack Bot Token` ([#268](https://github.com/praetorian-inc/noseyparker/pull/268))
 
 - CI jobs that run on Ubuntu 20.04 have been replaced with Ubuntu 22.04, now that Ubuntu 20.04 runners have been removed from GitHub Actions ([#267](https://github.com/praetorian-inc/noseyparker/pull/267))
 
