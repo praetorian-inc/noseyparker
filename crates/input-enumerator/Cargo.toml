@@ -18,7 +18,7 @@ fixedbitset = "0.5"
 gix = { version = "0.72", features = ["max-performance", "serde"] }
 gix-date = "0.10"
 ignore = "0.4"
-petgraph = "0.7"
+petgraph = "0.8"
 roaring = "0.10"
 schemars = { version = "0.8" }
 serde = { version = "1.0", features = ["derive"] }
