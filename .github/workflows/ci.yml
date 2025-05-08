@@ -56,8 +56,8 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: ubuntu-20.04.x86_64.stable.release
-          os: ubuntu-20.04
+        - name: ubuntu-22.04.x86_64.stable.release
+          os: ubuntu-22.04
           rust: stable
           profile: release
           features: -F release
