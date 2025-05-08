@@ -73,7 +73,7 @@ bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 clap_complete = "4.4"
 clap_mangen = "0.2"
-color-backtrace = { version = "0.6", optional = true }
+color-backtrace = { version = "0.7", optional = true }
 console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
