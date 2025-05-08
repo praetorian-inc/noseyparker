@@ -26,6 +26,9 @@ Note that the use of semantic versioning applies to the command-line interface a
     - `Sourcegraph Access Token` ([#252](https://github.com/praetorian-inc/noseyparker/pull/252))
     - `Tavily API Key` ([#253](https://github.com/praetorian-inc/noseyparker/pull/253))
 
+- SARIF output now again includes Git commit information when available ([#266](https://github.com/praetorian-inc/noseyparker/pull/266) from @PBarri)
+
+
 ### Changes
 - The `Credentials in PsExec` rule has been renamed to `Credentials in PsExec Invocation` ([#251](https://github.com/praetorian-inc/noseyparker/pull/251))
 
@@ -33,6 +36,8 @@ Note that the use of semantic versioning applies to the command-line interface a
 
     - `Azure Connection String` ([#257](https://github.com/praetorian-inc/noseyparker/pull/257))
     - `Generic Username and Password` ([#260](https://github.com/praetorian-inc/noseyparker/pull/260))
+
+- CI jobs that run on Ubuntu 20.04 have been replaced with Ubuntu 22.04, now that Ubuntu 20.04 runners have been removed from GitHub Actions ([#267](https://github.com/praetorian-inc/noseyparker/pull/267))
 
 
 ## [v0.23.0](https://github.com/praetorian-inc/noseyparker/releases/v0.23.0) (2025-01-28)
