@@ -109,9 +109,9 @@ tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-
 url = "2.3"
 vectorscan-rs = { version = "0.0.5" }
 object-pool = "0.6.0"
-parquet = { version = "54.0.0", optional = true }
-arrow-schema = { version = "54.0.0", optional = true }
-arrow-array = { version = "54.0.0", optional = true }
+parquet = { version = "55.0.0", optional = true }
+arrow-schema = { version = "55.0.0", optional = true }
+arrow-array = { version = "55.0.0", optional = true }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }
