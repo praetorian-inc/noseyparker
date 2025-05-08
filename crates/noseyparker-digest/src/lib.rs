@@ -1,11 +1,10 @@
-#[derive(Default)]
-pub struct Sha1(gix_features::hash::Hasher);
+pub struct Sha1(gix_hash::Hasher);
 
 pub type Sha1Digest = [u8; 20];
 
 impl Sha1 {
     pub fn new() -> Self {
-        Self::default()
+        Self(gix_hash::hasher(gix_hash::Kind::Sha1))
     }
 
     pub fn update(&mut self, input: &[u8]) {
@@ -13,16 +12,21 @@ impl Sha1 {
     }
 
     pub fn hexdigest(self) -> String {
-        hex::encode(self.0.digest())
+        self.0.try_finalize().unwrap().to_string()
     }
 
     pub fn digest(self) -> Sha1Digest {
-        self.0.digest()
+        self.0
+            .try_finalize()
+            .unwrap()
+            .as_bytes()
+            .try_into()
+            .unwrap()
     }
 }
 
 pub fn sha1_hexdigest(input: &[u8]) -> String {
-    let mut h = Sha1::default();
+    let mut h = Sha1::new();
     h.update(input);
     h.hexdigest()
 }

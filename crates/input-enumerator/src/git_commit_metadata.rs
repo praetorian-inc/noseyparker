@@ -1,6 +1,6 @@
 use bstr::BString;
-use gix::date::Time;
 use gix::ObjectId;
+use gix_date::{parse::TimeBuf, Time};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -45,7 +45,8 @@ mod text_time {
     }
 
     pub fn serialize<S: serde::Serializer>(v: &Time, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.collect_str(&v.to_bstring())
+        let mut buf = TimeBuf::default();
+        serializer.collect_str(v.to_str(&mut buf))
     }
 
     pub fn deserialize<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Time, D::Error> {

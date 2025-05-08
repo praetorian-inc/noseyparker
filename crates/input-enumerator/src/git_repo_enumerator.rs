@@ -99,13 +99,21 @@ impl<'a> GitRepoWithMetadataEnumerator<'a> {
 
             let committer = &commit.committer;
             let author = &commit.author;
+
+            let committer_timestamp = unwrap_ok_or_continue!(committer.time(), |e| {
+                error!("Failed to parse committer timestamp: {e}");
+            });
+            let author_timestamp = unwrap_ok_or_continue!(author.time(), |e| {
+                error!("Failed to parse author timestamp: {e}");
+            });
+
             let md = CommitMetadata {
                 commit_id: *commit_oid,
                 committer_name: committer.name.to_owned(),
-                committer_timestamp: committer.time,
+                committer_timestamp,
                 committer_email: committer.email.to_owned(),
                 author_name: author.name.to_owned(),
-                author_timestamp: author.time,
+                author_timestamp,
                 author_email: author.email.to_owned(),
                 message: commit.message.to_owned(),
             };
