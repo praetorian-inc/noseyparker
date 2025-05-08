@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         include:
-        - build: ubuntu-20.04.x86_64
-          os: ubuntu-20.04
+        - build: ubuntu-22.04.x86_64
+          os: ubuntu-22.04
           rust: stable
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
