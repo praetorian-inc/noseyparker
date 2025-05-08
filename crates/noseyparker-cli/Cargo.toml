@@ -100,7 +100,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-sarif = "0.7"
 strum = { version = "0.27", features = ["derive"] }
-sysinfo = { version =  "0.33" }
+sysinfo = "0.35"
 tar = "0.4"
 tempfile = "3.1"
 tracing = "0.1"
