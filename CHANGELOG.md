@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Note that the use of semantic versioning applies only to the command-line interface and output formats; the Rust crate APIs are considered an implementation detail.
 
 
-## Unreleased
+## [v0.24.0](https://github.com/praetorian-inc/noseyparker/releases/v0.24.0) (2025-05-08)
 
 ### Additions
 - New rules:
