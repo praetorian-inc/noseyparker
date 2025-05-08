@@ -19,7 +19,7 @@ Rule Selection Options:
                               [possible values: true, false]
 
 Input Specifier Options:
-  [INPUT]...                    Scan the specified file, directory, or local Git repository
+  [INPUT]...                        Scan the specified file, directory, or local Git repository
       --git-url <URL>               Clone and scan the Git repository at the specified URL
       --github-repo-type <TYPE>     Clone and scan GitHub repos only of the given type [default:
                                     source] [possible values: all, source, fork]

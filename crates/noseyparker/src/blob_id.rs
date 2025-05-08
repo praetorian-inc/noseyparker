@@ -54,7 +54,7 @@ impl BlobId {
         use noseyparker_digest::Sha1;
         use std::io::Write;
 
-        let mut h = Sha1::default();
+        let mut h = Sha1::new();
         write!(&mut h, "blob {}\0", input.len()).unwrap();
         h.update(input);
         BlobId(h.digest())

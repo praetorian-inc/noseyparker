@@ -73,12 +73,12 @@ bstr = { version = "1.0" }
 clap = { version = "4.3", features = ["cargo", "derive", "env", "unicode", "wrap_help"] }
 clap_complete = "4.4"
 clap_mangen = "0.2"
-color-backtrace = { version = "0.6", optional = true }
+color-backtrace = { version = "0.7", optional = true }
 console = "0.15"
 content-guesser = { path = "../content-guesser" }
 crossbeam-channel = "0.5"
 flate2 = "1.0"
-gix = { version = "0.70", features = ["max-performance", "serde"] }
+gix = { version = "0.72", features = ["max-performance", "serde"] }
 glob = "0.3.1"
 indenter = "0.3"
 indicatif = { version = "0.17", features = ["improved_unicode"] }
@@ -99,8 +99,8 @@ schemars = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-sarif = "0.7"
-strum = { version = "0.26", features = ["derive"] }
-sysinfo = { version =  "0.33" }
+strum = { version = "0.27", features = ["derive"] }
+sysinfo = "0.35"
 tar = "0.4"
 tempfile = "3.1"
 tracing = "0.1"
@@ -109,9 +109,9 @@ tracing-subscriber = { version = "0.3", features = ["tracing-log", "ansi", "env-
 url = "2.3"
 vectorscan-rs = { version = "0.0.5" }
 object-pool = "0.6.0"
-parquet = { version = "54.0.0", optional = true }
-arrow-schema = { version = "54.0.0", optional = true }
-arrow-array = { version = "54.0.0", optional = true }
+parquet = { version = "55.0.0", optional = true }
+arrow-schema = { version = "55.0.0", optional = true }
+arrow-array = { version = "55.0.0", optional = true }
 
 [dev-dependencies]
 assert_cmd = { version = "2.0", features = ["color-auto"] }

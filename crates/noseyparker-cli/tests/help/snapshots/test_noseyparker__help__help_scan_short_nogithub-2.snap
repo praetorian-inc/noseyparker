@@ -19,7 +19,7 @@ Rule Selection Options:
                               [possible values: true, false]
 
 Input Specifier Options:
-  [INPUT]...            Scan the specified file, directory, or local Git repository
+  [INPUT]...                Scan the specified file, directory, or local Git repository
       --git-url <URL>       Clone and scan the Git repository at the specified URL
       --enumerator <PATH>   Read inputs from a JSONL enumerator file (experimental)
       --git-clone <MODE>    Use the specified method for cloning Git repositories [default: bare]
