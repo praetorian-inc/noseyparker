@@ -9,7 +9,7 @@
 #
 # See https://github.com/praetorian-inc/noseyparker/issues/58.
 ################################################################################
-FROM rust:1.81-bullseye AS chef
+FROM rust:1.82-bullseye AS chef
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
 RUN cargo install --locked cargo-chef
