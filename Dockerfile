@@ -9,7 +9,7 @@
 #
 # See https://github.com/praetorian-inc/noseyparker/issues/58.
 ################################################################################
-FROM rust:1.82-bullseye AS chef
+FROM rust:1.82-bookworm AS chef
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
 RUN cargo install --locked cargo-chef
@@ -53,7 +53,7 @@ RUN ./scripts/create-release.zsh && cp -r release /release
 ################################################################################
 # Build a smaller image just for running the `noseyparker` binary
 ################################################################################
-FROM debian:11-slim AS runner
+FROM debian:12-slim AS runner
 
 # Add `git` so that noseyparker's git and github integration works
 RUN apt-get update && \
