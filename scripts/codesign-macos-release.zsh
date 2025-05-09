@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+# This script codesigns and notarizes a Nosey Parker release tarball.
+# It is intended to be run on a macOS machine that has access to the appropriate developer ID.
+
 set -eu
 
 ################################################################################
