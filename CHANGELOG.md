@@ -12,7 +12,7 @@ Note that the use of semantic versioning applies only to the command-line interf
 ### Additions
 - New rules:
 
-    - `Generic Secret` x2
+    - `Generic Secret` x2 ([#271](https://github.com/praetorian-inc/noseyparker/pull/271))
 
 
 ## [v0.24.0](https://github.com/praetorian-inc/noseyparker/releases/v0.24.0) (2025-05-08)
