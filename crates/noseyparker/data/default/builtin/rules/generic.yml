@@ -523,3 +523,73 @@ rules:
   examples:
   - |
       The default password for the user "pyne-user" is "pyne".
+
+
+- name: Generic Secret
+  id: np.generic.15
+
+  pattern: |
+    (?x)(?i)
+    \b if \b .{0,50}
+    \b (?: secret | pass | password | challenge ) \b
+    \s* (?: == | != | === | !== ) \s*
+    " ( [^"\n]{3,60} ) "
+
+  categories: [fuzzy, generic, secret]
+
+  description: >
+    A password was found.
+    This may allow an attacker unintended privileged access to a resource.
+
+  examples:
+  - |
+      if creds.Secret != "open-sesame" {
+        http.Error(rw, "unauthorized", http.StatusUnauthorized)
+      }
+
+  - |
+      username = request.form["username"]
+      password = request.form["password"]
+
+      if username == "jojoba" and password == "team10":
+          return redirect(url_for('profile'))
+      else:
+          return render_template("login.html", error="Invalid credentials")
+
+  - |
+      password = request.form.get('password')
+      result = "Incorrect Username or Password"
+      if username == "adM1n1sTrat0R" and password == "123P4ssW0rd@@":
+          result = "Logged in successfully as an Admin"
+      return render_template('vulnerabilities/sensitive-data-exposure-low.html',msg=result)
+
+- name: Generic Secret
+  id: np.generic.16
+
+  pattern: |
+    (?x)(?i)
+    \b if \b .{0,50}
+    \b (?: secret | pass | password | challenge ) \b
+    \s* (?: == | != | === | !== ) \s*
+    ' ( [^'\n]{3,60} ) '
+
+  categories: [fuzzy, generic, secret]
+
+  description: >
+    A password was found.
+    This may allow an attacker unintended privileged access to a resource.
+
+  examples:
+  - |
+      if creds.Secret != 'open-sesame' {
+        http.Error(rw, "unauthorized", http.StatusUnauthorized)
+      }
+
+  - |
+      hashed_password = users.get(username)
+      if username == 'example@gmail.com' and password =='logmein':
+          return jsonify({'success': True, 'message': 'Login successful'}), 200
+      if hashed_password and check_password_hash(hashed_password, password):
+          return jsonify({'success': True, 'message': 'Login successful'}), 200
+      else:
+          return jsonify({'success': False, 'message': 'Invalid credentials'}), 401

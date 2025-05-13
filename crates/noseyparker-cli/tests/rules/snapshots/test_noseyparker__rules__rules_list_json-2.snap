@@ -1325,6 +1325,51 @@ expression: stdout
       }
     },
     {
+      "id": "np.generic.15",
+      "structural_id": "b417ad14d1ce4c086a53d520d4a6da876ad3b53e",
+      "name": "Generic Secret",
+      "syntax": {
+        "name": "Generic Secret",
+        "id": "np.generic.15",
+        "pattern": "(?x)(?i)\n\\b if \\b .{0,50}\n\\b (?: secret | pass | password | challenge ) \\b\n\\s* (?: == | != | === | !== ) \\s*\n\" ( [^\"\\n]{3,60} ) \"\n",
+        "description": "A password was found. This may allow an attacker unintended privileged access to a resource.\n",
+        "examples": [
+          "if creds.Secret != \"open-sesame\" {\n  http.Error(rw, \"unauthorized\", http.StatusUnauthorized)\n}\n",
+          "username = request.form[\"username\"]\npassword = request.form[\"password\"]\n\nif username == \"jojoba\" and password == \"team10\":\n    return redirect(url_for('profile'))\nelse:\n    return render_template(\"login.html\", error=\"Invalid credentials\")\n",
+          "password = request.form.get('password')\nresult = \"Incorrect Username or Password\"\nif username == \"adM1n1sTrat0R\" and password == \"123P4ssW0rd@@\":\n    result = \"Logged in successfully as an Admin\"\nreturn render_template('vulnerabilities/sensitive-data-exposure-low.html',msg=result)\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.generic.16",
+      "structural_id": "76b6e809f7ed723b12451a1a88be65692d481e03",
+      "name": "Generic Secret",
+      "syntax": {
+        "name": "Generic Secret",
+        "id": "np.generic.16",
+        "pattern": "(?x)(?i)\n\\b if \\b .{0,50}\n\\b (?: secret | pass | password | challenge ) \\b\n\\s* (?: == | != | === | !== ) \\s*\n' ( [^'\\n]{3,60} ) '\n",
+        "description": "A password was found. This may allow an attacker unintended privileged access to a resource.\n",
+        "examples": [
+          "if creds.Secret != 'open-sesame' {\n  http.Error(rw, \"unauthorized\", http.StatusUnauthorized)\n}\n",
+          "hashed_password = users.get(username)\nif username == 'example@gmail.com' and password =='logmein':\n    return jsonify({'success': True, 'message': 'Login successful'}), 200\nif hashed_password and check_password_hash(hashed_password, password):\n    return jsonify({'success': True, 'message': 'Login successful'}), 200\nelse:\n    return jsonify({'success': False, 'message': 'Invalid credentials'}), 401\n"
+        ],
+        "negative_examples": [],
+        "references": [],
+        "categories": [
+          "fuzzy",
+          "generic",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.generic.2",
       "structural_id": "ac1028729d342a4d0cf282377532d882a48795c6",
       "name": "Generic API Key",
@@ -4615,7 +4660,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 162
+      "num_rules": 164
     },
     {
       "id": "np.assets",
