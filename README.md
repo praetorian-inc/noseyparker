@@ -10,7 +10,7 @@ It has found secrets in hundreds of offensive security engagements at [Praetoria
 
 **Key features:**
 - **Flexiblity:** It natively scans files, directories, GitHub, and Git history, and has an extensible input enumeration mechanism
-- **Field-tested rules:** It uses regular expressions with [185 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high precision based on feedback from security engineers
+- **Field-tested rules:** It uses regular expressions with [186 patterns](crates/noseyparker/data/default/builtin/rules) chosen for high precision based on feedback from security engineers
 - **Signal-to-noise:** It deduplicates matches that share the same secret, reducing review burden by 10-1000x or more
 - **Speed & scalability:** it can scan at GB/s on a multicore system, and has scanned inputs as large as 20TB during security engagements
 

@@ -107,7 +107,7 @@ rules:
 
 
 # This detects various hardcoded PATs that come from Microsoft example documentation
-- name: Azure Personal Access Token
+- name: Azure DevOps Personal Access Token
   id: np.azure.3
 
   pattern: |
@@ -134,3 +134,46 @@ rules:
   - api
   - fuzzy
   - secret
+
+  description: >
+    An Azure DevOps Personal Access Token was found.
+    Azure DevOps is a code hosting, testing, and deployment platform.
+    Depending on the privileges granted to the token, an attacker may be able to use it to access source code, secrets, and build resources, enabling a supply chain attack.
+
+
+- name: Azure DevOps Personal Access Token
+  id: np.azure.4
+
+  pattern: '\b([a-zA-Z0-9]{76}AZDO[a-zA-Z0-9]{4})\b'
+
+  references:
+  - https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+  - https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#changes-to-format
+
+  categories:
+  - api
+  - secret
+
+  examples:
+  - '6RtqHqPc66Y6DYbkydbrrFJTYnRoA7r40ts7LWS2SkINSFsRABxhJQQJ99BFACAAAAALGcqjAAASAZDO3eqU'
+  - 'aQwErTy123456789AbCdEf0123456789AbCdEf0123456789AbCdEf0123456789AbCdEf012345AZDOabc1'
+  - |
+      team = 'ChickenBone Team'
+      token = '23IcywOgHQTktCPK7D1r1zLjJkRiDu9m1udhpuOnl9XKhUzybqlMJQQJ98BAACAAAAATbLuLAAASAZDOWP7X'
+  - |
+      # Use your real DevOps org & PAT
+      azure_devops_url             = "https://dev.azure.com/Example-Team-DevSecOps/"
+      azure_devops_pat             = "GBVknRcxXb9mv097EZvvmJhvdKEjmmllsz8puwgJHpnA8rAd912ZJQQJ96BBACAAAAAP0mgpAAASAZDO4Ssi"
+      azure_devops_agent_pool_name = "Default"
+
+  negative_examples:
+  - 'a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8s9T0u1V2w3X4y5Z6a7B8c9D0e1F2g3H4i5J6k7L8m9AZDOn0p1Q'
+  - 'X9y8Z7a6B5c4D3e2F1g0H9i8J7k6L5m4N3o2P1q0R9s8T7u6V5w4X3y2Z1a0B9c8D7e6F5g4H3i2J1k0AZDOl9M8n'
+  - '6RtqHqPc66Y6DYbkydbrrFJTYnRoA7r40ts7LWS2SkINSFsRABxhJQQJ99BFACAAAAALGcqjAAASAZDO3eq'
+  - 'zpczok4kqgnw5prpfy3ehiylbqvgbjfkdiqkejsxqamy7qbkep7q'
+  - 'a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8s9T0u1V2w3X4y5Z6a7B8c9D0e1F2g3H4i5J6k7L8m9XXXX12345'
+
+  description: >
+    An Azure DevOps Personal Access Token was found.
+    Azure DevOps is a code hosting, testing, and deployment platform.
+    Depending on the privileges granted to the token, an attacker may be able to use it to access source code, secrets, and build resources, enabling a supply chain attack.
