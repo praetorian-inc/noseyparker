@@ -26,6 +26,7 @@ rulesets:
   - np.azure.1        # Azure Connection String
   - np.azure.2        # Azure App Configuration Connection String
   - np.azure.3        # Azure Personal Access Token
+  - np.azure.4        # Azure DevOps Personal Access Token
   - np.bitbucket.1    # Bitbucket App Password
   - np.blynk.1        # Blynk Device Access Token
   - np.blynk.2        # Blynk Organization Access Token

@@ -12,7 +12,12 @@ Note that the use of semantic versioning applies only to the command-line interf
 ### Additions
 - New rules:
 
+    - `Azure DevOps Personal Access Token` ([#272](https://github.com/praetorian-inc/noseyparker/pull/272))
     - `Generic Secret` x2 ([#271](https://github.com/praetorian-inc/noseyparker/pull/271))
+
+- Rule modifications:
+
+    - `Azure Personal Access Token` has been renamed to `Azure DevOps Personal Access Token` and has gained a description ([#272](https://github.com/praetorian-inc/noseyparker/pull/272))
 
 
 ## [v0.24.0](https://github.com/praetorian-inc/noseyparker/releases/v0.24.0) (2025-05-08)
