@@ -200,6 +200,30 @@ expression: stdout
       }
     },
     {
+      "id": "np.atlassian.1",
+      "structural_id": "67603cf49275fc9e3e4857bb54d6cee95fee9e2b",
+      "name": "Atlassian Cloud API Token",
+      "syntax": {
+        "name": "Atlassian Cloud API Token",
+        "id": "np.atlassian.1",
+        "pattern": "(?x)\n\\b(\nATATT3xFfGF0 [a-zA-Z0-9_-]{20,200} =[0-9A-F]{8}\n)\\b\n",
+        "description": "An Atlassian Cloud API Token was found. An attacker could use this to access resources including Confluence wiki and Jira project management resources.\n",
+        "examples": [
+          "# Replace 'your_email' and 'your_api_token' with your actual email and Jira API token\nemail = 'info@example.com'\napi_token = 'ATATT3xFfGF0pogUFVOH0_AjBEA8LJcnOJx_Ki4yl_PYkv-LwEBQQp3r37KZYnKm8IGQ-KKXDxCl7qnzxF7BRF0a3pwEeAuKEo3iLK7bHXNQgZgVBAURy4RnTnYXwyifmYqWlCAW5J7u04BqXA6pSSceOPQewIpy2CQzDe8MRqmqZw-zcpzSRS0=110E6FC6'\n",
+          "# ######## Set your Jira credentials and endpoint ########\nJIRA_USER=\"example@example.com\"\nJIRA_API_TOKEN=\"ATATT3xFfGF0xYT7HPCi5lokFfZWNkl0R1xi9BpiieoCRoG3Dn64p6PHPNO-J0-xpcxCZ2GgfV37TfLYSqwT0fQddokHukUVKaxaTqEvQiDM6zbsr2u4ME8Nlp8cTwIvw92CRaD6_U1Awmr3pQFAgIsli5clBlZoRsollYlRztAtrIQ-qDiyUg4=D46B4967\"\n",
+          "'jira' => [\n    'host' => env('JIRA_HOST', 'https://example.net'),\n    'user' => env('JIRA_USER', 'admin@example.com'),\n    'secret' => env('JIRA_SECRET'),\n    'token' => env('JIRA_API_TOKEN', 'ATATT3xFfGF0Hv2D5CyGjDnjGL5j9medBUqpDdy923KtUnA3BBICVROxYboITpzmWeDhIeFvj-noomSdyaPSaigvQ4QZg8EN_mfJqQ-gAI4swknj2HDYa2pNROqqvuzWn4HkpIPjQ0Z8MAMOPv5U0QtygZbxhUG73VMwzmlHEAM4Wiv_lS2pCKo=569C722C'),\n],\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.auth0.1",
       "structural_id": "49dbb46e6f82da72157248aa3a1e1378fcabe0af",
       "name": "Auth0 Application Credentials",
@@ -4692,7 +4716,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 165
+      "num_rules": 166
     },
     {
       "id": "np.assets",

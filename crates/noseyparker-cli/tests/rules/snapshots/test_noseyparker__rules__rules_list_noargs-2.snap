@@ -12,6 +12,7 @@ expression: stdout
  np.appsync.1         AWS AppSync API Key                                           api, secret 
  np.arn.1             Amazon Resource Name                                          api, identifier 
  np.artifactory.1     Artifactory API Key                                           api, fuzzy, secret 
+ np.atlassian.1       Atlassian Cloud API Token                                     api, secret 
  np.auth0.1           Auth0 Application Credentials                                 api, fuzzy, secret 
  np.aws.1             AWS API Key                                                   api, identifier 
  np.aws.2             AWS Secret Access Key                                         api, fuzzy, secret 
@@ -193,6 +194,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             165 
+ default      Nosey Parker default rules             166 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6

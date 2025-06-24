@@ -1,0 +1,37 @@
+rules:
+
+- name: Atlassian Cloud API Token
+  id: np.atlassian.1
+  pattern: |
+    (?x)
+    \b(
+    ATATT3xFfGF0 [a-zA-Z0-9_-]{20,200} =[0-9A-F]{8}
+    )\b
+
+  categories: [api, secret]
+
+  description: >
+    An Atlassian Cloud API Token was found.
+    An attacker could use this to access resources including Confluence wiki and Jira project management resources.
+
+  references:
+  - https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/
+
+  examples:
+  - |
+      # Replace 'your_email' and 'your_api_token' with your actual email and Jira API token
+      email = 'info@example.com'
+      api_token = 'ATATT3xFfGF0pogUFVOH0_AjBEA8LJcnOJx_Ki4yl_PYkv-LwEBQQp3r37KZYnKm8IGQ-KKXDxCl7qnzxF7BRF0a3pwEeAuKEo3iLK7bHXNQgZgVBAURy4RnTnYXwyifmYqWlCAW5J7u04BqXA6pSSceOPQewIpy2CQzDe8MRqmqZw-zcpzSRS0=110E6FC6'
+
+  - |
+      # ######## Set your Jira credentials and endpoint ########
+      JIRA_USER="example@example.com"
+      JIRA_API_TOKEN="ATATT3xFfGF0xYT7HPCi5lokFfZWNkl0R1xi9BpiieoCRoG3Dn64p6PHPNO-J0-xpcxCZ2GgfV37TfLYSqwT0fQddokHukUVKaxaTqEvQiDM6zbsr2u4ME8Nlp8cTwIvw92CRaD6_U1Awmr3pQFAgIsli5clBlZoRsollYlRztAtrIQ-qDiyUg4=D46B4967"
+
+  - |
+      'jira' => [
+          'host' => env('JIRA_HOST', 'https://example.net'),
+          'user' => env('JIRA_USER', 'admin@example.com'),
+          'secret' => env('JIRA_SECRET'),
+          'token' => env('JIRA_API_TOKEN', 'ATATT3xFfGF0Hv2D5CyGjDnjGL5j9medBUqpDdy923KtUnA3BBICVROxYboITpzmWeDhIeFvj-noomSdyaPSaigvQ4QZg8EN_mfJqQ-gAI4swknj2HDYa2pNROqqvuzWn4HkpIPjQ0Z8MAMOPv5U0QtygZbxhUG73VMwzmlHEAM4Wiv_lS2pCKo=569C722C'),
+      ],
