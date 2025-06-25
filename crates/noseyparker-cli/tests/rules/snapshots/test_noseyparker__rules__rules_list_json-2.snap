@@ -2936,6 +2936,29 @@ expression: stdout
       }
     },
     {
+      "id": "np.nasa.1",
+      "structural_id": "40e5cd9657b110dc2899d52cb62b97d2619e7083",
+      "name": "NASA API Key",
+      "syntax": {
+        "name": "NASA API Key",
+        "id": "np.nasa.1",
+        "pattern": "(?x)\n\\b\nnasa\\.gov/ .{0,200}\napi_key=([a-zA-Z0-9]{40})\n\\b\n",
+        "description": "A NASA API key was found. This API key allows access to several rate-limited APIs. An attacker could use this API key to consume limited resources and cause denial of service.\n",
+        "examples": [
+          "get('https://api.nasa.gov/planetary/earth/imagery?api_key=fWfSMcDzyHfMuH8BW6jiIUBYaj0hKRyKBRTBqgEQ')\n  .then(function(response) {\n    // There is an issue with the image being pulled from the API, so using a different one instead\n    document.getElementsByClassName('targetImage')[0].src = \"https://api.nasa.gov/images/earth.png\";\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://api.nasa.gov"
+        ],
+        "categories": [
+          "api",
+          "secret",
+          "fuzzy"
+        ]
+      }
+    },
+    {
       "id": "np.netrc.1",
       "structural_id": "6cf5346e5563c0c4a41a3acb83f3ba90ee0c3941",
       "name": "netrc Credentials",
@@ -4716,7 +4739,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 166
+      "num_rules": 167
     },
     {
       "id": "np.assets",

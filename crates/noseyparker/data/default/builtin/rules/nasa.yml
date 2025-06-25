@@ -1,0 +1,28 @@
+rules:
+
+- name: NASA API Key
+  id: np.nasa.1
+
+  pattern: |
+    (?x)
+    \b
+    nasa\.gov/ .{0,200}
+    api_key=([a-zA-Z0-9]{40})
+    \b
+
+  categories: [api, secret, fuzzy]
+
+  description: >
+    A NASA API key was found.
+    This API key allows access to several rate-limited APIs.
+    An attacker could use this API key to consume limited resources and cause denial of service.
+
+  examples:
+  - |
+      get('https://api.nasa.gov/planetary/earth/imagery?api_key=fWfSMcDzyHfMuH8BW6jiIUBYaj0hKRyKBRTBqgEQ')
+        .then(function(response) {
+          // There is an issue with the image being pulled from the API, so using a different one instead
+          document.getElementsByClassName('targetImage')[0].src = "https://api.nasa.gov/images/earth.png";
+
+  references:
+  - https://api.nasa.gov
