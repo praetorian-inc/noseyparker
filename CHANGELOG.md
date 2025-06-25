@@ -12,7 +12,7 @@ Note that the use of semantic versioning applies only to the command-line interf
 ### Additions
 - New rules:
 
-    - `Atlassian Cloud API Token`
+    - `Atlassian Cloud API Token` ([#275](https://github.com/praetorian-inc/noseyparker/pull/275))
     - `Azure DevOps Personal Access Token` ([#272](https://github.com/praetorian-inc/noseyparker/pull/272))
     - `Generic Secret` x2 ([#271](https://github.com/praetorian-inc/noseyparker/pull/271))
 
