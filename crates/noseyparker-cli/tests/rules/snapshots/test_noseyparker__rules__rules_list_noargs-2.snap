@@ -121,6 +121,7 @@ expression: stdout
  np.mapbox.3          Mapbox Temporary Access Token                                 api, fuzzy, secret 
  np.mongodb.1         Credentials in MongoDB Connection String                      secret 
  np.msteams.1         Microsoft Teams Webhook                                       api, secret 
+ np.nasa.1            NASA API Key                                                  api, fuzzy, secret 
  np.netrc.1           netrc Credentials                                             secret 
  np.newrelic.1        New Relic License Key                                         secret 
  np.newrelic.2        New Relic License Key                                         secret 
@@ -194,6 +195,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             166 
+ default      Nosey Parker default rules             167 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
