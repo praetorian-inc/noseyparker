@@ -15,6 +15,7 @@ rulesets:
   - np.adafruit.1     # Adafruit IO Key
   - np.adobe.1        # Adobe OAuth Client Secret
   - np.age.2          # Age Identity (X22519 secret key)
+  - np.atlassian.1    # Atlassian Cloud API Token
   - np.anthropic.1    # Anthropic API Key
   - np.artifactory.1  # Artifactory API Key
   - np.appsync.1      # AWS AppSync API Key
