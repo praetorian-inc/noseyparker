@@ -118,8 +118,8 @@ banner "Assembling release dir"
 NP="$PWD/$RELEASE_DIR/bin/${NOSEYPARKER}"
 cp -p "$CARGO_BUILD_DIR/noseyparker-cli" "$NP" || fatal "failed to copy ${NOSEYPARKER}"
 
-# Copy CHANGELOG.md, LICENSE, and README.md
-cp -p CHANGELOG.md LICENSE README.md "$RELEASE_DIR/" || fatal "failed to copy assets"
+# Include CHANGELOG.md, LICENSE, NOTICE, and README.md
+cp -p CHANGELOG.md LICENSE NOTICE README.md "$RELEASE_DIR/" || fatal "failed to copy assets"
 
 if (( $INCLUDE_DEBUG )); then
     if [[ $PLATFORM == 'linux' ]]; then
