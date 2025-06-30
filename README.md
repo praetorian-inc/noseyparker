@@ -263,7 +263,7 @@ Nosey Parker has a few third-party integrations:
 - [DefectDojo](https://defectdojo.org) includes a [parser for Nosey Parker v0.16 JSON](https://github.com/DefectDojo/django-DefectDojo/blob/c182e9ca9d8f981c15de2018f948fe69c4d1a800/docs/content/en/integrations/parsers/file/noseyparker.md)
 - [Nemesis](https://github.com/SpecterOps/Nemesis) includes support for Nosey Parker
 - [noseyparker-compact](https://github.com/metaory/noseyparker-compact) provides compact report postprocessors
-- [segfault.net root servers include Nosey Parker preinstalled](https://www.thc.org/segfault/)
+- [segfault.net disposable root servers](https://www.thc.org/segfault/) come with Nosey Parker preinstalled
 
 
 If you have an integration you'd like to share that's not listed here, please create a PR.
