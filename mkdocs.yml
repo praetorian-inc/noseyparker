@@ -1,0 +1,116 @@
+#strict: true
+
+site_name: Nosey Parker
+site_description: Find secrets in textual data and Git history
+site_url: https://praetorian-inc.github.io/noseyparker
+
+repo_url: https://github.com/praetorian-inc/noseyparker
+edit_uri: edit/main/docs
+
+nav:
+
+- Home: index.md
+
+- Getting Started:
+  - installation.md
+  - tutorial.md
+
+- Examples:
+
+  - scanning.md
+  - reporting.md
+  - enumeration.md
+
+- Reference:
+  - data-model.md
+
+  # N.B., handled by the `generate_commands_reference.py` script and `gen-files` / `literate-nav` extensions
+  - Commands: commands/
+
+# N.B., handled by the `generate_rules_docs.py` script and `gen-files` / `literate-nav` extensions
+- Built-in Rules: rules/
+
+- Contributing:
+  - Overview: contributing/index.md
+  - adding-rules.md
+  - integrations.md
+
+- Changelog: CHANGELOG.md
+
+
+markdown_extensions:
+# allows for notes / callouts
+- admonition
+- pymdownx.fancylists
+# allows for arbitrary nesting of code and content blocks inside each other,
+# including admonitions, tabs, lists and all other elements
+- pymdownx.superfences
+- toc:
+    permalink: true
+    toc_depth: 2  # Only show 2 levels in the table of contents
+
+
+plugins:
+- gen-files:
+    scripts:
+    - doc-scripts/generate_rules_docs.py
+    - doc-scripts/generate_command_reference.py
+- literate-nav
+#- offline
+- search
+
+# Explicitly add some entries to make `mkdocs serve` more useful
+watch:
+- doc-scripts
+
+theme:
+  name: material
+  palette:
+  # Palette toggle for automatic mode
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+
+  # Palette toggle for light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+
+  # Palette toggle for dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to system preference
+
+  features:
+
+  - content.action.edit
+  - content.action.view
+  - content.code.copy
+  - content.code.annotate
+
+  - navigation.tabs
+  - navigation.expand
+
+  - navigation.instant
+  # - navigation.instant.prefetch
+  - navigation.instant.preview
+
+  #- navigation.prune
+  #- navigation.footer
+  #- navigation.sections
+  - navigation.tracking
+
+  - toc.integrate
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+copyright: Copyright &copy; <a href="https://praetorian.com">Praetorian</a>
