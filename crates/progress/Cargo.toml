@@ -9,4 +9,4 @@ publish.workspace = true
 
 [dependencies]
 # TODO Consider switching from indicatif to status_line: https://docs.rs/status-line/latest/status_line/struct.StatusLine.html
-indicatif = { version = "0.17", features = ["improved_unicode"] }
+indicatif = { version = "0.18", features = ["improved_unicode"] }
