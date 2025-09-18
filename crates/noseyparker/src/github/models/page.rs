@@ -1,7 +1,8 @@
-use crate::github::Result;
 use lazy_static::lazy_static;
 use regex::{Regex, RegexBuilder};
 use url::Url;
+
+use crate::github::Result;
 
 // -------------------------------------------------------------------------------------------------
 // Page

@@ -2,13 +2,13 @@ pub mod blob_appearance;
 pub mod bstring_table;
 pub mod git_commit_metadata;
 pub mod git_metadata_graph;
-pub use gix::{Repository, ThreadSafeRepository};
+use std::path::{Path, PathBuf};
 
 use anyhow::{Result, bail};
 use crossbeam_channel::Sender;
+pub use gix::{Repository, ThreadSafeRepository};
 pub use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use ignore::{DirEntry, WalkBuilder, WalkState};
-use std::path::{Path, PathBuf};
 use tracing::{debug, warn};
 
 // -------------------------------------------------------------------------------------------------

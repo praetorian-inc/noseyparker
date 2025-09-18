@@ -1,8 +1,9 @@
-use schemars::JsonSchema;
-use serde::ser::SerializeSeq;
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::Arc;
+
+use schemars::JsonSchema;
+use serde::ser::SerializeSeq;
 
 use crate::provenance::Provenance;
 

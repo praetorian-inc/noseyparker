@@ -1,10 +1,10 @@
-use anyhow::{Result, bail};
-use regex::bytes::Regex;
 use std::time::Instant;
+
+use anyhow::{Result, bail};
+use noseyparker_rules::Rule;
+use regex::bytes::Regex;
 use tracing::{debug, debug_span};
 use vectorscan_rs::{BlockDatabase, Flag, Pattern};
-
-use noseyparker_rules::Rule;
 
 pub struct RulesDatabase {
     // NOTE: pub(crate) here so that `Matcher` can access these
@@ -69,8 +69,9 @@ impl RulesDatabase {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     pub fn test_vectorscan_sanity() -> Result<()> {

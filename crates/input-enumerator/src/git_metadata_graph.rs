@@ -1,17 +1,19 @@
+use std::collections::BinaryHeap;
+use std::time::Instant;
+
 use anyhow::{Context, Result, bail};
 use bstr::BString;
 use fixedbitset::FixedBitSet;
 use gix::hashtable::{HashMap, hash_map};
+use gix::object::Kind;
 use gix::objs::tree::EntryKind;
 use gix::prelude::*;
-use gix::{ObjectId, OdbHandle, object::Kind};
+use gix::{ObjectId, OdbHandle};
 use petgraph::graph::{DiGraph, EdgeIndex, IndexType, NodeIndex};
 use petgraph::prelude::*;
 use petgraph::visit::Visitable;
 use roaring::RoaringBitmap;
 use smallvec::SmallVec;
-use std::collections::BinaryHeap;
-use std::time::Instant;
 use tracing::{debug, error, error_span, warn};
 
 use crate::bstring_table::{BStringTable, SymbolType};

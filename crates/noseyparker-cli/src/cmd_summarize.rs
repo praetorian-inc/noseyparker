@@ -1,6 +1,5 @@
 use anyhow::{Context, Result};
 use indicatif::HumanCount;
-
 use noseyparker::datastore::{Datastore, FindingSummary};
 
 use crate::args::{GlobalArgs, SummarizeArgs, SummarizeOutputFormat};

@@ -1,6 +1,7 @@
-use indicatif::{ProgressBar, ProgressStyle};
 use std::borrow::Cow;
 use std::time::{Duration, Instant};
+
+use indicatif::{ProgressBar, ProgressStyle};
 
 /// How often should progress bars be redrawn?
 pub const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(500);

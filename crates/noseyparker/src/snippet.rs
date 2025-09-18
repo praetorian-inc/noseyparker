@@ -1,9 +1,10 @@
+// use std::borrow::Cow;
+use std::fmt::{Display, Formatter};
+
 use bstr::BString;
 use bstring_serde::BStringLossyUtf8;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-// use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
 
 use crate::bstring_escape::Escaped;
 

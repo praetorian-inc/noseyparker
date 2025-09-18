@@ -23,7 +23,8 @@ use args::{CommandLineArgs, GlobalArgs};
 /// Set up the logging / tracing system for the application.
 fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
     use tracing_log::{AsLog, LogTracer};
-    use tracing_subscriber::{EnvFilter, filter::LevelFilter};
+    use tracing_subscriber::EnvFilter;
+    use tracing_subscriber::filter::LevelFilter;
 
     // Set the tracing level according to the `-q`/`--quiet` and `-v`/`--verbose` options
     let level_filter = if global_args.quiet {
@@ -62,8 +63,9 @@ fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
 
 /// Set the process rlimits according to the global arguments.
 fn configure_rlimits(global_args: &GlobalArgs) -> Result<()> {
-    use rlimit::Resource;
     use std::cmp::max;
+
+    use rlimit::Resource;
 
     let nofile_limit = global_args.advanced.rlimit_nofile;
     let (soft, hard) = Resource::NOFILE.get()?;

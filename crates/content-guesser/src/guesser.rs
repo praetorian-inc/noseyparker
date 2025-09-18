@@ -1,6 +1,8 @@
 use mime_guess::MimeGuess;
 
-use crate::{error::GuesserError, input::Input, output::Output};
+use crate::error::GuesserError;
+use crate::input::Input;
+use crate::output::Output;
 
 pub struct Guesser {
     #[cfg(feature = "libmagic")]

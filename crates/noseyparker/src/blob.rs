@@ -1,5 +1,6 @@
-use anyhow::Result;
 use std::path::Path;
+
+use anyhow::Result;
 
 pub use crate::blob_id::BlobId;
 

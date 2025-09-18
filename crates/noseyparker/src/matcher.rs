@@ -1,8 +1,8 @@
-use anyhow::Result;
 use std::sync::Mutex;
-use tracing::error;
 
+use anyhow::Result;
 use noseyparker_rules::Rule;
+use tracing::error;
 
 use crate::blob::Blob;
 use crate::blob_id_map::BlobIdMap;
@@ -330,11 +330,10 @@ impl<'a> Matcher<'a> {
 // -------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use noseyparker_rules::RuleSyntax;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     pub fn test_simple() -> Result<()> {

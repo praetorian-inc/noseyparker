@@ -1,6 +1,7 @@
 use chrono::{DateTime, Duration, TimeDelta, TimeZone, Utc};
 use reqwest;
-use reqwest::{StatusCode, Url, header, header::HeaderValue};
+use reqwest::header::HeaderValue;
+use reqwest::{StatusCode, Url, header};
 use secrecy::ExposeSecret;
 
 use super::models::{OrganizationShort, Page, RateLimitOverview, Repository, User};
@@ -136,8 +137,9 @@ fn url_from_path_parts_and_params(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     fn make_url(base_url: &str, path_parts: &[&str], params: &[(&str, &str)]) -> Result<Url> {
         let base_url = Url::parse(base_url).unwrap();

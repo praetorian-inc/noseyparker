@@ -1,12 +1,10 @@
 use anyhow::{Context, Result};
+use noseyparker::datastore::{Annotations, Datastore};
 // use tracing::info;
 use tracing::debug;
 
 use crate::args::{AnnotationsArgs, AnnotationsExportArgs, AnnotationsImportArgs, GlobalArgs};
 use crate::util::{get_reader_for_file_or_stdin, get_writer_for_file_or_stdout};
-
-use noseyparker::datastore::Annotations;
-use noseyparker::datastore::Datastore;
 
 pub fn run(global_args: &GlobalArgs, args: &AnnotationsArgs) -> Result<()> {
     use crate::args::AnnotationsCommand::*;

@@ -1,14 +1,15 @@
 use anyhow::{Context, Result, bail};
+use noseyparker::github;
 use url::Url;
 
 use crate::args::{
     GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs, validate_github_api_url,
 };
 use crate::reportable::Reportable;
-use noseyparker::github;
 
 pub fn run(global_args: &GlobalArgs, args: &GitHubArgs) -> Result<()> {
-    use crate::args::{GitHubCommand::*, GitHubReposCommand::*};
+    use crate::args::GitHubCommand::*;
+    use crate::args::GitHubReposCommand::*;
     match &args.command {
         Repos(List(args_list)) => list_repos(global_args, args_list, args.github_api_url.clone()),
     }

@@ -1,10 +1,12 @@
-use anyhow::{Context, Result};
-use gix::{ObjectId, Repository, hashtable::HashMap};
-use ignore::gitignore::Gitignore;
-use smallvec::SmallVec;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Instant;
+
+use anyhow::{Context, Result};
+use gix::hashtable::HashMap;
+use gix::{ObjectId, Repository};
+use ignore::gitignore::Gitignore;
+use smallvec::SmallVec;
 // use std::time::Instant;
 use tracing::{debug, debug_span, error};
 

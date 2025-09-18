@@ -1,10 +1,10 @@
-use anyhow::Result;
-use lazy_static::lazy_static;
-use regex::Regex;
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
+use anyhow::Result;
+use lazy_static::lazy_static;
 use noseyparker_digest::sha1_hexdigest;
+use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 /// A pattern-based rule as represented syntactically.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]

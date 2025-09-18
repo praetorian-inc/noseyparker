@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
+use noseyparker::datastore::Datastore;
 use tracing::info;
 
 use crate::args::{DatastoreArgs, DatastoreExportArgs, DatastoreInitArgs, GlobalArgs};
-use noseyparker::datastore::Datastore;
 
 pub fn run(global_args: &GlobalArgs, args: &DatastoreArgs) -> Result<()> {
     use crate::args::DatastoreCommand::*;
@@ -28,9 +28,10 @@ fn cmd_datastore_export(global_args: &GlobalArgs, args: &DatastoreExportArgs) ->
     use crate::args::DatastoreExportOutputFormat::*;
     match args.format {
         Tgz => {
-            use flate2::write::GzEncoder;
             use std::ffi::OsStr;
             use std::path::Path;
+
+            use flate2::write::GzEncoder;
             use tempfile::NamedTempFile;
 
             let write_tar = |output_path: &Path| -> Result<()> {

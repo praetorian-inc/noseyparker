@@ -1,11 +1,11 @@
-use anyhow::{Context, Result, bail};
-use regex::Regex;
 use std::collections::HashSet;
-use tracing::{debug, error, error_span, info, warn};
-use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
+use anyhow::{Context, Result, bail};
 use noseyparker::rules_database::RulesDatabase;
 use noseyparker_rules::{Rule, RulesetSyntax};
+use regex::Regex;
+use tracing::{debug, error, error_span, info, warn};
+use vectorscan_rs::{BlockDatabase, Flag, Pattern, Scan};
 
 use crate::args::{GlobalArgs, RulesCheckArgs};
 use crate::rule_loader::RuleLoader;

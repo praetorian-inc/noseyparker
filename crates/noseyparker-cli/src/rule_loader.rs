@@ -1,10 +1,10 @@
-use anyhow::{Context, Result, anyhow, bail};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tracing::{debug, info};
 
+use anyhow::{Context, Result, anyhow, bail};
 use noseyparker::defaults::get_builtin_rules;
 use noseyparker_rules::{Rule, Rules, RulesetSyntax};
+use tracing::{debug, info};
 
 use crate::args::RuleSpecifierArgs;
 use crate::util::Counted;

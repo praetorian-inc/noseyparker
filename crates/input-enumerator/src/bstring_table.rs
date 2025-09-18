@@ -1,5 +1,6 @@
-use bstr::{BStr, BString};
 use std::collections::HashMap;
+
+use bstr::{BStr, BString};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Symbol<T> {
@@ -91,8 +92,9 @@ impl<S: SymbolType> BStringTable<S> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
+
+    use super::*;
 
     #[test]
     fn simple_roundtrip() {
