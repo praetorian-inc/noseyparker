@@ -92,7 +92,7 @@ fn configure_backtraces(global_args: &GlobalArgs) {
         } else {
             "1"
         };
-        std::env::set_var("RUST_BACKTRACE", val);
+        unsafe { std::env::set_var("RUST_BACKTRACE", val); }
     }
 
     #[cfg(feature = "color_backtrace")]

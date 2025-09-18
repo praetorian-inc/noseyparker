@@ -3,8 +3,8 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-edition = "2021"
-rust-version = "1.82"
+edition = "2024"
+rust-version = "1.85"
 
 license = "Apache-2.0"
 authors = ["Brad Larsen <bradford.larsen@praetorian.com>"]
