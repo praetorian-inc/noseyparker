@@ -1,9 +1,10 @@
+use std::path::{Path, PathBuf};
+
 use anyhow::{Context, Result, bail};
 use bstr::BString;
 use indoc::indoc;
 use noseyparker_rules::Rule;
 use rusqlite::Connection;
-use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span, info, trace};
 
 use crate::blob_metadata::BlobMetadata;
@@ -630,7 +631,8 @@ impl Datastore {
             }
         }
 
-        use rusqlite::{CachedStatement, ToSql, types::FromSql};
+        use rusqlite::types::FromSql;
+        use rusqlite::{CachedStatement, ToSql};
 
         /// This complicated helper function factors out some common "import a single annotation"
         /// logic that is common to finding comments, match comments, and match statuses.

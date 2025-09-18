@@ -1,18 +1,11 @@
-use anyhow::{Context, Result, bail};
-use indicatif::{HumanBytes, HumanCount, HumanDuration};
-use rayon::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use tracing::{debug, error, error_span, info, trace, warn};
 
-use crate::{args, rule_loader::RuleLoader};
-
+use anyhow::{Context, Result, bail};
 use content_guesser::Guesser;
+use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use input_enumerator::{FilesystemEnumerator, FoundInput};
-use progress::Progress;
-
 use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_map::BlobIdMap;
 use noseyparker::blob_metadata::BlobMetadata;
@@ -27,6 +20,12 @@ use noseyparker::matcher_stats::MatcherStats;
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
 use noseyparker::rules_database::RulesDatabase;
+use progress::Progress;
+use rayon::prelude::*;
+use tracing::{debug, error, error_span, info, trace, warn};
+
+use crate::args;
+use crate::rule_loader::RuleLoader;
 
 // -------------------------------------------------------------------------------------------------
 /// Something that can be turned into a parallel iterator of blobs
@@ -698,10 +697,11 @@ impl ParquetBlobCopier {
             Field::new("content_len", DataType::UInt64, /* nullable= */ false);
 
         let writer_pool = {
+            use std::fs::File;
+
             use arrow_schema::Schema;
             use parquet::arrow::arrow_writer::ArrowWriter;
             use parquet::file::properties::WriterProperties;
-            use std::fs::File;
 
             let mut writers = Vec::with_capacity(num_writers);
 

@@ -2,17 +2,19 @@
 
 #![allow(dead_code)]
 
-use indoc::indoc;
-// use lazy_static::lazy_static;
-
-pub use assert_cmd::prelude::*;
-pub use assert_fs::prelude::*;
-pub use assert_fs::{TempDir, fixture::ChildPath};
-pub use insta::{assert_json_snapshot, assert_snapshot, internals::Redaction, with_settings};
-pub use predicates::prelude::*;
-pub use predicates::str::RegexPredicate;
 pub use std::path::{Path, PathBuf};
 pub use std::process::Command;
+
+// use lazy_static::lazy_static;
+pub use assert_cmd::prelude::*;
+pub use assert_fs::TempDir;
+pub use assert_fs::fixture::ChildPath;
+pub use assert_fs::prelude::*;
+use indoc::indoc;
+pub use insta::internals::Redaction;
+pub use insta::{assert_json_snapshot, assert_snapshot, with_settings};
+pub use predicates::prelude::*;
+pub use predicates::str::RegexPredicate;
 
 /// Use `insta` to do snapshot testing against a command's exit code, stdout, and stderr.
 ///

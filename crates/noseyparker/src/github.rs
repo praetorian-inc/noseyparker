@@ -12,10 +12,9 @@ pub use auth::Auth;
 pub use client::Client;
 pub use client_builder::ClientBuilder;
 pub use error::Error;
+use progress::Progress;
 pub use repo_enumerator::{RepoEnumerator, RepoSpecifiers, RepoType};
 pub use result::Result;
-
-use progress::Progress;
 
 /// List accessible repository URLs matching the given specifiers.
 ///

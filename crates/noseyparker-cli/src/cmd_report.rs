@@ -1,11 +1,8 @@
+use std::fmt::{Display, Formatter, Write};
+
 use anyhow::{Context, Result, bail};
 use bstr::{BStr, ByteSlice};
 use indenter::indented;
-use schemars::JsonSchema;
-use serde::Serialize;
-use std::fmt::{Display, Formatter, Write};
-use tracing::info;
-
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::bstring_escape::Escaped;
 use noseyparker::datastore::{Datastore, FindingDataEntry, FindingMetadata, Status};
@@ -13,6 +10,9 @@ use noseyparker::defaults::get_builtin_rules;
 use noseyparker::match_type::{Group, Groups, Match};
 use noseyparker::provenance::Provenance;
 use noseyparker::provenance_set::ProvenanceSet;
+use schemars::JsonSchema;
+use serde::Serialize;
+use tracing::info;
 
 use crate::args::{FindingStatus, GlobalArgs, ReportArgs, ReportOutputFormat};
 use crate::reportable::Reportable;

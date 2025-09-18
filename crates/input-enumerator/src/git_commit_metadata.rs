@@ -1,10 +1,10 @@
 use bstr::BString;
+use bstring_serde::BStringLossyUtf8;
 use gix::ObjectId;
-use gix_date::{Time, parse::TimeBuf};
+use gix_date::Time;
+use gix_date::parse::TimeBuf;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-
-use bstring_serde::BStringLossyUtf8;
 
 /*
 // FIXME: figure out how to do this without allocating

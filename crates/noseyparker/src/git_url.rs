@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+
 use url::Url;
 
 #[derive(Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
@@ -93,10 +94,12 @@ impl TryFrom<Url> for GitUrl {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use pretty_assertions::assert_eq;
     use std::path::Path;
     use std::str::FromStr;
+
+    use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn bad_scheme_01() {

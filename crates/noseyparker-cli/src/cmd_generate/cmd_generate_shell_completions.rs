@@ -1,9 +1,9 @@
-use crate::args::{CommandLineArgs, GlobalArgs, ShellCompletionsArgs, ShellFormat};
 use anyhow::Result;
 use clap::{Command, CommandFactory};
-use clap_complete::{
-    generate, shells::Bash, shells::Elvish, shells::Fish, shells::PowerShell, shells::Zsh,
-};
+use clap_complete::generate;
+use clap_complete::shells::{Bash, Elvish, Fish, PowerShell, Zsh};
+
+use crate::args::{CommandLineArgs, GlobalArgs, ShellCompletionsArgs, ShellFormat};
 
 pub fn run(_global_args: &GlobalArgs, args: &ShellCompletionsArgs) -> Result<()> {
     let mut cmd = CommandLineArgs::command();

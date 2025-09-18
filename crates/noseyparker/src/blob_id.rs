@@ -51,8 +51,9 @@ impl BlobId {
     /// Create a new `BlobId` computed from the given input.
     #[inline]
     pub fn compute_from_bytes(input: &[u8]) -> Self {
-        use noseyparker_digest::Sha1;
         use std::io::Write;
+
+        use noseyparker_digest::Sha1;
 
         let mut h = Sha1::new();
         write!(&mut h, "blob {}\0", input.len()).unwrap();
@@ -142,9 +143,9 @@ impl From<BlobId> for gix::ObjectId {
 // sql
 // -------------------------------------------------------------------------------------------------
 mod sql {
-    use super::*;
-
     use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+
+    use super::*;
 
     impl ToSql for BlobId {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
@@ -164,9 +165,9 @@ mod sql {
 // -------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn simple() {

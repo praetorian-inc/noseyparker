@@ -1,8 +1,9 @@
-use anyhow::Result;
-use serde::de::DeserializeOwned;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+
+use anyhow::Result;
+use serde::de::DeserializeOwned;
 
 /// Load a value from a YAML file.
 pub fn load_yaml_file<T: DeserializeOwned, P: AsRef<Path>>(path: P) -> Result<T> {

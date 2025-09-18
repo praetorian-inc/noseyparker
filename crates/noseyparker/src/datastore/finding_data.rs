@@ -1,9 +1,7 @@
+use super::{MatchIdInt, Status};
 use crate::blob_metadata::BlobMetadata;
 use crate::match_type::Match;
 use crate::provenance_set::ProvenanceSet;
-
-use super::MatchIdInt;
-use super::Status;
 
 // -------------------------------------------------------------------------------------------------
 // FindingData

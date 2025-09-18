@@ -1,10 +1,11 @@
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+
 use bstr::BString;
 use bstring_serde::BStringLossyUtf8;
 use input_enumerator::git_commit_metadata::CommitMetadata;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 // -------------------------------------------------------------------------------------------------
 // Provenance
@@ -167,10 +168,10 @@ impl ExtendedProvenance {
 // sql
 // -------------------------------------------------------------------------------------------------
 mod sql {
-    use super::*;
-
     use rusqlite::Error::ToSqlConversionFailure;
     use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+
+    use super::*;
 
     impl ToSql for Provenance {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
@@ -194,11 +195,11 @@ mod sql {
 // -------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use anyhow::Result;
     use serde_json::json;
     use test_case::test_case;
+
+    use super::*;
 
     #[test_case(json!{"this is a string"}; "string")]
     #[test_case(json!{42}; "int")]

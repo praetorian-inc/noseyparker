@@ -129,9 +129,9 @@ impl JsonSchema for BStringBase64 {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use proptest::prelude::*;
+
+    use super::*;
 
     proptest! {
         #[test]

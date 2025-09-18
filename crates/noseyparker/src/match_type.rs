@@ -1,10 +1,11 @@
+use std::io::Write;
+
 use bstr::BString;
 use bstring_serde::BStringBase64;
 use noseyparker_digest::Sha1;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use std::io::Write;
 use tracing::debug;
 
 use crate::blob_id::BlobId;
@@ -34,10 +35,10 @@ pub struct Groups(pub SmallVec<[Group; 1]>);
 // sql
 // -------------------------------------------------------------------------------------------------
 mod sql {
-    use super::*;
-
     use rusqlite::Error::ToSqlConversionFailure;
     use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+
+    use super::*;
 
     impl ToSql for Groups {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {

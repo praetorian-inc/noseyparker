@@ -1,7 +1,7 @@
+use progress::Progress;
+
 use super::models::{OrganizationShort, Repository};
 use super::{Client, Result};
-
-use progress::Progress;
 
 /// A `RepoEnumerator` provides higher-level functionality on top of the GitHub REST API to list
 /// repositories belonging to specific users or organizations.

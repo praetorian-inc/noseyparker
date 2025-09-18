@@ -1,7 +1,7 @@
-use anyhow::Result;
-use include_dir::{Dir, include_dir};
 use std::path::Path;
 
+use anyhow::Result;
+use include_dir::{Dir, include_dir};
 use noseyparker_rules::Rules;
 
 // NOTE: `include_dir` does not seem to play nicely with incremental builds. When adding new rules,

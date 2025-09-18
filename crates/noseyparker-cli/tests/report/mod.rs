@@ -1,7 +1,7 @@
-use super::*;
-
 use indoc::indoc;
 pub use pretty_assertions::{assert_eq, assert_ne};
+
+use super::*;
 
 #[test]
 fn report_nonexistent_default_datastore() {

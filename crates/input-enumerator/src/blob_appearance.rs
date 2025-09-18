@@ -1,8 +1,10 @@
-use crate::git_commit_metadata::CommitMetadata;
-use bstr::{BString, ByteSlice};
-use smallvec::SmallVec;
 use std::path::Path;
 use std::sync::Arc;
+
+use bstr::{BString, ByteSlice};
+use smallvec::SmallVec;
+
+use crate::git_commit_metadata::CommitMetadata;
 
 /// Where was a particular blob seen?
 #[derive(Clone, Debug, serde::Serialize)]

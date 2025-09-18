@@ -1,6 +1,7 @@
-use console::strip_ansi_codes;
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter, Write};
+
+use console::strip_ansi_codes;
 
 fn escape_nonprinting(s: &str) -> Cow<'_, str> {
     for (i, ch) in s.char_indices() {

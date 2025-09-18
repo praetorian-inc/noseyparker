@@ -2,13 +2,14 @@
 //!
 //! The command-line interface is defined using `clap`.
 
+use std::io::IsTerminal;
+use std::path::PathBuf;
+
 use clap::{
     ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint, crate_description, crate_version,
 };
 use lazy_static::lazy_static;
 use noseyparker::git_url::GitUrl;
-use std::io::IsTerminal;
-use std::path::PathBuf;
 use strum::Display;
 #[cfg(feature = "github")]
 use url::Url;
