@@ -1,5 +1,6 @@
 ---
 source: crates/noseyparker-cli/tests/help/mod.rs
+assertion_line: 140
 expression: stdout
 ---
 Interact with GitHub
@@ -12,7 +13,7 @@ Commands:
 
 Options:
       --github-api-url <URL>  Use the specified URL for GitHub API access [default:
-                              https://api.github.com/] [aliases: api-url]
+                              https://api.github.com/] [aliases: --api-url]
   -h, --help                  Print help (see more with '--help')
 
 Global Options:
