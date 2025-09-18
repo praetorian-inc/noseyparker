@@ -257,10 +257,12 @@ fn scan_default_datastore() {
     assert_json_snapshot!(json_output);
 
     // now try to scan again with the existing default datastore
-    assert_cmd_snapshot!(noseyparker!("scan", input.path())
-        .current_dir(scan_env.root.path())
-        .assert()
-        .failure());
+    assert_cmd_snapshot!(
+        noseyparker!("scan", input.path())
+            .current_dir(scan_env.root.path())
+            .assert()
+            .failure()
+    );
 
     // Finally, try to scan again with the existing default datastore, explicitly specifying it
     noseyparker!("scan", "-d", ds.path(), input.path())
@@ -276,10 +278,12 @@ fn summarize_nonexistent_default_datastore() {
     let ds = scan_env.root.child("datastore.np");
     ds.assert(predicate::path::missing());
 
-    assert_cmd_snapshot!(noseyparker!("summarize")
-        .current_dir(scan_env.root.path())
-        .assert()
-        .failure());
+    assert_cmd_snapshot!(
+        noseyparker!("summarize")
+            .current_dir(scan_env.root.path())
+            .assert()
+            .failure()
+    );
 
     ds.assert(predicate::path::missing());
 }

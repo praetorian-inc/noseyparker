@@ -169,8 +169,8 @@ impl ExtendedProvenance {
 mod sql {
     use super::*;
 
-    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
     use rusqlite::Error::ToSqlConversionFailure;
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
 
     impl ToSql for Provenance {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {

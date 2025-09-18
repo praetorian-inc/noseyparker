@@ -29,9 +29,7 @@ impl Guesser {
     }
 
     pub fn guess<T>(&self, input: Input<T>) -> Output
-    where
-        T: AsRef<[u8]>,
-    {
+    where T: AsRef<[u8]> {
         let mime_guess = input.path.map(MimeGuess::from_path);
 
         #[cfg(feature = "libmagic")]

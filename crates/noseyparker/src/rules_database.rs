@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use regex::bytes::Regex;
 use std::time::Instant;
 use tracing::{debug, debug_span};

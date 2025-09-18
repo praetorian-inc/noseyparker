@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use gix::{hashtable::HashMap, ObjectId, Repository};
+use gix::{ObjectId, Repository, hashtable::HashMap};
 use ignore::gitignore::Gitignore;
 use smallvec::SmallVec;
 use std::path::{Path, PathBuf};

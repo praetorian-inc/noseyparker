@@ -1,6 +1,6 @@
 use chrono::{DateTime, Duration, TimeDelta, TimeZone, Utc};
 use reqwest;
-use reqwest::{header, header::HeaderValue, StatusCode, Url};
+use reqwest::{StatusCode, Url, header, header::HeaderValue};
 use secrecy::ExposeSecret;
 
 use super::models::{OrganizationShort, Page, RateLimitOverview, Repository, User};
@@ -68,16 +68,12 @@ impl Client {
     }
 
     pub async fn next_page<T>(&self, page: Page<T>) -> Result<Option<Page<T>>>
-    where
-        T: serde::de::DeserializeOwned,
-    {
+    where T: serde::de::DeserializeOwned {
         self.next_page_inner(page.links.next).await
     }
 
     async fn next_page_inner<T>(&self, next: Option<Url>) -> Result<Option<Page<T>>>
-    where
-        T: serde::de::DeserializeOwned,
-    {
+    where T: serde::de::DeserializeOwned {
         match next {
             Some(next) => {
                 let response = self.get_url(next).await?;
@@ -88,9 +84,7 @@ impl Client {
     }
 
     pub async fn get_all<T>(&self, page: Page<T>) -> Result<Vec<T>>
-    where
-        T: serde::de::DeserializeOwned,
-    {
+    where T: serde::de::DeserializeOwned {
         let mut results = Vec::new();
         let mut next_page = Some(page);
         while let Some(page) = next_page {

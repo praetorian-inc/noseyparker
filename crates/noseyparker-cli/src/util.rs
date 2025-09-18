@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{stdin, stdout, BufReader, BufWriter};
+use std::io::{BufReader, BufWriter, stdin, stdout};
 use std::path::Path;
 
 /// A utility type to generate properly pluralized count expressions in log messages,

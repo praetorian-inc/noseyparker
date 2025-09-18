@@ -7,7 +7,7 @@ use indoc::indoc;
 
 pub use assert_cmd::prelude::*;
 pub use assert_fs::prelude::*;
-pub use assert_fs::{fixture::ChildPath, TempDir};
+pub use assert_fs::{TempDir, fixture::ChildPath};
 pub use insta::{assert_json_snapshot, assert_snapshot, internals::Redaction, with_settings};
 pub use predicates::prelude::*;
 pub use predicates::str::RegexPredicate;
@@ -19,7 +19,7 @@ pub use std::process::Command;
 /// The given expression should be an `assert_cmd::assert::Assert`.
 #[macro_export]
 macro_rules! assert_cmd_snapshot {
-    ( $cmd:expr ) => {
+    ($cmd:expr) => {
         let cmd = $cmd;
         let output = cmd.get_output();
         let status = output.status;
@@ -98,7 +98,6 @@ pub fn noseyparker_cmd() -> Command {
 /// For example:
 ///
 ///     NP_TEST_PROGRAM="$PWD"/release/bin/noseyparker cargo test --test test_noseyparker
-///
 pub fn noseyparker_cmd() -> Command {
     if let Ok(np) = std::env::var("NP_TEST_PROGRAM") {
         Command::new(np)
@@ -189,9 +188,7 @@ impl ScanEnv {
     /// Create a larger input file within this mock scanning environment with the given name.
     /// The created input file will have content containing a fake AWS key that should be detected.
     pub fn large_input_file_with_secret(&self, name: &str) -> ChildPath {
-        self.input_file_with_contents(
-            name,
-            indoc! {r#"
+        self.input_file_with_contents(name, indoc! {r#"
             function lorem(ipsum, dolor = 1) {
               const sit = ipsum == null ? 0 : ipsum.sit;
               dolor = sit - amet(dolor);
@@ -249,8 +246,7 @@ impl ScanEnv {
               }
               return aliqua;
             }
-        "#},
-        )
+        "#})
     }
 
     /// Create an empty directory within this mock scanning environment with the given name.

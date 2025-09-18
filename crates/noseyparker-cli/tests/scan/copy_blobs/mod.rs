@@ -4,15 +4,12 @@ use super::*;
 fn scan_copy_blobs_files_matching() {
     let scan_env = scan_copy_blobs_common("--copy-blobs=matching", "--copy-blobs-format=files");
     let (paths, blobs_dir) = list_blob_paths(&scan_env);
-    assert_eq!(
-        paths,
-        [
-            blobs_dir.join("65"),
-            blobs_dir.join("65/e7948dcb965586ada5d231709c767c6b8ff3df"),
-            blobs_dir.join("be"),
-            blobs_dir.join("be/f17e1f92978931020b423cfcfb6f1e7381d559")
-        ]
-    );
+    assert_eq!(paths, [
+        blobs_dir.join("65"),
+        blobs_dir.join("65/e7948dcb965586ada5d231709c767c6b8ff3df"),
+        blobs_dir.join("be"),
+        blobs_dir.join("be/f17e1f92978931020b423cfcfb6f1e7381d559")
+    ]);
 }
 
 #[cfg(feature = "parquet")]
@@ -20,20 +17,14 @@ fn scan_copy_blobs_files_matching() {
 fn scan_copy_blobs_parquet_matching() {
     let scan_env = scan_copy_blobs_common("--copy-blobs=matching", "--copy-blobs-format=parquet");
     let (paths, blobs_dir) = list_blob_paths(&scan_env);
-    assert_eq!(
-        paths,
-        [
-            blobs_dir.join("blobs.00.parquet"),
-            blobs_dir.join("blobs.01.parquet")
-        ]
-    );
-    assert_eq!(
-        get_parquet_blob_ids(&paths),
-        vec![
-            "65e7948dcb965586ada5d231709c767c6b8ff3df",
-            "bef17e1f92978931020b423cfcfb6f1e7381d559",
-        ]
-    );
+    assert_eq!(paths, [
+        blobs_dir.join("blobs.00.parquet"),
+        blobs_dir.join("blobs.01.parquet")
+    ]);
+    assert_eq!(get_parquet_blob_ids(&paths), vec![
+        "65e7948dcb965586ada5d231709c767c6b8ff3df",
+        "bef17e1f92978931020b423cfcfb6f1e7381d559",
+    ]);
 }
 
 #[cfg(feature = "parquet")]
@@ -44,21 +35,15 @@ fn scan_copy_blobs_parquet_all_reused_datastore() {
 
     let scan_env = scan_copy_blobs_common(copy_blobs, copy_blobs_format);
     let (paths, blobs_dir) = list_blob_paths(&scan_env);
-    assert_eq!(
-        paths,
-        [
-            blobs_dir.join("blobs.00.parquet"),
-            blobs_dir.join("blobs.01.parquet")
-        ]
-    );
-    assert_eq!(
-        get_parquet_blob_ids(&paths),
-        vec![
-            "1fae2bccda861986f8290364d00fb709d7381e81",
-            "65e7948dcb965586ada5d231709c767c6b8ff3df",
-            "bef17e1f92978931020b423cfcfb6f1e7381d559",
-        ]
-    );
+    assert_eq!(paths, [
+        blobs_dir.join("blobs.00.parquet"),
+        blobs_dir.join("blobs.01.parquet")
+    ]);
+    assert_eq!(get_parquet_blob_ids(&paths), vec![
+        "1fae2bccda861986f8290364d00fb709d7381e81",
+        "65e7948dcb965586ada5d231709c767c6b8ff3df",
+        "bef17e1f92978931020b423cfcfb6f1e7381d559",
+    ]);
 
     // use only 2 of the original 3 paths this time
     let i1 = scan_env.child("i1.txt");
@@ -77,40 +62,31 @@ fn scan_copy_blobs_parquet_all_reused_datastore() {
     .stdout(match_scan_stats("119 B", 2, 0, 3));
 
     let (paths, blobs_dir) = list_blob_paths(&scan_env);
-    assert_eq!(
-        paths,
-        [
-            blobs_dir.join("blobs.00.parquet"),
-            blobs_dir.join("blobs.01.parquet"),
-            blobs_dir.join("blobs.02.parquet"),
-            blobs_dir.join("blobs.03.parquet"),
-        ]
-    );
-    assert_eq!(
-        get_parquet_blob_ids(&paths),
-        vec![
-            "1fae2bccda861986f8290364d00fb709d7381e81",
-            "65e7948dcb965586ada5d231709c767c6b8ff3df",
-            "bef17e1f92978931020b423cfcfb6f1e7381d559",
-        ]
-    );
+    assert_eq!(paths, [
+        blobs_dir.join("blobs.00.parquet"),
+        blobs_dir.join("blobs.01.parquet"),
+        blobs_dir.join("blobs.02.parquet"),
+        blobs_dir.join("blobs.03.parquet"),
+    ]);
+    assert_eq!(get_parquet_blob_ids(&paths), vec![
+        "1fae2bccda861986f8290364d00fb709d7381e81",
+        "65e7948dcb965586ada5d231709c767c6b8ff3df",
+        "bef17e1f92978931020b423cfcfb6f1e7381d559",
+    ]);
 }
 
 #[test]
 fn scan_copy_blobs_files_all() {
     let scan_env = scan_copy_blobs_common("--copy-blobs=all", "--copy-blobs-format=files");
     let (paths, blobs_dir) = list_blob_paths(&scan_env);
-    assert_eq!(
-        paths,
-        [
-            blobs_dir.join("1f"),
-            blobs_dir.join("1f/ae2bccda861986f8290364d00fb709d7381e81"),
-            blobs_dir.join("65"),
-            blobs_dir.join("65/e7948dcb965586ada5d231709c767c6b8ff3df"),
-            blobs_dir.join("be"),
-            blobs_dir.join("be/f17e1f92978931020b423cfcfb6f1e7381d559"),
-        ]
-    );
+    assert_eq!(paths, [
+        blobs_dir.join("1f"),
+        blobs_dir.join("1f/ae2bccda861986f8290364d00fb709d7381e81"),
+        blobs_dir.join("65"),
+        blobs_dir.join("65/e7948dcb965586ada5d231709c767c6b8ff3df"),
+        blobs_dir.join("be"),
+        blobs_dir.join("be/f17e1f92978931020b423cfcfb6f1e7381d559"),
+    ]);
 }
 
 #[test]

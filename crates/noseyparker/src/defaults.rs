@@ -1,5 +1,5 @@
 use anyhow::Result;
-use include_dir::{include_dir, Dir};
+use include_dir::{Dir, include_dir};
 use std::path::Path;
 
 use noseyparker_rules::Rules;

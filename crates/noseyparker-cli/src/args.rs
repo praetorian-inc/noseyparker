@@ -3,7 +3,7 @@
 //! The command-line interface is defined using `clap`.
 
 use clap::{
-    crate_description, crate_version, ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint,
+    ArgAction, Args, Parser, Subcommand, ValueEnum, ValueHint, crate_description, crate_version,
 };
 use lazy_static::lazy_static;
 use noseyparker::git_url::GitUrl;
@@ -79,8 +79,8 @@ const DEFAULT_DATASTORE: &str = "datastore.np";
 
 #[cfg(feature = "github")]
 pub fn validate_github_api_url(github_api_url: &Url, all_github_organizations: bool) {
-    use clap::error::ErrorKind;
     use clap::CommandFactory;
+    use clap::error::ErrorKind;
 
     // Check that a non-default value of `--github-api-url` has been specified.
     // This constraint is impossible to express natively using `clap` version 4.

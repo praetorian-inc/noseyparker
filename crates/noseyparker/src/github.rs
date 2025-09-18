@@ -27,7 +27,7 @@ pub fn enumerate_repo_urls(
     ignore_certs: bool,
     progress: Option<&mut Progress>,
 ) -> anyhow::Result<Vec<String>> {
-    use anyhow::{bail, Context};
+    use anyhow::{Context, bail};
     use tracing::{debug, warn};
 
     let client = ClientBuilder::new()

@@ -23,7 +23,7 @@ use args::{CommandLineArgs, GlobalArgs};
 /// Set up the logging / tracing system for the application.
 fn configure_tracing(global_args: &GlobalArgs) -> Result<()> {
     use tracing_log::{AsLog, LogTracer};
-    use tracing_subscriber::{filter::LevelFilter, EnvFilter};
+    use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
     // Set the tracing level according to the `-q`/`--quiet` and `-v`/`--verbose` options
     let level_filter = if global_args.quiet {

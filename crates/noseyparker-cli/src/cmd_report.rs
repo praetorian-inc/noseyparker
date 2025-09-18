@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use bstr::{BStr, ByteSlice};
 use indenter::indented;
 use schemars::JsonSchema;

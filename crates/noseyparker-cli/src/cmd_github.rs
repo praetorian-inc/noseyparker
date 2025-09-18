@@ -1,8 +1,8 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use url::Url;
 
 use crate::args::{
-    validate_github_api_url, GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs,
+    GitHubArgs, GitHubOutputFormat, GitHubReposListArgs, GlobalArgs, validate_github_api_url,
 };
 use crate::reportable::Reportable;
 use noseyparker::github;

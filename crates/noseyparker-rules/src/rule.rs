@@ -47,14 +47,14 @@ lazy_static! {
 }
 
 impl RuleSyntax {
+    // NOTE: Some of the patterns from default rules are complicated patterns that require more
+    // than the default regex size limit to compile. 16MiB has been enough so far...
+    const REGEX_SIZE_LIMIT: usize = 16 * 1024 * 1024;
+
     /// Get the pattern for this rule with any comments removed.
     pub fn uncommented_pattern(&self) -> Cow<'_, str> {
         RULE_COMMENTS_PATTERN.replace_all(&self.pattern, "")
     }
-
-    // NOTE: Some of the patterns from default rules are complicated patterns that require more
-    // than the default regex size limit to compile. 16MiB has been enough so far...
-    const REGEX_SIZE_LIMIT: usize = 16 * 1024 * 1024;
 
     fn build_regex(pattern: &str) -> Result<regex::bytes::Regex> {
         let pattern = regex::bytes::RegexBuilder::new(pattern)
