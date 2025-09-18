@@ -16,7 +16,7 @@ use crate::provenance_set::ProvenanceSet;
 use crate::snippet::Snippet;
 
 const CURRENT_SCHEMA_VERSION: u64 = 70;
-const CURRENT_SCHEMA: &str = include_str!("datastore/schema_70.sql");
+const CURRENT_SCHEMA: &str = include_str!("schema_70.sql");
 
 pub mod annotation;
 pub mod finding_data;
