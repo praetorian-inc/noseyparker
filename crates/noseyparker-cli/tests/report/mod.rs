@@ -9,10 +9,12 @@ fn report_nonexistent_default_datastore() {
     let ds = scan_env.root.child("datastore.np");
     ds.assert(predicate::path::missing());
 
-    assert_cmd_snapshot!(noseyparker!("report")
-        .current_dir(scan_env.root.path())
-        .assert()
-        .failure());
+    assert_cmd_snapshot!(
+        noseyparker!("report")
+            .current_dir(scan_env.root.path())
+            .assert()
+            .failure()
+    );
 
     ds.assert(predicate::path::missing());
 }
@@ -179,13 +181,10 @@ fn max_provenance_exceeded() {
 #[test]
 fn redundant_matches() {
     let scan_env = ScanEnv::new();
-    let input = scan_env.input_file_with_contents(
-        "input.txt",
-        indoc! {r#"
+    let input = scan_env.input_file_with_contents("input.txt", indoc! {r#"
             aws_access_key_id = 'AKIADEADBEEFDEADBEEF'
             aws_secret_access_key = 'FakeValues99cl9bqJFVA3iFUm+yqVe08HxhXFE/'
-        "#},
-    );
+        "#});
 
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
         .stdout(match_scan_stats("110 B", 1, 3, 3));

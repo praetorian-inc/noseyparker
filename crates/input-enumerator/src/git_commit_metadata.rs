@@ -1,6 +1,6 @@
 use bstr::BString;
 use gix::ObjectId;
-use gix_date::{parse::TimeBuf, Time};
+use gix_date::{Time, parse::TimeBuf};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

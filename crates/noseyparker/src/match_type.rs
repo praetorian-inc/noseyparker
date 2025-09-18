@@ -36,8 +36,8 @@ pub struct Groups(pub SmallVec<[Group; 1]>);
 mod sql {
     use super::*;
 
-    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
     use rusqlite::Error::ToSqlConversionFailure;
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
 
     impl ToSql for Groups {
         fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {

@@ -81,9 +81,7 @@ impl ProvenanceSet {
 
     #[inline]
     pub fn try_from_iter<I>(it: I) -> Option<Self>
-    where
-        I: IntoIterator<Item = Provenance>,
-    {
+    where I: IntoIterator<Item = Provenance> {
         let mut it = it.into_iter();
         let provenance = it.next()?;
         let more_provenance = it.collect();
@@ -108,9 +106,9 @@ impl ProvenanceSet {
 }
 
 impl IntoIterator for ProvenanceSet {
-    type Item = Provenance;
     type IntoIter =
         std::iter::Chain<std::iter::Once<Provenance>, <Vec<Provenance> as IntoIterator>::IntoIter>;
+    type Item = Provenance;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

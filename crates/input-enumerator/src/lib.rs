@@ -4,7 +4,7 @@ pub mod git_commit_metadata;
 pub mod git_metadata_graph;
 pub use gix::{Repository, ThreadSafeRepository};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use crossbeam_channel::Sender;
 pub use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use ignore::{DirEntry, WalkBuilder, WalkState};
@@ -78,8 +78,7 @@ struct VisitorBuilder<'t> {
 }
 
 impl<'s, 't> ignore::ParallelVisitorBuilder<'s> for VisitorBuilder<'t>
-where
-    't: 's,
+where 't: 's
 {
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(Visitor {
@@ -198,10 +197,10 @@ pub struct FilesystemEnumerator {
 }
 
 impl FilesystemEnumerator {
-    pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
-    pub const DEFAULT_FOLLOW_LINKS: bool = false;
     pub const DEFAULT_COLLECT_GIT_METADATA: bool = true;
     pub const DEFAULT_ENUMERATE_GIT_HISTORY: bool = true;
+    pub const DEFAULT_FOLLOW_LINKS: bool = false;
+    pub const DEFAULT_MAX_FILESIZE: u64 = 100 * 1024 * 1024;
 
     /// Create a new `FilesystemEnumerator` with the given set of input roots using default
     /// settings.
@@ -284,9 +283,7 @@ impl FilesystemEnumerator {
     ///
     /// This can be used to skip entire directories.
     pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
-    where
-        P: Fn(&DirEntry) -> bool + Send + Sync + 'static,
-    {
+    where P: Fn(&DirEntry) -> bool + Send + Sync + 'static {
         self.walk_builder.filter_entry(filter);
         self
     }

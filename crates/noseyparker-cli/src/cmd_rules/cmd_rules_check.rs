@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use regex::Regex;
 use std::collections::HashSet;
 use tracing::{debug, error, error_span, info, warn};
@@ -309,7 +309,9 @@ fn check_rule(rule: &Rule, args: &RulesCheckArgs) -> Result<CheckStats> {
                     Scan::Continue
                 })?;
                 if matched {
-                    error!("Vectorscan: incorrectly matched negative example {example_num}: {example:?}");
+                    error!(
+                        "Vectorscan: incorrectly matched negative example {example_num}: {example:?}"
+                    );
                     num_failed += 1;
                     num_errors += 1;
                 } else {

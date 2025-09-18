@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use indicatif::{HumanBytes, HumanCount, HumanDuration};
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
@@ -95,9 +95,7 @@ impl ParallelIterator for EnumeratorFileIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
-    {
+    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
         use std::io::BufRead;
         (1usize..)
             .zip(self.reader.lines())
@@ -136,9 +134,7 @@ impl ParallelIterator for FileResultIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
-    {
+    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
         use rayon::iter::plumbing::Folder;
 
         let item = Ok((Provenance::from_file(self.inner.path).into(), self.blob));
@@ -164,9 +160,7 @@ impl ParallelIterator for GitRepoResultIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
-    {
+    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
         let repo = self.inner.repository.into_sync();
         let repo_path = Arc::new(self.inner.path.clone());
         self.inner
@@ -289,9 +283,7 @@ impl ParallelIterator for FoundInputIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
-    {
+    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
         match self {
             FoundInputIter::File(i) => i.drive_unindexed(consumer),
             FoundInputIter::GitRepo(i) => i.drive_unindexed(consumer),

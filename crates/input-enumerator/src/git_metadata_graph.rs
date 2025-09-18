@@ -1,10 +1,10 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use bstr::BString;
 use fixedbitset::FixedBitSet;
-use gix::hashtable::{hash_map, HashMap};
+use gix::hashtable::{HashMap, hash_map};
 use gix::objs::tree::EntryKind;
 use gix::prelude::*;
-use gix::{object::Kind, ObjectId, OdbHandle};
+use gix::{ObjectId, OdbHandle, object::Kind};
 use petgraph::graph::{DiGraph, EdgeIndex, IndexType, NodeIndex};
 use petgraph::prelude::*;
 use petgraph::visit::Visitable;
@@ -29,10 +29,12 @@ unsafe impl IndexType for CommitGraphIdx {
     fn new(x: usize) -> Self {
         Self(NodeIndex::new(x))
     }
+
     #[inline(always)]
     fn index(&self) -> usize {
         self.0.index()
     }
+
     #[inline(always)]
     fn max() -> Self {
         Self(<NodeIndex as IndexType>::max())

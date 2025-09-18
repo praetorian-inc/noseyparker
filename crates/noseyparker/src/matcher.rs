@@ -353,14 +353,11 @@ mod test {
         let seen_blobs = BlobIdMap::new();
         let mut matcher = Matcher::new(&rules_db, &seen_blobs, None)?;
         matcher.scan_bytes_raw(input.as_bytes())?;
-        assert_eq!(
-            matcher.user_data.raw_matches_scratch.as_slice(),
-            &[RawMatch {
-                rule_id: 0,
-                start_idx: 0,
-                end_idx: 9
-            },]
-        );
+        assert_eq!(matcher.user_data.raw_matches_scratch.as_slice(), &[RawMatch {
+            rule_id: 0,
+            start_idx: 0,
+            end_idx: 9
+        },]);
         Ok(())
     }
 }
