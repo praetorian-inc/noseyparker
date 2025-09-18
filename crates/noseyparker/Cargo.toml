@@ -1,29 +1,19 @@
 [package]
-
+name = "noseyparker"
+authors.workspace = true
 edition = "2021"
 rust-version.workspace = true
-license.workspace = true
-authors.workspace = true
-homepage.workspace = true
 repository.workspace = true
+license.workspace = true
 publish.workspace = true
-
-name = "noseyparker"
-version = "0.0.0"
-
-[lib]
-name = "noseyparker"
-path = "src/lib.rs"
 
 [features]
 # Enable per-rule runtime profiling, causing profile data to be dumped in a
 # table to stdout after scanning.
 rule_profiling = []
-
 # Provide functionality for enumerating and interacting with GitHub.
 # If this is not enabled, no GitHub functionality will be available.
 github = ["dep:reqwest", "dep:tokio", "dep:secrecy", "dep:chrono"]
-
 
 [dependencies]
 anyhow = { version = "1.0" }
