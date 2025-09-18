@@ -1,70 +1,44 @@
 [package]
-edition.workspace = true
-rust-version.workspace = true
-license.workspace = true
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-publish.workspace = true
-
 name = "noseyparker-cli"
 version.workspace = true
 description = "Nosey Parker is a command-line program that finds secrets and sensitive information in textual data and Git history."
-
-# at most 5
 keywords = ["cli", "security", "scanner", "secret"]
-
-# must match one of these list items: https://crates.io/category_slugs; at most 5
 categories = ["command-line-utilities"]
-
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
 build = "build.rs"
-
 
 [features]
 # Enable scan-time per-rule profiling instrumentation
 rule_profiling = ["noseyparker/rule_profiling"]
-
 # Enable the file content classifier based on `libmagic`
 # Requires a aystem-wide `libmagic` to be available
 libmagic = ["content-guesser/libmagic"]
-
 # Compile out `trace`-level log and tracing messages in release builds
 disable_trace = ["log/release_max_level_debug", "tracing/release_max_level_debug"]
-
 # Specialize the build of Vectorscan for the microarchitecture of the build system's CPU.
 # This will result in binary that is not portable to other CPUs.
 vectorscan_cpu_native = ["vectorscan-rs/cpu_native"]
-
 # Specialize the build of Vectorscan to use available SIMD instructions on the build system's CPU.
 # This will result in binary that is not portable to other CPUs.
 vectorscan_simd_specialization = ["vectorscan-rs/simd_specialization"]
-
 # Enable all Vectorscan features that can improve speed but break binary portability.
 vectorscan_fast_nonportable = ["vectorscan_cpu_native", "vectorscan_simd_specialization"]
-
 # Use the mimalloc global allocator
 mimalloc = ["dep:mimalloc"]
-
 # Use color backtraces
 color_backtrace = ["dep:color-backtrace"]
-
 # Provide functionality for enumerating and interacting with GitHub.
 # If this is not enabled, no GitHub functionality will be available.
 github = ["noseyparker/github"]
-
 # Provide functionality for writing output in the Parquet format
 parquet = ["dep:parquet", "dep:arrow-schema", "dep:arrow-array"]
-
 # Enable features that are desirable in a release build
 release = ["disable_trace", "mimalloc"]
-
 default = ["mimalloc", "color_backtrace", "github", "parquet"]
-
-
-[build-dependencies]
-# Used for embedding compile-time version information into the `noseyparker` CLI
-vergen = { version = "9.0", features = ["build", "cargo", "rustc", "si"] }
-vergen-gitcl = { version = "1.0", features = ["build", "cargo", "rustc", "si"] }
 
 [dependencies]
 anyhow = { version = "1.0" }
@@ -123,4 +97,7 @@ insta = { version = "1.34", features = ["filters", "json", "redactions"] }
 predicates = "3.0"
 pretty_assertions = "1.3"
 
-# NOTE: See cargo-license to list dependency licenses: https://github.com/onur/cargo-license
+[build-dependencies]
+# Used for embedding compile-time version information into the `noseyparker` CLI
+vergen = { version = "9.0", features = ["build", "cargo", "rustc", "si"] }
+vergen-gitcl = { version = "1.0", features = ["build", "cargo", "rustc", "si"] }

@@ -1,34 +1,24 @@
 [workspace]
+resolver = "3"
 members = ["crates/*"]
-resolver = "2"
 
 [workspace.package]
+version = "0.25.0-dev"
+authors = ["Brad Larsen <bradford.larsen@praetorian.com>", "Rishabh Ahlawat <rishabh.ahlawat@praetorian.com>"]
 edition = "2024"
 rust-version = "1.85"
-
-license = "Apache-2.0"
-authors = ["Brad Larsen <bradford.larsen@praetorian.com>", "Rishabh Ahlawat <rishabh.ahlawat@praetorian.com>"]
-
-homepage = "https://github.com/praetorian-inc/noseyparker"
 repository = "https://github.com/praetorian-inc/noseyparker"
-
-version = "0.25.0-dev"
-
+license = "Apache-2.0"
 publish = false
-
 
 [profile.release]
 opt-level = 3
 lto = "thin"
-
 # strip out debug info from binary, but generate separate debuginfo
 strip = "debuginfo"
 split-debuginfo = "packed"
-
 debug = "line-tables-only"  # generate enough debug info to give useful stack traces upon panic
 #debug = true               # generate full debug info; significantly larger!
-
-
 
 # A number of packages benefit from being compiled with optimization even as dev dependencies.
 [profile.dev.package]
