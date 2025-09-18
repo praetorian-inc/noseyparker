@@ -1,5 +1,6 @@
 ---
 source: crates/noseyparker-cli/tests/help/mod.rs
+assertion_line: 134
 expression: stdout
 ---
 Interact with GitHub
@@ -22,7 +23,7 @@ Options:
           include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
           
           [default: https://api.github.com/]
-          [aliases: api-url]
+          [aliases: --api-url]
 
   -h, --help
           Print help (see a summary with '-h')

@@ -1,5 +1,6 @@
 ---
 source: crates/noseyparker-cli/tests/help/mod.rs
+assertion_line: 73
 expression: stdout
 ---
 Scan content for secrets
@@ -25,13 +26,13 @@ Input Specifier Options:
                                     source] [possible values: all, source, fork]
       --enumerator <PATH>           Read inputs from a JSONL enumerator file (experimental)
       --github-organization <NAME>  Clone and scan accessible repositories belonging to the
-                                    specified GitHub organization [aliases: github-org]
+                                    specified GitHub organization [aliases: --github-org]
       --github-user <NAME>          Clone and scan accessible repositories belonging to the
                                     specified GitHub user
       --all-github-organizations    Clone and scan accessible repositories from all accessible
-                                    GitHub organizations [aliases: all-github-orgs]
+                                    GitHub organizations [aliases: --all-github-orgs]
       --github-api-url <URL>        Use the specified URL for GitHub API access [default:
-                                    https://api.github.com/] [aliases: api-url]
+                                    https://api.github.com/] [aliases: --api-url]
       --git-clone <MODE>            Use the specified method for cloning Git repositories [default:
                                     bare] [possible values: bare, mirror]
       --git-history <MODE>          Use the specified mode for handling Git history [default: full]

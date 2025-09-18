@@ -1,5 +1,6 @@
 ---
 source: crates/noseyparker-cli/tests/help/mod.rs
+assertion_line: 106
 expression: stdout
 ---
 Report detailed scan findings
@@ -67,14 +68,14 @@ Output Options:
 
   -f, --format <FORMAT>
           Write output in the specified format
-          
-          [default: human]
 
           Possible values:
           - human: A text-based format designed for humans
           - json:  Pretty-printed JSON format
           - jsonl: JSON Lines format
           - sarif: SARIF format (experimental)
+          
+          [default: human]
 
 Global Options:
   -v, --verbose...

@@ -1,5 +1,6 @@
 ---
 source: crates/noseyparker-cli/tests/help/mod.rs
+assertion_line: 49
 expression: stdout
 ---
 Scan content for secrets
@@ -99,13 +100,13 @@ Input Specifier Options:
 
       --github-repo-type <TYPE>
           Clone and scan GitHub repos only of the given type
-          
-          [default: source]
 
           Possible values:
           - all:    Select both source repositories and fork repositories
           - source: Only source repositories, i.e., ones that are not forks
           - fork:   Only fork repositories
+          
+          [default: source]
 
       --enumerator <PATH>
           Read inputs from a JSONL enumerator file (experimental)
@@ -126,7 +127,7 @@ Input Specifier Options:
           
           This option can be repeated.
           
-          [aliases: github-org]
+          [aliases: --github-org]
 
       --github-user <NAME>
           Clone and scan accessible repositories belonging to the specified GitHub user
@@ -139,7 +140,7 @@ Input Specifier Options:
           This only works with a GitHub Enterprise Server instance. A non-default option for the
           `--github-api-url` option must be specified.
           
-          [aliases: all-github-orgs]
+          [aliases: --all-github-orgs]
 
       --github-api-url <URL>
           Use the specified URL for GitHub API access
@@ -148,16 +149,16 @@ Input Specifier Options:
           include the `api/v3` portion, e.g., `https://github.example.com/api/v3`.
           
           [default: https://api.github.com/]
-          [aliases: api-url]
+          [aliases: --api-url]
 
       --git-clone <MODE>
           Use the specified method for cloning Git repositories
-          
-          [default: bare]
 
           Possible values:
           - bare:   Match the behavior of `git clone --bare`
           - mirror: Match the behavior of `git clone --mirror`
+          
+          [default: bare]
 
       --git-history <MODE>
           Use the specified mode for handling Git history
@@ -166,12 +167,12 @@ Input Specifier Options:
           that this will interfere with other input specifiers that cause Git repositories to be
           automatically cloned. For example, specifying an input with `--git-url=<URL>` while
           simultaneously using `--git-history=none` will not result in useful scanning.
-          
-          [default: full]
 
           Possible values:
           - full: Scan all history
           - none: Scan no history
+          
+          [default: full]
 
 Content Filtering Options:
       --max-file-size <MEGABYTES>
@@ -194,35 +195,35 @@ Content Filtering Options:
 Metadata Collection Options:
       --blob-metadata <MODE>
           Specify which blobs will have metadata recorded
-          
-          [default: matching]
 
           Possible values:
           - all:      Record metadata for all encountered blobs
           - matching: Record metadata only for blobs with matches
           - none:     Record metadata for no blobs
+          
+          [default: matching]
 
       --git-blob-provenance <MODE>
           Specify which Git commit provenance metadata will be collected
           
           This should not need to be changed unless you are running into performance problems on a
           problematic Git repository input.
-          
-          [default: first-seen]
 
           Possible values:
           - first-seen: The Git repository and set of commits and accompanying pathnames in which a
             blob is first seen
           - minimal:    Only the Git repository in which a blob is seen
+          
+          [default: first-seen]
 
       --copy-blobs-format <FORMAT>
           Specify the format for blobs copied by the `--copy-blobs` option
-          
-          [default: parquet]
 
           Possible values:
           - parquet: Parquet format
           - files:   Plain files, similar to Git's loose object format
+          
+          [default: parquet]
 
 Data Collection Options:
       --snippet-length <BYTES>
@@ -243,13 +244,13 @@ Data Collection Options:
           
           This mechanism exists to aid in ad-hoc downstream investigation. Copied blobs are not used
           elsewhere in Nosey Parker at this point.
-          
-          [default: none]
 
           Possible values:
           - all:      Copy all encountered blobs
           - matching: Copy only blobs with matches
           - none:     Copy no blobs
+          
+          [default: none]
 
 Global Options:
   -v, --verbose...
