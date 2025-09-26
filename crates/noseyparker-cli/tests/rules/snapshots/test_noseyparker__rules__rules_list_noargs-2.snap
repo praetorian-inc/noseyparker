@@ -187,6 +187,7 @@ expression: stdout
  np.truenas.1         TrueNAS API Key (WebSocket)                                   api, fuzzy, secret 
  np.truenas.2         TrueNAS API Key (REST API)                                    api, fuzzy, secret 
  np.twilio.1          Twilio API Key                                                api, fuzzy, secret 
+ np.twitch.1          Twitch Stream Key                                             api, secret 
  np.twitter.1         Twitter Client ID                                             api, fuzzy, identifier 
  np.twitter.2         Twitter Secret Key                                            api, fuzzy, secret 
  np.vmware.1          Credentials in Connect-VIServer Invocation                    fuzzy, secret 
@@ -195,6 +196,6 @@ expression: stdout
 
  Ruleset ID   Ruleset Name                         Rules 
 ─────────────────────────────────────────────────────────
- default      Nosey Parker default rules             167 
+ default      Nosey Parker default rules             168 
  np.assets    Nosey Parker asset detection rules      15 
  np.hashes    Nosey Parker password hash rules         6
