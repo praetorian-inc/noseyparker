@@ -176,6 +176,7 @@ rulesets:
   - np.truenas.2      # TrueNAS API Key (REST API)
   - np.twilio.1       # Twilio API Key
   - np.twitter.2      # Twitter Secret Key
+  - np.twitch.1       # Twitch Stream Key
   - np.vmware.1       # Credentials in Connect-VIServer Command
   - np.wireguard.1    # WireGuard Private Key
   - np.wireguard.2    # WireGuard Preshared Key
