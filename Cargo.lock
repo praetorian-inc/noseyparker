@@ -3086,6 +3086,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "noseyparker-datastore"
+version = "0.25.0-dev"
+
+[[package]]
 name = "noseyparker-digest"
 version = "0.0.0"
 dependencies = [
