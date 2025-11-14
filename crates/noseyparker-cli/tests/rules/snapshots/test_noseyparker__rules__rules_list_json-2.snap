@@ -4613,6 +4613,35 @@ expression: stdout
       }
     },
     {
+      "id": "np.twitch.1",
+      "structural_id": "29992a4304a9e161038079d7064bbe00e29a3cd5",
+      "name": "Twitch Stream Key",
+      "syntax": {
+        "name": "Twitch Stream Key",
+        "id": "np.twitch.1",
+        "pattern": "(?xi)\n(?:\n  \\b (?:twitch)? (?:[_-]?)? stream (?:[_-]?)? key \\b\n  [^A-Za-z0-9]{0,3}\n)?\n[\"']?\n(\n  live_                                (?# live_ prefix)\n  \\d{8,12}                             (?# 8–12 digit account ID - examples have 9, unsure of variance)\n  _\n  [A-Za-z0-9]{30,36}                   (?# underscore followed by 30-36 chars)\n)\n[\"']?\n",
+        "description": null,
+        "examples": [
+          "STREAM_KEY=live_126031192_RJVJxpxq8Q1X1Qdc9SwwTvpXonANmi",
+          "live_126031192_tiX3sbwIzL9VmkecdxioBMA1LJ9S4m",
+          "live_126031192_IgvUabrXbWSihj2ENnA59G1F8349jn",
+          "live_126031192_m3owJxYRKOf531B9Zc3ZQcLfOLCzKK"
+        ],
+        "negative_examples": [
+          "TWITCH_STREAM_KEY = \"126031192_IgvUabrXbWSihj2ENnA59G1F8\"",
+          "live_126031192_IgvUabrXbWSihj2ENnA59G1F8",
+          "stream_url: \"rtmp://live.twitch.tv/app/STREAM_KEY\""
+        ],
+        "references": [
+          "https://help.twitch.tv/s/article/twitch-stream-key-faq?language=en_US"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.twitter.1",
       "structural_id": "1e0cb253c7c5f1244b5a37b74b8a6a5199ce4432",
       "name": "Twitter Client ID",
@@ -4739,7 +4768,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 167
+      "num_rules": 168
     },
     {
       "id": "np.assets",

@@ -1,0 +1,35 @@
+rules:
+
+- name: Twitch Stream Key
+  id: np.twitch.1
+
+  pattern: |
+    (?xi)
+    (?:
+      \b (?:twitch)? (?:[_-]?)? stream (?:[_-]?)? key \b
+      [^A-Za-z0-9]{0,3}
+    )?
+    ["']?
+    (
+      live_                                (?# live_ prefix)
+      \d{8,12}                             (?# 8–12 digit account ID - examples have 9, unsure of variance)
+      _
+      [A-Za-z0-9]{30,36}                   (?# underscore followed by 30-36 chars)
+    )
+    ["']?
+
+  categories: [api, secret]
+
+  references:
+  - https://help.twitch.tv/s/article/twitch-stream-key-faq?language=en_US
+
+  examples:
+  - 'STREAM_KEY=live_126031192_RJVJxpxq8Q1X1Qdc9SwwTvpXonANmi'
+  - 'live_126031192_tiX3sbwIzL9VmkecdxioBMA1LJ9S4m'
+  - 'live_126031192_IgvUabrXbWSihj2ENnA59G1F8349jn'
+  - 'live_126031192_m3owJxYRKOf531B9Zc3ZQcLfOLCzKK'
+
+  negative_examples:
+  - 'TWITCH_STREAM_KEY = "126031192_IgvUabrXbWSihj2ENnA59G1F8"'   # no live_ prefix
+  - 'live_126031192_IgvUabrXbWSihj2ENnA59G1F8'                    # body too short
+  - 'stream_url: "rtmp://live.twitch.tv/app/STREAM_KEY"'          # generic URL with no stream key
