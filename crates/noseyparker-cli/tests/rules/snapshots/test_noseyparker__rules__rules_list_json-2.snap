@@ -3348,6 +3348,96 @@ expression: stdout
       }
     },
     {
+      "id": "np.openai.2",
+      "structural_id": "6f849ebde80451dd8a36554daed1db1bcd06411e",
+      "name": "OpenAI Project API Key",
+      "syntax": {
+        "name": "OpenAI Project API Key",
+        "id": "np.openai.2",
+        "pattern": "(?x)\n\\b\n(\nsk-proj-                             (?# Project API Key prefix )\n[a-zA-Z0-9_-]{48}\n)\n\\b\n",
+        "description": null,
+        "examples": [
+          "   OPENAI_API_KEY=\"sk-proj-QQmRn0z0jGG5W29rn0CwDVJbRivNE8YpCSBBkEVW20vUCF7w\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://platform.openai.com/docs/api-reference/project-api-keys",
+          "https://community.openai.com/t/project-api-key-length-has-it-changed-from-48-to-156/920777"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.openai.3",
+      "structural_id": "36e7547ee36ea99acb07380ef83ee61924993e1c",
+      "name": "OpenAI Project API Key v2",
+      "syntax": {
+        "name": "OpenAI Project API Key v2",
+        "id": "np.openai.3",
+        "pattern": "(?x)\n\\b\n(\nsk-proj-                             (?# Project API Key prefix )\n[a-zA-Z0-9_-]{156}\n)\n\\b\n",
+        "description": null,
+        "examples": [
+          "OPENAI_API_KEY=sk-proj-bUWRyHzhUjxyJsw8VzD-boWSOX-lWFpL9ZVVwgzH3SnvblGeiC72duqxiezuLlxfRfgXOZ-swIXPAqHahMfkPZFrWEZ9Ky27WSgiw4ofBv-yKYXEWw7IOORz01ARkASGVE8kFw2kMpVk_Ufn_ogEN2Fyjw9d\nOPENAI_MODEL=gpt-5-nano-2025-08-07\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://platform.openai.com/docs/api-reference/project-api-keys",
+          "https://community.openai.com/t/project-api-key-length-has-it-changed-from-48-to-156/920777"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.openai.4",
+      "structural_id": "9f7710643b2b83ec8900206e34ce1766d5153565",
+      "name": "OpenAI Admin API Key",
+      "syntax": {
+        "name": "OpenAI Admin API Key",
+        "id": "np.openai.4",
+        "pattern": "(?x)\n\\b\n(\nsk-admin-                            (?# Admin API Key prefix )\n[a-zA-Z0-9_-]{124}\n)\n\\b\n",
+        "description": null,
+        "examples": [
+          "   OPENAI_ADMIN_API_KEY=\"sk-admin-90E9ZsxRiCay6CSW3Ftmq-n3IJ1gKDC-EtwNOpHf18LAvSae4uyKrygUf87jxzt-tfmcYpjS5X3WbPcQQu39OPh7xBkW4-c9imO9yQVzPnjd4fjpNS_w4nMJeAOx\""
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://platform.openai.com/docs/api-reference/admin-api-keys"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
+      "id": "np.openai.5",
+      "structural_id": "f5205ec41ebfd7c3fa1dea7bf91805bb572e7de9",
+      "name": "OpenAI Project Service Account",
+      "syntax": {
+        "name": "OpenAI Project Service Account",
+        "id": "np.openai.5",
+        "pattern": "(?x)\n\\b\n(\nsk-svcacct-                          (?# Project Service Account prefix )\n[a-zA-Z0-9_-]{156}\n)\n\\b\n",
+        "description": null,
+        "examples": [
+          "OPENAI_API_KEY = \"sk-svcacct-cD3v20igDxpt-JpaQxnbqiex3ko2WcW_IQNyhRAEgzCqMlgYPRN2pAqZ8-kyFqGAxJkdUtaG30_6aYZuU0nNRJq9l4-h3wJ9VkZtz3ybX1fT8GchB6D7M00BBXajfQNOi_-rSCYvGJ-NiFyEPzcPSAj20sIF\"\nOPENAI_WS_URI = \"wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17\"\n"
+        ],
+        "negative_examples": [],
+        "references": [
+          "https://platform.openai.com/docs/api-reference/project-service-accounts"
+        ],
+        "categories": [
+          "api",
+          "secret"
+        ]
+      }
+    },
+    {
       "id": "np.particleio.1",
       "structural_id": "8ab26f61a067886b886641bd883f453b2355f85d",
       "name": "particle.io Access Token",
@@ -4768,7 +4858,7 @@ expression: stdout
     {
       "id": "default",
       "name": "Nosey Parker default rules",
-      "num_rules": 168
+      "num_rules": 172
     },
     {
       "id": "np.assets",
