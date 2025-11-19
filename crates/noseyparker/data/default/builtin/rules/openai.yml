@@ -18,3 +18,93 @@ rules:
   references:
   - https://platform.openai.com/docs/api-reference
   - https://platform.openai.com/docs/api-reference/authentication
+
+
+- name: OpenAI Project API Key
+  id: np.openai.2
+
+  pattern: |
+    (?x)
+    \b
+    (
+    sk-proj-                             (?# Project API Key prefix )
+    [a-zA-Z0-9_-]{48}
+    )
+    \b
+
+  categories: [api, secret]
+
+  references:
+  - https://platform.openai.com/docs/api-reference/project-api-keys
+  - https://community.openai.com/t/project-api-key-length-has-it-changed-from-48-to-156/920777
+
+  examples:
+  - '   OPENAI_API_KEY="sk-proj-QQmRn0z0jGG5W29rn0CwDVJbRivNE8YpCSBBkEVW20vUCF7w"'
+
+
+- name: OpenAI Project API Key v2
+  id: np.openai.3
+
+  pattern: |
+    (?x)
+    \b
+    (
+    sk-proj-                             (?# Project API Key prefix )
+    [a-zA-Z0-9_-]{156}
+    )
+    \b
+
+  categories: [api, secret]
+
+  references:
+  - https://platform.openai.com/docs/api-reference/project-api-keys
+  - https://community.openai.com/t/project-api-key-length-has-it-changed-from-48-to-156/920777
+
+  examples:
+  - |
+      OPENAI_API_KEY=sk-proj-bUWRyHzhUjxyJsw8VzD-boWSOX-lWFpL9ZVVwgzH3SnvblGeiC72duqxiezuLlxfRfgXOZ-swIXPAqHahMfkPZFrWEZ9Ky27WSgiw4ofBv-yKYXEWw7IOORz01ARkASGVE8kFw2kMpVk_Ufn_ogEN2Fyjw9d
+      OPENAI_MODEL=gpt-5-nano-2025-08-07
+
+
+- name: OpenAI Admin API Key
+  id: np.openai.4
+
+  pattern: |
+    (?x)
+    \b
+    (
+    sk-admin-                            (?# Admin API Key prefix )
+    [a-zA-Z0-9_-]{124}
+    )
+    \b
+
+  categories: [api, secret]
+
+  references:
+  - https://platform.openai.com/docs/api-reference/admin-api-keys
+
+  examples:
+  - '   OPENAI_ADMIN_API_KEY="sk-admin-90E9ZsxRiCay6CSW3Ftmq-n3IJ1gKDC-EtwNOpHf18LAvSae4uyKrygUf87jxzt-tfmcYpjS5X3WbPcQQu39OPh7xBkW4-c9imO9yQVzPnjd4fjpNS_w4nMJeAOx"'
+
+
+- name: OpenAI Project Service Account
+  id: np.openai.5
+
+  pattern: |
+    (?x)
+    \b
+    (
+    sk-svcacct-                          (?# Project Service Account prefix )
+    [a-zA-Z0-9_-]{156}
+    )
+    \b
+
+  categories: [api, secret]
+
+  references:
+  - https://platform.openai.com/docs/api-reference/project-service-accounts
+
+  examples:
+  - |
+    OPENAI_API_KEY = "sk-svcacct-cD3v20igDxpt-JpaQxnbqiex3ko2WcW_IQNyhRAEgzCqMlgYPRN2pAqZ8-kyFqGAxJkdUtaG30_6aYZuU0nNRJq9l4-h3wJ9VkZtz3ybX1fT8GchB6D7M00BBXajfQNOi_-rSCYvGJ-NiFyEPzcPSAj20sIF"
+    OPENAI_WS_URI = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
