@@ -1,0 +1,77 @@
+rules:
+
+- name: pyx User API token (v1)
+  id: np.pyx.1
+
+  pattern: |
+    (?x)
+    \b
+    sk-pyx-[a-zA-Z0-9]{64}
+
+  categories: [api, secret]
+
+  references:
+  - https://docs.pyx.dev/authentication
+
+  examples:
+  - |
+    client.auth = httpx.BasicAuth(
+        username="__token__", password="sk-pyx-h7WWBQWdJIFeu4S8H3ys8IGvA5o7KuBFRPCmUquX7xnsXOeqD5Q7BREJR1A69dY2"
+    )
+
+- name: pyx User API token (v2)
+  id: np.pyx.2
+
+  pattern: |
+    (?x)
+    \b
+    sk-pyx-2[a-zA-Z]{44}[a-zA-Z]
+
+  categories: [api, secret]
+
+  references:
+  - https://docs.pyx.dev/authentication
+
+  examples:
+  - |
+    client.auth = httpx.BasicAuth(
+        username="__token__", password="sk-pyx-2gvGtWLgUbYcBKgYtjSXNKZyCiUoiBvcXRyxwQxrBEDGWl"
+    )
+
+- name: pyx Trusted Publishing token (v1)
+  id: np.pyx.3
+
+  pattern: |
+    (?x)
+    \b
+    tp-pyx-[a-zA-Z0-9]{64}
+
+  categories: [api, secret]
+
+  references:
+  - https://docs.pyx.dev/authentication
+
+  examples:
+  - |
+    client.auth = httpx.BasicAuth(
+        username="__token__", password="tp-pyx-h7WWBQWdJIFeu4S8H3ys8IGvA5o7KuBFRPCmUquX7xnsXOeqD5Q7BREJR1A69dY2"
+    )
+  
+- name: pyx Trusted Publishing token (v2)
+  id: np.pyx.4
+
+  pattern: |
+    (?x)
+    \b
+    tp-pyx-2[a-zA-Z]{44}[a-zA-Z]
+
+  categories: [api, secret]
+
+  references:
+  - https://docs.pyx.dev/authentication
+
+  examples:
+  - |
+    client.auth = httpx.BasicAuth(
+        username="__token__", password="tp-pyx-2gvGtWLgUbYcBKgYtjSXNKZyCiUoiBvcXRyxwQxrBEDGWl"
+    )
