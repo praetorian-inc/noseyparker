@@ -78,7 +78,8 @@ struct VisitorBuilder<'t> {
 }
 
 impl<'s, 't> ignore::ParallelVisitorBuilder<'s> for VisitorBuilder<'t>
-where 't: 's
+where
+    't: 's,
 {
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(Visitor {
@@ -283,7 +284,9 @@ impl FilesystemEnumerator {
     ///
     /// This can be used to skip entire directories.
     pub fn filter_entry<P>(&mut self, filter: P) -> &mut Self
-    where P: Fn(&DirEntry) -> bool + Send + Sync + 'static {
+    where
+        P: Fn(&DirEntry) -> bool + Send + Sync + 'static,
+    {
         self.walk_builder.filter_entry(filter);
         self
     }

@@ -184,8 +184,8 @@ fn combine_ignore_and_ignore_secrets() {
     // - One that should be ignored by path
     // - One that should be ignored by secret value
     let input = scan_env.input_dir("input");
-    scan_env.input_file_with_secret("input/ignored.txt");      // Ignored by path
-    scan_env.input_file_with_secret("input/scanned.txt");      // Ignored by secret value
+    scan_env.input_file_with_secret("input/ignored.txt"); // Ignored by path
+    scan_env.input_file_with_secret("input/scanned.txt"); // Ignored by secret value
 
     // Should find 0 matches because:
     // - ignored.txt is skipped due to path ignore (not scanned at all)

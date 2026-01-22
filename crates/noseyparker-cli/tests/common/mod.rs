@@ -190,7 +190,9 @@ impl ScanEnv {
     /// Create a larger input file within this mock scanning environment with the given name.
     /// The created input file will have content containing a fake AWS key that should be detected.
     pub fn large_input_file_with_secret(&self, name: &str) -> ChildPath {
-        self.input_file_with_contents(name, indoc! {r#"
+        self.input_file_with_contents(
+            name,
+            indoc! {r#"
             function lorem(ipsum, dolor = 1) {
               const sit = ipsum == null ? 0 : ipsum.sit;
               dolor = sit - amet(dolor);
@@ -248,7 +250,8 @@ impl ScanEnv {
               }
               return aliqua;
             }
-        "#})
+        "#},
+        )
     }
 
     /// Create an empty directory within this mock scanning environment with the given name.

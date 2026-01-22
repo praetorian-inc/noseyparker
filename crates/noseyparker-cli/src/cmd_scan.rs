@@ -11,9 +11,9 @@ use noseyparker::blob_id_map::BlobIdMap;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
 use noseyparker::defaults::{DEFAULT_IGNORE_RULES, DEFAULT_IGNORE_SECRETS};
-use noseyparker::ignore_secrets::IgnoreSecrets;
 use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
+use noseyparker::ignore_secrets::IgnoreSecrets;
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
@@ -95,7 +95,9 @@ impl ParallelIterator for EnumeratorFileIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
+    where
+        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
+    {
         use std::io::BufRead;
         (1usize..)
             .zip(self.reader.lines())
@@ -134,7 +136,9 @@ impl ParallelIterator for FileResultIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
+    where
+        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
+    {
         use rayon::iter::plumbing::Folder;
 
         let item = Ok((Provenance::from_file(self.inner.path).into(), self.blob));
@@ -160,7 +164,9 @@ impl ParallelIterator for GitRepoResultIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
+    where
+        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
+    {
         let repo = self.inner.repository.into_sync();
         let repo_path = Arc::new(self.inner.path.clone());
         self.inner
@@ -283,7 +289,9 @@ impl ParallelIterator for FoundInputIter {
     type Item = Result<(ProvenanceSet, Blob)>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where C: rayon::iter::plumbing::UnindexedConsumer<Self::Item> {
+    where
+        C: rayon::iter::plumbing::UnindexedConsumer<Self::Item>,
+    {
         match self {
             FoundInputIter::File(i) => i.drive_unindexed(consumer),
             FoundInputIter::GitRepo(i) => i.drive_unindexed(consumer),
