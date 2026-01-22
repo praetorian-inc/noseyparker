@@ -82,9 +82,7 @@ impl ProvenanceSet {
 
     #[inline]
     pub fn try_from_iter<I>(it: I) -> Option<Self>
-    where
-        I: IntoIterator<Item = Provenance>,
-    {
+    where I: IntoIterator<Item = Provenance> {
         let mut it = it.into_iter();
         let provenance = it.next()?;
         let more_provenance = it.collect();

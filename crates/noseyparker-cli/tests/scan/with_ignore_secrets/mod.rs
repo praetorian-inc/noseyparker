@@ -10,14 +10,11 @@ fn default_ignore_aws_example_key() {
     let scan_env = ScanEnv::new();
 
     // Create a file with an AWS example key that should be in the default ignore list
-    let input = scan_env.input_file_with_contents(
-        "aws_example.txt",
-        indoc! {r#"
+    let input = scan_env.input_file_with_contents("aws_example.txt", indoc! {r#"
             # AWS configuration with example key
             aws_access_key_id = AKIAIOSFODNN7EXAMPLE
             aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-        "#},
-    );
+        "#});
 
     // The default ignore-secrets.conf should suppress these known false positives
     // File is still scanned (143 B, 1 blob) but 0 matches because secrets are filtered
@@ -31,13 +28,10 @@ fn custom_ignore_secrets_file() {
     let scan_env = ScanEnv::new();
 
     // Create an ignore-secrets file with the test secret
-    let ignore_file = scan_env.input_file_with_contents(
-        "ignore-secrets.conf",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("ignore-secrets.conf", indoc! {r#"
             # Ignore this specific GitHub PAT
             ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-        "#},
-    );
+        "#});
 
     // Create input with the secret
     let input = scan_env.input_file_with_secret("input.txt");
@@ -61,13 +55,10 @@ fn non_ignored_secret_still_detected() {
     let scan_env = ScanEnv::new();
 
     // Create an ignore-secrets file with a DIFFERENT secret
-    let ignore_file = scan_env.input_file_with_contents(
-        "ignore-secrets.conf",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("ignore-secrets.conf", indoc! {r#"
             # This is a different secret
             ghp_DIFFERENTKEYNOTINFILE0000000000000000
-        "#},
-    );
+        "#});
 
     // Create input with a secret that is NOT in the ignore list
     let input = scan_env.input_file_with_secret("input.txt");
@@ -90,21 +81,15 @@ fn multiple_ignore_secrets_files() {
     let scan_env = ScanEnv::new();
 
     // Create two ignore-secrets files
-    let ignore_file1 = scan_env.input_file_with_contents(
-        "ignore1.conf",
-        indoc! {r#"
+    let ignore_file1 = scan_env.input_file_with_contents("ignore1.conf", indoc! {r#"
             # First ignored secret
             SECRET_ONE_12345
-        "#},
-    );
+        "#});
 
-    let ignore_file2 = scan_env.input_file_with_contents(
-        "ignore2.conf",
-        indoc! {r#"
+    let ignore_file2 = scan_env.input_file_with_contents("ignore2.conf", indoc! {r#"
             # Second ignored secret - the actual test secret
             ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-        "#},
-    );
+        "#});
 
     // Create input with a secret that is in the second ignore file
     let input = scan_env.input_file_with_secret("input.txt");
@@ -129,9 +114,7 @@ fn multiple_ignore_secrets_files() {
 fn ignore_secrets_with_comments() {
     let scan_env = ScanEnv::new();
 
-    let ignore_file = scan_env.input_file_with_contents(
-        "ignore-secrets.conf",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("ignore-secrets.conf", indoc! {r#"
             # This is a comment
 
             # Another comment with leading whitespace
@@ -140,8 +123,7 @@ fn ignore_secrets_with_comments() {
             ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
 
             # Trailing comment
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_file_with_secret("input.txt");
 
@@ -163,22 +145,16 @@ fn combine_ignore_and_ignore_secrets() {
     let scan_env = ScanEnv::new();
 
     // Create path-based ignore file
-    let path_ignore = scan_env.input_file_with_contents(
-        "path-ignore.conf",
-        indoc! {r#"
+    let path_ignore = scan_env.input_file_with_contents("path-ignore.conf", indoc! {r#"
             # Ignore files named ignored.txt
             ignored.txt
-        "#},
-    );
+        "#});
 
     // Create secret-based ignore file
-    let secret_ignore = scan_env.input_file_with_contents(
-        "secret-ignore.conf",
-        indoc! {r#"
+    let secret_ignore = scan_env.input_file_with_contents("secret-ignore.conf", indoc! {r#"
             # Ignore this specific secret
             ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-        "#},
-    );
+        "#});
 
     // Create input directory with two files:
     // - One that should be ignored by path

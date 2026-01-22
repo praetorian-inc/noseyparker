@@ -8,12 +8,9 @@ use super::*;
 #[test]
 fn root_input_noignore_01() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             input.dat
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_file_with_secret("input.dat");
 
@@ -34,12 +31,9 @@ fn root_input_noignore_01() {
 #[test]
 fn root_input_noignore_02() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             input
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/input.dat");
@@ -58,12 +52,9 @@ fn root_input_noignore_02() {
 #[test]
 fn literal_match_01() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             input.dat
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/input.dat");
@@ -75,12 +66,9 @@ fn literal_match_01() {
 #[test]
 fn literal_match_02() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             whoohaw/input.dat
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/input.dat");
@@ -99,12 +87,9 @@ fn literal_match_02() {
 #[test]
 fn literal_match_03() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             subdir1/
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/subdir1/input.dat");
@@ -123,13 +108,10 @@ fn literal_match_03() {
 #[test]
 fn glob_01() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             # here is a comment
             *.dat
-        "#},
-    );
+        "#});
     assert!(ignore_file.is_file());
     let contents = std::fs::read_to_string(ignore_file.path()).unwrap();
     println!("ignore file at {}:\n#####\n{}\n#####", ignore_file.display(), contents);
@@ -153,12 +135,9 @@ fn glob_01() {
 #[test]
 fn path_glob_01() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             **/test
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/test/input.dat");
@@ -179,13 +158,10 @@ fn path_glob_01() {
 #[test]
 fn negation_01() {
     let scan_env = ScanEnv::new();
-    let ignore_file = scan_env.input_file_with_contents(
-        "npignore",
-        indoc! {r#"
+    let ignore_file = scan_env.input_file_with_contents("npignore", indoc! {r#"
             *.dat
             !**/subdir1/**
-        "#},
-    );
+        "#});
 
     let input = scan_env.input_dir("input");
     scan_env.input_file_with_secret("input/input.dat");

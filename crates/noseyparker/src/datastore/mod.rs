@@ -1190,9 +1190,7 @@ impl Datastore {
 // -------------------------------------------------------------------------------------------------
 
 fn collect<T, F>(rows: rusqlite::MappedRows<'_, F>) -> Result<Vec<T>>
-where
-    F: FnMut(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
-{
+where F: FnMut(&rusqlite::Row<'_>) -> rusqlite::Result<T> {
     let mut entries = Vec::new();
     for row in rows {
         entries.push(row?);
@@ -1206,9 +1204,7 @@ where
 /// doesn't allow defining TryFrom<&rusqlite::Row<'_>> for any T that implements rusqlite::types::FromSql.
 /// Without this function, you would have to use 1-tuples all over the place instead.
 fn val_from_row<T>(row: &rusqlite::Row<'_>) -> rusqlite::Result<T>
-where
-    T: rusqlite::types::FromSql,
-{
+where T: rusqlite::types::FromSql {
     row.get(0)
 }
 
