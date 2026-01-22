@@ -20,8 +20,9 @@ fn default_ignore_aws_example_key() {
     );
 
     // The default ignore-secrets.conf should suppress these known false positives
+    // File is still scanned (143 B, 1 blob) but 0 matches because secrets are filtered
     noseyparker_success!("scan", "-d", scan_env.dspath(), input.path())
-        .stdout(match_nothing_scanned());
+        .stdout(match_scan_stats("143 B", 1, 0, 0));
 }
 
 /// Test that custom ignore-secrets file works
@@ -41,7 +42,8 @@ fn custom_ignore_secrets_file() {
     // Create input with the secret
     let input = scan_env.input_file_with_secret("input.txt");
 
-    // Should find nothing because we ignore the specific secret
+    // Should find 0 matches because we ignore the specific secret
+    // File is still scanned (104 B, 1 blob) but matches are filtered
     noseyparker_success!(
         "scan",
         "--ignore-secrets",
@@ -50,7 +52,7 @@ fn custom_ignore_secrets_file() {
         scan_env.dspath(),
         input.path()
     )
-    .stdout(match_nothing_scanned());
+    .stdout(match_scan_stats("104 B", 1, 0, 0));
 }
 
 /// Test that secrets NOT in the ignore list are still detected
@@ -107,7 +109,8 @@ fn multiple_ignore_secrets_files() {
     // Create input with a secret that is in the second ignore file
     let input = scan_env.input_file_with_secret("input.txt");
 
-    // Should find nothing because the secret is in ignore2.conf
+    // Should find 0 matches because the secret is in ignore2.conf
+    // File is still scanned (104 B, 1 blob) but matches are filtered
     noseyparker_success!(
         "scan",
         "--ignore-secrets",
@@ -118,7 +121,7 @@ fn multiple_ignore_secrets_files() {
         scan_env.dspath(),
         input.path()
     )
-    .stdout(match_nothing_scanned());
+    .stdout(match_scan_stats("104 B", 1, 0, 0));
 }
 
 /// Test that comments and empty lines in ignore-secrets files are handled correctly
@@ -130,18 +133,19 @@ fn ignore_secrets_with_comments() {
         "ignore-secrets.conf",
         indoc! {r#"
             # This is a comment
-            
+
             # Another comment with leading whitespace
               # Yet another comment
-            
+
             ghp_XIxB7KMNdAr3zqWtQqhE94qglHqOzn1D1stg
-            
+
             # Trailing comment
         "#},
     );
 
     let input = scan_env.input_file_with_secret("input.txt");
 
+    // File is still scanned (104 B, 1 blob) but matches are filtered
     noseyparker_success!(
         "scan",
         "--ignore-secrets",
@@ -150,7 +154,7 @@ fn ignore_secrets_with_comments() {
         scan_env.dspath(),
         input.path()
     )
-    .stdout(match_nothing_scanned());
+    .stdout(match_scan_stats("104 B", 1, 0, 0));
 }
 
 /// Test combining --ignore (path-based) and --ignore-secrets (value-based)
@@ -183,9 +187,10 @@ fn combine_ignore_and_ignore_secrets() {
     scan_env.input_file_with_secret("input/ignored.txt");      // Ignored by path
     scan_env.input_file_with_secret("input/scanned.txt");      // Ignored by secret value
 
-    // Should find nothing because:
-    // - ignored.txt is skipped due to path ignore
-    // - scanned.txt's secret is in the ignore-secrets list
+    // Should find 0 matches because:
+    // - ignored.txt is skipped due to path ignore (not scanned at all)
+    // - scanned.txt's secret is in the ignore-secrets list (scanned but filtered)
+    // Only scanned.txt is actually scanned (104 B, 1 blob)
     noseyparker_success!(
         "scan",
         "--ignore",
@@ -196,5 +201,5 @@ fn combine_ignore_and_ignore_secrets() {
         scan_env.dspath(),
         input.path()
     )
-    .stdout(match_nothing_scanned());
+    .stdout(match_scan_stats("104 B", 1, 0, 0));
 }
