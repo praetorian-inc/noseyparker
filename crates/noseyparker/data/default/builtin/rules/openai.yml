@@ -41,6 +41,9 @@ rules:
   examples:
   - '   OPENAI_API_KEY="sk-proj-QQmRn0z0jGG5W29rn0CwDVJbRivNE8YpCSBBkEVW20vUCF7w"'
 
+  description: >
+    OpenAI Project API Key (legacy 48-character format, deprecated August 2024).
+
 
 - name: OpenAI Project API Key v2
   id: np.openai.3
@@ -65,6 +68,9 @@ rules:
       OPENAI_API_KEY=sk-proj-bUWRyHzhUjxyJsw8VzD-boWSOX-lWFpL9ZVVwgzH3SnvblGeiC72duqxiezuLlxfRfgXOZ-swIXPAqHahMfkPZFrWEZ9Ky27WSgiw4ofBv-yKYXEWw7IOORz01ARkASGVE8kFw2kMpVk_Ufn_ogEN2Fyjw9d
       OPENAI_MODEL=gpt-5-nano-2025-08-07
 
+  description: >
+    OpenAI Project API Key (current 156-character format, introduced August 2024).
+
 
 - name: OpenAI Admin API Key
   id: np.openai.4
@@ -85,6 +91,9 @@ rules:
 
   examples:
   - '   OPENAI_ADMIN_API_KEY="sk-admin-90E9ZsxRiCay6CSW3Ftmq-n3IJ1gKDC-EtwNOpHf18LAvSae4uyKrygUf87jxzt-tfmcYpjS5X3WbPcQQu39OPh7xBkW4-c9imO9yQVzPnjd4fjpNS_w4nMJeAOx"'
+
+  description: >
+    OpenAI Admin API Key for organization-wide administrative operations.
 
 
 - name: OpenAI Project Service Account
@@ -108,3 +117,6 @@ rules:
   - |
     OPENAI_API_KEY = "sk-svcacct-cD3v20igDxpt-JpaQxnbqiex3ko2WcW_IQNyhRAEgzCqMlgYPRN2pAqZ8-kyFqGAxJkdUtaG30_6aYZuU0nNRJq9l4-h3wJ9VkZtz3ybX1fT8GchB6D7M00BBXajfQNOi_-rSCYvGJ-NiFyEPzcPSAj20sIF"
     OPENAI_WS_URI = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
+
+  description: >
+    OpenAI Project Service Account API Key for automated systems and CI/CD pipelines.
