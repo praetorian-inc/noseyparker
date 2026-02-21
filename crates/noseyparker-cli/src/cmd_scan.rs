@@ -10,9 +10,10 @@ use noseyparker::blob::{Blob, BlobId};
 use noseyparker::blob_id_map::BlobIdMap;
 use noseyparker::blob_metadata::BlobMetadata;
 use noseyparker::datastore::Datastore;
-use noseyparker::defaults::DEFAULT_IGNORE_RULES;
+use noseyparker::defaults::{DEFAULT_IGNORE_RULES, DEFAULT_IGNORE_SECRETS};
 use noseyparker::git_binary::{CloneMode, Git};
 use noseyparker::git_url::GitUrl;
+use noseyparker::ignore_secrets::IgnoreSecrets;
 use noseyparker::location;
 use noseyparker::match_type::Match;
 use noseyparker::matcher::{Matcher, ScanResult};
@@ -474,6 +475,23 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
         args::CopyBlobsMode::None => BlobCopier::Noop,
     };
 
+    // Load ignore secrets configuration
+    let ignore_secrets = {
+        let mut ignore_secrets = IgnoreSecrets::new();
+        // Load default ignore secrets
+        ignore_secrets.load_from_str(DEFAULT_IGNORE_SECRETS);
+        // Load any user-specified ignore secrets files
+        for path in &args.content_filtering_args.ignore_secrets {
+            ignore_secrets.load_from_file(path).with_context(|| {
+                format!("Failed to load ignore secrets from {}", path.display())
+            })?;
+        }
+        if !ignore_secrets.is_empty() {
+            debug!("Loaded {} ignored secret values", ignore_secrets.len());
+        }
+        Arc::new(ignore_secrets)
+    };
+
     let blob_processor_init_time = Mutex::new(t1.elapsed());
 
     let make_blob_processor = || -> BlobProcessor {
@@ -488,6 +506,7 @@ pub fn run(global_args: &args::GlobalArgs, args: &args::ScanArgs) -> Result<()> 
             blob_metadata_recording_mode: args.metadata_args.blob_metadata,
             blob_copier: blob_copier.clone(),
             copy_blobs_mode: args.copy_blobs,
+            ignore_secrets: ignore_secrets.clone(),
         };
         *blob_processor_init_time.lock().unwrap() += t1.elapsed();
 
@@ -824,6 +843,7 @@ struct BlobProcessor<'a> {
     blob_metadata_recording_mode: args::BlobMetadataMode,
     copy_blobs_mode: args::CopyBlobsMode,
     blob_copier: BlobCopier,
+    ignore_secrets: Arc<IgnoreSecrets>,
 }
 
 impl<'a> BlobProcessor<'a> {
@@ -863,6 +883,25 @@ impl<'a> BlobProcessor<'a> {
             // blob has not been seen; need to record blob metadata, provenance, and matches
             ScanResult::New(matches) => {
                 trace!(us = scan_us, mbps = scan_mbps, status = "new", matches = matches.len());
+
+                // Filter out matches whose capture groups match ignored secret values
+                let matches: Vec<_> = if self.ignore_secrets.is_empty() {
+                    matches
+                } else {
+                    matches
+                        .into_iter()
+                        .filter(|m| {
+                            // Check each capture group (skip group 0 which is the full match)
+                            let groups: Vec<&[u8]> = m
+                                .captures
+                                .iter()
+                                .skip(1)
+                                .filter_map(|g| g.map(|g| g.as_bytes()))
+                                .collect();
+                            !self.ignore_secrets.any_ignored(&groups)
+                        })
+                        .collect()
+                };
 
                 let do_copy = match self.copy_blobs_mode {
                     args::CopyBlobsMode::All => true,

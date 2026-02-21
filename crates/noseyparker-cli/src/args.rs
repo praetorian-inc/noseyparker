@@ -1005,11 +1005,16 @@ pub struct ContentFilteringArgs {
     /// This option can be repeated.
     #[arg(long, short, value_name = "FILE", value_hint = ValueHint::FilePath)]
     pub ignore: Vec<PathBuf>,
-    /*
-    /// Do not scan files that appear to be binary
-    #[arg(long)]
-    pub skip_binary_files: bool,
-    */
+
+    /// Use custom secret-based ignore rules from the specified file
+    ///
+    /// The ignore file should contain secret values to ignore, one per line.
+    /// Lines starting with # are treated as comments.
+    /// Matches where any capture group exactly equals an ignored secret value will be suppressed.
+    ///
+    /// This option can be repeated.
+    #[arg(long, value_name = "FILE", value_hint = ValueHint::FilePath)]
+    pub ignore_secrets: Vec<PathBuf>,
 }
 
 impl ContentFilteringArgs {

@@ -192,6 +192,15 @@ Content Filtering Options:
           
           This option can be repeated.
 
+      --ignore-secrets <FILE>
+          Use custom secret-based ignore rules from the specified file
+          
+          The ignore file should contain secret values to ignore, one per line. Lines starting with
+          # are treated as comments. Matches where any capture group exactly equals an ignored
+          secret value will be suppressed.
+          
+          This option can be repeated.
+
 Metadata Collection Options:
       --blob-metadata <MODE>
           Specify which blobs will have metadata recorded

@@ -10,6 +10,7 @@ pub mod git_binary;
 pub mod git_url;
 #[cfg(feature = "github")]
 pub mod github;
+pub mod ignore_secrets;
 pub mod location;
 pub mod match_type;
 pub mod matcher;

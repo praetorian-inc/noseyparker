@@ -17,6 +17,9 @@ pub static DEFAULT_RULES_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/data/d
 pub static DEFAULT_IGNORE_RULES: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/default/ignore.conf"));
 
+pub static DEFAULT_IGNORE_SECRETS: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/default/ignore-secrets.conf"));
+
 fn load_yaml_files<'a>(dir: &Dir<'a>) -> Vec<(&'a Path, &'a [u8])> {
     dir.find("**/*.yml")
         .expect("Constant glob should compile")

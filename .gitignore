@@ -19,3 +19,6 @@ gha-creds-*.json
 
 # Jetbrains IDE Files
 .idea
+
+# Git worktrees
+.worktrees/

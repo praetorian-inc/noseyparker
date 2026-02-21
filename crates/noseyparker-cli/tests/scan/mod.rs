@@ -9,3 +9,4 @@ mod git_url;
 mod github;
 mod snippet_length;
 mod with_ignore;
+mod with_ignore_secrets;
