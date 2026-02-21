@@ -144,6 +144,10 @@ rulesets:
   - np.postmark.1     # Postmark API Token
   - np.psexec.1       # Credentials in PsExec Command
   - np.pypi.1         # PyPI Upload Token
+  - np.pyx.1          # pyx User API token (v1)
+  - np.pyx.2          # pyx User API token (v2)
+  - np.pyx.3          # pyx Trusted Publishing token (v1)
+  - np.pyx.4          # pyx Trusted Publishing token (v2)
   - np.reactapp.1     # React App Username
   - np.reactapp.2     # React App Password
   - np.rubygems.1     # RubyGems API Key
